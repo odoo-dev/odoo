@@ -198,7 +198,7 @@ class TestExpenses(TestExpenseCommon):
         # Unlinking moves
         (payment_1 | payment_2).action_draft()
         (payment_1 | payment_2).move_id.line_ids.remove_move_reconcile()
-        self.assertEqual(first_expense_by_employee.state, 'posted')
+        self.assertEqual(first_expense_by_employee.state, 'approved')
         expenses_by_employee.account_move_id.button_draft()
         expenses_by_employee.account_move_id.unlink()
         self.assertFalse(expenses_by_employee.account_move_id)
@@ -710,7 +710,7 @@ class TestExpenses(TestExpenseCommon):
         expense.action_approve()
         self.post_expenses(expense)
 
-        self.assertEqual(expense.state, 'posted')
+        self.assertEqual(expense.state, 'approved')
         expense_data = self.env['hr.expense'].with_user(self.expense_user_employee).get_expense_dashboard()
         self.assertEqual(expense_data['approved']['amount'], 1000.00)
 

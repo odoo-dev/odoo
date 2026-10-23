@@ -284,6 +284,7 @@ class HrExpense(models.Model):
         copy=False,
         index='btree_not_null',
     )
+    account_move_state = fields.Selection(related='account_move_id.state', string="Journal Entry Status")
     payment_mode = fields.Selection(
         selection=[
             ('own_account', "Employee"),
@@ -521,12 +522,13 @@ class HrExpense(models.Model):
         Compute the states of the expense as such (priority is given to the last matching state of the list):
             - draft: By default
             - submitted: When the approval_state is 'submitted'
-            - approved: When the approval_state is 'approved' or the linked move state is 'draft'
+            - approved: When the approval_state is 'approved', the linked move state is 'draft',
+                        or the move of an expense paid by the employee is 'posted' but not paid yet
             - refused: When the approval_state is 'refused'
             - paid: When it is a company paid expense or the move state is neither 'draft' nor 'posted'
             - in_payment (or paid): When the move state is 'posted' and it's 'payment_state' is 'in_payment' or 'paid'
                                     or ('partial' and there is a residual amount)
-            - posted: When the linked move state is 'posted' and it's 'payment_state' is 'not_paid'
+            - posted: When the linked move state is 'posted' and it's 'payment_state' is 'not_paid', for other payment modes
         """
         for expense in self:
             move = expense.account_move_id
@@ -542,7 +544,8 @@ class HrExpense(models.Model):
                 elif expense.has_existing_bill:
                     expense.state = 'paid' if move.origin_payment_id.state == 'reconciled' else self.env['account.move']._get_invoice_in_payment_state()
                 elif move.payment_state == 'not_paid':
-                    expense.state = 'posted'
+                    # For the employee, the posting of the entry changes nothing, the expense is still waiting to be reimbursed
+                    expense.state = 'approved' if expense.payment_mode == 'own_account' else 'posted'
                 elif (
                         move.payment_state == 'in_payment'
                         or (move.payment_state == 'partial' and not expense.company_currency_id.is_zero(expense.amount_residual))
@@ -1591,7 +1594,7 @@ class HrExpense(models.Model):
 
     def action_split_wizard(self):
         self.ensure_one()
-        if self.filtered(lambda expense: expense.state in {'posted', 'paid', 'in_payment'}):
+        if self.filtered(lambda expense: expense.state in {'posted', 'paid', 'in_payment'} or expense.account_move_state == 'posted'):
             raise UserError(_("You cannot split an expense that is already posted."))
         if not self.is_editable:
             raise UserError(_("You do not have the rights to edit this expense."))
