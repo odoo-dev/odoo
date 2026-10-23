@@ -1074,8 +1074,13 @@ class IrQweb(models.AbstractModel):
 
     def _load_code_cached(self, ref: int):
         """ Return the compiled code of the template from `ir.cache`, or None. """
-        self.env['ir.ui.view'].flush_model(['inherit_id', 'active', 'arch_db'])
         key = self._get_ir_cache_key(ref)
+        misses = self.env.cr.cache.setdefault('_qweb_ir_cache_misses', set())
+        if key in misses:
+            # already looked up by `_preload_code_cached`
+            misses.discard(key)
+            return None
+        self.env['ir.ui.view'].flush_model(['inherit_id', 'active', 'arch_db'])
         entry = self.env['ir.cache']._get('qweb', [key], VIEWS_HASH_SQL).get(key)
         if not entry:
             return None
@@ -1099,7 +1104,9 @@ class IrQweb(models.AbstractModel):
             if not keys:
                 return
             calls = OrderedSet()
-            for key, (view_hash, data) in self.env['ir.cache']._get('qweb', keys, VIEWS_HASH_SQL).items():
+            entries = self.env['ir.cache']._get('qweb', keys, VIEWS_HASH_SQL)
+            self.env.cr.cache.setdefault('_qweb_ir_cache_misses', set()).update(keys.keys() - entries.keys())
+            for key, (view_hash, data) in entries.items():
                 code, sub_calls = self._load_code_memo(key, view_hash, data)
                 ormcache.add_value(self, keys[key], cache_value=code)
                 calls.update(sub_calls)

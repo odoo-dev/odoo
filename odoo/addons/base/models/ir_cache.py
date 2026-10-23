@@ -113,7 +113,10 @@ class IrCache(models.Model):
         """ Add a signed entry, with the hash of ``hash_sql`` computed from
         ``control``. This must be done in the transaction that produced
         ``data``: when the transaction is rolled back, the entry is either
-        rolled back too, or does not match its source anymore. """
+        rolled back too, or does not match its source anymore. Nothing is
+        stored with a read-only cursor. """
+        if self.env.cr.readonly:
+            return
         key_id, secret = _get_database_key(self.env.cr.dbname)
         control_json = json.dumps(control)
         [[hash_]] = self.env.execute_query(SQL("SELECT %s FROM (SELECT %s::jsonb AS control) entry", hash_sql, control_json))
@@ -123,16 +126,7 @@ class IrCache(models.Model):
             INSERT INTO ir_cache (create_date, kind, key, key_id, control, hash, data, signature)
             VALUES (NOW() AT TIME ZONE 'UTC', %s, %s, %s, %s, %s, %s, %s)
         """, kind, key, key_id, control_json, hash_, data, _sign(secret, key_id, kind, key, control, hash_, data))
-        if not self.env.cr.readonly:
-            self.env.cr.execute(query)
-            return
-        # read-only transaction (e.g. a website page): store it in its own
-        # transaction, the source used by the entry is committed
-        try:
-            with self.env.registry.cursor() as cr:
-                cr.execute(query)
-        except Exception:  # noqa: BLE001
-            _logger.info("ir.cache: can not store the %s entry %r", kind, key, exc_info=True)
+        self.env.cr.execute(query)
 
     @api.autovacuum
     def _gc_cache(self):

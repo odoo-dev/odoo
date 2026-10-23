@@ -2691,7 +2691,7 @@ class TestQwebPerformance(TransactionCaseWithUserDemo):
 
         first_view.arch_db = '<div>Hello</div>'
 
-        check(extend_view_2.id, "<div><div>Hello</div><h1></h1><section></section></div>", queries=8, cachemiss=1)
+        check(extend_view_2.id, "<div><div>Hello</div><h1></h1><section></section></div>", queries=7, cachemiss=1)
         check(first_view.id, "<div>Hello</div>", queries=0)
 
         first_view.arch_db = '<div>Hello1</div>'
@@ -2705,7 +2705,7 @@ class TestQwebPerformance(TransactionCaseWithUserDemo):
         # 1 more query on ir_mode_data from _is_studio_view() in apply_inheritance_specs
         # TODO: use key (actually empty for some view) instead of xml_id field
         addons = tuple(self.env.registry._init_modules) + (self.env.context.get('install_module'),)
-        check(extend_view_2.id, "<div><div>Hello2</div><h1></h1><section></section></div>", queries=9, cachemiss=1)
+        check(extend_view_2.id, "<div><div>Hello2</div><h1></h1><section></section></div>", queries=8, cachemiss=1)
         check(first_view.id, "<div>Hello2</div>", queries=0)
 
         first_view.arch_db = '<div>Hello3</div>'
@@ -2855,6 +2855,13 @@ class TestQWebCodeCache(TransactionCase):
         # a new signed row is added and used
         self.render(self.caller, '<div><span>callee</span></div>', generated=[])
         self.assertEqual(len(self.rows(self.callee)), 2)
+
+    def test_readonly(self):
+        """ Nothing is stored with a read-only cursor (e.g. on a replica). """
+        self.patch(type(self.env.cr), 'readonly', True)
+        self.render(self.caller, '<div><span>callee</span></div>', generated=self.caller + self.callee)
+        self.assertFalse(self.rows(self.caller) or self.rows(self.callee))
+        self.render(self.caller, '<div><span>callee</span></div>', generated=self.caller + self.callee)
 
     def test_gc(self):
         self.render(self.caller, '<div><span>callee</span></div>', generated=self.caller + self.callee)
