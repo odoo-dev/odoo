@@ -84,10 +84,11 @@ class IrCache(models.Model):
     _kind_key_idx = models.Index('(kind, key, key_id, id DESC)')
 
     @api.model
-    def _get(self, kind: str, keys, hash_sql: SQL) -> dict[str, tuple[str, bytes]]:
+    def _get(self, kind: str, keys, hash_sql: SQL | None = None) -> dict[str, tuple[str, bytes]]:
         """ Return ``{key: (hash, data)}`` for the last entry of each
         key if its signature is valid and its source did not change:
-        ``hash_sql`` computed from its ``control`` gives its ``hash``.
+        ``hash_sql`` computed from its ``control`` gives its ``hash``
+        (without ``hash_sql``, the key identifies the source).
         Nothing else is trustworthy: an entry with an invalid signature is
         ignored. """
         key_id, secret = _get_database_key(self.env.cr.dbname)
@@ -98,7 +99,7 @@ class IrCache(models.Model):
                  WHERE kind = %s AND key = ANY(%s) AND key_id = %s
               ORDER BY key, id DESC
             ) entry
-        """, hash_sql, kind, list(keys), key_id))
+        """, hash_sql or SQL("''"), kind, list(keys), key_id))
         result = {}
         for key, control, hash_, data, signature, current_hash in rows:
             data = bytes(data)
@@ -109,7 +110,7 @@ class IrCache(models.Model):
         return result
 
     @api.model
-    def _set(self, kind: str, key: str, control, hash_sql: SQL, data: bytes):
+    def _set(self, kind: str, key: str, control, hash_sql: SQL | None, data: bytes):
         """ Add a signed entry, with the hash of ``hash_sql`` computed from
         ``control``. This must be done in the transaction that produced
         ``data``: when the transaction is rolled back, the entry is either
@@ -119,7 +120,7 @@ class IrCache(models.Model):
             return
         key_id, secret = _get_database_key(self.env.cr.dbname)
         control_json = json.dumps(control)
-        [[hash_]] = self.env.execute_query(SQL("SELECT %s FROM (SELECT %s::jsonb AS control) entry", hash_sql, control_json))
+        [[hash_]] = self.env.execute_query(SQL("SELECT %s FROM (SELECT %s::jsonb AS control) entry", hash_sql or SQL("''"), control_json))
         if hash_ is None:
             return
         query = SQL("""

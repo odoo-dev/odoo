@@ -19,6 +19,7 @@ import os
 import polib
 import re
 import tarfile
+import threading
 import typing
 from collections import defaultdict, namedtuple
 from collections.abc import Iterable, Iterator
@@ -2603,44 +2604,96 @@ class CodeTranslations:
         return translations
 
     @staticmethod
-    def _get_code_translations(module_name, lang, filter_func):
-        po_paths = get_po_paths(module_name, lang)
-        translations = {}
-        for po_path in po_paths:
+    def _read_translations(module_name, lang):
+        """ Return the python and web translations of the module, reading its
+        po files once. """
+        python, web = {}, {}
+        for po_path in get_po_paths(module_name, lang):
             try:
                 with file_open(po_path, mode='rb') as fileobj:
-                    p = CodeTranslations._read_code_translations_file(fileobj, filter_func)
-                translations.update(p)
+                    for row in translation_file_reader(fileobj, fileformat='po'):
+                        if row.get('type') == 'code' and row.get('src') and row.get('value'):
+                            if PYTHON_TRANSLATION_COMMENT in row['comments']:
+                                python[row['src']] = row['value']
+                            if JAVASCRIPT_TRANSLATION_COMMENT in row['comments']:
+                                web[row['src']] = row['value']
             except IOError:
                 iso_lang = get_iso_codes(lang)
                 filename = '[lang: %s][format: %s]' % (iso_lang or 'new', 'po')
                 _logger.exception("couldn't read translation file %s", filename)
-        return translations
+        return python, web
 
-    def _load_python_translations(self, module_name, lang):
-        def filter_func(row):
-            return row.get('value') and PYTHON_TRANSLATION_COMMENT in row['comments']
-        translations = CodeTranslations._get_code_translations(module_name, lang, filter_func)
-        self.python_translations[module_name, lang] = frozendict(translations)
-
-    def _load_web_translations(self, module_name, lang):
-        def filter_func(row):
-            return row.get('value') and JAVASCRIPT_TRANSLATION_COMMENT in row['comments']
-        translations = CodeTranslations._get_code_translations(module_name, lang, filter_func)
+    def _set_translations(self, module_name, lang, python, web):
+        self.python_translations[module_name, lang] = frozendict(python)
         self.web_translations[module_name, lang] = frozendict({
             "messages": tuple(
                 frozendict({"id": src, "string": value})
-                for src, value in translations.items())
+                for src, value in web.items())
         })
+
+    @staticmethod
+    def _get_registry():
+        """ Return the registry of the database of the current thread, if ready. """
+        from odoo.modules.registry import Registry  # noqa: PLC0415
+        dbname = getattr(threading.current_thread(), 'dbname', None)
+        registry = dbname and Registry.registries.get(dbname)
+        return registry if registry and registry.ready and 'ir.cache' in registry else None
+
+    def load(self, module_names, lang):
+        """ Load the translations of the modules not loaded yet. They are read
+        from the persistent cache `ir.cache` of the database of the current
+        thread, else from the po files (and then stored in `ir.cache`). """
+        missing = [
+            module_name for module_name in module_names
+            if (module_name, lang) not in self.python_translations
+            or (module_name, lang) not in self.web_translations
+        ]
+        if not missing:
+            return
+        if registry := self._get_registry():
+            try:
+                # own cursor: the current transaction may be aborted, or read-only
+                with registry.cursor() as cr:
+                    env = odoo.api.Environment(cr, odoo.api.SUPERUSER_ID, {})
+                    self._load_ir_cache(env, missing, lang)
+            except Exception:  # noqa: BLE001
+                _logger.warning("Can not load the code translations from ir.cache", exc_info=True)
+        for module_name in missing:
+            if (module_name, lang) not in self.python_translations or (module_name, lang) not in self.web_translations:
+                self._set_translations(module_name, lang, *self._read_translations(module_name, lang))
+
+    def _load_ir_cache(self, env, module_names, lang):
+        """ Load the translations of the modules from `ir.cache`, and store the
+        missing ones. The key contains the stat of the po files, so a changed
+        file is read again. """
+        keys = {}
+        for module_name in module_names:
+            stats = tuple((po_path, (stat := os.stat(po_path)).st_mtime_ns, stat.st_size) for po_path in get_po_paths(module_name, lang))
+            if stats:
+                keys[repr((module_name, lang, stats))] = module_name
+            else:
+                self._set_translations(module_name, lang, {}, {})
+        IrCache = env['ir.cache']
+        entries = IrCache._get('code_translations', keys)
+        for key, module_name in keys.items():
+            if key in entries:
+                translations = json.loads(entries[key][1])
+                python, web = translations['python'], translations['web']
+            else:
+                python, web = self._read_translations(module_name, lang)
+                IrCache._set('code_translations', key, [], None, json.dumps({'python': python, 'web': web}).encode())
+            self._set_translations(module_name, lang, python, web)
 
     def get_python_translations(self, module_name, lang):
         if (module_name, lang) not in self.python_translations:
-            self._load_python_translations(module_name, lang)
+            # load the whole language: all the installed modules
+            registry = self._get_registry()
+            self.load({module_name, *(registry._init_modules if registry else ())}, lang)
         return self.python_translations[(module_name, lang)]
 
     def get_web_translations(self, module_name, lang):
         if (module_name, lang) not in self.web_translations:
-            self._load_web_translations(module_name, lang)
+            self.load([module_name], lang)
         return self.web_translations[(module_name, lang)]
 
 

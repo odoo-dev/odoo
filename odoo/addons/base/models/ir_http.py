@@ -556,6 +556,7 @@ class IrHttp(models.AbstractModel):
 
         # Regional languages (ll_CC) must inherit/override their parent lang (ll), but this is
         # done server-side when the language is loaded, so we only need to load the user's lang.
+        code_translations.load(modules, lang)
         translations_per_module = {}
         for module in modules:
             translations_per_module[module] = code_translations.get_web_translations(module, lang)
