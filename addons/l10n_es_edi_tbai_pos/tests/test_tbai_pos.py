@@ -12,6 +12,12 @@ from odoo.tests import tagged
 class TestPosEdi(TestEsEdiTbaiCommonGipuzkoa, CommonPosEsEdiTest):
     _test_user_groups = None  # FIXME list needed groups
 
+    def test_load_pos_refund_reasons(self):
+        data = self.env['pos.config']._load_pos_data_read(self.pos_config_usd, self.pos_config_usd)
+        reasons = data[0]['_tbai_refund_reasons']
+        self.assertEqual([reason['value'] for reason in reasons], ['R1', 'R2', 'R3', 'R4'])
+        self.assertTrue(all(reason['name'] for reason in reasons))
+
     @classmethod
     def pay_pos_order(self, pos_order, with_error=False):
         context_make_payment = {

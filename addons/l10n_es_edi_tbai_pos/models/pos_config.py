@@ -9,11 +9,11 @@ class PosConfig(models.Model):
         data = super()._load_pos_data_read(records, config)
 
         if data and self.env.company.country_id.code == 'ES':
-            tbai_refund_reason_field = self.env['ir.model.fields']._get('pos.order', 'l10n_es_invoice_type')
+            tbai_refund_reasons = self.env['pos.order'].fields_get(['l10n_es_invoice_type'])['l10n_es_invoice_type']['selection']
             data[0]['_tbai_refund_reasons'] = [
-                {'value': refund_reason.value, 'name': refund_reason.name}
-                for refund_reason in tbai_refund_reason_field.selection_ids
-                if refund_reason.value != 'R5'  # R5 is for simplified invoice
+                {'value': value, 'name': name}
+                for value, name in tbai_refund_reasons
+                if value != 'R5'  # R5 is for simplified invoice
             ]
 
         return data
