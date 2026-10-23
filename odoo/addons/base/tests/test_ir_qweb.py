@@ -1,6 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import itertools
+import marshal
 import markupsafe
 
 from lxml import etree
@@ -10,7 +11,7 @@ from odoo.tests import tagged
 from odoo.tests.common import BaseCase, TransactionCase
 from odoo.addons.base.tests.common import TransactionCaseWithUserDemo
 from odoo.addons.base.models.ir_qweb import QWebError, render as mock_render
-from odoo.tools import file_open, misc, mute_logger
+from odoo.tools import SQL, file_open, misc, mute_logger
 from odoo.tools.json import scriptsafe as json_scriptsafe
 from odoo.exceptions import UserError, MissingError
 
@@ -2573,27 +2574,19 @@ class TestQwebPerformance(TransactionCaseWithUserDemo):
             self.assertEqual(str(value), expected % name)
             self.assertEqual(env.cr.sql_log_count - init, queries, f'Maximum queries: {queries}')
 
-        # 'base.testing_content'
+        # 'base.testing_content' and each called template (8 templates), the
+        # compiled code being in `ir.cache`:
         #     SELECT id + fields from xmlid
-        #     SELECT RECURSIVE arch combine
-        # 'base.testing_layout', 'base.testing_header_0'
-        #     SELECT id + fields from xmlid
-        #     SELECT RECURSIVE arch combine => TODO: batch me
-        # 'base.testing_header', 'base.testing_footer'
-        #     SELECT id + fields from xmlid
-        #     SELECT RECURSIVE arch combine => TODO: batch me
-        # 'base.testing_header_1', 'base.testing_footer_0', 'base.testing_footer_1'
-        #     SELECT id + fields from xmlid
-        #     SELECT RECURSIVE arch combine => TODO: batch me
+        #     SELECT the last ir.cache row of the template + hash of its views
 
         FIRST_SEARCH_FETCH = 1  # the first "SELECT id + fields from xmlid"
-        OTHER_SEARCH_FETCH = 3  # "SELECT id + fields from xmlid"
-        ARCH_COMBINE = 4  # SELECT RECURSIVE arch combine
+        OTHER_SEARCH_FETCH = 8  # "SELECT id + fields from xmlid" (header_0 is called by id)
+        IR_CACHE = 8  # SELECT the last ir.cache row
 
         self.env.transaction.invalidate_ormcache('templates')
         view.invalidate_model()
 
-        check('base.testing_content', 'test-cold-0', FIRST_SEARCH_FETCH + OTHER_SEARCH_FETCH + ARCH_COMBINE)  # 8
+        check('base.testing_content', 'test-cold-0', FIRST_SEARCH_FETCH + OTHER_SEARCH_FETCH + IR_CACHE)  # 17
         check('base.testing_content', 'test-hot-0', 0)
         check('base.testing_content', 'test-hot-1', 0)
 
@@ -2603,20 +2596,20 @@ class TestQwebPerformance(TransactionCaseWithUserDemo):
 
         # like 'test-cold-0'
         self.env.transaction.invalidate_ormcache('templates')
-        check(view.id, 'test-cold-id-1', FIRST_SEARCH_FETCH + OTHER_SEARCH_FETCH + ARCH_COMBINE)  # 8
+        check(view.id, 'test-cold-id-1', FIRST_SEARCH_FETCH + OTHER_SEARCH_FETCH + IR_CACHE)  # 17
 
         # like 'test-cold-0' the first search query is replaced by a fetching
         self.env.transaction.invalidate_ormcache('templates')
         view.invalidate_model()
-        check(view.id, 'test-cold-id-2', FIRST_SEARCH_FETCH + OTHER_SEARCH_FETCH + ARCH_COMBINE)  # 8
+        check(view.id, 'test-cold-id-2', FIRST_SEARCH_FETCH + OTHER_SEARCH_FETCH + IR_CACHE)  # 17
 
         # like 'test-cold-0'
         self.env.transaction.invalidate_ormcache('templates')
-        check('base.testing_content', 'test-cold-1', FIRST_SEARCH_FETCH + OTHER_SEARCH_FETCH + ARCH_COMBINE)  # 8
+        check('base.testing_content', 'test-cold-1', FIRST_SEARCH_FETCH + OTHER_SEARCH_FETCH + IR_CACHE - 1)  # 16
 
         # like 'test-cold-0'
         self.env.transaction.invalidate_ormcache('templates')
-        check(view.id, 'test-cold-id-3', FIRST_SEARCH_FETCH + OTHER_SEARCH_FETCH + ARCH_COMBINE - 1)  # 7
+        check(view.id, 'test-cold-id-3', FIRST_SEARCH_FETCH + OTHER_SEARCH_FETCH + IR_CACHE - 2)  # 15
 
     def test_render_query_count_after_write(self):
         View = self.env['ir.ui.view']
@@ -2654,9 +2647,9 @@ class TestQwebPerformance(TransactionCaseWithUserDemo):
         counter = itertools.count()
         o_generate_code_uncached = self.env['ir.qweb']._generate_code_uncached
 
-        def generate_code_uncached(template):
+        def generate_code_uncached(template, ir_cache_key=None):
             next(counter)
-            return o_generate_code_uncached(template)
+            return o_generate_code_uncached(template, ir_cache_key)
 
         def check(template, expected, queries, cachemiss=0):
             init = env.cr.sql_log_count
@@ -2682,19 +2675,21 @@ class TestQwebPerformance(TransactionCaseWithUserDemo):
         check(extend_view_2.id, "<div><div>Hello World</div><h1></h1><section></section></div>", queries=0)
         check(first_view.id, "<div>Hello World</div>", queries=0)
 
+        # a cache miss does 4 more queries: the last `ir.cache` row of the
+        # template, its views, their hash and the insertion of the new row
         first_view.arch_db = '<div>Hello 2</div>'
 
-        check(first_view.id, "<div>Hello 2</div>", queries=1, cachemiss=1)
+        check(first_view.id, "<div>Hello 2</div>", queries=5, cachemiss=1)
         check(extend_view_2.id, "<div><div>Hello 2</div><h1></h1><section></section></div>", queries=1, cachemiss=0)
 
         first_view.arch_db = '<div>Hello</div>'
 
-        check(extend_view_2.id, "<div><div>Hello</div><h1></h1><section></section></div>", queries=3, cachemiss=1)
+        check(extend_view_2.id, "<div><div>Hello</div><h1></h1><section></section></div>", queries=7, cachemiss=1)
         check(first_view.id, "<div>Hello</div>", queries=0)
 
         first_view.arch_db = '<div>Hello1</div>'
 
-        check(first_view.id, "<div>Hello1</div>", queries=1, cachemiss=1)
+        check(first_view.id, "<div>Hello1</div>", queries=5, cachemiss=1)
         check(extend_view_2.id, "<div><div>Hello1</div><h1></h1><section></section></div>", queries=1)
 
         first_view.arch_db = '<div>Hello2</div>'
@@ -2703,20 +2698,20 @@ class TestQwebPerformance(TransactionCaseWithUserDemo):
         # 1 more query on ir_mode_data from _is_studio_view() in apply_inheritance_specs
         # TODO: use key (actually empty for some view) instead of xml_id field
         addons = tuple(self.env.registry._init_modules) + (self.env.context.get('install_module'),)
-        check(extend_view_2.id, "<div><div>Hello2</div><h1></h1><section></section></div>", queries=5, cachemiss=1)
+        check(extend_view_2.id, "<div><div>Hello2</div><h1></h1><section></section></div>", queries=8, cachemiss=1)
         check(first_view.id, "<div>Hello2</div>", queries=0)
 
         first_view.arch_db = '<div>Hello3</div>'
         self.env.invalidate_all()
 
-        check(first_view.id, "<div>Hello3</div>", queries=2, cachemiss=1)
+        check(first_view.id, "<div>Hello3</div>", queries=6, cachemiss=1)
 
-        check(extend_view_2.id, "<div><div>Hello3</div><h1></h1><section></section></div>", queries=3)
+        check(extend_view_2.id, "<div><div>Hello3</div><h1></h1><section></section></div>", queries=2)
 
         extend_view_1.arch_db = '<xpath expr="//div" position="inside"><article/></xpath>'
         self.env.invalidate_all()
 
-        check(extend_view_2.id, "<div><div>Hello3</div><article></article><section></section></div>", queries=5, cachemiss=1)
+        check(extend_view_2.id, "<div><div>Hello3</div><article></article><section></section></div>", queries=10, cachemiss=1)
 
 
 class TestQwebMocked(BaseCase):
@@ -2726,3 +2721,145 @@ class TestQwebMocked(BaseCase):
             return etree.fromstring("""<p>Ok: <t t-out="vv"/></p>"""), template_name
         content = mock_render('abc', {'vv': 42}, loader)
         self.assertEqual(str(content).strip(), """<p>Ok: 42</p>""")
+
+
+class TestQWebCodeCache(TransactionCase):
+    """ Compiled code shared through the `ir.cache` table. """
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        View = cls.env['ir.ui.view']
+        cls.callee = View.create({
+            'name': 'callee', 'type': 'qweb', 'key': 'base.test_code_cache_callee',
+            'arch': '<span>callee</span>',
+        })
+        cls.caller = View.create({
+            'name': 'caller', 'type': 'qweb', 'key': 'base.test_code_cache_caller',
+            'arch': '<div><t t-call="base.test_code_cache_callee"/></div>',
+        })
+
+    def render(self, template, expected, generated, **context):
+        """ Render the template like a new worker (only the `ir.cache` table)
+        and check which templates were generated. """
+        self.env.transaction.invalidate_ormcache('templates')
+        self.env.registry._template_code__.clear()
+        self.env.invalidate_all()
+        IrQweb = self.env['ir.qweb'].with_context(**context)
+        refs = []
+        origin = type(IrQweb)._generate_code
+
+        def _generate_code(self, template):
+            refs.append(template)
+            return origin(self, template)
+
+        with patch.object(type(IrQweb), '_generate_code', _generate_code):
+            self.assertEqual(str(IrQweb._render(template.id)), expected)
+        self.assertEqual(sorted(refs), sorted(t.id for t in generated))
+
+    def rows(self, template):
+        return self.env['ir.cache'].search([('kind', '=', 'qweb'), ('key', '=like', f'({template.id}, %')])
+
+    def test_reuse(self):
+        self.render(self.caller, '<div><span>callee</span></div>', generated=self.caller + self.callee)
+        self.assertEqual(len(self.rows(self.caller)), 1)
+        self.render(self.caller, '<div><span>callee</span></div>', generated=[])
+        self.assertEqual(len(self.rows(self.caller)), 1, "the valid row is used, no new row")
+
+    def test_invalidation(self):
+        self.render(self.caller, '<div><span>callee</span></div>', generated=self.caller + self.callee)
+
+        # the t-call is resolved when rendering: only the callee is generated
+        self.callee.arch = '<span>callee 2</span>'
+        self.render(self.caller, '<div><span>callee 2</span></div>', generated=self.callee)
+        self.assertEqual(len(self.rows(self.callee)), 2, "a new row, the old one is kept")
+
+        # a new view inheriting from the template, even inactive
+        extension = self.env['ir.ui.view'].create({
+            'name': 'extension', 'type': 'qweb', 'mode': 'extension', 'active': False,
+            'inherit_id': self.caller.id, 'arch': '<xpath expr="//div" position="inside"><b/></xpath>',
+        })
+        self.render(self.caller, '<div><span>callee 2</span></div>', generated=self.caller)
+        self.render(self.caller, '<div><span>callee 2</span></div>', generated=[])
+
+        # activation
+        extension.active = True
+        self.render(self.caller, '<div><span>callee 2</span><b></b></div>', generated=self.caller)
+
+        # deletion
+        extension.unlink()
+        self.render(self.caller, '<div><span>callee 2</span></div>', generated=self.caller)
+
+        # back to a previous version: a new row (the last one is used)
+        self.callee.arch = '<span>callee</span>'
+        self.render(self.caller, '<div><span>callee</span></div>', generated=self.callee)
+        self.render(self.caller, '<div><span>callee</span></div>', generated=[])
+
+        # other options (cache keys), other rows
+        self.render(self.caller, '<div><span>callee</span></div>', generated=self.caller + self.callee, preserve_comments=True)
+        self.render(self.caller, '<div><span>callee</span></div>', generated=[], preserve_comments=True)
+
+        # another version of the compiler
+        self.env.registry._qweb_compiler_hash__ = 'other'
+        self.render(self.caller, '<div><span>callee</span></div>', generated=self.caller + self.callee)
+
+    def test_signature(self):
+        """ The bytecode of the table is executed: whoever writes in the table,
+        only the rows signed by this server are used. """
+        self.render(self.caller, '<div><span>callee</span></div>', generated=self.caller + self.callee)
+        row = self.rows(self.callee)
+        evil = marshal.dumps(('', {}, 'evil', compile('raise Exception("evil")', '<evil>', 'exec')))
+
+        def forge(**values):
+            """ Copy the row of the callee with ``values`` (as the last row). """
+            columns = ['create_date', 'kind', 'key', 'key_id', 'control', 'hash', 'data', 'signature']
+            self.env.cr.execute(SQL(
+                "INSERT INTO ir_cache (%s) SELECT %s FROM ir_cache WHERE id = %s",
+                SQL(', ').join(map(SQL.identifier, columns)),
+                SQL(', ').join(SQL('%s', values[c]) if c in values else SQL.identifier(c) for c in columns),
+                row.id,
+            ))
+
+        def check_forged(generated, **values):
+            with self.env.cr.savepoint(flush=False) as savepoint:
+                forge(**values)
+                with self.assertLogs('odoo.addons.base.models.ir_cache', 'WARNING'):
+                    self.render(self.caller, '<div><span>callee</span></div>', generated=generated)
+                savepoint.rollback()
+
+        # the payload, the control (e.g. no view to check), the hash, or the
+        # key (the row of another template)
+        check_forged(self.callee, data=evil)
+        check_forged(self.callee, control='[]')
+        check_forged(self.callee, hash='x')
+        check_forged(self.caller, key=self.rows(self.caller).key)
+        # a row of another key (another server, a previous run, another database)
+        with self.env.cr.savepoint(flush=False) as savepoint:
+            forge(key_id=b'12345678', data=evil)
+            self.render(self.caller, '<div><span>callee</span></div>', generated=[])
+            savepoint.rollback()
+
+        # the ORM is not more trusted than SQL
+        with self.assertLogs('odoo.addons.base.models.ir_cache', 'WARNING'):
+            row.write({'hash': 'x'})
+            row.flush_recordset()
+            self.render(self.caller, '<div><span>callee</span></div>', generated=self.callee)
+
+        # a new signed row is added and used
+        self.render(self.caller, '<div><span>callee</span></div>', generated=[])
+        self.assertEqual(len(self.rows(self.callee)), 2)
+
+    def test_gc(self):
+        self.render(self.caller, '<div><span>callee</span></div>', generated=self.caller + self.callee)
+        self.callee.arch = '<span>callee 2</span>'
+        self.render(self.caller, '<div><span>callee 2</span></div>', generated=self.callee)
+        self.assertEqual(len(self.rows(self.callee)), 2)
+
+        # the replaced rows are deleted, then the old rows
+        self.env['ir.cache']._gc_cache()
+        self.assertEqual(len(self.rows(self.callee)), 1)
+        self.render(self.caller, '<div><span>callee 2</span></div>', generated=[])
+        self.env.cr.execute(SQL("UPDATE ir_cache SET create_date = create_date - interval '31 days' WHERE id = %s", self.rows(self.caller).id))
+        self.env['ir.cache']._gc_cache()
+        self.assertFalse(self.rows(self.caller))
+        self.assertEqual(len(self.rows(self.callee)), 1)

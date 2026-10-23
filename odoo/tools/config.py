@@ -228,6 +228,8 @@ class configmanager:
         parser = OdooOptionParser(version=version, option_class=OdooOption)
 
         parser.add_option(FileOnlyOption(dest='admin_passwd', my_default='admin'))
+        parser.add_option(FileOnlyOption(dest='cache_max_age', type='int', my_default=30, file_exportable=False))
+        parser.add_option(FileOnlyOption(dest='cache_secret', my_default='', file_exportable=False))
         parser.add_option(FileOnlyOption(dest='bin_path', type='path', my_default='', file_exportable=False))
         parser.add_option(FileOnlyOption(dest='csv_internal_sep', my_default=','))
         parser.add_option(FileOnlyOption(dest='default_productivity_apps', type='bool', my_default=False, file_exportable=False))

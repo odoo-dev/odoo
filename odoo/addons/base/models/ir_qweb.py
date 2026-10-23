@@ -353,10 +353,14 @@ structure.
 from __future__ import annotations
 
 import ast
+import contextlib
 import fnmatch
 import glob
+import hashlib
+import inspect
 import io
 import logging
+import marshal
 import math
 import pprint
 import re
@@ -387,7 +391,7 @@ from urllib.parse import unquote_plus
 from odoo import api, models, tools
 from odoo.modules import Manifest
 from odoo.modules.registry import _REGISTRY_CACHES
-from odoo.tools import BinaryValue, config, safe_eval, OrderedSet, frozendict, json
+from odoo.tools import SQL, BinaryValue, config, safe_eval, OrderedSet, frozendict, json
 from odoo.tools.constants import SUPPORTED_DEBUGGER, EXTERNAL_ASSET
 from odoo.tools.safe_eval import (
     _BLACKLIST,
@@ -466,6 +470,15 @@ _SAFE_QWEB_OPCODES = _EXPR_OPCODES.union(to_opcodes([
 
 # eval to compile generated string python code into binary code, used in `_compile`
 unsafe_eval = eval
+
+# hash of the views of `control` (ids of the views of a template) and of the
+# views inheriting from them, see `ir.cache`
+VIEWS_HASH_SQL = SQL("""(
+    SELECT md5(string_agg(concat_ws('|', v.id, v.inherit_id, v.active, v.write_date, md5(v.arch_db::text)), ',' ORDER BY v.id))
+      FROM ir_ui_view v
+     WHERE v.id IN (SELECT jsonb_array_elements_text(control)::int)
+        OR v.inherit_id IN (SELECT jsonb_array_elements_text(control)::int)
+)""")
 
 
 VOID_ELEMENTS = frozenset([
@@ -1042,28 +1055,52 @@ class IrQweb(models.AbstractModel):
         api.ormcache('ref', 'tuple(self.env.context.get(k) or False for k in self._get_template_cache_keys())', cache='templates'),
     )
     def _generate_code_cached(self, ref: int):
-        # The method preloads templates to put information into the transaction
-        # cache in addition to browse records. It also loads in batch the
-        # template from directives (like: t-call and t-snippet).
-        try:
-            document = self._get_template(ref)[1]
-        except Exception:  # noqa: BLE001
-            return self._generate_code_uncached(ref)
-
-        view_hash = hash(document)
         cache_key = tuple(self.env.context.get(k) or False for k in self._get_template_cache_keys())
 
         if 'xml' in tools.config['dev_mode']:
             return self._generate_code_uncached(ref)
+        ir_cache_key = repr((ref, cache_key, self._get_compiler_hash()))
+        self.env['ir.ui.view'].flush_model(['inherit_id', 'active', 'arch_db'])
+        entry = self.env['ir.cache']._get('qweb', ir_cache_key, VIEWS_HASH_SQL)
+        if not entry:
+            return self._generate_code_uncached(ref, ir_cache_key)
+        view_hash, data = entry
         memo_key = (ref, view_hash, cache_key)
         cache = self.env.registry._template_code__
         code = cache.get(memo_key)
         if code is None:
-            code = self._generate_code_uncached(ref)
+            code = self._load_code(*marshal.loads(data))
             cache[memo_key] = code
         return code
 
-    def _generate_code_uncached(self, template: int | str | etree._Element):
+    def _get_compiler_hash(self) -> str:
+        """ Hash of the code of the compiler (the compiled code depends on it). """
+        registry = self.env.registry
+        if not hasattr(registry, '_qweb_compiler_hash__'):
+            digest = hashlib.sha256()
+            for cls in type(self).mro():
+                with contextlib.suppress(TypeError, OSError):
+                    digest.update(Path(inspect.getsourcefile(cls)).read_bytes())
+            registry._qweb_compiler_hash__ = digest.hexdigest()
+        return registry._qweb_compiler_hash__
+
+    def _get_template_view_ids(self, ref: int) -> list[int]:
+        """ Return the views of the template: its parents and all the views
+        inheriting from them (active or not). """
+        return [view_id for [view_id] in self.env.execute_query(SQL("""
+            WITH RECURSIVE parents(id, inherit_id) AS (
+                SELECT id, inherit_id FROM ir_ui_view WHERE id = %s
+            UNION
+                SELECT v.id, v.inherit_id FROM ir_ui_view v JOIN parents p ON v.id = p.inherit_id
+            ), tree(id) AS (
+                SELECT id FROM parents
+            UNION
+                SELECT v.id FROM ir_ui_view v JOIN tree t ON v.inherit_id = t.id
+            )
+            SELECT id FROM tree ORDER BY id
+        """, ref))]
+
+    def _generate_code_uncached(self, template: int | str | etree._Element, ir_cache_key=None):
         assert isinstance(self, IrQweb)
         ref = self._get_template_info(template)['id'] if isinstance(template, (int, str)) else None
 
@@ -1088,6 +1125,12 @@ class IrQweb(models.AbstractModel):
             "    return template_functions",
         ])
         compiled = compile(wrap_code, f"<{ref}>", 'exec')
+        if ir_cache_key:
+            data = marshal.dumps((code, options, def_name, compiled))
+            self.env['ir.cache']._set('qweb', ir_cache_key, self._get_template_view_ids(ref), VIEWS_HASH_SQL, data)
+        return self._load_code(code, options, def_name, compiled)
+
+    def _load_code(self, code, options, def_name, compiled):
         globals_dict = self.__prepare_globals()
         globals_dict['__builtins__'] = globals_dict  # So that unknown/unsafe builtins are never added.
         unsafe_eval(compiled, globals_dict)
@@ -3183,6 +3226,9 @@ def render(template_name: str | int, values: dict, load: Callable[[str], tuple[e
 
         def _get_asset_nodes(self, *args):
             raise NotImplementedError("Assets are not allowed in this rendering mode. Please use \"env['ir.qweb']._render\" method")
+
+        def _generate_code_cached(self, ref):
+            return self._generate_code_uncached(ref)
 
     class MockCr:
         def __init__(self):

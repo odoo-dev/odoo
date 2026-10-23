@@ -61,6 +61,8 @@ class TestConfigManager(TransactionCase):
         self.assertConfigEqual({
             # options not exposed on the command line
             'admin_passwd': 'admin',
+            'cache_max_age': 30,
+            'cache_secret': '',
             'bin_path': '',
             'csv_internal_sep': ',',
             'default_productivity_apps': False,
@@ -182,6 +184,8 @@ class TestConfigManager(TransactionCase):
         self.assertConfigEqual({
             # options not exposed on the command line
             'admin_passwd': 'Tigrou007',
+            'cache_max_age': 30,
+            'cache_secret': '',
             'bin_path': '',
             'csv_internal_sep': '@',
             'default_productivity_apps': False,
@@ -332,6 +336,8 @@ class TestConfigManager(TransactionCase):
         self.assertConfigEqual({
             # options taken from the configuration file
             'admin_passwd': 'admin',
+            'cache_max_age': 30,
+            'cache_secret': '',
             'config': config_path,
             'csv_internal_sep': ',',
             'db_host': '',
@@ -483,6 +489,8 @@ class TestConfigManager(TransactionCase):
         self.assertConfigEqual({
             # options not exposed on the command line
             'admin_passwd': 'admin',
+            'cache_max_age': 30,
+            'cache_secret': '',
             'bin_path': '',
             'csv_internal_sep': ',',
             'default_productivity_apps': False,
@@ -614,6 +622,8 @@ class TestConfigManager(TransactionCase):
         self.assertConfigEqual({
             # options not exposed on the command line
             'admin_passwd': 'admin',
+            'cache_max_age': 30,
+            'cache_secret': '',
             'bin_path': '',
             'csv_internal_sep': ',',
             'default_productivity_apps': False,
