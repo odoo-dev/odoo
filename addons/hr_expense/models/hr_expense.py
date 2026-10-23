@@ -270,7 +270,7 @@ class HrExpense(models.Model):
         domain="""[
             ('company_id', '=', company_id),
             ('move_type', '=', 'in_invoice'),
-            ('state', 'in', ['posted', 'draft']),
+            ('state', '=', 'posted'),
             ('amount_residual', '>', 0),
             '|', ('partner_id', '=', vendor_id), (not vendor_id, '=', True),
         ]""",

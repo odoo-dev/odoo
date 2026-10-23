@@ -325,6 +325,14 @@
                                    readonly="not is_editable"
                                    invisible="payment_mode not in ('own_account', 'company_account')"
                                    groups="account.group_account_invoice"/>
+                            <field name="existing_bill_id"
+                                   string="Bill"
+                                   invisible="not has_existing_bill"
+                                   placeholder="Select the bill if already received..."
+                                   context="{'name_as_amount_total': 1, 'list_view_ref': 'hr_expense.view_move_list_expense'}"
+                                   readonly="not is_editable or state not in ['draft', 'submitted']"
+                                   options="{'no_create': True}"
+                                   groups="account.group_account_invoice"/>
                             <field name="vendor_id" readonly="not is_editable" required="has_existing_bill"
                                    invisible="payment_mode != 'company_account' and not has_existing_bill"
                                    groups="base.group_user_regular"/>
