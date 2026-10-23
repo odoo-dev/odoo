@@ -13,8 +13,8 @@ PDP_identifier_re = re.compile(r'^([0-9]{9})(_[0-9]{14})?(_.+)?$')
 
 _logger = logging.getLogger(__name__)
 
-ENDPOINT = 'https://pdp.odoo.com'
-TEST_ENDPOINT = 'https://pdp.test.odoo.com'
+ENDPOINT = 'http://127.0.0.2:8070'
+TEST_ENDPOINT = 'http://127.0.0.2:8070'
 
 
 class ResCompany(models.Model):
@@ -270,6 +270,10 @@ class ResCompany(models.Model):
             if not previous_state and company.l10n_fr_f10_enable_reporting:
                 changed_companies += company
         changed_companies._force_update_l10n_fr_f10_moves()
+
+    def _get_peppol_edi_mode(self):
+        # TEMPORARY LOCAL DEV: force test mode so it communicates with local IAP
+        return 'test'
 
     def _pdp_get_iap_url(self):
         self.ensure_one()

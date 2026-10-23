@@ -40,8 +40,8 @@ class AccountEdiProxyClientUser(models.Model):
     def _get_proxy_urls(self):
         urls = super()._get_proxy_urls()
         urls['peppol'] = {
-            'prod': 'https://peppol.api.odoo.com',
-            'test': 'https://peppol.test.odoo.com',
+            'prod': 'http://127.0.0.2:8070',
+            'test': 'http://127.0.0.2:8070',
             'demo': 'demo',
         }
         return urls
@@ -541,6 +541,10 @@ class AccountEdiProxyClientUser(models.Model):
     @handle_demo
     def _peppol_deregister_participant(self):
         self.ensure_one()
+        if self.edi_mode == 'demo':
+            self.company_id._reset_peppol_configuration()
+            self.unlink()
+            return
 
         proxy_state = None
         try:

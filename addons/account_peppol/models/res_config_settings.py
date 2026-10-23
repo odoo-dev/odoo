@@ -86,6 +86,7 @@ class ResConfigSettings(models.TransientModel):
             endpoint=self.account_peppol_edi_user._get_peppol_proxy_endpoint('1/update_user'),
             params=params,
         )
+        self.account_peppol_edi_user._peppol_get_participant_status()
         return True
 
     @handle_demo

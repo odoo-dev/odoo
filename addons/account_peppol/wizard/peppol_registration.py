@@ -356,15 +356,8 @@ class PeppolRegistration(models.TransientModel):
         ]).active = False
         edi_proxy_client.flush_model(['active'])
 
-        authorization_url = self.env['res.company']._peppol_select_kyc_url(
-            company._peppol_can_connect(edi_identification.lower())
-        )
-
-        if authorization_url:
-            # redirect to IAP KYC link (that will redirect back to here thru callback)
-            return {'type': 'ir.actions.act_url', 'url': authorization_url, 'target': 'self'}
-
-        company._peppol_create_connection(edi_identification.lower())  # no auth, IAP will authorize connection directly
+        # TEMPORARY LOCAL DEV: bypass external KYC and register directly on local IAP
+        company._peppol_create_connection(edi_identification.lower())
         notifications = {
             'sender': _('You can now send electronic invoices via Peppol.'),
             'smp_registration': _('Your Peppol registration will be activated soon. You can already send invoices.'),

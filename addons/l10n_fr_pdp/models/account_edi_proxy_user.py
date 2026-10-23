@@ -123,8 +123,8 @@ class AccountEdiProxyClientUser(models.Model):
     def _get_proxy_urls(self):
         urls = super()._get_proxy_urls()
         urls['pdp'] = {
-            'prod': 'https://pdp.api.odoo.com',
-            'test': 'https://pdp.test.odoo.com',
+            'prod': 'http://127.0.0.2:8070',
+            'test': 'http://127.0.0.2:8070',
             'demo': 'demo',
         }
         return urls
@@ -206,6 +206,14 @@ class AccountEdiProxyClientUser(models.Model):
 
         datetime_in_1_hour = fields.Datetime.add(fields.Datetime.now(), hours=1)
         self.env.ref('account_peppol.ir_cron_peppol_get_participant_status')._trigger(at=datetime_in_1_hour)
+
+    def _peppol_deregister_participant(self):
+        self.ensure_one()
+        if self.edi_mode == 'demo':
+            self.company_id._reset_peppol_configuration()
+            self.unlink()
+            return
+        return super()._peppol_deregister_participant()
 
     def _peppol_process_participant_status(self, proxy_user):
         self.ensure_one()

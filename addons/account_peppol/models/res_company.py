@@ -359,12 +359,8 @@ class ResCompany(models.Model):
         }
 
     def _get_peppol_edi_mode(self):
-        self.ensure_one()
-        config_param = self.env['ir.config_parameter'].sudo().get_param('account_peppol.edi.mode')
-        # by design, we can only have zero or one proxy user per company with type Peppol
-        peppol_user = self.sudo().account_edi_proxy_client_ids.filtered(lambda u: u.proxy_type in self.env['account_edi_proxy_client.user']._get_peppol_proxy_types())
-        demo_if_demo_identifier = 'demo' if self.peppol_eas == 'odemo' else False
-        return demo_if_demo_identifier or peppol_user.edi_mode or config_param or 'prod'
+        # TEMPORARY LOCAL DEV: force test mode so it communicates with local IAP
+        return 'test'
 
     def _get_peppol_proxy_type(self):
         self.ensure_one()
