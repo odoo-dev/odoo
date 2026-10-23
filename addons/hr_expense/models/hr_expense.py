@@ -823,9 +823,8 @@ class HrExpense(models.Model):
                     ('journal_id.active', '=', True),
                 ])
                 if expense.payment_mode == 'company_account':
-                    # The expense is already paid, bank payment methods (SEPA, checks, ...) are only kept if there is nothing else
-                    card_and_cash_lines = method_lines.filtered(lambda line: line.journal_id.type in ('credit', 'cash'))
-                    method_lines = card_and_cash_lines.sorted(lambda line: line.journal_id.type != 'credit') or method_lines
+                    # The expense is already paid, a SEPA transfer makes no sense
+                    method_lines = method_lines.filtered(lambda line: line.code != 'sepa_ct')
                 expense.selectable_payment_method_line_ids = method_lines
 
     @api.onchange('payment_mode')
