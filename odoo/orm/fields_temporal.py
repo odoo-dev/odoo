@@ -297,7 +297,13 @@ class Datetime(BaseDate[datetime]):
         return getter
 
     def convert_to_cache(self, value, records, validate=True):
-        return self.to_datetime(value)
+        dt = self.to_datetime(value)
+        return dt.replace(microsecond=0) if dt else None
+
+    def _insert_cache(self, records, values):
+        # XXX for testing
+        values = (dt.replace(microsecond=0) if dt else None for dt in values)
+        return super()._insert_cache(records, values)
 
     def convert_to_export(self, value, record):
         value = self.convert_to_display_name(value, record)
