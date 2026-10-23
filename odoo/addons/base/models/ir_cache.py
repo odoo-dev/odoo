@@ -83,24 +83,29 @@ class IrCache(models.Model):
     _kind_key_idx = models.Index('(kind, key, key_id, id DESC)')
 
     @api.model
-    def _get(self, kind: str, key: str, hash_sql: SQL) -> tuple[str, bytes] | None:
-        """ Return ``(hash, data)`` of the last entry of ``key`` if its
-        signature is valid and its source did not change: ``hash_sql``
-        computed from its ``control`` gives its ``hash``. Nothing else is
-        trustworthy: an entry with an invalid signature is ignored. """
+    def _get(self, kind: str, keys, hash_sql: SQL) -> dict[str, tuple[str, bytes]]:
+        """ Return ``{key: (hash, data)}`` for the last entry of each
+        key if its signature is valid and its source did not change:
+        ``hash_sql`` computed from its ``control`` gives its ``hash``.
+        Nothing else is trustworthy: an entry with an invalid signature is
+        ignored. """
         key_id, secret = _get_database_key(self.env.cr.dbname)
         rows = self.env.execute_query(SQL("""
-            SELECT control, hash, data, signature, %s
-              FROM (SELECT * FROM ir_cache WHERE kind = %s AND key = %s AND key_id = %s ORDER BY id DESC LIMIT 1) entry
-        """, hash_sql, kind, key, key_id))
-        if not rows:
-            return None
-        control, hash_, data, signature, current_hash = rows[0]
-        data = bytes(data)
-        if not hmac.compare_digest(bytes(signature), _sign(secret, key_id, kind, key, control, hash_, data)):
-            _logger.warning("ir.cache: invalid signature of the %s entry %r, ignored", kind, key)
-            return None
-        return (hash_, data) if hash_ == current_hash else None
+            SELECT key, control, hash, data, signature, %s
+              FROM (
+                SELECT DISTINCT ON (key) * FROM ir_cache
+                 WHERE kind = %s AND key = ANY(%s) AND key_id = %s
+              ORDER BY key, id DESC
+            ) entry
+        """, hash_sql, kind, list(keys), key_id))
+        result = {}
+        for key, control, hash_, data, signature, current_hash in rows:
+            data = bytes(data)
+            if not hmac.compare_digest(bytes(signature), _sign(secret, key_id, kind, key, control, hash_, data)):
+                _logger.warning("ir.cache: invalid signature of the %s entry %r, ignored", kind, key)
+            elif hash_ == current_hash:
+                result[key] = (hash_, data)
+        return result
 
     @api.model
     def _set(self, kind: str, key: str, control, hash_sql: SQL, data: bytes):

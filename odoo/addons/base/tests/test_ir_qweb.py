@@ -2574,19 +2574,27 @@ class TestQwebPerformance(TransactionCaseWithUserDemo):
             self.assertEqual(str(value), expected % name)
             self.assertEqual(env.cr.sql_log_count - init, queries, f'Maximum queries: {queries}')
 
-        # 'base.testing_content' and each called template (8 templates), the
-        # compiled code being in `ir.cache`:
+        # 'base.testing_content'
         #     SELECT id + fields from xmlid
-        #     SELECT the last ir.cache row of the template + hash of its views
+        #     SELECT ir.cache compiled code
+        # 'base.testing_layout', 'base.testing_header_0'
+        #     SELECT id + fields from xmlid
+        #     SELECT ir.cache compiled code
+        # 'base.testing_header', 'base.testing_footer'
+        #     SELECT id + fields from xmlid
+        #     SELECT ir.cache compiled code
+        # 'base.testing_header_1', 'base.testing_footer_0', 'base.testing_footer_1'
+        #     SELECT id + fields from xmlid
+        #     SELECT ir.cache compiled code
 
         FIRST_SEARCH_FETCH = 1  # the first "SELECT id + fields from xmlid"
-        OTHER_SEARCH_FETCH = 8  # "SELECT id + fields from xmlid" (header_0 is called by id)
-        IR_CACHE = 8  # SELECT the last ir.cache row
+        OTHER_SEARCH_FETCH = 3  # "SELECT id + fields from xmlid"
+        IR_CACHE = 4  # SELECT ir.cache compiled code (no arch combine)
 
         self.env.transaction.invalidate_ormcache('templates')
         view.invalidate_model()
 
-        check('base.testing_content', 'test-cold-0', FIRST_SEARCH_FETCH + OTHER_SEARCH_FETCH + IR_CACHE)  # 17
+        check('base.testing_content', 'test-cold-0', FIRST_SEARCH_FETCH + OTHER_SEARCH_FETCH + IR_CACHE)  # 8
         check('base.testing_content', 'test-hot-0', 0)
         check('base.testing_content', 'test-hot-1', 0)
 
@@ -2596,20 +2604,20 @@ class TestQwebPerformance(TransactionCaseWithUserDemo):
 
         # like 'test-cold-0'
         self.env.transaction.invalidate_ormcache('templates')
-        check(view.id, 'test-cold-id-1', FIRST_SEARCH_FETCH + OTHER_SEARCH_FETCH + IR_CACHE)  # 17
+        check(view.id, 'test-cold-id-1', FIRST_SEARCH_FETCH + OTHER_SEARCH_FETCH + IR_CACHE)  # 8
 
         # like 'test-cold-0' the first search query is replaced by a fetching
         self.env.transaction.invalidate_ormcache('templates')
         view.invalidate_model()
-        check(view.id, 'test-cold-id-2', FIRST_SEARCH_FETCH + OTHER_SEARCH_FETCH + IR_CACHE)  # 17
+        check(view.id, 'test-cold-id-2', FIRST_SEARCH_FETCH + OTHER_SEARCH_FETCH + IR_CACHE)  # 8
 
         # like 'test-cold-0'
         self.env.transaction.invalidate_ormcache('templates')
-        check('base.testing_content', 'test-cold-1', FIRST_SEARCH_FETCH + OTHER_SEARCH_FETCH + IR_CACHE - 1)  # 16
+        check('base.testing_content', 'test-cold-1', FIRST_SEARCH_FETCH + OTHER_SEARCH_FETCH + IR_CACHE)  # 8
 
         # like 'test-cold-0'
         self.env.transaction.invalidate_ormcache('templates')
-        check(view.id, 'test-cold-id-3', FIRST_SEARCH_FETCH + OTHER_SEARCH_FETCH + IR_CACHE - 2)  # 15
+        check(view.id, 'test-cold-id-3', FIRST_SEARCH_FETCH + OTHER_SEARCH_FETCH + IR_CACHE - 1)  # 7
 
     def test_render_query_count_after_write(self):
         View = self.env['ir.ui.view']
@@ -2675,8 +2683,7 @@ class TestQwebPerformance(TransactionCaseWithUserDemo):
         check(extend_view_2.id, "<div><div>Hello World</div><h1></h1><section></section></div>", queries=0)
         check(first_view.id, "<div>Hello World</div>", queries=0)
 
-        # a cache miss does 4 more queries: the last `ir.cache` row of the
-        # template, its views, their hash and the insertion of the new row
+        # a cache miss also reads `ir.cache` and stores the compiled code
         first_view.arch_db = '<div>Hello 2</div>'
 
         check(first_view.id, "<div>Hello 2</div>", queries=5, cachemiss=1)
@@ -2684,7 +2691,7 @@ class TestQwebPerformance(TransactionCaseWithUserDemo):
 
         first_view.arch_db = '<div>Hello</div>'
 
-        check(extend_view_2.id, "<div><div>Hello</div><h1></h1><section></section></div>", queries=7, cachemiss=1)
+        check(extend_view_2.id, "<div><div>Hello</div><h1></h1><section></section></div>", queries=8, cachemiss=1)
         check(first_view.id, "<div>Hello</div>", queries=0)
 
         first_view.arch_db = '<div>Hello1</div>'
@@ -2698,7 +2705,7 @@ class TestQwebPerformance(TransactionCaseWithUserDemo):
         # 1 more query on ir_mode_data from _is_studio_view() in apply_inheritance_specs
         # TODO: use key (actually empty for some view) instead of xml_id field
         addons = tuple(self.env.registry._init_modules) + (self.env.context.get('install_module'),)
-        check(extend_view_2.id, "<div><div>Hello2</div><h1></h1><section></section></div>", queries=8, cachemiss=1)
+        check(extend_view_2.id, "<div><div>Hello2</div><h1></h1><section></section></div>", queries=9, cachemiss=1)
         check(first_view.id, "<div>Hello2</div>", queries=0)
 
         first_view.arch_db = '<div>Hello3</div>'

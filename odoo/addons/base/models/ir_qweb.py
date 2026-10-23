@@ -1055,34 +1055,64 @@ class IrQweb(models.AbstractModel):
         api.ormcache('ref', 'tuple(self.env.context.get(k) or False for k in self._get_template_cache_keys())', cache='templates'),
     )
     def _generate_code_cached(self, ref: int):
-        cache_key = tuple(self.env.context.get(k) or False for k in self._get_template_cache_keys())
-
         if 'xml' in tools.config['dev_mode']:
             return self._generate_code_uncached(ref)
-        ir_cache_key = repr((ref, cache_key, self._get_compiler_hash()))
-        self.env['ir.ui.view'].flush_model(['inherit_id', 'active', 'arch_db'])
-        entry = self.env['ir.cache']._get('qweb', ir_cache_key, VIEWS_HASH_SQL)
-        if not entry:
-            return self._generate_code_uncached(ref, ir_cache_key)
-        view_hash, data = entry
-        memo_key = (ref, view_hash, cache_key)
-        cache = self.env.registry._template_code__
-        code = cache.get(memo_key)
-        if code is None:
-            code = self._load_code(*marshal.loads(data))
-            cache[memo_key] = code
-        return code
+        return self._load_code_cached(ref) or self._generate_code_uncached(ref, self._get_ir_cache_key(ref))
 
-    def _get_compiler_hash(self) -> str:
-        """ Hash of the code of the compiler (the compiled code depends on it). """
+    def _get_ir_cache_key(self, ref: int) -> str:
+        """ Key of the compiled code of the template in `ir.cache`. """
         registry = self.env.registry
         if not hasattr(registry, '_qweb_compiler_hash__'):
+            # the compiled code depends on the code of the compiler
             digest = hashlib.sha256()
             for cls in type(self).mro():
                 with contextlib.suppress(TypeError, OSError):
                     digest.update(Path(inspect.getsourcefile(cls)).read_bytes())
             registry._qweb_compiler_hash__ = digest.hexdigest()
-        return registry._qweb_compiler_hash__
+        cache_key = tuple(self.env.context.get(k) or False for k in self._get_template_cache_keys())
+        return repr((ref, cache_key, registry._qweb_compiler_hash__))
+
+    def _load_code_cached(self, ref: int):
+        """ Return the compiled code of the template from `ir.cache`, or None. """
+        self.env['ir.ui.view'].flush_model(['inherit_id', 'active', 'arch_db'])
+        key = self._get_ir_cache_key(ref)
+        entry = self.env['ir.cache']._get('qweb', [key], VIEWS_HASH_SQL).get(key)
+        if not entry:
+            return None
+        view_hash, data = entry
+        code, calls = self._load_code_memo(key, view_hash, data)
+        self._preload_code_cached(calls)
+        return code
+
+    def _preload_code_cached(self, calls):
+        """ Load in batch the compiled code of the called templates (and of
+        the templates they call) from `ir.cache`, in the cache of
+        `_generate_code_cached`. """
+        ormcache = IrQweb._generate_code_cached.__cache__
+        while calls:
+            infos = self.env['ir.ui.view']._preload_views(list(calls))
+            keys = {
+                self._get_ir_cache_key(info['ref']): info['ref'] for call in calls
+                if (info := infos.get(_id_or_xmlid(call))) and info['ref']
+                and ormcache.get_value(self, info['ref']) is None
+            }
+            if not keys:
+                return
+            calls = OrderedSet()
+            for key, (view_hash, data) in self.env['ir.cache']._get('qweb', keys, VIEWS_HASH_SQL).items():
+                code, sub_calls = self._load_code_memo(key, view_hash, data)
+                ormcache.add_value(self, keys[key], cache_value=code)
+                calls.update(sub_calls)
+
+    def _load_code_memo(self, key: str, view_hash: str, data: bytes):
+        """ Return the compiled code of a signed `ir.cache` entry and the
+        templates it calls, memoized in the registry. """
+        memo = self.env.registry._template_code__
+        result = memo.get((key, view_hash))
+        if result is None:
+            code, options, def_name, compiled, calls = marshal.loads(data)
+            result = memo[key, view_hash] = (self._load_code(code, options, def_name, compiled), calls)
+        return result
 
     def _get_template_view_ids(self, ref: int) -> list[int]:
         """ Return the views of the template: its parents and all the views
@@ -1126,8 +1156,10 @@ class IrQweb(models.AbstractModel):
         ])
         compiled = compile(wrap_code, f"<{ref}>", 'exec')
         if ir_cache_key:
-            data = marshal.dumps((code, options, def_name, compiled))
+            calls = list(self._get_called_templates(self._get_template(ref)[0]))
+            data = marshal.dumps((code, options, def_name, compiled, calls))
             self.env['ir.cache']._set('qweb', ir_cache_key, self._get_template_view_ids(ref), VIEWS_HASH_SQL, data)
+            self._preload_code_cached(calls)
         return self._load_code(code, options, def_name, compiled)
 
     def _load_code(self, code, options, def_name, compiled):
@@ -1315,6 +1347,17 @@ class IrQweb(models.AbstractModel):
     def _get_preload_attribute_xmlids(self):
         return ['t-call']
 
+    def _get_called_templates(self, tree) -> OrderedSet:
+        """ Return the templates statically called by the template ``tree``. """
+        ref_names = self._get_preload_attribute_xmlids()
+        return OrderedSet(
+            el.get(ref_name)
+            for ref_name in ref_names
+            for el in tree.xpath(f'//*[@{ref_name}]')
+            if not any(att.startswith('t-options-') or att == 't-options' or att == 't-lang' for att in el.attrib)
+            if '{' not in el.get(ref_name) and '<' not in el.get(ref_name) and '/' not in el.get(ref_name)
+        )
+
     def _preload_trees(self, refs: Sequence[int | str]):
         """ Preload all tree and subtree (from t-call and other '_get_preload_attribute_xmlids' values).
 
@@ -1353,16 +1396,9 @@ class IrQweb(models.AbstractModel):
             compile_batch[xmlid].update(data)
 
         # preload sub template
-        ref_names = self._get_preload_attribute_xmlids()
         sub_refs = OrderedSet()
         for tree in trees:
-            sub_refs.update(
-                el.get(ref_name)
-                for ref_name in ref_names
-                for el in tree.xpath(f'//*[@{ref_name}]')
-                if not any(att.startswith('t-options-') or att == 't-options' or att == 't-lang' for att in el.attrib)
-                if '{' not in el.get(ref_name) and '<' not in el.get(ref_name) and '/' not in el.get(ref_name)
-            )
+            sub_refs.update(self._get_called_templates(tree))
         assert not any(not f for f in sub_refs), "template is required"
         self._preload_trees(list(sub_refs))
 
