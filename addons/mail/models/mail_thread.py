@@ -3589,8 +3589,14 @@ class MailThread(models.AbstractModel):
         additional_values = {'auto_delete': mail_auto_delete}
         if kwargs.get('mail_headers'):
             additional_values['headers'] = kwargs['mail_headers']
+        # Cc recipients notified in Odoo receive no email, but they are still
+        # displayed in the Cc of emails sent to other recipients
+        headers_recipients_data = [
+            r for r in recipients_data
+            if r['notif'] == 'email' or (r['notif'] == 'inbox' and r['is_cc'])
+        ]
         base_mail_values = self._notify_by_email_get_base_mail_values(
-            message, partners_data, additional_values=additional_values,
+            message, headers_recipients_data, additional_values=additional_values,
         )
         base_notification_values = self._notify_by_email_get_base_notification_values(message)
 
@@ -3971,8 +3977,10 @@ class MailThread(models.AbstractModel):
         notification emails based on a given message.
 
         :param record message: <mail.message> record being notified;
-        :param list recipients_data: list of email recipients data based on <res.partner>
-          records formatted using a list of dicts. See ``MailThread._notify_get_recipients()``;
+        :param list recipients_data: list of recipients data based on <res.partner>
+          records formatted using a list of dicts, used to compute displayed
+          recipients headers (email recipients and Cc recipients notified in
+          Odoo). See ``MailThread._notify_get_recipients()``;
         :param dict additional_values: optional additional values to add (ease
           custom calls and inheritance);
 

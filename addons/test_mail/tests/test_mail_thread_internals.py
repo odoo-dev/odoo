@@ -1190,36 +1190,46 @@ class TestChatterTweaks(ThreadRecipients):
     @users('employee')
     def test_post_headers_recipients_internal_cc(self):
         """ Internal partners explicitly set in Cc are displayed to external
-        recipients, while internal followers and internal partners in To are
-        not. """
-        self.assertEqual(self.user_employee_2.notification_type, 'email')
+        recipients, whether they are notified by email or in Odoo, while
+        internal followers and internal partners in To are not. Cc partners
+        notified in Odoo are only displayed, they do not receive any email. """
         test_record = self.test_record.with_env(self.env)
         test_record.message_subscribe(self.partner_admin.ids)
 
-        with self.mock_mail_gateway(mail_unlink_sent=False), self.mock_mail_app():
-            message = test_record.message_post(
-                body='With Internal Cc',
-                message_type='comment',
-                partner_cc_ids=self.partner_employee_2.ids,
-                partner_ids=(self.test_partner + self.partner_admin).ids,
-                subtype_xmlid='mail.mt_comment',
-            )
+        for notification_type in ('email', 'inbox'):
+            with self.subTest(notification_type=notification_type):
+                self.user_employee_2.notification_type = notification_type
+                with self.mock_mail_gateway(mail_unlink_sent=False), self.mock_mail_app():
+                    message = test_record.message_post(
+                        body='With Internal Cc',
+                        message_type='comment',
+                        partner_cc_ids=self.partner_employee_2.ids,
+                        partner_ids=(self.test_partner + self.partner_admin).ids,
+                        subtype_xmlid='mail.mt_comment',
+                    )
 
-        headers = {
-            'Return-Path': f'{self.mail_alias_domain.bounce_email}',
-            'X-Custom': 'Done',  # model override
-            'X-Msg-Cc-Add': self.partner_employee_2.email_formatted,
-            'X-Msg-To-Add': self.test_partner.email_formatted,
-            'X-Odoo-Objects': f'{test_record._name}-{test_record.id}',
-        }
-        self.assertMailMail(
-            self.test_partner,
-            'sent',
-            author=self.partner_employee,
-            mail_message=message,
-            email_values={'headers': headers},
-            fields_values={'headers': headers},
-        )
+                headers = {
+                    'Return-Path': f'{self.mail_alias_domain.bounce_email}',
+                    'X-Custom': 'Done',  # model override
+                    'X-Msg-Cc-Add': self.partner_employee_2.email_formatted,
+                    'X-Msg-To-Add': self.test_partner.email_formatted,
+                    'X-Odoo-Objects': f'{test_record._name}-{test_record.id}',
+                }
+                self.assertMailMail(
+                    self.test_partner,
+                    'sent',
+                    author=self.partner_employee,
+                    mail_message=message,
+                    email_values={'headers': headers},
+                    fields_values={'headers': headers},
+                )
+                employee_2_notif = message.notification_ids.filtered(
+                    lambda n: n.res_partner_id == self.partner_employee_2)
+                self.assertEqual(employee_2_notif.notification_type, notification_type)
+                self.assertEqual(
+                    bool(self._new_mails.filtered(lambda m: self.partner_employee_2 in m.recipient_cc_ids)),
+                    notification_type == 'email',
+                )
 
     def test_post_no_subscribe_author(self):
         original = self.test_record.message_follower_ids
