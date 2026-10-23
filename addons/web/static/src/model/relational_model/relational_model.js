@@ -468,10 +468,23 @@ export class RelationalModel extends Model {
             });
 
             // orderBy
-            config.orderBy = "orderBy" in params ? params.orderBy : config.orderBy;
+            let previousOrderBy = currentConfig.orderBy || [];
+            if ("orderBy" in params) {
+                config.orderBy = params.orderBy;
+                // forget the order terms the search previously imposed but no longer does
+                // (e.g. order by count switched off), but keep the ones set by the user
+                const isSameTerm = (o1, o2) => o1.name === o2.name && o1.asc === o2.asc;
+                const droppedTerms = (currentConfig.searchOrderBy || []).filter(
+                    (o) => !params.orderBy.some((p) => isSameTerm(p, o))
+                );
+                previousOrderBy = previousOrderBy.filter(
+                    (o) => !droppedTerms.some((d) => isSameTerm(d, o))
+                );
+                config.searchOrderBy = params.orderBy;
+            }
             // re-apply previous orderBy if not given (or no order)
             if (!config.orderBy.length) {
-                config.orderBy = currentConfig.orderBy || [];
+                config.orderBy = previousOrderBy;
             }
             // apply default order if no order
             if (this.defaultOrderBy && !config.orderBy.length) {

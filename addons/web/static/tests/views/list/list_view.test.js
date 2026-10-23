@@ -3564,6 +3564,39 @@ test(`Loading a filter with a sort attribute`, async () => {
     expect.verifySteps(["date ASC, foo DESC", "date DESC, foo ASC"]);
 });
 
+test.tags("desktop");
+test(`removing a filter with a sort attribute keeps the column order`, async () => {
+    Foo._filters = [
+        {
+            context: "{}",
+            domain: "[]",
+            id: 7,
+            is_default: true,
+            name: "My favorite",
+            sort: '["foo desc"]',
+            user_ids: [2],
+        },
+    ];
+
+    onRpc("web_search_read", ({ kwargs }) => expect.step(kwargs.order));
+    await mountView({
+        resModel: "foo",
+        type: "list",
+        arch: `
+            <list>
+                <field name="foo"/>
+                <field name="int_field"/>
+            </list>
+        `,
+        loadIrFilters: true,
+    });
+    expect.verifySteps(["foo DESC"]);
+    await contains("th[data-name=int_field]").click();
+    expect.verifySteps(["int_field ASC, foo DESC"]);
+    await removeFacet("My favorite");
+    expect.verifySteps(["int_field ASC"]);
+});
+
 test(`many2one field rendering`, async () => {
     await mountView({
         resModel: "foo",
