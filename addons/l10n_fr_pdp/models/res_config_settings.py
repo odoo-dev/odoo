@@ -55,6 +55,11 @@ class ResConfigSettings(models.TransientModel):
     def _inverse_l10n_fr_pdp_pilot_phase(self):
         pass
 
+    def button_update_peppol_user_data(self):
+        res = super().button_update_peppol_user_data()
+        self.account_peppol_edi_user._peppol_get_participant_status()
+        return res
+
     # TODO: remove in master
     @api.model
     def _pdp_ensure_selection_value(self, model_name, field_name, new_value):

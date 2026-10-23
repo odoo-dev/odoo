@@ -227,6 +227,10 @@ class PdpRegistration(models.TransientModel):
     @handle_demo
     def button_trigger_authentication(self):
         self.ensure_one()
+        # TEMPORARY LOCAL DEV: bypass external KYC and register directly on local IAP
+        self.pdp_kyc_status = 'success'
+        return self.button_register_pdp_participant()
+
         if not self.siren_number:
             raise RedirectWarning(
                 message=self.env._("You need to have a valid siren number to authenticate."),
