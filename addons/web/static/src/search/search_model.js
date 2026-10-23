@@ -721,6 +721,7 @@ export class SearchModel extends EventBus {
     deactivateGroup(groupId) {
         if (groupId === DEFAULT_GROUPBY_ID) {
             this.defaultGroupBy = undefined;
+            this._checkOrderByCountStatus();
             this._notify();
             return;
         }
@@ -1519,12 +1520,8 @@ export class SearchModel extends EventBus {
     }
 
     _checkOrderByCountStatus() {
-        if (
-            this.orderByCount &&
-            !this.query.some((item) =>
-                ["dateGroupBy", "groupBy"].includes(this.searchItems[item.searchItemId].type)
-            )
-        ) {
+        // the groups can also come from the default or global group bys
+        if (!this._getGroupBy().length) {
             this.orderByCount = false;
         }
     }
@@ -2118,12 +2115,7 @@ export class SearchModel extends EventBus {
             if (type === "field") {
                 facet.title = title;
             } else {
-                if (type === "groupBy" && this.orderByCount) {
-                    facet.icon =
-                        FACET_ICONS[this.orderByCount === "Asc" ? "groupByAsc" : "groupByDesc"];
-                } else {
-                    facet.icon = FACET_ICONS[type];
-                }
+                facet.icon = type === "groupBy" ? this._getGroupByFacetIcon() : FACET_ICONS[type];
                 facet.color = FACET_COLORS[type];
             }
             if (tooltip) {
@@ -2154,11 +2146,18 @@ export class SearchModel extends EventBus {
                     return string;
                 }),
                 separator: ">",
-                icon: FACET_ICONS.groupBy,
+                icon: this._getGroupByFacetIcon(),
                 color: FACET_COLORS.groupBy,
             });
         }
         return facets;
+    }
+
+    _getGroupByFacetIcon() {
+        if (!this.orderByCount) {
+            return FACET_ICONS.groupBy;
+        }
+        return FACET_ICONS[this.orderByCount === "Asc" ? "groupByAsc" : "groupByDesc"];
     }
 
     /**

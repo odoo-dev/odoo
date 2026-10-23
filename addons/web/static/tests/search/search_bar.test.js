@@ -2062,6 +2062,37 @@ test("order by count resets when there is no group left", async () => {
     expect(".oi[data-icon='swap_vert']").toHaveCount(1);
 });
 
+test("order by count of the default group by", async () => {
+    const searchBar = await mountWithSearch(SearchBar, {
+        resModel: "partner",
+        searchMenuTypes: ["groupBy", "filter"],
+        searchViewId: false,
+        searchViewArch: `
+            <search>
+                <filter string="Foo" name="foo" domain="[('foo', '=', 'qsdf')]"/>
+            </search>
+        `,
+        defaultGroupBy: ["bar"],
+    });
+    searchBar.env.searchModel.canOrderByCount = true;
+    await contains(".o_searchview_facet_label").click();
+    expect(".o_searchview_facet_label .oi[data-icon='arrow_downward']").toHaveCount(1);
+
+    // removing an unrelated filter keeps the order
+    await toggleSearchBarMenu();
+    await toggleMenuItem("Foo");
+    await toggleMenuItem("Foo");
+    expect(".o_searchview_facet_label .oi[data-icon='arrow_downward']").toHaveCount(1);
+    expect(searchBar.env.searchModel.orderBy).toEqual([{ name: "__count", asc: false }]);
+
+    // removing the default group by resets it
+    await removeFacet("Bar");
+    await toggleSearchBarMenu();
+    await selectGroup("bool");
+    expect(".o_searchview_facet_label .oi[data-icon='arrow_downward']").toHaveCount(0);
+    expect(searchBar.env.searchModel.orderBy).toEqual([]);
+});
+
 test("subitems have a load more item if there is more records available", async () => {
     for (let i = 0; i < 20; i++) {
         Partner._records.push({
