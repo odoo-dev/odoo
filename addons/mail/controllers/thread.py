@@ -14,7 +14,9 @@ from odoo.addons.mail.tools.discuss import Store
 
 class ThreadController(http.Controller):
     @http.route("/mail/thread/data", methods=["POST"], type="json", auth="public", readonly=True)
-    def mail_thread_data(self, thread_model, thread_id, request_list, **kwargs):
+    def mail_thread_data(self, thread_model, thread_id, request_list, context=None, **kwargs):
+        if context:
+            request.update_context(**context)
         thread = request.env[thread_model]._get_thread_with_access(thread_id, **kwargs)
         if not thread:
             return Store(
@@ -23,7 +25,7 @@ class ThreadController(http.Controller):
                 as_thread=True,
             ).get_result()
         if not request.env.user._is_internal() or not thread.sudo(False).with_context(
-            allowed_company_ids=[]
+            allowed_company_ids=(request.env.company | request.env.user.company_ids).ids
         ).has_access("read"):
             request_list = []
         return Store(thread, as_thread=True, request_list=request_list).get_result()
@@ -104,7 +106,7 @@ class ThreadController(http.Controller):
                 )
             )
         if not request.env.user._is_internal() or not thread.sudo(False).with_context(
-            allowed_company_ids=[]
+            allowed_company_ids=(request.env.company | request.env.user.company_ids).ids
         ).has_access(thread._get_mail_message_access(thread.ids, "create")):
             partners = partners & self._filter_message_post_partners(thread, partners)
             post_data["message_type"] = "comment"

@@ -1,6 +1,7 @@
 import { Record } from "@mail/core/common/record";
 import { assignDefined } from "@mail/utils/common/misc";
 import { rpc } from "@web/core/network/rpc";
+import { user } from "@web/core/user";
 
 import { FileModelMixin } from "@web/core/file_viewer/file_model";
 
@@ -66,7 +67,7 @@ export class Attachment extends FileModelMixin(Record) {
     async remove() {
         if (this.id > 0) {
             const rpcParams = assignDefined(
-                { attachment_id: this.id },
+                { attachment_id: this.id, context: user.context },
                 { access_token: this.access_token }
             );
             const thread = this.thread || this.message?.thread;

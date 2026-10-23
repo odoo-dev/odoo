@@ -1,6 +1,7 @@
 import { EventBus } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
+import { user } from "@web/core/user";
 import { Deferred } from "@web/core/utils/concurrency";
 
 export class AttachmentUploadService {
@@ -160,6 +161,7 @@ export class AttachmentUploadService {
     }
 
     _buildFormData(formData, tmpURL, thread, composer, tmpId, options) {
+        formData.append("context", JSON.stringify(user.context));
         formData.append("thread_id", thread.id);
         formData.append("tmp_url", tmpURL);
         formData.append("thread_model", thread.model);

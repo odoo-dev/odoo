@@ -522,6 +522,7 @@ export class Message extends Record {
                 {
                     action: "add",
                     content,
+                    context: user.context,
                     message_id: this.id,
                     ...this.thread.rpcParams,
                 },

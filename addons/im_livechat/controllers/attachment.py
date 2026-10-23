@@ -1,5 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import json
+
 from werkzeug.exceptions import NotFound
 
 from odoo import _
@@ -12,7 +14,11 @@ from odoo.addons.mail.models.discuss.mail_guest import add_guest_to_context
 class LivechatAttachmentController(AttachmentController):
     @route()
     @add_guest_to_context
-    def mail_attachment_upload(self, ufile, thread_id, thread_model, is_pending=False, **kwargs):
+    def mail_attachment_upload(
+        self, ufile, thread_id, thread_model, is_pending=False, context=None, **kwargs
+    ):
+        if context:
+            request.update_context(**json.loads(context))
         post_access = request.env[thread_model].sudo()._get_mail_message_access(int(thread_id), "create")
         thread = request.env[thread_model]._get_thread_with_access(int(thread_id), mode=post_access, **kwargs)
         if not thread:

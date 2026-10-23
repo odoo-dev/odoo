@@ -1,6 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import io
+import json
 import logging
 import zipfile
 
@@ -47,7 +48,11 @@ class AttachmentController(http.Controller):
 
     @http.route("/mail/attachment/upload", methods=["POST"], type="http", auth="public")
     @add_guest_to_context
-    def mail_attachment_upload(self, ufile, thread_id, thread_model, is_pending=False, **kwargs):
+    def mail_attachment_upload(
+        self, ufile, thread_id, thread_model, is_pending=False, context=None, **kwargs
+    ):
+        if context:
+            request.update_context(**json.loads(context))
         post_access = request.env[thread_model].sudo()._get_mail_message_access(int(thread_id), "create")
         thread = request.env[thread_model]._get_thread_with_access(int(thread_id), mode=post_access, **kwargs)
         if not thread:
@@ -93,7 +98,9 @@ class AttachmentController(http.Controller):
 
     @http.route("/mail/attachment/delete", methods=["POST"], type="json", auth="public")
     @add_guest_to_context
-    def mail_attachment_delete(self, attachment_id, access_token=None, **kwargs):
+    def mail_attachment_delete(self, attachment_id, access_token=None, context=None, **kwargs):
+        if context:
+            request.update_context(**context)
         attachment = request.env["ir.attachment"].browse(int(attachment_id)).exists()
         if not attachment:
             request.env.user._bus_send("ir.attachment/delete", {"id": attachment_id})

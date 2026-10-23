@@ -11,7 +11,9 @@ from odoo.addons.mail.tools.discuss import Store
 class MessageReactionController(http.Controller):
     @http.route("/mail/message/reaction", methods=["POST"], type="json", auth="public")
     @add_guest_to_context
-    def mail_message_reaction(self, message_id, content, action, **kwargs):
+    def mail_message_reaction(self, message_id, content, action, context=None, **kwargs):
+        if context:
+            request.update_context(**context)
         message = request.env["mail.message"]._get_with_access(int(message_id), "create", **kwargs)
         if not message:
             raise NotFound()

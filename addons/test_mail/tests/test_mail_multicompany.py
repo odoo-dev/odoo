@@ -1,6 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import base64
+import json
 import socket
 
 from itertools import product
@@ -13,7 +14,8 @@ from odoo.addons.mail.tests.common import MailCommon, mail_new_test_user
 from odoo.addons.test_mail.models.test_mail_corner_case_models import MailTestMultiCompanyWithActivity
 from odoo.addons.test_mail.tests.common import TestRecipients
 from odoo.exceptions import AccessError
-from odoo.tests import tagged, users, HttpCase
+from odoo.http import Request
+from odoo.tests import tagged, users, HttpCase, JsonRpcException
 from odoo.tools import mute_logger
 
 
@@ -361,6 +363,86 @@ class TestMultiCompanyControllers(TestMailMCCommon, HttpCase):
         self.authenticate(self.user_employee_c2.login, self.user_employee_c2.login)
         messages = self.make_jsonrpc_request("/mail/inbox/messages")
         self.assertEqual(len(messages['data']['mail.message']), 1)
+
+    def test_mail_thread_access_active_company_rule(self):
+        self.env["ir.rule"].create(
+            {
+                "domain_force": "[('company_id', '=', company_id)]",
+                "model_id": self.env["ir.model"]._get_id("mail.test.multi.company"),
+                "name": "Write on the records of the active company",
+                "perm_read": False,
+            },
+        )
+        self.user_employee_c2.company_ids = self.company_admin + self.company_2
+        self.assertEqual(self.user_employee_c2.company_id, self.company_2)
+        record_c1, record_c2 = self.test_records_mc
+        self.authenticate(self.user_employee_c2.login, self.user_employee_c2.login)
+        context = {"allowed_company_ids": (self.company_admin + self.company_2).ids}
+        for record, can_write in ((record_c1, True), (record_c2, False)):
+            with self.subTest(record=record.name):
+                result = self.make_jsonrpc_request(
+                    "/mail/thread/data",
+                    {
+                        "context": context,
+                        "request_list": [],
+                        "thread_id": record.id,
+                        "thread_model": record._name,
+                    },
+                )
+                self.assertTrue(result["mail.thread"][0]["hasReadAccess"])
+                self.assertEqual(result["mail.thread"][0]["hasWriteAccess"], can_write)
+                attachment = self.env["ir.attachment"].create(
+                    {
+                        "name": "test.txt",
+                        "res_id": record.id,
+                        "res_model": record._name,
+                    },
+                )
+                message = record.message_post(body="Test", message_type="comment")
+                requests = (
+                    (
+                        "/mail/message/reaction",
+                        {"action": "add", "content": "x", "message_id": message.id},
+                    ),
+                    ("/mail/attachment/delete", {"attachment_id": attachment.id}),
+                    (
+                        "/mail/message/post",
+                        {
+                            "post_data": {
+                                "body": "Hello",
+                                "message_type": "comment",
+                                "partner_ids": self.partner_1.ids,
+                            },
+                            "thread_id": record.id,
+                            "thread_model": record._name,
+                        },
+                    ),
+                )
+                for route, params in requests:
+                    if can_write:
+                        self.make_jsonrpc_request(route, {**params, "context": context})
+                    else:
+                        with self.assertRaises(JsonRpcException), mute_logger("odoo.http"):
+                            self.make_jsonrpc_request(route, {**params, "context": context})
+                with mute_logger("odoo.http"):
+                    response = self.url_open(
+                        "/mail/attachment/upload",
+                        data={
+                            "context": json.dumps(context),
+                            "csrf_token": Request.csrf_token(self),
+                            "thread_id": record.id,
+                            "thread_model": record._name,
+                        },
+                        files={"ufile": ("upload.txt", b"Hello", "text/plain")},
+                    )
+                self.assertEqual(response.status_code, 200 if can_write else 404)
+                self.assertEqual(bool(attachment.exists()), not can_write)
+                self.assertEqual(len(record.message_ids), 3 if can_write else 2)
+                self.assertEqual(
+                    record.message_ids[0].partner_ids,
+                    self.partner_1 if can_write else self.env["res.partner"],
+                )
+                self.assertEqual(bool(message.reaction_ids), can_write)
 
     def test_redirect_to_records(self):
         """ Test mail/view redirection in MC environment, notably cids being
