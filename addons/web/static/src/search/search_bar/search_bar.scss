@@ -21,6 +21,11 @@
         z-index: 0;
     }
 
+    // group bys that can be reordered by drag and drop
+    .o_facet_value_item {
+        cursor: grab;
+    }
+
     .o_facet_value {
         max-width: $o-search-bar-facet-value-width;
 

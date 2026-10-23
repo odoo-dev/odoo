@@ -2111,6 +2111,63 @@ test("order by count of the default group by", async () => {
     expect(searchBar.env.searchModel.orderBy).toEqual([]);
 });
 
+test.tags("desktop");
+test("reorder the group bys by dragging the values of the group by facet", async () => {
+    const searchBar = await mountWithSearch(SearchBar, {
+        resModel: "partner",
+        searchMenuTypes: ["groupBy"],
+        searchViewId: false,
+        searchViewArch: `
+            <search>
+                <filter name="groupby_bar" string="Bar" context="{'group_by': 'bar'}"/>
+                <filter name="groupby_birthday" string="Birthday" context="{'group_by': 'birthday'}"/>
+            </search>
+        `,
+    });
+    searchBar.env.searchModel.canOrderByCount = true;
+    const getFacetText = () => getFacetTexts().map((str) => str.replace(/\s+/g, " "));
+    await toggleSearchBarMenu();
+    await toggleMenuItem("Bar");
+    expect(".o_facet_value_item").toHaveCount(0); // a single group by
+    await toggleMenuItem("Birthday");
+    await toggleMenuItemOption("Birthday", "Month");
+    await selectGroup("foo");
+    await toggleSearchBarMenu();
+    expect(searchBar.env.searchModel.groupBy).toEqual(["bar", "birthday:month", "foo"]);
+    expect(".o_facet_value_item").toHaveCount(3);
+
+    await contains(".o_facet_value_item:eq(0)").dragAndDrop(".o_facet_value_item:eq(2)");
+    expect(searchBar.env.searchModel.groupBy).toEqual(["birthday:month", "foo", "bar"]);
+    expect(getFacetText()).toEqual(["Birthday: Month > Foo > Bar"]);
+    // the drop is not a click on the facet
+    expect(searchBar.env.searchModel.orderBy).toEqual([]);
+
+    await contains(".o_facet_value_item:eq(2)").dragAndDrop(".o_facet_value_item:eq(0)");
+    expect(searchBar.env.searchModel.groupBy).toEqual(["bar", "birthday:month", "foo"]);
+
+    // a removed group by is added back at the end
+    await toggleSearchBarMenu();
+    await toggleMenuItem("Bar");
+    expect(searchBar.env.searchModel.groupBy).toEqual(["birthday:month", "foo"]);
+    await toggleMenuItem("Bar");
+    expect(searchBar.env.searchModel.groupBy).toEqual(["birthday:month", "foo", "bar"]);
+    expect(getFacetText()).toEqual(["Birthday: Month > Foo > Bar"]);
+});
+
+test.tags("desktop");
+test("reorder the default group bys", async () => {
+    const searchBar = await mountWithSearch(SearchBar, {
+        resModel: "partner",
+        searchMenuTypes: ["groupBy"],
+        searchViewId: false,
+        defaultGroupBy: ["bar", "bool"],
+    });
+    expect(searchBar.env.searchModel.groupBy).toEqual(["bar", "bool"]);
+    await contains(".o_facet_value_item:eq(1)").dragAndDrop(".o_facet_value_item:eq(0)");
+    expect(searchBar.env.searchModel.groupBy).toEqual(["bool", "bar"]);
+    expect(getFacetTexts().map((str) => str.replace(/\s+/g, " "))).toEqual(["Bool > Bar"]);
+});
+
 test("subitems have a load more item if there is more records available", async () => {
     for (let i = 0; i < 20; i++) {
         Partner._records.push({

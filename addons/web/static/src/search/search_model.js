@@ -158,6 +158,7 @@ function execute(op, source, target) {
         searchItems,
         searchPanelInfo,
         sections,
+        groupBySequence,
         _appliedSearch,
     } = source;
 
@@ -165,6 +166,7 @@ function execute(op, source, target) {
     target.nextGroupNumber = nextGroupNumber;
     target.nextId = nextId;
     target._appliedSearch = _appliedSearch;
+    target.groupBySequence = [...(groupBySequence || [])];
 
     // Filled in place: on import, the target is the search model, whose
     // containers are reactive and must not be replaced by raw values.
@@ -216,7 +218,11 @@ export class SearchModel extends EventBus {
     query = proxy([]);
     searchItems = proxy({});
 
-    _groupByState = signal.Object({ defaultGroupBy: undefined, globalGroupBy: [] });
+    _groupByState = signal.Object({
+        defaultGroupBy: undefined,
+        globalGroupBy: [],
+        groupBySequence: [],
+    });
     _groupBy = computed(() => (this.searchMenuTypes.has("groupBy") ? this._getGroupBy() : []));
 
     constructor(env, services, args) {
@@ -517,6 +523,18 @@ export class SearchModel extends EventBus {
     }
 
     /**
+     * Order in which the user arranged the group bys (by drag and drop). Group
+     * bys absent from it keep their natural order and come after the others.
+     */
+    get groupBySequence() {
+        return this._groupByState().groupBySequence;
+    }
+
+    set groupBySequence(groupBySequence) {
+        this._groupByState().groupBySequence = groupBySequence;
+    }
+
+    /**
      * @returns {string[]}
      */
     get groupBy() {
@@ -609,6 +627,7 @@ export class SearchModel extends EventBus {
     clearQuery() {
         this.query.length = 0;
         this.orderByCount = false;
+        this.groupBySequence = [];
         this._notify();
     }
 
@@ -721,12 +740,12 @@ export class SearchModel extends EventBus {
     deactivateGroup(groupId) {
         if (groupId === DEFAULT_GROUPBY_ID) {
             this.defaultGroupBy = undefined;
-            this._checkOrderByCountStatus();
+            this._checkGroupByStatus();
             this._notify();
             return;
         }
         this._filterQuery((item) => this.searchItems[item.searchItemId].groupId !== groupId);
-        this._checkOrderByCountStatus();
+        this._checkGroupByStatus();
         this._notify();
     }
 
@@ -1045,10 +1064,11 @@ export class SearchModel extends EventBus {
         const index = this.query.findIndex((queryElem) => queryElem.searchItemId === searchItemId);
         if (index >= 0) {
             this.query.splice(index, 1);
-            this._checkOrderByCountStatus();
+            this._checkGroupByStatus();
         } else {
             if (searchItem.type === "favorite") {
                 this.query.length = 0;
+                this.groupBySequence = [];
             }
             this.query.push({ searchItemId });
         }
@@ -1132,7 +1152,7 @@ export class SearchModel extends EventBus {
         );
         if (index >= 0) {
             this.query.splice(index, 1);
-            this._checkOrderByCountStatus();
+            this._checkGroupByStatus();
         } else {
             this.query.push({ searchItemId, intervalId });
         }
@@ -1187,6 +1207,17 @@ export class SearchModel extends EventBus {
             discardButtonText: _t("Discard"),
             isDebugMode: this.debugMode.isActive(),
         });
+    }
+
+    /**
+     * @param {string[]} groupBys the group bys of a facet, in the wanted order
+     */
+    reorderGroupBys(groupBys) {
+        const remaining = [...groupBys];
+        this.groupBySequence = this.groupBy.map((gb) =>
+            groupBys.includes(gb) ? remaining.shift() : gb
+        );
+        this._notify();
     }
 
     /**
@@ -1523,9 +1554,14 @@ export class SearchModel extends EventBus {
         }
     }
 
-    _checkOrderByCountStatus() {
+    _checkGroupByStatus() {
+        const groupBys = this._getGroupBy();
+        // forget the position of the removed group bys, so that they come last if added back
+        if (this.groupBySequence.some((gb) => !groupBys.includes(gb))) {
+            this.groupBySequence = this.groupBySequence.filter((gb) => groupBys.includes(gb));
+        }
         // the groups can also come from the default or global group bys
-        if (!this._getGroupBy().length) {
+        if (!groupBys.length) {
             this.orderByCount = false;
         }
     }
@@ -2094,6 +2130,7 @@ export class SearchModel extends EventBus {
         for (const group of groups) {
             const groupActiveItemDomains = [];
             const values = [];
+            const groupByValues = []; // for group by facets
             let title;
             let type;
             let tooltip;
@@ -2108,7 +2145,17 @@ export class SearchModel extends EventBus {
                 if (type === "field") {
                     title = searchItem.description;
                 }
-                values.push(...this._getFacetValues(searchItem, activeItem));
+                const facetValues = this._getFacetValues(searchItem, activeItem);
+                values.push(...facetValues);
+                if (type === "groupBy") {
+                    // one value per group by
+                    groupByValues.push(
+                        ...this._getSearchItemGroupBys(activeItem).map((groupBy, index) => ({
+                            groupBy,
+                            value: facetValues[index],
+                        }))
+                    );
+                }
             }
             const facet = {
                 groupId: group.id,
@@ -2116,6 +2163,11 @@ export class SearchModel extends EventBus {
                 values,
                 separator: type === "groupBy" ? ">" : _t("or"),
             };
+            if (type === "groupBy") {
+                const sorted = this._sortGroupBys(groupByValues, (item) => item.groupBy);
+                facet.groupBys = sorted.map((item) => item.groupBy);
+                facet.values = sorted.map((item) => item.value);
+            }
             if (type === "field") {
                 facet.title = title;
             } else {
@@ -2137,10 +2189,12 @@ export class SearchModel extends EventBus {
             this.defaultGroupBy &&
             this.env.config.viewType !== "kanban"
         ) {
+            const groupBys = this._sortGroupBys(this.defaultGroupBy);
             facets.unshift({
                 groupId: DEFAULT_GROUPBY_ID,
                 type: "groupBy",
-                values: this.defaultGroupBy.map((gb) => {
+                groupBys,
+                values: groupBys.map((gb) => {
                     const [fieldName, interval] = gb.split(":");
                     const { string } = this.searchViewFields[fieldName];
                     if (interval) {
@@ -2263,7 +2317,24 @@ export class SearchModel extends EventBus {
             : this.globalGroupBy.length
             ? this.globalGroupBy.slice()
             : (fallbackOnDefault && this.defaultGroupBy?.slice()) || [];
-        return typeof groupBy === "string" ? [groupBy] : groupBy;
+        return this._sortGroupBys(typeof groupBy === "string" ? [groupBy] : groupBy);
+    }
+
+    /**
+     * @param {any[]} items
+     * @param {(item: any) => string} [getGroupBy]
+     * @returns {any[]} the items, sorted according to the groupBySequence
+     */
+    _sortGroupBys(items, getGroupBy = (item) => item) {
+        const sequence = this.groupBySequence;
+        if (!sequence.length) {
+            return items;
+        }
+        const rank = (item) => {
+            const index = sequence.indexOf(getGroupBy(item));
+            return index < 0 ? sequence.length : index;
+        };
+        return [...items].sort((item1, item2) => rank(item1) - rank(item2));
     }
 
     /**

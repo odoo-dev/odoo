@@ -5,9 +5,11 @@
         <t t-foreach="this.env.searchModel.facets" t-as="facet" t-key="facet_index">
             <div class="o_searchview_facet position-relative d-inline-flex rounded-2 bg-100 border border-transparent text-nowrap opacity-trigger-hover mw-100"
                 t-att-class="{o_facet_with_domain: facet.domain }"
+                t-att-data-facet-index="facet_index"
                 role="listitem"
                 aria-label="search"
                 tabindex="0"
+                t-on-pointerdown="() => (this.facetDragged = false)"
                 t-on-click="() => this.onFacetLabelClick(facet)"
             >
 
@@ -20,8 +22,11 @@
                     t-att-class="{'cursor-pointer': facet.type != 'groupBy'}"
                 >
                     <t t-foreach="facet.values" t-as="facetValue" t-key="facetValue_index">
-                        <em t-if="!facetValue_first" class="o_facet_values_sep small fw-bold mx-1 opacity-50" t-out="facet.separator"/>
-                        <small class="o_facet_value text-truncate" t-out="facetValue" t-att-title="facet.tooltip or facetValue"/>
+                        <!-- group bys that can be reordered by drag and drop -->
+                        <span t-if="facet.groupBys?.length > 1" class="o_facet_value_item d-flex align-items-center mw-100" t-att-data-index="facetValue_index">
+                            <t t-call="web.SearchBar.FacetValue"/>
+                        </span>
+                        <t t-else="" t-call="web.SearchBar.FacetValue"/>
                     </t>
                     <button class="o_facet_remove oi btn btn-hover-danger d-flex align-items-center px-1 py-0 d-print-none fs-5"
                         data-icon="close_small"
@@ -33,6 +38,11 @@
                 </div>
             </div>
         </t>
+    </t>
+
+    <t t-name="web.SearchBar.FacetValue">
+        <em t-if="!facetValue_first" class="o_facet_values_sep small fw-bold mx-1 opacity-50" t-out="facet.separator"/>
+        <small class="o_facet_value text-truncate" t-out="facetValue" t-att-title="facet.tooltip or facetValue"/>
     </t>
 
     <t t-name="web.SearchBar.NormalFacetIcon">

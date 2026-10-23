@@ -4331,6 +4331,33 @@ test("order by count switched off keeps the column order", async () => {
     expect.verifySteps(["web_read_group foo order by int_field ASC"]);
 });
 
+test.tags("desktop");
+test("reorder the group bys from the group by facet", async () => {
+    onRpc("foo", "web_read_group", ({ kwargs, method }) => {
+        expect.step(`${method} ${kwargs.groupby}`);
+    });
+    await mountView({
+        resModel: "foo",
+        type: "list",
+        arch: `<list>
+                    <field name="foo"/>
+                    <field name="bar"/>
+                </list>`,
+    });
+    await toggleSearchBarMenu();
+    await selectGroup("foo");
+    await selectGroup("currency_id");
+    await toggleSearchBarMenu();
+    expect.verifySteps(["web_read_group foo", "web_read_group foo,currency_id"]);
+    await contains(".o_facet_value_item:eq(1)").dragAndDrop(".o_facet_value_item:eq(0)");
+    // a single request, instead of removing and adding back the group bys
+    expect.verifySteps(["web_read_group currency_id,foo"]);
+    expect(queryAllTexts`tr.o_group_header .o_group_name`).toEqual([
+        "USD 3 records",
+        "EUR 1 record",
+    ]);
+});
+
 test("order by count reset", async () => {
     let readGroupCount = 0;
     onRpc("foo", "web_read_group", ({ kwargs, method }) => {

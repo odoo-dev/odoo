@@ -11,6 +11,7 @@ import { registry } from "@web/core/registry";
 import { KeepLast } from "@web/core/utils/concurrency";
 import { useAutofocus, useBus, useService } from "@web/core/utils/hooks";
 import { fuzzyTest } from "@web/core/utils/search";
+import { useSortable } from "@web/core/utils/sortable_owl";
 import { render } from "@web/owl2/utils";
 import { SearchBarDropdown } from "@web/search/search_bar_dropdown";
 import { SearchBarMenu } from "@web/search/search_bar_menu/search_bar_menu";
@@ -115,6 +116,18 @@ export class SearchBar extends Component {
         });
 
         useBus(this.env.searchModel, "update", () => render(this));
+
+        // the values of the group by facets can be dragged to reorder the group bys
+        useSortable({
+            ref: this.facetContainerRef,
+            elements: ".o_facet_value_item",
+            groups: ".o_searchview_facet",
+            enable: () => !this.ui.isSmall,
+            cursor: "grabbing",
+            onDrop: (params) => this.onFacetValueDrop(params),
+            // the facets handle their clicks before the sortable can prevent them
+            onDragEnd: () => (this.facetDragged = true),
+        });
     }
 
     /**
@@ -607,7 +620,29 @@ export class SearchBar extends Component {
     // Handlers
     //---------------------------------------------------------------------
 
+    /**
+     * @param {Object} params
+     * @param {HTMLElement} params.element
+     * @param {HTMLElement | null} params.previous
+     * @param {HTMLElement} params.group
+     */
+    onFacetValueDrop({ element, previous, group }) {
+        const facet = this.env.searchModel.facets[Number(group.dataset.facetIndex)];
+        const groupBys = [...facet.groupBys];
+        const from = Number(element.dataset.index);
+        let to = previous ? Number(previous.dataset.index) + 1 : 0;
+        if (to > from) {
+            to--;
+        }
+        const [groupBy] = groupBys.splice(from, 1);
+        groupBys.splice(to, 0, groupBy);
+        this.env.searchModel.reorderGroupBys(groupBys);
+    }
+
     onFacetLabelClick(facet) {
+        if (this.facetDragged) {
+            return;
+        }
         const clickToOrder = this.env.searchModel.canOrderByCount && facet.type === "groupBy";
         if (clickToOrder) {
             this.env.searchModel.switchGroupBySort();
