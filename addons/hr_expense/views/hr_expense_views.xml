@@ -310,6 +310,11 @@
                             <div id="payment_mode">
                                 <field name="payment_mode" widget="radio" readonly="state != 'draft'"/>
                             </div>
+                            <field name="payment_method_line_id"
+                                   options="{'no_open': True, 'no_create': True}"
+                                   readonly="not is_editable"
+                                   invisible="payment_mode != 'company_account' and not has_existing_bill"
+                                   required="payment_mode == 'company_account'"/>
                         </group>
                         <group>
                             <field name="date" readonly="not is_editable"/>
@@ -360,10 +365,6 @@
                                    groups="account.group_account_invoice"
                                    readonly="not (is_editable or can_edit_account)"
                                    context="{'default_company_id': company_id}"/>
-                            <field name="payment_method_line_id"
-                                   options="{'no_open': True, 'no_create': True}"
-                                   readonly="not is_editable"
-                                   required="payment_mode == 'company_account'"/>
                             <field name="analytic_distribution"
                                 string="Analytic"
                                 widget="analytic_distribution"

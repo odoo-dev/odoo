@@ -817,19 +817,24 @@ class HrExpense(models.Model):
         for expense in self:
             expense.payment_method_line_id = expense.selectable_payment_method_line_ids[:1]
 
-    @api.depends('company_id')
+    @api.depends('company_id', 'payment_mode')
     def _compute_selectable_payment_method_line_ids(self):
         for expense in self:
             allowed_method_line_ids = expense.company_id.company_expense_allowed_payment_method_line_ids
             if allowed_method_line_ids:
                 expense.selectable_payment_method_line_ids = allowed_method_line_ids
             else:
-                expense.selectable_payment_method_line_ids = self.env['account.payment.method.line'].search([
+                method_lines = self.env['account.payment.method.line'].search([
                     # The journal is the source of the payment method line company
                     *self.env['account.journal']._check_company_domain(expense.company_id),
                     ('payment_type', '=', 'outbound'),
                     ('journal_id.active', '=', True),
                 ])
+                if expense.payment_mode == 'company_account':
+                    # The expense is already paid, bank payment methods (SEPA, checks, ...) are only kept if there is nothing else
+                    card_and_cash_lines = method_lines.filtered(lambda line: line.journal_id.type in ('credit', 'cash'))
+                    method_lines = card_and_cash_lines.sorted(lambda line: line.journal_id.type != 'credit') or method_lines
+                expense.selectable_payment_method_line_ids = method_lines
 
     @api.onchange('has_existing_bill')
     def _onchange_has_existing_bill(self):
