@@ -4299,9 +4299,36 @@ test("group order by count", async () => {
     await contains("tr.o_group_header:eq(0)").click();
     expect.verifySteps(["web_read_group currency_id order by __count DESC"]);
     await contains(".o_searchview_facet_label").click();
-    expect.verifySteps(["web_read_group foo,currency_id order by __count ASC"]);
+    expect.verifySteps(["web_read_group foo,currency_id order by "]);
     await contains(".o_searchview_facet_label").click();
     expect.verifySteps(["web_read_group foo,currency_id order by __count DESC"]);
+});
+
+test("order by count switched off keeps the column order", async () => {
+    let readGroupCount = 0;
+    onRpc("foo", "web_read_group", ({ kwargs, method }) => {
+        if (readGroupCount < 1) {
+            readGroupCount++;
+        } else {
+            expect.step(`${method} ${kwargs.groupby} order by ${kwargs.order}`);
+        }
+    });
+    await mountView({
+        resModel: "foo",
+        type: "list",
+        arch: `<list>
+                    <field name="foo"/>
+                    <field name="int_field"/>
+                </list>`,
+    });
+    await toggleSearchBarMenu();
+    await selectGroup("foo");
+    await contains(".o_searchview_facet_label").click();
+    expect.verifySteps(["web_read_group foo order by __count DESC"]);
+    await contains("th[data-name=int_field]").click();
+    expect.verifySteps(["web_read_group foo order by int_field ASC, __count DESC"]);
+    await contains(".o_searchview_facet_label").click();
+    expect.verifySteps(["web_read_group foo order by int_field ASC"]);
 });
 
 test("order by count reset", async () => {

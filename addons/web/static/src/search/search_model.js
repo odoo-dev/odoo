@@ -1189,12 +1189,12 @@ export class SearchModel extends EventBus {
         });
     }
 
+    /**
+     * Switches between the default order of the groups and the descending
+     * order of their count.
+     */
     switchGroupBySort() {
-        if (this.orderByCount === "Desc") {
-            this.orderByCount = "Asc";
-        } else {
-            this.orderByCount = "Desc";
-        }
+        this.orderByCount = this.orderByCount ? false : "Desc";
         this._notify();
     }
 
@@ -1462,7 +1462,11 @@ export class SearchModel extends EventBus {
             this.globalOrderBy = JSON.parse(decodeURIComponent(urlOrderBy));
             const orderByCount = this.globalOrderBy.find((o) => o.name == "__count");
             if (orderByCount) {
-                this.orderByCount = orderByCount.asc ? "Asc" : "Desc";
+                // given by orderByCount from now on, so that it can be switched off
+                this.globalOrderBy = this.globalOrderBy.filter((o) => o !== orderByCount);
+                if (this.groupBy.length) {
+                    this.orderByCount = orderByCount.asc ? "Asc" : "Desc";
+                }
             }
             urlApplyStatus.anySuccess = true;
         } catch {

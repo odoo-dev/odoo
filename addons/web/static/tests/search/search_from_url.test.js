@@ -11,6 +11,7 @@ import {
     mountWithSearch,
     onRpc,
     patchWithCleanup,
+    selectGroup,
     toggleMenuItem,
     toggleMenuItemOption,
     toggleSearchBarMenu,
@@ -140,6 +141,41 @@ test("URL with groupBy and orderBy activates ordered groupBy", async () => {
     expect(`.o_searchview_facet_label .oi[data-icon='arrow_downward']`).toHaveCount(1); // OrderBy desc icon
     expect(searchBar.env.searchModel.groupBy).toEqual(["partner_id"]);
     expect(searchBar.env.searchModel.orderBy).toEqual([{ asc: false, name: "__count" }]);
+});
+
+test("order by count from the URL can be switched off", async () => {
+    const encodedgroupBy = encodeURIComponent('["partner_id"]');
+    const encodedorderBy = encodeURIComponent('[{"name":"__count","asc":false}]');
+    redirect("?groupBy=" + encodedgroupBy + "&orderBy=" + encodedorderBy);
+    const searchBar = await mountWithSearch(SearchBar, {
+        resModel: "mock.purchase.order",
+        searchMenuTypes: ["groupBy"],
+        searchViewId: false,
+    });
+    searchBar.env.searchModel.canOrderByCount = true;
+    expect(searchBar.env.searchModel.orderBy).toEqual([{ asc: false, name: "__count" }]);
+    await contains(".o_searchview_facet_label").click();
+    expect(`.o_searchview_facet_label .oi[data-icon='arrow_downward']`).toHaveCount(0);
+    expect(searchBar.env.searchModel.orderBy).toEqual([]);
+});
+
+test("order by count from the URL without group by can be switched off", async () => {
+    const encodedorderBy = encodeURIComponent('[{"name":"__count","asc":false}]');
+    redirect("?orderBy=" + encodedorderBy);
+    const searchBar = await mountWithSearch(SearchBar, {
+        resModel: "mock.purchase.order",
+        searchMenuTypes: ["groupBy"],
+        searchViewId: false,
+    });
+    searchBar.env.searchModel.canOrderByCount = true;
+    expect(searchBar.env.searchModel.orderBy).toEqual([]);
+    await toggleSearchBarMenu();
+    await selectGroup("partner_id");
+    expect(searchBar.env.searchModel.orderBy).toEqual([]);
+    await contains(".o_searchview_facet_label").click();
+    expect(searchBar.env.searchModel.orderBy).toEqual([{ asc: false, name: "__count" }]);
+    await contains(".o_searchview_facet_label").click();
+    expect(searchBar.env.searchModel.orderBy).toEqual([]);
 });
 
 test("URL with filter + groupBy + orderBy activates filters", async () => {

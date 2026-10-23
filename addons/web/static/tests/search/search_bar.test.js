@@ -2028,38 +2028,56 @@ test("order by count resets when there is no group left", async () => {
     expect(".oi[data-icon='swap_vert']").toHaveCount(1);
     await contains(".oi[data-icon='swap_vert']", { visible: false }).click();
     expect(".o_searchview_facet_label .oi[data-icon='arrow_downward']").toHaveCount(1);
-    await contains(".o_searchview_facet_label .oi[data-icon='arrow_downward']").click();
-    expect(".o_searchview_facet_label .oi[data-icon='arrow_upward']").toHaveCount(1);
 
     await toggleSearchBarMenu();
     await toggleMenuItem("Foo");
-    expect(".o_searchview_facet_label .oi[data-icon='arrow_upward']").toHaveCount(1);
+    expect(".o_searchview_facet_label .oi[data-icon='arrow_downward']").toHaveCount(1);
 
     await toggleMenuItem("Foo");
     await toggleMenuItem("Bool");
-    expect(".o_searchview_facet_label .oi[data-icon='arrow_upward']").toHaveCount(1);
+    expect(".o_searchview_facet_label .oi[data-icon='arrow_downward']").toHaveCount(1);
     await toggleMenuItem("Bar");
-    expect(".o_searchview_facet_label .oi[data-icon='arrow_upward']").toHaveCount(0);
+    expect(".o_searchview_facet_label .oi[data-icon='arrow_downward']").toHaveCount(0);
 
     await toggleMenuItem("Bar");
-    expect(".o_searchview_facet_label .oi[data-icon='arrow_upward']").toHaveCount(0);
+    expect(".o_searchview_facet_label .oi[data-icon='arrow_downward']").toHaveCount(0);
     expect(".oi[data-icon='swap_vert']").toHaveCount(1);
     await contains(".oi[data-icon='swap_vert']", { visible: false }).click();
-    await contains(".o_searchview_facet_label .oi[data-icon='arrow_downward']").click();
-    expect(".o_searchview_facet_label .oi[data-icon='arrow_upward']").toHaveCount(1);
     await toggleSearchBarMenu();
     await toggleMenuItem("Bool");
-    expect(".o_searchview_facet_label .oi[data-icon='arrow_upward']").toHaveCount(1);
+    expect(".o_searchview_facet_label .oi[data-icon='arrow_downward']").toHaveCount(1);
 
     await contains(".o_facet_remove").click();
-    expect(".o_searchview_facet_label .oi[data-icon='arrow_upward']").toHaveCount(1);
+    expect(".o_searchview_facet_label .oi[data-icon='arrow_downward']").toHaveCount(1);
     await contains(".o_facet_remove").click();
     expect(".o_searchview_facet").toHaveCount(0);
 
     await toggleSearchBarMenu();
     await toggleMenuItem("Bar");
-    expect(".o_searchview_facet_label .oi[data-icon='arrow_upward']").toHaveCount(0);
+    expect(".o_searchview_facet_label .oi[data-icon='arrow_downward']").toHaveCount(0);
     expect(".oi[data-icon='swap_vert']").toHaveCount(1);
+});
+
+test("order by count is switched off by clicking on the group by facet again", async () => {
+    const searchBar = await mountWithSearch(SearchBar, {
+        resModel: "partner",
+        searchMenuTypes: ["groupBy"],
+        searchViewId: false,
+    });
+    searchBar.env.searchModel.canOrderByCount = true;
+    await toggleSearchBarMenu();
+    await selectGroup("bool");
+    await toggleSearchBarMenu();
+    expect(searchBar.env.searchModel.orderBy).toEqual([]);
+
+    await contains(".o_searchview_facet_label").click();
+    expect(".o_searchview_facet_label .oi[data-icon='arrow_downward']").toHaveCount(1);
+    expect(searchBar.env.searchModel.orderBy).toEqual([{ name: "__count", asc: false }]);
+
+    await contains(".o_searchview_facet_label").click();
+    expect(".o_searchview_facet_label .oi[data-icon='arrow_downward']").toHaveCount(0);
+    expect(".oi[data-icon='swap_vert']").toHaveCount(1);
+    expect(searchBar.env.searchModel.orderBy).toEqual([]);
 });
 
 test("order by count of the default group by", async () => {
