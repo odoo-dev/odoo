@@ -286,10 +286,10 @@ class HrExpense(models.Model):
     )
     payment_mode = fields.Selection(
         selection=[
-            ('own_account', "Employee (Through a Purchase Receipt)"),
-            ('company_account', "None (Paid by Company)")
+            ('own_account', "Employee"),
+            ('company_account', "Company Card")
         ],
-        string="Reimbursement",
+        string="Paid by",
         default='own_account',
         required=True,
         tracking=True,
