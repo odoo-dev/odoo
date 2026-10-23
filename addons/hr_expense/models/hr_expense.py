@@ -1500,11 +1500,6 @@ class HrExpense(models.Model):
         if not self.has_access('write') and self.employee_id.user_id != self.env.user:
             raise AccessError(self.env._("You don't have the access rights to modify this expense."))
         attachment_ids = [attachment_id for attachment_id in kwargs.get('attachment_ids', []) if attachment_id]  # Filter out falsy values
-        if not attachment_ids:
-            # If uploading the document fails due to the checks in the create method of ir.attachment, the
-            # attachment_ids will contains [None], so we need to check here to raise the UserError.
-            raise UserError(self.env._("You can't add an attachment to an expense once it has been approved."))
-
         attachment = self.env['ir.attachment'].browse(attachment_ids[-1:])
         user_expenses = self.filtered(lambda expense: expense.employee_id.user_id == self.env.user)
         user_expenses.sudo()._message_set_main_attachment_id(attachment, force=True)
