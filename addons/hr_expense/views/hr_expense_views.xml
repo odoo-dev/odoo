@@ -266,17 +266,19 @@
                                 </div>
                             </div>
 
-                            <!-- CASE: product has no cost defined -> user input amount (in other currency if multi-currency) -->
-                            <field name="total_amount_currency" string="Total"  widget='monetary' options="{'currency_field': 'currency_id'}"
-                                invisible="product_has_cost" readonly="not is_editable"/>
-                            <field name="currency_id" string="Currency"
-                                options="{'no_create': True, 'no_open': True}"
-                                readonly="not is_editable" groups="base.group_multi_currency"/>
+                            <!-- User input amount only if the product has no cost (in other currency if multi-currency) -->
+                            <label for="total_amount_currency" string="Total"/>
+                            <div class="o_row">
+                                <field name="total_amount_currency" widget='monetary' options="{'currency_field': 'currency_id'}"
+                                       readonly="not is_editable or product_has_cost"/>
+                                <field name="currency_id"
+                                       options="{'no_create': True, 'no_open': True}"
+                                       readonly="not is_editable" groups="base.group_multi_currency"/>
+                            </div>
 
                             <!-- CASE: converter when currency is different than the company one -->
-                            <label name="total_amount_product_cost_label" for="total_amount" string="Total" invisible="is_multiple_currency or not product_has_cost"/>
                             <label name="total_amount_multicurrency_label" for="total_amount" string="Total With Conversion" invisible="not is_multiple_currency"/>
-                            <div class="d-flex gap-1" invisible="not is_multiple_currency and not product_has_cost">
+                            <div class="d-flex gap-1" invisible="not is_multiple_currency">
                                 <field name="total_amount" widget='monetary' options="{'currency_field': 'company_currency_id'}"
                                        force_save="1" readonly="not is_editable or product_has_cost"/>
                                 <field name="label_currency_rate"/>
