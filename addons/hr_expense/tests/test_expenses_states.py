@@ -202,7 +202,7 @@ class TestExpensesStates(TestExpenseCommon, MailCase):
         self.post_expenses(self.expenses_all)
         self.assertSequenceEqual(['posted', 'paid'], self.expenses_all.mapped('state'))
 
-        # expense state should not be approved at submission if existing_bill_id is not set
+        # expense state should not be approved at submission if the bill is sent separately and the vendor is not set
         expense_existing_bill = self.create_expenses({
             'name': 'Expense Employee 2',
             'has_existing_bill': True,

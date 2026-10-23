@@ -1127,43 +1127,28 @@ class TestExpenses(TestExpenseCommon):
             ]
         )
 
-    def test_expense_paid_by_company_with_linked_bill(self):
-        """ Test that linking a bill uses the payable account and reconciles automatically """
+    def test_expense_paid_by_company_with_bill_sent_separately(self):
+        """ Test that an expense whose bill is sent separately uses the vendor payable account, so it can be matched with the bill later """
         other_payable_account = self.company_data['default_account_payable'].copy()
         partner = self.env['res.partner'].create({
             'name': 'test partner',
             'property_account_payable_id': other_payable_account.id,
         })
-        bill = self.env['account.move'].create({
-            'move_type': 'in_invoice',
-            'partner_id': partner.id,
-            'invoice_date': '2026-01-01',
-            'invoice_line_ids': [
-                Command.create({
-                    'name': 'test bill line',
-                    'price_unit': 100.0,
-                })
-            ]
-        })
-        bill.action_post()
 
-        # 2. Create Expense with existing bill flag but let existing_bill_id empty
         expense = self.create_expenses({
-            'name': 'Expense matched to bill',
+            'name': 'Expense with a bill sent separately',
             'payment_mode': 'company_account',
             'total_amount_currency': 100.0,
             'has_existing_bill': True,
         })
         expense.action_submit()
-        # shouldn't be able to approve without existing_bill_id
-        with self.assertRaisesRegex(UserError, "The existing bill must be set."):
+        # shouldn't be able to approve without a vendor
+        with self.assertRaisesRegex(UserError, "The vendor must be set when a bill is sent separately."):
             expense.action_approve()
         self.assertEqual(expense.state, 'submitted')
 
-        # 3. Link bill to the expense
-        expense.action_reset()
-        expense.existing_bill_id = bill.id
-        self.assertEqual(expense.account_id, other_payable_account, "The expense account should be the bill's payable account")
+        expense.vendor_id = partner
+        self.assertEqual(expense.account_id, other_payable_account, "The expense account should be the vendor payable account")
 
         expense.action_approve()
 
@@ -1172,10 +1157,26 @@ class TestExpenses(TestExpenseCommon):
         self.assertEqual(
             set(payment_entry.line_ids.account_id.ids),
             {other_payable_account.id, outstanding_payment_account.id},
-            "The accounts on the payment entry should be the bill's payable account and the outstanding payment account"
+            "The accounts on the payment entry should be the vendor payable account and the outstanding payment account"
         )
+        payment_entry.action_post()
 
+        # The bill received afterwards can be matched with the payment
+        bill = self.env['account.move'].create({
+            'move_type': 'in_invoice',
+            'partner_id': partner.id,
+            'invoice_date': '2026-01-01',
+            'invoice_line_ids': [
+                Command.create({
+                    'name': 'test bill line',
+                    'price_unit': 100.0,
+                    'tax_ids': [],
+                })
+            ]
+        })
+        bill.action_post()
         payable_move_line = payment_entry.line_ids.filtered(lambda l: l.account_id == other_payable_account)
+        bill.js_assign_outstanding_line(payable_move_line.id)
         self.assertTrue(bill.payment_state in ('in_payment', 'paid'), "The bill should be marked as paid/in_payment")
         self.assertTrue(payable_move_line.reconciled, "The payment entry should be reconciled with the bill")
 

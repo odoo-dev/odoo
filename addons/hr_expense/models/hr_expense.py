@@ -258,8 +258,8 @@ class HrExpense(models.Model):
         help="The payment method used when the expense is paid by the company.",
     )
     has_existing_bill = fields.Boolean(
-        help=""" - When a bill already exists, the payment will use the supplier payable account so it can be matched with the bill.
-                 - When no bill exists, the payment will be recorded directly on the expense account, as usual.
+        help=""" - When the vendor sends a bill separately, the payment will use the vendor payable account so it can be matched with the bill.
+                 - Otherwise, the payment will be recorded directly on the expense account, as usual.
             """
     )
 
@@ -360,14 +360,6 @@ class HrExpense(models.Model):
         for expense in self:
             if len(expense.account_move_id.origin_payment_id.expense_ids) > 1:
                 raise ValidationError(_("Only one expense can be linked to a particular payment"))
-
-    @api.constrains('existing_bill_id')
-    def _check_existing_bill_is_set(self):
-        # case where an expense has an existing bill, but it's not filled in. We cannot add this condition
-        # in can_approve as can_approve is used at submission (see action_submit)
-        for expense in self:
-            if not expense.existing_bill_id and expense.has_existing_bill and expense.state not in ['draft', 'submitted', 'refused']:
-                raise ValidationError(self.env._("The existing bill must be set."))
 
     # --------------------------------------------
     # Compute methods
@@ -547,7 +539,7 @@ class HrExpense(models.Model):
                     expense.state = 'paid'
                 elif move.state == 'draft':
                     expense.state = 'approved'
-                elif expense.existing_bill_id:
+                elif expense.has_existing_bill:
                     expense.state = 'paid' if move.origin_payment_id.state == 'reconciled' else self.env['account.move']._get_invoice_in_payment_state()
                 elif move.payment_state == 'not_paid':
                     expense.state = 'posted'
@@ -835,6 +827,11 @@ class HrExpense(models.Model):
                     card_and_cash_lines = method_lines.filtered(lambda line: line.journal_id.type in ('credit', 'cash'))
                     method_lines = card_and_cash_lines.sorted(lambda line: line.journal_id.type != 'credit') or method_lines
                 expense.selectable_payment_method_line_ids = method_lines
+
+    @api.onchange('payment_mode')
+    def _onchange_payment_mode(self):
+        if self.payment_mode not in ('own_account', 'company_account'):
+            self.has_existing_bill = False
 
     @api.onchange('has_existing_bill')
     def _onchange_has_existing_bill(self):
@@ -1415,10 +1412,9 @@ class HrExpense(models.Model):
         """ Check whether the given expenses can be auto-validated (no approver) """
         self.ensure_one()
         has_rights = (not self.manager_id and not self.employee_id.expense_manager_id) or self.manager_id == self.employee_id.user_id
-        # In case the expense is linked to an existing bill, the existing_bill_id must be set to be autovalidated
-        # If it's not linked to an existing bill, then the field is not required
-        existing_bill_is_set = self.existing_bill_id or not self.has_existing_bill
-        return has_rights and existing_bill_is_set
+        # When a bill is sent separately, the vendor is needed to book the payment on its payable account
+        vendor_is_set = self.vendor_id or self.existing_bill_id or not self.has_existing_bill
+        return has_rights and vendor_is_set
 
     def action_approve(self):
         """ Approve an expense, pops a wizard if a duplicated expense is found to confirm they are all valid expenses """
@@ -1718,8 +1714,8 @@ class HrExpense(models.Model):
 
     def _do_approve(self):
         expenses_to_approve = self.filtered(lambda s: s.state in {'submitted', 'draft'})
-        if any(expense.has_existing_bill and not expense.existing_bill_id for expense in expenses_to_approve):
-            raise UserError(self.env._("The existing bill must be set."))
+        if any(expense.has_existing_bill and not (expense.vendor_id or expense.existing_bill_id) for expense in expenses_to_approve):
+            raise UserError(self.env._("The vendor must be set when a bill is sent separately."))
 
         for expense in expenses_to_approve:
             expense.write({
@@ -1793,7 +1789,7 @@ class HrExpense(models.Model):
 
         if employee_expenses:
             # Creation of the account moves for the employee paid expenses.
-            existing_bill_expenses = employee_expenses.filtered('existing_bill_id')
+            existing_bill_expenses = employee_expenses.filtered('has_existing_bill')
             existing_bill_expenses._create_entry_for_expense_with_linked_bill()
 
             no_bill_expenses = employee_expenses - existing_bill_expenses
