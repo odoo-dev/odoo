@@ -1080,12 +1080,14 @@ class IrQweb(models.AbstractModel):
             # already looked up by `_preload_code_cached`
             misses.discard(key)
             return None
-        self.env['ir.ui.view'].flush_model(['inherit_id', 'active', 'arch_db'])
-        entry = self.env['ir.cache']._get('qweb', [key], VIEWS_HASH_SQL).get(key)
-        if not entry:
-            return None
-        view_hash, data = entry
-        code, calls = self._load_code_memo(key, view_hash, data)
+        result = self._get_code_memo(ref, key)
+        if result is None:
+            self.env['ir.ui.view'].flush_model(['inherit_id', 'active', 'arch_db'])
+            entry = self.env['ir.cache']._get('qweb', [key], VIEWS_HASH_SQL).get(key)
+            if not entry:
+                return None
+            result = self._load_code_memo(ref, key, *entry)
+        code, calls = result
         self._preload_code_cached(calls)
         return code
 
@@ -1101,41 +1103,72 @@ class IrQweb(models.AbstractModel):
                 if (info := infos.get(_id_or_xmlid(call))) and info['ref']
                 and ormcache.get_value(self, info['ref']) is None
             }
-            if not keys:
-                return
             calls = OrderedSet()
-            entries = self.env['ir.cache']._get('qweb', keys, VIEWS_HASH_SQL)
-            self.env.cr.cache.setdefault('_qweb_ir_cache_misses', set()).update(keys.keys() - entries.keys())
-            for key, (view_hash, data) in entries.items():
-                code, sub_calls = self._load_code_memo(key, view_hash, data)
+            results = {key: result for key, ref in keys.items() if (result := self._get_code_memo(ref, key))}
+            if missing := keys.keys() - results.keys():
+                entries = self.env['ir.cache']._get('qweb', missing, VIEWS_HASH_SQL)
+                self.env.cr.cache.setdefault('_qweb_ir_cache_misses', set()).update(missing - entries.keys())
+                for key, entry in entries.items():
+                    results[key] = self._load_code_memo(keys[key], key, *entry)
+            for key, (code, sub_calls) in results.items():
                 ormcache.add_value(self, keys[key], cache_value=code)
                 calls.update(sub_calls)
 
-    def _load_code_memo(self, key: str, view_hash: str, data: bytes):
+    def _get_code_memo(self, ref: int, key: str):
+        """ Return the compiled code of the template and the templates it
+        calls from the registry memo if its views did not change since it
+        was memoized (see `_get_views_versions`), or None. """
+        memo = self.env.registry._template_code__.get(key)
+        if memo and memo[3] == self._get_template_versions(ref):
+            return memo[1:3]
+        return None
+
+    def _load_code_memo(self, ref: int, key: str, view_hash: str, data: bytes):
         """ Return the compiled code of a signed `ir.cache` entry and the
         templates it calls, memoized in the registry. """
         memo = self.env.registry._template_code__
-        result = memo.get((key, view_hash))
-        if result is None:
+        entry = memo.get(key)
+        if entry is None or entry[0] != view_hash:
             code, options, def_name, compiled, calls = marshal.loads(data)
-            result = memo[key, view_hash] = (self._load_code(code, options, def_name, compiled), calls)
-        return result
+            entry = (view_hash, self._load_code(code, options, def_name, compiled), calls)
+        memo[key] = (*entry[:3], self._get_template_versions(ref))
+        return entry[1:3]
 
-    def _get_template_view_ids(self, ref: int) -> list[int]:
-        """ Return the views of the template: its parents and all the views
-        inheriting from them (active or not). """
-        return [view_id for [view_id] in self.env.execute_query(SQL("""
-            WITH RECURSIVE parents(id, inherit_id) AS (
-                SELECT id, inherit_id FROM ir_ui_view WHERE id = %s
-            UNION
-                SELECT v.id, v.inherit_id FROM ir_ui_view v JOIN parents p ON v.id = p.inherit_id
-            ), tree(id) AS (
-                SELECT id FROM parents
-            UNION
-                SELECT v.id FROM ir_ui_view v JOIN tree t ON v.inherit_id = t.id
-            )
-            SELECT id FROM tree ORDER BY id
-        """, ref))]
+    def _get_views_versions(self) -> tuple[dict, dict]:
+        """ Return ``(views, children)``: ``{id: (inherit_id, version)}`` of
+        all the views and ``{id: [inheriting view ids]}``. The version of a
+        row (``xmin`` and ``ctid``) changes on every update, even in the same
+        transaction. Fetched once per transaction and invalidation of the
+        'templates' caches. """
+        self.env['ir.ui.view']._clear_preload_views_cache_if_needed()
+        versions = self.env.cr.cache.get('_qweb_views_versions')
+        if versions is None:
+            self.env['ir.ui.view'].flush_model()
+            views = {}
+            children = defaultdict(list)
+            for view_id, inherit_id, version in self.env.execute_query(SQL("SELECT id, inherit_id, xmin || '-' || ctid FROM ir_ui_view")):
+                views[view_id] = (inherit_id, version)
+                if inherit_id:
+                    children[inherit_id].append(view_id)
+            versions = self.env.cr.cache['_qweb_views_versions'] = (views, children)
+        return versions
+
+    def _get_template_versions(self, ref: int) -> tuple:
+        """ Return the sorted ``(id, version)`` of the views of the template: its
+        parents and all the views inheriting from them (active or not). """
+        views, children = self._get_views_versions()
+        tree = set()
+        todo = []
+        view_id = ref
+        while view_id in views and view_id not in todo:
+            todo.append(view_id)
+            view_id = views[view_id][0]
+        while todo:
+            view_id = todo.pop()
+            if view_id not in tree:
+                tree.add(view_id)
+                todo.extend(children.get(view_id, ()))
+        return tuple(sorted((view_id, views[view_id][1]) for view_id in tree))
 
     def _generate_code_uncached(self, template: int | str | etree._Element, ir_cache_key=None):
         assert isinstance(self, IrQweb)
@@ -1162,12 +1195,15 @@ class IrQweb(models.AbstractModel):
             "    return template_functions",
         ])
         compiled = compile(wrap_code, f"<{ref}>", 'exec')
+        result = self._load_code(code, options, def_name, compiled)
         if ir_cache_key:
             calls = list(self._get_called_templates(self._get_template(ref)[0]))
+            versions = self._get_template_versions(ref)
             data = marshal.dumps((code, options, def_name, compiled, calls))
-            self.env['ir.cache']._set('qweb', ir_cache_key, self._get_template_view_ids(ref), VIEWS_HASH_SQL, data)
+            self.env['ir.cache']._set('qweb', ir_cache_key, [view_id for view_id, _version in versions], VIEWS_HASH_SQL, data)
+            self.env.registry._template_code__[ir_cache_key] = (None, result, calls, versions)
             self._preload_code_cached(calls)
-        return self._load_code(code, options, def_name, compiled)
+        return result
 
     def _load_code(self, code, options, def_name, compiled):
         globals_dict = self.__prepare_globals()

@@ -2576,25 +2576,22 @@ class TestQwebPerformance(TransactionCaseWithUserDemo):
 
         # 'base.testing_content'
         #     SELECT id + fields from xmlid
-        #     SELECT ir.cache compiled code
+        #     SELECT versions of the views (the compiled code is in the registry memo)
         # 'base.testing_layout', 'base.testing_header_0'
         #     SELECT id + fields from xmlid
-        #     SELECT ir.cache compiled code
         # 'base.testing_header', 'base.testing_footer'
         #     SELECT id + fields from xmlid
-        #     SELECT ir.cache compiled code
         # 'base.testing_header_1', 'base.testing_footer_0', 'base.testing_footer_1'
         #     SELECT id + fields from xmlid
-        #     SELECT ir.cache compiled code
 
         FIRST_SEARCH_FETCH = 1  # the first "SELECT id + fields from xmlid"
         OTHER_SEARCH_FETCH = 3  # "SELECT id + fields from xmlid"
-        IR_CACHE = 4  # SELECT ir.cache compiled code (no arch combine)
+        VIEWS_VERSIONS = 1  # SELECT versions of the views (no arch combine, no ir.cache)
 
         self.env.transaction.invalidate_ormcache('templates')
         view.invalidate_model()
 
-        check('base.testing_content', 'test-cold-0', FIRST_SEARCH_FETCH + OTHER_SEARCH_FETCH + IR_CACHE)  # 8
+        check('base.testing_content', 'test-cold-0', FIRST_SEARCH_FETCH + OTHER_SEARCH_FETCH + VIEWS_VERSIONS)  # 5
         check('base.testing_content', 'test-hot-0', 0)
         check('base.testing_content', 'test-hot-1', 0)
 
@@ -2604,20 +2601,20 @@ class TestQwebPerformance(TransactionCaseWithUserDemo):
 
         # like 'test-cold-0'
         self.env.transaction.invalidate_ormcache('templates')
-        check(view.id, 'test-cold-id-1', FIRST_SEARCH_FETCH + OTHER_SEARCH_FETCH + IR_CACHE)  # 8
+        check(view.id, 'test-cold-id-1', FIRST_SEARCH_FETCH + OTHER_SEARCH_FETCH + VIEWS_VERSIONS)  # 5
 
         # like 'test-cold-0' the first search query is replaced by a fetching
         self.env.transaction.invalidate_ormcache('templates')
         view.invalidate_model()
-        check(view.id, 'test-cold-id-2', FIRST_SEARCH_FETCH + OTHER_SEARCH_FETCH + IR_CACHE)  # 8
+        check(view.id, 'test-cold-id-2', FIRST_SEARCH_FETCH + OTHER_SEARCH_FETCH + VIEWS_VERSIONS)  # 5
 
         # like 'test-cold-0'
         self.env.transaction.invalidate_ormcache('templates')
-        check('base.testing_content', 'test-cold-1', FIRST_SEARCH_FETCH + OTHER_SEARCH_FETCH + IR_CACHE)  # 8
+        check('base.testing_content', 'test-cold-1', FIRST_SEARCH_FETCH + OTHER_SEARCH_FETCH + VIEWS_VERSIONS)  # 5
 
         # like 'test-cold-0'
         self.env.transaction.invalidate_ormcache('templates')
-        check(view.id, 'test-cold-id-3', FIRST_SEARCH_FETCH + OTHER_SEARCH_FETCH + IR_CACHE - 1)  # 7
+        check(view.id, 'test-cold-id-3', FIRST_SEARCH_FETCH + OTHER_SEARCH_FETCH + VIEWS_VERSIONS - 1)  # 4
 
     def test_render_query_count_after_write(self):
         View = self.env['ir.ui.view']
@@ -2687,17 +2684,17 @@ class TestQwebPerformance(TransactionCaseWithUserDemo):
         first_view.arch_db = '<div>Hello 2</div>'
 
         check(first_view.id, "<div>Hello 2</div>", queries=5, cachemiss=1)
-        check(extend_view_2.id, "<div><div>Hello 2</div><h1></h1><section></section></div>", queries=1, cachemiss=0)
+        check(extend_view_2.id, "<div><div>Hello 2</div><h1></h1><section></section></div>", queries=0, cachemiss=0)
 
         first_view.arch_db = '<div>Hello</div>'
 
-        check(extend_view_2.id, "<div><div>Hello</div><h1></h1><section></section></div>", queries=7, cachemiss=1)
+        check(extend_view_2.id, "<div><div>Hello</div><h1></h1><section></section></div>", queries=6, cachemiss=1)
         check(first_view.id, "<div>Hello</div>", queries=0)
 
         first_view.arch_db = '<div>Hello1</div>'
 
         check(first_view.id, "<div>Hello1</div>", queries=5, cachemiss=1)
-        check(extend_view_2.id, "<div><div>Hello1</div><h1></h1><section></section></div>", queries=1)
+        check(extend_view_2.id, "<div><div>Hello1</div><h1></h1><section></section></div>", queries=0)
 
         first_view.arch_db = '<div>Hello2</div>'
         self.env.invalidate_all()
@@ -2705,7 +2702,7 @@ class TestQwebPerformance(TransactionCaseWithUserDemo):
         # 1 more query on ir_mode_data from _is_studio_view() in apply_inheritance_specs
         # TODO: use key (actually empty for some view) instead of xml_id field
         addons = tuple(self.env.registry._init_modules) + (self.env.context.get('install_module'),)
-        check(extend_view_2.id, "<div><div>Hello2</div><h1></h1><section></section></div>", queries=8, cachemiss=1)
+        check(extend_view_2.id, "<div><div>Hello2</div><h1></h1><section></section></div>", queries=7, cachemiss=1)
         check(first_view.id, "<div>Hello2</div>", queries=0)
 
         first_view.arch_db = '<div>Hello3</div>'
@@ -2713,12 +2710,12 @@ class TestQwebPerformance(TransactionCaseWithUserDemo):
 
         check(first_view.id, "<div>Hello3</div>", queries=6, cachemiss=1)
 
-        check(extend_view_2.id, "<div><div>Hello3</div><h1></h1><section></section></div>", queries=2)
+        check(extend_view_2.id, "<div><div>Hello3</div><h1></h1><section></section></div>", queries=1)
 
         extend_view_1.arch_db = '<xpath expr="//div" position="inside"><article/></xpath>'
         self.env.invalidate_all()
 
-        check(extend_view_2.id, "<div><div>Hello3</div><article></article><section></section></div>", queries=10, cachemiss=1)
+        check(extend_view_2.id, "<div><div>Hello3</div><article></article><section></section></div>", queries=9, cachemiss=1)
 
 
 class TestQwebMocked(BaseCase):
@@ -2855,6 +2852,40 @@ class TestQWebCodeCache(TransactionCase):
         # a new signed row is added and used
         self.render(self.caller, '<div><span>callee</span></div>', generated=[])
         self.assertEqual(len(self.rows(self.callee)), 2)
+
+    def test_memo(self):
+        """ The registry memo is used without `ir.cache` while the views of
+        the template did not change. """
+        self.render(self.caller, '<div><span>callee</span></div>', generated=self.caller + self.callee)
+        IrCache = type(self.env['ir.cache'])
+        origin = IrCache._get
+        lookups = []
+
+        def _get(self, kind, keys, hash_sql):
+            lookups.extend(keys)
+            return origin(self, kind, keys, hash_sql)
+
+        def render(expected):
+            self.env.transaction.invalidate_ormcache('templates')
+            lookups.clear()
+            with patch.object(IrCache, '_get', _get):
+                self.assertEqual(str(self.env['ir.qweb']._render(self.caller.id)), expected)
+
+        render('<div><span>callee</span></div>')
+        self.assertFalse(lookups)
+
+        # only the modified template is checked in `ir.cache` (then compiled)
+        self.callee.arch = '<span>callee 2</span>'
+        render('<div><span>callee 2</span></div>')
+        self.assertEqual(lookups, [self.env['ir.qweb']._get_ir_cache_key(self.callee.id)])
+
+        # a new view inheriting from the template
+        self.env['ir.ui.view'].create({
+            'name': 'extension', 'type': 'qweb', 'mode': 'extension',
+            'inherit_id': self.caller.id, 'arch': '<xpath expr="//div" position="inside"><b/></xpath>',
+        })
+        render('<div><span>callee 2</span><b></b></div>')
+        self.assertEqual(lookups, [self.env['ir.qweb']._get_ir_cache_key(self.caller.id)])
 
     def test_readonly(self):
         """ Nothing is stored with a read-only cursor (e.g. on a replica). """
