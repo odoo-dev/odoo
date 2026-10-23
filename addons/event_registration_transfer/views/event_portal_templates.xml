@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="portal_breadcrumbs" inherit_id="portal.portal_breadcrumbs">
+        <xpath expr="//ol[hasclass('o_portal_submenu')]" position="inside">
+            <t t-if="page_name == 'event_transfer'">
+                <li class="breadcrumb-item"><a href="/my/events">Events</a></li>
+                <li class="breadcrumb-item active">Transfer Ticket</li>
+            </t>
+        </xpath>
+    </template>
+
+    <template id="portal_my_events" inherit_id="event.portal_my_events">
+        <xpath expr="//t[@t-call='portal.portal_searchbar']" position="after">
+            <t t-set="transfer_feedback" t-value="request.params.get('transfer')"/>
+            <div t-if="transfer_feedback == 'sent'" class="alert alert-success" role="status">
+                The transfer request was sent. The ticket stays yours until the recipient accepts it.
+            </div>
+            <div t-elif="transfer_feedback == 'revoked'" class="alert alert-info" role="status">
+                The transfer was revoked.
+            </div>
+            <div t-elif="transfer_feedback == 'returned'" class="alert alert-info" role="status">
+                The ticket was returned to its sender.
+            </div>
+            <div t-elif="transfer_feedback == 'error'" class="alert alert-danger" role="alert">
+                This action is no longer possible on this ticket.
+            </div>
+        </xpath>
+        <xpath expr="//td[hasclass('text-end')]" position="inside">
+            <t t-set="pending_transfer" t-value="registration.pending_transfer_id"/>
+            <t t-if="pending_transfer">
+                <span class="badge rounded-pill text-bg-warning ms-1"
+                      t-attf-title="Pending transfer to {{ pending_transfer.recipient_partner_id.name }}">
+                    Transfer Pending
+                </span>
+                <form t-attf-action="/my/events/transfer/{{ pending_transfer.id }}/revoke" method="post" class="d-inline">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <button type="submit" class="btn btn-sm btn-outline-danger ms-1">Revoke</button>
+                </form>
+            </t>
+            <a t-elif="registration.is_transfer_allowed" t-attf-href="/my/events/{{ registration.id }}/transfer"
+               class="btn btn-sm btn-outline-primary ms-1" title="Transfer this ticket">
+                <i class="fa fa-exchange me-1"/>Transfer
+            </a>
+            <t t-set="returnable_transfer" t-value="registration.returnable_transfer_id"/>
+            <form t-if="returnable_transfer and returnable_transfer.recipient_partner_id == request.env.user.partner_id"
+                  t-attf-action="/my/events/transfer/{{ returnable_transfer.id }}/return" method="post" class="d-inline">
+                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                <button type="submit" class="btn btn-sm btn-outline-secondary ms-1"
+                        t-attf-title="Give this ticket back to {{ returnable_transfer.sender_partner_id.name }}">
+                    Return
+                </button>
+            </form>
+        </xpath>
+    </template>
+
+    <template id="portal_registration_transfer" name="Transfer Ticket">
+        <t t-call="portal.portal_layout">
+            <div class="row mt-4">
+                <div class="col-lg-8">
+                    <h3>Transfer your ticket</h3>
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title" t-field="registration.event_id.name"/>
+                            <p class="card-text mb-0">
+                                <span t-field="registration.event_begin_date" t-options='{"widget": "datetime", "hide_seconds": True}'/>
+                                <t t-if="registration.event_ticket_id"> - <span t-field="registration.event_ticket_id.name"/></t>
+                            </p>
+                            <p class="card-text text-muted">Attendee: <span t-field="registration.name"/></p>
+                        </div>
+                    </div>
+                    <div t-if="blocking_reason" class="alert alert-warning" role="alert" t-out="blocking_reason"/>
+                    <form t-else="" t-attf-action="/my/events/{{ registration.id }}/transfer" method="post">
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                        <div t-if="error" class="alert alert-danger" role="alert" t-out="error"/>
+                        <div class="mb-3">
+                            <label class="form-label" for="recipient">Recipient email or phone number</label>
+                            <input type="text" class="form-control" id="recipient" name="recipient" required="required"
+                                   t-att-value="recipient" placeholder="e.g. jane@example.com or +32 470 12 34 56"/>
+                            <div class="form-text">
+                                The recipient must already be one of our contacts. They will receive an email to accept the ticket.
+                                <t t-if="registration.event_id.transfer_limit">
+                                    A ticket can be transferred at most <t t-out="registration.event_id.transfer_limit"/> time(s).
+                                </t>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Send Transfer Request</button>
+                        <a href="/my/events" class="btn btn-secondary ms-1">Cancel</a>
+                    </form>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="portal_registration_transfer_accept" name="Accept Ticket Transfer">
+        <t t-call="web.frontend_layout">
+            <t t-set="registration" t-value="transfer.registration_id"/>
+            <div class="container my-5">
+                <div class="row justify-content-center">
+                    <div class="col-lg-6">
+                        <h3>Ticket transfer <span t-field="transfer.name"/></h3>
+                        <p>
+                            <strong t-out="transfer.sender_partner_id.name or transfer.previous_name"/>
+                            is transferring a ticket to <strong t-field="transfer.recipient_partner_id.name"/>.
+                        </p>
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title" t-field="transfer.event_id.name"/>
+                                <p class="card-text mb-0">
+                                    <span t-field="registration.event_begin_date" t-options='{"widget": "datetime", "hide_seconds": True}'/>
+                                    <t t-if="registration.event_ticket_id"> - <span t-field="registration.event_ticket_id.name"/></t>
+                                </p>
+                            </div>
+                        </div>
+                        <div t-if="error" class="alert alert-danger" role="alert" t-out="error"/>
+                        <t t-if="transfer.state == 'pending'">
+                            <p t-if="transfer.expiry_datetime" class="text-muted">
+                                This offer is valid until
+                                <span t-field="transfer.expiry_datetime" t-options='{"widget": "datetime", "hide_seconds": True}'/>.
+                            </p>
+                            <form t-attf-action="/event/transfer/{{ transfer.id }}/accept" method="post">
+                                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                <input type="hidden" name="access_token" t-att-value="access_token"/>
+                                <button type="submit" class="btn btn-primary">Accept Ticket</button>
+                            </form>
+                        </t>
+                        <div t-elif="transfer.state == 'accepted'" class="alert alert-success" role="status">
+                            The ticket is yours! Your badge was sent to
+                            <strong t-out="registration.email"/>.
+                        </div>
+                        <div t-else="" class="alert alert-warning" role="status">
+                            This transfer is no longer valid (<span t-field="transfer.state"/>).
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

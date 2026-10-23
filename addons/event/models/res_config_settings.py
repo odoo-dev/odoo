@@ -29,6 +29,7 @@ class ResConfigSettings(models.TransientModel):
     barcode_nomenclature_id = fields.Many2one('barcode.nomenclature', related='company_id.nomenclature_id', readonly=False)
     module_website_event_sale = fields.Boolean("Online Ticketing")
     module_event_booth = fields.Boolean("Booth Management")
+    module_event_registration_transfer = fields.Boolean("Ticket Transfer")
     use_google_maps_static_api = fields.Boolean("Google Maps static API", default=_default_use_google_maps_static_api)
 
     @api.depends('use_google_maps_static_api')

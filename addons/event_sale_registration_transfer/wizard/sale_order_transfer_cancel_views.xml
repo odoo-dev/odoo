@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="sale_order_transfer_cancel_view_form" model="ir.ui.view">
+        <field name="name">sale.order.transfer.cancel.view.form</field>
+        <field name="model">sale.order.transfer.cancel</field>
+        <field name="arch" type="xml">
+            <form string="Cancel Order">
+                <div class="alert alert-warning" role="alert">
+                    Some tickets of this order were transferred to other attendees.
+                    Cancelling the order will also cancel their tickets.
+                </div>
+                <field name="sale_order_ids" invisible="1"/>
+                <field name="registration_ids" readonly="1">
+                    <list>
+                        <field name="event_id"/>
+                        <field name="name" string="Current Attendee"/>
+                        <field name="email"/>
+                        <field name="event_ticket_id"/>
+                    </list>
+                </field>
+                <footer>
+                    <button name="action_cancel_order" type="object" string="Cancel Order Anyway"
+                            class="btn-primary" data-hotkey="q"/>
+                    <button string="Go Back" special="cancel" class="btn-secondary" data-hotkey="x"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

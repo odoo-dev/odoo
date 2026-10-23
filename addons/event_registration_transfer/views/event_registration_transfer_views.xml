@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="event_registration_transfer_view_list" model="ir.ui.view">
+        <field name="name">event.registration.transfer.view.list</field>
+        <field name="model">event.registration.transfer</field>
+        <field name="arch" type="xml">
+            <list string="Ticket Transfers" create="false" sample="1">
+                <field name="name"/>
+                <field name="event_id"/>
+                <field name="registration_id"/>
+                <field name="sender_partner_id"/>
+                <field name="recipient_partner_id"/>
+                <field name="create_date" string="Requested On"/>
+                <field name="expiry_datetime" optional="hide"/>
+                <field name="accept_datetime" optional="show"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+                <field name="state" widget="badge"
+                       decoration-info="state == 'pending'"
+                       decoration-success="state == 'accepted'"
+                       decoration-warning="state == 'returned'"
+                       decoration-muted="state in ('revoked', 'expired')"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="event_registration_transfer_view_form" model="ir.ui.view">
+        <field name="name">event.registration.transfer.view.form</field>
+        <field name="model">event.registration.transfer</field>
+        <field name="arch" type="xml">
+            <form string="Ticket Transfer" create="false">
+                <header>
+                    <button name="action_accept" type="object" string="Accept" class="oe_highlight"
+                            invisible="state != 'pending'" groups="event.group_event_manager"
+                            confirm="The ticket will be reassigned to the recipient without their confirmation."/>
+                    <button name="action_revoke" type="object" string="Revoke"
+                            invisible="state != 'pending'"/>
+                    <button name="action_return" type="object" string="Return to Sender"
+                            invisible="state != 'accepted'" groups="event.group_event_manager"/>
+                    <field name="state" widget="statusbar" statusbar_visible="pending,accepted"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group name="ticket">
+                            <field name="registration_id"/>
+                            <field name="event_id"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group name="parties">
+                            <field name="sender_partner_id"/>
+                            <field name="recipient_partner_id"/>
+                            <field name="expiry_datetime" invisible="state != 'pending'"/>
+                            <field name="accept_datetime" invisible="not accept_datetime"/>
+                        </group>
+                    </group>
+                    <group string="Previous Attendee" name="previous_attendee" invisible="not accept_datetime">
+                        <group>
+                            <field name="previous_name" string="Name"/>
+                            <field name="previous_email" string="Email"/>
+                            <field name="previous_phone" string="Phone"/>
+                        </group>
+                        <group>
+                            <field name="previous_company_name" string="Company"/>
+                            <field name="previous_barcode"/>
+                        </group>
+                    </group>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="event_registration_transfer_view_search" model="ir.ui.view">
+        <field name="name">event.registration.transfer.view.search</field>
+        <field name="model">event.registration.transfer</field>
+        <field name="arch" type="xml">
+            <search string="Ticket Transfers">
+                <field name="name"/>
+                <field name="event_id"/>
+                <field name="registration_id"/>
+                <field name="sender_partner_id"/>
+                <field name="recipient_partner_id"/>
+                <filter string="Pending" name="filter_pending" domain="[('state', '=', 'pending')]"/>
+                <filter string="Accepted" name="filter_accepted" domain="[('state', '=', 'accepted')]"/>
+                <filter string="Returned" name="filter_returned" domain="[('state', '=', 'returned')]"/>
+                <filter string="Revoked or Expired" name="filter_closed" domain="[('state', 'in', ('revoked', 'expired'))]"/>
+                <separator/>
+                <filter string="Requested On" name="filter_create_date" date="create_date"/>
+                <group>
+                    <filter string="Event" name="group_by_event_id" context="{'group_by': 'event_id'}"/>
+                    <filter string="Status" name="group_by_state" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="event_registration_transfer_action" model="ir.actions.act_window">
+        <field name="name">Ticket Transfers</field>
+        <field name="res_model">event.registration.transfer</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No ticket transfer yet!
+            </p>
+            <p>
+                Attendees can transfer their tickets from their portal, once transfers are allowed on the event.
+            </p>
+        </field>
+    </record>
+
+    <menuitem id="event_registration_transfer_menu"
+        name="Ticket Transfers"
+        action="event_registration_transfer_action"
+        parent="event.menu_reporting_events"
+        sequence="20"/>
+</odoo>

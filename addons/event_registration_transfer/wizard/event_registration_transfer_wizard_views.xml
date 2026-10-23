@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="event_registration_transfer_wizard_view_form" model="ir.ui.view">
+        <field name="name">event.registration.transfer.wizard.view.form</field>
+        <field name="model">event.registration.transfer.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Transfer Ticket">
+                <group>
+                    <field name="registration_id"/>
+                    <field name="sender_partner_id"/>
+                    <field name="recipient_partner_id" options="{'no_create': True}"/>
+                </group>
+                <footer>
+                    <button name="action_send_request" type="object" string="Send Request" class="btn-primary"
+                            data-hotkey="q"/>
+                    <button name="action_transfer_now" type="object" string="Transfer Now" class="btn-secondary"
+                            data-hotkey="w"
+                            confirm="The ticket will be reassigned immediately, without the recipient's acceptance."/>
+                    <button string="Discard" special="cancel" data-hotkey="x"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

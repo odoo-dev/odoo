@@ -44,6 +44,9 @@
                             <setting name="event_settings_website" help="Sell tickets on your website">
                                 <field name="module_website_event_sale"/>
                             </setting>
+                            <setting id="ticket_transfer" help="Let attendees transfer their tickets to another contact">
+                                <field name="module_event_registration_transfer"/>
+                            </setting>
                         </block>
                         <block title="Attendance" name="attendance_setting_container">
                             <setting id="event" company_dependent="1" help="Enable barcode scanning">

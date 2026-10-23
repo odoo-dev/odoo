@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_event_registration_form" model="ir.ui.view">
+        <field name="name">event.registration.view.form.inherit.transfer</field>
+        <field name="model">event.registration</field>
+        <field name="inherit_id" ref="event.view_event_registration_form"/>
+        <field name="arch" type="xml">
+            <button name="action_cancel" position="before">
+                <button name="action_open_transfer_wizard" type="object" string="Transfer"
+                        invisible="not is_transfer_allowed"/>
+            </button>
+            <div name="button_box" position="inside">
+                <button name="action_view_transfers" type="object" class="oe_stat_button" icon="fa-exchange"
+                        invisible="not transfer_count">
+                    <field name="transfer_count" widget="statinfo" string="Transfers"/>
+                </button>
+            </div>
+            <field name="barcode" position="after">
+                <field name="pending_transfer_id" invisible="not pending_transfer_id"/>
+            </field>
+        </field>
+    </record>
+</odoo>

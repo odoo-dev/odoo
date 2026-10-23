@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_event_form" model="ir.ui.view">
+        <field name="name">event.event.view.form.inherit.transfer</field>
+        <field name="model">event.event</field>
+        <field name="inherit_id" ref="event.view_event_form"/>
+        <field name="arch" type="xml">
+            <page name="event_notes" position="before">
+                <page string="Ticket Transfer" name="ticket_transfer">
+                    <group>
+                        <group>
+                            <field name="allow_transfer"/>
+                            <field name="allow_transfer_return" invisible="not allow_transfer"/>
+                        </group>
+                        <group invisible="not allow_transfer">
+                            <field name="transfer_deadline_hours"/>
+                            <field name="transfer_expiry_hours"/>
+                            <field name="transfer_limit"/>
+                        </group>
+                    </group>
+                </page>
+            </page>
+        </field>
+    </record>
+</odoo>

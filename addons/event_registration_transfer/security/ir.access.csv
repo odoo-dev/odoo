@@ -1,0 +1,5 @@
+id,name,model_id,group_id/id,operation,domain
+access_event_registration_transfer_registration,event.registration.transfer.registration,event.registration.transfer,event.group_event_registration_desk,cru,
+access_event_registration_transfer_manager,event.registration.transfer.manager,event.registration.transfer,event.group_event_manager,crud,
+access_event_registration_transfer_wizard,event.registration.transfer.wizard,event.registration.transfer.wizard,event.group_event_registration_desk,crud,
+event_registration_transfer_company_rule,Event/Ticket Transfer: multi-company,event.registration.transfer,,crud,"[('company_id', 'in', company_ids + [False])]"

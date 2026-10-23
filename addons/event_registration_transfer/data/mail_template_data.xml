@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <record id="mail_template_transfer_request" model="mail.template">
+            <field name="name">Event: Ticket Transfer Request</field>
+            <field name="model_id" ref="event_registration_transfer.model_event_registration_transfer"/>
+            <field name="subject">{{ object.sender_partner_id.name or object.registration_id.name }} sent you a ticket for {{ object.event_id.name }}</field>
+            <field name="email_from">{{ (object.event_id.organizer_id.email_formatted or object.event_id.company_id.email_formatted or user.email_formatted or '') }}</field>
+            <field name="partner_to">{{ object.recipient_partner_id.id }}</field>
+            <field name="use_default_to" eval="False"/>
+            <field name="description">Sent to the recipient of a ticket transfer, with the link to accept it</field>
+            <field name="body_html" type="html">
+<div style="margin: 0px; padding: 0px; font-size: 13px;">
+    <p>Hello <t t-out="object.recipient_partner_id.name or ''">Marc Demo</t>,</p>
+    <p>
+        <t t-out="object.sender_partner_id.name or object.registration_id.name or ''">Patrick Portal</t>
+        would like to transfer their ticket for
+        <strong t-out="object.event_id.name or ''">OpenWood Collection Online Reveal</strong>
+        (<t t-out="format_datetime(object.registration_id.event_begin_date, tz=object.event_id.date_tz, dt_format='medium')">May 4, 2026, 7:00 PM</t>)
+        to you.
+    </p>
+    <p t-if="object.expiry_datetime">
+        This offer is valid until
+        <t t-out="format_datetime(object.expiry_datetime, tz=object.event_id.date_tz, dt_format='medium')">May 3, 2026, 7:00 PM</t>.
+    </p>
+    <div style="margin: 16px 0px 16px 0px;">
+        <a t-att-href="object.get_base_url() + object.get_portal_url()"
+            style="background-color: #875A7B; padding: 8px 16px 8px 16px; text-decoration: none; color: #fff; border-radius: 5px;">
+            View and Accept
+        </a>
+    </div>
+    <p>If you were not expecting this ticket, you can ignore this email.</p>
+</div>
+            </field>
+            <field name="lang">{{ object.recipient_partner_id.lang }}</field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+
+        <record id="mail_template_transfer_accepted" model="mail.template">
+            <field name="name">Event: Ticket Transfer Accepted</field>
+            <field name="model_id" ref="event_registration_transfer.model_event_registration_transfer"/>
+            <field name="subject">Your ticket for {{ object.event_id.name }} was transferred</field>
+            <field name="email_from">{{ (object.event_id.organizer_id.email_formatted or object.event_id.company_id.email_formatted or user.email_formatted or '') }}</field>
+            <field name="partner_to">{{ object.sender_partner_id.id or '' }}</field>
+            <field name="use_default_to" eval="False"/>
+            <field name="description">Sent to the sender of a ticket transfer once the recipient accepted it</field>
+            <field name="body_html" type="html">
+<div style="margin: 0px; padding: 0px; font-size: 13px;">
+    <p>Hello <t t-out="object.sender_partner_id.name or ''">Patrick Portal</t>,</p>
+    <p>
+        <t t-out="object.recipient_partner_id.name or ''">Marc Demo</t> accepted your ticket for
+        <strong t-out="object.event_id.name or ''">OpenWood Collection Online Reveal</strong>.
+        Your previous ticket is no longer valid.
+    </p>
+</div>
+            </field>
+            <field name="lang">{{ object.sender_partner_id.lang }}</field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+
+        <record id="mail_template_transfer_returned" model="mail.template">
+            <field name="name">Event: Ticket Transfer Returned</field>
+            <field name="model_id" ref="event_registration_transfer.model_event_registration_transfer"/>
+            <field name="subject">Your ticket for {{ object.event_id.name }} was returned to you</field>
+            <field name="email_from">{{ (object.event_id.organizer_id.email_formatted or object.event_id.company_id.email_formatted or user.email_formatted or '') }}</field>
+            <field name="partner_to">{{ object.sender_partner_id.id or '' }}</field>
+            <field name="use_default_to" eval="False"/>
+            <field name="description">Sent to the sender of a ticket transfer when the recipient gives the ticket back</field>
+            <field name="body_html" type="html">
+<div style="margin: 0px; padding: 0px; font-size: 13px;">
+    <p>Hello <t t-out="object.sender_partner_id.name or ''">Patrick Portal</t>,</p>
+    <p>
+        <t t-out="object.recipient_partner_id.name or ''">Marc Demo</t> returned your ticket for
+        <strong t-out="object.event_id.name or ''">OpenWood Collection Online Reveal</strong>.
+        You will receive your new ticket in a separate email.
+    </p>
+</div>
+            </field>
+            <field name="lang">{{ object.sender_partner_id.lang }}</field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+
+    </data>
+</odoo>
