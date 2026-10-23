@@ -1117,9 +1117,9 @@ class IrQweb(models.AbstractModel):
     def _get_code_memo(self, ref: int, key: str):
         """ Return the compiled code of the template and the templates it
         calls from the registry memo if its views did not change since it
-        was memoized (see `_get_views_versions`), or None. """
+        was memoized (see `ir.ui.view._get_views_versions`), or None. """
         memo = self.env.registry._template_code__.get(key)
-        if memo and memo[3] == self._get_template_versions(ref):
+        if memo and memo[3] == self.env['ir.ui.view']._get_tree_versions(ref):
             return memo[1:3]
         return None
 
@@ -1131,44 +1131,8 @@ class IrQweb(models.AbstractModel):
         if entry is None or entry[0] != view_hash:
             code, options, def_name, compiled, calls = marshal.loads(data)
             entry = (view_hash, self._load_code(code, options, def_name, compiled), calls)
-        memo[key] = (*entry[:3], self._get_template_versions(ref))
+        memo[key] = (*entry[:3], self.env['ir.ui.view']._get_tree_versions(ref))
         return entry[1:3]
-
-    def _get_views_versions(self) -> tuple[dict, dict]:
-        """ Return ``(views, children)``: ``{id: (inherit_id, version)}`` of
-        all the views and ``{id: [inheriting view ids]}``. The version of a
-        row (``xmin`` and ``ctid``) changes on every update, even in the same
-        transaction. Fetched once per transaction and invalidation of the
-        'templates' caches. """
-        self.env['ir.ui.view']._clear_preload_views_cache_if_needed()
-        versions = self.env.cr.cache.get('_qweb_views_versions')
-        if versions is None:
-            self.env['ir.ui.view'].flush_model()
-            views = {}
-            children = defaultdict(list)
-            for view_id, inherit_id, version in self.env.execute_query(SQL("SELECT id, inherit_id, xmin || '-' || ctid FROM ir_ui_view")):
-                views[view_id] = (inherit_id, version)
-                if inherit_id:
-                    children[inherit_id].append(view_id)
-            versions = self.env.cr.cache['_qweb_views_versions'] = (views, children)
-        return versions
-
-    def _get_template_versions(self, ref: int) -> tuple:
-        """ Return the sorted ``(id, version)`` of the views of the template: its
-        parents and all the views inheriting from them (active or not). """
-        views, children = self._get_views_versions()
-        tree = set()
-        todo = []
-        view_id = ref
-        while view_id in views and view_id not in todo:
-            todo.append(view_id)
-            view_id = views[view_id][0]
-        while todo:
-            view_id = todo.pop()
-            if view_id not in tree:
-                tree.add(view_id)
-                todo.extend(children.get(view_id, ()))
-        return tuple(sorted((view_id, views[view_id][1]) for view_id in tree))
 
     def _generate_code_uncached(self, template: int | str | etree._Element, ir_cache_key=None):
         assert isinstance(self, IrQweb)
@@ -1198,7 +1162,7 @@ class IrQweb(models.AbstractModel):
         result = self._load_code(code, options, def_name, compiled)
         if ir_cache_key:
             calls = list(self._get_called_templates(self._get_template(ref)[0]))
-            versions = self._get_template_versions(ref)
+            versions = self.env['ir.ui.view']._get_tree_versions(ref)
             data = marshal.dumps((code, options, def_name, compiled, calls))
             self.env['ir.cache']._set('qweb', ir_cache_key, [view_id for view_id, _version in versions], VIEWS_HASH_SQL, data)
             self.env.registry._template_code__[ir_cache_key] = (None, result, calls, versions)

@@ -33,6 +33,8 @@ class TestACL(TransactionCaseWithUserDemo):
         self.patch(field, 'groups', groups)
         self.env.transaction.clear()
         # because of monkey patching, we clear everything including caches
+        # (the code changed: the persistent cache is cleared too)
+        self.env.cr.execute("DELETE FROM ir_cache")
         self.env.transaction.invalidate_ormcache('stable')
         self.env.transaction.invalidate_ormcache('groups')
         self.env.transaction.invalidate_ormcache('templates')

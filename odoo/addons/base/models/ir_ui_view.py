@@ -4,6 +4,7 @@ import ast
 import collections
 import functools
 import inspect
+import json
 import logging
 import pprint
 import re
@@ -27,6 +28,24 @@ from odoo.tools.misc import file_path, get_diff, ConstantMapping
 from odoo.tools.template_inheritance import apply_inheritance_specs, locate_node
 from odoo.tools.translate import xml_translate, TRANSLATED_ATTRS, StoredTranslations
 from odoo.tools.view_validation import valid_view, get_domain_value_names, get_expression_field_names, get_dict_asts
+
+# hash of the views used by a cached view (see `Base._get_view_cache`): the
+# views of `control['views']` and the views inheriting from them, and the
+# candidate default views of `control['defaults']` (``[model, view_type]``)
+VIEW_CACHE_HASH_SQL = SQL("""(
+    SELECT md5(concat(
+        (SELECT string_agg(concat_ws('|', v.id, v.inherit_id, v.active, v.mode, v.priority, v.write_date, md5(v.arch_db::text),
+                                     (SELECT string_agg(r.group_id::text, ',' ORDER BY r.group_id) FROM ir_ui_view_group_rel r WHERE r.view_id = v.id)),
+                           ',' ORDER BY v.id)
+           FROM ir_ui_view v
+          WHERE v.id IN (SELECT jsonb_array_elements_text(control->'views')::int)
+             OR v.inherit_id IN (SELECT jsonb_array_elements_text(control->'views')::int)),
+        '#',
+        (SELECT string_agg(concat_ws('|', v.id, v.active, v.priority), ',' ORDER BY v.id)
+           FROM ir_ui_view v JOIN jsonb_array_elements(control->'defaults') d ON v.model = d->>0 AND v.type = d->>1
+          WHERE v.mode = 'primary')
+    ))
+)""")
 
 _logger = logging.getLogger(__name__)
 
@@ -1256,7 +1275,64 @@ actual arch.
         """ Invalidate the local cache when the orm cache is cleared
         """
         self.env.cr.cache.pop('_compile_batch_', None)
-        self.env.cr.cache.pop('_qweb_views_versions', None)
+        self.env.cr.cache.pop('_views_versions', None)
+        self.env.cr.cache.pop('_view_cache_access_token', None)
+
+    def _get_views_versions(self) -> tuple[dict, dict]:
+        """ Return ``(views, children)``: ``{id: (inherit_id, version)}`` of
+        all the views and ``{id: [inheriting view ids]}``. The version of a
+        row (``xmin`` and ``ctid``) changes on every update, even in the same
+        transaction. Fetched once per transaction and invalidation of the
+        'templates' caches. """
+        self._clear_preload_views_cache_if_needed()
+        versions = self.env.cr.cache.get('_views_versions')
+        if versions is None:
+            self.flush_model()
+            views = {}
+            children = collections.defaultdict(list)
+            for view_id, inherit_id, version in self.env.execute_query(SQL("SELECT id, inherit_id, xmin || '-' || ctid FROM ir_ui_view")):
+                views[view_id] = (inherit_id, version)
+                if inherit_id:
+                    children[inherit_id].append(view_id)
+            versions = self.env.cr.cache['_views_versions'] = (views, children)
+        return versions
+
+    def _get_tree_versions(self, view_id: int) -> tuple:
+        """ Return the sorted ``(id, version)`` of the views of the tree of the
+        view: its parents and all the views inheriting from them (active or
+        not), see `_get_views_versions`. """
+        views, children = self._get_views_versions()
+        tree = set()
+        todo = []
+        while view_id in views and view_id not in todo:
+            todo.append(view_id)
+            view_id = views[view_id][0]
+        while todo:
+            view_id = todo.pop()
+            if view_id not in tree:
+                tree.add(view_id)
+                todo.extend(children.get(view_id, ()))
+        return tuple(sorted((view_id, views[view_id][1]) for view_id in tree))
+
+    def _get_view_cache_access_token(self) -> str:
+        """ Version of the groups and of the access rights, on which the
+        postprocessing of the views depends (see `Base._get_view_cache`).
+        Fetched once per transaction and invalidation of the 'templates'
+        caches (the 'groups' caches invalidate them). """
+        self._clear_preload_views_cache_if_needed()
+        token = self.env.cr.cache.get('_view_cache_access_token')
+        if token is None:
+            self.env['res.groups'].flush_model()
+            self.env['ir.access'].flush_model()
+            [[token]] = self.env.execute_query(SQL("""
+                SELECT md5(string_agg(version, ',' ORDER BY version)) FROM (
+                    SELECT 'g' || xmin || '-' || ctid FROM res_groups
+                    UNION ALL SELECT 'i' || xmin || '-' || ctid FROM res_groups_implied_rel
+                    UNION ALL SELECT 'a' || xmin || '-' || ctid FROM ir_access
+                ) AS versions(version)
+            """))
+            self.env.cr.cache['_view_cache_access_token'] = token
+        return token
 
     def _preload_views(self, refs: Sequence[int | str]) -> dict[int | str, dict]:
         """
@@ -2990,6 +3066,7 @@ class Base(models.AbstractModel):
         options = options or {}
         result = {}
 
+        self._preload_view_cache(views, **options)
         result['views'] = {
             v_type: self.get_view(
                 v_id, v_type,
@@ -3083,11 +3160,13 @@ class Base(models.AbstractModel):
             if not view_id:
                 # otherwise try to find the lowest priority matching ir.ui.view
                 view_id = IrUiView.default_view(self._name, view_type)
+                self._add_view_cache_dependency(default=(self._name, view_type))
 
         if view_id:
             # read the view with inherited views applied
             view = IrUiView.browse(view_id)
             arch = view._get_combined_arch()
+            self._add_view_cache_dependency(view_id=view.id)
         else:
             # fallback on default views methods if no ir.ui.view could be found
             view = IrUiView.browse()
@@ -3096,6 +3175,15 @@ class Base(models.AbstractModel):
             except AttributeError:
                 raise UserError(_("No default view of type '%s' could be found!", view_type))
         return arch, view
+
+    def _add_view_cache_dependency(self, view_id=None, default=None):
+        """ Add a view, or a ``(model, view_type)`` whose default view is used,
+        to the dependencies of the views being computed by `_get_view_cache`. """
+        for dependencies in self.env.cr.cache.get('_view_cache_dependencies', ()):
+            if view_id:
+                dependencies['views'].add(view_id)
+            if default:
+                dependencies['defaults'].add(default)
 
     def _get_view_postprocessed(self, view, arch, **options):
         """
@@ -3175,6 +3263,20 @@ class Base(models.AbstractModel):
 
         :rtype: dict
         """
+        # The result is shared through `ir.cache`, valid while the views it
+        # uses (and their candidates as default views) did not change.
+        use_ir_cache = 'xml' not in config['dev_mode']
+        if use_ir_cache:
+            key = self._get_view_ir_cache_key(view_id, view_type, **options)
+            misses = self.env.cr.cache.setdefault('_view_cache_misses', set())
+            if key in misses:
+                # already looked up by `_preload_view_cache`
+                misses.discard(key)
+            elif entry := self.env['ir.cache']._get('view', [key], VIEW_CACHE_HASH_SQL).get(key):
+                return self._load_view_cache(entry[1])
+        dependencies = {'views': set(), 'defaults': set()}
+        self.env.cr.cache.setdefault('_view_cache_dependencies', []).append(dependencies)
+
         # Get the view arch and all other attributes describing the composition of the view
         arch, view = self._get_view(view_id, view_type, **options)
 
@@ -3192,7 +3294,53 @@ class Base(models.AbstractModel):
             'models': frozendict({model: tuple(fields) for model, fields in models.items()}),
         }
 
+        self.env.cr.cache['_view_cache_dependencies'].remove(dependencies)
+        if use_ir_cache:
+            IrUiView = self.env['ir.ui.view']
+            control = {
+                'views': sorted({tree_view_id for view_id in dependencies['views'] for tree_view_id, _version in IrUiView._get_tree_versions(view_id)}),
+                'defaults': sorted(map(list, dependencies['defaults'])),
+            }
+            data = json.dumps({**result, 'models': {model: list(fields) for model, fields in models.items()}})
+            self.env['ir.cache']._set('view', key, control, VIEW_CACHE_HASH_SQL, data.encode())
         return frozendict(result)
+
+    @api.model
+    def _get_view_ir_cache_key(self, view_id=None, view_type='form', **options) -> str:
+        """ Key of the view in `ir.cache`: the cache key of the view, the
+        version of the registry and of the groups and access rights. """
+        return repr((
+            self._name,
+            self._get_view_cache_key(view_id, view_type, **options),
+            self.env.registry.registry_sequence,
+            self.env['ir.ui.view']._get_view_cache_access_token(),
+        ))
+
+    @api.model
+    def _load_view_cache(self, data: bytes) -> frozendict:
+        result = json.loads(data)
+        result['models'] = frozendict({model: tuple(fields) for model, fields in result['models'].items()})
+        return frozendict(result)
+
+    @api.model
+    def _preload_view_cache(self, views, **options):
+        """ Load in batch from `ir.cache` the views ``[(view_id, view_type)]``
+        missing in the cache of `_get_view_cache`. """
+        if 'xml' in config['dev_mode']:
+            return
+        ormcache = Base._get_view_cache.__cache__
+        keys = {
+            self._get_view_ir_cache_key(view_id, view_type, **options): (view_id, view_type)
+            for view_id, view_type in views
+            if ormcache.get_value(self, view_id, view_type, **options) is None
+        }
+        if not keys:
+            return
+        entries = self.env['ir.cache']._get('view', keys, VIEW_CACHE_HASH_SQL)
+        self.env.cr.cache.setdefault('_view_cache_misses', set()).update(keys.keys() - entries.keys())
+        for key, (_hash, data) in entries.items():
+            view_id, view_type = keys[key]
+            ormcache.add_value(self, view_id, view_type, cache_value=self._load_view_cache(data), **options)
 
     @api.model
     def get_view(self, view_id=None, view_type='form', **options):

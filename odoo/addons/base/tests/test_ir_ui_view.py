@@ -3,6 +3,7 @@ import logging
 import re
 import time
 from contextlib import contextmanager
+from unittest.mock import patch
 
 from functools import partial
 from collections import defaultdict
@@ -6147,3 +6148,63 @@ class ViewModifiers(ViewCase):
                 'inherit_id': parent_view.id,
                 'arch': inherit_arch,
             })
+
+
+class TestViewIrCache(common.TransactionCase):
+    """ The views of `get_view` are shared through the `ir.cache` table. """
+
+    def get_view(self, computed, view_id=None):
+        """ Return the arch of the form view of countries like a new worker
+        (only the `ir.cache` table) and check whether it was computed. """
+        self.env.transaction.invalidate_ormcache('templates')
+        IrUiView = type(self.env['ir.ui.view'])
+        origin = IrUiView.postprocess_and_fields
+        calls = []
+
+        def postprocess_and_fields(view, *args, **kwargs):
+            calls.append(view)
+            return origin(view, *args, **kwargs)
+
+        with patch.object(IrUiView, 'postprocess_and_fields', postprocess_and_fields):
+            arch = self.env['res.country'].get_view(view_id, 'form')['arch']
+        self.assertEqual(bool(calls), computed)
+        return arch
+
+    def test_ir_cache(self):
+        view = self.env.ref('base.view_country_form')
+        self.get_view(True)
+        self.get_view(False)
+        self.get_view(True, view.id)
+        self.get_view(False, view.id)
+
+        # the view itself
+        view.arch = view.arch.replace('<form', '<form string="Changed"', 1)
+        self.assertIn('Changed', self.get_view(True))
+        self.get_view(False)
+
+        # a new view inheriting from it
+        self.env['ir.ui.view'].create({
+            'name': 'extension', 'model': 'res.country', 'inherit_id': view.id,
+            'arch': '<form position="attributes"><attribute name="string">Extended</attribute></form>',
+        })
+        self.assertIn('Extended', self.get_view(True))
+        self.get_view(False)
+        self.get_view(True, view.id)
+
+        # a new default view (the view with the given id is still valid)
+        self.env['ir.ui.view'].create({
+            'name': 'default', 'model': 'res.country', 'priority': 1,
+            'arch': '<form string="Default"><field name="name"/></form>',
+        })
+        self.assertIn('Default', self.get_view(True))
+        self.get_view(False, view.id)
+
+        # the groups and access rights
+        self.env['res.groups'].create({'name': 'new group'})
+        self.get_view(True)
+
+    def test_signature(self):
+        self.get_view(True)
+        with mute_logger('odoo.addons.base.models.ir_cache'):
+            self.env.cr.execute("UPDATE ir_cache SET data = convert_to('{}', 'UTF8') WHERE kind = 'view'")
+            self.get_view(True)
