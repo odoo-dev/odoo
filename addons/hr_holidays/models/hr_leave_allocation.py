@@ -343,7 +343,7 @@ class HrLeaveAllocation(models.Model):
         for allocation in self:
             allocation.number_of_days = allocation.number_of_days_display
 
-    @api.onchange('employee_id')
+    @api.onchange('employee_id', 'number_of_hours')
     def _inverse_number_of_hours(self):
         for allocation in self.filtered('employee_id'):
             hours_per_day = allocation._get_employee_hours_per_day()
