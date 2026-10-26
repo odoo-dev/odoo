@@ -37,16 +37,27 @@ class Website(models.Model):
         website_event_menu = False
         if template == 'website.default_page' and name and name.startswith('event/'):
             website_event_menu = self.env["website.event.menu"].sudo().search([
-                ('menu_id.url', '=', '/' + name)
+                ('menu_id.url', '=', '/' + name),
+                ('view_id', '=', False),
             ], limit=1)
             if website_event_menu:
                 template = "website_event.layout"
+                page_values = dict(page_values or {})
+                page_values.setdefault('header_visible', website_event_menu.event_id.header_visible)
+                page_values.setdefault('footer_visible', website_event_menu.event_id.footer_visible)
 
         new_page = super().new_page(name, add_menu, template, ispage, namespace, page_values, menu_values, sections_arch, page_title)
 
         if website_event_menu and new_page.get('view_id'):
             website_event_menu.view_id = new_page['view_id']
-            website_event_menu.view_id.key = f'website_event.{website_event_menu.event_id.name}-{name.split("/")[-1]}'
+            page_slug = new_page['url'].rstrip('/').split('/')[-1]
+            website_event_menu.view_id.key = f'website_event.{website_event_menu.event_id.name}-{page_slug}'
+
+            if website_event_menu.menu_id:
+                website_event_menu.menu_id.write({
+                    'url': new_page['url'],
+                    'page_id': new_page.get('page_id'),
+                })
 
             arch = website_event_menu.view_id.arch
             if arch:

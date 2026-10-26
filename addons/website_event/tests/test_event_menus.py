@@ -240,3 +240,54 @@ class TestEventMenus(OnlineEventCase, HttpCase):
                 IrUiView.search_count([("key", "=", "website_event.%s" % end_url_2)]),
                 1,
             )
+
+    def test_submenu_create_page_before_save(self):
+        """ Simulate the "Create page" button of the menu editor on a new,
+        not saved yet, event sub-menu: the menu is saved first and the page is
+        then created with the URL computed for that menu. """
+        event = self.env["event.event"].create({
+            "name": "Test Event",
+            "date_begin": fields.Datetime.to_string(datetime.today() + timedelta(days=1)),
+            "date_end": fields.Datetime.to_string(datetime.today() + timedelta(days=15)),
+            "is_published": True,
+            "website_menu": True,
+            "community_menu": False,
+        })
+        website = self.env["website"].get_current_website()
+        temp_ids = ["menu_new_1", "menu_new_2"]
+        data = [{
+            "id": temp_id,
+            "parent_id": event.menu_id.id,
+            "name": "My Page",
+            "url": "/My Page",
+            "new_window": False,
+            "is_mega_menu": False,
+        } for temp_id in temp_ids]
+
+        result = self.env["website.menu"].with_context(return_menu_ids=True).save(
+            website.id, {"data": data, "to_delete": []})
+
+        self.assertEqual(set(result["id_mapping"]), set(temp_ids))
+        menu_1, menu_2 = self.env["website.menu"].browse([result["id_mapping"][temp_id] for temp_id in temp_ids])
+        self.assertEqual(menu_1.url, f"{event.website_url}/page/my-page")
+        self.assertEqual(menu_2.url, f"{event.website_url}/page/my-page-1", "Event page URLs should be unique")
+
+        new_page = website.new_page(name=menu_1.url.lstrip("/"))
+        event_menu = self.env["website.event.menu"].search([("menu_id", "=", menu_1.id)])
+        self.assertEqual(new_page["url"], menu_1.url)
+        self.assertEqual(event_menu.view_id.id, new_page["view_id"])
+        self.assertEqual(menu_1.page_id.id, new_page["page_id"])
+        self.assertEqual(self.url_open(menu_1.url).status_code, 200)
+
+    def test_menu_save_return_menu_ids(self):
+        """ Without the context key, `save` keeps returning True. """
+        website = self.env["website"].get_current_website()
+        data = [{
+            "id": "menu_new",
+            "parent_id": website.menu_id.id,
+            "name": "Other",
+            "url": "/other",
+            "new_window": False,
+            "is_mega_menu": False,
+        }]
+        self.assertIs(self.env["website.menu"].save(website.id, {"data": data, "to_delete": []}), True)

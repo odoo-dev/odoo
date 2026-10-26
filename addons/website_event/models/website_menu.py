@@ -100,14 +100,31 @@ class WebsiteMenu(models.Model):
                 event_menu_values = []
                 for new_menu in new_menus:
                     menu_record = self.env['website.menu'].browse(new_menu['id'])
-                    menu_record_url = menu_record.url.lstrip("/")
+                    menu_record_url = menu_record.url.strip('/')
+                    if menu_record_url and menu_record_url != '#':
+                        menu_record_url = self.env['ir.http']._slugify(menu_record_url.split('/')[-1])
                     if not menu_record_url or menu_record_url == '#':
                         # prevent blank URLs, use 't' prefix to avoid slug syntax
                         menu_record_url = f"t{int(datetime.now().timestamp())}"
 
+                    base_url = f'{event_url}/page/{menu_record_url}'
+                    final_url = base_url
+                    inc = 0
+                    while self.env['website.menu'].search_count([
+                        ('website_id', '=', website_id),
+                        ('url', '=', final_url),
+                        ('id', '!=', menu_record.id),
+                    ]) or self.env['website.page'].search_count([
+                        ('website_id', '=', website_id),
+                        ('url', '=', final_url),
+                    ]):
+                        inc += 1
+                        final_url = f'{base_url}-{inc}'
+
                     menu_record.write({
-                        'url': f'{event_url}/page/{menu_record_url}'
+                        'url': final_url
                     })
+                    new_menu['url'] = final_url
                     event_menu_values.append({
                         'menu_id': menu_record.id,
                         'event_id': parent_event_menu.event_id.id,

@@ -181,12 +181,15 @@ class WebsiteEventController(http.Controller):
         if '.' not in page:
             page = 'website_event.%s' % page
 
-        view = request.env["website.event.menu"].sudo().search([
+        page_slug = base_page_name.rstrip('/').split('/')[-1]
+        event_menu = request.env["website.event.menu"].sudo().search([
             ("event_id", "=", event.id),
-            '|',
+            '|', '|',
               ("view_id.key", "ilike", page),
-              ("view_id.key", "ilike", f'website_event.{event.name}-{base_page_name.split("/")[-1]}'),
-        ], limit=1).view_id
+              ("view_id.key", "ilike", f'website_event.{event.name}-{page_slug}'),
+              ("menu_id.url", "=like", f"%/page/{page_slug}"),
+        ], limit=1)
+        view = event_menu.view_id
 
         try:
             # Every event page view should have its own SEO.
@@ -196,6 +199,7 @@ class WebsiteEventController(http.Controller):
         except ValueError:
             # page not found
             page = 'website.page_404'
+            values['main_object'] = event
 
         return request.render(page, values)
 

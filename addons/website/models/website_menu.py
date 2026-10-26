@@ -297,12 +297,14 @@ class WebsiteMenu(models.Model):
         to_delete = data.get('to_delete')
         if to_delete:
             self.browse(to_delete).unlink()
+        id_mapping = {}
         for menu in data['data']:
             mid = menu['id']
             # new menu are prefixed by new-
             if isinstance(mid, str):
                 new_menu = self.create({'name': menu['name'], 'website_id': website_id})
                 replace_id(mid, new_menu.id)
+                id_mapping[mid] = new_menu.id
         for menu in data['data']:
             menu_id = self.browse(menu['id'])
             # Check if the url match a website.page (to set the m2o relation),
@@ -342,4 +344,6 @@ class WebsiteMenu(models.Model):
                         menu_id.page_id.write({'url': menu['url']})
             menu_id.write(menu)
 
+        if self.env.context.get('return_menu_ids'):
+            return {'id_mapping': id_mapping}
         return True

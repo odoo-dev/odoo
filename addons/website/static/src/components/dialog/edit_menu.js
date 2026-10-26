@@ -368,7 +368,7 @@ export class EditMenuDialog extends Component {
         }
     }
 
-    async onClickSave(goToWebsite = true, url) {
+    async onClickSave(goToWebsite = true, url, saveOnly = false) {
         const data = [];
         this.map.forEach((menu, id) => {
             if (this.state.rootMenu.fields["id"] !== id) {
@@ -383,7 +383,7 @@ export class EditMenuDialog extends Component {
             }
         });
 
-        await this.orm.call(
+        const result = await this.orm.call(
             "website.menu",
             "save",
             [
@@ -393,8 +393,18 @@ export class EditMenuDialog extends Component {
                     to_delete: this.toDelete,
                 },
             ],
-            { context: { lang: this.website.currentWebsite.metadata.lang } }
+            {
+                context: {
+                    lang: this.website.currentWebsite.metadata.lang,
+                    return_menu_ids: saveOnly,
+                },
+            }
         );
+
+        if (saveOnly) {
+            return result;
+        }
+
         if (this.props.save) {
             this.props.save(url);
         } else if (goToWebsite) {
@@ -403,15 +413,33 @@ export class EditMenuDialog extends Component {
     }
 
     async createPage(id) {
-        const menu = this.map.get(id);
-        let url = menu.fields["url"];
-        url = url.startsWith("/") ? url : "/" + url;
+        // Save first so that the menu exists in database and gets its final
+        // URL (which can be rewritten server side, e.g. for event menus).
+        const { id_mapping } = await this.onClickSave(false, undefined, true);
+        this.toDelete = [];
+        for (const [tempId, dbId] of Object.entries(id_mapping)) {
+            const menu = this.map.get(tempId);
+            menu.fields["id"] = dbId;
+            this.map.delete(tempId);
+            this.map.set(dbId, menu);
+            for (const child of menu.children) {
+                child.fields["parent_id"] = dbId;
+            }
+        }
+        const menuId = id_mapping[id] || id;
+        const menu = this.map.get(menuId);
+        const savedMenus = await this.orm.read("website.menu", [...this.map.keys()], ["url"]);
+        for (const savedMenu of savedMenus) {
+            this.map.get(savedMenu.id).fields["url"] = savedMenu.url;
+        }
+        const url = menu.fields["url"];
         this.dialogs.add(AddPageDialog, {
-            onAddPage: ({ createdUrl }) => {
+            onAddPage: async ({ createdUrl }) => {
                 if (createdUrl) {
                     menu.fields["url"] = createdUrl;
                 }
-                this.onClickSave(false, createdUrl ?? url);
+                await this.onClickSave(false, createdUrl ?? url);
+                this.props.close?.();
             },
             websiteId: this.website.currentWebsite.id,
             forcedURL: url,
