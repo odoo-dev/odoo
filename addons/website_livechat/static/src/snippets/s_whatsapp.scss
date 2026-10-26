@@ -1,0 +1,8 @@
+// The livechat bubbles sit in the bottom-right corner, never mirrored in RTL:
+// lift the WhatsApp button above them when it is on that side.
+body:has(> .o-livechat-root) {
+    #wrapwrap:not(.o_rtl) .s_whatsapp:not(:has(.s_whatsapp_pos_left)),
+    .o_rtl .s_whatsapp:has(.s_whatsapp_pos_left) {
+        bottom: 8rem;
+    }
+}

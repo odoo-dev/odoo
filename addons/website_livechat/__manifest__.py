@@ -41,10 +41,12 @@
         ],
         'web.assets_frontend': [
             "website_livechat/static/src/core/common/**/*",
+            "website_livechat/static/src/snippets/**/*",
         ],
         'web.assets_backend': [
             "website_livechat/static/src/core/common/**/*",
             'website_livechat/static/src/**/*',
+            ('remove', 'website_livechat/static/src/snippets/**/*'),
         ],
         'web.assets_unit_tests': [
             'website_livechat/static/tests/**/*',
