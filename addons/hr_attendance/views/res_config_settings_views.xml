@@ -9,12 +9,12 @@
             <xpath expr="//form" position="inside">
                 <app data-string="Attendances" string="Attendances" name="hr_attendance" groups="hr_attendance.group_hr_attendance_manager">
                     <block title="Attendance Rules &amp; Enforcement" name="attendance_settings">
-                        <setting string="Attendance Validation" company_dependent="1" help="When enabled, attendance records must be validated by an officer before they count toward work entries and time rules.">
+                        <setting string="Attendance Validation" company_dependent="1" help="Exceptions includes attendances modified manually (not kiosk, or systray), late check-in, early check-out, overtime, and conflicts with Time Offs.">
                             <field name="attendance_validation" widget="radio"/>
-                            <div invisible="attendance_validation != 'tolerance_validation'" class="mt-2">
+                            <div invisible="attendance_validation != 'review_conflicts'" class="mt-2">
                                 <span class="me-2">Tolerance</span>
                                 <field name="attendance_validation_tolerance" class="text-center w-25"/>
-                                <span class="ms-2">Hours</span>
+                                <span class="ms-2">Minutes</span>
                             </div>
                         </setting>
                         <setting string="Automatic Check-Out" company_dependent="1" help="Automatically check out employees based on their working schedule with an additional tolerance, or at a specific time each day. Does not apply to employees with a flexible working schedule.">
@@ -96,5 +96,5 @@
         <field name="context">{'module' : 'hr_attendance'}</field>
     </record>
 
-    <menuitem id="menu_hr_attendance_settings" name="Settings" parent="menu_hr_attendance_configuration" sequence="10" action="action_hr_attendance_settings" groups="hr_attendance.group_hr_attendance_manager"/>
+    <menuitem id="menu_hr_attendance_settings" name="Settings" parent="menu_hr_attendance_configuration" sequence="1" action="action_hr_attendance_settings" groups="hr_attendance.group_hr_attendance_manager"/>
 </odoo>

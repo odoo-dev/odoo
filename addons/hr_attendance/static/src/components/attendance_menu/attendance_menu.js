@@ -1,4 +1,4 @@
-import { Component, onWillStart, proxy, usePlugin } from "@odoo/owl";
+import { Component, EventBus, onWillDestroy, onWillStart, proxy, usePlugin } from "@odoo/owl";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";
@@ -7,7 +7,7 @@ import { rpc, ConnectionLostError } from "@web/core/network/rpc";
 import { registry } from "@web/core/registry";
 import { formatFloatTime, formatDateTime } from "@web/views/fields/formatters";
 import { getPropertyFieldInfo } from "@web/views/fields/field";
-import { useService } from "@web/core/utils/hooks";
+import { useBus, useService } from "@web/core/utils/hooks";
 import { _t } from "@web/core/l10n/translation";
 import { Record } from "@web/model/record";
 import { usePopover } from "@web/core/popover/popover_hook";
@@ -28,6 +28,8 @@ const ATTENDANCE_FIELD_NAMES = [
     "out_location",
 ];
 
+export const attendanceSystrayBus = new EventBus();
+
 export class ActivityMenu extends Component {
     static components = { Dropdown, Record, AttendanceInlineForm, AttendanceVideoStream };
     static template = "hr_attendance.attendance_menu";
@@ -37,6 +39,7 @@ export class ActivityMenu extends Component {
         this.lazySession = usePlugin(LazySessionPlugin);
         this.notification = useService("notification");
         this.dialogService = useService("dialog");
+        this.action = useService("action");
         const { services } = this.env;
         const datetimePicker = services.datetime_picker;
         const attendanceDateTimePicker = Object.create(datetimePicker);
@@ -67,6 +70,27 @@ export class ActivityMenu extends Component {
         this.cameraCapture = null;
         this.attendanceRecord = null;
         this.dropdown = useDropdownState();
+        // Clicking the app while the dialog is open must close it, but the click
+        // away already closes it on pointerdown: remember its state before that.
+        // Registered at setup, this listener runs before the popover's one.
+        this.wasOpenOnPointerDown = false;
+        const onPointerDown = () => (this.wasOpenOnPointerDown = this.dropdown.isOpen);
+        window.addEventListener("pointerdown", onPointerDown, { capture: true });
+        onWillDestroy(() =>
+            window.removeEventListener("pointerdown", onPointerDown, { capture: true })
+        );
+        useBus(attendanceSystrayBus, "OPEN", ({ detail }) => {
+            if (!this.state.isDisplayed) {
+                return;
+            }
+            detail.opened = true;
+            if (this.dropdown.isOpen || this.wasOpenOnPointerDown) {
+                this.dropdown.close();
+            } else {
+                this.dropdown.open();
+            }
+            this.wasOpenOnPointerDown = false;
+        });
 
         onWillStart(() => {
             this.lazySession.getValue("attendance_check_in_ability", (hasAbility) => {
@@ -355,6 +379,11 @@ export class ActivityMenu extends Component {
         );
     }
 
+    async openMyAttendances() {
+        this.dropdown.close();
+        await this.action.doAction("hr_attendance.hr_attendance_my_action");
+    }
+
     async checking({ latitude = false, longitude = false, checkInImage = null } = {}) {
         try {
             const employee = await rpc("/hr_attendance/systray_check_in_out", {
@@ -447,6 +476,24 @@ export class ActivityMenu extends Component {
 export const systrayAttendance = {
     Component: ActivityMenu,
 };
+
+/**
+ * Client action used as the Attendances app action for self-service users:
+ * it opens the systray dialog instead of navigating to the app.
+ */
+function openAttendanceSystray() {
+    const action = useService("action");
+    const payload = { opened: false };
+    // Without a current screen (e.g. at webclient startup), display the app instead
+    if (action.currentController) {
+        attendanceSystrayBus.trigger("OPEN", payload);
+    }
+    if (!payload.opened) {
+        return "hr_attendance.hr_attendance_my_action";
+    }
+}
+
+registry.category("actions").add("hr_attendance.open_systray", openAttendanceSystray);
 
 registry
     .category("systray")

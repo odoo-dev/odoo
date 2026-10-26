@@ -41,84 +41,196 @@
             <field eval="(datetime.now()+relativedelta(months=-1, days=-1)).strftime('%Y-%m-%d 08:00:24')" name="check_in"/>
             <field eval="(datetime.now()+relativedelta(months=-1, days=-1)).strftime('%Y-%m-%d 12:01:33')" name="check_out"/>
             <field name="employee_id" ref="hr.employee_admin"/>
+            <field name="in_mode">systray</field>
+            <field name="in_latitude">37.7898</field>
+            <field name="in_longitude">-122.3942</field>
+            <field name="in_location">San Francisco</field>
+            <field name="out_mode">systray</field>
+            <field name="out_latitude">37.7898</field>
+            <field name="out_longitude">-122.3942</field>
+            <field name="out_location">San Francisco</field>
         </record>
 
         <record id="attendance_root2" model="hr.attendance">
             <field eval="(datetime.now()+relativedelta(months=-1, days=-1)).strftime('%Y-%m-%d 13:02:58')" name="check_in"/>
             <field eval="(datetime.now()+relativedelta(months=-1, days=-1)).strftime('%Y-%m-%d 18:09:22')" name="check_out"/>
             <field name="employee_id" ref="hr.employee_admin"/>
+            <field name="in_mode">systray</field>
+            <field name="in_latitude">37.7898</field>
+            <field name="in_longitude">-122.3942</field>
+            <field name="in_location">San Francisco</field>
+            <field name="out_mode">systray</field>
+            <field name="out_latitude">37.7898</field>
+            <field name="out_longitude">-122.3942</field>
+            <field name="out_location">San Francisco</field>
         </record>
 
         <record id="attendance1" model="hr.attendance">
             <field eval="(datetime.now()+relativedelta(months=-1)).strftime('%Y-%m-01 08:21')" name="check_in"/>
             <field eval="(datetime.now()+relativedelta(months=-1)).strftime('%Y-%m-01 15:51')" name="check_out"/>
             <field name="employee_id" ref="hr.employee_qdp"/>
+            <field name="in_mode">systray</field>
+            <field name="in_latitude">37.3352</field>
+            <field name="in_longitude">-121.8811</field>
+            <field name="in_location">San Jose</field>
+            <field name="out_mode">systray</field>
+            <field name="out_latitude">37.3352</field>
+            <field name="out_longitude">-121.8811</field>
+            <field name="out_location">San Jose</field>
         </record>
 
         <record id="attendance2" model="hr.attendance">
             <field eval="(datetime.now()+relativedelta(months=-1)).strftime('%Y-%m-02 08:47')" name="check_in"/>
             <field eval="(datetime.now()+relativedelta(months=-1)).strftime('%Y-%m-02 15:53')" name="check_out"/>
             <field name="employee_id" ref="hr.employee_qdp"/>
+            <field name="in_mode">systray</field>
+            <field name="in_latitude">37.3352</field>
+            <field name="in_longitude">-121.8811</field>
+            <field name="in_location">San Jose</field>
+            <field name="out_mode">systray</field>
+            <field name="out_latitude">37.3352</field>
+            <field name="out_longitude">-121.8811</field>
+            <field name="out_location">San Jose</field>
         </record>
 
         <record id="attendance3" model="hr.attendance">
             <field eval="(datetime.now()+relativedelta(months=-1)).strftime('%Y-%m-03 08:32')" name="check_in"/>
             <field eval="(datetime.now()+relativedelta(months=-1)).strftime('%Y-%m-03 15:22')" name="check_out"/>
             <field name="employee_id" ref="hr.employee_qdp"/>
+            <field name="in_mode">systray</field>
+            <field name="in_latitude">37.3352</field>
+            <field name="in_longitude">-121.8811</field>
+            <field name="in_location">San Jose</field>
+            <field name="out_mode">systray</field>
+            <field name="out_latitude">37.3352</field>
+            <field name="out_longitude">-121.8811</field>
+            <field name="out_location">San Jose</field>
         </record>
 
         <record id="attendance4" model="hr.attendance">
             <field eval="(datetime.now()+relativedelta(months=-1)).strftime('%Y-%m-04 08:01')" name="check_in"/>
             <field eval="(datetime.now()+relativedelta(months=-1)).strftime('%Y-%m-04 16:21')" name="check_out"/>
             <field name="employee_id" ref="hr.employee_qdp"/>
+            <field name="in_mode">systray</field>
+            <field name="in_latitude">37.3352</field>
+            <field name="in_longitude">-121.8811</field>
+            <field name="in_location">San Jose</field>
+            <field name="out_mode">systray</field>
+            <field name="out_latitude">37.3352</field>
+            <field name="out_longitude">-121.8811</field>
+            <field name="out_location">San Jose</field>
         </record>
 
         <record id="attendance5" model="hr.attendance">
             <field eval="(datetime.now()+relativedelta(months=-1)).strftime('%Y-%m-05 10:10')" name="check_in"/>
             <field eval="(datetime.now()+relativedelta(months=-1)).strftime('%Y-%m-05 14:42')" name="check_out"/>
             <field name="employee_id" ref="hr.employee_qdp"/>
+            <field name="in_mode">systray</field>
+            <field name="in_latitude">37.3352</field>
+            <field name="in_longitude">-121.8811</field>
+            <field name="in_location">San Jose</field>
+            <field name="out_mode">systray</field>
+            <field name="out_latitude">37.3352</field>
+            <field name="out_longitude">-121.8811</field>
+            <field name="out_location">San Jose</field>
         </record>
 
         <record id="attendance6" model="hr.attendance">
             <field eval="(datetime.now()+relativedelta(months=-1)).strftime('%Y-%m-06 10:10')" name="check_in"/>
             <field eval="(datetime.now()+relativedelta(months=-1)).strftime('%Y-%m-06 17:34')" name="check_out"/>
             <field name="employee_id" ref="hr.employee_qdp"/>
+            <field name="in_mode">systray</field>
+            <field name="in_latitude">37.3352</field>
+            <field name="in_longitude">-121.8811</field>
+            <field name="in_location">San Jose</field>
+            <field name="out_mode">systray</field>
+            <field name="out_latitude">37.3352</field>
+            <field name="out_longitude">-121.8811</field>
+            <field name="out_location">San Jose</field>
         </record>
 
         <record id="attendance7" model="hr.attendance">
             <field eval="(datetime.now()+relativedelta(months=-1)).strftime('%Y-%m-07 08:21')" name="check_in"/>
             <field eval="(datetime.now()+relativedelta(months=-1)).strftime('%Y-%m-07 17:29')" name="check_out"/>
             <field name="employee_id" ref="hr.employee_qdp"/>
+            <field name="in_mode">systray</field>
+            <field name="in_latitude">37.3352</field>
+            <field name="in_longitude">-121.8811</field>
+            <field name="in_location">San Jose</field>
+            <field name="out_mode">systray</field>
+            <field name="out_latitude">37.3352</field>
+            <field name="out_longitude">-121.8811</field>
+            <field name="out_location">San Jose</field>
         </record>
 
         <record id="attendance8" model="hr.attendance">
             <field eval="(datetime.now()+relativedelta(months=-1)).strftime('%Y-%m-08 09:21')" name="check_in"/>
             <field eval="(datetime.now()+relativedelta(months=-1)).strftime('%Y-%m-08 14:54')" name="check_out"/>
             <field name="employee_id" ref="hr.employee_qdp"/>
+            <field name="in_mode">systray</field>
+            <field name="in_latitude">37.3352</field>
+            <field name="in_longitude">-121.8811</field>
+            <field name="in_location">San Jose</field>
+            <field name="out_mode">systray</field>
+            <field name="out_latitude">37.3352</field>
+            <field name="out_longitude">-121.8811</field>
+            <field name="out_location">San Jose</field>
         </record>
 
         <record id="attendance9" model="hr.attendance">
             <field eval="(datetime.now()+relativedelta(months=-1)).strftime('%Y-%m-09 10:32')" name="check_in"/>
             <field eval="(datetime.now()+relativedelta(months=-1)).strftime('%Y-%m-09 17:31')" name="check_out"/>
             <field name="employee_id" ref="hr.employee_qdp"/>
+            <field name="in_mode">systray</field>
+            <field name="in_latitude">37.3352</field>
+            <field name="in_longitude">-121.8811</field>
+            <field name="in_location">San Jose</field>
+            <field name="out_mode">systray</field>
+            <field name="out_latitude">37.3352</field>
+            <field name="out_longitude">-121.8811</field>
+            <field name="out_location">San Jose</field>
         </record>
 
         <record id="attendance10" model="hr.attendance">
             <field eval="(datetime.now()+relativedelta(months=-1)).strftime('%Y-%m-10 08:00')" name="check_in"/>
             <field eval="(datetime.now()+relativedelta(months=-1)).strftime('%Y-%m-10 17:00')" name="check_out"/>
             <field name="employee_id" ref="hr.employee_qdp"/>
+            <field name="in_mode">systray</field>
+            <field name="in_latitude">37.3352</field>
+            <field name="in_longitude">-121.8811</field>
+            <field name="in_location">San Jose</field>
+            <field name="out_mode">systray</field>
+            <field name="out_latitude">37.3352</field>
+            <field name="out_longitude">-121.8811</field>
+            <field name="out_location">San Jose</field>
         </record>
 
         <record id="attendance11" model="hr.attendance">
             <field eval="(datetime.now()+timedelta(hours=-4)).strftime('%Y-%m-%d %H:%M:00')" name="check_in"/>
             <field eval="(datetime.now()+timedelta(minutes=-30)).strftime('%Y-%m-%d %H:%M:00')" name="check_out"/>
             <field name="employee_id" ref="hr.employee_hne"/>
+            <field name="in_mode">systray</field>
+            <field name="in_latitude">34.0522</field>
+            <field name="in_longitude">-118.2437</field>
+            <field name="in_location">Los Angeles</field>
+            <field name="out_mode">systray</field>
+            <field name="out_latitude">34.0522</field>
+            <field name="out_longitude">-118.2437</field>
+            <field name="out_location">Los Angeles</field>
         </record>
 
         <record id="attendance12" model="hr.attendance">
             <field eval="(datetime.now()+timedelta(hours=-31)).strftime('%Y-%m-%d %H:%M:00')" name="check_in"/>
             <field eval="(datetime.now()+timedelta(hours=-7)).strftime('%Y-%m-%d %H:%M:00')" name="check_out"/>
             <field name="employee_id" ref="hr.employee_mit"/>
+            <field name="in_mode">systray</field>
+            <field name="in_latitude">32.7157</field>
+            <field name="in_longitude">-117.1611</field>
+            <field name="in_location">San Diego</field>
+            <field name="out_mode">systray</field>
+            <field name="out_latitude">32.7157</field>
+            <field name="out_longitude">-117.1611</field>
+            <field name="out_location">San Diego</field>
         </record>
 
         <record id="attendance12_message1" model="mail.message">
@@ -135,12 +247,28 @@
             <field eval="(datetime.now()+timedelta(hours=-7)).strftime('%Y-%m-%d %H:%M:10')" name="check_in"/>
             <field eval="(datetime.now()+timedelta(hours=-2)).strftime('%Y-%m-%d %H:%M:00')" name="check_out"/>
             <field name="employee_id" ref="hr.employee_mit"/>
+            <field name="in_mode">systray</field>
+            <field name="in_latitude">32.7157</field>
+            <field name="in_longitude">-117.1611</field>
+            <field name="in_location">San Diego</field>
+            <field name="out_mode">systray</field>
+            <field name="out_latitude">32.7157</field>
+            <field name="out_longitude">-117.1611</field>
+            <field name="out_location">San Diego</field>
         </record>
 
         <record id="attendance14" model="hr.attendance">
             <field eval="(datetime.now()+timedelta(hours=-15)).strftime('%Y-%m-%d %H:%M:00')" name="check_in"/>
             <field eval="(datetime.now()+timedelta(hours=-3)).strftime('%Y-%m-%d %H:%M:00')" name="check_out"/>
             <field name="employee_id" ref="hr.employee_chs"/>
+            <field name="in_mode">systray</field>
+            <field name="in_latitude">38.5816</field>
+            <field name="in_longitude">-121.4944</field>
+            <field name="in_location">Sacramento</field>
+            <field name="out_mode">systray</field>
+            <field name="out_latitude">38.5816</field>
+            <field name="out_longitude">-121.4944</field>
+            <field name="out_location">Sacramento</field>
         </record>
     </data>
 </odoo>

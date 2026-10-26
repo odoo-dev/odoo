@@ -34,7 +34,7 @@ class TestHrAttendanceKiosk(HttpCase):
             'department_id': cls.department_A.id,
         })
         cls.company_B.attendance_break_management = True
-        cls.company_B.attendance_validation = 'manual_validation'
+        cls.company_B.attendance_validation = 'review_all'
 
     def _create_checked_out_attendance(self, employee=None):
         employee = employee or self.employee_A
@@ -43,6 +43,7 @@ class TestHrAttendanceKiosk(HttpCase):
             'employee_id': employee.id,
             'check_in': now - timedelta(hours=2),
             'check_out': now - timedelta(hours=1),
+            'in_mode': 'kiosk',
         })
 
     def _update_break(self, **params):
@@ -122,6 +123,7 @@ class TestHrAttendanceKiosk(HttpCase):
         latest_attendance = self.env['hr.attendance'].create({
             'employee_id': self.employee_A.id,
             'check_in': now - timedelta(minutes=30),
+            'in_mode': 'kiosk',
         })
 
         self.assertFalse(self._update_break(

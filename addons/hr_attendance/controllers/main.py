@@ -31,7 +31,7 @@ class HrAttendance(http.Controller):
     ):
         response = {}
         if employee:
-            attendance_fields = ['check_in', 'check_out', 'worked_hours', 'work_entry_type_id', 'wet_color', 'wet_display_code']
+            attendance_fields = ['check_in', 'check_out', 'worked_hours', 'wet_display_code']
             if include_attendance_details:
                 attendance_fields += [
                     'break_duration',
@@ -44,7 +44,10 @@ class HrAttendance(http.Controller):
                 'name': employee.name,
                 'hours_today': float_round(employee.hours_today, precision_digits=3),
                 'hours_previously_today': float_round(employee.hours_previously_today, precision_digits=2),
-                'today_attendance_ids': employee.today_attendance_ids.read(attendance_fields),
+                'today_attendance_ids': [
+                    {**values, 'wet_color': attendance.work_entry_type_id.color}
+                    for attendance, values in zip(employee.today_attendance_ids, employee.today_attendance_ids.read(attendance_fields))
+                ],
                 'last_attendance_worked_hours': float_round(employee.last_attendance_worked_hours, precision_digits=2),
                 'last_check_in': employee.last_check_in,
                 'attendance_state': employee.attendance_state,

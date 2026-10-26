@@ -28,3 +28,10 @@
 .o_readonly_color:has(.o_readonly_modifier) {
     color: var(--o-bs-text-muted);
 }
+
+/* attendance lists: cells to look at (decoration-danger) get a soft red background */
+.o_attendance_list .o_data_cell.text-danger,
+.o_attendance_list .o_data_cell:has(> .o_field_widget.text-danger) {
+    background-color: var(--o-bs-danger-bg-subtle) !important;
+    color: var(--o-text-color-danger) !important;
+}

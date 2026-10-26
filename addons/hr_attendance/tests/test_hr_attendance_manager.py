@@ -101,8 +101,8 @@ class TestAttendanceManager(TransactionCase):
         self.assertTrue(self.marc_employee.with_user(self.ryan).display_attendances)
         self.assertTrue(self.ryan_employee.with_user(self.ryan).display_attendances)
 
-    def test_attendance_officer_without_hr_access_can_open_employees_menu(self):
-        """The Attendance app's "Overview > Employees" menu must stay usable by a user
+    def test_attendance_officer_without_hr_access_can_open_employees(self):
+        """The employees view opened from attendances must stay usable by a user
         who only has Attendance Officer rights and no access to the Employees app
         (no hr.group_hr_user).
         """
@@ -112,13 +112,11 @@ class TestAttendanceManager(TransactionCase):
         )
         self.assertFalse(officer.has_group('hr.group_hr_user'))
 
-        menu = self.env.ref('hr_attendance.menu_hr_attendance_employee')
-        action = menu.action
-        action_res_model = action.with_user(officer).run().get('res_model')
+        action_res_model = self.env['hr.attendance'].with_user(officer).get_record_default_action().get('res_model')
 
         self.assertEqual(
             action_res_model, 'hr.employee.public',
-            "The Attendance 'Employees' menu must point to the public/safe employees action",
+            "Attendance officers must be redirected to the public/safe employees action",
         )
 
         kanban_fields = ['name', 'avatar_128', 'job_id', 'work_location_id', 'attendance_state']

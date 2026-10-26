@@ -3,12 +3,14 @@ import { registry } from "@web/core/registry";
 import { listView } from "@web/views/list/list_view";
 import { ListRenderer } from "@web/views/list/list_renderer";
 import { AttendanceActionHelper } from "@hr_attendance/views/attendance_helper_view";
+import { AttendanceDashboard } from "@hr_attendance/views/attendance_dashboard/attendance_dashboard";
 
 export class AttendanceListRenderer extends ListRenderer {
     static template = "hr_attendance.AttendanceListRenderer";
     static components = {
         ...AttendanceListRenderer.components,
         AttendanceActionHelper,
+        AttendanceDashboard,
     };
 
     /** @override **/
