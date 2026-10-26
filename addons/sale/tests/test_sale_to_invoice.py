@@ -85,6 +85,21 @@ class TestSaleToInvoice(TestSaleCommon):
         self._check_order_search(self.sale_order, [('invoice_ids', '=', False)], self.env['sale.order'])
         self._check_order_search(self.sale_order, [('invoice_ids', '!=', False)], self.sale_order)
 
+    def test_sales_receipt_smart_button(self):
+        """A sales receipt created from an order is linked to it."""
+        self.sale_order.action_confirm()
+        self.assertEqual(self.sale_order.receipt_count, 0)
+
+        receipt = self.sale_order._create_invoices()
+        receipt.move_type = 'out_receipt'
+        self.sale_order.invalidate_recordset(['invoice_ids', 'receipt_ids'])
+
+        self.assertEqual(self.sale_order.receipt_ids, receipt)
+        self.assertEqual(self.sale_order.receipt_count, 1)
+        self.assertFalse(self.sale_order.invoice_ids)
+        action = self.sale_order.action_view_receipt()
+        self.assertEqual(action['res_id'], receipt.id)
+
     def test_downpayment(self):
         """ Test invoice with a way of downpayment and check downpayment's SO line is created
             and also check a total amount of invoice is equal to a respective sale order's total amount

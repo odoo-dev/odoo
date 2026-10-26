@@ -239,6 +239,12 @@ class SaleOrder(models.Model):
         compute='_get_invoiced',
         search='_search_invoice_ids',
         copy=False)
+    receipt_count = fields.Integer(string="Receipt Count", compute='_get_invoiced')
+    receipt_ids = fields.Many2many(
+        comodel_name='account.move',
+        string="Sales Receipts",
+        compute='_get_invoiced',
+        copy=False)
     invoice_status = fields.Selection(
         selection=INVOICE_STATUS,
         string="Invoice Status",
@@ -557,9 +563,13 @@ class SaleOrder(models.Model):
         # existing invoices. This is necessary since such a refund is not
         # directly linked to the SO.
         for order in self:
-            invoices = order.order_line.invoice_lines.move_id.filtered(lambda r: r.move_type in ('out_invoice', 'out_refund'))
+            moves = order.order_line.invoice_lines.move_id
+            invoices = moves.filtered(lambda r: r.move_type in ('out_invoice', 'out_refund'))
+            receipts = moves.filtered(lambda r: r.move_type == 'out_receipt')
             order.invoice_ids = invoices
             order.invoice_count = len(invoices)
+            order.receipt_ids = receipts
+            order.receipt_count = len(receipts)
 
     def _search_invoice_ids(self, operator, value):
         if operator in expression.NEGATIVE_TERM_OPERATORS:
@@ -1428,6 +1438,10 @@ class SaleOrder(models.Model):
             })
         action['context'] = context
         return action
+
+    @api.readonly
+    def action_view_receipt(self):
+        return self.action_view_invoice(invoices=self.receipt_ids)
 
     def _get_invoice_grouping_keys(self):
         return ['company_id', 'partner_id', 'partner_shipping_id', 'currency_id', 'fiscal_position_id']

@@ -416,6 +416,13 @@
                         invisible="invoice_count == 0">
                         <field name="invoice_count" widget="statinfo" string="Invoices"/>
                     </button>
+                    <button name="action_view_receipt"
+                        type="object"
+                        class="oe_stat_button"
+                        icon="fa-pencil-square-o"
+                        invisible="receipt_count == 0">
+                        <field name="receipt_count" widget="statinfo" string="Receipts"/>
+                    </button>
                 </div>
                 <div class="badge rounded-pill text-bg-secondary float-end fs-6 border-0"
                     invisible="not locked">
