@@ -135,12 +135,31 @@ class PublicPageController(http.Controller):
             companyName=request.env.company.name,
             inPublicPage=True,
         )
+<<<<<<< 47310f1b01c5b22384ab7e96a5397c9c10791b1d
         if channel:
             store.add(channel, "_store_channel_fields")
             store.add_model_values(
                 "DiscussApp",
                 lambda res: res.one("thread", [], as_thread=True, value=channel),
             )
+||||||| 8e77c1add687ae89ec636ced60dfcf6ee2232dc5
+        store.add(channel, "_store_channel_fields")
+        store.add_model_values(
+            "DiscussApp",
+            lambda res: res.one("thread", [], as_thread=True, value=channel),
+        )
+=======
+        store.add(channel, "_store_channel_fields")
+        # sudo: res.users - can access the avatar card of the creator of an accessible channel
+        store.add(
+            channel,
+            lambda res: res.one("create_uid", "_store_avatar_card_fields", sudo=True),
+        )
+        store.add_model_values(
+            "DiscussApp",
+            lambda res: res.one("thread", [], as_thread=True, value=channel),
+        )
+>>>>>>> 5f91aa85dac7771614bae22eb96637bd3010277a
         return request.render(
             "mail.discuss_public_channel_template",
             {

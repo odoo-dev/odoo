@@ -31,8 +31,16 @@
             <div class="card-body p-2">
                 <div class="d-flex flex-column gap-2">
                     <t t-call="mail.WelcomePage.inviteHeader"/>
+<<<<<<< 47310f1b01c5b22384ab7e96a5397c9c10791b1d
                     <div class="bg-100 rounded-2 p-2 d-flex flex-column gap-3">
                         <t t-call="mail.WelcomePage.invitedBy"/>
+||||||| 8e77c1add687ae89ec636ced60dfcf6ee2232dc5
+                    <div class="bg-secondary-subtle rounded-2 p-2 d-flex flex-column gap-3">
+                        <t t-call="mail.WelcomePage.invitedBy"/>
+=======
+                    <div class="bg-secondary-subtle rounded-2 p-2 d-flex flex-column gap-3">
+                        <t t-if="!this.channel.create_uid.is_public" t-call="mail.WelcomePage.invitedBy"/>
+>>>>>>> 5f91aa85dac7771614bae22eb96637bd3010277a
                         <t t-call="mail.WelcomePage.meetingDetails"/>
                         <t t-call="mail.WelcomePage.joiningAs"/>
                     </div>
