@@ -329,6 +329,7 @@ test("Click on inset card should replace the inset and active stream together", 
     await contains("video[type='camera']:not(.o-inset)");
 });
 
+<<<<<<< e3f8e4ecbd9b96602c9d9a961d31d124d52cc8f5
 test("Inset card is hidden when sidebar is open", async () => {
     const pyEnv = await startServer();
     const channelId = pyEnv["discuss.channel"].create({ name: "General" });
@@ -347,6 +348,32 @@ test("Inset card is hidden when sidebar is open", async () => {
     await contains(".o-discuss-CallParticipantCard.o-inset");
 });
 
+||||||| 4dc980f818e641c485289d261f450328491616d6
+=======
+test("Inset card removed while being dragged", async () => {
+    mockGetMedia();
+    const pyEnv = await startServer();
+    const channelId = pyEnv["discuss.channel"].create({ name: "General" });
+    const env = await start();
+    const rtc = env.services["discuss.rtc"];
+    await openDiscuss(channelId);
+    await click("[title='Start Call']");
+    await click("[title='More']");
+    await click("[title='Share Screen']");
+    await click("[title='Turn camera on']");
+    await contains("video[type='camera'].o-inset");
+    await manuallyDispatchProgrammaticEvent(
+        queryFirst(".o-discuss-CallParticipantCard.o-inset"),
+        "mousedown"
+    );
+    await rtc.toggleVideo("screen", false);
+    await contains("video[type='camera']:not(.o-inset)");
+    await contains(".o-discuss-CallParticipantCard.o-inset", { count: 0 });
+    await manuallyDispatchProgrammaticEvent(document, "mousemove", { clientX: 10, clientY: 10 });
+    await manuallyDispatchProgrammaticEvent(document, "mouseup");
+});
+
+>>>>>>> 2425b80d23bb890c4df8bca9d8c82c7d9777c66e
 test("join/leave sounds are only played on main tab", async () => {
     const pyEnv = await startServer();
     const channelId = pyEnv["discuss.channel"].create({ name: "General" });
