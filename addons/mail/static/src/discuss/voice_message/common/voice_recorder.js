@@ -12,6 +12,7 @@ import {
 import { BaseAction } from "@mail/core/common/action_list";
 
 import { CallPermissionDeniedDialog } from "@mail/discuss/call/common/call_permission_denied_dialog";
+import { TalkingAudioBars } from "@mail/discuss/call/common/talking_audio_bars";
 import { loadLamejs } from "@mail/discuss/voice_message/common/voice_message_service";
 import { monitorAudio } from "@mail/utils/common/media_monitoring";
 import { _t } from "@web/core/l10n/translation";
@@ -21,7 +22,18 @@ import { Mp3Encoder } from "./mp3_encoder";
 
 /** @typedef {import("@mail/discuss/call/common/rtc_service").ContextOptions} ContextOptions */
 
+const VOLUME_HISTORY_SIZE = 16;
+
+/**
+ * @param {number} seconds
+ * @returns {string}
+ */
+function formatTime(seconds) {
+    return luxon.Duration.fromObject({ seconds }).toFormat("m:ss");
+}
+
 export class VoiceRecorder extends Component {
+    static components = { TalkingAudioBars };
     static template = "mail.VoiceRecorder";
 
     setup() {
@@ -32,6 +44,7 @@ export class VoiceRecorder extends Component {
             state: types.object({
                 cancelRecording: types.function([]),
                 elapsed: types.string(),
+                limit: types.string(),
                 limitWarning: types.boolean(),
                 onClick: types.function([]),
                 volumes: types.array(types.number()),
@@ -43,7 +56,7 @@ export class VoiceRecorder extends Component {
         return _t("Stop Recording");
     }
     get cancelTitle() {
-        return _t("Cancel");
+        return _t("Cancel (%(keyboard_command)s)", { keyboard_command: "Esc" });
     }
 }
 
@@ -90,8 +103,9 @@ export function useVoiceRecorder(params = {}, options = {}) {
         limitWarning: false,
         isActionPending: false,
         recording: false,
-        elapsed: "00 : 00",
-        volumes: new Array(3).fill(0),
+        elapsed: formatTime(0),
+        limit: formatTime(maxDuration),
+        volumes: new Array(VOLUME_HISTORY_SIZE).fill(0),
         onClick() {
             if (state.recording) {
                 return stopRecording();
@@ -156,7 +170,7 @@ export function useVoiceRecorder(params = {}, options = {}) {
                 return;
             }
         }
-        state.elapsed = "00 : 00";
+        state.elapsed = formatTime(0);
         state.recording = true;
         audioContext = new window.AudioContext();
 
@@ -171,12 +185,7 @@ export function useVoiceRecorder(params = {}, options = {}) {
                 return;
             }
             const elapsedSeconds = Math.floor((e.timeStamp - startTimeStamp) / 1000);
-            const second = elapsedSeconds % 60;
-            const minute = Math.floor(elapsedSeconds / 60);
-            state.elapsed =
-                (minute < 10 ? "0" + minute : minute) +
-                " : " +
-                (second < 10 ? "0" + second : second);
+            state.elapsed = formatTime(elapsedSeconds);
             if (elapsedSeconds > maxDuration - 5 && elapsedSeconds < maxDuration) {
                 state.limitWarning = true;
             }
@@ -271,7 +280,7 @@ export function useVoiceRecorder(params = {}, options = {}) {
 
         disconnectAudioMonitor?.();
         disconnectAudioMonitor = undefined;
-        state.volumes = new Array(3).fill(0);
+        state.volumes = new Array(VOLUME_HISTORY_SIZE).fill(0);
         startTimeStamp = false;
         microphone?.getTracks().forEach((track) => track.stop());
         microphone = null;

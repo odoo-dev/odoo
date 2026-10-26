@@ -1,15 +1,24 @@
 .o-mail-VoiceRecorder {
     --o-btn-circle-height: initial;
 
+    .o-mail-VoiceRecorder-dot {
+        animation: o-mail-VoiceRecorder-dotPulse 1.5s ease-in-out infinite;
+    }
+
     .o-mail-VoiceRecorder-elapsed {
         width: max-content;
         font-variant-numeric: tabular-nums;
     }
 
-    .o-mail-VoiceRecorder-bar {
-        width: 2px;
-        transform-origin: center;
-        will-change: transform;
-        transition: transform 0.05s linear;
+    .o-mail-VoiceRecorder-visualizer {
+        width: 6rem;
+
+        .o-discuss-TalkingAudioBars {
+            --TalkingAudioBars__audioBar-maxHeight: 1.25rem;
+        }
     }
+}
+
+@keyframes o-mail-VoiceRecorder-dotPulse {
+    50% { opacity: 0.3; }
 }

@@ -1,12 +1,26 @@
 .o-discuss-TalkingAudioBars {
+    --TalkingAudioBars__audioBar-size: 3px;
+    --TalkingAudioBars__audioBar-maxHeight: 11px;
+
     gap: 3px;
     height: 10px;
 
     .o-discuss-TalkingAudioBars-audioBar {
-        width: 3px;
-        height: 3px;
+        width: var(--TalkingAudioBars__audioBar-size);
+        height: var(--TalkingAudioBars__audioBar-size);
         border-radius: 50%;
         transform-origin: center;
+    }
+
+    .o-discuss-TalkingAudioBars-volumeBar {
+        height: calc(
+            var(--TalkingAudioBars__audioBar-size) +
+            (
+                var(--TalkingAudioBars__audioBar-maxHeight) -
+                var(--TalkingAudioBars__audioBar-size)
+            ) * var(--TalkingAudioBars__audioBar-level)
+        );
+        transition: height 0.05s linear;
     }
 
     &.o-isTalking {
@@ -28,8 +42,8 @@
 }
 
 @keyframes o-discuss-TalkingAudioBars-audioBarSpeak {
-    0%   { height: 3px; }
-    30%  { height: 11px; }
+    0%   { height: var(--TalkingAudioBars__audioBar-size); }
+    30%  { height: var(--TalkingAudioBars__audioBar-maxHeight); }
     60%  { height: 6px; }
-    100% { height: 3px; }
+    100% { height: var(--TalkingAudioBars__audioBar-size); }
 }

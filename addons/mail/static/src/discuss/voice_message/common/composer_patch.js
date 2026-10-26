@@ -22,13 +22,24 @@ patch(Composer.prototype, {
         return super.getActionComponent(params);
     },
     get isSendButtonDisabled() {
-        return this.voiceRecorder?.recording || super.isSendButtonDisabled;
+        if (this.voiceRecorder?.recording) {
+            return !this.state.active;
+        }
+        return super.isSendButtonDisabled;
     },
     onKeydown(ev) {
-        if (ev.key === "Enter" && this.voiceRecorder?.recording) {
+        if (ev.key === "Escape" && this.voiceRecorder?.recording) {
             ev.preventDefault();
+            ev.stopPropagation();
+            this.voiceRecorder.cancelRecording();
             return;
         }
         return super.onKeydown(ev);
+    },
+    async sendMessage() {
+        if (this.voiceRecorder?.recording) {
+            await this.voiceRecorder.onClick();
+        }
+        return super.sendMessage();
     },
 });

@@ -1,10 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
     <t t-name="discuss.TalkingAudioBars">
-        <div t-if="this.props.session" class="o-discuss-TalkingAudioBars d-flex align-items-center justify-content-center" t-att-class="{ 'o-isTalking': this.props.session.isActuallyTalking, 'o-pill rounded-pill o-p-2_5': this.props.asPill }">
-            <span class="o-discuss-TalkingAudioBars-audioBar bg-dark"/>
-            <span class="o-discuss-TalkingAudioBars-audioBar bg-dark"/>
-            <span class="o-discuss-TalkingAudioBars-audioBar bg-dark"/>
+        <div t-if="this.props.session or this.props.volumes" class="o-discuss-TalkingAudioBars d-flex align-items-center justify-content-center" t-att-class="{ 'o-isTalking': this.props.session?.isActuallyTalking, 'o-pill rounded-pill o-p-2_5': this.props.asPill }">
+            <t t-if="this.props.volumes">
+                <span t-foreach="this.props.volumes" t-as="volume" t-key="volume_index" class="o-discuss-TalkingAudioBars-audioBar o-discuss-TalkingAudioBars-volumeBar rounded-pill" t-att-class="this.props.barClass" t-attf-style="--TalkingAudioBars__audioBar-level: {{ this.barLevel(volume) }};"/>
+            </t>
+            <t t-else="">
+                <span class="o-discuss-TalkingAudioBars-audioBar" t-att-class="this.props.barClass"/>
+                <span class="o-discuss-TalkingAudioBars-audioBar" t-att-class="this.props.barClass"/>
+                <span class="o-discuss-TalkingAudioBars-audioBar" t-att-class="this.props.barClass"/>
+            </t>
         </div>
     </t>
 </templates>
