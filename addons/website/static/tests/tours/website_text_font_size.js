@@ -45,7 +45,18 @@ function getFontSizeTestSteps(fontSizeClass) {
             content: `[${fontSizeClass}] Click on the text block first paragraph (to auto select)`,
             trigger: ":iframe .s_text_block p",
             run: "click",
+        },
+        // The small font size must be fixed, not relative to its parent.
+        ...(fontSizeClass === "o_small-fs" ? [{
+            content: "Open the style dropdown to turn the paragraph into a heading",
+            trigger: "#style button",
+            run: "click",
         }, {
+            content: "Turn the paragraph into a Header 1",
+            trigger: "#heading1",
+            run: "click",
+        }] : []),
+        {
             content: `Open the font size dropdown to select ${fontSizeClass}`,
             trigger: "#font-size button",
             run: "click",
