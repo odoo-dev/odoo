@@ -65,6 +65,8 @@ class HrExpensePostWizard(models.TransientModel):
 
         # Add the company_paid ids to the redirect
         moves_ids = moves_sudo.ids + self.env.context.get('company_paid_move_ids', [])
+        # hook to add additional move ids to include in action
+        moves_ids += self.env.context.get('additional_move_ids', [])
 
         action = {
             'type': 'ir.actions.act_window',
