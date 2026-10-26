@@ -732,7 +732,12 @@ export class DeletePlugin extends Plugin {
             if (
                 sibling &&
                 !isBlock(sibling) &&
-                !(sibling.nodeType === Node.TEXT_NODE && !isVisibleTextNode(sibling))
+                !(
+                    sibling.nodeType === Node.TEXT_NODE &&
+                    !isVisibleTextNode(sibling) &&
+                    // A ZWNBSP right after a button is visible (see isVisibleChar).
+                    !(isZwnbsp(sibling) && isButton(sibling.previousSibling))
+                )
             ) {
                 return { node: sibling, type: "inline" };
             }

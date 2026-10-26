@@ -149,7 +149,8 @@ describe("Selection collapsed", () => {
                     '<p data-selection-placeholder=""><br></p>' +
                     '<div><p>uv</p><br><span class="style" data-oe-zws-empty-inline="">[]\u200B</span></div>' +
                     '<p data-selection-placeholder=""><br></p>',
-                contentAfter: '<div><p>uv</p><br><span class="style" data-oe-zws-empty-inline="">[]\u200B</span></div>',
+                contentAfter:
+                    '<div><p>uv</p><br><span class="style" data-oe-zws-empty-inline="">[]\u200B</span></div>',
             });
         });
 
@@ -239,7 +240,8 @@ describe("Selection collapsed", () => {
                 },
                 contentAfterEdit:
                     '<p>ab<span class="style" data-oe-zws-empty-inline="">[]\u200B</span>ef</p>',
-                contentAfter: '<p>ab<span class="style" data-oe-zws-empty-inline="">[]\u200B</span>ef</p>',
+                contentAfter:
+                    '<p>ab<span class="style" data-oe-zws-empty-inline="">[]\u200B</span>ef</p>',
             });
         });
 
@@ -586,6 +588,22 @@ describe("Selection collapsed", () => {
                 contentBefore: `<p>a<a class="btn" href="http://test.test/">[]</a></p>`,
                 stepFunction: deleteBackward,
                 contentAfter: `<p>a[]</p>`,
+            });
+        });
+
+        test("should delete an empty paragraph after a button in an editable root", async () => {
+            await testEditor({
+                contentBefore: `<div contenteditable="false"><div contenteditable="true"><a href="#" class="btn btn-primary">ab</a><p>[]<br></p></div></div>`,
+                stepFunction: deleteBackward,
+                contentAfter: `<div contenteditable="false"><div contenteditable="true"><a href="#" class="btn btn-primary">ab</a>[]</div></div>`,
+            });
+        });
+
+        test("should delete an empty paragraph after a button surrounded by whitespace", async () => {
+            await testEditor({
+                contentBefore: `<div contenteditable="false"><div contenteditable="true">\n<a href="#" class="btn btn-primary">ab</a>\n<p>[]<br></p>\n</div></div>`,
+                stepFunction: deleteBackward,
+                contentAfter: `<div contenteditable="false"><div contenteditable="true">\n<a href="#" class="btn btn-primary">ab</a>[]<br>\n</div></div>`,
             });
         });
 
@@ -1729,7 +1747,8 @@ describe("Selection not collapsed", () => {
                 '<p data-selection-placeholder=""><br></p>' +
                 '<div><p>ab <span class="style" data-oe-zws-empty-inline="">[]\u200B</span> d</p></div>' +
                 '<p data-selection-placeholder=""><br></p>',
-            contentAfter: '<div><p>ab <span class="style" data-oe-zws-empty-inline="">[]\u200B</span> d</p></div>',
+            contentAfter:
+                '<div><p>ab <span class="style" data-oe-zws-empty-inline="">[]\u200B</span> d</p></div>',
         });
     });
 
@@ -2290,7 +2309,8 @@ describe("Selection not collapsed", () => {
         await testEditor({
             contentBefore: '<p>ab<b class="oe_unremovable">[cd]</b>ef</p>',
             stepFunction: deleteBackward,
-            contentAfter: '<p>ab<b class="oe_unremovable" data-oe-zws-empty-inline="">[]\u200B</b>ef</p>',
+            contentAfter:
+                '<p>ab<b class="oe_unremovable" data-oe-zws-empty-inline="">[]\u200B</b>ef</p>',
         });
     });
 
@@ -2365,7 +2385,8 @@ describe("Selection not collapsed", () => {
         await testEditor({
             contentBefore: '<p>a<span class="style-class">[bcde]</span>f</p>',
             stepFunction: deleteBackward,
-            contentAfter: '<p>a<span class="style-class" data-oe-zws-empty-inline="">[]\u200B</span>f</p>',
+            contentAfter:
+                '<p>a<span class="style-class" data-oe-zws-empty-inline="">[]\u200B</span>f</p>',
         });
     });
 
