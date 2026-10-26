@@ -74,7 +74,7 @@ registry.category("web_tour.tours").add("blog_tags", {
         },
         {
             content: "Click on 'Tour Tag 1'",
-            trigger: ":iframe a[href^='/blog/tag/tour-tag-1-'].o_post_link_js_loaded",
+            trigger: ":iframe a[href^='#nc=/blog/tag/tour-tag-1-']",
             run: "click",
         },
         {

@@ -572,7 +572,7 @@
                     <a
                         role="menuitem"
                         rel="noindex,nofollow"
-                        t-att-href="keep(order=sortby[0])"
+                        t-att-href="nocrawl(keep(order=sortby[0]))"
                         t-attf-class="dropdown-item {{_is_active and 'active'}}"
                     >
                         <span t-out="sortby[1]"/>
@@ -972,11 +972,11 @@
                                 <a t-foreach="website_sale_sortable" t-as="sortby"
                                    role="menuitem"
                                    rel="noindex,nofollow"
-                                   t-att-href="keep(order=sortby[0])"
+                                   t-att-href="nocrawl(keep(order=sortby[0]))"
                                    class="list-group-item border-0 ps-0 pb-0">
                                     <div class="form-check d-inline-block">
                                         <input type="radio"
-                                               t-attf-onclick="location.href='#{keep(order=sortby[0])}';"
+                                               t-attf-onclick="location.href='#{nocrawl(keep(order=sortby[0]))}';"
                                                class="form-check-input o_not_editable"
                                                name="wsale_sortby_radios_offcanvas"
                                                t-att-checked="isSortingBy and isSortingBy == sortby[1]">
@@ -1589,7 +1589,7 @@
         <t t-set="inactive_pill_class" t-value="'btn border'"/>
         <a
             t-if="show_on_sale_filter"
-            t-att-href="keep(on_sale=0 if on_sale_active else 1)"
+            t-att-href="nocrawl(keep(on_sale=0 if on_sale_active else 1))"
             t-att-class="'o_wsale_ribbon_filter ' + (active_pill_class if on_sale_active else inactive_pill_class)"
             aria-label="Filter by on sale products"
         >
@@ -1597,7 +1597,7 @@
         </a>
         <a
             t-if="show_in_stock_filter"
-            t-att-href="keep(in_stock=0 if in_stock_active else 1)"
+            t-att-href="nocrawl(keep(in_stock=0 if in_stock_active else 1))"
             t-att-class="'o_wsale_ribbon_filter ' + (active_pill_class if in_stock_active else inactive_pill_class)"
             aria-label="Filter by in stock products"
         >

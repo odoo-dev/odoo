@@ -345,9 +345,8 @@ according to the enabled options.
 <template id="post_tags">
     <div t-if="len(blog_post.tag_ids)" t-attf-class="d-flex flex-wrap gap-1 #{_tags_classes}">
         <t t-foreach="blog_post.tag_ids" t-as="one_tag">
-            <a t-attf-href="#{blog_url(tag=tags_list(active_tag_ids, one_tag.id))}"
-               t-attf-class="badge o_tag o_color_#{one_tag.color} post_link"
-               t-att-rel="len(active_tag_ids) and 'nofollow'"
+            <a t-att-href="nocrawl(blog_url(tag=tags_list(active_tag_ids, one_tag.id)))"
+               t-attf-class="badge o_tag o_color_#{one_tag.color}"
                t-out="one_tag.name"/>
         </t>
     </div>

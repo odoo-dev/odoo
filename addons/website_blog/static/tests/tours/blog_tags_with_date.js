@@ -11,7 +11,7 @@ registerWebsitePreviewTour("blog_tags_with_date", {}, () => [
     },
     {
         content: "Click on 'Tour Tag 1'",
-        trigger: ":iframe #o_wblog_sidebar a.o_post_link_js_loaded:contains('Tour Tag 1')",
+        trigger: ":iframe #o_wblog_sidebar a[href^='#nc=']:contains('Tour Tag 1')",
         run: "click",
     },
     {
@@ -20,7 +20,7 @@ registerWebsitePreviewTour("blog_tags_with_date", {}, () => [
     },
     {
         content: "Click on 'Tour Tag 2'",
-        trigger: ":iframe #o_wblog_sidebar a.o_post_link_js_loaded:contains('Tour Tag 2')",
+        trigger: ":iframe #o_wblog_sidebar a[href^='#nc=']:contains('Tour Tag 2')",
         run: "click",
     },
     {
@@ -50,7 +50,8 @@ registerWebsitePreviewTour("blog_tags_with_date", {}, () => [
     },
     {
         content: "Remove the date filter",
-        trigger: ":iframe #o_wblog_posts_loop span:has(i[data-icon='calendar_today']) a.o_post_link_js_loaded",
+        trigger:
+            ":iframe #o_wblog_posts_loop span:has(i[data-icon='calendar_today']) a.o_post_link_js_loaded",
         run: "click",
     },
     {

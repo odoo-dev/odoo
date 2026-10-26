@@ -25,6 +25,15 @@ class IrQweb(models.AbstractModel):
         'img': 'src',
     }
 
+    def _prepare_environment(self, values):
+        irQweb = super()._prepare_environment(values)
+        # Wrap URLs built from the current filters (2+ tags, sort, ...) so that
+        # crawlers can't explore every combination. They ignore the fragment,
+        # and website/static/src/core/nocrawl_link.js restores the real href
+        # as soon as a human interacts with the link.
+        values['nocrawl'] = lambda url: '#nc=' + self.env['ir.http']._url_for(url)
+        return irQweb
+
     def _compile_root(self, element, compile_context):
         # Removes the attributes used by the "/website/snippet/filter_templates"
         # controller and used only to be filtered without using irQweb rendering

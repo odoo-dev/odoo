@@ -213,13 +213,6 @@ class WebsiteBlog(http.Controller):
 
         date_begin, date_end = opt.get('date_begin'), opt.get('date_end')
 
-        if tag and request.httprequest.method == 'GET':
-            # redirect get tag-1,tag-2 -> get tag-1
-            tags = tag.split(',')
-            if len(tags) > 1:
-                url = QueryURL('' if blog else '/blog', ['blog', 'tag'], blog=blog, tag=tags[0], date_begin=date_begin, date_end=date_end, search=search)()
-                return request.redirect(url, code=302)
-
         values = self._prepare_blog_values(blogs=blogs, blog=blog, tags=tag, page=page, search=search, **opt)
 
         # in case of a redirection need by `_prepare_blog_values` we follow it
