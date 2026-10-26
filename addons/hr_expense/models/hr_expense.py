@@ -680,12 +680,11 @@ class HrExpense(models.Model):
     def _compute_account_id(self):
         for _expense in self:
             expense = _expense.with_company(_expense.company_id)
-            if not expense.product_id:
-                expense.account_id = _expense.company_id.expense_account_id
-                continue
-            account = expense.product_id.product_tmpl_id._get_product_accounts()['expense']
-            if account:
-                expense.account_id = account
+            account = False
+            if expense.product_id:
+                account = expense.product_id.product_tmpl_id._get_product_accounts()['expense']
+
+            expense.account_id = account or expense.company_id.expense_account_id
 
     @api.depends('company_id')
     def _compute_employee_id(self):
@@ -1581,28 +1580,27 @@ class HrExpense(models.Model):
         """
         self = self.with_context(clean_context(self.env.context), project_id=False)  # noqa: PLW0642  # remove default_* and project_id
         company_account_expenses = self.filtered(lambda expense: expense.payment_mode == 'company_account')
-        moves_sudo = self.env['account.move'].sudo()
+        moves = self.env['account.move']
 
         if company_account_expenses:
             move_vals_list, payment_vals_list = zip(*[expense._prepare_payments_vals() for expense in company_account_expenses])
 
-            payment_moves_sudo = self.env['account.move'].sudo().create(move_vals_list)
-            for payment_vals, move in zip(payment_vals_list, payment_moves_sudo):
+            payment_moves = self.env['account.move'].create(move_vals_list)
+            for payment_vals, move in zip(payment_vals_list, payment_moves):
                 payment_vals['move_id'] = move.id
 
             payments_sudo = self.env['account.payment'].sudo().create(payment_vals_list)
-            for payment_sudo, move_sudo in zip(payments_sudo, payment_moves_sudo):
-                move_sudo.update({
+            for payment_sudo, move in zip(payments_sudo, payment_moves):
+                move.update({
                     'origin_payment_id': payment_sudo.id,
                     # We need to put the journal_id because editing origin_payment_id triggers a re-computation chain
                     # that voids the company_currency_id of the lines
-                    'journal_id': move_sudo.journal_id.id,
+                    'journal_id': move.journal_id.id,
                 })
 
-            moves_sudo |= payment_moves_sudo
+            moves |= payment_moves
 
-        # returning the move with the superuser flag set back as it was at the origin of the call
-        return moves_sudo.sudo(self.env.su)
+        return moves
 
     def _prepare_receipts_vals(self):
         return_vals = []
