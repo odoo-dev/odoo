@@ -331,6 +331,10 @@ class TestMailComposerRendering(TestMailComposer):
 class TestMailComposerUI(MailCommon, HttpCase):
 
     def test_mail_composer_test_tour(self):
+        role_employee, role_other = self.env['res.role'].create([
+            {'name': 'Employee Role', 'user_ids': [(4, self.user_employee.id)]},
+            {'name': 'Other Role'},
+        ])
         template_data = [
             {
                 'name': 'Test template',
@@ -339,6 +343,14 @@ class TestMailComposerUI(MailCommon, HttpCase):
             {
                 'name': 'Test template for admin',
                 'user_id': self.env.ref('base.user_admin').id,
+            },
+            {
+                'name': 'Test template for my role',
+                'role_ids': [(4, role_employee.id)],
+            },
+            {
+                'name': 'Test template for other role',
+                'role_ids': [(4, role_other.id)],
             },
         ]
         self.env['mail.template'].create([
