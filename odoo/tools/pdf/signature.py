@@ -580,7 +580,7 @@ class PdfSigner:
 
         return self.fill_signature_placeholder(prepared, cms_content_info.dump())
 
-    def write_signature_placeholder(self, sig_overlay_pdf: PdfFileReader | None = None, field_name: str | None = None, appearance_origin: tuple[float, float] | None = None) -> PreparedSignature | None:
+    def write_signature_placeholder(self, sig_overlay_pdf: PdfFileReader | None = None, field_name: str | None = None, appearance_origin: tuple[float, float] | None = None, *, document_timestamp: bool = False) -> PreparedSignature | None:
         """ Write the signature increment and compute the digest to sign.
 
         Prepares the signature field, appends the incremental update,
@@ -611,11 +611,13 @@ class PdfSigner:
         incremented_objects = {}
 
         # 1. Normalize PDF annotations in case it wasn't signed before
-        self._normalize_unsigned_pdf_annotations()
+        if not document_timestamp:
+            self._normalize_unsigned_pdf_annotations()
 
         # 2. Prepare the Signature Field Structure
         contents_placeholder, byte_range_placeholder = self._setup_form(
             self.pdf_reader, field_name, incremented_objects, sig_overlay_pdf, appearance_origin,
+            document_timestamp=document_timestamp,
         )
 
         # 3. Write the Incremental Updated PDF, the placeholders record their own offsets while serializing
@@ -626,6 +628,10 @@ class PdfSigner:
         return self._fill_byte_range_and_hash(
             pdf_merger.get_output_stream_value(), contents_placeholder, byte_range_placeholder,
         )
+
+    def write_document_timestamp_placeholder(self, field_name: str | None = None) -> PreparedSignature | None:
+        """Reserve an invisible RFC 3161 document timestamp without signing locally."""
+        return self.write_signature_placeholder(field_name=field_name, document_timestamp=True)
 
     @staticmethod
     def fill_signature_placeholder(prepared: PreparedSignature, cms_der: bytes) -> bytes:
@@ -669,6 +675,8 @@ class PdfSigner:
             incremented_objects: dict[tuple[int, int], Any],
             sig_overlay_pdf: PdfFileReader | None = None,
             appearance_origin: tuple[float, float] | None = None,
+            *,
+            document_timestamp: bool = False,
     ) -> tuple[_SignatureContentsPlaceholder, _ByteRangePlaceholder]:
         """ Configure the PDF ``/AcroForm`` and create the required Signature Field dictionaries.
 
@@ -792,13 +800,19 @@ class PdfSigner:
 
         signature_object = DictionaryObject()
         signature_object.update({
-            NameObject("/Type"): NameObject("/Sig"),
+            NameObject("/Type"): NameObject("/DocTimeStamp" if document_timestamp else "/Sig"),
             NameObject("/Contents"): contents_placeholder,
             NameObject("/ByteRange"): byte_range_placeholder,
             NameObject("/Filter"): NameObject("/Adobe.PPKLite"),
-            NameObject("/SubFilter"): NameObject("/ETSI.CAdES.detached"),
-            NameObject("/M"): create_string_object(self.signing_time.strftime("D:%Y%m%d%H%M%SZ")),
+            NameObject("/SubFilter"): NameObject("/ETSI.RFC3161" if document_timestamp else "/ETSI.CAdES.detached"),
         })
+        if document_timestamp:
+            signature_object[NameObject("/V")] = NumberObject(0)
+            # Document timestamps are part of ISO 32000-2. Declare the effective
+            # version in the new catalog without rewriting the original header.
+            catalog[NameObject("/Version")] = NameObject("/2.0")
+        else:
+            signature_object[NameObject("/M")] = create_string_object(self.signing_time.strftime("D:%Y%m%d%H%M%SZ"))
 
         # Register objects with the temporary wrapper to get references
         signature_annotation_ref = indirect_obj_wrapper.add_object(signature_annotation)
