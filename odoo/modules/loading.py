@@ -5,6 +5,7 @@
 """
 from __future__ import annotations
 
+import contextlib
 import datetime
 import itertools
 import logging
@@ -40,6 +41,13 @@ _logger = logging.getLogger(__name__)
 _FORCED_MODULES = ('base',)
 
 
+def _probe_timed(kind, name, min_wall=0.0):
+    if not tools.config['test_enable']:
+        return contextlib.nullcontext()
+    from odoo.tests import perf_probe  # noqa: PLC0415
+    return perf_probe.timed(kind, name, min_wall)
+
+
 def load_data(env: Environment, idref: IdRef, mode: LoadMode, kind: LoadKind, package: ModuleNode) -> bool:
     """
     noupdate is False, unless it is demo data
@@ -60,8 +68,9 @@ def load_data(env: Environment, idref: IdRef, mode: LoadMode, kind: LoadKind, pa
         files.add(filename)
 
         _logger.info("loading %s/%s", package.name, filename)
-        convert_file(env, package.name, filename, idref, mode, noupdate=kind == 'demo')
-        env.cr.flush()  # run precommit hooks
+        with _probe_timed(f'load_{kind}', f'{package.name}/{filename}', min_wall=1.0):
+            convert_file(env, package.name, filename, idref, mode, noupdate=kind == 'demo')
+            env.cr.flush()  # run precommit hooks
 
     return bool(files)
 
@@ -156,6 +165,8 @@ def load_module_graph(
             continue
 
         module_t0 = time.time()
+        module_probe = _probe_timed('module_load', module_name, min_wall=2.0)
+        module_probe.__enter__()
         module_cursor_query_count = env.cr.sql_log_count
         module_extra_query_count = odoo.sql_db.sql_counter
 
@@ -303,6 +314,7 @@ def load_module_graph(
             extras.append(f'+{test_queries} test')
         if extra_queries:
             extras.append(f'+{extra_queries} other')
+        module_probe.__exit__(None, None, None)
         _logger.log(
             module_log_level, "Module %s loaded in %.2fs%s, %s queries%s",
             module_name, time.time() - module_t0,
