@@ -1,7 +1,8 @@
+import { HotkeyPlugin } from "@web/core/hotkeys/hotkey_plugin";
 import { registry } from "@web/core/registry";
 import { CommandPalette } from "./command_palette";
 
-import { Component, EventBus, t, useProps } from "@odoo/owl";
+import { Component, EventBus, t, usePlugin, useProps } from "@odoo/owl";
 
 /**
  * @typedef {import("./command_palette").CommandPaletteConfig} CommandPaletteConfig
@@ -56,8 +57,9 @@ class DefaultFooter extends Component {
 }
 
 export const commandService = {
-    dependencies: ["dialog", "hotkey", "ui"],
-    start(env, { dialog, hotkey: hotkeyService, ui }) {
+    dependencies: ["dialog", "ui"],
+    start(env, { dialog, ui }) {
+        const hotkeyService = usePlugin(HotkeyPlugin);
         /** @type {Map<CommandRegistration>} */
         const registeredCommands = new Map();
         let nextToken = 0;

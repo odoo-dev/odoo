@@ -1,14 +1,25 @@
 import { onWillRender } from "@web/owl2/utils";
-import { Component, onMounted, onWillUnmount, useProps, proxy, signal, t, useApp } from "@odoo/owl";
+import {
+    Component,
+    onMounted,
+    onWillUnmount,
+    usePlugin,
+    useProps,
+    proxy,
+    signal,
+    t,
+    useApp,
+} from "@odoo/owl";
 import { loadBundle, loadCSS } from "@web/core/assets";
 import { isBrowserFirefox } from "@web/core/browser/feature_detection";
 import { Dialog } from "@web/core/dialog/dialog";
+import { HotkeyPlugin } from "@web/core/hotkeys/hotkey_plugin";
 import { getActiveHotkey } from "@web/core/hotkeys/hotkey_utils";
 import { localization } from "@web/core/l10n/localization";
 import { _t } from "@web/core/l10n/translation";
 import { getFirstAndLastTabableElements } from "@web/core/ui/ui_utils";
 import { cookie } from "@web/core/browser/cookie";
-import { useAutofocus, useService } from "@web/core/utils/hooks";
+import { useAutofocus } from "@web/core/utils/hooks";
 import { SnippetViewer } from "./snippet_viewer";
 
 /**
@@ -34,7 +45,7 @@ export class AddSnippetDialog extends Component {
 
     setup() {
         useAutofocus({ ref: this.autofocusRef });
-        this.hotkeyService = useService("hotkey");
+        this.hotkeyService = usePlugin(HotkeyPlugin);
         this.modalRef = signal.ref();
         this.state = proxy({
             search: "",

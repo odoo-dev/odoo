@@ -20,6 +20,7 @@ import { location } from "@web/core/browser/browser";
 import { isBrowserChrome, isBrowserMicrosoftEdge } from "@web/core/browser/feature_detection";
 import { router } from "@web/core/browser/router";
 import { DebugModePlugin } from "@web/core/debug_mode_plugin";
+import { HotkeyPlugin } from "@web/core/hotkeys/hotkey_plugin";
 import { getActiveHotkey } from "@web/core/hotkeys/hotkey_utils";
 import { _t } from "@web/core/l10n/translation";
 import { LazyComponent } from "@web/core/lazy_component";
@@ -77,7 +78,7 @@ export class WebsiteBuilderClientAction extends Component {
         this.websiteService = useService("website");
         this.ui = useService("ui");
         this.title = useService("title");
-        this.hotkeyService = useService("hotkey");
+        this.hotkeyService = usePlugin(HotkeyPlugin);
         this.websiteService.websiteRootInstance = undefined;
         this.iframeFallbackUrl = "/website/iframefallback";
         this.iframefallback = signal.ref();

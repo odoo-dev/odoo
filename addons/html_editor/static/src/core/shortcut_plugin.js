@@ -1,5 +1,7 @@
+import { usePlugin } from "@odoo/owl";
 import { Plugin, isValidTargetForDomListener } from "../plugin";
 import { leftLeafOnlyNotBlockPath } from "@html_editor/utils/dom_state";
+import { HotkeyPlugin } from "@web/core/hotkeys/hotkey_plugin";
 import { omit } from "@web/core/utils/objects";
 import { escapeRegExp } from "@web/core/utils/strings";
 
@@ -37,6 +39,7 @@ import { escapeRegExp } from "@web/core/utils/strings";
 export class ShortCutPlugin extends Plugin {
     static id = "shortcut";
     static dependencies = ["userCommand", "selection", "split", "dom", "history", "delete"];
+    hotkey = usePlugin(HotkeyPlugin);
 
     /** @type {import("plugins").EditorResources} */
     resources = {
@@ -70,17 +73,12 @@ export class ShortCutPlugin extends Plugin {
     };
 
     setup() {
-        const hotkeyService = this.services.hotkey;
-        if (!hotkeyService) {
-            throw new Error("ShorcutPlugin needs hotkey service to properly work");
-        }
-
         // We override the command palette shortcut to open a palette with an
         // onClose callback to focus the editor and keep the selection without
         // scrolling. We also pass the editable as the area option for this
         // hotkey override, so it only applies when calling the command palette
         // from the editor.
-        this.removeEditorCommandPalette = this.services.hotkey.add(
+        this.removeEditorCommandPalette = this.hotkey.add(
             "control+k",
             () => {
                 this.services.command.openMainPalette({}, () => {
@@ -94,7 +92,7 @@ export class ShortCutPlugin extends Plugin {
             }
         );
         if (document !== this.document) {
-            hotkeyService.registerIframe({ contentWindow: this.window });
+            this.hotkey.registerIframe({ contentWindow: this.window });
         }
         for (const shortcut of this.getResource("shortcuts")) {
             const command = this.dependencies.userCommand.getCommand(shortcut.commandId);
@@ -127,7 +125,7 @@ export class ShortCutPlugin extends Plugin {
 
     addShortcut(hotkey, action, { isAvailable, global }) {
         this._cleanups.push(
-            this.services.hotkey.add(hotkey, action, {
+            this.hotkey.add(hotkey, action, {
                 bypassEditableProtection: true,
                 allowRepeat: true,
                 isAvailable: (target) => {

@@ -3,8 +3,18 @@ import { onExternalClick } from "@mail/utils/common/hooks";
 import { useAncestors } from "@mail/core/common/ancestor_plugin";
 import { markEventHandled, isEventHandled } from "@web/core/utils/misc";
 
-import { Component, proxy, signal, t, useListener, useOnChange, useProps } from "@odoo/owl";
+import {
+    Component,
+    proxy,
+    signal,
+    t,
+    useListener,
+    useOnChange,
+    usePlugin,
+    useProps,
+} from "@odoo/owl";
 
+import { HotkeyPlugin } from "@web/core/hotkeys/hotkey_plugin";
 import { getActiveHotkey } from "@web/core/hotkeys/hotkey_utils";
 import { usePosition } from "@web/core/position/position_hook";
 import { useService } from "@web/core/utils/hooks";
@@ -77,7 +87,7 @@ export class NavigableList extends Component {
             open: false,
             showLoading: false,
         });
-        this.hotkey = useService("hotkey");
+        this.hotkey = usePlugin(HotkeyPlugin);
         this.hotkeysToRemove = [];
         useListener(this.env.pipWindow || window, "keydown", (ev) => this.onKeydown(ev), true);
         onExternalClick(this.rootRef, async (ev) => {

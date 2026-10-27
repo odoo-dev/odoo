@@ -1,3 +1,4 @@
+import { HotkeyPlugin } from "@web/core/hotkeys/hotkey_plugin";
 import { OverlayPlugin } from "@web/core/overlay/overlay_plugin";
 import { Component, types, useApp, usePlugin, useProps, xml } from "@odoo/owl";
 import { useOwnDebugContext } from "@web/core/debug/debug_context";
@@ -31,8 +32,8 @@ export const mailPopoutService = {
      */
     async addAssets(window) {},
 
-    dependencies: ["hotkey"],
-    start(env, { hotkey }) {
+    start(env) {
+        const hotkey = usePlugin(HotkeyPlugin);
         /**
          * @type {Map<any, {
          *  externalWindow: Window | null;

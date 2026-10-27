@@ -1,4 +1,3 @@
-import { registry } from "../registry";
 import { browser } from "../browser/browser";
 import { getVisibleElements } from "../utils/ui";
 import { onWillDestroy, Plugin, usePlugin } from "@odoo/owl";
@@ -447,19 +446,3 @@ export class HotkeyPlugin extends Plugin {
 }
 
 services.add(HotkeyPlugin);
-
-/**
- * -----------------------------------------------------------------------------
- * @todo owl3 migration
- * temporary - to remove when all use of the hotkey service are removed
- * -----------------------------------------------------------------------------
- */
-export const hotkeyService = {
-    dependencies: ["ui"],
-    start() {
-        return usePlugin(HotkeyPlugin);
-    },
-};
-
-registry.category("services").add("hotkey", hotkeyService);
-/** @typedef {ReturnType<hotkeyService["start"]>} HotkeyService */

@@ -1,4 +1,6 @@
+import { usePlugin } from "@odoo/owl";
 import { Plugin } from "@html_editor/plugin";
+import { HotkeyPlugin } from "@web/core/hotkeys/hotkey_plugin";
 
 /**
  * Registers the undo/redo shortcuts, as ShortCutPlugin is not part of the text plugin set.
@@ -10,6 +12,7 @@ import { Plugin } from "@html_editor/plugin";
 export class UndoRedoShortcutPlugin extends Plugin {
     static id = "undoRedoShortcut";
     static dependencies = ["history"];
+    hotkey = usePlugin(HotkeyPlugin);
 
     setup() {
         const { undo, redo } = this.dependencies.history;
@@ -20,7 +23,7 @@ export class UndoRedoShortcutPlugin extends Plugin {
 
     addShortcut(hotkey, run) {
         this._cleanups.push(
-            this.services.hotkey.add(hotkey, run, {
+            this.hotkey.add(hotkey, run, {
                 // the editable is not a valid hotkey target by default
                 bypassEditableProtection: true,
                 allowRepeat: true,

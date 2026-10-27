@@ -1,3 +1,4 @@
+import { HotkeyPlugin } from "@web/core/hotkeys/hotkey_plugin";
 import { jsToPyLocale } from "@web/core/l10n/utils";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
@@ -6,7 +7,7 @@ import { isVisible } from "@web/core/utils/ui";
 
 import { FullscreenIndication } from "../components/fullscreen_indication/fullscreen_indication";
 import { WebsiteLoader } from "../components/website_loader/website_loader";
-import { EventBus, proxy } from "@odoo/owl";
+import { EventBus, proxy, usePlugin } from "@odoo/owl";
 
 const websiteSystrayRegistry = registry.category("website_systray");
 
@@ -25,8 +26,9 @@ export const unslugHtmlDataObject = (repr) => {
 const ANONYMOUS_PROCESS_ID = "ANONYMOUS_PROCESS_ID";
 
 export const websiteService = {
-    dependencies: ["orm", "action", "hotkey"],
-    start(env, { orm, action, hotkey }) {
+    dependencies: ["orm", "action"],
+    start(env, { orm, action }) {
+        const hotkey = usePlugin(HotkeyPlugin);
         let websites = [];
         let currentWebsiteId;
         const currentWebsiteIdList = [];

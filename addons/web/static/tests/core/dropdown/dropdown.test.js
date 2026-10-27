@@ -19,9 +19,9 @@ import {
     assignTestEnv,
     contains,
     defineParams,
+    getService,
     isSmall,
     makeTestApp,
-    mockService,
     mountWithCleanup,
     patchWithCleanup,
     registerTemplate,
@@ -32,6 +32,7 @@ import { DropdownPopover } from "@web/core/dropdown/_behaviours/dropdown_popover
 import { CheckboxItem } from "@web/core/dropdown/checkbox_item";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
+import { HotkeyPlugin } from "@web/core/hotkeys/hotkey_plugin";
 import { useActiveElement } from "@web/core/ui/ui_plugin";
 import { useService } from "@web/core/utils/hooks";
 
@@ -1557,7 +1558,7 @@ test("multi-level dropdown: unsubscribe all keynav when root destroyed", async (
     }
 
     await makeTestApp();
-    mockService("hotkey", {
+    patchWithCleanup(getService(HotkeyPlugin), {
         add(key) {
             const remove = super.add(...arguments);
             registeredHotkeys.add(key);
