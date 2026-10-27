@@ -1,0 +1,30 @@
+.o_attendance_dashboard_card {
+    min-width: 7rem;
+
+    $attendance-dashboard-colors: (
+        orange: ($orange-100, $orange-200, $orange-700, $orange-800),
+        red: ($red-100, $red-200, $red-700, $red-800),
+        purple: ($purple-100, $purple-200, $purple-700, $purple-800),
+        cyan: ($cyan-100, $cyan-200, $cyan-700, $cyan-800),
+        yellow: ($yellow-100, $yellow-200, $yellow-700, $yellow-800),
+        blue: ($blue-100, $blue-200, $blue-700, $blue-800),
+    );
+
+    @each $name, $shades in $attendance-dashboard-colors {
+        &.o_attendance_dashboard_card_#{$name} {
+            --btn-bg: #{nth($shades, 1)};
+            --btn-hover-bg: #{nth($shades, 2)};
+            --btn-active-bg: #{nth($shades, 2)};
+            --btn-active-border-color: transparent;
+
+            .o_attendance_dashboard_card_count {
+                color: #{nth($shades, 3)};
+            }
+
+            &.active {
+                outline: var(--border-width) var(--border-style) #{nth($shades, 4)};
+                outline-offset: var(--border-width);
+            }
+        }
+    }
+}

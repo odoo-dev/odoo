@@ -79,6 +79,11 @@
                 <field name="check_out"/>
                 <field name="source_stale"/>
                 <field name="time_rule_id"/>
+                <field name="in_mode"/>
+                <field name="out_mode"/>
+                <field name="is_late_check_in"/>
+                <field name="is_early_check_out"/>
+                <field name="has_overtime"/>
                 <templates>
                     <t t-name="card">
                         <div class="d-flex justify-content-between align-items-start gap-2 mb-1">
@@ -88,10 +93,30 @@
                                    decoration-info="state == 'draft'"
                                    decoration-muted="state == 'refused'"/>
                         </div>
+                        <t t-set="check_out" t-value="record.check_out.raw_value"/>
                         <div class="d-flex align-items-center gap-1">
-                            <field name="check_in" widget="daterange" options="{'end_date_field': 'check_out'}" readonly="1"/>
-                            <span t-if="!record.check_out.raw_value" class="text-muted">- In progress</span>
-                            <field t-if="record.check_out.raw_value" name="worked_hours" widget="float_time" class="ms-auto fw-bold"/>
+                            <span class="px-1 rounded"
+                                  t-att-class="{
+                                      'bg-danger-subtle text-danger': record.is_late_check_in.raw_value or record.in_mode.raw_value === 'manual',
+                                      'fw-bold': record.in_mode.raw_value === 'manual',
+                                  }">
+                                <field name="check_in"/>
+                            </span>
+                            <span>-</span>
+                            <span t-if="check_out" class="px-1 rounded"
+                                  t-att-class="{
+                                      'bg-danger-subtle text-danger': record.is_early_check_out.raw_value or ['manual', 'auto_check_out'].includes(record.out_mode.raw_value),
+                                      'fw-bold': record.out_mode.raw_value === 'manual',
+                                  }">
+                                <t t-if="check_out.hasSame(record.check_in.raw_value, 'day')"
+                                   t-out="check_out.toLocaleString({hour: 'numeric', minute: '2-digit'})"/>
+                                <field t-if="!check_out.hasSame(record.check_in.raw_value, 'day')" name="check_out"/>
+                            </span>
+                            <span t-else="" class="text-muted">In progress</span>
+                            <span t-if="check_out" class="ms-auto px-1 rounded fw-bold"
+                                  t-att-class="{'bg-danger-subtle text-danger': record.has_overtime.raw_value}">
+                                <field name="worked_hours" widget="float_time"/>
+                            </span>
                         </div>
                         <div t-if="record.source_stale.raw_value and record.time_rule_id.raw_value"
                              class="text-warning small mt-1">

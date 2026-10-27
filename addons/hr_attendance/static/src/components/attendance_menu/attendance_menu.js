@@ -5,6 +5,7 @@ import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";
 import { deserializeDateTime } from "@web/core/l10n/dates";
 import { rpc, ConnectionLostError } from "@web/core/network/rpc";
 import { registry } from "@web/core/registry";
+import { user } from "@web/core/user";
 import { formatFloatTime, formatDateTime } from "@web/views/fields/formatters";
 import { getPropertyFieldInfo } from "@web/views/fields/field";
 import { useBus, useService } from "@web/core/utils/hooks";
@@ -478,11 +479,23 @@ export const systrayAttendance = {
 };
 
 /**
- * Client action used as the Attendances app action for self-service users:
- * it opens the systray dialog instead of navigating to the app.
+ * Client action of the Attendances app: self-service users open the systray
+ * dialog instead of navigating to the app, others open the app on its first
+ * (sub)menu having an action, as for any app.
  */
-function openAttendanceSystray() {
+async function openAttendanceSystray() {
     const action = useService("action");
+    const menuService = useService("menu");
+    if (await user.hasGroup("hr_attendance.group_hr_attendance_officer")) {
+        const app = menuService
+            .getApps()
+            .find((menu) => menu.xmlid === "hr_attendance.menu_hr_attendance_root");
+        let menu = app?.children.length && menuService.getMenu(app.children[0]);
+        while (menu && !menu.actionID && menu.children.length) {
+            menu = menuService.getMenu(menu.children[0]);
+        }
+        return menu?.actionID;
+    }
     const payload = { opened: false };
     // Without a current screen (e.g. at webclient startup), display the app instead
     if (action.currentController) {

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="hr_attendance.AttendanceDashboard">
+        <div t-if="this.state.isOfficer and this.state.cards.length"
+             class="o_attendance_dashboard d-flex flex-wrap gap-2 px-3 pt-1 pb-3">
+            <t t-foreach="this.state.cards" t-as="card" t-key="card.filter">
+                <button t-if="this.getFilter(card)"
+                        class="o_attendance_dashboard_card btn py-2 px-4 lh-sm"
+                        t-attf-class="o_attendance_dashboard_card_{{ card.color }} {{ this.isActive(card) ? 'active' : '' }}"
+                        t-att-title="card.label"
+                        t-on-click="() => this.onCardClick(card)">
+                    <span class="o_attendance_dashboard_card_count d-block fs-4 fw-bolder" t-out="card.count"/>
+                    <span class="d-block" t-out="card.label"/>
+                </button>
+            </t>
+        </div>
+    </t>
+</templates>
