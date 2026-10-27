@@ -289,7 +289,7 @@
                                             <record id="tax_report_de_tag_42_tag" model="account.report.expression">
                                                 <field name="label">balance</field>
                                                 <field name="engine">tax_tags</field>
-                                                <field name="formula">42</field>
+                                                <field name="formula">-42</field>
                                             </record>
                                         </field>
                                     </record>
