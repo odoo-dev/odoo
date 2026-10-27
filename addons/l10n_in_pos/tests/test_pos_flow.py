@@ -9,6 +9,60 @@ class TestPosFlow(TestInPosBase):
     """
     _test_user_groups = None  # FIXME list needed groups
 
+    def test_missing_hsn_after_resolving_draft_orders(self):
+        session = self.open_new_session(0.0)
+        self.product_a.l10n_in_hsn_code = False
+        draft_order = self._create_order({
+            'pos_order_lines_ui_args': [(self.product_a, 1.0)],
+            'pos_order_ui_args': {'state': 'draft'},
+            'payments': [],
+        })
+        self.assertFalse(session.set_missing_hsn_codes_in_pos_orders())
+        self.assertEqual(session.close_session_from_ui()['type'], 'draft_orders')
+
+        paid_order = self._create_order({
+            'pos_order_lines_ui_args': [(self.product_a, 1.0)],
+            'payments': [(self.bank_pm1, 105.0)],
+        })
+        self.assertEqual(session.set_missing_hsn_codes_in_pos_orders(), paid_order.lines)
+        self.assertEqual(session.close_session_from_ui()['type'], 'draft_orders')
+
+        draft_order.cancel_order_from_pos()
+        self.assertEqual(session.close_session_from_ui()['type'], 'missing_hsn_codes')
+        self.product_a.l10n_in_hsn_code = '1111'
+        self.assertTrue(session.close_session_from_ui()['status'])
+        self.assertEqual(paid_order.lines.l10n_in_hsn_code, '1111')
+        self.assertFalse(draft_order.lines.l10n_in_hsn_code)
+
+    def test_missing_hsn_draft_order_processed(self):
+        session = self.open_new_session(0.0)
+        self.product_a.l10n_in_hsn_code = False
+        order = self._create_order({
+            'pos_order_lines_ui_args': [(self.product_a, 1.0)],
+            'pos_order_ui_args': {'state': 'draft'},
+            'payments': [],
+        })
+        self.assertEqual(session.close_session_from_ui()['type'], 'draft_orders')
+        order.add_payment({
+            'pos_order_id': order.id,
+            'payment_method_id': self.bank_pm1.id,
+            'amount': 105.0,
+        })
+        order.action_pos_order_paid()
+        self.assertEqual(session.close_session_from_ui()['type'], 'missing_hsn_codes')
+
+    def test_missing_hsn_only_cancelled_orders(self):
+        session = self.open_new_session(0.0)
+        self.product_a.l10n_in_hsn_code = False
+        order = self._create_order({
+            'pos_order_lines_ui_args': [(self.product_a, 1.0)],
+            'pos_order_ui_args': {'state': 'draft'},
+            'payments': [],
+        })
+        self.assertEqual(session.close_session_from_ui()['type'], 'draft_orders')
+        order.cancel_order_from_pos()
+        self.assertTrue(session.close_session_from_ui()['status'])
+
     def test_invoice_order_after_session_closed(self):
         """Test that an order can be invoiced after its session is closed.
         Scenario:

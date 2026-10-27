@@ -4,11 +4,24 @@ from odoo import models
 class PosSession(models.Model):
     _inherit = 'pos.session'
 
+    def close_session_from_ui(self, payment_method_closing={}):
+        self.ensure_one()
+        # Let the standard closing flow handle ongoing orders first.
+        if (
+            self.state != 'closed'
+            and self.company_id.l10n_in_gst_registration_type
+            and not any(order.state == 'draft' for order in self.get_session_orders())
+            and self.set_missing_hsn_codes_in_pos_orders()
+        ):
+            return {'status': False, 'type': 'missing_hsn_codes'}
+        return super().close_session_from_ui(payment_method_closing)
+
     def set_missing_hsn_codes_in_pos_orders(self):
         self.ensure_one()
         PosOrderLine = self.env['pos.order.line']
         base_domain = [
             ('order_id.session_id', '=', self.id),
+            ('order_id.state', 'in', ['paid', 'done']),
             ('order_id.account_move', '=', False),
             ('l10n_in_hsn_code', '=', False),
             ('tax_ids', '!=', False),
