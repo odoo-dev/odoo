@@ -1,6 +1,6 @@
 import { onWillUnmount, usePlugin, useScope } from "@odoo/owl";
+import { BottomSheetPlugin } from "@web/core/bottom_sheet/bottom_sheet_plugin";
 import { PopoverPlugin } from "@web/core/popover/popover_plugin";
-import { useService } from "@web/core/utils/hooks";
 
 /**
  * @typedef {import("@web/core/popover/popover_plugin").PopoverPlugin["add"]} PopoverServiceAddFunction
@@ -56,7 +56,7 @@ export function makePopover(addFn, component, options) {
 export function usePopover(component, options = {}) {
     let service;
     if (options.useBottomSheet) {
-        service = useService("bottom_sheet");
+        service = usePlugin(BottomSheetPlugin);
     } else {
         service = usePlugin(PopoverPlugin);
     }

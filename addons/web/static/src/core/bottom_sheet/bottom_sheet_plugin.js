@@ -1,6 +1,5 @@
 import { assertType, markRaw, Plugin, signal, t, useEffect, usePlugin } from "@odoo/owl";
 import { BottomSheet } from "@web/core/bottom_sheet/bottom_sheet";
-import { registry } from "@web/core/registry";
 import { OverlayPlugin } from "@web/core/overlay/overlay_plugin";
 import { services } from "@web/core/services";
 
@@ -61,17 +60,3 @@ export class BottomSheetPlugin extends Plugin {
 }
 
 services.add(BottomSheetPlugin);
-
-/**
- * -----------------------------------------------------------------------------
- * @todo owl3 migration
- * temporary - to remove when all use of the bottomSheet service are removed
- * -----------------------------------------------------------------------------
- */
-export const bottomSheetService = {
-    start() {
-        return usePlugin(BottomSheetPlugin);
-    },
-};
-
-registry.category("services").add("bottom_sheet", bottomSheetService);

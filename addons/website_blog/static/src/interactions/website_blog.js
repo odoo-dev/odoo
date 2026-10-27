@@ -1,4 +1,6 @@
+import { usePlugin } from "@odoo/owl";
 import { scrollFixedOffset, scrollTo } from "@html_builder/utils/scrolling";
+import { BottomSheetPlugin } from "@web/core/bottom_sheet/bottom_sheet_plugin";
 import { Interaction } from "@web/public/interaction";
 import { registry } from "@web/core/registry";
 import { location } from "@web/core/browser/browser";
@@ -30,6 +32,7 @@ export class WebsiteBlog extends Interaction {
     };
 
     setup() {
+        this.bottomSheet = usePlugin(BottomSheetPlugin);
         this.defaultPosition = this._isCompactListOrSplitGridView() ? 0 : 16;
         // The sidebar becomes sticky once the scroll reaches the table of
         // content.
@@ -54,7 +57,7 @@ export class WebsiteBlog extends Interaction {
             href: a.getAttribute("href"),
             active: a.classList.contains("active"),
         }));
-        this.services.bottom_sheet.add(this.el, BlogNavSheet, { blogs });
+        this.bottomSheet.add(this.el, BlogNavSheet, { blogs });
     }
 
     /**

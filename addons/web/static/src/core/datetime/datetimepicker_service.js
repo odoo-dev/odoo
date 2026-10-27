@@ -9,6 +9,7 @@ import {
     untrack,
     usePlugin,
 } from "@odoo/owl";
+import { BottomSheetPlugin } from "@web/core/bottom_sheet/bottom_sheet_plugin";
 import { hasTouch } from "@web/core/browser/feature_detection";
 import { PopoverPlugin } from "@web/core/popover/popover_plugin";
 import { onWillRender } from "@web/owl2/utils";
@@ -83,8 +84,9 @@ const parsers = {
 };
 
 export const datetimePickerService = {
-    dependencies: ["bottom_sheet", "ui"],
-    start(_env, { bottom_sheet: bottomSheetService, ui }) {
+    dependencies: ["ui"],
+    start(_env, { ui }) {
+        const bottomSheetService = usePlugin(BottomSheetPlugin);
         const popoverService = usePlugin(PopoverPlugin);
         function defaultCreatePopover(...args) {
             const service = useBottomSheet() ? bottomSheetService : popoverService;
