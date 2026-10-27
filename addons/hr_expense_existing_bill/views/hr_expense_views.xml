@@ -7,16 +7,15 @@
             <field name="inherit_id" ref="hr_expense.hr_expense_view_form"/>
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='vendor_id']" position="after">
-                    <label for="has_existing_bill" invisible="payment_mode != 'company_account'"/>
-                    <div class="d-flex flex-column flex-lg-row" invisible="payment_mode != 'company_account'">
+                    <label for="has_existing_bill"/>
+                    <div class="d-flex flex-column flex-lg-row">
                         <field name="has_existing_bill"
                                string="Existing Bill"
                                widget="boolean_radio"
-                               invisible="payment_mode != 'company_account'"
                                options="{'no_label_element_id': 'direct_expense', 'yes_label_element_id': 'match_bill', 'first_element': false}"
                                readonly="not is_editable"
                                style="width: 60%"
-                               groups="account.group_account_readonly"/>
+                               groups="account.group_account_invoice"/>
                         <template id="direct_expense">No (Direct Expense)</template>
                         <template id="match_bill">Yes (Match to Bill)</template>
 
@@ -26,10 +25,10 @@
                                style="margin-bottom: calc(0.25rem + var(--fieldWidget-margin-bottom))"
                                nolabel="1"
                                placeholder="Select Bill..."
-                               context="{'name_as_amount_residual': 1, 'list_view_ref': 'hr_expense.view_move_list_expense'}"
-                               readonly="not is_editable"
+                               context="{'name_as_amount_total': 1, 'list_view_ref': 'hr_expense.view_move_list_expense'}"
+                               readonly="not is_editable or state not in ['draft', 'submitted']"
                                options="{'no_create': True}"
-                               groups="account.group_account_readonly"/>
+                               groups="account.group_account_invoice"/>
                     </div>
                 </xpath>
                 <xpath expr="//field[@name='account_id']" position="attributes">

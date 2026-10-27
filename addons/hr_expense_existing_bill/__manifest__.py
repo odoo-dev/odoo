@@ -8,6 +8,7 @@ This is a bridge module to link an existing bill to an expense, it'll be removed
     'depends': ['hr_expense'],
     'auto_install': True,
     'data': [
+        'views/account_move_views.xml',
         'views/hr_expense_views.xml',
     ],
     'author': 'Odoo S.A.',
