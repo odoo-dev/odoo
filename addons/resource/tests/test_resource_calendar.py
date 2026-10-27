@@ -281,3 +281,71 @@ class TestResourceCalendar(TransactionCase):
             form.company_id = self.env.company
 
         self.assertEqual(work_schedule.attendance_ids, attendance_1)
+
+    def test_generic_leave_resource_company_handling(self):
+        """
+        Test that:
+        1. A generic company leave applies to a resource with company_id=False (e.g. shared / appointment resource).
+        2. A generic leave for Company 1 does NOT apply to a resource belonging to Company 2.
+        3. A global generic leave with company_id=False applies to both shared and company-specific resources.
+        """
+        company_1 = self.env.company
+        company_2 = self.env['res.company'].create({'name': 'Company 2'})
+
+        calendar = self.env['resource.calendar'].create({
+            'name': 'Test Shared Calendar',
+            'company_id': False,
+            'attendance_ids': [(0, 0, {
+                'name': 'Everyday',
+                'dayofweek': str(i),
+                'hour_from': 8,
+                'hour_to': 18,
+            }) for i in range(7)],
+        })
+
+        shared_resource = self.env['resource.resource'].create({
+            'name': 'Shared Resource',
+            'calendar_id': calendar.id,
+            'company_id': False,
+        })
+        company_2_resource = self.env['resource.resource'].create({
+            'name': 'Company 2 Resource',
+            'calendar_id': calendar.id,
+            'company_id': company_2.id,
+        })
+
+        # 1. Generic company leave for Company 1
+        start_dt = datetime(2026, 1, 15, 9, 0, 0).astimezone(pytz.UTC)
+        end_dt = datetime(2026, 1, 15, 17, 0, 0).astimezone(pytz.UTC)
+        self.env['resource.calendar.leaves'].create({
+            'name': "Company 1 Holiday",
+            'company_id': company_1.id,
+            'date_from': datetime(2026, 1, 15, 9, 0, 0),
+            'date_to': datetime(2026, 1, 15, 17, 0, 0),
+            'resource_id': False,
+            'calendar_id': False,
+        })
+
+        leaves = calendar._leave_intervals_batch(
+            start_dt, end_dt, resources=[shared_resource, company_2_resource]
+        )
+        self.assertTrue(leaves[shared_resource.id], "Generic leave of Company 1 should apply to shared resource (company_id=False)")
+        self.assertFalse(leaves[company_2_resource.id], "Generic leave of Company 1 should not apply to Company 2 resource")
+
+        # 2. Global generic leave with company_id=False
+        global_start_dt = datetime(2026, 2, 10, 9, 0, 0).astimezone(pytz.UTC)
+        global_end_dt = datetime(2026, 2, 10, 17, 0, 0).astimezone(pytz.UTC)
+        global_leave = self.env['resource.calendar.leaves'].create({
+            'name': "Global Holiday",
+            'date_from': datetime(2026, 2, 10, 9, 0, 0),
+            'date_to': datetime(2026, 2, 10, 17, 0, 0),
+            'resource_id': False,
+            'calendar_id': False,
+        })
+        global_leave.company_id = False
+
+        global_leaves = calendar._leave_intervals_batch(
+            global_start_dt, global_end_dt, resources=[shared_resource, company_2_resource]
+        )
+        self.assertTrue(global_leaves[shared_resource.id], "Global leave (company_id=False) should apply to shared resource")
+        self.assertTrue(global_leaves[company_2_resource.id], "Global leave (company_id=False) should apply to Company 2 resource")
