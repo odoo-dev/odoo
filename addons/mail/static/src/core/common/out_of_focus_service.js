@@ -1,5 +1,6 @@
 import { htmlToTextContentInline } from "@mail/utils/common/format";
 
+import { MultiTabPlugin } from "@bus/multi_tab_plugin";
 import { usePlugin } from "@odoo/owl";
 import { isAndroid } from "@web/core/browser/feature_detection";
 import { _t } from "@web/core/l10n/translation";
@@ -23,7 +24,7 @@ export class OutOfFocusService {
     setup(env, services) {
         this.env = env;
         this.audio = undefined;
-        this.multiTab = services.multi_tab;
+        this.multiTab = usePlugin(MultiTabPlugin);
         this.notificationService = usePlugin(NotificationPlugin);
         this.soundEffectService = services["mail.sound_effects"];
         /** @type {import("models").Store} */
@@ -186,7 +187,7 @@ export class OutOfFocusService {
 }
 
 export const outOfFocusService = {
-    dependencies: ["multi_tab", "mail.sound_effects", "mail.store"],
+    dependencies: ["mail.sound_effects", "mail.store"],
     /**
      * @param {import("@web/env").OdooEnv} env
      * @param {import("services").ServiceFactories} services

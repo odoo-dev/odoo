@@ -1,5 +1,6 @@
 import { proxy, usePlugin } from "@odoo/owl";
 
+import { MultiTabPlugin } from "@bus/multi_tab_plugin";
 import { _t } from "@web/core/l10n/translation";
 import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 import { registry } from "@web/core/registry";
@@ -15,7 +16,7 @@ export class DiscussCoreWeb {
         this.notificationService = usePlugin(NotificationPlugin);
         this.store = services["mail.store"];
         this.ui = this.store.ui;
-        this.multiTab = services.multi_tab;
+        this.multiTab = usePlugin(MultiTabPlugin);
     }
 
     setup() {
@@ -44,7 +45,7 @@ export class DiscussCoreWeb {
 }
 
 export const discussCoreWeb = {
-    dependencies: ["bus_service", "mail.store", "multi_tab"],
+    dependencies: ["bus_service", "mail.store"],
     /**
      * @param {import("@web/env").OdooEnv} env
      * @param {import("services").ServiceFactories} services

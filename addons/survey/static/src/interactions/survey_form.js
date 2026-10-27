@@ -1,3 +1,5 @@
+import { usePlugin } from "@odoo/owl";
+import { MultiTabPlugin } from "@bus/multi_tab_plugin";
 import { cookie } from "@web/core/browser/cookie";
 import { _t } from "@web/core/l10n/translation";
 import { rpc } from "@web/core/network/rpc";
@@ -66,6 +68,7 @@ export class SurveyForm extends Interaction {
 
     setup() {
         this.dialog = this.services.dialog;
+        this.multiTab = usePlugin(MultiTabPlugin);
         this.fadeInOutDelay = 400;
         this.formEl = this.el.querySelector("form.o_survey-fill-form");
         const optionsData = this.el.querySelector("form.o_survey-fill-form").dataset;
@@ -1204,7 +1207,7 @@ export class SurveyForm extends Interaction {
 
     async checkIsOnMainTab() {
         const check = async (shouldReloadMasterTab) => {
-            if (await this.services.multi_tab.isOnMainTab()) {
+            if (await this.multiTab.isOnMainTab()) {
                 // Force reload the page when survey is ready to be followed, to force restart long polling
                 if (shouldReloadMasterTab) {
                     window.location.reload();

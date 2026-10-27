@@ -141,7 +141,7 @@ const DiscussChannelPatch = {
         if (
             !hadSelfSession || // sound for self-join is played instead
             !this.hadSelfSession || // sound for self-leave is played instead
-            !(await this.store.env.services["multi_tab"].isOnMainTab()) // another tab playing sound
+            !(await this.store.multiTab.isOnMainTab()) // another tab playing sound
         ) {
             return;
         }

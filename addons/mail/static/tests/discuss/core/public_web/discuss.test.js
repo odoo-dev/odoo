@@ -1,4 +1,5 @@
 import { waitUntilSubscribe } from "@bus/../tests/bus_test_helpers";
+import { MultiTabPlugin } from "@bus/multi_tab_plugin";
 import { WebsocketWorker } from "@bus/workers/websocket_worker";
 import {
     defineMailModels,
@@ -8,7 +9,7 @@ import {
 } from "@mail/../tests/mail_test_helpers";
 import { describe, expect, test, waitFor } from "@odoo/hoot";
 import { mockDate } from "@odoo/hoot-mock";
-import { Command, mockService, serverState, withUser } from "@web/../tests/web_test_helpers";
+import { Command, patchWithCleanup, serverState, withUser } from "@web/../tests/web_test_helpers";
 import { patch } from "@web/core/utils/patch";
 
 import { rpc } from "@web/core/network/rpc";
@@ -46,7 +47,7 @@ test("notify message to user as non member", async () => {
             addEventListener() {}
         },
     });
-    mockService("multi_tab", { isOnMainTab: () => true });
+    patchWithCleanup(MultiTabPlugin.prototype, { isOnMainTab: () => true });
     const pyEnv = await startServer();
     const johnUser = pyEnv["res.users"].create({ name: "John" });
     const johnPartner = pyEnv["res.partner"].create({ name: "John", user_ids: [johnUser] });
