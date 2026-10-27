@@ -750,6 +750,38 @@ class TestExpenses(TestExpenseCommon):
         expense_data = self.env['hr.expense'].with_user(self.expense_user_employee).get_expense_dashboard()
         self.assertEqual(expense_data['approved']['amount'], 0.00)
 
+    def test_dashboard_ignores_stage_filters(self):
+        """ Check that clicking a dashboard stage does not zero the amounts of the other stages,
+            while the other search filters still narrow them.
+        """
+        expenses = self.create_expenses([
+            {
+                'name': 'Company expense',
+                'payment_mode': 'company_account',
+                'total_amount_currency': 1000.00,
+                'employee_id': self.expense_employee.id,
+            },
+            {
+                'name': 'Employee expense',
+                'payment_mode': 'own_account',
+                'total_amount_currency': 500.00,
+                'employee_id': self.expense_employee.id,
+            },
+        ])
+        expenses.filtered(lambda e: e.payment_mode == 'own_account').action_submit()
+        self.assertRecordValues(expenses.sorted('total_amount'), [
+            {'payment_mode': 'own_account', 'state': 'submitted'},
+            {'payment_mode': 'company_account', 'state': 'draft'},
+        ])
+
+        expense_data = self.env['hr.expense'].with_user(self.expense_user_employee).with_context(domain=[('state', '=', 'submitted')]).get_expense_dashboard()
+        self.assertEqual(expense_data['draft']['amount'], 1000.00)
+        self.assertEqual(expense_data['submitted']['amount'], 500.00)
+
+        expense_data = self.env['hr.expense'].with_user(self.expense_user_employee).with_context(domain=[('payment_mode', '=', 'company_account')]).get_expense_dashboard()
+        self.assertEqual(expense_data['draft']['amount'], 1000.00)
+        self.assertEqual(expense_data['submitted']['amount'], 0.00)
+
     def test_update_expense_price_on_product_standard_price(self):
         """
         Tests that updating the standard price of a product will update all the un-submitted

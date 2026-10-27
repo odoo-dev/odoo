@@ -1308,6 +1308,8 @@ class HrExpense(models.Model):
             '&', ('payment_mode', '=', 'own_account'), ('state', 'in', {'approved', 'posted'})
         ]
         if domain := self.env.context.get('domain'):
+            # Stage filters must not zero the other cards
+            domain = Domain(domain).map_conditions(lambda c: Domain.TRUE if c.field_expr == 'state' else c)
             base_domain = Domain.AND([base_domain, domain])
 
         fetched_expenses = self._read_group(base_domain, ['state'], ['total_amount:sum'])

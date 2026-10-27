@@ -65,6 +65,11 @@ export class ExpenseDashboard extends Component {
                 searchModel.toggleSearchItem(item.searchItemId);
             });
         }
+        // The stages are about the employee's own expenses so apply "My Expenses"
+        const [myExpenses] = searchModel.getSearchItems((item) => item.name === "my_open_expenses");
+        if (myExpenses && !myExpenses.isActive) {
+            searchModel.toggleSearchItem(myExpenses.id);
+        }
         // Toggle the filter corresponding to the current state
         const searchItem = Object.values(searchModel.searchItems).find(
             (searchItem) => searchItem.name === filterName
