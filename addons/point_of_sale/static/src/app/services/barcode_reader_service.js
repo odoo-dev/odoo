@@ -1,3 +1,5 @@
+import { usePlugin } from "@odoo/owl";
+import { BarcodePlugin } from "@barcodes/barcode_plugin";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { Mutex } from "@web/core/utils/concurrency";
@@ -118,9 +120,10 @@ export class BarcodeReader {
 }
 
 export const barcodeReaderService = {
-    dependencies: ["dialog", "barcode", "notification", "action", "orm"],
+    dependencies: ["dialog", "notification", "action", "orm"],
     async start(env, deps) {
-        const { dialog, barcode, orm } = deps;
+        const { dialog, orm } = deps;
+        const barcode = usePlugin(BarcodePlugin);
         let barcodeReader = null;
 
         try {
