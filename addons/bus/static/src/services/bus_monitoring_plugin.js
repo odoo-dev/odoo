@@ -1,7 +1,6 @@
 import { Plugin, signal, useListener, usePlugin } from "@odoo/owl";
 import { WORKER_STATE } from "@bus/workers/websocket_worker";
 import { browser } from "@web/core/browser/browser";
-import { registry } from "@web/core/registry";
 import { BusPlugin } from "@bus/services/bus_plugin";
 import { services } from "@web/core/services";
 
@@ -49,15 +48,3 @@ export class BusMonitoringPlugin extends Plugin {
 }
 
 services.add(BusMonitoringPlugin);
-
-/**
- * -----------------------------------------------------------------------------
- * @todo owl3 migration
- * temporary - to remove when all use of the bus.monitoring_service service are removed
- * -----------------------------------------------------------------------------
- */
-registry.category("services").add("bus.monitoring_service", {
-    start() {
-        return usePlugin(BusMonitoringPlugin);
-    },
-});
