@@ -224,6 +224,9 @@ class ProjectProject(models.Model):
 
     @api.onchange('reinvoiced_sale_order_id')
     def _onchange_reinvoiced_sale_order_id(self):
+        order = self.reinvoiced_sale_order_id
+        if not self.account_id and order.project_account_id and not order.order_line.filtered('is_service'):
+            self.account_id = order.project_account_id
         if (
             not self.sale_line_id
             and (service_sols := self.reinvoiced_sale_order_id.order_line.filtered('is_service'))
@@ -239,6 +242,12 @@ class ProjectProject(models.Model):
     def create(self, vals_list):
         projects = super().create(vals_list)
         for project, vals in zip(projects, vals_list):
+            if (
+                not project.account_id
+                and project.reinvoiced_sale_order_id.project_account_id
+                and not project.reinvoiced_sale_order_id.order_line.filtered('is_service')
+            ):
+                project.account_id = project.reinvoiced_sale_order_id.project_account_id
             if project.sale_order_id and not project.sale_order_id.project_id:
                 project.sale_order_id.project_id = project.id
             elif project.sudo().reinvoiced_sale_order_id and not project.sudo().reinvoiced_sale_order_id.project_id:

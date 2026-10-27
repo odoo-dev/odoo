@@ -87,5 +87,7 @@ class ProjectTemplateCreateWizard(models.TransientModel):
                 values['name'] = "%s - %s" % (so_name, product.project_template_id.name or name)
             else:
                 values['name'] = so_name
+            if (sale_order.project_account_id and not sale_order.order_line.filtered('is_service')):
+                values['account_id'] = sale_order.project_account_id.id
             project = self.env['project.project'].create(values)
         return project.action_view_tasks()
