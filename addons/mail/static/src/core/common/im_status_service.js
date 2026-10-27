@@ -1,3 +1,5 @@
+import { PresencePlugin } from "@bus/services/presence_plugin";
+import { usePlugin } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 
 export const AWAY_DELAY = 30 * 60 * 1000; // 30 minutes
@@ -16,9 +18,10 @@ export const AWAY_DELAY = 30 * 60 * 1000; // 30 minutes
  * See `_get_im_status_access_token`.
  */
 export const imStatusService = {
-    dependencies: ["bus_service", "presence"],
+    dependencies: ["bus_service"],
 
-    start(env, { bus_service, presence }) {
+    start(env, { bus_service }) {
+        const presence = usePlugin(PresencePlugin);
         let lastSentInactivity;
         let becomeAwayTimeout;
 

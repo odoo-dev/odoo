@@ -4,6 +4,7 @@ import { attClassObjectToString, generateEmojisOnHtml } from "@mail/utils/common
 
 import { Plugin, proxy, usePlugin } from "@odoo/owl";
 
+import { PresencePlugin } from "@bus/services/presence_plugin";
 import { location } from "@web/core/browser/browser";
 import { cookie } from "@web/core/browser/cookie";
 import { isMobileOS } from "@web/core/browser/feature_detection";
@@ -895,6 +896,7 @@ export class StorePlugin extends Plugin {
     ui = usePlugin(UIPlugin);
     notification = usePlugin(NotificationPlugin);
     orm = usePlugin(ORM);
+    presence = usePlugin(PresencePlugin);
 
     setup() {
         /** @type {import("models").Store} */
@@ -902,6 +904,7 @@ export class StorePlugin extends Plugin {
         this.store.ui = this.ui;
         this.store.notification = this.notification;
         this.store.orm = this.orm;
+        this.store.presence = this.presence;
         this.store.insert(session.storeData);
         /**
          * Add a default for `self` because in livechat there could be no user and no guest yet

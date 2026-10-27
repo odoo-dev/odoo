@@ -7,7 +7,8 @@ import { CallPermissionDeniedDialog } from "@mail/discuss/call/common/call_permi
 import { rpc } from "@web/core/network/rpc";
 import { assignDefined, closeStream } from "@mail/utils/common/misc";
 
-import { markup, proxy, toRaw } from "@odoo/owl";
+import { markup, proxy, toRaw, usePlugin } from "@odoo/owl";
+import { PresencePlugin } from "@bus/services/presence_plugin";
 
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { _t } from "@web/core/l10n/translation";
@@ -2955,7 +2956,6 @@ export const rtcService = {
         "mail.fullscreen",
         "mail.sound_effects",
         "mail.store",
-        "presence",
     ],
     /**
      * @param {import("@web/env").OdooEnv} env
@@ -3077,7 +3077,7 @@ export const rtcService = {
          * Attempts to play RTC medias when a user shows signs of presence (interaction with the page) as
          * they cannot be played on windows that have not been interacted with.
          */
-        services["presence"].bus.addEventListener(
+        usePlugin(PresencePlugin).bus.addEventListener(
             "presence",
             () => {
                 env.bus.trigger("RTC-SERVICE:PLAY_MEDIA");

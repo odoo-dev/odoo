@@ -1,3 +1,5 @@
+import { PresencePlugin } from "@bus/services/presence_plugin";
+import { usePlugin } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { session } from "@web/session";
 
@@ -63,16 +65,16 @@ export class CheckIdentityTimeout {
  * - Listens for inactivity via presence service
  *
  * @type {Object}
- * @property {string[]} dependencies Services this one relies on: ["check_identity", "bus_service", "presence"]
+ * @property {string[]} dependencies Services this one relies on: ["check_identity", "bus_service"]
  * @method start
  * @param {Object} env OWL environment
  * @param {Object} deps Injected services: check_identity, bus_service, presence
  */
 export const checkIdentityTimeoutService = {
-    dependencies: ["check_identity", "bus_service", "presence"],
+    dependencies: ["check_identity", "bus_service"],
 
     start(env, services) {
-        return new CheckIdentityTimeout(env, services);
+        return new CheckIdentityTimeout(env, { ...services, presence: usePlugin(PresencePlugin) });
     },
 };
 
