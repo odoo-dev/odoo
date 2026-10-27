@@ -182,6 +182,21 @@ class CloseFrame(Frame):
 _websocket_instances = WeakSet()
 
 
+def _close_batch_size():
+    """ Number of websockets that can close at once without exhausting the
+    connection pool: each one needs a cursor, and the presence notification
+    a second connection, hence a fraction of the pool.
+    """
+    maxconn = (config["db_maxconn_gevent"] if odoo.evented else 0) or config["db_maxconn"]
+    return max(maxconn // 8, 1)
+
+
+# Bounds the websockets running their on close DB work at the same time, so
+# a mass disconnect doesn't exhaust the connection pool. A slot is also held
+# while `acquire_cursor` retries on a busy pool.
+_close_semaphore = threading.BoundedSemaphore(_close_batch_size())
+
+
 class Websocket:
     __event_callbacks = defaultdict(set)
     # Maximum size for a message in bytes, whether it is sent as one
@@ -533,7 +548,7 @@ class Websocket:
         self.__cmd_queue.close()
         dispatch.unsubscribe(self)
         self._trigger_lifecycle_event(LifecycleEvent.CLOSE)
-        with acquire_cursor(self._db) as cr:
+        with _close_semaphore, acquire_cursor(self._db) as cr:
             env = new_env(cr, self._session)
             env["ir.websocket"]._on_websocket_closed(self._cookies)
 
@@ -987,7 +1002,7 @@ def _kick_all(code=CloseCode.GOING_AWAY):
     try:
         _logger.info("Disconnecting %s websockets", len(_websocket_instances))
         count = 0
-        wait_threshold = max(odoo.sql_db._Pool._maxconn // 8, 8) if odoo.sql_db._Pool else 32
+        wait_threshold = max(_close_batch_size(), 8)
         for websocket in _websocket_instances:
             if websocket.state is ConnectionState.OPEN:
                 websocket.close(code)
