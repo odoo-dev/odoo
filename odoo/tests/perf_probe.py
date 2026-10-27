@@ -1,5 +1,6 @@
 """Throwaway sampler attributing slow test windows to CPU, cgroup, memory or PostgreSQL waits."""
 import collections
+import contextlib
 import logging
 import os
 import re
@@ -102,6 +103,17 @@ def report(kind, name, before, min_wall=0.0):
             _logger.info("%s=%s %s", kind, name, deltas)
     except Exception:  # noqa: BLE001
         _logger.warning("perf probe report failed", exc_info=True)
+
+
+@contextlib.contextmanager
+def timed(kind, name, min_wall=0.0):
+    """Report the counter deltas of the wrapped block, starting the sampler if needed."""
+    start()
+    before = snapshot()
+    try:
+        yield
+    finally:
+        report(kind, name, before, min_wall=min_wall)
 
 
 def _read(path):
