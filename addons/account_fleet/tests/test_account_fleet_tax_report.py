@@ -70,7 +70,7 @@ class TestAccountFleet(TestAccountTaxDetailsReport):
     def test_tax_report_with_mixed_vehicle_lines(self):
         """Test tax report with mixed vehicle/non-vehicle base lines sharing a tax.
 
-        When the tax repartition line uses a non-expense account (use_in_tax_closing=True),
+        When the tax repartition line uses a non-expense account (is_deductible=True),
         vehicle_id is excluded from the tax line grouping key, causing a single merged
         tax line with vehicle_id = NULL. The vehicle_id matching must allow this tax line
         to match both base lines to avoid tax report inconsistencies.

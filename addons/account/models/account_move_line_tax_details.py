@@ -78,7 +78,7 @@ class AccountMoveLine(models.Model):
                     %(aml_fields_select)s,
                     ANY_VALUE(tax_rep.account_id) AS rep_account_id,
                     ANY_VALUE(tax_rep.factor_percent) AS factor_percent,
-                    ANY_VALUE(tax_rep.use_in_tax_closing) AS use_in_tax_closing,
+                    ANY_VALUE(%(tax_rep_is_deductible)s) AS is_deductible,
                     ANY_VALUE(COALESCE(aml.group_tax_id, aml.tax_line_id)) AS applied_tax_id,
                     COALESCE(
                         ARRAY_AGG(rel.account_tax_id ORDER BY tax.sequence, tax.id) FILTER (WHERE rel.account_tax_id IS NOT NULL),
@@ -170,7 +170,7 @@ class AccountMoveLine(models.Model):
                     )
                     OR base_line.account_id = tax_line.account_id
                 ) AND (
-                    (tax.analytic IS NOT TRUE AND tax_line.use_in_tax_closing IS TRUE)
+                    (tax.analytic IS NOT TRUE AND tax_line.is_deductible IS TRUE)
                     OR base_line.analytic_distribution IS NOT DISTINCT FROM tax_line.analytic_distribution
                 )
                 %(extra_query_base_tax_line_mapping)s
@@ -219,6 +219,7 @@ class AccountMoveLine(models.Model):
             table_references=domain_query.from_clause,
             search_condition=domain_query.where_clause,
             aml_fields_select=aml_fields_select,
+            tax_rep_is_deductible=self.env['account.tax.repartition.line']._field_to_sql('tax_rep', 'is_deductible'),
             tax_line_join=SQL('LEFT JOIN') if include_without_tax_line else SQL('JOIN'),
             extra_query_base_tax_line_mapping=extra_query_base_tax_line_mapping,
         )

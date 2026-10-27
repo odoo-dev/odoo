@@ -461,35 +461,29 @@ class TestReInvoice(TestExpenseCommon, TestSaleCommon):
             'invoice_repartition_line_ids': [
                 Command.create({
                     'repartition_type': 'base',
-                    'use_in_tax_closing': False,
                 }),
                 Command.create({
                     'repartition_type': 'tax',
                     'factor_percent': 70,
-                    'use_in_tax_closing': False,
                 }),
                 Command.create({
                     'repartition_type': 'tax',
                     'factor_percent': 30,
                     'account_id': self.company_data['default_account_tax_purchase'].id,
-                    'use_in_tax_closing': True,
                 }),
             ],
             'refund_repartition_line_ids': [
                 Command.create({
                     'repartition_type': 'base',
-                    'use_in_tax_closing': False,
                 }),
                 Command.create({
                     'repartition_type': 'tax',
                     'factor_percent': 70,
-                    'use_in_tax_closing': False,
                 }),
                 Command.create({
                     'repartition_type': 'tax',
                     'factor_percent': 30,
                     'account_id': self.company_data['default_account_tax_purchase'].id,
-                    'use_in_tax_closing': True,
                 }),
             ],
         })

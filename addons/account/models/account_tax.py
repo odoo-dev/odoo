@@ -1,6 +1,7 @@
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError, ValidationError
 from odoo.fields import Command, Domain
+from odoo.models import Query
 from odoo.tools import frozendict, groupby, html2plaintext, is_html_empty, split_every, SQL
 from odoo.tools.float_utils import float_is_zero, float_repr, float_round, float_compare
 from odoo.tools.translate import html_translate, adapt_translated_field_value
@@ -340,7 +341,7 @@ class AccountTax(models.Model):
         for tax in self:
             tax.is_used = tax in used_taxes
 
-    @api.depends('is_used', 'repartition_line_ids.account_id', 'repartition_line_ids.sequence', 'repartition_line_ids.factor_percent', 'repartition_line_ids.use_in_tax_closing', 'repartition_line_ids.tag_ids')
+    @api.depends('is_used', 'repartition_line_ids.account_id', 'repartition_line_ids.sequence', 'repartition_line_ids.factor_percent', 'repartition_line_ids.tag_ids')
     def _compute_repartition_lines_str(self):
         for tax in self:
             repartition_lines_str = tax.repartition_lines_str or ""
@@ -359,7 +360,6 @@ class AccountTax(models.Model):
                         _('Factor Percent'): repartition_line.factor_percent,
                         _('Account'): repartition_line.account_id.display_name or _('None'),
                         _('Tax Grids'): repartition_line.tag_ids.mapped('name') or _('None'),
-                        _('Use in tax closing'): _('True') if repartition_line.use_in_tax_closing else _('False'),
                     }
                 repartition_lines_str = str(repartition_line_info)
             tax.repartition_lines_str = repartition_lines_str
@@ -660,7 +660,7 @@ class AccountTax(models.Model):
 
     @api.depends(
         'invoice_repartition_line_ids.repartition_type',
-        'invoice_repartition_line_ids.use_in_tax_closing',
+        'invoice_repartition_line_ids.is_deductible',
         'invoice_repartition_line_ids.factor_percent',
     )
     def _compute_non_deductible_amount(self):
@@ -668,7 +668,7 @@ class AccountTax(models.Model):
             tax.non_deductible_amount = sum(
                 rep_line.factor_percent / 100.0
                 for rep_line in tax.invoice_repartition_line_ids
-                if rep_line.repartition_type == 'tax' and not rep_line.use_in_tax_closing
+                if rep_line.repartition_type == 'tax' and not rep_line.is_deductible
             )
 
     @api.onchange('amount_type')
@@ -2357,7 +2357,7 @@ class AccountTax(models.Model):
             'group_tax_id': tax_data['group'].id,
             'analytic_distribution': (
                 base_line_grouping_key['analytic_distribution']
-                if tax.analytic or not tax_rep.use_in_tax_closing
+                if tax.analytic or not tax_rep.is_deductible
                 else False
             ),
             'account_id': tax_rep_data['account'].id or base_line_grouping_key['account_id'],
@@ -4944,7 +4944,7 @@ class AccountTax(models.Model):
                     'sequence': tax.sequence,
                     'account_id': tax_rep_data['account'].id,
                     'analytic': tax.analytic,
-                    'use_in_tax_closing': rep_line.use_in_tax_closing,
+                    'is_deductible': rep_line.is_deductible,
                     'is_reverse_charge': tax_data['is_reverse_charge'],
                     'price_include': tax._is_price_included(base_line['document_tax_mode']),
                     'tax_exigibility': tax.tax_exigibility,
@@ -5212,9 +5212,10 @@ class AccountTaxRepartitionLine(models.Model):
     company_id = fields.Many2one(string="Company", comodel_name='res.company', related="tax_id.company_id", store=True, help="The company this distribution line belongs to.")
     sequence = fields.Integer(string="Sequence", default=1,
         help="The order in which distribution lines are displayed and matched. For refunds to work properly, invoice distribution lines should be arranged in the same order as the credit note distribution lines they correspond to.")
-    use_in_tax_closing = fields.Boolean(
-        string="Tax Closing Entry",
-        compute='_compute_use_in_tax_closing', store=True, readonly=False, precompute=True,
+    is_deductible = fields.Boolean(
+        compute='_compute_is_deductible',
+        compute_sql='_compute_sql_is_deductible',
+        compute_sudo=True,
     )
 
     tag_ids_domain = fields.Json(string="tag domain", help="Dynamic domain used for the tag that can be set on tax", compute="_compute_tag_ids_domain")
@@ -5225,14 +5226,25 @@ class AccountTaxRepartitionLine(models.Model):
             allowed_country_ids = (False, rep_line.company_id.account_fiscal_country_id.id, *rep_line.company_id.multi_vat_foreign_country_ids.ids,)
             rep_line.tag_ids_domain = [('applicability', '=', 'taxes'), ('country_id', 'in', allowed_country_ids)]
 
-    @api.depends('account_id', 'repartition_type')
-    def _compute_use_in_tax_closing(self):
+    @api.depends('account_id.internal_group', 'repartition_type')
+    def _compute_is_deductible(self):
         for rep_line in self:
-            rep_line.use_in_tax_closing = (
+            rep_line.is_deductible = (
                 rep_line.repartition_type == 'tax'
                 and rep_line.account_id
                 and rep_line.account_id.internal_group not in ('income', 'expense')
             )
+
+    def _compute_sql_is_deductible(self, table):
+        # Use a sub-query rather than a join, so that the field can be used in raw SQL queries.
+        account_query = Query(self.env['account.account'])
+        account_query.add_where(SQL(
+            "%s = %s AND %s NOT IN ('income', 'expense')",
+            account_query.table.id,
+            table.account_id,
+            account_query.table.internal_group,
+        ))
+        return SQL("(%s = 'tax' AND EXISTS %s)", table.repartition_type, account_query.subselect(SQL()))
 
     @api.depends('factor_percent')
     def _compute_factor(self):

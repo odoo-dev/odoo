@@ -158,13 +158,13 @@ CSV_DATA = {
     'tax_1': (
         '"id","name","type_tax_use","amount","amount_type","description","invoice_label","tax_group_id","repartition_line_ids/repartition_type",'
         '"repartition_line_ids/factor_percent","repartition_line_ids/document_type","repartition_line_ids/tag_ids","repartition_line_ids/account_id",'
-        '"repartition_line_ids/use_in_tax_closing","description@en"\n'
-        '"tax_1","5%","sale","5.0","percent","","VAT 5%","tax_group_taxes","base","","invoice","tax_tag_name_1||tax_tag_name_2","","","Test tax"\n'
-        '"","","","","","","","","tax","50","invoice","tax_tag_name_3","test_account_income_template","False",""\n'
-        '"","","","","","","","","tax","50","invoice","tax_tag_name_4","test_account_income_template","False",""\n'
-        '"","","","","","","","","base","","refund","tax_tag_name_5||tax_tag_name_6","","",""\n'
-        '"","","","","","","","","tax","50","refund","tax_tag_name_7","test_account_income_template","False",""\n'
-        '"","","","","","","","","tax","50","refund","tax_tag_name_8","test_account_income_template","False",""\n'
+        '"description@en"\n'
+        '"tax_1","5%","sale","5.0","percent","","VAT 5%","tax_group_taxes","base","","invoice","tax_tag_name_1||tax_tag_name_2","","Test tax"\n'
+        '"","","","","","","","","tax","50","invoice","tax_tag_name_3","test_account_income_template",""\n'
+        '"","","","","","","","","tax","50","invoice","tax_tag_name_4","test_account_income_template",""\n'
+        '"","","","","","","","","base","","refund","tax_tag_name_5||tax_tag_name_6","",""\n'
+        '"","","","","","","","","tax","50","refund","tax_tag_name_7","test_account_income_template",""\n'
+        '"","","","","","","","","tax","50","refund","tax_tag_name_8","test_account_income_template",""\n'
     ),
     "tax_4": (
         '"id","fiscal_position_ids"\n'
@@ -1085,7 +1085,7 @@ class TestChartTemplate(AccountTestInvoicingCommon):
 
     def test_parsed_csv_submodel_being_loaded(self):
         def get_rep_line_data(x):
-            return (x.document_type, x.repartition_type, x.factor_percent, x.use_in_tax_closing)
+            return (x.document_type, x.repartition_type, x.factor_percent)
 
         with patch('odoo.addons.account.models.chart_template.file_open',
                    side_effect=lambda *args: io.StringIO(CSV_DATA['tax_1'])):
@@ -1095,10 +1095,10 @@ class TestChartTemplate(AccountTestInvoicingCommon):
         tax_1 = self.env.ref(f'account.{self.company.id}_tax_1', raise_if_not_found=False)
         tax_rep_lines = tax_1.repartition_line_ids.filtered(lambda x: x.repartition_type == 'tax')
         self.assertEqual([
-            ('invoice', 'tax', 50.0, False),
-            ('invoice', 'tax', 50.0, False),
-            ('refund', 'tax', 50.0, False),
-            ('refund', 'tax', 50.0, False),
+            ('invoice', 'tax', 50.0),
+            ('invoice', 'tax', 50.0),
+            ('refund', 'tax', 50.0),
+            ('refund', 'tax', 50.0),
         ], tax_rep_lines.mapped(get_rep_line_data))
 
     def test_parsed_csv_submodel_being_updated(self):

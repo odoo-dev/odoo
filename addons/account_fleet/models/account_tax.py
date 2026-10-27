@@ -25,7 +25,7 @@ class AccountTax(models.Model):
     def _prepare_base_line_tax_repartition_grouping_key(self, base_line, base_line_grouping_key, tax_data, tax_rep_data):
         # EXTENDS 'account'
         results = super()._prepare_base_line_tax_repartition_grouping_key(base_line, base_line_grouping_key, tax_data, tax_rep_data)
-        results['vehicle_id'] = base_line_grouping_key['vehicle_id'] if not tax_rep_data['tax_rep'].use_in_tax_closing else False
+        results['vehicle_id'] = base_line_grouping_key['vehicle_id'] if not tax_rep_data['tax_rep'].is_deductible else False
         return results
 
     def _prepare_tax_line_repartition_grouping_key(self, tax_line):

@@ -48,9 +48,6 @@
                            widget="many2many_tags"
                            options="{'no_create': True}"
                            domain="tag_ids_domain"/>
-                    <field name="use_in_tax_closing"
-                           optional="hidden"
-                           invisible="repartition_type == 'base'"/>
                 </list>
             </field>
         </record>
@@ -87,7 +84,6 @@
                         <field name="repartition_type"/>
                         <field name="account_id"/>
                         <field name="tag_ids" widget="many2many_tags"/>
-                        <field name="use_in_tax_closing" widget="boolean_toggle"/>
                     </group>
                 </form>
             </field>

@@ -3463,13 +3463,11 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
                     'factor_percent': 30,
                     'account_id': self.tax_account_1.id,
                     'repartition_type': 'tax',
-                    'use_in_tax_closing': True,
                 }),
                 Command.create({
                     'factor_percent': 70,
                     'account_id': self.tax_account_2.id,
                     'repartition_type': 'tax',
-                    'use_in_tax_closing': False,
                 }),
             ],
             'refund_repartition_line_ids': [
@@ -3481,13 +3479,11 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
                     'factor_percent': 30,
                     'account_id': self.tax_account_1.id,
                     'repartition_type': 'tax',
-                    'use_in_tax_closing': True,
                 }),
                 Command.create({
                     'factor_percent': 70,
                     'account_id': self.tax_account_2.id,
                     'repartition_type': 'tax',
-                    'use_in_tax_closing': False,
                 }),
             ],
         })
@@ -3506,13 +3502,11 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
                     'factor_percent': 30,
                     'account_id': self.tax_account_1.id,
                     'repartition_type': 'tax',
-                    'use_in_tax_closing': True,
                 }),
                 Command.create({
                     'factor_percent': 70,
                     'account_id': self.tax_account_2.id,
                     'repartition_type': 'tax',
-                    'use_in_tax_closing': False,
                 }),
             ],
             'refund_repartition_line_ids': [
@@ -3524,13 +3518,11 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
                     'factor_percent': 30,
                     'account_id': self.tax_account_1.id,
                     'repartition_type': 'tax',
-                    'use_in_tax_closing': True,
                 }),
                 Command.create({
                     'factor_percent': 70,
                     'account_id': self.tax_account_2.id,
                     'repartition_type': 'tax',
-                    'use_in_tax_closing': False,
                 }),
             ],
         })
@@ -5372,6 +5364,8 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
             str(analytic_account_b.id): 100,
         }
 
+        # The 30% repartition line is deductible, unlike the 70% one which is on an income account.
+        deductible_tax_account = self.company_data['default_account_tax_sale']
         tax = self.env['account.tax'].create({
             'name': 'cash basis 20%',
             'type_tax_use': 'purchase',
@@ -5386,15 +5380,13 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
                 }),
                 Command.create({
                     'factor_percent': 30,
-                    'account_id': self.tax_account_1.id,
+                    'account_id': deductible_tax_account.id,
                     'repartition_type': 'tax',
-                    'use_in_tax_closing': True,
                 }),
                 Command.create({
                     'factor_percent': 70,
                     'account_id': self.tax_account_2.id,
                     'repartition_type': 'tax',
-                    'use_in_tax_closing': False,
                 }),
             ],
             'refund_repartition_line_ids': [
@@ -5404,15 +5396,13 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
                 }),
                 Command.create({
                     'factor_percent': 30,
-                    'account_id': self.tax_account_1.id,
+                    'account_id': deductible_tax_account.id,
                     'repartition_type': 'tax',
-                    'use_in_tax_closing': True,
                 }),
                 Command.create({
                     'factor_percent': 70,
                     'account_id': self.tax_account_2.id,
                     'repartition_type': 'tax',
-                    'use_in_tax_closing': False,
                 }),
             ],
         })
@@ -5451,15 +5441,15 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
 
         # Check the caba move lines.
         # I.e. lines with different analytic distributions should not be grouped / mixed together.
-        # The value of the `use_in_tax_closing` field on the repartition lines is important.
+        # The value of the `is_deductible` field on the repartition lines is important.
         # (Here) It determines whether the analytic distribution will be applied to the journal items or not.
         # When creating the caba move (lines) only the journal items (and their analytic distribution) are considered
         # (and not the invoice lines).
-        #   * base repartition lines: use_in_tax_closing is False (default computed); the analytic distribution will be applied.
+        #   * base repartition lines: is_deductible is False; the analytic distribution will be applied.
         #     They should be separated by analytic distribution.
-        #   * 30% repartition line: use_in_tax_closing is True; the analytic distribution will not be applied.
+        #   * 30% repartition line: is_deductible is True; the analytic distribution will not be applied.
         #     They should all be grouped together.
-        #   * 70% repartiton line: use_in_tax_closing is False; the analytic distribution will be applied.
+        #   * 70% repartiton line: is_deductible is False; the analytic distribution will be applied.
         #     They should be separated by analytic distribution.
         caba_move = invoice.tax_cash_basis_created_move_ids
         expected_caba_move_line_values = [
@@ -5488,7 +5478,7 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
                 'analytic_distribution': analytic_distribution_b_serialized,
             },
             {
-                'account_id': self.tax_account_1.id,
+                'account_id': deductible_tax_account.id,
                 'debit': 0.0,
                 'credit': 18.0,
                 'analytic_distribution': False,
@@ -5559,6 +5549,7 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
             str(analytic_account_b.id): 100,
         }
 
+        deductible_tax_account = self.company_data['default_account_tax_sale']
         tax = self.env['account.tax'].create({
             'name': 'cash basis 20%',
             'type_tax_use': 'purchase',
@@ -5573,15 +5564,13 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
                 }),
                 Command.create({
                     'factor_percent': 30,
-                    'account_id': self.tax_account_1.id,
+                    'account_id': deductible_tax_account.id,
                     'repartition_type': 'tax',
-                    'use_in_tax_closing': True,
                 }),
                 Command.create({
                     'factor_percent': 70,
                     'account_id': self.tax_account_2.id,
                     'repartition_type': 'tax',
-                    'use_in_tax_closing': False,
                 }),
             ],
             'refund_repartition_line_ids': [
@@ -5591,15 +5580,13 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
                 }),
                 Command.create({
                     'factor_percent': 30,
-                    'account_id': self.tax_account_1.id,
+                    'account_id': deductible_tax_account.id,
                     'repartition_type': 'tax',
-                    'use_in_tax_closing': True,
                 }),
                 Command.create({
                     'factor_percent': 70,
                     'account_id': self.tax_account_2.id,
                     'repartition_type': 'tax',
-                    'use_in_tax_closing': False,
                 }),
             ],
         })
@@ -5640,7 +5627,7 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
         # I.e. lines with different analytic distributions should not be grouped / mixed together.
         # The value of the `analytic` field on the tax is `True` here.
         # Thus the analytic distribution will be applied to all the journal items
-        # (i.e. even though `use_in_tax_closing` is `True` on the 30% repartition line).
+        # (i.e. even though `is_deductible` is `True` on the 30% repartition line).
         # When creating the caba move (lines) only the journal items (and their analytic distribution) are considered
         # (and not the invoice lines).
         # Thus on the caba move the base / 30% and 70% repartition lines are all separated by the analytic distribution respectively.
@@ -5671,7 +5658,7 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
                 'analytic_distribution': analytic_distribution_b_serialized,
             },
             {
-                'account_id': self.tax_account_1.id,
+                'account_id': deductible_tax_account.id,
                 'debit': 0.0,
                 'credit': 6.0,
                 'analytic_distribution': analytic_distribution_a_serialized,
@@ -5695,7 +5682,7 @@ class TestAccountMoveReconcile(AccountTestInvoicingCommon):
                 'analytic_distribution': analytic_distribution_a_serialized,
             },
             {
-                'account_id': self.tax_account_1.id,
+                'account_id': deductible_tax_account.id,
                 'debit': 0.0,
                 'credit': 12.0,
                 'analytic_distribution': analytic_distribution_b_serialized,
