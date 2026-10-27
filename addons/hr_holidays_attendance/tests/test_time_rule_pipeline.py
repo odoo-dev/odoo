@@ -2302,7 +2302,8 @@ class TestTimeRulePipeline(TransactionCase):
         )
 
     def test_auto_check_out_employee_time_off(self):
-        """Auto-check-out with personal leave (15:00-17:00): check_out trimmed, 0.1h OT output created."""
+        """Auto-check-out with personal leave (15:00-17:00): check_out after the 6 scheduled hours,
+        the tolerance only delays the cron, so no OT output is created."""
         Attendance = self.env['hr.attendance']
         company = self.env.company
         company.write({'auto_check_out': True, 'auto_check_out_tolerance': 0.1})
@@ -2332,8 +2333,8 @@ class TestTimeRulePipeline(TransactionCase):
             ('check_in', '<', datetime(2024, 1, 2)),
         ])
         self.assertAlmostEqual(
-            sum(a.worked_hours for a in output_atts), 0.1, places=4,
-            msg="Time rule should generate 0.1h overtime output attendance",
+            sum(a.worked_hours for a in output_atts), 0.0, places=4,
+            msg="Time rule should not generate any overtime output attendance",
         )
         all_atts = Attendance.search([
             ('employee_id', '=', self.cal_emp.id),
@@ -2341,9 +2342,10 @@ class TestTimeRulePipeline(TransactionCase):
             ('check_in', '<', datetime(2024, 1, 2)),
         ])
         self.assertAlmostEqual(
-            sum(a.worked_hours for a in all_atts), 6.1, places=4,
-            msg="Total attendance (source + output) should equal 6.1h",
+            sum(a.worked_hours for a in all_atts), 6.0, places=4,
+            msg="Total attendance should equal the 6 scheduled hours",
         )
+        self.assertEqual(attendance.check_out, datetime(2024, 1, 1, 14, 0))
         self.assertEqual(
             attendance.check_in, datetime(2024, 1, 1, 8, 0),
             "Source attendance check_in must be unchanged",
