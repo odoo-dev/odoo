@@ -133,14 +133,19 @@ class AccountAnalyticLine(models.Model):
             if self.task_id.pricing_type in ('task_rate', 'fixed_rate'):
                 return self.task_id.sale_line_id
             else:  # then pricing_type = 'employee_rate'
+                employee = self.employee_id or self.env.user.employee_id
                 map_entry = self.project_id.sale_line_employee_ids.filtered(
-                    lambda map_entry:
-                        map_entry.employee_id == (self.employee_id or self.env.user.employee_id)
-                        and map_entry.sale_line_id.order_partner_id.commercial_partner_id == self.task_id.partner_id.commercial_partner_id
+                    lambda mapping: mapping.employee_id == employee
                 )
                 if map_entry:
-                    return map_entry.sale_line_id
-                return self.task_id.sale_line_id
+                    map_entry = map_entry.filtered(
+                        lambda mapping:
+                            mapping.sale_line_id.order_partner_id.commercial_partner_id
+                            == self.task_id.partner_id.commercial_partner_id
+                    )
+
+                result = map_entry.sale_line_id if map_entry else self.task_id.sale_line_id
+                return result
         return False
 
     def _timesheet_get_portal_domain(self):

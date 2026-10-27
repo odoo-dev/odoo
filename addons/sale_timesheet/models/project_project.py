@@ -175,14 +175,39 @@ class ProjectProject(models.Model):
         return res
 
     def _update_timesheets_sale_line_id(self):
-        for project in self.filtered(lambda p: p.allow_billable and p.allow_timesheets):
-            timesheet_ids = project.mapped('timesheet_ids').filtered(lambda t: not t.is_so_line_edited and t._is_updatable_timesheet())
-            if not timesheet_ids:
-                continue
-            for employee_id in project.sale_line_employee_ids.filtered(lambda l: l.project_id == project).employee_id:
-                sale_line_id = project.sale_line_employee_ids.filtered(lambda l: l.project_id == project and l.employee_id == employee_id).sale_line_id
-                timesheet_ids.filtered(lambda t: t.employee_id == employee_id and t.so_line != sale_line_id).sudo().so_line = sale_line_id
+            for project in self.filtered(lambda p: p.allow_billable and p.allow_timesheets):
+                timesheets = project.timesheet_ids.filtered(
+                    lambda t: not t.is_so_line_edited and t._is_updatable_timesheet()
+                )
+                if not timesheets:
+                    continue
 
+                sale_line_by_employee = {
+                    mapping.employee_id.id: mapping.sale_line_id
+                    for mapping in project.sale_line_employee_ids
+                }
+                timesheets_by_employee = {}
+                for timesheet in timesheets:
+                    if timesheet.employee_id:
+                        timesheets_by_employee.setdefault(
+                            timesheet.employee_id.id,
+                            self.env['account.analytic.line'],
+                        )
+                        timesheets_by_employee[timesheet.employee_id.id] |= timesheet
+
+                for employee_id, employee_timesheets in timesheets_by_employee.items():
+                    sale_line = sale_line_by_employee.get(employee_id)
+
+                    if not sale_line:
+                        continue
+
+                    employee_timesheets = employee_timesheets.filtered(
+                        lambda t: t.so_line != sale_line
+                    )
+
+                    if employee_timesheets:
+                        employee_timesheets.sudo().so_line = sale_line
+    
     def action_view_timesheet(self):
         self.ensure_one()
         return {
