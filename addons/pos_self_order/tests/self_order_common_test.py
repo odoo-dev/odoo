@@ -8,11 +8,11 @@ import odoo.tests
 
 from odoo import Command
 from odoo.addons.mail.tests.common import mail_new_test_user
-from odoo.addons.point_of_sale.tests.common import archive_products
+from odoo.addons.point_of_sale.tests.common import PosMultiTabHttpCase, archive_products
 
 
 @odoo.tests.tagged("post_install", "-at_install")
-class SelfOrderCommonTest(odoo.tests.HttpCase):
+class SelfOrderCommonTest(PosMultiTabHttpCase):
     browser_size = "375x667"
     touch_enabled = True
     allow_inherited_tests_method = True

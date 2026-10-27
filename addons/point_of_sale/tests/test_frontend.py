@@ -15,7 +15,7 @@ from odoo.tests import tagged, loaded_demo_data
 from odoo.addons.account.tests.common import TestTaxCommon, AccountTestInvoicingHttpCommon
 from odoo.addons.point_of_sale.tests.common_setup_methods import setup_product_combo_items
 from datetime import date, timedelta
-from odoo.addons.point_of_sale.tests.common import archive_products
+from odoo.addons.point_of_sale.tests.common import PosMultiTabHttpCase, archive_products
 from odoo.exceptions import UserError
 from freezegun import freeze_time
 
@@ -29,7 +29,7 @@ def _create_image(color: int | str = 0, dims=(1920, 1080), format='JPEG'):
     return BinaryBytes(f.read())
 
 
-class TestPointOfSaleHttpCommon(AccountTestInvoicingHttpCommon):
+class TestPointOfSaleHttpCommon(AccountTestInvoicingHttpCommon, PosMultiTabHttpCase):
 
     _test_user_groups = None  # FIXME list needed groups
 
@@ -1232,6 +1232,21 @@ class TestUi(TestPointOfSaleHttpCommon):
         order = self.env['pos.order'].search([], limit=1)
         self.assertEqual(order.lines.filtered(lambda l: l.product_id.type == 'combo').margin, 0)
         self.assertEqual(order.lines.filtered(lambda l: l.product_id.type == 'combo').margin_percent, 0)
+
+    def test_pos_customer_display_multi_tab(self):
+        config = self.main_pos_config
+        config.with_user(self.pos_user).open_ui()
+        # A theme change reloads the display and can discard an in-flight order update.
+        theme = 'light'
+        customer_display_url = f'/pos_customer_display/{config.id}/1?access_token={config.access_token}&theme={theme}'
+        self.start_pos_multi_tab_tour(
+            'test_pos_customer_display_multi_tab',
+            {
+                'pos': self._get_url(),
+                'customer_display': customer_display_url,
+            },
+            cookies={'pos_color_scheme': theme},
+        )
 
     def test_customer_display_as_public(self):
         self.main_pos_config.customer_display_bg_img = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGNgYGAAAAAEAAH2FzhVAAAAAElFTkSuQmCC'

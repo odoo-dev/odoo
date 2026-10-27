@@ -1,14 +1,43 @@
+import inspect
+import json
 import logging
 
 from random import randint
 from datetime import datetime
 from odoo import fields, tools
 from odoo.fields import Command
-from odoo.tests import Form
+from odoo.tests import Form, HttpCase
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 
 
 _logger = logging.getLogger(__name__)
+
+
+class PosMultiTabHttpCase(HttpCase):
+    """HTTP helpers shared by terminal, self-order, and preparation display tests."""
+
+    def get_method_additional_tags(self, test_method):
+        additional_tags = super().get_method_additional_tags(test_method)
+        if 'self.start_pos_multi_tab_tour' in inspect.getsource(test_method):
+            additional_tags.append('is_tour')
+        return additional_tags
+
+    def start_pos_multi_tab_tour(self, tour_name, urls, login="pos_user", step_delay=None, **kwargs):
+        """Run a tour with named, same-origin interfaces sharing one browser session.
+
+        ``urls`` maps tab names to URLs. Sessions and interface-specific records
+        must be created by the caller, just as with ``start_pos_tour``.
+        Additional tabs can be opened by the tour once their URL is known.
+        """
+        options = {'stepDelay': step_delay or 0, 'debug': kwargs.get('debug', False)}
+        code = f"""
+            odoo.loader.modules.get(
+                '@point_of_sale/../tests/generic_helpers/multi_tab'
+            ).openTabs({json.dumps(urls)});
+            odoo.startTour({json.dumps(tour_name)}, {json.dumps(options)});
+        """
+        self.start_tour('/odoo', tour_name, login=login, step_delay=step_delay, code=code, **kwargs)
+
 
 def archive_products(env):
     # Archive all existing product to avoid noise during the tours
