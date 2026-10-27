@@ -334,7 +334,8 @@ export class Action {
      * @returns {(() => void)|undefined} closes what was opened
      */
     _openOverlay(container) {
-        const { popover, dialog } = this.store.env.services;
+        const { dialog } = this.store.env.services;
+        const popover = this.store.popover;
         const panel = this.getPanel();
         const onClose = () => {
             if (this.overlayState.isOpen) {

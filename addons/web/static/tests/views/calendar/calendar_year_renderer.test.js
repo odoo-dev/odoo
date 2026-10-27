@@ -1,7 +1,8 @@
 import { expect, test } from "@odoo/hoot";
 import { queryAllTexts } from "@odoo/hoot-dom";
 import { mockTimeZone } from "@odoo/hoot-mock";
-import { mockService, mountWithCleanup, preloadBundle } from "@web/../tests/web_test_helpers";
+import { mountWithCleanup, patchWithCleanup, preloadBundle } from "@web/../tests/web_test_helpers";
+import { PopoverPlugin } from "@web/core/popover/popover_plugin";
 import { FAKE_MODEL, clickDate, selectDateRange } from "./calendar_test_helpers";
 
 import { CalendarYearRenderer } from "@web/views/calendar/calendar_year/calendar_year_renderer";
@@ -61,12 +62,12 @@ test(`mount a CalendarYearRenderer`, async () => {
 
 test.tags("desktop");
 test(`display events`, async () => {
-    mockService("popover", () => ({
+    patchWithCleanup(PopoverPlugin.prototype, {
         add(target, component, props) {
             expect.step(`${props.date.toISODate()} ${props.records[0].title}`);
             return () => {};
         },
-    }));
+    });
 
     await start({
         createRecord(record) {

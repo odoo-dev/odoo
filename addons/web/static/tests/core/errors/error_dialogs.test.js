@@ -25,6 +25,7 @@ import {
     UnlinkBlockedErrorDialog,
     WarningDialog,
 } from "@web/core/errors/error_dialogs";
+import { PopoverPlugin } from "@web/core/popover/popover_plugin";
 
 describe.current.tags("desktop");
 
@@ -142,12 +143,12 @@ test("button clipboard copy error traceback", async () => {
 
 test("Display a tooltip on clicking copy button", async () => {
     expect.assertions(1);
-    mockService("popover", () => ({
+    patchWithCleanup(PopoverPlugin.prototype, {
         add(el, comp, params) {
             expect(params).toEqual({ tooltip: "Copied" });
             return () => {};
         },
-    }));
+    });
 
     assignDialogTestEnv();
     await mountWithCleanup(ErrorDialog, {

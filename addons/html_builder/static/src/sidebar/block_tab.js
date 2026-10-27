@@ -1,4 +1,14 @@
-import { Component, onMounted, onWillDestroy, proxy, signal, useProps, t } from "@odoo/owl";
+import {
+    Component,
+    onMounted,
+    onWillDestroy,
+    proxy,
+    signal,
+    usePlugin,
+    useProps,
+    t,
+} from "@odoo/owl";
+import { PopoverPlugin } from "@web/core/popover/popover_plugin";
 import { useService } from "@web/core/utils/hooks";
 import { Tooltip } from "@web/core/tooltip/tooltip";
 import { closestScrollableY, getScrollingElement, isScrollableY } from "@web/core/utils/scrolling";
@@ -38,7 +48,7 @@ export class BlockTab extends Component {
     setup() {
         this.dialog = useService("dialog");
         this.orm = useService("orm");
-        this.popover = useService("popover");
+        this.popover = usePlugin(PopoverPlugin);
         this.snippetModel = useSnippets(this.props.snippetsName);
         // Needed to avoid race condition in tours.
         this.state = proxy({ ongoingInsertion: false });

@@ -1,7 +1,8 @@
 import { beforeEach, expect, test } from "@odoo/hoot";
 import { queryAllTexts, queryFirst, queryRect } from "@odoo/hoot-dom";
 import { animationFrame, runAllTimers, mockTimeZone } from "@odoo/hoot-mock";
-import { mockService, mountWithCleanup, preloadBundle } from "@web/../tests/web_test_helpers";
+import { mountWithCleanup, patchWithCleanup, preloadBundle } from "@web/../tests/web_test_helpers";
+import { PopoverPlugin } from "@web/core/popover/popover_plugin";
 import {
     DEFAULT_DATE,
     FAKE_MODEL,
@@ -106,13 +107,13 @@ test(`Day: check event`, async () => {
 
 test.tags("desktop");
 test(`Day: click on event`, async () => {
-    mockService("popover", () => ({
+    patchWithCleanup(PopoverPlugin.prototype, {
         add(target, component, { record }) {
             expect.step("popover");
             expect(record.id).toBe(1);
             return () => {};
         },
-    }));
+    });
     await start({ model: { ...FAKE_MODEL, scale: "day" } });
     await clickEvent(1);
     await runAllTimers();

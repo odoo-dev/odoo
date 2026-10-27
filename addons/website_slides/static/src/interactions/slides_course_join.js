@@ -1,6 +1,8 @@
+import { usePlugin } from "@odoo/owl";
 import { Interaction } from "@web/public/interaction";
 import { registry } from "@web/core/registry";
 import { _t } from "@web/core/l10n/translation";
+import { PopoverPlugin } from "@web/core/popover/popover_plugin";
 import { redirect } from "@web/core/utils/urls";
 import { SlidesCourseJoinPopup } from "@website_slides/js/public/components/course_join_popup/course_join_popup";
 import { session } from "@web/session";
@@ -15,7 +17,7 @@ export class WebsiteSlidesCourseJoinLink extends Interaction {
 
     setup() {
         this.slidesService = this.services.website_slides;
-        this.popover = this.services.popover;
+        this.popover = usePlugin(PopoverPlugin);
         const data = this.el.dataset;
         this.slidesService.setChannel({
             id: Number(data.channelId),

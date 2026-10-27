@@ -413,7 +413,6 @@ services.add(TooltipPlugin);
  * -----------------------------------------------------------------------------
  */
 export const tooltipService = {
-    dependencies: ["popover"],
     start() {
         return usePlugin(TooltipPlugin);
     },

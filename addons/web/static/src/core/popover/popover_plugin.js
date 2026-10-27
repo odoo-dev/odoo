@@ -1,6 +1,5 @@
 import { markRaw, t, Plugin, usePlugin, assertType } from "@odoo/owl";
 import { Popover } from "@web/core/popover/popover";
-import { registry } from "@web/core/registry";
 import { OverlayPlugin } from "@web/core/overlay/overlay_plugin";
 import { services } from "@web/core/services";
 
@@ -76,17 +75,3 @@ export class PopoverPlugin extends Plugin {
 }
 
 services.add(PopoverPlugin);
-
-/**
- * -----------------------------------------------------------------------------
- * @todo owl3 migration
- * temporary - to remove when all use of the popover service are removed
- * -----------------------------------------------------------------------------
- */
-export const popoverService = {
-    start() {
-        return usePlugin(PopoverPlugin);
-    },
-};
-
-registry.category("services").add("popover", popoverService);

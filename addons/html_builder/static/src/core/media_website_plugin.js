@@ -1,8 +1,10 @@
+import { usePlugin } from "@odoo/owl";
 import { Plugin } from "@html_editor/plugin";
 import { MEDIA_SELECTOR, isProtected } from "@html_editor/utils/dom_info";
 import { closestElement } from "@html_editor/utils/dom_traversal";
 import { shouldEditableMediaBeEditable } from "@html_builder/utils/utils_css";
 import { _t } from "@web/core/l10n/translation";
+import { PopoverPlugin } from "@web/core/popover/popover_plugin";
 import { Tooltip } from "@web/core/tooltip/tooltip";
 
 /**
@@ -38,7 +40,7 @@ export class MediaWebsitePlugin extends Plugin {
             }
         });
 
-        this.popover = this.services.popover;
+        this.popover = usePlugin(PopoverPlugin);
         this.removeCurrentTooltip = () => {};
         this.addDomListener(this.editable, "click", (ev) => {
             const targetEl = ev.target.closest(this.basicMediaSelector);

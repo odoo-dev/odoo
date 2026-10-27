@@ -5,11 +5,11 @@ import {
     defineModels,
     fieldInput,
     fields,
-    mockService,
     models,
     mountView,
     patchWithCleanup,
 } from "@web/../tests/web_test_helpers";
+import { PopoverPlugin } from "@web/core/popover/popover_plugin";
 import { registry } from "@web/core/registry";
 
 class Partner extends models.Model {
@@ -110,7 +110,7 @@ test("Copy button is visible on readonly empty field with default value", async 
 });
 
 test("Display a tooltip on click", async () => {
-    mockService("popover", {
+    patchWithCleanup(PopoverPlugin.prototype, {
         add(el, comp, params) {
             expect(params).toEqual({ tooltip: "Copied" });
             expect.step("copied tooltip");
