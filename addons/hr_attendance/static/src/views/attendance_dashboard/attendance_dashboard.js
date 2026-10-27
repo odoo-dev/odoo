@@ -1,4 +1,5 @@
 import { Component, onWillStart, proxy, t, useProps } from "@odoo/owl";
+import { Domain } from "@web/core/domain";
 import { user } from "@web/core/user";
 import { KeepLast } from "@web/core/utils/concurrency";
 import { useBus, useService } from "@web/core/utils/hooks";
@@ -36,8 +37,10 @@ export class AttendanceDashboard extends Component {
         if (!this.state.isOfficer) {
             return;
         }
+        // count within the action domain, so that a card matches what clicking it shows
+        const actionDomain = new Domain(this.env.searchModel.globalDomain).toList(user.context);
         this.state.cards = await this.keepLast.add(
-            this.orm.call("hr.attendance", "get_attendance_dashboard", [])
+            this.orm.call("hr.attendance", "get_attendance_dashboard", [actionDomain])
         );
     }
 

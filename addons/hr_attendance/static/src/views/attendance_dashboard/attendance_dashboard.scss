@@ -4,10 +4,9 @@
     $attendance-dashboard-colors: (
         orange: ($orange-100, $orange-200, $orange-700, $orange-800),
         red: ($red-100, $red-200, $red-700, $red-800),
-        purple: ($purple-100, $purple-200, $purple-700, $purple-800),
         cyan: ($cyan-100, $cyan-200, $cyan-700, $cyan-800),
-        yellow: ($yellow-100, $yellow-200, $yellow-700, $yellow-800),
         blue: ($blue-100, $blue-200, $blue-700, $blue-800),
+        green: ($green-100, $green-200, $green-700, $green-800),
     );
 
     @each $name, $shades in $attendance-dashboard-colors {
@@ -27,4 +26,12 @@
             }
         }
     }
+}
+
+// worked time with overtime: same orange as the Overtime card
+.o_attendance_overtime,
+.o_attendance_list .o_data_cell.text-warning,
+.o_attendance_list .o_data_cell:has(> .o_field_widget.text-warning) {
+    background-color: $orange-100 !important;
+    color: $orange-700 !important;
 }

@@ -56,7 +56,7 @@ class ResCompany(models.Model):
         help="Work entry type assigned to attendances and read by the time rule engine.",
     )
 
-    attendance_device_tracking = fields.Boolean(string="Device & Location Tracking", default=False)
+    attendance_device_tracking = fields.Boolean(string="Location Tracking", default=False)
     attendance_capture_check_in = fields.Boolean(string="Take Pictures on Check-In", default=False)
     attendance_break_management = fields.Boolean(
         string="Break Management on Checkout",

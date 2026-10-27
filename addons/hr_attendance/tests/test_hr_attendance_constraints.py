@@ -91,7 +91,10 @@ class TestHrAttendance(TransactionCase):
             'check_in': time.strftime('%Y-%m-28 08:00'),
             'check_out': time.strftime('%Y-%m-28 09:00'),
         })
-        self.assertEqual(attendance_id.display_name, f"{self.test_employee.name}: A - 1h")
+        # recorded manually: flagged with a pencil
+        self.assertEqual(attendance_id.display_name, f"✏ {self.test_employee.name}: A - 1h")
         # the employee is omitted when obvious from the context
-        self.assertEqual(attendance_id.with_context(my_attendances=True).display_name, "A - 1h")
-        self.assertEqual(attendance_id.with_context(attendance_hide_employee=True).display_name, "A - 1h")
+        self.assertEqual(attendance_id.with_context(my_attendances=True).display_name, "✏ A - 1h")
+        self.assertEqual(attendance_id.with_context(attendance_hide_employee=True).display_name, "✏ A - 1h")
+        attendance_id.write({'check_in': attendance_id.check_in, 'in_mode': 'systray', 'out_mode': 'systray'})
+        self.assertEqual(attendance_id.display_name, f"{self.test_employee.name}: A - 1h")

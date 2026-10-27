@@ -43,7 +43,7 @@
                 <field name="check_in" decoration-danger="is_late_check_in or in_mode == 'manual'" decoration-bf="in_mode == 'manual'"/>
                 <field name="check_out" options="{}" decoration-danger="is_early_check_out or out_mode in ('manual', 'auto_check_out')" decoration-bf="out_mode == 'manual'"/>
                 <field name="break_duration" widget="float_time" optional="show"/>
-                <field name="worked_hours" string="Hours" widget="float_time" decoration-danger="has_overtime" sum="Total Hours"/>
+                <field name="worked_hours" string="Hours" widget="float_time" decoration-warning="has_overtime" sum="Total Hours"/>
                 <field name="state" widget="badge"
                        decoration-success="state == 'validated'"
                        decoration-info="state == 'draft'"
@@ -108,13 +108,13 @@
                                       'bg-danger-subtle text-danger': record.is_early_check_out.raw_value or ['manual', 'auto_check_out'].includes(record.out_mode.raw_value),
                                       'fw-bold': record.out_mode.raw_value === 'manual',
                                   }">
-                                <t t-if="check_out.hasSame(record.check_in.raw_value, 'day')"
-                                   t-out="check_out.toLocaleString({hour: 'numeric', minute: '2-digit'})"/>
-                                <field t-if="!check_out.hasSame(record.check_in.raw_value, 'day')" name="check_out"/>
+                                <t t-set="same_day" t-value="check_out.slice(0, 10) === record.check_in.raw_value.slice(0, 10)"/>
+                                <t t-if="same_day" t-out="record.check_out.value.split(', ').pop()"/>
+                                <field t-if="!same_day" name="check_out"/>
                             </span>
                             <span t-else="" class="text-muted">In progress</span>
                             <span t-if="check_out" class="ms-auto px-1 rounded fw-bold"
-                                  t-att-class="{'bg-danger-subtle text-danger': record.has_overtime.raw_value}">
+                                  t-att-class="{'o_attendance_overtime': record.has_overtime.raw_value}">
                                 <field name="worked_hours" widget="float_time"/>
                             </span>
                         </div>
@@ -213,11 +213,11 @@
                                 <group name="logs_group">
                                     <group name="check_in_group" string="Check In">
                                         <field name="in_mode" string="Mode"/>
-                                        <field name="in_ip_address" string="IP Address" invisible="in_mode == 'manual' or not device_tracking_enabled"/>
-                                        <field name="in_browser" string="Browser" invisible="in_mode == 'manual' or not device_tracking_enabled"/>
-                                        <field name="in_location" string="Location" invisible="in_mode == 'manual' or not device_tracking_enabled"/>
-                                        <label for="in_latitude" string="GPS Coordinates" invisible="in_mode == 'manual' or not device_tracking_enabled"/>
-                                        <div invisible="in_mode == 'manual' or not device_tracking_enabled">
+                                        <field name="in_ip_address" string="IP Address" invisible="not in_ip_address"/>
+                                        <field name="in_browser" string="Browser" invisible="not in_browser"/>
+                                        <field name="in_location" string="Location" invisible="not in_location"/>
+                                        <label for="in_latitude" string="GPS Coordinates" invisible="not in_latitude and not in_longitude"/>
+                                        <div invisible="not in_latitude and not in_longitude">
                                             <div class="o_row">
                                                 <span>
                                                     <field name="in_latitude"/>
@@ -236,11 +236,11 @@
                                     </group>
                                     <group name="check_out_group" string="Check Out" invisible="not check_out">
                                         <field name="out_mode" string="Mode"/>
-                                        <field name="out_ip_address" string="IP Address" invisible="out_mode == 'manual' or not device_tracking_enabled"/>
-                                        <field name="out_browser" string="Browser" invisible="out_mode == 'manual' or not device_tracking_enabled"/>
-                                        <field name="out_location" string="Location" invisible="out_mode == 'manual' or not device_tracking_enabled"/>
-                                        <label for="out_latitude" string="GPS Coordinates" invisible="out_mode == 'manual' or not device_tracking_enabled"/>
-                                        <div invisible="out_mode == 'manual' or not device_tracking_enabled">
+                                        <field name="out_ip_address" string="IP Address" invisible="not out_ip_address"/>
+                                        <field name="out_browser" string="Browser" invisible="not out_browser"/>
+                                        <field name="out_location" string="Location" invisible="not out_location"/>
+                                        <label for="out_latitude" string="GPS Coordinates" invisible="not out_latitude and not out_longitude"/>
+                                        <div invisible="not out_latitude and not out_longitude">
                                             <div class="o_row">
                                                 <span>
                                                     <field name="out_latitude"/>
@@ -437,15 +437,12 @@
                 <filter string="Refused" name="state_refused" domain="[('state', '=', 'refused')]"/>
                 <separator/>
                 <filter string="At Work" name="nocheckout" domain="[('check_out', '=', False)]" />
-                <filter string="Errors" name="errors"
-                        domain="['|', ('worked_hours', '&gt;=', 16), '&amp;', ('check_out', '=', False), ('check_in', '&lt;=', '-1d')]"/>
                 <filter string="Forgot Check-Out" name="auto_check"
                         domain="[('out_mode', '=', 'auto_check_out')]"/>
                 <filter string="Late Clock In" name="late_check_in" domain="[('is_late_check_in', '=', True)]"/>
                 <filter string="Early Clock Out" name="early_check_out" domain="[('is_early_check_out', '=', True)]"/>
                 <filter string="Overtime" name="overtime" domain="[('has_overtime', '=', True)]"/>
                 <separator/>
-                <filter string="Today" name="today" domain="[('date', '=', 'today')]" invisible="1"/>
                 <filter string="Date" name="check_in_filter" date="check_in"/>
                 <field name="resource_calendar_id"/>
                 <separator invisible="1"/>
@@ -577,7 +574,7 @@
                 <field name="check_in" readonly="1" decoration-danger="is_late_check_in or in_mode == 'manual'" decoration-bf="in_mode == 'manual'"/>
                 <field name="check_out" readonly="1" decoration-danger="is_early_check_out or out_mode in ('manual', 'auto_check_out')" decoration-bf="out_mode == 'manual'"/>
                 <field name="break_duration" readonly="1" widget="float_time"/>
-                <field name="worked_hours" readonly="1" string="Worked Time" widget="float_time" decoration-danger="has_overtime"/>
+                <field name="worked_hours" readonly="1" string="Worked Time" widget="float_time" decoration-warning="has_overtime"/>
                 <field name="has_overtime" column_invisible="1"/>
                 <field name="in_mode" column_invisible="1"/>
                 <field name="is_late_check_in" column_invisible="1"/>
@@ -615,7 +612,6 @@
                 "search_default_state_draft": 1,
             }
         </field>
-        <field name="domain">[('check_out', '!=', False)]</field>
         <field name="help" type="html">
             <p>
                 No attendance to review: you're all set!

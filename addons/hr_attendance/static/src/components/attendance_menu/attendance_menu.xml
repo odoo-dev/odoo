@@ -138,24 +138,22 @@
                         </div>
                     </div>
 
-                    <div class="o_wrap_btn_sign_out d-flex gap-3 align-items-center bottom-0 p-2 z-2">
-                        <div class="d-flex gap-1 flex-grow-1">
-                            <button t-on-click="() => this.signInOut()"
-                                    t-attf-class="btn btn-{{ this.state.checkedIn ? 'warning' : 'primary' }} flex-grow-1">
-                                <span t-if="!this.state.checkedIn">Check in</span>
-                                <span t-else="">Check out</span>
-                                <i class="oi ms-1" t-attf-data-icon="{{ this.state.checkedIn ? 'logout' : 'login' }}"/>
-                            </button>
-                            <button class="btn btn-secondary"
-                                    t-on-click="() => this.openMyAttendances()"
-                                    title="My Attendances"
-                                    aria-label="My Attendances">
-                                <i class="oi" data-icon="format_list_bulleted"/>
-                            </button>
-                        </div>
+                    <div class="o_wrap_btn_sign_out d-flex gap-1 align-items-center bottom-0 p-2 z-2">
+                        <button t-on-click="() => this.signInOut()"
+                                t-attf-class="btn btn-{{ this.state.checkedIn ? 'warning' : 'primary' }} flex-grow-1">
+                            <span t-if="!this.state.checkedIn">Check in</span>
+                            <span t-else="">Check out</span>
+                            <i class="oi ms-1" t-attf-data-icon="{{ this.state.checkedIn ? 'logout' : 'login' }}"/>
+                        </button>
+                        <button class="btn btn-secondary"
+                                t-on-click="() => this.openMyAttendances()"
+                                title="My Attendances"
+                                aria-label="My Attendances">
+                            <i class="oi" data-icon="format_list_bulleted"/>
+                        </button>
                         <t t-set="attendanceTotals"
                             t-value="this.state.attendances.length > 1 and attendanceReviewDetails"/>
-                        <div t-if="attendanceTotals" name="attendance_totals" class="text-end text-nowrap ms-auto">
+                        <div t-if="attendanceTotals" name="attendance_totals" class="text-end text-nowrap ms-auto ps-2">
                             <div class="d-flex align-items-baseline justify-content-end gap-2">
                                 <span class="small text-muted">Worked</span>
                                 <strong class="fs-5 lh-1">

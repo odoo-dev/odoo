@@ -48,7 +48,7 @@
                         <setting string="Attendances from Backend" company_dependent="1" help="Allow Users to Check in/out from Odoo.">
                             <field name="attendance_from_systray" required="1"/>
                         </setting>
-                        <setting string="Device &amp; Location Tracking" company_dependent="1" help="Allow the collection of GPS location, IP address, and browser/device details used to track employee access and attendance">
+                        <setting string="Location Tracking" company_dependent="1" help="Allow precise location tracking, if the user allows it on the device.">
                             <field name="attendance_device_tracking"/>
                         </setting>
                         <setting string="Take Pictures on Check-In" company_dependent="1" help="Capture a photo at the time of check-in using the device camera (if available). Images are automatically optimized for performance and storage.">

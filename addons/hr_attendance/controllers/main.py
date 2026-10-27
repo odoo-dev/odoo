@@ -100,9 +100,21 @@ class HrAttendance(http.Controller):
 
     @staticmethod
     def _get_geoip_response(mode, latitude=False, longitude=False, device_tracking_enabled=True):
-        response = {'mode': mode}
+        geoip = request.geoip
+        response = {
+            'mode': mode,
+            'ip_address': geoip.ip,
+            'browser': request.httprequest.user_agent.browser,
+        }
 
         if not device_tracking_enabled:
+            # no device tracking: only an approximate location from the IP address, if GeoIP is available
+            if geoip and geoip.location.latitude:
+                response.update({
+                    'location': ', '.join(filter(None, [geoip.city.name, geoip.country_name])),
+                    'latitude': geoip.location.latitude,
+                    'longitude': geoip.location.longitude,
+                })
             return response
         try:
             location = request.env['base.geocoder']._get_localisation(latitude, longitude)
@@ -111,10 +123,8 @@ class HrAttendance(http.Controller):
 
         response.update({
             'location': location,
-            'latitude': latitude or request.geoip.location.latitude or False,
-            'longitude': longitude or request.geoip.location.longitude or False,
-            'ip_address': request.geoip.ip,
-            'browser': request.httprequest.user_agent.browser,
+            'latitude': latitude or geoip.location.latitude or False,
+            'longitude': longitude or geoip.location.longitude or False,
         })
 
         return response

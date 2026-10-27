@@ -79,7 +79,6 @@ class HrAttendance(models.Model):
                                            ('auto_check_out', 'Forgot')],
                                 readonly=True,
                                 tracking=True)
-    device_tracking_enabled = fields.Boolean(related="employee_id.company_id.attendance_device_tracking")
     resource_calendar_id = fields.Many2one(related='employee_id.resource_calendar_id', string="Working Schedule")
     break_duration = fields.Float(string="Break Duration", tracking=True, help="Extra unpaid break duration (hours)")
     work_entry_type_id = fields.Many2one(
@@ -163,17 +162,19 @@ class HrAttendance(models.Model):
         for fname in ('is_late_check_in', 'is_early_check_out'):
             self.env.add_to_compute(self._fields[fname], siblings)
 
-    @api.depends('overtime_attendance_ids')
+    # overtime entries whose source changed since (source_stale) are left over, not current overtime
+    @api.depends('overtime_attendance_ids.source_stale')
     def _compute_has_overtime(self):
         for attendance in self:
-            attendance.has_overtime = bool(attendance.overtime_attendance_ids)
+            attendance.has_overtime = any(not output.source_stale for output in attendance.overtime_attendance_ids)
 
     def _search_has_overtime(self, operator, value):
         if operator != 'in':
             return NotImplemented
         if True in value and False in value:
             return Domain.TRUE
-        return [('overtime_attendance_ids', '!=' if True in value else '=', False)]
+        domain = Domain('overtime_attendance_ids', 'any', [('source_stale', '=', False)])
+        return domain if True in value else ~domain
 
     @api.depends('state')
     def _compute_color(self):
@@ -181,7 +182,7 @@ class HrAttendance(models.Model):
         for attendance in self:
             attendance.color = colors.get(attendance.state, 0)
 
-    @api.depends('employee_id.name', 'check_in', 'check_out', 'work_entry_type_id', 'source_stale')
+    @api.depends('employee_id.name', 'check_in', 'check_out', 'work_entry_type_id', 'source_stale', 'in_mode', 'out_mode')
     @api.depends_context('my_attendances', 'attendance_hide_employee')
     def _compute_display_name(self):
         # the employee is omitted when obvious: my attendances, or the view
@@ -201,6 +202,8 @@ class HrAttendance(models.Model):
                 name = f"{wet_name} - {dur}" if wet_name else dur
             if show_employee and attendance.employee_id:
                 name = f"{attendance.employee_id.name}: {name}"
+            if 'manual' in (attendance.in_mode, attendance.out_mode):
+                name = f"✏ {name}"
             attendance.display_name = f"⚠ {name}" if attendance.source_stale else name
 
     @api.depends_context('uid')
@@ -315,6 +318,12 @@ class HrAttendance(models.Model):
             return self.with_context(skip_time_rules=True).write(vals)
         if vals.get('state') in ('validated', 'refused') and not self._is_attendance_reviewer():
             raise AccessError(_("Only attendance officers can review attendances."))
+        if not self.env.context.get('skip_time_rules'):
+            # changing a check in or out without its mode (e.g. from the form) is a manual change
+            if 'check_in' in vals and 'in_mode' not in vals:
+                vals = {**vals, 'in_mode': 'manual'}
+            if vals.get('check_out') and 'out_mode' not in vals:
+                vals = {**vals, 'out_mode': 'manual'}
         if (
             'state' not in vals
             and self._REVIEW_TRIGGER_FIELDS & vals.keys()
@@ -334,11 +343,7 @@ class HrAttendance(models.Model):
         stale_targets = self.env['hr.attendance']
         if self._STALE_TRIGGER_FIELDS & vals.keys():
             stale_targets = self.sudo().mapped('overtime_attendance_ids').filtered('id')
-        # checking out without a mode (e.g. from the form) is a manual check out
-        without_out_mode = self.filtered(lambda a: not a.out_mode) if vals.get('check_out') and 'out_mode' not in vals else self.browse()
         result = super().write(vals)
-        if without_out_mode:
-            without_out_mode.write({'out_mode': 'manual'})
         for prefix in ('in', 'out'):
             if {f'{prefix}_latitude', f'{prefix}_longitude'} & vals.keys():
                 self._log_gps_coordinates(prefix)
@@ -365,13 +370,13 @@ class HrAttendance(models.Model):
     def copy(self, default=None):
         raise exceptions.UserError(_('You cannot duplicate an attendance.'))
 
-    def _get_gps_coordinates_link(self, prefix):
+    def _get_gps_coordinates_link(self, prefix, label=None):
         self.ensure_one()
         latitude, longitude = self[f'{prefix}_latitude'], self[f'{prefix}_longitude']
         if not latitude and not longitude:
             return False
-        return Markup('<a href="%s" target="_blank">%s, %s</a>') % (
-            get_google_maps_url(latitude, longitude), latitude, longitude)
+        return Markup('<a href="%s" target="_blank">%s</a>') % (
+            get_google_maps_url(latitude, longitude), label or f"{latitude}, {longitude}")
 
     def _log_gps_coordinates(self, prefix):
         label = _("Locate Check In in map") if prefix == 'in' else _("Locate Check Out in map")
@@ -401,13 +406,10 @@ class HrAttendance(models.Model):
     def _creation_message(self):
         # Tracking only logs changes: log the check-in values at creation
         self.ensure_one()
-        lines = [_("Checked in (%(mode)s)", mode=dict(
+        lines = [_("Checked In (%(mode)s)", mode=dict(
             self._fields['in_mode']._description_selection(self.env)).get(self.in_mode, ''))]
-        for fname in ('in_location', 'in_ip_address', 'in_browser'):
-            if self[fname]:
-                lines.append(Markup('%s: %s') % (self._fields[fname]._description_string(self.env), self[fname]))
-        if link := self._get_gps_coordinates_link('in'):
-            lines.append(Markup('%s: %s') % (_("Locate Check In in map"), link))
+        if location := self._get_gps_coordinates_link('in', label=self.in_location) or self.in_location:
+            lines.append(Markup('%s: %s') % (_("Location"), location))
         return Markup('<br/>').join(lines)
 
     @api.model
@@ -415,16 +417,16 @@ class HrAttendance(models.Model):
         """ KPI cards displayed on top of the attendance list view: each card
         counts the records matching a filter of the search view. """
         return [
-            {'filter': 'state_draft', 'label': _("To Review"), 'color': 'orange', 'domain': [('state', '=', 'draft')]},
-            {'filter': 'nocheckout', 'label': _("At Work"), 'color': 'yellow', 'domain': [('check_out', '=', False)]},
+            {'filter': 'state_draft', 'label': _("To Review"), 'color': 'blue', 'domain': [('state', '=', 'draft')]},
+            {'filter': 'nocheckout', 'label': _("At Work"), 'color': 'green', 'domain': [('check_out', '=', False)]},
             {'filter': 'late_check_in', 'label': _("Late Clock In"), 'color': 'red', 'domain': [('is_late_check_in', '=', True)]},
-            {'filter': 'early_check_out', 'label': _("Early Clock Out"), 'color': 'purple', 'domain': [('is_early_check_out', '=', True)]},
-            {'filter': 'overtime', 'label': _("Overtime"), 'color': 'blue', 'domain': [('has_overtime', '=', True)]},
+            {'filter': 'early_check_out', 'label': _("Early Clock Out"), 'color': 'red', 'domain': [('is_early_check_out', '=', True)]},
+            {'filter': 'overtime', 'label': _("Overtime"), 'color': 'orange', 'domain': [('has_overtime', '=', True)]},
         ]
 
     @api.model
-    def get_attendance_dashboard(self):
-        base_domain = Domain('employee_id.active', '=', True)
+    def get_attendance_dashboard(self, domain=()):
+        base_domain = Domain('employee_id.active', '=', True) & Domain(domain or [])
         return [
             {
                 'filter': card['filter'],
@@ -650,10 +652,11 @@ class HrAttendance(models.Model):
 
                 # Attendances where Last open attendance time + previously worked time on that day + tolerance greater than the attendances hours (including lunch) in his calendar
                 if (current_attendance_duration + previous_attendances_duration - max_tol) > expected_worked_hours:
-                    att.with_context(skip_time_rules=True).check_out = check_in_datetime.replace(hour=23, minute=59, second=59).astimezone(UTC).replace(tzinfo=None)
-                    excess_hours = att.worked_hours - (expected_worked_hours + max_tol - previous_attendances_duration)
+                    # check out once the scheduled hours are worked, the tolerance only delays the cron
+                    remaining_hours = max(expected_worked_hours - previous_attendances_duration, 0)
+                    check_out = att.check_in + relativedelta(hours=att.break_duration + remaining_hours)
                     att.write({
-                        "check_out": max(att.check_out - relativedelta(hours=excess_hours), att.check_in + relativedelta(seconds=1)),
+                        "check_out": max(check_out, att.check_in + relativedelta(seconds=1)),
                         "out_mode": "auto_check_out"
                     })
                     att.message_post(
