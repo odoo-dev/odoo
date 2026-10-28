@@ -340,7 +340,15 @@ class PosOrder(models.Model):
         self.config_id._notify("TICKET_PRINTING_REQUESTED", self.ids)
 
     def is_refund_or_negative(self):
-        return self.is_refund or self.amount_total < 0
+        """ Whether the accounting document of the order is a refund (credit note).
+
+        A refund order can mix refunded lines (negative quantities) with regular lines
+        (positive quantities), so the document type follows the sign of the net amount. An order
+        created from the refund flow keeps being a refund when its net amount is null.
+        """
+        if self.is_refund and (not self.amount_total or (self.currency_id and self.currency_id.is_zero(self.amount_total))):
+            return True
+        return self.amount_total < 0
 
     @api.depends('account_move')
     def _compute_invoice_status(self):
@@ -408,10 +416,9 @@ class PosOrder(models.Model):
     @api.depends('lines.margin', 'is_total_cost_computed')
     def _compute_margin(self):
         for order in self:
-            sign = -1 if order.is_refund_or_negative() else 1
             if order.is_total_cost_computed:
                 order.margin = sum(order.lines.mapped('margin'))
-                amount_untaxed = order.currency_id.round(sum(line.price_subtotal for line in order.lines)) * sign
+                amount_untaxed = order.currency_id.round(sum(line.price_subtotal * line._get_amount_sign() for line in order.lines))
                 order.margin_percent = (not float_is_zero(amount_untaxed, precision_rounding=order.currency_id.rounding)
                                         and order.margin / amount_untaxed) \
                                         or 0

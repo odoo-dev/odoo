@@ -237,10 +237,23 @@ class PosOrderLine(models.Model):
             )
             line.is_total_cost_computed = True
 
+    def _get_amount_sign(self):
+        """ Amounts of the lines are stored as magnitudes, this is the sign of the line.
+
+        An order created from the refund flow can mix refunded lines (negative quantities) with
+        regular lines (positive quantities), so the sign of each of its lines comes from its own
+        quantity. Otherwise, all the lines of an order share the sign of the order.
+        """
+        self.ensure_one()
+        order = self.order_id
+        if order.is_refund:
+            return -1 if self.qty < 0 else 1
+        return -1 if order.is_refund_or_negative() else 1
+
     @api.depends('price_subtotal', 'total_cost')
     def _compute_margin(self):
         for line in self:
-            sign = -1 if line.order_id.is_refund_or_negative() else 1
+            sign = line._get_amount_sign()
             if line.product_id.type == 'combo':
                 line.margin = 0
                 line.margin_percent = 0

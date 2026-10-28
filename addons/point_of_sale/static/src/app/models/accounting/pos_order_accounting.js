@@ -6,7 +6,7 @@ import { formatCurrency } from "@web/core/currency";
 const CONSOLE_COLOR = "#4EFF4D";
 
 export class PosOrderAccounting extends Base {
-    static accountingFields = new Set(["pricelist_id", "fiscal_position_id"]);
+    static accountingFields = new Set(["pricelist_id", "fiscal_position_id", "is_refund"]);
 
     setup() {
         super.setup();
@@ -31,8 +31,47 @@ export class PosOrderAccounting extends Base {
 
     _doRecomputeAllPrices() {
         this._pricesDirty = false;
+        // The document type must be known before computing any price, and it has to be the same
+        // for every computation of this pass (the unit prices are computed with a quantity of 1).
+        this._isRefundDocument = this._computeIsRefundDocument();
         this._prices.original = this._constructPriceData();
         this._prices.unit = this._constructPriceData({ baseLineOpts: { quantity: 1 } });
+    }
+
+    /**
+     * Whether the accounting document of the order is a refund (credit note).
+     *
+     * A refund order can mix refunded lines (negative quantities) with regular lines
+     * (positive quantities), so the document type follows the sign of the net amount of the
+     * order, like the backend does. An order which is not a refund is never a refund document,
+     * and a refund order with a null amount stays a refund document.
+     */
+    get isRefundDocument() {
+        return this._isRefundDocument ?? this.isRefund;
+    }
+
+    _computeIsRefundDocument() {
+        if (!this.isRefund) {
+            return false;
+        }
+        const lines = this.lines;
+        if (!lines.some((line) => line.qty > 0)) {
+            // Only refunded lines (or no line at all): the net amount cannot be positive.
+            return true;
+        }
+        // The amount does not depend on the document type, only the repartition lines do.
+        const baseLines = lines.map((line) =>
+            line.getBaseLine({ quantity: line.qty, price_unit: line.price_unit, is_refund: false })
+        );
+        accountTaxHelpers.add_tax_details_in_base_lines(baseLines, this.company);
+        accountTaxHelpers.round_base_lines_tax_details(baseLines, this.company);
+        const data = accountTaxHelpers.get_tax_totals_summary(
+            baseLines,
+            this.currency,
+            this.company,
+            {}
+        );
+        return this.currency.isZero(data.total_amount_currency) || data.total_amount_currency < 0;
     }
 
     get paymentAmountInCurrency() {
@@ -250,8 +289,11 @@ export class PosOrderAccounting extends Base {
         this.amount_total = this.currency.round(this.priceIncl);
         this.amount_return = this.change; // Already rounded by the getter
         this.lines.forEach((line) => {
-            line.price_subtotal = line.priceExcl;
-            line.price_subtotal_incl = line.priceIncl;
+            // The lines of a refund order are sent as magnitudes (the quantity gives the sign),
+            // since the order can mix refunded lines with regular lines going the other way.
+            const toSyncedAmount = (amount) => (this.isRefund ? Math.abs(amount) : amount);
+            line.price_subtotal = toSyncedAmount(line.priceExcl);
+            line.price_subtotal_incl = toSyncedAmount(line.priceIncl);
         });
     }
     /**
@@ -378,12 +420,14 @@ export class PosOrderAccounting extends Base {
     _computeAllPrices(opts = {}) {
         const currency = this.currency;
         const lines = opts.lines || this.lines;
-        const documentSign = this.isRefund ? -1 : 1;
+        const isRefundDocument = this.isRefundDocument;
+        const documentSign = isRefundDocument ? -1 : 1;
         const company = this.company;
         const baseLines = lines.map((l) =>
             l.getBaseLine({
                 quantity: l.qty,
                 price_unit: l.price_unit,
+                is_refund: isRefundDocument,
                 ...(opts.baseLineOpts || {}),
             })
         );

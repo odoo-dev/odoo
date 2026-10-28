@@ -153,7 +153,8 @@ export class PosOrderlineAccounting extends Base {
     }
 
     isRefund() {
-        return this.order_id.isRefund;
+        // The accounting document type, which follows the net amount of the order.
+        return this.order_id.isRefundDocument;
     }
 
     getUnitPriceFromDisplayPrice(price) {

@@ -391,10 +391,6 @@ export class PosOrder extends PosOrderAccounting {
         return true;
     }
 
-    isSaleDisallowed(values, options) {
-        return this.isRefund && (!values.qty || values.qty > 0);
-    }
-
     getSelectedOrderline() {
         return this.lines.find((line) => line.uuid === this.uiState.selected_orderline_uuid);
     }

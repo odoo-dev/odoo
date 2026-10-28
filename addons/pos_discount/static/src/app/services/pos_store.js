@@ -127,7 +127,7 @@ patch(PosStore.prototype, {
                         extra_tax_data: extra_tax_data,
                     },
                     order,
-                    { force: true },
+                    {},
                     false
                 );
             }

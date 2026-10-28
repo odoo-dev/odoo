@@ -278,7 +278,10 @@ export class ProductScreen extends Component {
             this.pos.numpadMode = buttonValue;
             return;
         }
-        if (this.pos.getOrder().isRefund && buttonValue !== "Backspace") {
+        // Only the lines refunding an existing line are locked: the refund order can also
+        // contain regular lines (e.g. the customer exchanges a product), those stay editable.
+        const selectedLine = this.pos.getOrder().getSelectedOrderline();
+        if (selectedLine?.refunded_orderline_id && buttonValue !== "Backspace") {
             return this.dialog.add(AlertDialog, {
                 title: _t("%s update not allowed", this.pos.numpadMode),
                 body: _t("You can not change the %s of the refund order.", this.pos.numpadMode),

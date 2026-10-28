@@ -113,7 +113,7 @@ class ReportPoint_Of_SaleReport_Saledetails(models.AbstractModel):
             if line.order_id.config_id.module_pos_discount and line.product_id.id == line.order_id.config_id.discount_product_id.id:
                 continue
             currency = line.currency_id
-            if not line.order_id.is_refund_or_negative():
+            if not self._is_refund_order_line(line):
                 products_sold, taxes = self._get_products_and_taxes_dict(line, products_sold, taxes, currency)
             else:
                 refund_done, refund_taxes = self._get_products_and_taxes_dict(line, refund_done, refund_taxes, currency)
@@ -447,6 +447,12 @@ class ReportPoint_Of_SaleReport_Saledetails(models.AbstractModel):
 
     def _get_product_total_amount(self, line):
         return line.currency_id.round(line.price_unit * line.qty * (100 - line.discount) / 100.0)
+
+    def _is_refund_order_line(self, line):
+        # A refund order can also contain regular lines, they are reported as sold products.
+        if line.order_id.is_refund:
+            return line.qty < 0
+        return line.order_id.is_refund_or_negative()
 
     def _get_products_and_taxes_dict(self, line, products, taxes, currency):
         key2 = (line.product_id, line.price_unit, line.discount)
