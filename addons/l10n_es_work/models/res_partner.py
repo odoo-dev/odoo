@@ -1,3 +1,4 @@
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
 from odoo import api, fields, models
 from odoo.exceptions import ValidationError
 
@@ -6,8 +7,13 @@ class ResPartner(models.Model):
     _inherit = 'res.partner'
 
     l10n_es_irpf_rate = fields.Float(
-        string='Cuota IRPF',
+        string="IRPF Withholding Rate (%)",
+        digits=(5, 2),
         company_dependent=True,
+        groups='account.group_account_invoice,account.group_account_readonly',
+        help="Personal IRPF withholding rate, as a positive percentage (e.g. 12.37). When set, it replaces "
+             "the percentage of the salary withholding taxes flagged with 'Use partner IRPF rate'. "
+             "Leave it empty to apply the percentage of the tax.",
     )
 
     @api.constrains('l10n_es_irpf_rate')

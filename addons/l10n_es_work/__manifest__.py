@@ -1,11 +1,12 @@
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
 {
     'name': 'Spain - IRPF withholding rate per partner',
     'version': '1.0',
     'countries': ['es'],
     'category': 'Accounting/Localizations',
-    'summary': 'Apply a personal IRPF withholding rate to salary withholding taxes',
-    'description': """not alter existing entries.""",
-    'depends': ['l10n_es'],
+    'summary': 'Withholding tax for salaries using the personal IRPF rate of each partner',
+    'description': """Personal IRPF withholding rate""",
+    'depends': ['l10n_es', 'account'],
     'auto_install': True,
     'data': [
         'views/account_views.xml',
