@@ -63,6 +63,10 @@ class AccountEdiXmlUbl21Fr(models.AbstractModel):
         if self._pdp_is_b2g(customer) and not self._pdp_can_invoice_b2g(customer):
             cpro_module_name = self.env['ir.module.module'].sudo()._get('l10n_fr_facturx_chorus_pro').display_name
             constraints["ubl_21_fr_cpro_module_missing"] = self.env._("This partner is behind Chorus PRO. Please install the module '%s'", cpro_module_name)
+        # [BR-FR-CPRO-02]
+        document_id = vals['document_node'].get('cbc:ID', {}).get('_text') or ''
+        if self._pdp_is_b2g(customer) and len(document_id) > 20:
+            constraints["ubl_21_fr_cpro_len_id"] = self.env._("The name of the journal entry must not exceed 20 characters: %s", document_id)
 
         return constraints
 
@@ -89,6 +93,11 @@ class AccountEdiXmlUbl21Fr(models.AbstractModel):
         for code, default_content in self._get_default_notes(vals).items():
             document_node['cbc:Note'].append({
                 '_text': f"#{code}#{default_content}",
+            })
+
+        if b2g:
+            document_node['cbc:Note'].append({
+                '_text': "#ADN#B2G",
             })
 
         # [BR-FR-MAP-18] EN16931 caps the Note (BT-22) to 1024 characters.
