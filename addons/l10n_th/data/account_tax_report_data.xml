@@ -230,4 +230,52 @@
             </record>
         </field>
     </record>
+
+    <record id="tax_report_pp36" model="account.report">
+        <field name="name">P.P. 36 - VAT Report (Foreign)</field>
+        <field name="name@th">ภ.พ. 36 - รายงานภาษีมูลค่าเพิ่ม (ต่างประเทศ)</field>
+        <field name="root_report_id" ref="account.generic_tax_report"/>
+        <field name="country_id" ref="base.th"/>
+        <field name="availability_condition">country</field>
+        <field name="column_ids">
+            <record id="tax_report_pp36_balance" model="account.report.column">
+                <field name="name">Balance</field>
+                <field name="name@th">ยอดคงเหลือ</field>
+                <field name="expression_label">balance</field>
+            </record>
+        </field>
+        <field name="line_ids">
+            <record id="tax_report_pp36_tax_computation" model="account.report.line">
+                <field name="name">Tax computation</field>
+                <field name="name@th">การคำนวณภาษี</field>
+                <field name="hierarchy_level">0</field>
+                <field name="children_ids">
+                    <record id="tax_report_pp36_payment" model="account.report.line">
+                        <field name="name">1. Payment made</field>
+                        <field name="name@th">1. จำนวนเงินที่จ่าย</field>
+                        <field name="code">PP36_PAYMENT</field>
+                        <field name="expression_ids">
+                            <record id="tax_report_pp36_payment_tag" model="account.report.expression">
+                                <field name="label">balance</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">PP36_payment</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="tax_report_pp36_tax_remit" model="account.report.line">
+                        <field name="name">2. Amount of VAT to be remitted</field>
+                        <field name="name@th">2. จำนวนเงินภาษีมูลค่าเพิ่มที่ต้องนำส่ง</field>
+                        <field name="code">PP36_TAX_REMIT</field>
+                        <field name="expression_ids">
+                            <record id="tax_report_pp36_tax_remit_tag" model="account.report.expression">
+                                <field name="label">balance</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">-PP36_tax_remit</field>
+                            </record>
+                        </field>
+                    </record>
+                </field>
+            </record>
+        </field>
+    </record>
 </odoo>
