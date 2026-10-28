@@ -1,0 +1,5 @@
+"id","sequence","active","description","type_tax_use","name","name@es","description@es","amount","amount_type","tax_group_id","l10n_es_type","l10n_es_irpf_partner_rate","repartition_line_ids/repartition_type","repartition_line_ids/tag_ids","repartition_line_ids/document_type","repartition_line_ids/account_id"
+"account_tax_template_p_irpf_trab_personal","1000","True","Withholding income tax (workers, personal rate)","purchase","WHI worker personal rate","Ret IRPF Trab tipo personal","Retenciones IRPF (Trabajadores, tipo personal)","0.0","percent","tax_group_retenciones_trab_personal","retencion","True","base","mod111[02]","invoice",""
+"","","","","","","","","","","","","","tax","mod111[03]","invoice","account_common_4751"
+"","","","","","","","","","","","","","base","mod111[02]","refund",""
+"","","","","","","","","","","","","","tax","mod111[03]","refund","account_common_4751"
