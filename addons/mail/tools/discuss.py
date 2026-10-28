@@ -416,7 +416,40 @@ class Store:
             if record_version:
                 for record_data in record_data_list:
                     record_data["__version__"] = record_version.isoformat(timespec="microseconds")
+                if field_versions := {
+                    name: Store._format_version(Store._get_unstored_field_version(record, name))
+                    for name in standard_fields
+                    if isinstance(name, str)
+                    and (field := record._fields.get(name))
+                    and not field.store
+                }:
+                    record_data_list.append({"__field_versions__": field_versions})
         return records_data_list
+
+    @staticmethod
+    def _format_version(version):
+        # None means unversioned: the value is applied whatever its arrival order.
+        return version.isoformat(timespec="microseconds") if version else None
+
+    @staticmethod
+    def _get_unstored_field_version(record, field_name):
+        """Version of a field that is not stored on the record, whose write_date thus does not
+        change with it. A related field follows the write_date of the record holding the value.
+        Anything else (computed, fake) is left unversioned."""
+        field = record._fields.get(field_name)
+        if not field or not field.related:
+            return None
+        # sudo: related fields are read as superuser by default.
+        *path, target_name = field.related.split(".")
+        target = record.sudo()
+        for name in path:
+            target = target[name]
+        target_field = target._fields[target_name]
+        if len(target) != 1 or not target._log_access or not target_field.store:
+            return None
+        with suppress(MissingError):
+            return target.write_date
+        return None
 
     def _add_abstract_fields_value(self, abstract_fields, data_list, record=None):
         for field in abstract_fields:
@@ -425,12 +458,23 @@ class Store:
                     data_list.append(field)
                 elif not field.predicate or field.predicate(record):
                     data = {field.field_name: field._get_value(record)}
-                    # A relation's version is carried by its command (see Many._get_id).
-                    is_relation = isinstance(field, Store.Relation)
-                    if not is_relation and (version := field._get_version(record)):
-                        data["__field_versions__"] = {
-                            field.field_name: version.isoformat(timespec="microseconds"),
-                        }
+                    # A many's version is carried by its commands (see Many._get_id).
+                    if (
+                        not isinstance(field, Store.Many)
+                        and field.field_name
+                        and record is not None
+                    ):
+                        version = NO_VALUE
+                        if field.version is not None:
+                            version = field._get_version(record)
+                        elif field.value is not NO_VALUE:
+                            version = None
+                        elif field._is_fake_field(record):
+                            version = Store._get_unstored_field_version(record, field.field_name)
+                        if version is not NO_VALUE:
+                            data["__field_versions__"] = {
+                                field.field_name: Store._format_version(version),
+                            }
                     data_list.append(data)
 
     def _get_record_index(self, model_name, data_list):
@@ -547,6 +591,13 @@ class Store:
             if self.value is NO_VALUE:
                 return None
             return self.value
+
+        def _is_fake_field(self, record):
+            """Whether the value does not come from a stored field of the record."""
+            if self.value is not NO_VALUE:
+                return True
+            field = record._fields.get(self.field_name)
+            return field is None or not field.store
 
         def _get_version(self, record):
             return self.version(record) if callable(self.version) else self.version
@@ -741,6 +792,8 @@ class Store:
             # the comodel record, so its write_date can't be trusted as the relation's
             # version. Only known when built from a named field.
             self._is_many2many = False
+            # Not backed by a stored field: linking never writes the comodel record either.
+            self._is_unstored = False
 
         def _copy_with_records(self, records, calling_record):
             if records is None:
@@ -750,6 +803,7 @@ class Store:
             res.sort = self.sort
             field = calling_record and calling_record._fields.get(self.field_name)
             res._is_many2many = field and field.type == "many2many"
+            res._is_unstored = bool(calling_record) and (not field or not field.store)
             if res.mode == "DELETE" and res.version is None and calling_record:
                 res.version = calling_record.env.cr.now()
             return res
@@ -798,6 +852,10 @@ class Store:
             for val, record in zip(values, records):
                 version = self.version
                 if version is None and record is not None:
+                    if self._is_unstored:
+                        # Linking does not write the comodel record: leave it unversioned.
+                        versioned.append(val)
+                        continue
                     with suppress(MissingError):
                         # sudo: the record is sent, its write_date can be read
                         version = record.sudo().write_date

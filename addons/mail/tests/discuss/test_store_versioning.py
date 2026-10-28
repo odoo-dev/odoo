@@ -86,6 +86,11 @@ class TestStoreVersioning(HttpCase, MailCase):
                                 "id": bob.id,
                                 "name": "bob (base.group_user)",
                                 "__version__": bob.write_date.isoformat(timespec="microseconds"),
+                                "__field_versions__": {
+                                    "name": bob.partner_id.write_date.isoformat(
+                                        timespec="microseconds"
+                                    ),
+                                },
                             }
                         ],
                     },

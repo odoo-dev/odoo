@@ -439,6 +439,32 @@ class TestDiscussTools(MailCase):
         )
         self.assertNotEqual(record["__version__"], explicit_version.isoformat(timespec="microseconds"))
 
+    def test_398_unstored_fields_are_not_versioned_with_write_date(self):
+        user_a = new_test_user(self.env, "test_user_398@example.com")
+        partner_version = user_a.partner_id.write_date.isoformat(timespec="microseconds")
+
+        def _get_fields(res):
+            res.extend(["email", "name", "display_name"])
+            res.attr("fake", 42)
+            res.attr("is_admin", lambda u: False)
+            res.attr("explicit_unversioned", 1, version=False)
+
+        store = Store()
+        store.add(user_a, _get_fields)
+        record = store._build_result()["res.users"][0]
+        self.assertEqual(
+            record["__field_versions__"],
+            {
+                # Related (inherited): versioned with the write_date of the record holding the value.
+                "email": partner_version,
+                "name": partner_version,
+                "display_name": None,
+                "fake": None,
+                "is_admin": None,
+                "explicit_unversioned": None,
+            },
+        )
+
     # 4xx Tests many command modes
 
     def test_450_replace_clear_existing_data(self):

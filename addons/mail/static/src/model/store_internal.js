@@ -148,7 +148,8 @@ export class StoreInternal extends RecordInternal {
      * @param {Object} vals `vals.__version__` is this record's default version, applied
      *   to any field with none of its own. `vals.__field_versions__`, if present, maps a
      *   field name to its own version, overriding the default for that field only (e.g.
-     *   a value whose real clock isn't this record's own write_date).
+     *   a value whose real clock isn't this record's own write_date). A null version
+     *   leaves the field unversioned.
      * @param {Object} [options={}]
      * @param {boolean} [options.forceApply=true] Apply the values even when their
      * write date is out of order. Only versioned server data turns it off.
@@ -184,14 +185,17 @@ export class StoreInternal extends RecordInternal {
                     (isCommandList(normalized) &&
                         normalized.every(([mode]) => mode.endsWith(".noinv"))),
             };
+            // A null field version means unversioned: the value is applied whatever its
+            // arrival order (e.g. a value not stored on the record).
+            const fieldVersion =
+                fieldVersions && fieldName in fieldVersions
+                    ? fieldVersions[fieldName] ?? version.lastWriteDate
+                    : undefined;
             const toApply = isManyField
                 ? version.resolveApply(normalized, options)
                 : version.resolveApply(
                       value,
-                      commandVersion ??
-                          fieldVersions?.[fieldName] ??
-                          incomingWriteDate ??
-                          version.lastWriteDate,
+                      commandVersion ?? fieldVersion ?? incomingWriteDate ?? version.lastWriteDate,
                       options
                   );
             if (toApply === SKIP_REVISION) {
