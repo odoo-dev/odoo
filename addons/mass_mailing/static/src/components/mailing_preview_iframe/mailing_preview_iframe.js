@@ -5,10 +5,11 @@ import { renderToFragment } from "@web/core/utils/render";
 import { isBrowserSafari } from "@web/core/browser/feature_detection";
 import { useThrottleForAnimation } from "@web/core/utils/timing";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
-import { Component, onMounted, status, proxy } from "@odoo/owl";
+import { Component, onMounted, status, usePlugin } from "@odoo/owl";
 import { loadIframe } from "@mail/convert_inline/iframe_utils";
 import { MailingPreviewDisplayModeToggle } from "../mailing_preview_mode_toggle/mailing_preview_mode_toggle";
 import { MassMailingPreviewRecordField } from "./mass_mailing_preview_record_field";
+import { MailingPreviewPlugin } from "./mailing_preview_plugin";
 
 export class MailingPreviewIframe extends Component {
     static template = "mass_mailing.MailingPreviewIframe";
@@ -22,7 +23,7 @@ export class MailingPreviewIframe extends Component {
     };
 
     setup() {
-        this.state = proxy(this.env.displayState);
+        this.mailingPreviewPlugin = usePlugin(MailingPreviewPlugin);
         this.action = useService("action");
         this.ui = useService("ui");
         this.iframeRef = useRef("iframeRef");
@@ -49,12 +50,18 @@ export class MailingPreviewIframe extends Component {
         );
 
         useLayoutEffect(
-            () => {
+            (isMobileMode) => {
                 this.iframeLoaded.promise.then(() => {
                     this.throttledResize();
                 });
+                const modalDialogClasses = this.env.dialogData?.modalDialogClasses;
+                if (!isMobileMode || !modalDialogClasses) {
+                    return;
+                }
+                modalDialogClasses.add("o_mass_mailing_preview_transparent_dialog");
+                return () => modalDialogClasses.delete("o_mass_mailing_preview_transparent_dialog");
             },
-            () => [this.state.isMobileMode]
+            () => [this.mailingPreviewPlugin.isMobileMode()]
         );
 
         useBus(this.ui.bus, "resize", () => {
@@ -69,7 +76,7 @@ export class MailingPreviewIframe extends Component {
             if (content) {
                 content.style.zoom = "";
             }
-            if (this.state.isMobileMode) {
+            if (this.mailingPreviewPlugin.isMobileMode()) {
                 // same styling for mobile as we have in 'mass_mailing_iframe'
                 iframe.style.width = "367px";
                 iframe.style.height = "668px";

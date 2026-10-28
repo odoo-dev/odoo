@@ -1,6 +1,8 @@
 import { registry } from "@web/core/registry";
+import { useService } from "@web/core/utils/hooks";
 import { standardWidgetProps } from "@web/views/widgets/standard_widget_props";
-import { Component, proxy } from "@odoo/owl";
+import { Component, usePlugin } from "@odoo/owl";
+import { MailingPreviewPlugin } from "../mailing_preview_iframe/mailing_preview_plugin";
 
 export class MailingPreviewDisplayModeToggle extends Component {
     static template = "mass_mailing.MailingPreviewModeToggle";
@@ -9,11 +11,12 @@ export class MailingPreviewDisplayModeToggle extends Component {
     };
 
     setup() {
-        this.state = proxy(this.env.displayState);
+        this.ui = useService("ui");
+        this.mailingPreviewPlugin = usePlugin(MailingPreviewPlugin);
     }
 
     onTogglePreviewMode(isMobileMode) {
-        this.state.isMobileMode = isMobileMode;
+        this.mailingPreviewPlugin.mobileModeSelected.set(isMobileMode);
     }
 }
 

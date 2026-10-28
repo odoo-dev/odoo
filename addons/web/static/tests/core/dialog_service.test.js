@@ -136,6 +136,45 @@ test("a popover with an autofocus child can become the UI active element", async
     expect(".o_popover input").toBeFocused();
 });
 
+test("dialog content can add classes to its modal-dialog", async () => {
+    class DialogContent extends Component {
+        static template = xml`
+            <button class="o_add_a" t-on-click="() => this.add('o_test_a')">Add A</button>
+            <button class="o_add_b" t-on-click="() => this.add('o_test_b')">Add B</button>
+            <button class="o_remove_a" t-on-click="() => this.remove('o_test_a')">Remove A</button>
+        `;
+        static props = ["*"];
+        add(className) {
+            this.env.dialogData.modalDialogClasses.add(className);
+        }
+        remove(className) {
+            this.env.dialogData.modalDialogClasses.delete(className);
+        }
+    }
+    class CustomDialog extends Component {
+        static components = { Dialog, DialogContent };
+        static template = xml`<Dialog title="'Welcome'"><DialogContent/></Dialog>`;
+        static props = ["*"];
+    }
+    getService("dialog").add(CustomDialog);
+    await animationFrame();
+    expect(".modal-dialog").toHaveClass("modal-lg");
+    expect(".modal-dialog").not.toHaveClass("o_test_a");
+
+    await click(".o_add_a");
+    await animationFrame();
+    expect(".modal-dialog").toHaveClass(["modal-lg", "o_test_a"]);
+
+    await click(".o_add_b");
+    await animationFrame();
+    expect(".modal-dialog").toHaveClass(["o_test_a", "o_test_b"]);
+
+    await click(".o_remove_a");
+    await animationFrame();
+    expect(".modal-dialog").not.toHaveClass("o_test_a");
+    expect(".modal-dialog").toHaveClass(["modal-lg", "o_test_b"]);
+});
+
 test("Interactions between multiple dialogs", async () => {
     function activity(modals) {
         const active = [];

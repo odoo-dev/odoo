@@ -221,6 +221,7 @@ export async function makeDialogMockEnv(partialEnv) {
         dialogData: {
             close: () => {},
             isActive: true,
+            modalDialogClasses: new Set(),
             scrollToOrigin: () => {},
             ...partialEnv?.dialogData,
         },

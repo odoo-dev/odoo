@@ -46,6 +46,7 @@ export const dialogService = {
                 id,
                 close,
                 isActive: true,
+                modalDialogClasses: new Set(),
             });
 
             deactivate();
