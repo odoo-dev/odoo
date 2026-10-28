@@ -188,7 +188,7 @@ class HootSuite(HootCommon):
         self.browser_js('/web/static/lib/hoot/tests/index.html?headless&loglevel=2', "", "", login='admin', timeout=1800, success_signal="[HOOT] Test suite succeeded", error_checker=unit_test_error_checker)
 
 
-@odoo.tests.tagged('hoot', 'post_install', '-at_install')
+@odoo.tests.tagged('hoot', 'post_install', '-at_install', 'post_install_l10n')
 class WebSuite(HootCommon, odoo.tests.CrossModule):
     @odoo.tests.no_retry
     def test_unit_desktop(self, modules):
@@ -201,7 +201,7 @@ class WebSuite(HootCommon, odoo.tests.CrossModule):
         self.browser_js(f'/web/tests?&headless&loglevel=2&preset=desktop&timeout=15000{filters}', "", "", login='admin', timeout=timeout, success_signal="[HOOT] Test suite succeeded", error_checker=unit_test_error_checker)
 
 
-@odoo.tests.tagged('hoot', 'post_install', '-at_install')
+@odoo.tests.tagged('hoot', 'post_install', '-at_install', 'post_install_l10n')
 class MobileWebSuite(HootCommon, odoo.tests.CrossModule):
     browser_size = '375x667'
     touch_enabled = True
