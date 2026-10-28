@@ -1,22 +1,28 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-from odoo import models
-from odoo.addons.account.models.chart_template import template
+from odoo import Command, models
+from odoo.addons.account.models.chart_template import TAX_TAG_DELIMITER, template
 
-# Withholding taxes on salaries ("rendimientos del trabajo") that can take the partner's rate.
-L10N_ES_IRPF_PARTNER_RATE_TAXES = (
-    'account_tax_template_p_irpf21t',      # 15% Ret IRPF Trab
-    'account_tax_template_p_irpf21te',     # 15% Ret IRPF Trab especie
-    'account_tax_template_p_irpf21td',     # 15% Ret IRPF dinerario
-    'account_tax_template_p_irpf21tdit',   # 15% Ret IRPF dinerario IT
-)
+# Technical name of this module, whatever the folder is called: the CSV files are read from it.
+MODULE = __name__.split('.')[2]
 
 
 class AccountChartTemplate(models.AbstractModel):
     _inherit = 'account.chart.template'
 
+    @template('es_common', 'account.tax.group')
+    def _get_es_common_l10n_es_irpf_partner_account_tax_group(self):
+        return self._parse_csv('es_common', 'account.tax.group', module=MODULE)
+
     @template('es_common', 'account.tax')
     def _get_es_common_l10n_es_irpf_partner_account_tax(self):
-        return {
-            xmlid: {'l10n_es_irpf_partner_rate': True}
-            for xmlid in L10N_ES_IRPF_PARTNER_RATE_TAXES
-        }
+        tax_data = self._parse_csv('es_common', 'account.tax', module=MODULE)
+        self._l10n_es_irpf_partner_deref_tags(tax_data)
+        return tax_data
+
+    def _l10n_es_irpf_partner_deref_tags(self, tax_data):
+        mapper = self._get_tag_mapper(self.env.ref('base.es').id)
+        for tax_values in tax_data.values():
+            for command in tax_values.get('repartition_line_ids', []):
+                values = command[2]
+                if isinstance(values.get('tag_ids'), str):
+                    values['tag_ids'] = [Command.set(mapper(*values['tag_ids'].split(TAX_TAG_DELIMITER)))]
