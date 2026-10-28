@@ -13,3 +13,8 @@ class ResConfigSettings(models.TransientModel):
         help='This symbol will be used on invoices by default.',
         readonly=False,
     )
+    module_l10n_vn_edi_viettel = fields.Boolean(string="Vietnam E-invoicing (SInvoice)")
+
+    def action_l10n_vn_activate_edi_viettel(self):
+        self.env['ir.module.module'].search([('name', '=', 'l10n_vn_edi_viettel')]).button_immediate_install()
+        return {'type': 'ir.actions.client', 'tag': 'reload'}
