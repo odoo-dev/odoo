@@ -12,3 +12,8 @@ class AccountMove(models.Model):
         for move in to_compute:
             move.l10n_in_state_id = move.company_id.state_id
         return res
+
+    @api.model
+    def _l10n_in_get_extra_document_summary(self, companies, date_from, date_to):
+        return super()._l10n_in_get_extra_document_summary(companies, date_from, date_to) + \
+            self.env['pos.order']._l10n_in_get_b2c_document_summary(companies, date_from, date_to)

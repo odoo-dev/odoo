@@ -10,7 +10,11 @@ patch(GeneratePrinterData.prototype, {
 
         if (this.order.isInCompany) {
             data.conditions.code_in = this.order.isInCompany;
+            // Invoices requested afterwards from the ticket portal are not GST compliant.
+            data.conditions.use_self_invoicing = false;
             data.extra_data.l10n_in_hsn_summary = this.order._prepareL10nInHsnSummary();
+            data.extra_data.l10n_in_invoice_name =
+                (this.order.to_invoice && this.order.invoiceName) || false;
         }
 
         return data;

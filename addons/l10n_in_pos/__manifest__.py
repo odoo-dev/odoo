@@ -15,6 +15,7 @@
         'views/product_view.xml',
         'views/res_config_settings_views.xml',
         'views/res_partner_views.xml',
+        'views/pos_order_views.xml',
         'data/pos_bill_data.xml',
         'receipt/pos_order_receipt.xml',
     ],

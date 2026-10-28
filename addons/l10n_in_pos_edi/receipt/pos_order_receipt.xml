@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <template id="l10n_in_pos_edi.pos_order_receipt" inherit_id="point_of_sale.pos_order_receipt">
+        <div name="before-footer" position="before">
+            <table class="w-100 mt-2" name="l10n_in_irn" t-if="conditions.get('code_in') and extra_data.get('l10n_in_irn')">
+                <tbody>
+                    <tr>
+                        <td class="w-25" t-if="image.get('l10n_in_irn_qr_code')">
+                            <img class="invoice-qr-code" t-att-src="image['l10n_in_irn_qr_code']"/>
+                        </td>
+                        <td class="text-start top w-75 ps-1">
+                            <div class="text-bold text-normal">IRN:</div>
+                            <div class="text-small text-break" t-out="extra_data['l10n_in_irn']"/>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </template>
+</odoo>

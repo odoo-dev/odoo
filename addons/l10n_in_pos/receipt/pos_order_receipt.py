@@ -15,7 +15,10 @@ class PosOrderReceipt(models.AbstractModel):
             self.env['account.tax']._round_base_lines_tax_details(base_lines, self.company_id)
             l10n_in_hsn_summary = self.env['account.tax']._l10n_in_get_hsn_summary_table(base_lines, False)
             data['extra_data']['l10n_in_hsn_summary'] = l10n_in_hsn_summary
+            data['extra_data']['l10n_in_invoice_name'] = (self.to_invoice and self.account_move.name) or False
             data['conditions']['code_in'] = self.company_id.country_id.code == 'IN'
+            # Invoices requested afterwards from the ticket portal are not GST compliant.
+            data['conditions']['use_self_invoicing'] = False
 
             for summary in data['extra_data']['l10n_in_hsn_summary'].get('items'):
                 if summary.get('tax_amount_igst') is not None:

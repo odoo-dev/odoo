@@ -29,17 +29,24 @@
             </div>
         </template>
         <template id="l10n_in_pos.pos_order_receipt_header" inherit_id="point_of_sale.pos_order_receipt_header">
-            <span name="ticket" position="after">
-                <span t-if="conditions.get('code_in') and not order['to_invoice']">
-                    <t t-if="order['is_refund']">R-</t>INVOICE
-                </span>
-                <span t-elif="conditions.get('code_in') and order['to_invoice']">
-                    Tax <t t-if="order['is_refund']">R-</t>Invoice
-                </span>
-            </span>
-            <span name="ticket" position="attributes">
-                <attribute name="t-if">not conditions.get('code_in')</attribute>
-            </span>
+            <div name="ticket_reference" position="replace">
+                <t t-if="conditions.get('code_in')">
+                    <div t-if="order['to_invoice']" name="l10n_in_tax_invoice_reference">
+                        Tax <t t-if="order['is_refund']">R-</t>Invoice
+                        <t t-out="extra_data.get('l10n_in_invoice_name') or order['pos_reference']"/>
+                    </div>
+                    <t t-else="">
+                        <div name="l10n_in_receipt_reference">
+                            <t t-if="order['is_refund']">Refund </t>Receipt <t t-out="order['pos_reference']"/>
+                        </div>
+                        <div t-if="order.get('l10n_in_b2c_invoice_number')" name="l10n_in_b2c_invoice_number">
+                            <t t-if="order['is_refund']">Credit Note</t><t t-else="">Invoice</t>
+                            <t t-out="order['l10n_in_b2c_invoice_number']"/>
+                        </div>
+                    </t>
+                </t>
+                <t t-else="">$0</t>
+            </div>
         </template>
         <template id="l10n_in_pos.pos_orderline_receipt_information" inherit_id="point_of_sale.pos_orderline_receipt_information">
             <div name="extra-info">

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_pos_pos_form_l10n_in_b2c" model="ir.ui.view">
+        <field name="name">pos.order.form.inherit.l10n_in_pos</field>
+        <field name="model">pos.order</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_pos_form"/>
+        <field name="arch" type="xml">
+            <field name="date_order" position="after">
+                <field name="l10n_in_b2c_invoice_number" invisible="not l10n_in_b2c_invoice_number"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="view_pos_order_tree_l10n_in_b2c" model="ir.ui.view">
+        <field name="name">pos.order.list.inherit.l10n_in_pos</field>
+        <field name="model">pos.order</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_order_tree"/>
+        <field name="arch" type="xml">
+            <field name="pos_reference" position="after">
+                <field name="l10n_in_b2c_invoice_number" optional="show"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="view_pos_order_search_l10n_in_b2c" model="ir.ui.view">
+        <field name="name">pos.order.search.inherit.l10n_in_pos</field>
+        <field name="model">pos.order</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_order_filter"/>
+        <field name="arch" type="xml">
+            <field name="pos_reference" position="after">
+                <field name="l10n_in_b2c_invoice_number"/>
+            </field>
+        </field>
+    </record>
+</odoo>

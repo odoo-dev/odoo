@@ -68,7 +68,7 @@ class TestGenericIN(TestGenericLocalization, CommonPosTest):
         return refund.order_receipt_generate_html()
 
     def test_refund_order_receipt(self):
-        self.assertIn("R-INVOICE", self._get_refund_receipt_html())
+        self.assertIn("Refund Receipt", self._get_refund_receipt_html())
 
     def test_refund_invoice_order_receipt(self):
         self.assertIn("Tax R-Invoice", self._get_refund_receipt_html(to_invoice=True))

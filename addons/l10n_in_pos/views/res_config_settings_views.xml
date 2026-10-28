@@ -10,6 +10,21 @@
                     <span>Please note that the kiosk for INR currency only works with Razorpay terminal</span>
                 </div>
             </xpath>
+            <xpath expr="//setting[@id='flexible_taxes']" position="after">
+                <setting id="l10n_in_b2c_invoice_sequence" string="B2C Invoice Sequence" invisible="country_code != 'IN'"
+                         help="Number the orders of consumers, which are not invoiced one by one, as reported to the GST portal. Use %%(y)s for the year.">
+                    <div class="content-group mt16">
+                        <div class="row">
+                            <label string="Invoice" for="pos_l10n_in_b2c_invoice_prefix" class="col-lg-3 o_light_label"/>
+                            <field name="pos_l10n_in_b2c_invoice_prefix" placeholder="e.g. P1/%%(y)s/"/>
+                        </div>
+                        <div class="row">
+                            <label string="Credit Note" for="pos_l10n_in_b2c_refund_prefix" class="col-lg-3 o_light_label"/>
+                            <field name="pos_l10n_in_b2c_refund_prefix" placeholder="e.g. PR1/%%(y)s/"/>
+                        </div>
+                    </div>
+                </setting>
+            </xpath>
         </field>
     </record>
 </odoo>

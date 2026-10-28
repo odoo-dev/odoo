@@ -593,6 +593,16 @@ class AccountMove(models.Model):
         return l10n_in_tax_details
 
     @api.model
+    def _l10n_in_get_extra_document_summary(self, companies, date_from, date_to):
+        """ Hook for documents numbered outside of the journal entries (e.g. PoS receipts),
+        to be reported in GSTR-1 Table 13 next to the invoices.
+
+        :return: list of dicts with the keys nature_of_document, serial_from, serial_to,
+                 total_issued and total_cancelled.
+        """
+        return []
+
+    @api.model
     def _l10n_in_edi_get_iap_buy_credits_message(self):
         url = self.env['iap.account'].get_credits_url(service_name=IAP_SERVICE_NAME)
         return Markup("""<p><b>%s</b></p><p>%s <a href="%s">%s</a></p>""") % (
