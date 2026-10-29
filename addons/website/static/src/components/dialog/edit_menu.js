@@ -9,6 +9,7 @@ import { AddPageDialog } from "@website/components/dialog/add_page_dialog";
 import { isAbsoluteURLInCurrentDomain } from "@html_editor/utils/url";
 import { useDebounced } from "@web/core/utils/timing";
 import { KeepLast } from "@web/core/utils/concurrency";
+import { withDraftParam } from "@website/utils/misc";
 
 function urlToCheck(url) {
     let relativeUrl = false;
@@ -205,7 +206,10 @@ export class EditMenuDialog extends Component {
                 "website.menu",
                 "get_tree",
                 [this.website.currentWebsite.id, this.props.rootID],
-                { context: { lang: this.website.currentWebsite.metadata.lang } }
+                {
+                    draft: this.website.isDraftEnabled,
+                    context: { lang: this.website.currentWebsite.metadata.lang },
+                }
             );
             await this.markPageNotFound(menu);
             this.state.rootMenu = menu;
@@ -369,7 +373,7 @@ export class EditMenuDialog extends Component {
         const parent = this.map.get(parentId);
         parent.children = parent.children.filter((menu) => menu.fields["id"] !== id);
         this.map.delete(id);
-        if (parseInt(id)) {
+        if (parseInt(id) || this.website.isDraftEnabled) {
             this.toDelete.push(id);
         }
     }
@@ -391,7 +395,7 @@ export class EditMenuDialog extends Component {
 
         await this.orm.call(
             "website.menu",
-            "save",
+            this.website.isDraftEnabled ? "save_draft" : "save",
             [
                 this.website.currentWebsite.id,
                 {
@@ -404,7 +408,11 @@ export class EditMenuDialog extends Component {
         if (this.props.save) {
             this.props.save(url);
         } else if (goToWebsite) {
-            this.website.goToWebsite();
+            const path = this.website.contentWindow?.location.href;
+            // the changes are saved in the draft, show it
+            this.website.goToWebsite(
+                this.website.isDraftEnabled && path ? { path: withDraftParam(path) } : {}
+            );
         }
     }
 

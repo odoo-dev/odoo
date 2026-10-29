@@ -6,6 +6,7 @@ import { isVisible } from "@web/core/utils/ui";
 
 import { FullscreenIndication } from "../components/fullscreen_indication/fullscreen_indication";
 import { WebsiteLoader } from "../components/website_loader/website_loader";
+import { withDraftParam } from "../utils/misc";
 import { EventBus, proxy } from "@odoo/owl";
 
 const websiteSystrayRegistry = registry.category("website_systray");
@@ -38,7 +39,7 @@ export const websiteService = {
         let websiteRootInstance;
         let isRestrictedEditor;
         let isDesigner;
-        let canHaveDraftPreviewProm;
+        let isDraftEnabled;
         let hasMultiWebsites;
         let actionJsId;
         const blockingProcesses = [];
@@ -142,8 +143,13 @@ export const websiteService = {
             get bus() {
                 return bus;
             },
+            /** Whether the page shown is the draft (vs the live website). */
             get isDraftPreview() {
                 return !!currentMetadata.draftPreview;
+            },
+            /** Whether edits are saved in the draft (always, when enabled). */
+            get isDraftEnabled() {
+                return isDraftEnabled === true;
             },
             set pageDocument(document) {
                 pageDocument = document;
@@ -280,12 +286,7 @@ export const websiteService = {
             async goToWebsite({ websiteId, path, edition, translation, lang } = {}) {
                 this.websiteRootInstance = undefined;
                 if (path && this.isDraftPreview) {
-                    const url = new URL(path, window.location.origin);
-                    url.searchParams.set("draft_preview", "1");
-                    path =
-                        url.origin === window.location.origin
-                            ? url.pathname + url.search + url.hash
-                            : url.href;
+                    path = withDraftParam(path);
                 }
                 if (lang) {
                     invalidateSnippetCache = true;
@@ -310,6 +311,9 @@ export const websiteService = {
                     user.hasGroup("website.group_website_designer"),
                     user.hasGroup("website.group_multi_website"),
                 ]);
+                isDraftEnabled =
+                    isDesigner &&
+                    (await orm.call("res.config.settings", "is_draft_preview_enabled", []));
             },
             async fetchWebsites() {
                 websites = (
@@ -420,16 +424,6 @@ export const websiteService = {
                 }
                 await modelNamesProm;
                 return modelNames[model] || _t("Data");
-            },
-            async getCanHaveDraftPreview() {
-                if (!canHaveDraftPreviewProm) {
-                    canHaveDraftPreviewProm = orm.call(
-                        "res.config.settings",
-                        "is_draft_preview_enabled",
-                        []
-                    );
-                }
-                return canHaveDraftPreviewProm;
             },
         };
     },

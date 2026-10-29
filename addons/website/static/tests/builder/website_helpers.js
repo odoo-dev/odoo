@@ -585,7 +585,7 @@ export const websiteServiceInTranslateMode = {
             metadata: {},
         },
     ],
-    getCanHaveDraftPreview: () => false,
+    isDraftEnabled: false,
 };
 
 export async function setupSidebarBuilderForTranslation(options) {

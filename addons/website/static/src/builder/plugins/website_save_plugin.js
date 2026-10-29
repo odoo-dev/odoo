@@ -67,7 +67,7 @@ export class WebsiteSavePlugin extends Plugin {
                             this.processThrough("clean_for_save_processors", el.cloneNode(true))
                                 .outerHTML,
                             (!el.dataset.oeExpression && el.dataset.oeXpath) || null,
-                            this.services.website.isDraftPreview,
+                            this.services.website.isDraftEnabled,
                         ],
                         { context }
                     );

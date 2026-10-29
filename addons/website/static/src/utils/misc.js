@@ -95,3 +95,13 @@ export function deleteQueryParam(param, target = window, adaptBrowserUrl = false
         deleteQueryParam(param);
     }
 }
+
+/**
+ * @param {string} href
+ * @returns {string} `href` with the param that shows the website's draft
+ */
+export function withDraftParam(href) {
+    const url = new URL(href, window.location.origin);
+    url.searchParams.set("draft_preview", "1");
+    return url.origin === window.location.origin ? url.pathname + url.search + url.hash : url.href;
+}

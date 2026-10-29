@@ -35,7 +35,7 @@ import { redirect } from "@web/core/utils/urls";
 import { standardActionServiceProps } from "@web/webclient/actions/action_plugin";
 import { AddPageDialog } from "@website/components/dialog/add_page_dialog";
 import { ResourceEditor } from "@website/components/resource_editor/resource_editor";
-import { deleteQueryParam } from "@website/utils/misc";
+import { deleteQueryParam, withDraftParam } from "@website/utils/misc";
 import { CreatePageMessage } from "./create_page_message";
 import { isHTTPSorNakedDomainRedirection } from "./utils";
 import { WebsiteSystrayItem } from "./website_systray_item";
@@ -306,6 +306,11 @@ export class WebsiteBuilderClientAction extends Component {
             await this.websiteService.isNavigatingToAnotherPage.promise;
         }
 
+        // Edits are always saved in the draft, so they are made on top of it.
+        if (this.websiteService.isDraftEnabled && !this.websiteService.isDraftPreview) {
+            this.showDraft();
+        }
+
         await this.loadIframeAndBundles(true);
         window.document.dispatchEvent(
             new CustomEvent("edit_page", {
@@ -502,9 +507,8 @@ export class WebsiteBuilderClientAction extends Component {
                         // the browser navigates
                         if (this.websiteService.isDraftPreview) {
                             ev.preventDefault();
-                            const draftUrl = new URL(href);
-                            draftUrl.searchParams.set("draft_preview", "1");
-                            this.websiteContent().contentWindow.location.href = draftUrl.toString();
+                            this.websiteContent().contentWindow.location.href =
+                                withDraftParam(href);
                             return;
                         }
                     }
@@ -599,6 +603,14 @@ export class WebsiteBuilderClientAction extends Component {
         if (reloadIframe) {
             await this.reloadIframe(isEditing);
         }
+    }
+
+    showDraft() {
+        const contentWindow = this.websiteContent().contentWindow;
+        this.preparePublicRootReady();
+        this.setIframeLoaded();
+        this.websiteService.websiteRootInstance = undefined;
+        contentWindow.location.replace(withDraftParam(contentWindow.location.href));
     }
 
     async reloadIframe(isEditing = true, url) {
