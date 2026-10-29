@@ -7,6 +7,8 @@ from odoo.tests import Form, tagged
 from odoo.tools import mute_logger
 
 from .test_project_base import TestProjectCommon
+from odoo.tools.safe_eval import safe_eval
+from lxml import etree
 
 
 class TestProjectSharingCommon(TestProjectCommon):
@@ -706,3 +708,50 @@ class TestProjectSharing(TestProjectSharingCommon):
         project_share_wizard.action_send_mail()
         self.assertIn(self.user_projectmanager.partner_id, project.message_partner_ids, "Project manager should still be a follower after sharing the project")
         self.assertEqual(len(project.message_follower_ids), 2, "number of followers should be 2")
+
+    def test_create_nested_subtask_in_project_sharing(self):
+        """Portal users can create nested subtasks without access to the project customer."""
+
+        self.project_portal.write({
+            'partner_id': self.env['res.partner'].create({'name': 'Project Customer'}).id,
+            'collaborator_ids': [
+                Command.create({'partner_id': self.partner_portal.id}),
+            ],
+        })
+        parent_task = self.env['project.task'].with_context(
+            tracking_disable=True,
+            default_project_id=self.project_portal.id,
+            default_user_ids=[Command.link(self.user_portal.id)],
+        ).create({
+            'name': 'Parent Task',
+            'project_id': self.project_portal.id,
+        })
+
+        with self.get_project_sharing_form_view(parent_task, self.user_portal) as form:
+            with form.child_ids.new() as subtask:
+                subtask.name = 'Subtask'
+
+        subtask = parent_task.child_ids
+        self.assertEqual(len(subtask), 1)
+
+        # Use the child_ids context from the actual project-sharing form.
+        portal_subtask = subtask.with_user(self.user_portal)
+        action = portal_subtask.action_project_sharing_open_task()
+        view_id = next(view_id for view_id, view_type in action['views'] if view_type == 'form')
+        arch = etree.fromstring(portal_subtask.get_view(view_id=view_id, view_type='form')['arch'])
+        child_field = arch.xpath("//field[@name='child_ids']")[0]
+
+        context = safe_eval(child_field.get('context', '{}'), {
+            'id': subtask.id,
+            'project_id': subtask.project_id.id,
+            'partner_id': subtask.partner_id.id,
+            'allow_milestones': subtask.allow_milestones,
+            'milestone_id': subtask.milestone_id.id,
+        })
+
+        nested_subtask = self.env['project.task'].with_user(self.user_portal).with_context(
+            **context
+        ).create({'name': 'Nested Subtask'})
+
+        self.assertEqual(nested_subtask.parent_id, subtask)
+        self.assertEqual(nested_subtask.project_id, self.project_portal)
