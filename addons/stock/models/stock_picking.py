@@ -431,7 +431,7 @@ class StockPicking(models.Model):
             # if shipping weight is not assigned => default to calculated product weight
             shipping_weight = picking.weight_bulk
             relevant_packages = picking.move_line_ids.result_package_id.outermost_package_id
-            for package in relevant_packages:
+            for package in relevant_packages.with_context(picking_ids=picking.ids):
                 if package.shipping_weight:
                     shipping_weight += package.shipping_weight
                     continue
@@ -891,6 +891,7 @@ class StockPicking(models.Model):
                 'default_location_id': self.location_id.id,
                 'default_location_dest_id': self.location_dest_id.id,
                 'default_company_id': self.company_id.id,
+                'picking_ids': self.ids,
                 'show_lots_text': self.show_lots_text,
                 'picking_code': self.picking_type_code,
                 'create': self.state not in ('done', 'cancel'),
