@@ -102,6 +102,7 @@ export function assignDialogTestEnv(dialogData) {
         dialogData: {
             close: () => {},
             isActive: true,
+            modalDialogClasses: new Set(),
             scrollToOrigin: () => {},
             ...dialogData,
         },

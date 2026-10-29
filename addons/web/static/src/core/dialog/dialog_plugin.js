@@ -54,6 +54,7 @@ export class DialogPlugin extends Plugin {
             id,
             close,
             isActive: true,
+            modalDialogClasses: new Set(),
         });
 
         this.deactivate();
