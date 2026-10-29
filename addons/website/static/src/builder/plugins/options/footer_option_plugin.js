@@ -121,7 +121,7 @@ export class WebsiteConfigFooterAction extends BuilderAction {
             rpc("/website/update_footer_template", {
                 template_key: view,
                 possible_values: [...possibleValues],
-                draft: this.services.website.isDraftPreview,
+                draft: this.services.website.isDraftEnabled,
             }),
         ]);
     }

@@ -30,7 +30,6 @@ export class WebsiteSystrayItem extends Component {
         this.website = useService("website");
         onWillStart(async () => {
             this.iframeEl = await this.props.iframeLoaded;
-            this.canHaveDraftPreview = await this.website.getCanHaveDraftPreview();
         });
     }
 

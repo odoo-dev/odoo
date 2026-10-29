@@ -106,7 +106,7 @@ export class CustomizeWebsitePlugin extends Plugin {
                 enable: [...this.viewsToEnableOnSave],
                 disable: [...this.viewsToDisableOnSave],
                 reset_view_arch: false,
-                draft: this.services.website.isDraftPreview,
+                draft: this.services.website.isDraftEnabled,
             });
         }
     }
@@ -242,14 +242,14 @@ export class CustomizeWebsitePlugin extends Plugin {
         await this.services.orm.call("website.assets", "make_scss_customization", [
             url,
             values,
-            this.services.website.isDraftPreview,
+            this.services.website.isDraftEnabled,
         ]);
     }
     reloadBundles = debounce(this._reloadBundles.bind(this), 0);
     async _reloadBundles() {
         const { font_urls: fontURLs = [], ...bundles } = await rpc(
             "/website/theme_customize_bundle_reload",
-            { draft: this.services.website.isDraftPreview }
+            { draft: this.services.website.isDraftEnabled }
         );
         const documents = [this.document, this.config.extraPreviewDocument].filter(Boolean);
         const allLinksIframeEls = [];
@@ -336,7 +336,7 @@ export class CustomizeWebsitePlugin extends Plugin {
                     rpc("/website/theme_customize_data_get", {
                         keys,
                         is_view_data: isViewData,
-                        draft: this.services.website.isDraftPreview,
+                        draft: this.services.website.isDraftEnabled,
                     }).then((r) => {
                         if (!this.isDestroyed) {
                             for (const key of keys) {
@@ -840,7 +840,7 @@ export class WebsiteConfigAction extends BuilderAction {
                     enable: [...aggregatedToEnable],
                     disable: [...aggregatedToDisable],
                     reset_view_arch: shouldReset,
-                    draft: this.services.website.isDraftPreview,
+                    draft: this.services.website.isDraftEnabled,
                 })
                     .then(() => Promise.all(defs.map((def) => def.resolve())))
                     .catch(() => Promise.all(defs.map((def) => def.reject())));
