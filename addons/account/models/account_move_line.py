@@ -3245,9 +3245,15 @@ class AccountMoveLine(models.Model):
         if not self.env.context.get('move_reverse_cancel') and not self.env.context.get('no_cash_basis'):
             for plan in plan_list:
                 if is_cash_basis_needed(plan['amls']):
-                    plan['partials']\
-                        .with_context(no_exchange_difference_no_recursive=False, exchange_account_per_move=exchange_account_per_move)\
-                        ._create_tax_cash_basis_moves()
+                    # The cash basis entries and the reconciliation of their tax lines must create exchange
+                    # differences, even when those of the current reconciliation are handled by the caller.
+                    caba_partials = plan['partials'].with_context(
+                        no_exchange_difference_no_recursive=False,
+                        exchange_account_per_move=exchange_account_per_move,
+                    )
+                    caba_partials._reconcile_tax_cash_basis_lines_of_reversed_moves()
+                    caba_partials._create_tax_cash_basis_moves()
+                    caba_partials._recompute_tax_cash_basis_moves_of_reversed_moves()
                     plan['partials']._set_draft_caba_move_vals()
 
         # ==== Prepare full reconcile creation ====

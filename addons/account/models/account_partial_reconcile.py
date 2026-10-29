@@ -140,18 +140,7 @@ class AccountPartialReconcile(models.Model):
 
         # Reverse or unlink CABA/exchange move entries.
         if moves_to_reverse:
-            default_values_list = []
-            for move in moves_to_reverse:
-                has_tax = move._affect_tax_report()
-                # Keep the reversal in the origin's period
-                reversal_date = move.date
-                if lock_dates := move._get_violated_lock_dates(move.date, has_tax):
-                    reversal_date = lock_dates[-1][0] + timedelta(days=1)
-                default_values_list.append({
-                    'date': reversal_date,
-                    'ref': move.env._('Reversal of: %s', move.name),
-                })
-            moves_to_reverse._unlink_or_reverse(default_values_list=default_values_list)
+            moves_to_reverse._unlink_or_reverse(default_values_list=moves_to_reverse._get_reversal_default_values_after_lock_dates())
 
         # Unlink partials before doing anything else to avoid 'Record has already been deleted' due to the recursion.
         res = super().unlink()
@@ -542,6 +531,68 @@ class AccountPartialReconcile(models.Model):
             frozendict(tax_line.analytic_distribution or {}),
         )
 
+    def _reconcile_tax_cash_basis_lines_of_reversed_moves(self):
+        ''' Reconcile the cash basis tax lines of an invoice and of a credit note when their receivable/payable
+        lines are reconciled together, as when posting a reversal (see account.move._post). Otherwise, the credit
+        note would reduce the base to make exigible on the invoice but not its tax, and the tax lines of both
+        moves would stay forever on the transition account.
+        '''
+        reconciliation_plan = []
+        used_lines = self.env['account.move.line']
+        reversed_move_pairs = {
+            (partial.debit_move_id.move_id, partial.credit_move_id.move_id)
+            for partial in self
+            if partial.debit_move_id.move_id._is_reverse_of(partial.credit_move_id.move_id)
+        }
+        for debit_move, credit_move in reversed_move_pairs:
+            tax_lines = (debit_move.line_ids | credit_move.line_ids).filtered(lambda line: (
+                line.tax_line_id.tax_exigibility == 'on_payment'
+                and not line.reconciled
+                and line not in used_lines
+            ))
+            for lines in tax_lines.grouped(lambda line: (line.account_id, line.currency_id, line.tax_line_id)).values():
+                if len(lines.move_id) != 2:
+                    continue
+                # Already reconciled together, e.g. by the same reconciliation plan when posting a reversal: the
+                # remaining amount, if any, is an exchange difference that is still to be handled.
+                if any(
+                    partial.debit_move_id in lines and partial.credit_move_id in lines
+                    for partial in lines.matched_debit_ids | lines.matched_credit_ids
+                ):
+                    continue
+                reconciliation_plan.append(lines)
+                used_lines |= lines
+        self.env['account.move.line']._reconcile_plan(reconciliation_plan)
+
+    def _recompute_tax_cash_basis_moves_of_reversed_moves(self):
+        ''' Reconciling an invoice with one of its credit notes is not a payment, but it changes the amounts the
+        payments of both moves must make exigible. When one of them already has cash basis entries, reverse them
+        and create them again with the final amounts. Partials with a payment are not concerned: their cash basis
+        entries have just been created with the right amounts.
+        '''
+        reverse_partials = self.filtered(
+            lambda partial: partial.debit_move_id.move_id._is_reverse_of(partial.credit_move_id.move_id)
+        )
+        reversed_moves = reverse_partials.debit_move_id.move_id | reverse_partials.credit_move_id.move_id
+        payment_partials = reversed_moves.tax_cash_basis_created_move_ids.tax_cash_basis_rec_id
+        if not payment_partials:
+            return
+
+        caba_moves = self.env['account.move'].search([
+            ('tax_cash_basis_rec_id', 'in', payment_partials.ids),
+            ('state', '=', 'posted'),
+            ('reversed_entry_id', '=', False),
+            ('reversal_move_ids', '=', False),
+        ])
+        if not caba_moves:
+            return
+
+        # Unreconcile the cash basis entries from the tax lines they made exigible, so that those lines can be
+        # made exigible again by the new entries.
+        (caba_moves.line_ids.matched_debit_ids | caba_moves.line_ids.matched_credit_ids).unlink()
+        caba_moves._unlink_or_reverse(default_values_list=caba_moves._get_reversal_default_values_after_lock_dates())
+        payment_partials._create_tax_cash_basis_moves()
+
     def _create_tax_cash_basis_moves(self):
         ''' Create the tax cash basis journal entries.
         :return: The newly created journal entries.
@@ -587,7 +638,7 @@ class AccountPartialReconcile(models.Model):
                     # ==========================================================================
 
                     # Percentage expressed in the foreign currency.
-                    amount_currency = line.currency_id.round(line.amount_currency * partial_values['percentage'])
+                    amount_currency = line.currency_id.round(move_values['amount_currency_per_line'][line] * partial_values['percentage'])
                     if (
                         caba_treatment == 'tax'
                         and (

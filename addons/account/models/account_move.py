@@ -4250,6 +4250,79 @@ class AccountMove(models.Model):
     # RECONCILIATION METHODS
     # -------------------------------------------------------------------------
 
+    def _is_reverse_of(self, move):
+        ''' Whether the current move and the one passed as parameter are an invoice and a credit note of the same
+        kind, in either order, whether or not one of them has been created by reversing the other: reconciling them
+        settles both moves without any payment.
+        '''
+        self.ensure_one()
+        # Both directions are checked: a receipt is reversed by a credit note, but a credit note by an invoice.
+        return (
+            self.move_type != 'entry'
+            and move.move_type != 'entry'
+            and (move.move_type == TYPE_REVERSE_MAP[self.move_type] or self.move_type == TYPE_REVERSE_MAP[move.move_type])
+        )
+
+    def _get_cash_basis_reversed_amounts(self):
+        ''' Get the amounts of the current move settled by the reverse moves reconciled with it, i.e. its credit notes,
+        or its invoices if it is itself a credit note (see _is_reverse_of). They are not payments: they reduce what
+        remains to be paid and made exigible, so they must be removed before computing the cash basis percentages.
+
+        :return: A tuple (reversed_amounts_per_line, reversed_base_per_line) of amounts to add to the lines,
+        having the opposite sign of the lines they reduce:
+            * reversed_amounts_per_line maps each line reconciled with a reverse move (receivable/payable or cash
+              basis tax line) to the (balance, amount_currency) it settled.
+            * reversed_base_per_line maps each cash basis base line to its part of the reverse moves base, as an
+              amount_currency.
+        '''
+        self.ensure_one()
+        reversed_amounts_per_line = defaultdict(lambda: [0.0, 0.0])
+        reversed_base_per_line = {}
+        if self.move_type == 'entry':
+            return reversed_amounts_per_line, reversed_base_per_line
+
+        reverse_moves = self.env['account.move']
+        for partial in self.line_ids.matched_debit_ids | self.line_ids.matched_credit_ids:
+            if partial.debit_move_id.move_id == self:
+                line, counterpart_line = partial.debit_move_id, partial.credit_move_id
+                reversed_balance, reversed_amount_currency = -partial.amount, -partial.debit_amount_currency
+            else:
+                line, counterpart_line = partial.credit_move_id, partial.debit_move_id
+                reversed_balance, reversed_amount_currency = partial.amount, partial.credit_amount_currency
+            if self._is_reverse_of(counterpart_line.move_id):
+                reversed_amounts_per_line[line][0] += reversed_balance
+                reversed_amounts_per_line[line][1] += reversed_amount_currency
+                reverse_moves |= counterpart_line.move_id
+        if not reverse_moves:
+            return reversed_amounts_per_line, reversed_base_per_line
+
+        def get_cash_basis_taxes_key(line):
+            caba_taxes = line.tax_ids.flatten_taxes_hierarchy().filtered(lambda tax: tax.tax_exigibility == 'on_payment')
+            return caba_taxes and (line.currency_id, tuple(caba_taxes.ids))
+
+        # Base lines are not reconciled: spread the base of the reverse moves over the base lines of the current
+        # move having the same cash basis taxes, in proportion to their amounts. The other values of the lines,
+        # like the account or the analytic distribution, don't matter: the cash basis entry puts each base line
+        # and its counterpart on the same account with the same analytic distribution.
+        reversed_base_per_key = defaultdict(float)
+        for line in reverse_moves.line_ids:
+            if key := get_cash_basis_taxes_key(line):
+                reversed_base_per_key[key] += line.amount_currency
+
+        for key, base_lines in self.line_ids.grouped(get_cash_basis_taxes_key).items():
+            if key not in reversed_base_per_key:
+                continue
+            currency = key[0]
+            total = sum(base_lines.mapped('amount_currency'))
+            to_spread = reversed_base_per_key[key]
+            for line in base_lines[:-1]:
+                amount = 0.0 if currency.is_zero(total) else currency.round(reversed_base_per_key[key] * line.amount_currency / total)
+                reversed_base_per_line[line] = amount
+                to_spread -= amount
+            reversed_base_per_line[base_lines[-1]] = to_spread
+
+        return reversed_amounts_per_line, reversed_base_per_line
+
     def _collect_tax_cash_basis_values(self):
         ''' Collect all information needed to create the tax cash basis journal entries:
         - Determine if a tax cash basis journal entry is needed.
@@ -4264,10 +4337,14 @@ class AccountMove(models.Model):
                                               part in the caba entry (the tax part is already exigible on the invoice)
 
                                             - line is an account.move.line record being not exigible on the tax report.
+            * amount_currency_per_line: The amount_currency to prorate for each line of to_process_lines, without the
+                                        part settled by reverse moves (see _get_cash_basis_reversed_amounts).
             * currency:                 The currency on which the percentage has been computed.
-            * total_balance:            sum(payment_term_lines.mapped('balance').
+            * total_balance:            sum(payment_term_lines.mapped('balance'), without the part settled by
+                                        reverse moves.
             * total_residual:           sum(payment_term_lines.mapped('amount_residual').
-            * total_amount_currency:    sum(payment_term_lines.mapped('amount_currency').
+            * total_amount_currency:    sum(payment_term_lines.mapped('amount_currency'), without the part settled
+                                        by reverse moves.
             * total_residual_currency:  sum(payment_term_lines.mapped('amount_residual_currency').
             * is_fully_paid:            A flag indicating the current move is now fully paid.
         '''
@@ -4276,31 +4353,37 @@ class AccountMove(models.Model):
         values = {
             'move': self,
             'to_process_lines': [],
+            'amount_currency_per_line': {},
             'total_balance': 0.0,
             'total_residual': 0.0,
             'total_amount_currency': 0.0,
             'total_residual_currency': 0.0,
         }
+        reversed_amounts_per_line, reversed_base_per_line = self._get_cash_basis_reversed_amounts()
 
         currencies = set()
         has_term_lines = False
         for line in self.line_ids:
+            reversed_balance, reversed_amount_currency = reversed_amounts_per_line.get(line, (0.0, 0.0))
+
             if line.account_type in ('asset_receivable', 'liability_payable'):
                 sign = 1 if line.balance > 0.0 else -1
 
                 currencies.add(line.currency_id)
                 has_term_lines = True
-                values['total_balance'] += sign * line.balance
+                values['total_balance'] += sign * (line.balance + reversed_balance)
                 values['total_residual'] += sign * line.amount_residual
-                values['total_amount_currency'] += sign * line.amount_currency
+                values['total_amount_currency'] += sign * (line.amount_currency + reversed_amount_currency)
                 values['total_residual_currency'] += sign * line.amount_residual_currency
 
             elif line.tax_line_id.tax_exigibility == 'on_payment':
                 values['to_process_lines'].append(('tax', line))
+                values['amount_currency_per_line'][line] = line.amount_currency + reversed_amount_currency
                 currencies.add(line.currency_id)
 
             elif 'on_payment' in line.tax_ids.flatten_taxes_hierarchy().mapped('tax_exigibility'):
                 values['to_process_lines'].append(('base', line))
+                values['amount_currency_per_line'][line] = line.amount_currency + reversed_base_per_line.get(line, 0.0)
                 currencies.add(line.currency_id)
 
         if not values['to_process_lines'] or not has_term_lines:
@@ -5980,6 +6063,21 @@ class AccountMove(models.Model):
 
     def _is_protected_by_audit_trail(self):
         return any(move.posted_before and move.company_id.restrictive_audit_trail for move in self)
+
+    def _get_reversal_default_values_after_lock_dates(self):
+        ''' Default values to reverse the current moves in their own period, or just after the lock date protecting
+        them. To be used with _unlink_or_reverse.
+        '''
+        default_values_list = []
+        for move in self:
+            reversal_date = move.date
+            if lock_dates := move._get_violated_lock_dates(move.date, move._affect_tax_report()):
+                reversal_date = lock_dates[-1][0] + timedelta(days=1)
+            default_values_list.append({
+                'date': reversal_date,
+                'ref': move.env._('Reversal of: %s', move.name),
+            })
+        return default_values_list
 
     def _unlink_or_reverse(self, default_values_list=None):
         if not self:
