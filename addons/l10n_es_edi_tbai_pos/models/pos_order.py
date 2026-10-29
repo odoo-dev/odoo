@@ -108,8 +108,21 @@ class PosOrder(models.Model):
             if len(refund_reasons) > 1:
                 raise UserError(self.env._("You cannot consolidate orders with different TicketBAI refund reasons."))
             vals['l10n_es_tbai_refund_reason'] = refund_reasons.pop()
+            if self._l10n_es_tbai_get_substituted_documents():
+                # This invoice replaces tickets that were already declared, so it is a full
+                # invoice identifying the customer. Without this it would be declared as yet
+                # another simplified invoice, since 'l10n_es_pos' copies the flag from the
+                # order. Orders invoiced straight from the PoS keep their simplified flag.
+                vals['l10n_es_is_simplified'] = False
 
         return vals
+
+    def _l10n_es_tbai_get_substituted_documents(self):
+        """ Tickets of these orders that were already declared to TicketBAI, and that an
+        invoice covering them therefore replaces. Orders whose ticket was never accepted
+        are excluded: for those the invoice is the first declaration of the sale.
+        """
+        return self.l10n_es_tbai_post_document_id.filtered(lambda document: document.state == 'accepted')
 
     # -------------------------------------------------------------------------
     # PUBLIC METHODS

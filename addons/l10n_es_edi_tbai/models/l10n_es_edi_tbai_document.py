@@ -344,6 +344,7 @@ class L10n_Es_Edi_TbaiDocument(models.Model):
             rounded_value = float_round(value, precision_digits=precision_digits)
             return float_repr(rounded_value, precision_digits=precision_digits)
 
+        values.setdefault('substituted_docs', [])
         values.update({
             'doc': self,
             **self._get_header_values(),

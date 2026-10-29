@@ -305,6 +305,7 @@ class AccountMove(models.Model):
 
         return {
             **self._l10n_es_tbai_get_credit_note_values(),
+            'substituted_docs': self._l10n_es_tbai_get_substituted_docs(),
             'origin': self.invoice_origin and self.invoice_origin[:250] or 'manual',
             'taxes': taxes,
             'rate':  abs(self.amount_total / self.amount_total_signed) if self.amount_total else 1,
@@ -312,6 +313,14 @@ class AccountMove(models.Model):
             'nosujeto_causa': 'IE' if is_oss else 'RL',
             **({'post_doc': self.l10n_es_tbai_post_document_id} if cancel else {}),
         }
+
+    def _l10n_es_tbai_get_substituted_docs(self):
+        """ Simplified invoices already declared to TicketBAI that this invoice replaces.
+
+        Returns a list of {'serie', 'number', 'date'} dicts. Overridden in
+        'l10n_es_edi_tbai_pos' for invoices created out of Point of Sale tickets.
+        """
+        return []
 
     def _l10n_es_tbai_get_credit_note_values(self):
         return {

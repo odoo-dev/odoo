@@ -57,6 +57,58 @@ class TestPosEdi(TestEsEdiTbaiCommonGipuzkoa, CommonPosEsEdiTest):
         # The edi is handled by the invoice
         self.assertFalse(order.l10n_es_tbai_state)
 
+    def test_tbai_pos_order_invoiced_afterwards_substitutes_the_ticket(self):
+        """ A ticket declared to TicketBAI as a simplified invoice and invoiced afterwards must
+        be declared as substituted by that invoice, not a second time.
+
+        Invoicing goes through `action_pos_order_invoice`, which is what both the PoS "Invoice"
+        button of the Orders screen and the /pos/ticket self-invoicing portal call. The backend
+        form button is hidden once a ticket carries a TicketBAI document.
+        """
+        self.ten_dollars_with_10_incl.product_variant_id.lst_price = 100
+        order, _ = self.create_backend_pos_order({
+            'line_data': [
+                {'product_id': self.ten_dollars_with_10_incl.product_variant_id.id}
+            ],
+        })
+        if 'is_l10n_es_simplified_invoice' in order._fields:
+            # what the PoS front-end sets on a ticket under the simplified invoice limit
+            order.is_l10n_es_simplified_invoice = True
+        self.pay_pos_order(order)
+        self.assertEqual(order.l10n_es_tbai_state, 'sent')
+
+        ticket_document = order.l10n_es_tbai_post_document_id
+        ticket_serie, ticket_number = ticket_document._get_tbai_sequence_and_number()
+        ticket_date = ticket_document._get_tbai_signature_and_date()[1]
+
+        # The customer comes back and asks for an invoice
+        order.partner_id = self.partner_lowe
+        with patch(
+            'odoo.addons.l10n_es_edi_tbai.models.l10n_es_edi_tbai_document.requests.Session.request',
+            return_value=self.mock_response_post_invoice_success,
+        ):
+            order.action_pos_order_invoice()
+
+        invoice = order.account_move
+        self.assertTrue(invoice, "the order should have been invoiced")
+        self.assertFalse(invoice.l10n_es_is_simplified,
+                         "an invoice replacing tickets is a full invoice")
+
+        header = invoice.l10n_es_tbai_post_document_id._get_xml().find('Factura/CabeceraFactura')
+        self.assertEqual(header.find('FacturaSimplificada').text, 'N')
+        self.assertEqual(header.find('FacturaEmitidaSustitucionSimplificada').text, 'S')
+
+        substituted = header.findall('FacturasRectificadasSustituidas/IDFacturaRectificadaSustituida')
+        self.assertEqual(len(substituted), 1, "the replaced ticket must be identified")
+        self.assertEqual(substituted[0].find('SerieFactura').text, ticket_serie)
+        self.assertEqual(substituted[0].find('NumFactura').text, ticket_number)
+        # the date the ticket was declared with, not the date of the order
+        self.assertEqual(substituted[0].find('FechaExpedicionFactura').text,
+                         ticket_date.strftime('%d-%m-%Y'))
+
+        # the ticket itself stays valid and declared: TicketBAI substitution is not a cancellation
+        self.assertEqual(ticket_document.state, 'accepted')
+
     def test_tbai_pos_order_number_unique_across_devices(self):
         """Every device keeps its own receipt counter in its browser local storage, so
         two devices of the same PoS both start at 000001 and end up with the same order

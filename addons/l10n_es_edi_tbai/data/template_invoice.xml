@@ -106,6 +106,19 @@
                         </IDFacturaRectificadaSustituida>
                     </FacturasRectificadasSustituidas>
                 </t>
+                <t t-elif="is_emission and substituted_docs">
+                    <!-- Full invoice replacing simplified invoices (tickets) that were already
+                         declared. This is NOT a credit note: the tickets stay valid and must not
+                         be cancelled, they are identified here instead. -->
+                    <FacturaEmitidaSustitucionSimplificada>S</FacturaEmitidaSustitucionSimplificada>
+                    <FacturasRectificadasSustituidas>
+                        <IDFacturaRectificadaSustituida t-foreach="substituted_docs" t-as="substituted_doc">
+                            <SerieFactura t-out="substituted_doc['serie']"/>
+                            <NumFactura t-out="substituted_doc['number']"/>
+                            <FechaExpedicionFactura t-out="format_date(substituted_doc['date'])"/>
+                        </IDFacturaRectificadaSustituida>
+                    </FacturasRectificadasSustituidas>
+                </t>
             </CabeceraFactura>
             <DatosFactura t-if="is_emission">
                 <FechaOperacion t-if="delivery_date" t-out="format_date(delivery_date)"/>
