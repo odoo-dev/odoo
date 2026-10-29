@@ -52,10 +52,23 @@ export class ActionPanel extends Component {
 
     get classNames() {
         return attClassObjectToString({
+<<<<<<< c84fbd6b53c64b9b2aaa6168c47a1ca4378ab63c
             "o-mail-ActionPanel rounded-4 overflow-auto o-scrollbar-thin d-flex flex-column flex-shrink-0 position-relative py-2 pt-0 h-100 bg-inherit": true,
             "o-mail-ActionPanel-chatter": this.ancestors.inChatter,
             "o-chatWindow": this.ancestors.inChatWindow,
             "px-2": this.ancestors.inDiscussApp || this.ancestors.inChatWindow,
+||||||| ff333da20f9a42f70b52d1af97a5d08ac50c3cc5
+            "o-mail-ActionPanel rounded-4 overflow-auto o-scrollbar-thin d-flex flex-column flex-shrink-0 position-relative py-2 pt-0 h-100 bg-inherit": true,
+            "o-mail-ActionPanel-chatter": this.env.inChatter,
+            "o-chatWindow": this.env.inChatWindow,
+            "px-2": this.env.inDiscussApp || this.env.inChatWindow,
+=======
+            "o-mail-ActionPanel rounded-4 overflow-auto o-scrollbar-thin d-flex flex-column position-relative py-2 pt-0 h-100 bg-inherit": true,
+            "flex-shrink-0": !this.env.inDialog,
+            "o-mail-ActionPanel-chatter": this.env.inChatter,
+            "o-chatWindow": this.env.inChatWindow,
+            "px-2": this.env.inDiscussApp || this.env.inChatWindow,
+>>>>>>> b78734abd7d4c13afbe52137166792f85b9c793c
             rounded: !this.props.resizable,
         });
     }
