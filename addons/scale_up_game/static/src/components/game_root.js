@@ -350,13 +350,15 @@ export class GameRoot extends Component {
         }
     }
 
-    async onDialogClosed() {
+    onDialogClosed() {
         if (this.destroyed) {
             return;
         }
         this.state.dialogOpen = false;
         this.stopPolling();
-        await this.refresh();
+        // Not awaited: Odoo 20 awaits onClose before removing the dialog, and refresh()
+        // may run the whole delivery animation.
+        this.refresh();
     }
 
     openCompletedTransfer() {
