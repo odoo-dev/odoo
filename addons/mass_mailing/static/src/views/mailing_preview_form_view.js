@@ -1,29 +1,15 @@
-import { proxy } from "@odoo/owl";
-import { useSubEnv } from "@web/owl2/utils";
+import { providePlugins } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { formView } from "@web/views/form/form_view";
-import { useBus, useService } from "@web/core/utils/hooks";
 import { FormController } from "@web/views/form/form_controller";
 import { FormRenderer } from "@web/views/form/form_renderer";
 import { StatusBarButtons } from "@web/views/form/status_bar_buttons/status_bar_buttons";
+import { MailingPreviewPlugin } from "@mass_mailing/components/mailing_preview_iframe/mailing_preview_plugin";
 
 class MailingPreviewFormController extends FormController {
     setup() {
         super.setup();
-        this.ui = useService("ui");
-        const displayState = proxy({
-            isMobileMode: this.ui.isSmall,
-            isSmall: this.ui.isSmall,
-        });
-
-        useSubEnv({ displayState });
-
-        useBus(this.ui.bus, "resize", () => {
-            displayState.isSmall = this.ui.isSmall;
-            if (displayState.isSmall) {
-                displayState.isMobileMode = true;
-            }
-        });
+        providePlugins([MailingPreviewPlugin]);
     }
 }
 

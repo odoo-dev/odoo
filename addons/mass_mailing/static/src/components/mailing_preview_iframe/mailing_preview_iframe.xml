@@ -6,8 +6,8 @@
         <div class="o_mass_mailing_iframe_wrapper mailing_preview_iframe">
             <!-- Mobile container has fixed width -->
             <div class="o_mass_mailing_preview_container overflow-hidden"
-                t-att-class="{'o_is_mobile o_mass_mailing_preview_transparent_form': this.state.isMobileMode}">
-                <div t-if="this.state.isMobileMode" class="o_is_mobile_header px-2 pb-1">
+                t-att-class="{'o_is_mobile o_mass_mailing_preview_transparent_form': this.mailingPreviewPlugin.isMobileMode()}">
+                <div t-if="this.mailingPreviewPlugin.isMobileMode()" class="o_is_mobile_header px-2 pb-1">
                     <!-- "Mobile Header" (placed in the padding) -->
                     <div class="position-relative">
                         <div class="position-absolute d-flex justify-content-end p-2 column-gap-2 bottom-0 end-0">
@@ -45,7 +45,7 @@
                     </div>
                 </div>
                 <iframe t-ref="this.iframeRef" t-att-sandbox="this.isBrowserSafari ? 'allow-same-origin allow-scripts' : 'allow-same-origin'"/>
-                <div t-if="this.state.isMobileMode" class="o_is_mobile_footer">
+                <div t-if="this.mailingPreviewPlugin.isMobileMode()" class="o_is_mobile_footer">
                     <!--
                     Mobile Footer
                     Has additional padding in which to display the bottom of the phone background image,

@@ -1,5 +1,5 @@
 import { loadIframe } from "@mail/convert_inline/iframe_utils";
-import { Component, onMounted, proxy, signal, useProps, useScope } from "@odoo/owl";
+import { Component, onMounted, signal, usePlugin, useProps, useScope } from "@odoo/owl";
 import { isBrowserSafari } from "@web/core/browser/feature_detection";
 import { registry } from "@web/core/registry";
 import { useBus, useService } from "@web/core/utils/hooks";
@@ -8,6 +8,7 @@ import { useThrottleForAnimation } from "@web/core/utils/timing";
 import { useLayoutEffect } from "@web/owl2/utils";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { MailingPreviewDisplayModeToggle } from "../mailing_preview_mode_toggle/mailing_preview_mode_toggle";
+import { MailingPreviewPlugin } from "./mailing_preview_plugin";
 import { MassMailingPreviewRecordField } from "./mass_mailing_preview_record_field";
 
 export class MailingPreviewIframe extends Component {
@@ -23,8 +24,9 @@ export class MailingPreviewIframe extends Component {
 
     scope = useScope();
 
+    mailingPreviewPlugin = usePlugin(MailingPreviewPlugin);
+
     setup() {
-        this.state = proxy(this.env.displayState);
         this.action = useService("action");
         this.ui = useService("ui");
         this.iframeLoaded = Promise.withResolvers();
@@ -55,7 +57,7 @@ export class MailingPreviewIframe extends Component {
                     this.throttledResize();
                 });
             },
-            () => [this.state.isMobileMode]
+            () => [this.mailingPreviewPlugin.isMobileMode()]
         );
 
         useBus(this.ui.bus, "resize", () => {
@@ -70,7 +72,7 @@ export class MailingPreviewIframe extends Component {
             if (content) {
                 content.style.zoom = "";
             }
-            if (this.state.isMobileMode) {
+            if (this.mailingPreviewPlugin.isMobileMode()) {
                 // same styling for mobile as we have in 'mass_mailing_iframe'
                 iframe.style.width = "367px";
                 iframe.style.height = "668px";
