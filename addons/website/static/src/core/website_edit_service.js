@@ -64,6 +64,14 @@ export const websiteEditService = {
         const clearRpcCache = () => cache.invalidate();
         const rpcCache = async (params) => cache.read(params);
 
+        const getPreviewInteractions = () => {
+            if (!previewInteractions) {
+                const builders = registry.category("public.interactions.preview").getAll();
+                previewInteractions = buildEditableInteractions(builders);
+            }
+            return previewInteractions;
+        };
+
         const update = (target, mode) => {
             // editMode = true;
             // const currentEditMode = this.website_edit.mode === "edit";
@@ -80,11 +88,10 @@ export const websiteEditService = {
                 publicInteractions.editMode = true;
                 publicInteractions.activate(editableInteractions);
             } else if (mode === "preview") {
-                if (!previewInteractions) {
-                    const builders = registry.category("public.interactions.preview").getAll();
-                    previewInteractions = buildEditableInteractions(builders);
-                }
-                publicInteractions.activate(previewInteractions, target);
+                // Do not use `activate`: it would replace the interactions
+                // used for the page content. The preview interactions are
+                // selected in the patched `startInteractions`.
+                publicInteractions.startInteractions(target);
             } else {
                 publicInteractions.startInteractions(target);
             }
@@ -239,6 +246,22 @@ export const websiteEditService = {
                     },
                 }),
                 patch(publicInteractions.constructor.prototype, {
+                    startInteractions(el = this.el) {
+                        // Only the snippet previews (in the "Add snippet"
+                        // dialog) get the preview interactions, the page
+                        // content always gets the edit ones.
+                        if (!el.closest?.(".o_snippets_preview_row")) {
+                            return super.startInteractions(el);
+                        }
+                        const Interactions = this.Interactions;
+                        this.Interactions = getPreviewInteractions();
+                        try {
+                            return super.startInteractions(el);
+                        } finally {
+                            this.Interactions = Interactions;
+                        }
+                    },
+
                     shouldStop(el, interaction) {
                         if (this.isRefreshing) {
                             const mustBeRefreshed =
