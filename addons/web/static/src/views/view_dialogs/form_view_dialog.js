@@ -110,7 +110,7 @@ export class FormViewDialog extends Component {
         if (this.props.onRecordDiscarded) {
             await this.props.onRecordDiscarded();
         }
-        this.props.close();
+        this.props.close({ dismiss: true });
     }
 
     async onExpand(_ev, newWindow) {

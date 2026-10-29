@@ -363,7 +363,14 @@ export class CalendarController extends Component {
                         viewId: this.model.formViewId,
                         onRecordSaved: () => this.model.load(),
                     },
-                    { onClose: () => resolve() }
+                    {
+                        onClose: (closeInfo) => {
+                            if (closeInfo?.noReload && !closeInfo?.special && !closeInfo?.dismiss) {
+                                this.model.load();
+                            }
+                            resolve();
+                        },
+                    }
                 );
             });
         } else {
