@@ -274,17 +274,25 @@ class TestMrpCommon(TestStockCommon):
             }
         )
 
-    def full_availability(self):
-        """set full availability for all calendars"""
-        # setup master-data: resource.calendar edits require HR/system rights
-        calendar = self.env['resource.calendar'].sudo().search([])
-        calendar.write({'attendance_ids': [(5, 0, 0)]})
-        calendar.write({'attendance_ids': [
-            (0, 0, {'dayofweek': '0', 'hour_from': 0, 'hour_to': 24}),
-            (0, 0, {'dayofweek': '1', 'hour_from': 0, 'hour_to': 24}),
-            (0, 0, {'dayofweek': '2', 'hour_from': 0, 'hour_to': 24}),
-            (0, 0, {'dayofweek': '3', 'hour_from': 0, 'hour_to': 24}),
-            (0, 0, {'dayofweek': '4', 'hour_from': 0, 'hour_to': 24}),
-            (0, 0, {'dayofweek': '5', 'hour_from': 0, 'hour_to': 24}),
-            (0, 0, {'dayofweek': '6', 'hour_from': 0, 'hour_to': 24}),
-        ]})
+    def full_availability(self, workcenters=None):
+        """Make ``workcenters`` (by default, every workcenter in scope) fully
+        available 24/7, using a calendar this test fully owns.
+
+        A fresh calendar is created and assigned to the given workcenters,
+        instead of editing whatever calendar they currently use: that
+        calendar may be shared with employees of a company we have no access
+        to (which `hr` forbids editing) or with unrelated tests/master data.
+        """
+        if workcenters is None:
+            workcenters = self.env['mrp.workcenter'].search([
+                '|', ('company_id', '=', False), ('company_id', 'in', self.env.companies.ids),
+            ])
+        calendar = self.env['resource.calendar'].sudo().create({
+            'name': 'Full Availability (test)',
+            'attendance_ids': [
+                Command.create({'dayofweek': str(day), 'hour_from': 0, 'hour_to': 24})
+                for day in range(7)
+            ],
+        })
+        workcenters.resource_calendar_id = calendar.id
+        return calendar

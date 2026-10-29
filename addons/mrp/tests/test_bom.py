@@ -837,8 +837,6 @@ class TestBoM(TestMrpCommon):
         """ Simulate a BoM of a pickaxe, and test that the BoM structure report
             respects the hardcoded limit of 700 planning days (mocked as 28 days).
         """
-        # Workcenter is working 24/7
-        self.full_availability()
         pickaxe = self.env['product.product'].create({
             'name': 'Iron Pickaxe',
             'is_storable': True,
@@ -859,8 +857,9 @@ class TestBoM(TestMrpCommon):
 
         workcenter = self.env['mrp.workcenter'].create({
             'costs_hour': 10,
-            'name': 'Crafting Table'
+            'name': 'Crafting Table',
         })
+        self.full_availability(workcenter)
 
         # Required to display `operation_ids` in the form view
         self.env.user.group_ids += self.env.ref("mrp.group_mrp_routings")
