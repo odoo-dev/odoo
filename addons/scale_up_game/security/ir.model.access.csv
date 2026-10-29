@@ -1,5 +1,0 @@
-id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_scale_up_game_level_user,scale.up.game.level user,model_scale_up_game_level,stock.group_stock_user,1,0,0,0
-access_scale_up_game_level_system,scale.up.game.level system,model_scale_up_game_level,base.group_system,1,1,1,1
-access_scale_up_game_session_user,scale.up.game.session user,model_scale_up_game_session,stock.group_stock_user,1,0,1,0
-access_scale_up_game_session_system,scale.up.game.session system,model_scale_up_game_session,base.group_system,1,1,1,1

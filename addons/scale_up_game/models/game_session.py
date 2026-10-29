@@ -2,7 +2,6 @@ import logging
 
 from odoo import Command, _, api, fields, models
 from odoo.exceptions import AccessError, UserError, ValidationError
-from odoo.tools import float_compare
 
 _logger = logging.getLogger(__name__)
 
@@ -122,18 +121,17 @@ class ScaleUpGameSession(models.Model):
 
         level._check_configuration()
         product, src, dst, qty = level.product_id, level.location_src_id, level.location_dest_id, level.quantity
-        rounding = product.uom_id.rounding
 
         Quant = self.env['stock.quant']
         available = Quant._get_available_quantity(product, src, strict=True)
-        if float_compare(available, qty, precision_rounding=rounding) < 0:
+        if product.uom_id.compare(available, qty) < 0:
             raise UserError(_("There is no stock left in %(location)s to restock the shelf.",
                               location=src.complete_name))
 
         picking = self._create_and_validate_transfer(level)
 
         dst_qty = level._get_exact_quantity(dst)
-        if picking.state != 'done' or float_compare(dst_qty, qty, precision_rounding=rounding) < 0:
+        if picking.state != 'done' or product.uom_id.compare(dst_qty, qty) < 0:
             raise UserError(_("The transfer could not be completed."))
 
         # Game bookkeeping (own model, written with sudo because players only
@@ -158,7 +156,7 @@ class ScaleUpGameSession(models.Model):
             'move_ids': [Command.create({
                 'product_id': product.id,
                 'product_uom_qty': qty,
-                'product_uom': product.uom_id.id,
+                'uom_id': product.uom_id.id,
                 'location_id': src.id,
                 'location_dest_id': dst.id,
             })],
@@ -168,7 +166,7 @@ class ScaleUpGameSession(models.Model):
         if picking.state != 'assigned':
             raise UserError(_("The stock could not be reserved for this transfer."))
         picking.move_ids.picked = True
-        result = picking.with_context(skip_backorder=True, skip_immediate=True).button_validate()
+        result = picking.with_context(skip_backorder=True).button_validate()
         if result is not True:
             raise UserError(_("The transfer needs manual validation and could not be completed automatically."))
         return picking
@@ -181,7 +179,6 @@ class ScaleUpGameSession(models.Model):
         """Compare a player-made transfer with what the scenario asks for."""
         level = self.level_id.sudo()
         product, src, dst, qty = level.product_id, level.location_src_id, level.location_dest_id, level.quantity
-        rounding = product.uom_id.rounding
         issues = []
         moves = picking.move_ids.filtered(lambda m: m.product_id == product)
         if not picking.move_ids:
@@ -190,7 +187,7 @@ class ScaleUpGameSession(models.Model):
             issues.append(_("This transfer doesn't move the product the order needs (%s).", product.display_name))
         else:
             amount = sum(moves.mapped('quantity' if picking.state == 'done' else 'product_uom_qty'))
-            if float_compare(amount, qty, precision_rounding=rounding) < 0:
+            if product.uom_id.compare(amount, qty) < 0:
                 issues.append(_("The quantity is too small: the order needs %s.", self._fmt_qty(qty)))
         if picking.location_id != src:
             issues.append(_("The source location should be %s.", src.complete_name))
@@ -255,9 +252,8 @@ class ScaleUpGameSession(models.Model):
         if progress['stage'] != 'done':
             return False
         level = self.level_id.sudo()
-        rounding = level.product_id.uom_id.rounding
-        if float_compare(level._get_exact_quantity(level.location_dest_id), level.quantity,
-                         precision_rounding=rounding) < 0:
+        if level.product_id.uom_id.compare(
+                level._get_exact_quantity(level.location_dest_id), level.quantity) < 0:
             return False
         self.env.cr.execute("SELECT id FROM scale_up_game_session WHERE id = %s FOR UPDATE", (self.id,))
         self.invalidate_recordset(['state'])

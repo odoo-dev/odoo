@@ -1,7 +1,8 @@
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { loadJS } from "@web/core/assets";
-import { Component, onMounted, onWillUnmount, useRef, useState } from "@odoo/owl";
+import { standardActionServiceProps } from "@web/webclient/actions/action_plugin";
+import { Component, onMounted, onWillUnmount, proxy, signal, useProps } from "@odoo/owl";
 import { WarehouseScene, SCENE_OBJECT_IDS } from "@scale_up_game/three/scene";
 import { setupInteractions } from "@scale_up_game/three/interactions";
 
@@ -15,15 +16,15 @@ function errorMessage(error) {
 
 export class GameRoot extends Component {
     static template = "scale_up_game.GameRoot";
-    static props = ["*"];
+    props = useProps({ ...standardActionServiceProps });
 
     setup() {
         this.orm = useService("orm");
         this.action = useService("action");
-        this.containerRef = useRef("container");
-        this.anchorWRef = useRef("anchorW");
-        this.anchorTRef = useRef("anchorT");
-        this.state = useState({
+        this.containerRef = signal.ref();
+        this.anchorWRef = signal.ref();
+        this.anchorTRef = signal.ref();
+        this.state = proxy({
             loading: true,
             error: null,
             game: null,
@@ -61,7 +62,7 @@ export class GameRoot extends Component {
             if (this.destroyed) {
                 return;
             }
-            this.scene = new WarehouseScene(window.THREE, this.containerRef.el, {
+            this.scene = new WarehouseScene(window.THREE, this.containerRef(), {
                 onFrame: () => this.updateOverlay(),
                 onActivity: (label) => {
                     if (!this.destroyed) {
@@ -409,7 +410,7 @@ export class GameRoot extends Component {
             return;
         }
         for (const [ref, name] of [[this.anchorWRef, "worker"], [this.anchorTRef, "terminal"]]) {
-            const el = ref.el;
+            const el = ref();
             if (el) {
                 const { x, y } = this.scene.getScreenPosition(name);
                 el.style.transform = `translate(${Math.round(x)}px, ${Math.round(y)}px)`;

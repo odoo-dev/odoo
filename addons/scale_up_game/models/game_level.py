@@ -2,7 +2,6 @@ import logging
 
 from odoo import Command, _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
-from odoo.tools import float_compare
 
 _logger = logging.getLogger(__name__)
 
@@ -97,7 +96,7 @@ class ScaleUpGameLevel(models.Model):
             ('location_id', '=', location.id),
         ])
         current = sum(quants.mapped('quantity'))
-        if float_compare(current, qty, precision_rounding=product.uom_id.rounding) == 0:
+        if product.uom_id.compare(current, qty) == 0:
             return
         Quant = self.env['stock.quant'].sudo().with_context(inventory_mode=True)
         if quants:

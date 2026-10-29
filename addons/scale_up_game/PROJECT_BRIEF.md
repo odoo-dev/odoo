@@ -31,14 +31,24 @@ Order SO-001 needs 1 × *Demo Product* but `WH/Stock/Shelf-01` is empty while `W
 - **Frontend** (`static/src/`): `components/game_root.{js,xml,scss}` (mission card with objective, stock-on-hand panel, hint button; terminal menu opening the real `stock.picking` form in a dialog via `doAction(... target:"new")`; polling every 1.5 s while the dialog is open; on Done the dialog/wizards are closed and a "Validating…" pill shows while the bot works; recap card), `three/scene.js` (detailed warehouse: racks, pallets, desk + live terminal screen, order board, windows/light shafts/dust, labels with product & quantities, confetti), `three/animations.js` (tween runner, abortable walking, delivery sequence), `three/activities.js` (random work activities for the bot), `three/interactions.js` (raycasting by `userData.interactiveId`).
 - Stable object ids: `warehouse_worker_01`, `shelf_01`, `product_box_01`, `warehouse_floor_01`, `office_terminal_01`.
 
-## 4. Odoo 19 gotchas we hit (check each again on Odoo 20)
+## 4. Odoo 20 gotchas (verified in the Odoo 20 source; 19 notes kept where still true)
 
-- `stock.move` has **no `name` field** (creating a move with `name` raised `ValueError`).
-- Source/Destination fields on the transfer form only show with group `stock.group_stock_multi_locations` ("Storage Locations" setting). Adding it via XML on `base.group_user` was silently skipped (base's record is `noupdate`), so it is enforced from Python in `_ensure_multi_location_group()` through a `<function>` outside `noupdate`.
-- `models.Constraint` is used (not `_sql_constraints`); `<list>` view tag; `post_init_hook(env)` signature.
-- Reserve/validate flow used: `create` → `action_confirm` → `action_assign` → `move_ids.picked = True` → `button_validate` with context `skip_backorder`/`skip_immediate`; must return `True`.
-- Stock helpers used: `stock.quant._get_available_quantity(product, location, strict=True)`; inventory setup via `with_context(inventory_mode=True)` + `inventory_quantity` + `action_apply_inventory()`.
-- Product data: `type='consu'` + `is_storable=True`.
+**Changed in 20 (migration done):**
+- `stock.move.product_uom` → **`uom_id`**.
+- `uom.uom.rounding` is gone. Use `uom.compare(a, b)` / `is_zero()` / `round()` (precision "Product Unit") instead of `float_compare(precision_rounding=…)`.
+- `skip_immediate` context key no longer exists in stock (harmless); `skip_backorder` still works.
+- **`ir.model.access.csv` + `ir.rule` merged into `ir.access`**: file `security/ir.access.csv` with columns `id,name,model_id,group_id/id,operation,domain` (`model_id` = dotted model name, `operation` ∈ `crud` subsets, e.g. `cr`). With a group = permission (domain optional, OR-ed per group); no group = global restriction. `ir.rule` XML records no longer load.
+- **Owl 3** (`3.0.0-alpha.50` + `web/static/src/owl2/owl3_compatibility_layer.js`): `useState` → `proxy()`, `useRef("x")` → `signal.ref()` read as `this.x()` with `t-ref="this.x"`, `static props` throws → `props = useProps({...standardActionServiceProps})` (from `@web/webclient/actions/action_plugin`). Templates use the `this.` prefix everywhere; `t-esc` deprecated → `t-out`.
+- `useService("action")` / `useService("orm")` still work but are marked temporary bridges in the source (`@todo owl3 migration`).
+
+**Unchanged, re-verified in 20:**
+- `stock.move` has **no `name` field**.
+- Source/Destination fields on the transfer form need group `stock.group_stock_multi_locations`; still enforced from Python in `_ensure_multi_location_group()` (`<function>` at the end of `views/game_menu.xml`) because `base.group_user` is `noupdate`. Verified: implied for a new Inventory user.
+- `models.Constraint` (`_sql_constraints` is now rejected), `<list>` tag, `post_init_hook(env)`, `from odoo import _`, `Command`, `check_access('read')`, `has_group`.
+- Flow: `create` → `action_confirm` → `action_assign` → `move_ids.picked = True` → `button_validate` with `skip_backorder`; returns `True`.
+- `stock.quant._get_available_quantity(product, location, strict=True)`; inventory setup via `with_context(inventory_mode=True)` + `inventory_quantity` + `action_apply_inventory()`.
+- `type='consu'` + `is_storable=True`; `stock.location.warehouse_id`; `stock.warehouse.int_type_id`.
+- Web: `loadJS`, `doAction(..., {onClose})`, `ir.actions.act_window_close`, `.o_dialog` / `.modal.d-block` selectors, SCSS `darken`, client action registry, assets glob.
 
 ## 5. TASK A — Migrate to Odoo 20 (do this first)
 

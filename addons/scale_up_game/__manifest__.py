@@ -1,6 +1,6 @@
 {
     'name': 'Scale-Up! Virtual Business Game',
-    'version': '19.0.1.0.0',
+    'version': '20.0.1.0.0',
     'category': 'Inventory/Inventory',
     'summary': 'Interactive 3D business simulation driven by real Odoo inventory (Level 1: Restock the Shelf)',
     'description': """
@@ -10,8 +10,7 @@ business logic (Level 1 performs a genuine internal stock transfer).
 """,
     'depends': ['base', 'web', 'stock'],
     'data': [
-        'security/game_security.xml',
-        'security/ir.model.access.csv',
+        'security/ir.access.csv',
         'data/game_level_data.xml',
         'views/game_menu.xml',
     ],

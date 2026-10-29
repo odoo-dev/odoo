@@ -4,7 +4,7 @@
 > "Continue building scale_up_game from PROGRESS.md". Start at the first
 > unchecked milestone. Update the checkboxes below after each milestone.
 
-Target: Odoo 19 · Owl · Three.js r149 (vendored UMD, lazy-loaded via `loadJS`) · no automated tests (user tests manually).
+Target: Odoo 20 (migrated from 19) · Owl · Three.js r149 (vendored UMD, lazy-loaded via `loadJS`) · no automated tests (user tests manually).
 
 ## Milestones
 
@@ -18,6 +18,8 @@ Target: Odoo 19 · Owl · Three.js r149 (vendored UMD, lazy-loaded via `loadJS`)
 - [x] M7  Static syntax checks (py_compile, XML parse, node --check)
 - [x] M8  Package: copy to /mnt/user-data/outputs + zip, manual-test checklist below
 
+- [x] M9  Migrate to Odoo 20: backend (`uom_id`, `uom.compare`, `ir.access.csv`), Owl 3 frontend (`proxy`, `signal.ref`, `useProps`, `this.` templates), manifest 20.0.1.0.0. Install on fresh DB `su20` clean; backend flow smoke-tested via shell. **Browser check pending (user).**
+
 ## File map
 
 ```
@@ -25,7 +27,7 @@ scale_up_game/
 ├── __init__.py                  post_init_hook (seeds source stock once)
 ├── __manifest__.py
 ├── models/{game_level,game_session}.py
-├── security/{game_security.xml,ir.model.access.csv}
+├── security/ir.access.csv
 ├── data/game_level_data.xml     Shelf-01 location, Demo Product, level
 ├── views/game_menu.xml          client action, menus, admin views
 └── static/

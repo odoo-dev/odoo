@@ -1,0 +1,5 @@
+id,name,model_id,group_id/id,operation,domain
+access_scale_up_game_level_user,scale.up.game.level user,scale.up.game.level,stock.group_stock_user,r,
+access_scale_up_game_level_system,scale.up.game.level system,scale.up.game.level,base.group_system,crud,
+access_scale_up_game_session_user,Scale-Up session: own sessions,scale.up.game.session,stock.group_stock_user,cr,"[('user_id', '=', user.id)]"
+access_scale_up_game_session_system,Scale-Up session: administrators see all,scale.up.game.session,base.group_system,crud,
