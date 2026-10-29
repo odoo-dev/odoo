@@ -4256,14 +4256,15 @@ class AccountMove(models.Model):
         - Compute the lines to be processed and the amounts needed to compute a percentage.
         :return: A dictionary:
             * move:                     The current account.move record passed as parameter.
-            * to_process_lines:         A tuple (caba_treatment, line) where:
+            * to_process_lines:         A tuple (caba_treatment, line_values) where:
                                             - caba_treatment is either 'tax' or 'base', depending on what should
                                               be considered on the line when generating the caba entry.
                                               For example, a line with tax_ids=caba and tax_line_id=non_caba
                                               will have a 'base' caba treatment, as we only want to treat its base
                                               part in the caba entry (the tax part is already exigible on the invoice)
 
-                                            - line is an account.move.line record being not exigible on the tax report.
+                                            - line_values contains the source line as 'line_id' and its adjusted
+                                              amount_currency to use when creating the caba entry.
             * currency:                 The currency on which the percentage has been computed.
             * total_balance:            sum(payment_term_lines.mapped('balance').
             * total_residual:           sum(payment_term_lines.mapped('amount_residual').
@@ -4282,26 +4283,106 @@ class AccountMove(models.Model):
             'total_residual_currency': 0.0,
         }
 
+        reversed_moves = self.line_ids.reconciled_lines_ids.move_id.filtered(
+            lambda move: move.move_type in ('out_refund', 'in_refund')
+        )
+
+        def get_base_line_key(line):
+            return (
+                tuple(line.tax_ids.ids),
+                line.account_id.id,
+                line.currency_id.id,
+                frozendict(line.analytic_distribution or {}),
+            )
+
+        caba_base_lines = self.line_ids.filtered(
+            lambda line: 'on_payment' in line.tax_ids.flatten_taxes_hierarchy().mapped('tax_exigibility')
+        )
+
+        reversed_base_totals = defaultdict(lambda: [0.0, 0.0])
+        for line in reversed_moves.line_ids.filtered(
+            lambda line: 'on_payment' in line.tax_ids.flatten_taxes_hierarchy().mapped('tax_exigibility')
+        ):
+            totals = reversed_base_totals[get_base_line_key(line)]
+            totals[0] -= self.direction_sign * line.balance
+            totals[1] -= self.direction_sign * line.amount_currency
+
+        reversed_amounts = {}
+        for key, lines in caba_base_lines.grouped(get_base_line_key).items():
+            reversed_total = reversed_base_totals[key]
+            total_abs_balance = sum(abs(line.balance) for line in lines)
+            total_abs_amount_currency = sum(abs(line.amount_currency) for line in lines)
+            allocated_balance = 0.0
+            allocated_amount_currency = 0.0
+            for line in lines[:-1]:
+                balance = (
+                    reversed_total[0] * abs(line.balance) / total_abs_balance
+                    if total_abs_balance else 0.0
+                )
+                amount_currency = (
+                    reversed_total[1] * abs(line.amount_currency) / total_abs_amount_currency
+                    if total_abs_amount_currency else 0.0
+                )
+                reversed_amounts[line.id] = (balance, amount_currency)
+                allocated_balance += balance
+                allocated_amount_currency += amount_currency
+            last_line = lines[-1]
+            reversed_amounts[last_line.id] = (
+                reversed_total[0] - allocated_balance,
+                reversed_total[1] - allocated_amount_currency,
+            )
+
+        reversed_partials = (
+            reversed_moves.line_ids.matched_debit_ids
+            | reversed_moves.line_ids.matched_credit_ids
+        )
+        for partial in reversed_partials:
+            line = (
+                partial.credit_move_id
+                if partial.debit_move_id.move_id in reversed_moves
+                else partial.debit_move_id
+            )
+            if line.move_id == self:
+                reversed_balance, reversed_amount_currency = reversed_amounts.get(
+                    line.id, (0.0, 0.0)
+                )
+                reversed_amounts[line.id] = (
+                    reversed_balance + partial.amount,
+                    reversed_amount_currency + (
+                        partial.credit_amount_currency
+                        if line == partial.credit_move_id
+                        else partial.debit_amount_currency
+                    ),
+                )
+
         currencies = set()
         has_term_lines = False
         for line in self.line_ids:
-            if line.account_type in ('asset_receivable', 'liability_payable'):
-                sign = 1 if line.balance > 0.0 else -1
+            sign = 1 if line.balance > 0.0 else -1
+            reverse_amount, reverse_amount_currency = reversed_amounts.get(line.id, (0.0, 0.0))
 
+            if line.account_type in ('asset_receivable', 'liability_payable'):
                 currencies.add(line.currency_id)
                 has_term_lines = True
-                values['total_balance'] += sign * line.balance
+                values['total_balance'] += sign * line.balance - sign * reverse_amount
                 values['total_residual'] += sign * line.amount_residual
-                values['total_amount_currency'] += sign * line.amount_currency
+                values['total_amount_currency'] += sign * line.amount_currency - sign * reverse_amount_currency
                 values['total_residual_currency'] += sign * line.amount_residual_currency
+                continue
 
-            elif line.tax_line_id.tax_exigibility == 'on_payment':
-                values['to_process_lines'].append(('tax', line))
-                currencies.add(line.currency_id)
-
+            if line.tax_line_id.tax_exigibility == 'on_payment':
+                caba_treatment = 'tax'
             elif 'on_payment' in line.tax_ids.flatten_taxes_hierarchy().mapped('tax_exigibility'):
-                values['to_process_lines'].append(('base', line))
-                currencies.add(line.currency_id)
+                caba_treatment = 'base'
+            else:
+                continue
+
+            line_values = {
+                'line_id': line,
+                'amount_currency': line.amount_currency + reverse_amount_currency,
+            }
+            values['to_process_lines'].append((caba_treatment, line_values))
+            currencies.add(line.currency_id)
 
         if not values['to_process_lines'] or not has_term_lines:
             return None

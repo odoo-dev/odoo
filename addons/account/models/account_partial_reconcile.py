@@ -536,7 +536,11 @@ class AccountPartialReconcile(models.Model):
         for move_values in tax_cash_basis_values_per_move.values():
             move = move_values['move']
             pending_cash_basis_lines = []
-            amount_residual_per_tax_line = {line.id: line.amount_residual_currency for line_type, line in move_values['to_process_lines'] if line_type == 'tax'}
+            amount_residual_per_tax_line = {
+                line_values['line_id'].id: line_values['line_id'].amount_residual_currency
+                for line_type, line_values in move_values['to_process_lines']
+                if line_type == 'tax'
+            }
 
             for partial_values in move_values['partials']:
                 partial = partial_values['partial']
@@ -561,7 +565,7 @@ class AccountPartialReconcile(models.Model):
                 # Used to reduce the number of generated lines and to avoid rounding issues.
                 partial_lines_to_create = {}
 
-                for caba_treatment, line in move_values['to_process_lines']:
+                for caba_treatment, line_values in move_values['to_process_lines']:
                     # ==========================================================================
                     # Compute the balance of the current line on the cash basis entry.
                     # This balance is a percentage representing the part of the journal entry
@@ -569,7 +573,9 @@ class AccountPartialReconcile(models.Model):
                     # ==========================================================================
 
                     # Percentage expressed in the foreign currency.
-                    amount_currency = line.currency_id.round(line.amount_currency * partial_values['percentage'])
+                    line = line_values['line_id']
+                    amount_currency = line.currency_id.round(line_values['amount_currency'] * partial_values['percentage'])
+
                     if (
                         caba_treatment == 'tax'
                         and (
@@ -583,6 +589,7 @@ class AccountPartialReconcile(models.Model):
                         amount_currency = amount_residual_per_tax_line[line.id]
                     if caba_treatment == 'tax':
                         amount_residual_per_tax_line[line.id] -= amount_currency
+
                     balance = partial_values['payment_rate'] and amount_currency / partial_values['payment_rate'] or 0.0
 
                     # ==========================================================================
@@ -713,10 +720,10 @@ class AccountPartialReconcile(models.Model):
         if not debit_vals and not credit_vals:
             return False
         return json.dumps({
-            'debit_caba_lines': [(aml_type, aml.id) for aml_type, aml in debit_vals.get('to_process_lines', [])],
+            'debit_caba_lines': [(aml_type, line_values['line_id'].id) for aml_type, line_values in debit_vals.get('to_process_lines', [])],
             'debit_total_balance': debit_vals.get('total_balance'),
             'debit_total_amount_currency': debit_vals.get('total_amount_currency'),
-            'credit_caba_lines': [(aml_type, aml.id) for aml_type, aml in credit_vals.get('to_process_lines', [])],
+            'credit_caba_lines': [(aml_type, line_values['line_id'].id) for aml_type, line_values in credit_vals.get('to_process_lines', [])],
             'credit_total_balance': credit_vals.get('total_balance'),
             'credit_total_amount_currency': credit_vals.get('total_amount_currency'),
         })

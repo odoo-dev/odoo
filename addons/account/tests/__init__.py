@@ -11,6 +11,7 @@ from . import test_account_inalterable_hash
 from . import test_account_journal
 from . import test_account_account
 from . import test_account_tax
+from . import test_account_tax_caba
 from . import test_account_to_check
 from . import test_partner_identifiers
 from . import test_account_analytic
