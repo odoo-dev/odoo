@@ -247,5 +247,6 @@ class StockWarehouseOrderpoint(models.Model):
             ('orderpoint_id', 'in', self.ids),
             ('move_raw_ids', '!=', False),
             ('state', '=', 'draft'),
+            ('id', 'not in', self.env.context.get('ignore_mo_ids', []))
         ]).action_confirm()
         return super()._post_process_scheduler()
