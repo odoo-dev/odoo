@@ -68,7 +68,7 @@ class Json(Field):
         return False if value is None else copy.deepcopy(value)
 
     def convert_to_cache(self, value, records, validate=True):
-        if not value:
+        if value is None or value is False:
             return None
         return json.loads(json.dumps(value, ensure_ascii=False, default=json_default))
 
