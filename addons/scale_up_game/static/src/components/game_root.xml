@@ -4,6 +4,10 @@
         <div class="o_su_game">
             <div class="o_su_canvas" t-ref="this.containerRef"/>
 
+            <button type="button" class="o_su_back" t-on-click="() => this.props.onExit()">‹ Levels</button>
+
+            <Dialogue t-if="this.state.chatting and this.state.game" t-key="this.state.game.session_id"
+                      lines="this.state.game.chat" onDone="this.onStoryDone" onSpeaker="this.onSpeaker"/>
             <div t-if="this.state.loading" class="o_su_loading">Loading warehouse…</div>
             <div t-if="this.state.error" class="o_su_fatal" role="alert">
                 <strong>Can't start the game</strong>
@@ -13,7 +17,7 @@
             <!-- Mission card: objective + hint, nothing that gives the solution away -->
             <div t-if="this.state.game and !this.state.error" class="o_su_mission">
                 <div class="o_su_mission_head" t-on-click="this.toggleMission">
-                    <span class="o_su_mission_title">Level 1 · <t t-out="this.state.game.level_name"/></span>
+                    <span class="o_su_mission_title" t-out="this.missionTitle"/>
                     <span class="o_su_dots">
                         <t t-foreach="this.state.game.steps" t-as="step" t-key="step.key">
                             <span t-att-class="'o_su_dot' + (step.done ? ' o_su_dot--done' : '')"/>
@@ -24,17 +28,21 @@
                 <div t-if="this.state.missionOpen" class="o_su_mission_body">
                     <div class="o_su_label">OBJECTIVE</div>
                     <p class="o_su_story" t-out="this.state.game.objective"/>
-                    <div t-if="this.state.stock" class="o_su_stock">
-                        <div class="o_su_label">STOCK ON HAND · <t t-out="this.state.game.product_name"/></div>
-                        <div class="o_su_stock_row">
-                            <span t-out="this.state.game.source_location"/><strong t-out="this.state.stock.src"/>
-                        </div>
-                        <div class="o_su_stock_row">
-                            <span t-out="this.state.game.destination_location"/><strong t-out="this.state.stock.dst"/>
+                    <button t-if="this.state.game.chat.length" type="button" class="o_su_storybtn"
+                            t-on-click="this.replayStory">💬 Replay the conversation</button>
+                    <div t-if="this.panelRows.length" class="o_su_stock">
+                        <div class="o_su_label" t-out="this.panelTitle"/>
+                        <div t-foreach="this.panelRows" t-as="row" t-key="row_index" class="o_su_stock_row">
+                            <span t-out="row.label"/><strong t-out="row.value"/>
                         </div>
                     </div>
+                    <div t-if="this.state.game.answer and !this.state.complete" class="o_su_answer">
+                        <div class="o_su_label" t-out="this.state.game.answer.label"/>
+                        <input type="text" t-ref="this.answerRef" placeholder="e.g. -340" t-on-keydown="(ev) => ev.key === 'Enter' and this.onSubmitAnswer()"/>
+                        <button type="button" class="o_su_hintbtn" t-on-click="this.onSubmitAnswer">Tell Anita</button>
+                    </div>
                     <div t-if="this.state.game.issues.length and !this.state.complete" class="o_su_issues">
-                        <div class="o_su_label">THE BOT NOTICED</div>
+                        <div class="o_su_label" t-out="this.state.game.scenario ? 'WHAT LOOKS OFF' : 'THE BOT NOTICED'"/>
                         <div t-foreach="this.state.game.issues" t-as="issue" t-key="issue_index" t-out="issue"/>
                     </div>
                     <div t-if="this.hintText" class="o_su_hintbox">💡 <t t-out="this.hintText"/></div>
@@ -67,15 +75,19 @@
 
             <!-- Everything attached to the inventory terminal -->
             <div t-if="this.state.game and !this.state.error" class="o_su_anchor" t-ref="this.anchorTRef">
-                <div t-if="this.state.hoverId === 'office_terminal_01' and !this.state.menu" class="o_su_hint o_su_hint--active">
-                    Inventory terminal
+                <div t-if="this.showTip" class="o_su_tip">
+                    <span class="o_su_tip_hand">👆</span>
+                    <span>Click the <strong>computer</strong> to work in Odoo</span>
+                </div>
+                <div t-if="this.state.hoverId === 'office_terminal_01' and !this.state.menu and !this.showTip" class="o_su_hint o_su_hint--active">
+                    Open Odoo
                 </div>
                 <div t-if="this.state.menu === 'terminal'" class="o_su_menu">
-                    <div class="o_su_menu_title">Inventory</div>
-                    <button type="button" class="o_su_menu_btn" t-on-click="this.onNewTransfer">New transfer</button>
-                    <button t-if="this.state.game.current_picking_id" type="button" class="o_su_menu_btn o_su_menu_btn--alt"
-                            t-on-click="this.onOpenMyTransfer">
-                        Open my transfer (<t t-out="this.state.game.current_picking_name"/>)
+                    <div class="o_su_menu_title" t-out="this.state.game.scenario ? 'Office' : 'Inventory'"/>
+                    <button t-foreach="this.menuItems" t-as="item" t-key="item_index" type="button"
+                            t-att-class="'o_su_menu_btn' + (item.alt ? ' o_su_menu_btn--alt' : '')"
+                            t-on-click="() => this.openDocument(item.action)">
+                        <t t-out="item.label"/>
                     </button>
                 </div>
             </div>
@@ -84,20 +96,37 @@
             <div t-if="this.state.complete and this.state.showSummary" class="o_su_summary">
                 <button type="button" class="o_su_summary_close" t-on-click="this.toggleSummary">✕</button>
                 <h3>Level complete!</h3>
-                <p>Order <strong>SO-001</strong> can ship. You moved stock the Odoo way:</p>
-                <ol>
-                    <t t-foreach="this.state.game.steps" t-as="step" t-key="step.key">
-                        <li t-out="step.label"/>
-                    </t>
-                </ol>
-                <p class="o_su_small">
-                    Transfer <strong t-out="this.state.game.current_picking_name"/> ·
-                    hints used: <t t-out="this.state.hintsUsed"/>
-                </p>
-                <p class="o_su_small">
-                    A transfer document is how Odoo knows goods moved: it keeps the stock of every location accurate.
-                </p>
-                <button type="button" class="o_su_menu_btn" t-on-click="this.openCompletedTransfer">Open the transfer</button>
+                <t t-if="this.state.game.scenario">
+                    <p class="o_su_stars">
+                        <t t-foreach="Array.from({ length: this.state.game.max_stars })" t-as="star" t-key="star_index">
+                            <span t-att-class="star_index &lt; this.state.game.stars ? 'o_su_star o_su_star--on' : 'o_su_star'">★</span>
+                        </t>
+                    </p>
+                    <p>What Odoo recorded for you:</p>
+                    <ul>
+                        <li t-foreach="this.state.game.recap" t-as="line" t-key="line_index" t-out="line"/>
+                    </ul>
+                    <p class="o_su_small">Hints used: <t t-out="this.state.hintsUsed"/></p>
+                    <button type="button" class="o_su_menu_btn" t-on-click="() => this.props.onExit()">Back to levels</button>
+                    <button type="button" class="o_su_menu_btn o_su_menu_btn--alt" t-on-click="() => this.props.onReplay()">Play again</button>
+                </t>
+                <t t-else="">
+                    <p>Order <strong>SO-001</strong> can ship. You moved stock the Odoo way:</p>
+                    <ol>
+                        <t t-foreach="this.state.game.steps" t-as="step" t-key="step.key">
+                            <li t-out="step.label"/>
+                        </t>
+                    </ol>
+                    <p class="o_su_small">
+                        Transfer <strong t-out="this.state.game.current_picking_name"/> ·
+                        hints used: <t t-out="this.state.hintsUsed"/>
+                    </p>
+                    <p class="o_su_small">
+                        A transfer document is how Odoo knows goods moved: it keeps the stock of every location accurate.
+                    </p>
+                    <button type="button" class="o_su_menu_btn" t-on-click="this.openCompletedTransfer">Open the transfer</button>
+                    <button type="button" class="o_su_menu_btn o_su_menu_btn--alt" t-on-click="() => this.props.onReplay()">Play again</button>
+                </t>
             </div>
 
             <div t-if="this.state.toast" t-att-class="'o_su_toast o_su_toast--' + this.state.toastType" role="status">

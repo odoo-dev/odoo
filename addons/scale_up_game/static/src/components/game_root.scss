@@ -116,6 +116,28 @@ $su-orange: #e8742c;
     }
     .o_su_menu_btn--alt { background: $su-teal; &:hover:not(:disabled) { background: darken($su-teal, 8%); } }
 
+    // ---- Level sub-levels: back button, chat, answer, stars ------------
+    .o_su_back {
+        position: absolute; top: 12px; right: 12px; z-index: 2; border: 0; border-radius: 999px;
+        padding: 6px 14px; background: rgba(255, 255, 255, 0.94); color: $su-purple; font-weight: 700;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18); cursor: pointer;
+        &:hover { background: #fff; }
+    }
+    .o_su_mission_body { max-height: 62vh; overflow-y: auto; }
+    .o_su_chat { margin: 6px 0; display: flex; flex-direction: column; gap: 4px; }
+    .o_su_chat_msg {
+        padding: 5px 9px; border-radius: 10px; background: #eef3f6; font-size: 0.8rem; line-height: 1.25;
+        .o_su_chat_who { display: block; font-size: 0.68rem; font-weight: 700; color: $su-teal; }
+    }
+    .o_su_answer {
+        margin: 8px 0; display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+        .o_su_label { width: 100%; }
+        input { flex: 1; min-width: 80px; padding: 4px 8px; border: 1px solid #b9c4cc; border-radius: 6px; }
+    }
+    .o_su_stars { font-size: 1.4rem; margin: 2px 0 6px; }
+    .o_su_star { color: #d4d9de; }
+    .o_su_star--on { color: #f2b200; }
+
     // ---- Completion recap ---------------------------------------------
     .o_su_summary {
         position: absolute; left: 16px; bottom: 16px; width: 310px; max-width: 85%;

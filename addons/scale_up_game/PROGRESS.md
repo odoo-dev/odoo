@@ -20,6 +20,11 @@ Target: Odoo 20 (migrated from 19) · Owl · Three.js r149 (vendored UMD, lazy-l
 
 - [x] M9  Migrate to Odoo 20: backend (`uom_id`, `uom.compare`, `ir.access.csv`), Owl 3 frontend (`proxy`, `signal.ref`, `useProps`, `this.` templates), manifest 20.0.1.0.0. Install on fresh DB `su20` clean; backend flow smoke-tested via shell. **Browser check pending (user).**
 
+- [x] M10 Level menu + sub-levels: `scale.up.game.level` is now a tree (group → playable sub-levels, `state` available/soon), sessions are *attempts* (no unique constraint, replay never needs a reset), `start_attempt()` seeds a fresh scenario; POC kept as Training ▸ Restock the Shelf.
+- [x] M11 Level "Buy & Sell" = 9 independent sub-levels (`models/scenarios_buy_sell.py`, one `scale.up.game.scenario.<code>` abstract model each; each seeds its own prerequisites so any card plays alone). Specs: `docs/levels/level-01.md`.
+- [x] M12 Reusable 3D kit: `three/kit/{base_scene,characters,props}.js` + `three/scenes/buy_sell_scene.js`. Bot, humans (CEO avatar + NPCs), crate/pallet/rack/desk/truck/dock props are reusable; the POC `scene.js` is untouched (legacy; migrate to `BaseScene` later).
+- [ ] Browser checks by the user: menu → Buy & Sell → each sub-level; Training level replay; stars/✓ on the menu.
+
 ## File map
 
 ```
@@ -87,3 +92,11 @@ Flow: terminal → New transfer (real stock.picking form in a dialog) → set pr
 - Product name shown on box label, floating source tag (qty in WH/Stock), shelf sign (qty on shelf), order board, and a "Stock on hand" panel in the mission card.
 - Fixed scene placement bugs: barrels/cart were rotated whole (add() returns the parent), banner overlapped order board, order board texture was squashed, shelf label overlapped boxes, summary card clipped at the right edge (now bottom-left).
 - While the transfer dialog is open the game polls `check_progress` every 1.5s; when the transfer is Done the Odoo dialog/wizards are hidden (body.o_su_hide_modals), a "Validating…" pill shows, the bot delivers the box, then dialogs are closed.
+
+## Phase 3 — Menu, sub-levels, kit (checkpoint)
+
+- Menu client action = `components/app.js` (`ScaleUpApp`, registered as `scale_up_game.game_root`) → `LevelMenu` or `GameRoot(levelCode)`. `GameRoot` is generic: a payload with `scenario` is a Buy&Sell-type sub-level (scene `BuySellScene`, chat, info panel, terminal items and answer box from the payload); without it, the POC path.
+- Scenario contract (Python): `_steps`, `_setup` (seeds as OdooBot, returns data stored in `session.data`), `_evaluate` → `{stage, flags, issues}`, `_texts` (objective, briefing, chat, hints per step, recap), `_terminal` (menu entries = Odoo form actions), `_scene` (confirmed state for the 3D scene), `_bonus`, `_submit`.
+- Scoring: 2 ★, 1 ★ if a level-2 hint was used, +1 ★ bonus (card "Control the bill": message or credit note on the bill). Max stars per level in `max_stars`. Hints persisted server-side (`register_hint`).
+- Players need Purchase, Sales and Accounting rights besides Inventory (admin has them).
+- Debts: POC `scene.js` and POC evaluator not yet migrated to the kit/scenario contract; stock of the Training level is shared between players; the stock shown in Buy&Sell scenes is the total of the fixture product (accumulates across attempts, pallets cap at 24 crates).

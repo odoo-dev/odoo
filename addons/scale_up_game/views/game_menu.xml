@@ -15,10 +15,9 @@
                 <field name="sequence" widget="handle"/>
                 <field name="name"/>
                 <field name="code"/>
-                <field name="product_id"/>
-                <field name="location_src_id"/>
-                <field name="location_dest_id"/>
-                <field name="quantity"/>
+                <field name="parent_id"/>
+                <field name="scenario"/>
+                <field name="state"/>
             </list>
         </field>
     </record>
@@ -29,7 +28,7 @@
         <field name="arch" type="xml">
             <form>
                 <header>
-                    <button name="action_reset_scenario" type="object" string="Reset Scenario" class="btn-primary" confirm="This restores the initial stock (source stocked, shelf empty) and reopens all sessions of this level. Continue?"/>
+                    <button name="action_reset_scenario" type="object" string="Reset Scenario" class="btn-primary" invisible="scenario != 'restock_shelf'" confirm="This restores the initial stock (source stocked, shelf empty) and reopens all sessions of this level. Continue?"/>
                 </header>
                 <sheet>
                     <group>
@@ -38,8 +37,13 @@
                             <field name="code"/>
                             <field name="sequence"/>
                             <field name="active"/>
+                            <field name="parent_id"/>
+                            <field name="state"/>
+                            <field name="scenario"/>
+                            <field name="scene"/>
+                            <field name="max_stars"/>
                         </group>
-                        <group>
+                        <group string="Restock the Shelf (training)" invisible="scenario != 'restock_shelf'">
                             <field name="product_id"/>
                             <field name="location_src_id"/>
                             <field name="location_dest_id"/>
@@ -64,8 +68,8 @@
                 <field name="state"/>
                 <field name="started_at"/>
                 <field name="completed_at"/>
-                <field name="last_picking_id"/>
-                <field name="action_count"/>
+                <field name="stars"/>
+                <field name="hints_used"/>
             </list>
         </field>
     </record>

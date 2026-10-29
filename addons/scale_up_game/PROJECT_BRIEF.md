@@ -50,6 +50,14 @@ Order SO-001 needs 1 × *Demo Product* but `WH/Stock/Shelf-01` is empty while `W
 - `type='consu'` + `is_storable=True`; `stock.location.warehouse_id`; `stock.warehouse.int_type_id`.
 - Web: `loadJS`, `doAction(..., {onClose})`, `ir.actions.act_window_close`, `.o_dialog` / `.modal.d-block` selectors, SCSS `darken`, client action registry, assets glob.
 
+**Gotchas found while building the sub-levels (Odoo 20):**
+- A record from a `noupdate` data file is not updated by a later file: change it with a `<function ... name="write">`.
+- An empty recordset of an `AbstractModel` is falsy: test `scenario is not None`, not `if scenario:`.
+- `fields.Json` with `default=dict` reads back as `False` when empty: use `(record.data or {})`.
+- Odoo 20 awaits a dialog's `onClose` before removing it: never await long work (animations) inside it.
+- `env(su=True)` keeps the uid: seed with `env(user=SUPERUSER_ID)` so seeded records are not "created by the player".
+- Community has no Profit & Loss report: sub-level 9 computes the net profit from posted income/expense `account.move.line`.
+
 ## 5. TASK A — Migrate to Odoo 20 (do this first)
 
 Context: the module currently targets Odoo 19; it will live in an Odoo 20 source tree.

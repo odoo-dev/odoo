@@ -17,27 +17,75 @@ class ScaleUpGameLevel(models.Model):
     description = fields.Text(translate=True)
     active = fields.Boolean(default=True)
 
-    # Scenario configuration (resolved server-side; never hardcoded in JS)
+    # Menu structure: a level without parent is a group shown on the menu
+    # (e.g. "Buy & Sell"); its children are the playable sub-levels.
+    parent_id = fields.Many2one('scale.up.game.level', string="Level", ondelete='cascade', index=True)
+    child_ids = fields.One2many('scale.up.game.level', 'parent_id', string="Sub-levels")
+    state = fields.Selection(
+        [('available', "Available"), ('soon', "Coming soon")], default='available', required=True)
+    # Playable sub-level: name of a `scale.up.game.scenario.<scenario>` model, or
+    # 'restock_shelf' (the POC, handled directly by the session model).
+    scenario = fields.Char(help="Scenario implementation. Empty for a group.")
+    scene = fields.Char(default='office', help="3D scene of this level: office, dock or warehouse.")
+    max_stars = fields.Integer(default=2, help="Stars a player can earn (bonus stars included).")
+
+    # Restock-shelf (POC) scenario configuration
     product_id = fields.Many2one(
-        'product.product', string="Product", required=True, ondelete='restrict',
+        'product.product', string="Product", ondelete='restrict',
         domain=[('is_storable', '=', True)])
     location_src_id = fields.Many2one(
-        'stock.location', string="Source Location", required=True, ondelete='restrict',
+        'stock.location', string="Source Location", ondelete='restrict',
         domain=[('usage', '=', 'internal')])
     location_dest_id = fields.Many2one(
-        'stock.location', string="Destination Location", required=True, ondelete='restrict',
+        'stock.location', string="Destination Location", ondelete='restrict',
         domain=[('usage', '=', 'internal')])
-    quantity = fields.Float(string="Transfer Quantity", default=1.0, required=True)
+    quantity = fields.Float(string="Transfer Quantity", default=1.0)
     initial_stock_done = fields.Boolean(readonly=True, copy=False)
 
     _code_uniq = models.Constraint('unique(code)', 'The level code must be unique.')
+
+    # ------------------------------------------------------------------
+    # Menu
+    # ------------------------------------------------------------------
+    @api.model
+    def get_menu(self):
+        """Level menu of the current player: groups with their playable sub-levels."""
+        sessions = self.env['scale.up.game.session'].search([('user_id', '=', self.env.uid)])
+
+        def info(level):
+            mine = sessions.filtered(lambda s: s.level_id == level)
+            done = mine.filtered(lambda s: s.state == 'completed')
+            return {
+                'code': level.code,
+                'name': level.name,
+                'description': level.description or '',
+                'available': level.state == 'available' and bool(level.scenario or level.child_ids),
+                'played': bool(done),
+                'in_progress': bool(mine.filtered(lambda s: s.state == 'in_progress')),
+                'stars': max(done.mapped('stars'), default=0),
+                'max_stars': level.max_stars,
+            }
+
+        groups = []
+        for group in self.search([('parent_id', '=', False)]):
+            item = info(group)
+            children = [info(child) for child in group.child_ids]
+            item.update(
+                children=children,
+                available=group.state == 'available' and bool(children),
+                played=bool(children) and all(c['played'] for c in children),
+                stars=sum(c['stars'] for c in children),
+                max_stars=sum(c['max_stars'] for c in children),
+            )
+            groups.append(item)
+        return groups
 
     # ------------------------------------------------------------------
     # Validation
     # ------------------------------------------------------------------
     @api.constrains('location_src_id', 'location_dest_id', 'quantity')
     def _check_scenario_locations(self):
-        for level in self:
+        for level in self.filtered(lambda l: l.scenario == 'restock_shelf'):
             src, dst = level.location_src_id, level.location_dest_id
             if level.quantity <= 0:
                 raise ValidationError(_("The transfer quantity must be positive."))
@@ -122,7 +170,7 @@ class ScaleUpGameLevel(models.Model):
             self.env.ref('base.group_user').write({'implied_ids': [Command.link(group.id)]})
 
     def _init_scenario_stock(self):
-        for level in self.search([('initial_stock_done', '=', False)]):
+        for level in self.search([('initial_stock_done', '=', False), ('scenario', '=', 'restock_shelf')]):
             level._set_exact_quantity(level.location_src_id, level.quantity)
             level._set_exact_quantity(level.location_dest_id, 0.0)
             level.initial_stock_done = True

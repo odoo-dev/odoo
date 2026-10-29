@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="scale_up_game.LevelMenu">
+        <div class="o_su_levelmenu">
+            <div class="o_su_lm_head">
+                <h1>Scale-Up!</h1>
+                <p t-if="!this.group">Learn how a business runs, one process at a time. Choose a level.</p>
+                <t t-else="">
+                    <button type="button" class="o_su_lm_back" t-on-click="this.back">‹ All levels</button>
+                    <p><strong t-out="this.group.name"/> · <t t-out="this.group.description"/> Play the steps in order, or pick any one.</p>
+                </t>
+            </div>
+
+            <div t-if="!this.group" class="o_su_lm_grid">
+                <div t-foreach="this.state.groups" t-as="group" t-key="group.code"
+                     t-att-class="'o_su_lm_card' + (group.available ? '' : ' o_su_lm_card--soon') + (group.played ? ' o_su_lm_card--played' : '')"
+                     t-on-click="() => this.openGroup(group)">
+                    <div class="o_su_lm_title" t-out="group.name"/>
+                    <div class="o_su_lm_desc" t-out="group.description"/>
+                    <div class="o_su_lm_status">
+                        <span t-if="!group.available" class="o_su_lm_chip">Coming soon</span>
+                        <span t-elif="group.played" class="o_su_lm_chip o_su_lm_chip--played">✓ Played · <t t-out="group.stars"/>/<t t-out="group.max_stars"/> ★</span>
+                        <span t-else="" class="o_su_lm_chip o_su_lm_chip--play">
+                            <t t-out="group.children.length"/> levels
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div t-else="" class="o_su_lm_grid">
+                <div t-foreach="this.group.children" t-as="level" t-key="level.code"
+                     t-att-class="'o_su_lm_card' + (level.played ? ' o_su_lm_card--played' : '')">
+                    <div class="o_su_lm_num" t-out="level_index + 1"/>
+                    <div class="o_su_lm_title" t-out="level.name"/>
+                    <div class="o_su_lm_desc" t-out="level.description"/>
+                    <div class="o_su_lm_status">
+                        <span t-if="level.played" class="o_su_lm_chip o_su_lm_chip--played">✓ Played · <t t-out="level.stars"/>/<t t-out="level.max_stars"/> ★</span>
+                        <span t-elif="level.in_progress" class="o_su_lm_chip">In progress</span>
+                        <button type="button" class="o_su_lm_play" t-on-click="() => this.props.onPlay(level.code)">
+                            <t t-out="level.played ? 'Play again' : level.in_progress ? 'Resume' : 'Play'"/>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

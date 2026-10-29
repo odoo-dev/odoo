@@ -23,9 +23,11 @@ class ScaleUpGameSession(models.Model):
     completed_at = fields.Datetime()
     last_picking_id = fields.Many2one('stock.picking', string="Last Transfer", ondelete='set null')
     action_count = fields.Integer(string="Successful Actions", default=0)
-
-    _user_level_uniq = models.Constraint(
-        'unique(user_id, level_id)', 'A player can only have one session per level.')
+    # One session = one attempt: a player can replay a level any number of times.
+    hints_used = fields.Integer(default=0)
+    max_hint = fields.Integer(string="Highest Hint Level", default=0)
+    stars = fields.Integer(default=0)
+    data = fields.Json(string="Scenario Data", default=dict, help="Records seeded for this attempt.")
 
     # ------------------------------------------------------------------
     # ORM overrides: players can't forge progress through a raw create()
@@ -36,7 +38,8 @@ class ScaleUpGameSession(models.Model):
         for vals in vals_list:
             if not is_admin:
                 vals['user_id'] = self.env.uid
-                for forbidden in ('state', 'completed_at', 'last_picking_id', 'action_count'):
+                for forbidden in ('state', 'completed_at', 'last_picking_id', 'action_count',
+                                  'hints_used', 'max_hint', 'stars', 'data'):
                     vals.pop(forbidden, None)
             if not vals.get('name') or vals.get('name') == _("New"):
                 level = self.env['scale.up.game.level'].sudo().browse(vals.get('level_id'))
@@ -48,23 +51,63 @@ class ScaleUpGameSession(models.Model):
     # Public API called by the frontend
     # ------------------------------------------------------------------
     @api.model
-    def get_or_create_session(self, level_code='restock_shelf'):
-        """Return the current player's session state for a level (created if needed)."""
-        level = self.env['scale.up.game.level'].search([('code', '=', level_code)], limit=1)
+    def start_attempt(self, level_code):
+        """Resume the player's running attempt of a level, or start a fresh one
+        (seeding what the scenario needs). No manual reset is ever needed."""
+        level = self.env['scale.up.game.level'].search(
+            [('code', '=', level_code), ('state', '=', 'available'), ('scenario', '!=', False)], limit=1)
         if not level:
             raise UserError(_("This level is not available."))
-        domain = [('user_id', '=', self.env.uid), ('level_id', '=', level.id)]
-        session = self.search(domain, limit=1)
-        if not session:
-            try:
-                with self.env.cr.savepoint():
-                    session = self.create({'level_id': level.id, 'user_id': self.env.uid})
-            except Exception:  # concurrent creation from another tab: reuse theirs
-                session = self.search(domain, limit=1)
-                if not session:
-                    raise
+        session = self.search([('user_id', '=', self.env.uid), ('level_id', '=', level.id)], limit=1)
+        if not session or session.state != 'in_progress':
+            session = self.create({'level_id': level.id, 'user_id': self.env.uid})
+            session._setup_attempt()
         newly_completed = session._refresh_progress()
         return session._get_state_payload(newly_completed=newly_completed)
+
+    def _setup_attempt(self):
+        self.ensure_one()
+        scenario = self._scenario()
+        if scenario is not None:
+            self.sudo().data = scenario.sudo()._setup(self)
+        else:  # Restock the Shelf (POC): put the stock back for the new attempt
+            level = self.level_id.sudo()
+            level._set_exact_quantity(level.location_src_id, level.quantity)
+            level._set_exact_quantity(level.location_dest_id, 0.0)
+
+    def _scenario(self):
+        """Scenario model of this attempt, None for the Restock the Shelf POC."""
+        code = self.level_id.scenario
+        if code == 'restock_shelf':
+            return None
+        model = 'scale.up.game.scenario.%s' % code
+        if model not in self.env:
+            raise UserError(_("This level is not available."))
+        return self.env[model]
+
+    def register_hint(self, level):
+        """Remember that the player asked for a hint (hint level 2 costs a star)."""
+        self.ensure_one()
+        self._check_player_access()
+        if self.state == 'in_progress':
+            self.sudo().write({'hints_used': self.hints_used + 1, 'max_hint': max(self.max_hint, int(level))})
+        return True
+
+    def submit_answer(self, value):
+        """Answer of a scenario that asks a question; returns the new state."""
+        self.ensure_one()
+        try:
+            self._check_player_access()
+            scenario = self._scenario()
+            if scenario is None or self.state != 'in_progress':
+                raise UserError(_("This level doesn't expect an answer."))
+            scenario.sudo()._submit(self, value)
+            newly_completed = self._refresh_progress()
+            return self._get_state_payload(newly_completed=newly_completed)
+        except AccessError:
+            return self._failure_payload(_("You don't have permission to perform this action."))
+        except (UserError, ValidationError) as e:
+            return self._failure_payload(str(e))
 
     def check_progress(self):
         """Re-evaluate the documents the player created (called by the game
@@ -248,6 +291,9 @@ class ScaleUpGameSession(models.Model):
         Returns True only for the call that completes it."""
         if self.state != 'in_progress':
             return False
+        scenario = self._scenario()
+        if scenario is not None:
+            return scenario.sudo()._refresh(self)
         progress = self._evaluate_progress()
         if progress['stage'] != 'done':
             return False
@@ -264,6 +310,7 @@ class ScaleUpGameSession(models.Model):
             'completed_at': fields.Datetime.now(),
             'last_picking_id': progress['picking'].id,
             'action_count': self.action_count + 1,
+            'stars': 2 - (1 if self.max_hint >= 2 else 0),
         })
         return True
 
@@ -304,6 +351,10 @@ class ScaleUpGameSession(models.Model):
     def _get_state_payload(self, success=True, already_completed=False, message=None, newly_completed=False):
         """Compact structure for the frontend, built from real Odoo data."""
         self.ensure_one()
+        scenario = self._scenario()
+        if scenario is not None:
+            return scenario.sudo()._payload(
+                self, success=success, message=message, newly_completed=newly_completed)
         level = self.level_id.sudo()
         picking = self.last_picking_id.sudo()
         progress = self._evaluate_progress()

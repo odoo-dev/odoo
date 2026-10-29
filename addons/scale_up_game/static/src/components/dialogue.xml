@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="scale_up_game.Portrait">
+        <svg class="o_su_portrait" t-att-width="this.props.size" t-att-height="this.props.size" viewBox="0 0 64 64">
+            <circle cx="32" cy="32" r="31" t-att-fill="this.look.jacket || '#5a6b7d'" opacity="0.18"/>
+            <t t-if="this.look.icon">
+                <text x="32" y="43" text-anchor="middle" font-size="30" t-out="this.look.icon"/>
+            </t>
+            <t t-else="">
+                <!-- shoulders / jacket -->
+                <path d="M6,64 q4,-16 26,-18 q22,2 26,18 Z" t-att-fill="this.look.jacket"/>
+                <path d="M26,46 l6,8 l6,-8 l-6,-3 Z" t-att-fill="this.look.shirt"/>
+                <path t-if="this.look.tie" d="M30,49 l2,-2 l2,2 l-1,9 l-2,0 Z" t-att-fill="this.look.tie"/>
+                <!-- head -->
+                <ellipse cx="32" cy="30" rx="15" ry="17" t-att-fill="this.look.skin"/>
+                <path t-att-d="this.hairPath" t-att-fill="this.look.hair"/>
+                <ellipse t-if="this.look.beard" cx="32" cy="36" rx="14" ry="12" t-att-fill="this.look.hair" opacity="0.85"/>
+                <ellipse cx="32" cy="34" rx="13" ry="10" t-att-fill="this.look.skin"/>
+                <circle cx="26" cy="30" r="2" fill="#20242b"/>
+                <circle cx="38" cy="30" r="2" fill="#20242b"/>
+                <path d="M28,38 q4,3 8,0" fill="none" stroke="#8a4a4a" stroke-width="1.6" stroke-linecap="round"/>
+                <t t-if="this.look.glasses">
+                    <circle cx="26" cy="30" r="5" fill="none" stroke="#2a2f36" stroke-width="1.5"/>
+                    <circle cx="38" cy="30" r="5" fill="none" stroke="#2a2f36" stroke-width="1.5"/>
+                    <path d="M31,30 l2,0" stroke="#2a2f36" stroke-width="1.5"/>
+                </t>
+            </t>
+        </svg>
+    </t>
+
+    <t t-name="scale_up_game.Dialogue">
+        <div class="o_su_dialogue" t-on-click="this.advance">
+            <div class="o_su_dlg_box" t-att-key="this.state.index">
+                <Portrait who="this.line.who" size="64"/>
+                <div class="o_su_dlg_body">
+                    <div class="o_su_dlg_who">
+                        <strong t-out="this.look.name"/>
+                        <span t-if="this.look.role" class="o_su_dlg_role" t-out="this.look.role"/>
+                    </div>
+                    <p class="o_su_dlg_text" t-out="this.state.shown"/>
+                </div>
+                <div class="o_su_dlg_foot">
+                    <span class="o_su_dlg_count"><t t-out="this.state.index + 1"/> / <t t-out="this.props.lines.length"/></span>
+                    <span class="o_su_dlg_next" t-out="this.typing ? 'Click to skip' : (this.isLast ? 'Click to start ▸' : 'Click to continue ▸')"/>
+                </div>
+                <button type="button" class="o_su_dlg_skip" t-on-click.stop="this.finish">Skip ✕</button>
+            </div>
+        </div>
+    </t>
+
+</templates>

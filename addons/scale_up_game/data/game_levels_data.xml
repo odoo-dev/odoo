@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Level structure. Loaded on every update (not noupdate): the module owns it.
+         A level without parent is a menu group; its children are playable sub-levels. -->
+
+    <!-- Buy & Sell: 9 independent sub-levels, one per card of the board game -->
+    <record id="level_group_buy_sell" model="scale.up.game.level">
+        <field name="name">Buy &amp; Sell</field>
+        <field name="code">buy_sell</field>
+        <field name="sequence">10</field>
+        <field name="description">Set up your B2B business: buy desks, sell them and get paid.</field>
+    </record>
+
+    <record id="level_bs_create_product" model="scale.up.game.level">
+        <field name="parent_id" ref="level_group_buy_sell"/>
+        <field name="name">Create a product</field>
+        <field name="code">bs_create_product</field>
+        <field name="scenario">bs_create_product</field>
+        <field name="scene">office</field>
+        <field name="sequence">10</field>
+        <field name="description">Put the Large Desk of a new vendor in your catalog.</field>
+    </record>
+    <record id="level_bs_purchase" model="scale.up.game.level">
+        <field name="parent_id" ref="level_group_buy_sell"/>
+        <field name="name">Purchase large desks</field>
+        <field name="code">bs_purchase</field>
+        <field name="scenario">bs_purchase</field>
+        <field name="scene">office</field>
+        <field name="sequence">20</field>
+        <field name="description">Order the first batch of desks from Wood Corner.</field>
+    </record>
+    <record id="level_bs_receive" model="scale.up.game.level">
+        <field name="parent_id" ref="level_group_buy_sell"/>
+        <field name="name">Receive products</field>
+        <field name="code">bs_receive</field>
+        <field name="scenario">bs_receive</field>
+        <field name="scene">dock</field>
+        <field name="sequence">30</field>
+        <field name="description">The truck is at the dock: receive the desks.</field>
+    </record>
+    <record id="level_bs_bill" model="scale.up.game.level">
+        <field name="parent_id" ref="level_group_buy_sell"/>
+        <field name="name">Control the bill</field>
+        <field name="code">bs_bill</field>
+        <field name="scenario">bs_bill</field>
+        <field name="scene">office</field>
+        <field name="sequence">40</field>
+        <field name="max_stars">3</field>
+        <field name="description">Record and check the vendor bill.</field>
+    </record>
+    <record id="level_bs_sell" model="scale.up.game.level">
+        <field name="parent_id" ref="level_group_buy_sell"/>
+        <field name="name">Sell products</field>
+        <field name="code">bs_sell</field>
+        <field name="scenario">bs_sell</field>
+        <field name="scene">office</field>
+        <field name="sequence">50</field>
+        <field name="description">Quote and confirm 3 desks for Azure Interior.</field>
+    </record>
+    <record id="level_bs_deliver" model="scale.up.game.level">
+        <field name="parent_id" ref="level_group_buy_sell"/>
+        <field name="name">Deliver to customer</field>
+        <field name="code">bs_deliver</field>
+        <field name="scenario">bs_deliver</field>
+        <field name="scene">dock</field>
+        <field name="sequence">60</field>
+        <field name="description">Ship the order to the customer.</field>
+    </record>
+    <record id="level_bs_invoice" model="scale.up.game.level">
+        <field name="parent_id" ref="level_group_buy_sell"/>
+        <field name="name">Invoice customer</field>
+        <field name="code">bs_invoice</field>
+        <field name="scenario">bs_invoice</field>
+        <field name="scene">office</field>
+        <field name="sequence">70</field>
+        <field name="description">Bill the delivered order.</field>
+    </record>
+    <record id="level_bs_payment" model="scale.up.game.level">
+        <field name="parent_id" ref="level_group_buy_sell"/>
+        <field name="name">Record payment</field>
+        <field name="code">bs_payment</field>
+        <field name="scenario">bs_payment</field>
+        <field name="scene">office</field>
+        <field name="sequence">80</field>
+        <field name="description">The customer paid: register it.</field>
+    </record>
+    <record id="level_bs_profit" model="scale.up.game.level">
+        <field name="parent_id" ref="level_group_buy_sell"/>
+        <field name="name">Analyze profits</field>
+        <field name="code">bs_profit</field>
+        <field name="scenario">bs_profit</field>
+        <field name="scene">office</field>
+        <field name="sequence">90</field>
+        <field name="description">What is the net profit of the year?</field>
+    </record>
+
+    <!-- Coming soon -->
+    <record id="level_group_run_store" model="scale.up.game.level">
+        <field name="name">Run a Store</field>
+        <field name="code">run_store</field>
+        <field name="state">soon</field>
+        <field name="sequence">20</field>
+        <field name="description">Launch a point of sale for consumers.</field>
+    </record>
+    <record id="level_group_sell_online" model="scale.up.game.level">
+        <field name="name">Sell Online</field>
+        <field name="code">sell_online</field>
+        <field name="state">soon</field>
+        <field name="sequence">30</field>
+        <field name="description">Create an eCommerce website.</field>
+    </record>
+    <record id="level_group_sell_services" model="scale.up.game.level">
+        <field name="name">Sell Services</field>
+        <field name="code">sell_services</field>
+        <field name="state">soon</field>
+        <field name="sequence">40</field>
+        <field name="description">Manage projects and timesheets.</field>
+    </record>
+    <record id="level_group_manufacture" model="scale.up.game.level">
+        <field name="name">Manufacture</field>
+        <field name="code">manufacture</field>
+        <field name="state">soon</field>
+        <field name="sequence">50</field>
+        <field name="description">Build your own products.</field>
+    </record>
+
+    <!-- Training: the original proof of concept, still playable -->
+    <record id="level_group_training" model="scale.up.game.level">
+        <field name="name">Training</field>
+        <field name="code">training</field>
+        <field name="sequence">90</field>
+        <field name="description">Warm-up levels.</field>
+    </record>
+    <!-- The record is noupdate (game_level_data.xml): move it into the group with a write -->
+    <function model="scale.up.game.level" name="write"
+              eval="([ref('level_restock_shelf')], {'parent_id': ref('level_group_training'), 'scenario': 'restock_shelf', 'scene': 'warehouse'})"/>
+</odoo>

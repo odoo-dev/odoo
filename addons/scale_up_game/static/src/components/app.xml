@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="scale_up_game.App">
+        <div class="o_su_app">
+            <LevelMenu t-if="!this.state.levelCode" onPlay="this.play"/>
+            <GameRoot t-else="" t-key="this.state.attempt" levelCode="this.state.levelCode"
+                      onExit="this.exit" onReplay="this.replay"/>
+        </div>
+    </t>
+</templates>

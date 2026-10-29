@@ -1,14 +1,14 @@
-import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { loadJS } from "@web/core/assets";
-import { standardActionServiceProps } from "@web/webclient/actions/action_plugin";
-import { Component, onMounted, onWillUnmount, proxy, signal, useProps } from "@odoo/owl";
+import { Component, onMounted, onWillUnmount, proxy, signal, t, useProps } from "@odoo/owl";
 import { WarehouseScene, SCENE_OBJECT_IDS } from "@scale_up_game/three/scene";
+import { DockScene } from "@scale_up_game/three/scenes/dock_scene";
+import { OfficeScene } from "@scale_up_game/three/scenes/office_scene";
+import { Dialogue } from "@scale_up_game/components/dialogue";
 import { setupInteractions } from "@scale_up_game/three/interactions";
 
 const THREE_URL = "/scale_up_game/static/lib/three/three.min.js";
 const SESSION_MODEL = "scale.up.game.session";
-const LEVEL_CODE = "restock_shelf";
 
 function errorMessage(error) {
     return error?.data?.message || error?.message || "Something went wrong. Please try again.";
@@ -16,7 +16,8 @@ function errorMessage(error) {
 
 export class GameRoot extends Component {
     static template = "scale_up_game.GameRoot";
-    props = useProps({ ...standardActionServiceProps });
+    static components = { Dialogue };
+    props = useProps({ levelCode: t.string(), onExit: t.function(), onReplay: t.function() });
 
     setup() {
         this.orm = useService("orm");
@@ -24,6 +25,7 @@ export class GameRoot extends Component {
         this.containerRef = signal.ref();
         this.anchorWRef = signal.ref();
         this.anchorTRef = signal.ref();
+        this.answerRef = signal.ref();
         this.state = proxy({
             loading: true,
             error: null,
@@ -39,6 +41,8 @@ export class GameRoot extends Component {
             hintsUsed: 0,
             missionOpen: true,
             dialogOpen: false,
+            chatting: false,
+            tipSeen: false,
             animating: false,
             complete: false,
             showSummary: false,
@@ -59,10 +63,16 @@ export class GameRoot extends Component {
     async start() {
         try {
             await loadJS(THREE_URL);
+            // The initial state always comes from Odoo (never assumed). Starting an
+            // attempt resumes the running one or seeds a fresh one: no manual reset.
+            const game = await this.orm.call(SESSION_MODEL, "start_attempt", [], {
+                level_code: this.props.levelCode,
+            });
             if (this.destroyed) {
                 return;
             }
-            this.scene = new WarehouseScene(window.THREE, this.containerRef(), {
+            const SceneClass = { office: OfficeScene, dock: DockScene }[game.scene_key] || WarehouseScene;
+            this.scene = new SceneClass(window.THREE, this.containerRef(), {
                 onFrame: () => this.updateOverlay(),
                 onActivity: (label) => {
                     if (!this.destroyed) {
@@ -75,13 +85,6 @@ export class GameRoot extends Component {
                 onClickBackground: () => this.closeMenu(),
                 onHoverChange: (id) => this.onHoverChange(id),
             });
-            // The initial state always comes from Odoo (never assumed).
-            const game = await this.orm.call(SESSION_MODEL, "get_or_create_session", [], {
-                level_code: LEVEL_CODE,
-            });
-            if (this.destroyed) {
-                return;
-            }
             this.state.loading = false;
             await this.applyGame(game, { initial: true });
         } catch (error) {
@@ -140,7 +143,8 @@ export class GameRoot extends Component {
     }
 
     async applyGame(game, { initial = false } = {}) {
-        const prevStage = this.state.game ? this.state.game.stage : null;
+        const prevGame = this.state.game;
+        const prevStage = prevGame ? prevGame.stage : null;
         this.state.game = game;
         const stage = game.stage;
         const scene = this.scene;
@@ -150,6 +154,9 @@ export class GameRoot extends Component {
             this.state.hintStep = step ? step.key : null;
             this.state.hintLevel = 0;
             scene.setTerminalPulse(false);
+        }
+        if (game.scenario) {
+            return this.applyScenario(game, { initial, prevGame });
         }
         scene.setTerminalStatus({ title: "Inventory", ...this.terminalLines(game) });
         scene.setLabels({
@@ -182,6 +189,48 @@ export class GameRoot extends Component {
         }
     }
 
+    /** Sub-level of a level group: the scene mirrors the confirmed Odoo state. */
+    async applyScenario(game, { initial, prevGame }) {
+        const scene = this.scene;
+        const stage = game.stage;
+        const willAnimate = stage === "done" && (game.newly_completed || (!initial && prevGame?.stage !== "done"));
+        scene.applyState(willAnimate && prevGame ? prevGame : game);
+        this.state.complete = stage === "done" && !willAnimate;
+        if (willAnimate) {
+            await this.deliver(game);
+        } else if (!this.state.chatting) {
+            scene.startWorking();
+        }
+        // The story is played click by click when the attempt starts.
+        if (initial && stage !== "done" && game.chat.length) {
+            this.state.chatting = true;
+        }
+    }
+
+    get showTip() {
+        return Boolean(
+            this.state.game && !this.state.chatting && !this.state.tipSeen &&
+            !this.state.complete && !this.state.animating && this.state.menu !== "terminal"
+        );
+    }
+
+    replayStory() {
+        this.state.menu = null;
+        this.state.chatting = true;
+    }
+
+    onStoryDone = () => {
+        this.state.chatting = false;
+        this.scene?.startWorking();
+        if (!this.state.tipSeen) {
+            this.scene?.setTerminalPulse(true);
+        }
+    };
+
+    onSpeaker = (who) => {
+        this.scene?.setSpeaker?.(who);
+    };
+
     async deliver(game) {
         this.state.animating = true;
         this.state.menu = null;
@@ -198,7 +247,7 @@ export class GameRoot extends Component {
             }
         }
         try {
-            await this.scene.deliver();
+            await (game.scenario ? this.scene.celebrate(game) : this.scene.deliver());
         } finally {
             if (!this.destroyed) {
                 this.state.animating = false;
@@ -207,13 +256,15 @@ export class GameRoot extends Component {
         if (this.destroyed) {
             return;
         }
-        this.scene.setShelfStock(game.destination_quantity);
-        this.scene.setSourceStock(game.source_quantity);
-        this.scene.setOrderBoard(true);
-        this.state.stock = { src: game.source_quantity, dst: game.destination_quantity };
+        if (!game.scenario) {
+            this.scene.setShelfStock(game.destination_quantity);
+            this.scene.setSourceStock(game.source_quantity);
+            this.scene.setOrderBoard(true);
+            this.state.stock = { src: game.source_quantity, dst: game.destination_quantity };
+        }
         this.state.complete = true;
         this.state.showSummary = true;
-        this.say("Order shipped! Great job, boss!", 6000);
+        this.say(game.scenario ? "Level complete! Great job, boss!" : "Order shipped! Great job, boss!", 6000);
     }
 
     async closeDialogs() {
@@ -308,38 +359,52 @@ export class GameRoot extends Component {
         if (this.state.hintLevel < 2) {
             this.state.hintLevel++;
             this.state.hintsUsed++;
+            this.orm.call(SESSION_MODEL, "register_hint", [[this.state.game.session_id], this.state.hintLevel]);
         }
         // Second hint on the first step: make the terminal pulse.
         this.scene?.setTerminalPulse(step.key === "create" && this.state.hintLevel >= 2);
     }
 
-    onNewTransfer() {
-        return this.openTransfer(null);
-    }
-
-    onOpenMyTransfer() {
-        return this.openTransfer(this.state.game.current_picking_id);
-    }
-
-    /** The player works with the REAL Odoo transfer form. */
-    async openTransfer(resId) {
-        if (this.state.dialogOpen || this.state.animating) {
-            return;
-        }
-        this.state.menu = null;
-        this.state.dialogOpen = true;
+    get menuItems() {
         const game = this.state.game;
+        if (game.scenario) {
+            return game.terminal.items;
+        }
+        const items = [{ label: "New transfer", alt: false, action: this.transferAction(null) }];
+        if (game.current_picking_id) {
+            items.push({
+                label: `Open my transfer (${game.current_picking_name})`,
+                alt: true,
+                action: this.transferAction(game.current_picking_id),
+            });
+        }
+        return items;
+    }
+
+    transferAction(resId) {
         const action = {
             type: "ir.actions.act_window",
             name: resId ? "Transfer" : "New transfer",
             res_model: "stock.picking",
             views: [[false, "form"]],
             target: "new",
-            context: resId ? {} : { default_picking_type_id: game.picking_type_id },
+            context: resId ? {} : { default_picking_type_id: this.state.game.picking_type_id },
         };
         if (resId) {
             action.res_id = resId;
         }
+        return action;
+    }
+
+    /** The player works with the REAL Odoo form, in a dialog. */
+    async openDocument(action) {
+        if (this.state.dialogOpen || this.state.animating) {
+            return;
+        }
+        this.state.menu = null;
+        this.state.dialogOpen = true;
+        this.state.tipSeen = true;
+        this.scene?.setTerminalPulse(false);
         this.startPolling();
         try {
             await this.action.doAction(action, { onClose: () => this.onDialogClosed() });
@@ -347,6 +412,54 @@ export class GameRoot extends Component {
             this.state.dialogOpen = false;
             this.stopPolling();
             this.showToast(errorMessage(error), "danger");
+        }
+    }
+
+    get panelTitle() {
+        const game = this.state.game;
+        return game.scenario ? "INFO" : `STOCK ON HAND · ${game.product_name}`;
+    }
+
+    get panelRows() {
+        const game = this.state.game;
+        if (game.scenario) {
+            return game.panel;
+        }
+        if (!this.state.stock) {
+            return [];
+        }
+        return [
+            { label: game.source_location, value: this.state.stock.src },
+            { label: game.destination_location, value: this.state.stock.dst },
+        ];
+    }
+
+    get missionTitle() {
+        const game = this.state.game;
+        return `${game.group_name || "Training"} · ${game.level_name}`;
+    }
+
+    async onSubmitAnswer() {
+        const input = this.answerRef();
+        if (!input || !input.value.trim() || this.refreshing) {
+            return;
+        }
+        this.refreshing = true;
+        try {
+            const game = await this.orm.call(SESSION_MODEL, "submit_answer", [[this.state.game.session_id], input.value]);
+            if (!game.success) {
+                this.showToast(game.message, "danger");
+                return;
+            }
+            this.refreshing = false;
+            await this.applyGame(game);
+            if (game.issues.length) {
+                this.say("Hmm, that doesn't match the books…", 4000);
+            }
+        } catch (error) {
+            this.showToast(errorMessage(error), "danger");
+        } finally {
+            this.refreshing = false;
         }
     }
 
@@ -420,5 +533,3 @@ export class GameRoot extends Component {
         }
     }
 }
-
-registry.category("actions").add("scale_up_game.game_root", GameRoot);

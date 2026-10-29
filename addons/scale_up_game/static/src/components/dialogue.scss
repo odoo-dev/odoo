@@ -1,0 +1,83 @@
+// Story dialogue (click by click) + the first-time "click the computer" tip.
+$su-purple: #714b67;
+$su-teal: #017e84;
+
+.o_su_dialogue {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 0 16px 28px;
+    cursor: pointer;
+    background: linear-gradient(to bottom, rgba(16, 22, 30, 0) 45%, rgba(16, 22, 30, 0.45) 100%);
+}
+
+.o_su_dlg_box {
+    position: relative;
+    display: grid;
+    grid-template-columns: 64px 1fr;
+    grid-template-areas: "portrait body" "portrait foot";
+    gap: 4px 14px;
+    // LibSass (used by Odoo's asset pipeline) cannot evaluate min() with px
+    // and percentage values. These two declarations are equivalent here.
+    width: 100%;
+    max-width: 760px;
+    padding: 16px 18px 12px;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 10px 34px rgba(0, 0, 0, 0.35);
+    animation: o_su_dlg_in 0.18s ease-out;
+
+    .o_su_portrait { grid-area: portrait; align-self: start; border-radius: 50%; background: #eef1f5; }
+    .o_su_dlg_body { grid-area: body; }
+    .o_su_dlg_foot {
+        grid-area: foot; display: flex; align-items: center; justify-content: space-between;
+        font-size: 0.72rem; color: #8a929c;
+    }
+    .o_su_dlg_who { font-size: 0.9rem; color: $su-teal; }
+    .o_su_dlg_role { margin-left: 8px; font-size: 0.72rem; color: #8a929c; font-weight: 600; }
+    .o_su_dlg_text {
+        margin: 2px 0 6px; font-size: 1rem; line-height: 1.45; color: #22272f; min-height: 2.9em;
+    }
+    .o_su_dlg_next { font-weight: 700; color: $su-purple; }
+    .o_su_dlg_skip {
+        position: absolute; top: 8px; right: 10px; border: 0; background: transparent;
+        color: #9aa2ac; font-size: 0.72rem; font-weight: 700; cursor: pointer;
+        &:hover { color: $su-purple; }
+    }
+}
+
+@keyframes o_su_dlg_in {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: none; }
+}
+
+// First-time affordance: the computer is clickable.
+.o_su_game .o_su_anchor > .o_su_tip {
+    position: absolute;
+    transform: translate(-50%, -100%);
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 14px; border-radius: 999px; white-space: nowrap;
+    background: $su-teal; color: #fff; font-size: 0.82rem; font-weight: 600;
+    box-shadow: 0 6px 18px rgba(1, 126, 132, 0.45);
+    animation: o_su_tip_bounce 1.4s ease-in-out infinite;
+
+    &::after {
+        content: ""; position: absolute; left: 50%; bottom: -7px; margin-left: -7px;
+        border: 7px solid transparent; border-top-color: $su-teal; border-bottom: 0;
+    }
+    .o_su_tip_hand { font-size: 1rem; }
+}
+
+@keyframes o_su_tip_bounce {
+    0%, 100% { transform: translate(-50%, -100%) translateY(0); }
+    50% { transform: translate(-50%, -100%) translateY(-7px); }
+}
+
+.o_su_game .o_su_storybtn {
+    margin: 6px 0; border: 1px solid #d6dbe1; background: #fff; color: #5a6470;
+    border-radius: 999px; padding: 4px 12px; font-size: 0.78rem; font-weight: 600; cursor: pointer;
+    &:hover { border-color: $su-purple; color: $su-purple; }
+}

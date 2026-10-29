@@ -8,10 +8,12 @@ Scale-Up! is a 3D virtual business game rendered with Three.js inside the Odoo
 web client. Odoo is the source of truth: every game action runs real Odoo
 business logic (Level 1 performs a genuine internal stock transfer).
 """,
-    'depends': ['base', 'web', 'stock'],
+    'depends': ['base', 'web', 'stock', 'purchase_stock', 'sale_stock', 'account'],
     'data': [
         'security/ir.access.csv',
         'data/game_level_data.xml',
+        'data/game_buy_sell_data.xml',
+        'data/game_levels_data.xml',
         'views/game_menu.xml',
     ],
     'assets': {
