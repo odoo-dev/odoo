@@ -95,10 +95,17 @@ class SlideSlide(models.Model):
         ('quiz', "Quiz")],
         string='Category', required=True,
         default='document')
-    source_type = fields.Selection([
-        ('local_file', 'Upload from Device'),
-        ('external', 'Retrieve from Google Drive')],
-        default='local_file', required=True)
+    # source_type = fields.Selection([
+    #     ('local_file', 'Upload from Device'),
+    #     ('external', 'Retrieve from Google Drive')],
+    #     default='local_file', required=True)
+
+    source_type = fields.Selection(
+        selection='_set_source_type_selection',
+        default = 'local_file',
+        required = True,
+    )
+
     # generic
     url = fields.Char('External URL', help="URL of the Google Drive file or URL of the YouTube video")
     binary_content = fields.Binary('File', attachment=True)
@@ -1377,3 +1384,18 @@ class SlideSlide(models.Model):
 
     def _mail_get_partner_fields(self, introspect_fields=False):
         return []
+
+    def _is_documents_installed(self):
+        if self.env['ir.module.module']._get('documents').state == 'installed':
+            return True
+    
+    def _set_source_type_selection(self):
+        source_type_selection = [
+            ( 'local_file', 'Upload from Device'),
+            ('external', 'Retrieve from Google Drive'),]
+        if self._is_documents_installed():
+            source_type_selection.append(('documents', 'Add from Documents'))
+        
+        return source_type_selection
+
+

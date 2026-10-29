@@ -23,7 +23,8 @@ Featuring
         'website',
         'website_mail',
         'website_profile',
-        'digest'
+        'digest',
+        'documents'
     ],
     'data': [
         'security/website_slides_security.xml',
