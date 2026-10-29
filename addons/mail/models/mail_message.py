@@ -480,7 +480,9 @@ class MailMessage(models.Model):
             return
 
         # Non-employee see only messages with a subtype and not internal
-        query = self.sudo()._search(self._get_search_domain_share() & Domain('id', 'in', self.ids))
+        query = self.sudo()._search(
+            self._get_search_domain_share(operation) & Domain("id", "in", self.ids)
+        )
         accessible_messages = self.sudo(False)._filter_accessible_from_query(query, operation)
         accessible_messages[field_name] = True
         (self - accessible_messages)[field_name] = False
@@ -493,9 +495,10 @@ class MailMessage(models.Model):
         if not isinstance(domain, Domain):
             domain = Domain.TRUE
         # Non-employee see only messages with a subtype and not internal
-        share_domain = self._get_search_domain_share()
+        share_domain = self._get_search_domain_share(operation)
         domain = share_domain & domain
         self = self.sudo(False)  # noqa: PLW0642
+        is_internal = self.env.user._is_internal()
 
         # searching for all messages or a subset of models
         res_model_names = condition_values(self, 'model', domain) or ()
@@ -519,6 +522,10 @@ class MailMessage(models.Model):
             comodel_res_ids = condition_values(self, 'res_id', domain.map_conditions(
                 lambda cond: codomain & cond if cond.field_expr == 'model' else cond
             ))
+            if not is_internal:
+                # Share users only see this model's share messages (e.g.
+                # project.task exposes tracking); other models keep SHARE_DOMAIN.
+                codomain &= comodel._get_share_message_domain()
             # For each model, build a query with accessible comodel ids.
             # Start with a false domain and at each step:
             # 1. domain_operation is the remaining records
@@ -558,26 +565,56 @@ class MailMessage(models.Model):
             model_codomains |= codomain
 
         partner = self.env.user.partner_id
+        # A share user reaches a model's relaxed share domain (e.g. tracking on
+        # project.task, already folded into ``model_codomains`` above) only
+        # through document access; the identity-based branches below keep the
+        # strict global SHARE_DOMAIN.
+        strict_share = Domain.TRUE if is_internal else SHARE_DOMAIN
         # The search domain is only used above to restrict the models and ids
         # to check: the caller already filters on it, repeating it here would
         # only duplicate its conditions in the final query.
-        return share_domain & Domain.OR((
-            Domain('author_id', '=', partner.id),
-            Domain('create_uid', '=', self.env.uid),
-            # force an IN condition with a list of values
-            Domain('partner_ids', 'any!', partner._as_query()),
-            Domain('partner_cc_ids', 'any!', partner._as_query()),
-            Domain('notified_partner_ids', 'any!', partner._as_query()),
-            # User_notification notified relevant partners, hence covered by
-            # 'partner_ids' domain part (which is why it is ok to exclude them
-            # complete from records-based domain).
-            model_codomains & Domain('message_type', '!=', 'user_notification'),
-        ))
+        return Domain.OR(
+            (
+                strict_share & Domain("author_id", "=", partner.id),
+                strict_share & Domain("create_uid", "=", self.env.uid),
+                # force an IN condition with a list of values
+                strict_share & Domain("partner_ids", "any!", partner._as_query()),
+                strict_share & Domain("partner_cc_ids", "any!", partner._as_query()),
+                strict_share & Domain("notified_partner_ids", "any!", partner._as_query()),
+                # User_notification notified relevant partners, hence covered by
+                # 'partner_ids' domain part (which is why it is ok to exclude them
+                # complete from records-based domain).
+                model_codomains & Domain("message_type", "!=", "user_notification"),
+            )
+        )
 
-    def _get_search_domain_share(self):
+    def _get_search_domain_share(self, operation="read"):
         if self.env.user._is_internal():
             return Domain.TRUE
+        # A model may relax the share domain (e.g. to expose tracking) only for
+        # reading; a share user earns that relaxation through document access, so
+        # it is applied to the read candidate query and to the document-access
+        # branch, while the identity-based branches keep the strict SHARE_DOMAIN.
+        if operation == "read":
+            return self._get_share_domain_per_model()
         return SHARE_DOMAIN
+
+    @api.ormcache()
+    def _get_share_domain_per_model(self):
+        """Share domain keyed by document model: models relax the global
+        ``SHARE_DOMAIN`` through ``_get_share_message_domain`` (e.g. project.task
+        exposes tracking messages to share users who can access the task)."""
+        relaxed = {
+            model_name: share_domain
+            for model_name in self.env.registry.descendants(["mail.thread"], "_inherit")
+            if (share_domain := self.env[model_name]._get_share_message_domain()) != SHARE_DOMAIN
+        }
+        if not relaxed:
+            return SHARE_DOMAIN
+        return Domain.OR(
+            [Domain("model", "=", model_name) & domain for model_name, domain in relaxed.items()]
+            + [Domain("model", "not in", list(relaxed)) & SHARE_DOMAIN]
+        )
 
     def _filter_accessible_from_query(self, query: models.Query, operation: str) -> Self:
         """ Return the subset of ``self`` that satisfies the specific conditions
@@ -665,14 +702,35 @@ class MailMessage(models.Model):
         if not messages_to_check:
             return accessible
 
+        # A share user (non-internal) reaches a model's relaxed share domain
+        # (e.g. tracking on project.task) only through document access: the
+        # per-model relaxation is applied to the read candidate query, so the
+        # identity-based branches below are restricted to the strictly-shared
+        # subset. Non-read operations keep the strict candidate, so this is a
+        # no-op there.
+        strict_shared = None
+        if (
+            operation == "read"
+            and not self.env.user._is_internal()
+            and self._get_share_domain_per_model() != SHARE_DOMAIN
+        ):
+            # sudo: mail.message - metadata-only re-check of the global share
+            # filter; access is still decided by the branches below.
+            strict_shared = set(
+                self.sudo()._search(SHARE_DOMAIN & Domain("id", "in", list(messages_to_check)))
+            )
+
+        def identity_shareable(mid):
+            return strict_shared is None or mid in strict_shared
+
         # Author condition (READ, WRITE, CREATE (private))
         if operation == 'read':
             uid = self.env.uid
             messages_to_check = {
                 mid: message
                 for mid, message in messages_to_check.items()
-                if message['author_id'] != pid
-                and message['create_uid'] != uid
+                if (message["author_id"] != pid and message["create_uid"] != uid)
+                or not identity_shareable(mid)
             }
         elif operation == 'write':
             messages_to_check = {
@@ -697,7 +755,7 @@ class MailMessage(models.Model):
             messages_to_check = {
                 mid: message
                 for mid, message in messages_to_check.items()
-                if not message['notified']
+                if not message["notified"] or not identity_shareable(mid)
             }
             if not messages_to_check:
                 return accessible
