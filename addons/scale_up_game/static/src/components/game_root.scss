@@ -1,0 +1,156 @@
+$su-purple: #714b67;
+$su-teal: #017e84;
+$su-orange: #e8742c;
+
+.o_su_game {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: 420px;
+    overflow: hidden;
+    background: #d9e1ea;
+    user-select: none;
+    font-family: inherit;
+
+    .o_su_canvas { position: absolute; inset: 0; }
+
+    .o_su_loading, .o_su_fatal {
+        position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+        padding: 12px 20px; border-radius: 10px; background: rgba(255, 255, 255, 0.92);
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15); text-align: center;
+    }
+    .o_su_fatal { color: #a12a2a; max-width: 420px; }
+
+    // ---- Mission card -------------------------------------------------
+    .o_su_mission {
+        position: absolute; top: 12px; left: 12px; width: 300px; max-width: 80%;
+        border-radius: 12px; background: rgba(255, 255, 255, 0.94);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18); font-size: 0.85rem; overflow: hidden;
+    }
+    .o_su_mission_head {
+        display: flex; align-items: center; gap: 8px; padding: 8px 12px; cursor: pointer;
+        background: $su-purple; color: #fff;
+    }
+    .o_su_mission_title { flex: 1; font-weight: 700; }
+    .o_su_dots { display: flex; gap: 4px; }
+    .o_su_dot { width: 9px; height: 9px; border-radius: 50%; background: rgba(255, 255, 255, 0.35); }
+    .o_su_dot--done { background: #5ff5e8; }
+    .o_su_mission_body { padding: 10px 12px 12px; }
+    .o_su_label { font-size: 0.68rem; letter-spacing: 0.08em; font-weight: 700; color: $su-teal; margin-bottom: 2px; }
+    .o_su_story { margin: 0 0 8px; line-height: 1.4; }
+    .o_su_issues {
+        margin: 6px 0; padding: 6px 8px; border-radius: 8px; background: #fff3e8; color: #a14a12;
+        border-left: 3px solid $su-orange;
+    }
+    .o_su_hintbox {
+        margin: 6px 0; padding: 7px 9px; border-radius: 8px; background: #e6f6f6; color: #0b5559;
+        border-left: 3px solid $su-teal; line-height: 1.35;
+    }
+    .o_su_hintbtn {
+        border: 1px solid $su-teal; background: #fff; color: $su-teal; border-radius: 999px;
+        padding: 4px 14px; font-weight: 600; cursor: pointer;
+        &:hover { background: $su-teal; color: #fff; }
+    }
+    .o_su_stock {
+        margin: 0 0 8px; padding: 6px 8px; border-radius: 8px; background: #f3f0f5;
+    }
+    .o_su_stock_row { display: flex; justify-content: space-between; gap: 8px; font-size: 0.8rem; }
+    .o_su_validating {
+        position: absolute; top: 14px; left: 50%; transform: translateX(-50%);
+        padding: 8px 22px; border-radius: 999px; background: $su-purple; color: #fff;
+        font-weight: 700; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+    }
+    .o_su_small { margin-top: 6px; font-size: 0.75rem; color: #666; }
+
+    .o_su_complete {
+        position: absolute; top: 14px; left: 50%; transform: translateX(-50%);
+        padding: 8px 22px; border: 0; border-radius: 999px; background: $su-teal; color: #fff;
+        font-weight: 700; font-size: 1.05rem; cursor: pointer;
+        box-shadow: 0 4px 14px rgba(1, 126, 132, 0.45); animation: o_su_pop 0.4s ease-out;
+    }
+
+    // ---- Overlays anchored (via transform, set every frame) -----------
+    .o_su_anchor {
+        position: absolute; top: 0; left: 0; width: 0; height: 0;
+        pointer-events: none; will-change: transform;
+    }
+    .o_su_stack {
+        position: absolute; left: 0; top: 0; transform: translate(-50%, -100%);
+        display: flex; flex-direction: column; align-items: center; gap: 4px;
+    }
+    .o_su_bubble {
+        position: relative; width: 210px; padding: 8px 12px; border-radius: 14px; background: #fff;
+        color: #2b2f38; font-size: 0.82rem; line-height: 1.35; text-align: center;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+        &::after {
+            content: ""; position: absolute; left: 50%; bottom: -7px; margin-left: -7px;
+            border: 7px solid transparent; border-bottom: 0; border-top-color: #fff;
+        }
+    }
+    .o_su_chip {
+        display: flex; align-items: center; gap: 6px; white-space: nowrap; padding: 3px 10px;
+        border-radius: 999px; background: rgba(43, 47, 56, 0.82); color: #fff; font-size: 0.72rem;
+    }
+    .o_su_gear {
+        width: 10px; height: 10px; border-radius: 50%; border: 2px dashed #5ff5e8;
+        animation: o_su_spin 1.6s linear infinite;
+    }
+    .o_su_hint {
+        white-space: nowrap; padding: 3px 10px; border-radius: 999px;
+        background: rgba(113, 75, 103, 0.8); color: #fff; font-size: 0.75rem;
+        &.o_su_hint--active { background: $su-teal; }
+    }
+    .o_su_anchor > .o_su_hint { position: absolute; transform: translate(-50%, -100%); }
+
+    .o_su_menu {
+        position: absolute; left: 70px; top: -20px; display: flex; flex-direction: column; gap: 6px;
+        min-width: 190px; padding: 8px; border-radius: 12px; background: #fff;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28); pointer-events: auto;
+    }
+    .o_su_menu_title { font-size: 0.7rem; letter-spacing: 0.08em; font-weight: 700; color: $su-teal; }
+    .o_su_menu_btn {
+        border: 0; border-radius: 8px; padding: 8px 14px; background: $su-purple; color: #fff;
+        font-weight: 600; cursor: pointer; white-space: nowrap;
+        &:hover:not(:disabled) { background: darken($su-purple, 8%); }
+        &:disabled { opacity: 0.55; cursor: default; }
+    }
+    .o_su_menu_btn--alt { background: $su-teal; &:hover:not(:disabled) { background: darken($su-teal, 8%); } }
+
+    // ---- Completion recap ---------------------------------------------
+    .o_su_summary {
+        position: absolute; left: 16px; bottom: 16px; width: 310px; max-width: 85%;
+        padding: 14px 16px; border-radius: 14px; background: #fff; font-size: 0.85rem;
+        box-shadow: 0 8px 26px rgba(0, 0, 0, 0.3); animation: o_su_rise 0.4s ease-out;
+        h3 { margin: 0 0 6px; color: $su-teal; }
+        ol { padding-left: 20px; margin: 6px 0; }
+    }
+    .o_su_summary_close {
+        position: absolute; top: 8px; right: 10px; border: 0; background: transparent;
+        cursor: pointer; font-size: 1rem; color: #888;
+    }
+
+    .o_su_toast {
+        position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%);
+        max-width: 80%; padding: 8px 18px; border-radius: 8px; color: #fff; background: $su-purple;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25); pointer-events: none;
+        &.o_su_toast--success { background: $su-teal; }
+        &.o_su_toast--danger { background: #b3392f; }
+    }
+}
+
+@keyframes o_su_spin { to { transform: rotate(360deg); } }
+@keyframes o_su_pop {
+    from { opacity: 0; transform: translateX(-50%) scale(0.85); }
+    to { opacity: 1; transform: translateX(-50%) scale(1); }
+}
+
+@keyframes o_su_rise {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+// While the bot works, Odoo's transfer dialog/wizards are tucked away (see GameRoot.deliver)
+body.o_su_hide_modals .o_dialog,
+body.o_su_hide_modals .modal-backdrop {
+    display: none !important;
+}

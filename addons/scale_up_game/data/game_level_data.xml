@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!-- Training data: dedicated product + shelf location, referenced by the
+         level through external IDs (no hardcoded database IDs). -->
+    <record id="location_shelf_01" model="stock.location">
+        <field name="name">Shelf-01</field>
+        <field name="location_id" ref="stock.stock_location_stock"/>
+        <field name="usage">internal</field>
+    </record>
+
+    <record id="product_demo" model="product.product">
+        <field name="name">Demo Product</field>
+        <field name="type">consu</field>
+        <field name="is_storable" eval="True"/>
+        <field name="list_price">10.0</field>
+    </record>
+
+    <record id="level_restock_shelf" model="scale.up.game.level">
+        <field name="name">Restock the Shelf</field>
+        <field name="code">restock_shelf</field>
+        <field name="sequence">10</field>
+        <field name="description">Ask the warehouse worker to move the box from the stock area onto the empty shelf.</field>
+        <field name="product_id" ref="product_demo"/>
+        <field name="location_src_id" ref="stock.stock_location_stock"/>
+        <field name="location_dest_id" ref="location_shelf_01"/>
+        <field name="quantity">1.0</field>
+    </record>
+</odoo>

@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Client action: the Owl game component (registered in static/src/components/game_root.js) -->
+    <record id="action_game_play" model="ir.actions.client">
+        <field name="name">Scale-Up! Game</field>
+        <field name="tag">scale_up_game.game_root</field>
+    </record>
+
+    <!-- Admin views -->
+    <record id="view_game_level_list" model="ir.ui.view">
+        <field name="name">scale.up.game.level.list</field>
+        <field name="model">scale.up.game.level</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="product_id"/>
+                <field name="location_src_id"/>
+                <field name="location_dest_id"/>
+                <field name="quantity"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_game_level_form" model="ir.ui.view">
+        <field name="name">scale.up.game.level.form</field>
+        <field name="model">scale.up.game.level</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_reset_scenario" type="object" string="Reset Scenario" class="btn-primary" confirm="This restores the initial stock (source stocked, shelf empty) and reopens all sessions of this level. Continue?"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="code"/>
+                            <field name="sequence"/>
+                            <field name="active"/>
+                        </group>
+                        <group>
+                            <field name="product_id"/>
+                            <field name="location_src_id"/>
+                            <field name="location_dest_id"/>
+                            <field name="quantity"/>
+                            <field name="initial_stock_done"/>
+                        </group>
+                    </group>
+                    <field name="description" placeholder="Objective..."/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_game_session_list" model="ir.ui.view">
+        <field name="name">scale.up.game.session.list</field>
+        <field name="model">scale.up.game.session</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="user_id"/>
+                <field name="level_id"/>
+                <field name="state"/>
+                <field name="started_at"/>
+                <field name="completed_at"/>
+                <field name="last_picking_id"/>
+                <field name="action_count"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_game_session_form" model="ir.ui.view">
+        <field name="name">scale.up.game.session.form</field>
+        <field name="model">scale.up.game.session</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <field name="state" widget="statusbar" statusbar_visible="in_progress,completed"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="user_id"/>
+                            <field name="level_id"/>
+                        </group>
+                        <group>
+                            <field name="started_at"/>
+                            <field name="completed_at"/>
+                            <field name="last_picking_id"/>
+                            <field name="action_count"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_game_level" model="ir.actions.act_window">
+        <field name="name">Levels</field>
+        <field name="res_model">scale.up.game.level</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="action_game_session" model="ir.actions.act_window">
+        <field name="name">Sessions</field>
+        <field name="res_model">scale.up.game.session</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- Menus -->
+    <menuitem id="menu_game_root" name="Scale-Up!" sequence="95" groups="stock.group_stock_user"/>
+    <menuitem id="menu_game_play" name="Play" parent="menu_game_root" action="action_game_play" sequence="10"/>
+    <menuitem id="menu_game_config" name="Configuration" parent="menu_game_root" sequence="90" groups="base.group_system"/>
+    <menuitem id="menu_game_level" name="Levels" parent="menu_game_config" action="action_game_level" sequence="10"/>
+    <menuitem id="menu_game_session" name="Sessions" parent="menu_game_config" action="action_game_session" sequence="20"/>
+
+    <function model="scale.up.game.level" name="_ensure_multi_location_group"/>
+</odoo>

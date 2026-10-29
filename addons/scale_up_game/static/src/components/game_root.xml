@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="scale_up_game.GameRoot">
+        <div class="o_su_game">
+            <div class="o_su_canvas" t-ref="container"/>
+
+            <div t-if="state.loading" class="o_su_loading">Loading warehouse…</div>
+            <div t-if="state.error" class="o_su_fatal" role="alert">
+                <strong>Can't start the game</strong>
+                <div t-esc="state.error"/>
+            </div>
+
+            <!-- Mission card: objective + hint, nothing that gives the solution away -->
+            <div t-if="state.game and !state.error" class="o_su_mission">
+                <div class="o_su_mission_head" t-on-click="toggleMission">
+                    <span class="o_su_mission_title">Level 1 · <t t-esc="state.game.level_name"/></span>
+                    <span class="o_su_dots">
+                        <t t-foreach="state.game.steps" t-as="step" t-key="step.key">
+                            <span t-att-class="'o_su_dot' + (step.done ? ' o_su_dot--done' : '')"/>
+                        </t>
+                    </span>
+                    <span class="o_su_caret" t-esc="state.missionOpen ? '▾' : '▸'"/>
+                </div>
+                <div t-if="state.missionOpen" class="o_su_mission_body">
+                    <div class="o_su_label">OBJECTIVE</div>
+                    <p class="o_su_story" t-esc="state.game.objective"/>
+                    <div t-if="state.stock" class="o_su_stock">
+                        <div class="o_su_label">STOCK ON HAND · <t t-esc="state.game.product_name"/></div>
+                        <div class="o_su_stock_row">
+                            <span t-esc="state.game.source_location"/><strong t-esc="state.stock.src"/>
+                        </div>
+                        <div class="o_su_stock_row">
+                            <span t-esc="state.game.destination_location"/><strong t-esc="state.stock.dst"/>
+                        </div>
+                    </div>
+                    <div t-if="state.game.issues.length and !state.complete" class="o_su_issues">
+                        <div class="o_su_label">THE BOT NOTICED</div>
+                        <div t-foreach="state.game.issues" t-as="issue" t-key="issue_index" t-esc="issue"/>
+                    </div>
+                    <div t-if="hintText" class="o_su_hintbox">💡 <t t-esc="hintText"/></div>
+                    <button t-if="!state.complete and currentStep" type="button" class="o_su_hintbtn"
+                            t-on-click="onHint">
+                        💡 <t t-esc="state.hintLevel and state.hintStep === currentStep.key ? 'More help' : 'Hint'"/>
+                    </button>
+                    <div t-if="state.hintsUsed" class="o_su_small">Hints used: <t t-esc="state.hintsUsed"/></div>
+                </div>
+            </div>
+
+            <div t-if="state.animating" class="o_su_validating">⏳ Validating…</div>
+
+            <button t-if="state.complete" type="button" class="o_su_complete" t-on-click="toggleSummary">
+                ★ Level complete!
+            </button>
+
+            <!-- Everything attached to the worker -->
+            <div t-if="state.game and !state.error" class="o_su_anchor" t-ref="anchorW">
+                <div class="o_su_stack">
+                    <div t-if="state.speech" class="o_su_bubble" t-esc="state.speech"/>
+                    <div t-if="state.activity and !state.speech" class="o_su_chip">
+                        <span class="o_su_gear"/> <t t-esc="state.activity"/>
+                    </div>
+                    <div t-if="state.hoverId === 'warehouse_worker_01' and !state.speech" class="o_su_hint">
+                        Click to talk
+                    </div>
+                </div>
+            </div>
+
+            <!-- Everything attached to the inventory terminal -->
+            <div t-if="state.game and !state.error" class="o_su_anchor" t-ref="anchorT">
+                <div t-if="state.hoverId === 'office_terminal_01' and !state.menu" class="o_su_hint o_su_hint--active">
+                    Inventory terminal
+                </div>
+                <div t-if="state.menu === 'terminal'" class="o_su_menu">
+                    <div class="o_su_menu_title">Inventory</div>
+                    <button type="button" class="o_su_menu_btn" t-on-click="onNewTransfer">New transfer</button>
+                    <button t-if="state.game.current_picking_id" type="button" class="o_su_menu_btn o_su_menu_btn--alt"
+                            t-on-click="onOpenMyTransfer">
+                        Open my transfer (<t t-esc="state.game.current_picking_name"/>)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Completion recap -->
+            <div t-if="state.complete and state.showSummary" class="o_su_summary">
+                <button type="button" class="o_su_summary_close" t-on-click="toggleSummary">✕</button>
+                <h3>Level complete!</h3>
+                <p>Order <strong>SO-001</strong> can ship. You moved stock the Odoo way:</p>
+                <ol>
+                    <t t-foreach="state.game.steps" t-as="step" t-key="step.key">
+                        <li t-esc="step.label"/>
+                    </t>
+                </ol>
+                <p class="o_su_small">
+                    Transfer <strong t-esc="state.game.current_picking_name"/> ·
+                    hints used: <t t-esc="state.hintsUsed"/>
+                </p>
+                <p class="o_su_small">
+                    A transfer document is how Odoo knows goods moved: it keeps the stock of every location accurate.
+                </p>
+                <button type="button" class="o_su_menu_btn" t-on-click="openCompletedTransfer">Open the transfer</button>
+            </div>
+
+            <div t-if="state.toast" t-att-class="'o_su_toast o_su_toast--' + state.toastType" role="status">
+                <t t-esc="state.toast"/>
+            </div>
+        </div>
+    </t>
+</templates>
