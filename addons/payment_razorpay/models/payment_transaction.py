@@ -280,7 +280,9 @@ class PaymentTransaction(models.Model):
         converted_amount = payment_utils.to_minor_currency_units(self.amount, self.currency_id)
         payload = {"amount": converted_amount, "currency": self.currency_id.name}
         response_content = self._send_api_request(
-            "POST", f"payments/{self.source_transaction_id.provider_reference}/capture", json=payload
+            "POST",
+            f"payments/{self.source_transaction_id.provider_reference}/capture",
+            json=payload,
         )
 
         # Process the capture request response.
@@ -449,7 +451,9 @@ class PaymentTransaction(models.Model):
         if "amount" not in payment_data or "currency" not in payment_data:
             return None
 
-        amount = payment_utils.to_major_currency_units(payment_data["amount"], self.currency_id)
+        amount = payment_utils.to_major_currency_units(
+            payment_data["amount"] - payment_data.get("fee", 0), self.currency_id
+        )
         return {"amount": amount, "currency_code": payment_data["currency"]}
 
     def _extract_token_values(self, payment_data):
