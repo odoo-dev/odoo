@@ -168,3 +168,11 @@
 .o_hb_select_dropdown_item:has(.o_hb_theme_tab_link) {
     padding-right: 0;
 }
+
+.o_hb_selectMany2X_wrapper {
+    @include o_hb_select_wrapper;
+}
+
+.o_hb_selectMany2X_dropdown {
+    @include o_hb_select_dropdown;
+}
