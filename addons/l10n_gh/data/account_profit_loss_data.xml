@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo auto_sequence="1">
+    <!-- Source: IFRS (IAS 1) presentation of the l10n_gh chart of accounts; no legal rate or threshold is used in this report. -->
+    <record id="financial_report_gh_profit_loss" model="account.report">
+        <field name="name">Profit and Loss (Statement of Profit or Loss)</field>
+        <field name="country_id" ref="base.gh"/>
+        <field name="availability_condition">country</field>
+        <field name="groupby">account_id</field>
+        <field name="filter_unfold_all" eval="True"/>
+        <field name="filter_journals" eval="True"/>
+        <field name="column_ids">
+            <record id="financial_report_gh_pl_col" model="account.report.column">
+                <field name="name">Balance</field>
+                <field name="expression_label">balance</field>
+            </record>
+        </field>
+        <field name="line_ids">
+            <record id="financial_report_gh_pl_rev" model="account.report.line">
+                <field name="name">Revenue</field>
+                <field name="code">GH_PL_REV</field>
+                <field name="hierarchy_level">1</field>
+                <field name="expression_ids">
+                    <record id="financial_report_gh_pl_rev_balance" model="account.report.expression">
+                        <field name="label">balance</field>
+                        <field name="engine">domain</field>
+                        <field name="formula" eval="[('account_id.account_type', '=', 'income')]"/>
+                        <field name="subformula">-sum</field>
+                    </record>
+                </field>
+            </record>
+            <record id="financial_report_gh_pl_cos" model="account.report.line">
+                <field name="name">Cost of Sales</field>
+                <field name="code">GH_PL_COS</field>
+                <field name="hierarchy_level">1</field>
+                <field name="expression_ids">
+                    <record id="financial_report_gh_pl_cos_balance" model="account.report.expression">
+                        <field name="label">balance</field>
+                        <field name="engine">domain</field>
+                        <field name="formula" eval="[('account_id.account_type', '=', 'expense_direct_cost')]"/>
+                        <field name="subformula">-sum</field>
+                    </record>
+                </field>
+            </record>
+            <record id="financial_report_gh_pl_gp" model="account.report.line">
+                <field name="name">GROSS PROFIT</field>
+                <field name="code">GH_PL_GP</field>
+                <field name="aggregation_formula">GH_PL_REV.balance + GH_PL_COS.balance</field>
+                <field name="hierarchy_level">0</field>
+            </record>
+            <record id="financial_report_gh_pl_oth" model="account.report.line">
+                <field name="name">Other Income</field>
+                <field name="code">GH_PL_OTH</field>
+                <field name="hierarchy_level">1</field>
+                <field name="expression_ids">
+                    <record id="financial_report_gh_pl_oth_balance" model="account.report.expression">
+                        <field name="label">balance</field>
+                        <field name="engine">domain</field>
+                        <field name="formula" eval="[('account_id.account_type', '=', 'income_other')]"/>
+                        <field name="subformula">-sum</field>
+                    </record>
+                </field>
+            </record>
+            <record id="financial_report_gh_pl_opex" model="account.report.line">
+                <field name="name">Operating Expenses</field>
+                <field name="code">GH_PL_OPEX</field>
+                <field name="hierarchy_level">1</field>
+                <field name="expression_ids">
+                    <record id="financial_report_gh_pl_opex_balance" model="account.report.expression">
+                        <field name="label">balance</field>
+                        <field name="engine">domain</field>
+                        <field name="formula" eval="[('account_id.account_type', '=', 'expense')]"/>
+                        <field name="subformula">-sum</field>
+                    </record>
+                </field>
+            </record>
+            <record id="financial_report_gh_pl_dep" model="account.report.line">
+                <field name="name">Depreciation and Amortisation</field>
+                <field name="code">GH_PL_DEP</field>
+                <field name="hierarchy_level">1</field>
+                <field name="expression_ids">
+                    <record id="financial_report_gh_pl_dep_balance" model="account.report.expression">
+                        <field name="label">balance</field>
+                        <field name="engine">domain</field>
+                        <field name="formula" eval="[('account_id.account_type', '=', 'expense_depreciation')]"/>
+                        <field name="subformula">-sum</field>
+                    </record>
+                </field>
+            </record>
+            <record id="financial_report_gh_pl_ebit" model="account.report.line">
+                <field name="name">OPERATING PROFIT</field>
+                <field name="code">GH_PL_EBIT</field>
+                <field name="aggregation_formula">GH_PL_GP.balance + GH_PL_OTH.balance + GH_PL_OPEX.balance + GH_PL_DEP.balance</field>
+                <field name="hierarchy_level">0</field>
+            </record>
+            <record id="financial_report_gh_pl_fin" model="account.report.line">
+                <field name="name">Finance Costs (incl. IFRS 16 lease interest and FX losses)</field>
+                <field name="code">GH_PL_FIN</field>
+                <field name="account_codes_formula">-71</field>
+            </record>
+            <record id="financial_report_gh_pl_pbt" model="account.report.line">
+                <field name="name">PROFIT BEFORE TAX</field>
+                <field name="code">GH_PL_PBT</field>
+                <field name="aggregation_formula">GH_PL_EBIT.balance + GH_PL_FIN.balance</field>
+                <field name="hierarchy_level">0</field>
+            </record>
+            <record id="financial_report_gh_pl_tax" model="account.report.line">
+                <field name="name">Income Tax Expense (current and deferred)</field>
+                <field name="code">GH_PL_TAX</field>
+                <field name="account_codes_formula">-81</field>
+            </record>
+            <record id="financial_report_gh_pl_pat" model="account.report.line">
+                <field name="name">PROFIT FOR THE PERIOD</field>
+                <field name="code">GH_PL_PAT</field>
+                <field name="aggregation_formula">GH_PL_PBT.balance + GH_PL_TAX.balance</field>
+                <field name="hierarchy_level">0</field>
+            </record>
+        </field>
+    </record>
+</odoo>

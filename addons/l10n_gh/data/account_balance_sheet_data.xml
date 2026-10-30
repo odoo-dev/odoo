@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo auto_sequence="1">
+    <!-- Source: IFRS (IAS 1) presentation of the l10n_gh chart of accounts; no legal rate or threshold is used in this report. -->
+    <record id="financial_report_gh_balance_sheet" model="account.report">
+        <field name="name">Balance Sheet (Statement of Financial Position)</field>
+        <field name="country_id" ref="base.gh"/>
+        <field name="availability_condition">country</field>
+        <field name="groupby">account_id</field>
+        <field name="filter_unfold_all" eval="True"/>
+        <field name="filter_date_range" eval="False"/>
+        <field name="filter_journals" eval="True"/>
+        <field name="column_ids">
+            <record id="financial_report_gh_bs_col" model="account.report.column">
+                <field name="name">Balance</field>
+                <field name="expression_label">balance</field>
+            </record>
+        </field>
+        <field name="line_ids">
+            <record id="financial_report_gh_bs_assets" model="account.report.line">
+                <field name="name">ASSETS</field>
+                <field name="code">GH_BS_TA</field>
+                <field name="aggregation_formula">GH_BS_NCA.balance + GH_BS_CA.balance</field>
+                <field name="hierarchy_level">0</field>
+                <field name="children_ids">
+                    <record id="financial_report_gh_bs_nca" model="account.report.line">
+                        <field name="name">Non-current Assets</field>
+                        <field name="code">GH_BS_NCA</field>
+                        <field name="aggregation_formula">GH_BS_PPE.balance + GH_BS_INT.balance + GH_BS_INV.balance + GH_BS_DTA.balance</field>
+                        <field name="children_ids">
+                            <record id="financial_report_gh_bs_ppe" model="account.report.line">
+                                <field name="name">Property, Plant and Equipment (net of depreciation)</field>
+                                <field name="code">GH_BS_PPE</field>
+                                <field name="account_codes_formula">111 + 112</field>
+                            </record>
+                            <record id="financial_report_gh_bs_int" model="account.report.line">
+                                <field name="name">Intangible Assets (net of amortisation)</field>
+                                <field name="code">GH_BS_INT</field>
+                                <field name="account_codes_formula">113</field>
+                            </record>
+                            <record id="financial_report_gh_bs_inv" model="account.report.line">
+                                <field name="name">Investments and Investment Property</field>
+                                <field name="code">GH_BS_INV</field>
+                                <field name="account_codes_formula">114</field>
+                            </record>
+                            <record id="financial_report_gh_bs_dta" model="account.report.line">
+                                <field name="name">Deferred Tax Asset</field>
+                                <field name="code">GH_BS_DTA</field>
+                                <field name="account_codes_formula">115</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="financial_report_gh_bs_ca" model="account.report.line">
+                        <field name="name">Current Assets</field>
+                        <field name="code">GH_BS_CA</field>
+                        <field name="aggregation_formula">GH_BS_INVT.balance + GH_BS_REC.balance + GH_BS_TAXR.balance + GH_BS_CASH.balance</field>
+                        <field name="children_ids">
+                            <record id="financial_report_gh_bs_invt" model="account.report.line">
+                                <field name="name">Inventories</field>
+                                <field name="code">GH_BS_INVT</field>
+                                <field name="account_codes_formula">121</field>
+                            </record>
+                            <record id="financial_report_gh_bs_rec" model="account.report.line">
+                                <field name="name">Trade and Other Receivables and Prepayments</field>
+                                <field name="code">GH_BS_REC</field>
+                                <field name="account_codes_formula">122 + 123</field>
+                            </record>
+                            <record id="financial_report_gh_bs_taxr" model="account.report.line">
+                                <field name="name">Tax Receivables (VAT, NHIL, GETFund, WHT, Income Tax)</field>
+                                <field name="code">GH_BS_TAXR</field>
+                                <field name="account_codes_formula">124</field>
+                            </record>
+                            <record id="financial_report_gh_bs_cash" model="account.report.line">
+                                <field name="name">Cash and Cash Equivalents</field>
+                                <field name="code">GH_BS_CASH</field>
+                                <field name="account_codes_formula">131 + 132 + 133</field>
+                            </record>
+                        </field>
+                    </record>
+                </field>
+            </record>
+            <record id="financial_report_gh_bs_liabs" model="account.report.line">
+                <field name="name">LIABILITIES</field>
+                <field name="code">GH_BS_TL</field>
+                <field name="aggregation_formula">GH_BS_NCL.balance + GH_BS_CL.balance</field>
+                <field name="hierarchy_level">0</field>
+                <field name="children_ids">
+                    <record id="financial_report_gh_bs_ncl" model="account.report.line">
+                        <field name="name">Non-current Liabilities</field>
+                        <field name="code">GH_BS_NCL</field>
+                        <field name="aggregation_formula">GH_BS_LOAN.balance + GH_BS_LEASE.balance + GH_BS_DTL.balance + GH_BS_PROV.balance</field>
+                        <field name="children_ids">
+                            <record id="financial_report_gh_bs_loan" model="account.report.line">
+                                <field name="name">Long-term Loans</field>
+                                <field name="code">GH_BS_LOAN</field>
+                                <field name="account_codes_formula">-231</field>
+                            </record>
+                            <record id="financial_report_gh_bs_lease" model="account.report.line">
+                                <field name="name">Lease Liabilities (IFRS 16)</field>
+                                <field name="code">GH_BS_LEASE</field>
+                                <field name="account_codes_formula">-232</field>
+                            </record>
+                            <record id="financial_report_gh_bs_dtl" model="account.report.line">
+                                <field name="name">Deferred Tax Liability</field>
+                                <field name="code">GH_BS_DTL</field>
+                                <field name="account_codes_formula">-233</field>
+                            </record>
+                            <record id="financial_report_gh_bs_prov" model="account.report.line">
+                                <field name="name">Provisions and Employee Benefits</field>
+                                <field name="code">GH_BS_PROV</field>
+                                <field name="account_codes_formula">-234</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="financial_report_gh_bs_cl" model="account.report.line">
+                        <field name="name">Current Liabilities</field>
+                        <field name="code">GH_BS_CL</field>
+                        <field name="aggregation_formula">GH_BS_PAY.balance + GH_BS_BORR.balance + GH_BS_TAXP.balance</field>
+                        <field name="children_ids">
+                            <record id="financial_report_gh_bs_pay" model="account.report.line">
+                                <field name="name">Trade and Other Payables</field>
+                                <field name="code">GH_BS_PAY</field>
+                                <field name="account_codes_formula">-2111 - 2112 - 2113 - 2114 - 2115</field>
+                            </record>
+                            <record id="financial_report_gh_bs_borr" model="account.report.line">
+                                <field name="name">Borrowings and Current Lease Liabilities</field>
+                                <field name="code">GH_BS_BORR</field>
+                                <field name="account_codes_formula">-212</field>
+                            </record>
+                            <record id="financial_report_gh_bs_taxp" model="account.report.line">
+                                <field name="name">Tax and Statutory Payables (VAT, NHIL, GETFund, WHT, PAYE, SSNIT)</field>
+                                <field name="code">GH_BS_TAXP</field>
+                                <field name="account_codes_formula">-22</field>
+                            </record>
+                        </field>
+                    </record>
+                </field>
+            </record>
+            <record id="financial_report_gh_bs_equity" model="account.report.line">
+                <field name="name">EQUITY</field>
+                <field name="code">GH_BS_TE</field>
+                <field name="aggregation_formula">GH_BS_SC.balance + GH_BS_RES.balance + GH_BS_IS.balance + GH_BS_CYE.balance + GH_BS_PYE.balance</field>
+                <field name="hierarchy_level">0</field>
+                <field name="children_ids">
+                    <record id="financial_report_gh_bs_sc" model="account.report.line">
+                        <field name="name">Stated Capital</field>
+                        <field name="code">GH_BS_SC</field>
+                        <field name="account_codes_formula">-3111</field>
+                    </record>
+                    <record id="financial_report_gh_bs_res" model="account.report.line">
+                        <field name="name">Reserves</field>
+                        <field name="code">GH_BS_RES</field>
+                        <field name="account_codes_formula">-312</field>
+                    </record>
+                    <record id="financial_report_gh_bs_is" model="account.report.line">
+                        <field name="name">Income Surplus</field>
+                        <field name="code">GH_BS_IS</field>
+                        <field name="account_codes_formula">-321</field>
+                    </record>
+                    <record id="financial_report_gh_bs_cye" model="account.report.line">
+                        <field name="name">Current Year Earnings</field>
+                        <field name="code">GH_BS_CYE</field>
+                        <field name="expression_ids">
+                            <record id="financial_report_gh_bs_cye_balance" model="account.report.expression">
+                                <field name="label">balance</field>
+                                <field name="engine">domain</field>
+                                <field name="formula" eval="[('account_id.account_type', 'in', ['income', 'income_other', 'expense_direct_cost', 'expense', 'expense_depreciation', 'expense_other', 'equity_unaffected'])]"/>
+                                <field name="subformula">-sum</field>
+                                <field name="date_scope">from_fiscalyear</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="financial_report_gh_bs_pye" model="account.report.line">
+                        <field name="name">Previous Years Earnings (not yet in Income Surplus)</field>
+                        <field name="code">GH_BS_PYE</field>
+                        <field name="expression_ids">
+                            <record id="financial_report_gh_bs_pye_balance" model="account.report.expression">
+                                <field name="label">balance</field>
+                                <field name="engine">domain</field>
+                                <field name="formula" eval="[('account_id.account_type', 'in', ['income', 'income_other', 'expense_direct_cost', 'expense', 'expense_depreciation', 'expense_other', 'equity_unaffected'])]"/>
+                                <field name="subformula">-sum</field>
+                                <field name="date_scope">to_beginning_of_fiscalyear</field>
+                            </record>
+                        </field>
+                    </record>
+                </field>
+            </record>
+            <record id="financial_report_gh_bs_tle" model="account.report.line">
+                <field name="name">LIABILITIES + EQUITY</field>
+                <field name="code">GH_BS_TLE</field>
+                <field name="aggregation_formula">GH_BS_TE.balance + GH_BS_TL.balance</field>
+                <field name="hierarchy_level">0</field>
+            </record>
+        </field>
+    </record>
+</odoo>

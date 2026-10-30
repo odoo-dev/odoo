@@ -1,0 +1,327 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo auto_sequence="1">
+    <!-- Source: GRA Withholding Tax page (resident and non-resident rate tables); GRA Practice Note DT/2016/001; GRA form DT 110 layout (see REFERENCES.md). Report is registered under the generic tax report for Ghana. -->
+    <record id="tax_report_gh_wht" model="account.report">
+        <field name="name">Withholding Tax Report</field>
+        <field name="root_report_id" ref="account.generic_tax_report"/>
+        <field name="country_id" ref="base.gh"/>
+        <field name="allow_foreign_vat" eval="False"/>
+        <field name="availability_condition">country</field>
+        <field name="column_ids">
+            <record id="tax_report_gh_wht_col_base" model="account.report.column">
+                <field name="name">Payment Base</field>
+                <field name="expression_label">base</field>
+            </record>
+            <record id="tax_report_gh_wht_col_tax" model="account.report.column">
+                <field name="name">Tax Withheld</field>
+                <field name="expression_label">tax</field>
+            </record>
+        </field>
+        <field name="line_ids">
+            <record id="tax_report_gh_wht_sec_withheld" model="account.report.line">
+                <field name="name">A. TAX WITHHELD ON PAYMENTS TO SUPPLIERS</field>
+                <field name="hierarchy_level">0</field>
+            </record>
+            <record id="tax_report_gh_wht_sec_res" model="account.report.line">
+                <field name="name">Resident payees</field>
+                <field name="hierarchy_level">1</field>
+            </record>
+            <record id="tax_report_gh_wht_line_r_goods" model="account.report.line">
+                <field name="name">Supply of Goods 3%</field>
+                <field name="code">GH_WHT_01</field>
+                <field name="expression_ids">
+                    <record id="tax_report_gh_wht_r_goods_base" model="account.report.expression">
+                        <field name="label">base</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">WHT Resident - Supply of Goods Base</field>
+                    </record>
+                    <record id="tax_report_gh_wht_r_goods_tax" model="account.report.expression">
+                        <field name="label">tax</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">-WHT Resident - Supply of Goods Tax</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_gh_wht_line_r_works" model="account.report.line">
+                <field name="name">Supply of Works 5%</field>
+                <field name="code">GH_WHT_02</field>
+                <field name="expression_ids">
+                    <record id="tax_report_gh_wht_r_works_base" model="account.report.expression">
+                        <field name="label">base</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">WHT Resident - Supply of Works Base</field>
+                    </record>
+                    <record id="tax_report_gh_wht_r_works_tax" model="account.report.expression">
+                        <field name="label">tax</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">-WHT Resident - Supply of Works Tax</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_gh_wht_line_r_services" model="account.report.line">
+                <field name="name">Supply of Services 7.5%</field>
+                <field name="code">GH_WHT_03</field>
+                <field name="expression_ids">
+                    <record id="tax_report_gh_wht_r_services_base" model="account.report.expression">
+                        <field name="label">base</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">WHT Resident - Supply of Services Base</field>
+                    </record>
+                    <record id="tax_report_gh_wht_r_services_tax" model="account.report.expression">
+                        <field name="label">tax</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">-WHT Resident - Supply of Services Tax</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_gh_wht_line_r_rent_res" model="account.report.line">
+                <field name="name">Rent on Residential Property 8%</field>
+                <field name="code">GH_WHT_04</field>
+                <field name="expression_ids">
+                    <record id="tax_report_gh_wht_r_rent_res_base" model="account.report.expression">
+                        <field name="label">base</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">WHT Resident - Rent on Residential Property Base</field>
+                    </record>
+                    <record id="tax_report_gh_wht_r_rent_res_tax" model="account.report.expression">
+                        <field name="label">tax</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">-WHT Resident - Rent on Residential Property Tax</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_gh_wht_line_r_rent_nonres" model="account.report.line">
+                <field name="name">Rent on Non-residential Property 15%</field>
+                <field name="code">GH_WHT_05</field>
+                <field name="expression_ids">
+                    <record id="tax_report_gh_wht_r_rent_nonres_base" model="account.report.expression">
+                        <field name="label">base</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">WHT Resident - Rent on Non-residential Property Base</field>
+                    </record>
+                    <record id="tax_report_gh_wht_r_rent_nonres_tax" model="account.report.expression">
+                        <field name="label">tax</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">-WHT Resident - Rent on Non-residential Property Tax</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_gh_wht_total_res" model="account.report.line">
+                <field name="name">Total - resident payees</field>
+                <field name="code">GH_WHT_06</field>
+                <field name="expression_ids">
+                    <record id="tax_report_gh_wht_total_res_base" model="account.report.expression">
+                        <field name="label">base</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">GH_WHT_01.base + GH_WHT_02.base + GH_WHT_03.base + GH_WHT_04.base + GH_WHT_05.base</field>
+                    </record>
+                    <record id="tax_report_gh_wht_total_res_tax" model="account.report.expression">
+                        <field name="label">tax</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">GH_WHT_01.tax + GH_WHT_02.tax + GH_WHT_03.tax + GH_WHT_04.tax + GH_WHT_05.tax</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_gh_wht_sec_non" model="account.report.line">
+                <field name="name">Non-resident payees</field>
+                <field name="hierarchy_level">1</field>
+            </record>
+            <record id="tax_report_gh_wht_line_n_mgmt" model="account.report.line">
+                <field name="name">Management and Technical Service Fees 20%</field>
+                <field name="code">GH_WHT_07</field>
+                <field name="expression_ids">
+                    <record id="tax_report_gh_wht_n_mgmt_base" model="account.report.expression">
+                        <field name="label">base</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">WHT Non-resident - Management and Technical Service Fees Base</field>
+                    </record>
+                    <record id="tax_report_gh_wht_n_mgmt_tax" model="account.report.expression">
+                        <field name="label">tax</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">-WHT Non-resident - Management and Technical Service Fees Tax</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_gh_wht_line_n_gws" model="account.report.line">
+                <field name="name">Goods, Works or Any Services 20%</field>
+                <field name="code">GH_WHT_08</field>
+                <field name="expression_ids">
+                    <record id="tax_report_gh_wht_n_gws_base" model="account.report.expression">
+                        <field name="label">base</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">WHT Non-resident - Goods, Works or Any Services Base</field>
+                    </record>
+                    <record id="tax_report_gh_wht_n_gws_tax" model="account.report.expression">
+                        <field name="label">tax</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">-WHT Non-resident - Goods, Works or Any Services Tax</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_gh_wht_line_n_roy" model="account.report.line">
+                <field name="name">Royalties, Natural Resource Payments and Rents 15%</field>
+                <field name="code">GH_WHT_09</field>
+                <field name="expression_ids">
+                    <record id="tax_report_gh_wht_n_roy_base" model="account.report.expression">
+                        <field name="label">base</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">WHT Non-resident - Royalties, Natural Resource Payments and Rents Base</field>
+                    </record>
+                    <record id="tax_report_gh_wht_n_roy_tax" model="account.report.expression">
+                        <field name="label">tax</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">-WHT Non-resident - Royalties, Natural Resource Payments and Rents Tax</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_gh_wht_line_n_tel" model="account.report.line">
+                <field name="name">Telecommunication and Transportation Income 15%</field>
+                <field name="code">GH_WHT_10</field>
+                <field name="expression_ids">
+                    <record id="tax_report_gh_wht_n_tel_base" model="account.report.expression">
+                        <field name="label">base</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">WHT Non-resident - Telecommunication and Transportation Income Base</field>
+                    </record>
+                    <record id="tax_report_gh_wht_n_tel_tax" model="account.report.expression">
+                        <field name="label">tax</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">-WHT Non-resident - Telecommunication and Transportation Income Tax</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_gh_wht_line_n_pet" model="account.report.line">
+                <field name="name">Petroleum Subcontractors 15%</field>
+                <field name="code">GH_WHT_11</field>
+                <field name="expression_ids">
+                    <record id="tax_report_gh_wht_n_pet_base" model="account.report.expression">
+                        <field name="label">base</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">WHT Non-resident - Petroleum Subcontractors Base</field>
+                    </record>
+                    <record id="tax_report_gh_wht_n_pet_tax" model="account.report.expression">
+                        <field name="label">tax</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">-WHT Non-resident - Petroleum Subcontractors Tax</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_gh_wht_line_n_ins" model="account.report.line">
+                <field name="name">General Insurance Premiums 5%</field>
+                <field name="code">GH_WHT_12</field>
+                <field name="expression_ids">
+                    <record id="tax_report_gh_wht_n_ins_base" model="account.report.expression">
+                        <field name="label">base</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">WHT Non-resident - General Insurance Premiums Base</field>
+                    </record>
+                    <record id="tax_report_gh_wht_n_ins_tax" model="account.report.expression">
+                        <field name="label">tax</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">-WHT Non-resident - General Insurance Premiums Tax</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_gh_wht_total_non" model="account.report.line">
+                <field name="name">Total - non-resident payees</field>
+                <field name="code">GH_WHT_13</field>
+                <field name="expression_ids">
+                    <record id="tax_report_gh_wht_total_non_base" model="account.report.expression">
+                        <field name="label">base</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">GH_WHT_07.base + GH_WHT_08.base + GH_WHT_09.base + GH_WHT_10.base + GH_WHT_11.base + GH_WHT_12.base</field>
+                    </record>
+                    <record id="tax_report_gh_wht_total_non_tax" model="account.report.expression">
+                        <field name="label">tax</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">GH_WHT_07.tax + GH_WHT_08.tax + GH_WHT_09.tax + GH_WHT_10.tax + GH_WHT_11.tax + GH_WHT_12.tax</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_gh_wht_total_withheld" model="account.report.line">
+                <field name="name">Total tax withheld (to remit to GRA)</field>
+                <field name="code">GH_WHT_14</field>
+                <field name="expression_ids">
+                    <record id="tax_report_gh_wht_total_withheld_base" model="account.report.expression">
+                        <field name="label">base</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">GH_WHT_06.base + GH_WHT_13.base</field>
+                    </record>
+                    <record id="tax_report_gh_wht_total_withheld_tax" model="account.report.expression">
+                        <field name="label">tax</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">GH_WHT_06.tax + GH_WHT_13.tax</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_gh_wht_sec_credit" model="account.report.line">
+                <field name="name">B. WITHHOLDING TAX CREDITS (TAX WITHHELD BY OUR CUSTOMERS)</field>
+                <field name="hierarchy_level">0</field>
+            </record>
+            <record id="tax_report_gh_wht_line_c_goods" model="account.report.line">
+                <field name="name">Sale of Goods 3%</field>
+                <field name="code">GH_WHT_15</field>
+                <field name="expression_ids">
+                    <record id="tax_report_gh_wht_c_goods_base" model="account.report.expression">
+                        <field name="label">base</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">-WHT Credit - Sale of Goods Base</field>
+                    </record>
+                    <record id="tax_report_gh_wht_c_goods_tax" model="account.report.expression">
+                        <field name="label">tax</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">WHT Credit - Sale of Goods Tax</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_gh_wht_line_c_works" model="account.report.line">
+                <field name="name">Sale of Works 5%</field>
+                <field name="code">GH_WHT_16</field>
+                <field name="expression_ids">
+                    <record id="tax_report_gh_wht_c_works_base" model="account.report.expression">
+                        <field name="label">base</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">-WHT Credit - Sale of Works Base</field>
+                    </record>
+                    <record id="tax_report_gh_wht_c_works_tax" model="account.report.expression">
+                        <field name="label">tax</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">WHT Credit - Sale of Works Tax</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_gh_wht_line_c_services" model="account.report.line">
+                <field name="name">Sale of Services 7.5%</field>
+                <field name="code">GH_WHT_17</field>
+                <field name="expression_ids">
+                    <record id="tax_report_gh_wht_c_services_base" model="account.report.expression">
+                        <field name="label">base</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">-WHT Credit - Sale of Services Base</field>
+                    </record>
+                    <record id="tax_report_gh_wht_c_services_tax" model="account.report.expression">
+                        <field name="label">tax</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">WHT Credit - Sale of Services Tax</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_gh_wht_total_credit" model="account.report.line">
+                <field name="name">Total withholding tax credits</field>
+                <field name="code">GH_WHT_18</field>
+                <field name="expression_ids">
+                    <record id="tax_report_gh_wht_total_credit_base" model="account.report.expression">
+                        <field name="label">base</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">GH_WHT_15.base + GH_WHT_16.base + GH_WHT_17.base</field>
+                    </record>
+                    <record id="tax_report_gh_wht_total_credit_tax" model="account.report.expression">
+                        <field name="label">tax</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">GH_WHT_15.tax + GH_WHT_16.tax + GH_WHT_17.tax</field>
+                    </record>
+                </field>
+            </record>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,5 @@
+"id","sequence","name","auto_apply","vat_required","country_id","country_group_id"
+"fiscal_position_gh_domestic","1","Domestic (Ghana)","1","","base.gh",""
+"fiscal_position_gh_international","2","International (Exports and Imports)","1","","",""
+"fiscal_position_gh_free_zone","3","Free Zone Enterprise","0","","",""
+"fiscal_position_gh_import_services","4","Imported Services (Reverse Charge)","0","","",""

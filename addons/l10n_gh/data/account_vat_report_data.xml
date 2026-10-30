@@ -1,0 +1,460 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo auto_sequence="1">
+    <!-- Source: Value Added Tax Act, 2025 (Act 1151); GRA VAT page and Notice; GRA VAT Guidelines GRA/AG/25/002 (see REFERENCES.md). Return layout cross-checked against GRA form DT 0135 (pre-2026). -->
+    <record id="tax_report_gh_vat" model="account.report">
+        <field name="name">VAT Return</field>
+        <field name="root_report_id" ref="account.generic_tax_report"/>
+        <field name="country_id" ref="base.gh"/>
+        <field name="allow_foreign_vat" eval="False"/>
+        <field name="availability_condition">country</field>
+        <field name="column_ids">
+            <record id="tax_report_gh_vat_col_base" model="account.report.column">
+                <field name="name">Taxable Value</field>
+                <field name="expression_label">base</field>
+            </record>
+            <record id="tax_report_gh_vat_col_vat" model="account.report.column">
+                <field name="name">VAT</field>
+                <field name="expression_label">vat</field>
+            </record>
+            <record id="tax_report_gh_vat_col_nhil" model="account.report.column">
+                <field name="name">NHIL</field>
+                <field name="expression_label">nhil</field>
+            </record>
+            <record id="tax_report_gh_vat_col_getfund" model="account.report.column">
+                <field name="name">GETFund Levy</field>
+                <field name="expression_label">getfund</field>
+            </record>
+        </field>
+        <field name="line_ids">
+            <record id="tax_report_gh_vat_sec_out" model="account.report.line">
+                <field name="name">A. OUTPUT TAX (SALES)</field>
+                <field name="hierarchy_level">0</field>
+            </record>
+            <record id="tax_report_gh_vat_line_gh_01" model="account.report.line">
+                <field name="name">1. Standard-rated sales (VAT 15% + NHIL 2.5% + GETFund 2.5%)</field>
+                <field name="code">GH_01</field>
+                <field name="expression_ids">
+                    <record id="tax_report_gh_vat_gh_01_base" model="account.report.expression">
+                        <field name="label">base</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">-Standard Rated Sales Base</field>
+                    </record>
+                    <record id="tax_report_gh_vat_gh_01_vat" model="account.report.expression">
+                        <field name="label">vat</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">-Output VAT</field>
+                    </record>
+                    <record id="tax_report_gh_vat_gh_01_nhil" model="account.report.expression">
+                        <field name="label">nhil</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">-Output NHIL</field>
+                    </record>
+                    <record id="tax_report_gh_vat_gh_01_getfund" model="account.report.expression">
+                        <field name="label">getfund</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">-Output GETFund Levy</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_gh_vat_line_gh_02" model="account.report.line">
+                <field name="name">2. Zero-rated sales</field>
+                <field name="code">GH_02</field>
+                <field name="expression_ids">
+                    <record id="tax_report_gh_vat_gh_02_base" model="account.report.expression">
+                        <field name="label">base</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">-Zero Rated Sales Base</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_gh_vat_line_gh_03" model="account.report.line">
+                <field name="name">3. Export sales (zero-rated)</field>
+                <field name="code">GH_03</field>
+                <field name="expression_ids">
+                    <record id="tax_report_gh_vat_gh_03_base" model="account.report.expression">
+                        <field name="label">base</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">-Export Sales Base</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_gh_vat_line_gh_04" model="account.report.line">
+                <field name="name">4. Free zone sales (zero-rated)</field>
+                <field name="code">GH_04</field>
+                <field name="expression_ids">
+                    <record id="tax_report_gh_vat_gh_04_base" model="account.report.expression">
+                        <field name="label">base</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">-Free Zone Sales Base</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_gh_vat_line_gh_05" model="account.report.line">
+                <field name="name">5. Exempt sales</field>
+                <field name="code">GH_05</field>
+                <field name="expression_ids">
+                    <record id="tax_report_gh_vat_gh_05_base" model="account.report.expression">
+                        <field name="label">base</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">-Exempt Sales Base</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_gh_vat_line_gh_06" model="account.report.line">
+                <field name="name">6. Total sales</field>
+                <field name="code">GH_06</field>
+                <field name="expression_ids">
+                    <record id="tax_report_gh_vat_gh_06_base" model="account.report.expression">
+                        <field name="label">base</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">GH_01.base + GH_02.base + GH_03.base + GH_04.base + GH_05.base</field>
+                    </record>
+                    <record id="tax_report_gh_vat_gh_06_vat" model="account.report.expression">
+                        <field name="label">vat</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">GH_01.vat</field>
+                    </record>
+                    <record id="tax_report_gh_vat_gh_06_nhil" model="account.report.expression">
+                        <field name="label">nhil</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">GH_01.nhil</field>
+                    </record>
+                    <record id="tax_report_gh_vat_gh_06_getfund" model="account.report.expression">
+                        <field name="label">getfund</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">GH_01.getfund</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_gh_vat_line_gh_07" model="account.report.line">
+                <field name="name">7. Reverse charge on imported services (output tax)</field>
+                <field name="code">GH_07</field>
+                <field name="expression_ids">
+                    <record id="tax_report_gh_vat_gh_07_vat" model="account.report.expression">
+                        <field name="label">vat</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">-Reverse Charge Output VAT</field>
+                    </record>
+                    <record id="tax_report_gh_vat_gh_07_nhil" model="account.report.expression">
+                        <field name="label">nhil</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">-Reverse Charge Output NHIL</field>
+                    </record>
+                    <record id="tax_report_gh_vat_gh_07_getfund" model="account.report.expression">
+                        <field name="label">getfund</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">-Reverse Charge Output GETFund Levy</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_gh_vat_line_gh_08" model="account.report.line">
+                <field name="name">8. Total output tax</field>
+                <field name="code">GH_08</field>
+                <field name="expression_ids">
+                    <record id="tax_report_gh_vat_gh_08_vat" model="account.report.expression">
+                        <field name="label">vat</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">GH_06.vat + GH_07.vat</field>
+                    </record>
+                    <record id="tax_report_gh_vat_gh_08_nhil" model="account.report.expression">
+                        <field name="label">nhil</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">GH_06.nhil + GH_07.nhil</field>
+                    </record>
+                    <record id="tax_report_gh_vat_gh_08_getfund" model="account.report.expression">
+                        <field name="label">getfund</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">GH_06.getfund + GH_07.getfund</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_gh_vat_sec_in" model="account.report.line">
+                <field name="name">B. INPUT TAX (PURCHASES)</field>
+                <field name="hierarchy_level">0</field>
+            </record>
+            <record id="tax_report_gh_vat_line_gh_11" model="account.report.line">
+                <field name="name">11. Standard-rated local purchases</field>
+                <field name="code">GH_11</field>
+                <field name="expression_ids">
+                    <record id="tax_report_gh_vat_gh_11_base" model="account.report.expression">
+                        <field name="label">base</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">Standard Rated Purchases Base</field>
+                    </record>
+                    <record id="tax_report_gh_vat_gh_11_vat" model="account.report.expression">
+                        <field name="label">vat</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">Input VAT</field>
+                    </record>
+                    <record id="tax_report_gh_vat_gh_11_nhil" model="account.report.expression">
+                        <field name="label">nhil</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">Input NHIL</field>
+                    </record>
+                    <record id="tax_report_gh_vat_gh_11_getfund" model="account.report.expression">
+                        <field name="label">getfund</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">Input GETFund Levy</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_gh_vat_line_gh_12" model="account.report.line">
+                <field name="name">12. Imports of goods</field>
+                <field name="code">GH_12</field>
+                <field name="expression_ids">
+                    <record id="tax_report_gh_vat_gh_12_base" model="account.report.expression">
+                        <field name="label">base</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">Imports of Goods Base</field>
+                    </record>
+                    <record id="tax_report_gh_vat_gh_12_vat" model="account.report.expression">
+                        <field name="label">vat</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">Import VAT</field>
+                    </record>
+                    <record id="tax_report_gh_vat_gh_12_nhil" model="account.report.expression">
+                        <field name="label">nhil</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">Import NHIL</field>
+                    </record>
+                    <record id="tax_report_gh_vat_gh_12_getfund" model="account.report.expression">
+                        <field name="label">getfund</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">Import GETFund Levy</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_gh_vat_line_gh_13" model="account.report.line">
+                <field name="name">13. Imported services (reverse charge, input tax)</field>
+                <field name="code">GH_13</field>
+                <field name="expression_ids">
+                    <record id="tax_report_gh_vat_gh_13_base" model="account.report.expression">
+                        <field name="label">base</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">Imported Services Base</field>
+                    </record>
+                    <record id="tax_report_gh_vat_gh_13_vat" model="account.report.expression">
+                        <field name="label">vat</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">Reverse Charge Input VAT</field>
+                    </record>
+                    <record id="tax_report_gh_vat_gh_13_nhil" model="account.report.expression">
+                        <field name="label">nhil</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">Reverse Charge Input NHIL</field>
+                    </record>
+                    <record id="tax_report_gh_vat_gh_13_getfund" model="account.report.expression">
+                        <field name="label">getfund</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">Reverse Charge Input GETFund Levy</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_gh_vat_line_gh_14" model="account.report.line">
+                <field name="name">14. Zero-rated purchases</field>
+                <field name="code">GH_14</field>
+                <field name="expression_ids">
+                    <record id="tax_report_gh_vat_gh_14_base" model="account.report.expression">
+                        <field name="label">base</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">Zero Rated Purchases Base</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_gh_vat_line_gh_15" model="account.report.line">
+                <field name="name">15. Exempt purchases</field>
+                <field name="code">GH_15</field>
+                <field name="expression_ids">
+                    <record id="tax_report_gh_vat_gh_15_base" model="account.report.expression">
+                        <field name="label">base</field>
+                        <field name="engine">tax_tags</field>
+                        <field name="formula">Exempt Purchases Base</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_gh_vat_line_gh_16" model="account.report.line">
+                <field name="name">16. Total purchases</field>
+                <field name="code">GH_16</field>
+                <field name="expression_ids">
+                    <record id="tax_report_gh_vat_gh_16_base" model="account.report.expression">
+                        <field name="label">base</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">GH_11.base + GH_12.base + GH_13.base + GH_14.base + GH_15.base</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_gh_vat_line_gh_17" model="account.report.line">
+                <field name="name">17. Total input tax</field>
+                <field name="code">GH_17</field>
+                <field name="expression_ids">
+                    <record id="tax_report_gh_vat_gh_17_vat" model="account.report.expression">
+                        <field name="label">vat</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">GH_11.vat + GH_12.vat + GH_13.vat</field>
+                    </record>
+                    <record id="tax_report_gh_vat_gh_17_nhil" model="account.report.expression">
+                        <field name="label">nhil</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">GH_11.nhil + GH_12.nhil + GH_13.nhil</field>
+                    </record>
+                    <record id="tax_report_gh_vat_gh_17_getfund" model="account.report.expression">
+                        <field name="label">getfund</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">GH_11.getfund + GH_12.getfund + GH_13.getfund</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_gh_vat_line_gh_18" model="account.report.line">
+                <field name="name">18. Non-deductible input tax (enter manually - Act 1151 s.50, s.52)</field>
+                <field name="code">GH_18</field>
+                <field name="expression_ids">
+                    <record id="tax_report_gh_vat_gh_18_vat" model="account.report.expression">
+                        <field name="label">vat</field>
+                        <field name="engine">external</field>
+                        <field name="formula">sum</field>
+                        <field name="subformula">editable;rounding=2</field>
+                    </record>
+                    <record id="tax_report_gh_vat_gh_18_nhil" model="account.report.expression">
+                        <field name="label">nhil</field>
+                        <field name="engine">external</field>
+                        <field name="formula">sum</field>
+                        <field name="subformula">editable;rounding=2</field>
+                    </record>
+                    <record id="tax_report_gh_vat_gh_18_getfund" model="account.report.expression">
+                        <field name="label">getfund</field>
+                        <field name="engine">external</field>
+                        <field name="formula">sum</field>
+                        <field name="subformula">editable;rounding=2</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_gh_vat_line_gh_19" model="account.report.line">
+                <field name="name">19. Deductible input tax</field>
+                <field name="code">GH_19</field>
+                <field name="expression_ids">
+                    <record id="tax_report_gh_vat_gh_19_vat" model="account.report.expression">
+                        <field name="label">vat</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">GH_17.vat - GH_18.vat</field>
+                    </record>
+                    <record id="tax_report_gh_vat_gh_19_nhil" model="account.report.expression">
+                        <field name="label">nhil</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">GH_17.nhil - GH_18.nhil</field>
+                    </record>
+                    <record id="tax_report_gh_vat_gh_19_getfund" model="account.report.expression">
+                        <field name="label">getfund</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">GH_17.getfund - GH_18.getfund</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_gh_vat_sec_net" model="account.report.line">
+                <field name="name">C. NET TAX AND CREDIT CARRY-OVER</field>
+                <field name="hierarchy_level">0</field>
+            </record>
+            <record id="tax_report_gh_vat_line_gh_21" model="account.report.line">
+                <field name="name">21. Net tax payable / (credit) for the period</field>
+                <field name="code">GH_21</field>
+                <field name="expression_ids">
+                    <record id="tax_report_gh_vat_gh_21_vat" model="account.report.expression">
+                        <field name="label">vat</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">GH_08.vat - GH_19.vat</field>
+                    </record>
+                    <record id="tax_report_gh_vat_gh_21_nhil" model="account.report.expression">
+                        <field name="label">nhil</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">GH_08.nhil - GH_19.nhil</field>
+                    </record>
+                    <record id="tax_report_gh_vat_gh_21_getfund" model="account.report.expression">
+                        <field name="label">getfund</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">GH_08.getfund - GH_19.getfund</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_gh_vat_line_gh_22" model="account.report.line">
+                <field name="name">22. Credit brought forward from previous period</field>
+                <field name="code">GH_22</field>
+                <field name="expression_ids">
+                    <record id="tax_report_gh_vat_gh_22_applied_carryover_vat" model="account.report.expression">
+                        <field name="label">_applied_carryover_vat</field>
+                        <field name="engine">external</field>
+                        <field name="formula">most_recent</field>
+                        <field name="date_scope">previous_return_period</field>
+                    </record>
+                    <record id="tax_report_gh_vat_gh_22_vat" model="account.report.expression">
+                        <field name="label">vat</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">-GH_22._applied_carryover_vat</field>
+                    </record>
+                    <record id="tax_report_gh_vat_gh_22_applied_carryover_nhil" model="account.report.expression">
+                        <field name="label">_applied_carryover_nhil</field>
+                        <field name="engine">external</field>
+                        <field name="formula">most_recent</field>
+                        <field name="date_scope">previous_return_period</field>
+                    </record>
+                    <record id="tax_report_gh_vat_gh_22_nhil" model="account.report.expression">
+                        <field name="label">nhil</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">-GH_22._applied_carryover_nhil</field>
+                    </record>
+                    <record id="tax_report_gh_vat_gh_22_applied_carryover_getfund" model="account.report.expression">
+                        <field name="label">_applied_carryover_getfund</field>
+                        <field name="engine">external</field>
+                        <field name="formula">most_recent</field>
+                        <field name="date_scope">previous_return_period</field>
+                    </record>
+                    <record id="tax_report_gh_vat_gh_22_getfund" model="account.report.expression">
+                        <field name="label">getfund</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">-GH_22._applied_carryover_getfund</field>
+                    </record>
+                </field>
+            </record>
+            <record id="tax_report_gh_vat_line_gh_23" model="account.report.line">
+                <field name="name">23. Net tax payable / (credit carried forward)</field>
+                <field name="code">GH_23</field>
+                <field name="expression_ids">
+                    <record id="tax_report_gh_vat_gh_23_vat" model="account.report.expression">
+                        <field name="label">vat</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">GH_21.vat - GH_22.vat</field>
+                    </record>
+                    <record id="tax_report_gh_vat_gh_23_carryover_vat" model="account.report.expression">
+                        <field name="label">_carryover_vat</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">GH_23.vat</field>
+                        <field name="subformula">if_below(GHS(0))</field>
+                        <field name="carryover_target">GH_22._applied_carryover_vat</field>
+                    </record>
+                    <record id="tax_report_gh_vat_gh_23_nhil" model="account.report.expression">
+                        <field name="label">nhil</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">GH_21.nhil - GH_22.nhil</field>
+                    </record>
+                    <record id="tax_report_gh_vat_gh_23_carryover_nhil" model="account.report.expression">
+                        <field name="label">_carryover_nhil</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">GH_23.nhil</field>
+                        <field name="subformula">if_below(GHS(0))</field>
+                        <field name="carryover_target">GH_22._applied_carryover_nhil</field>
+                    </record>
+                    <record id="tax_report_gh_vat_gh_23_getfund" model="account.report.expression">
+                        <field name="label">getfund</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">GH_21.getfund - GH_22.getfund</field>
+                    </record>
+                    <record id="tax_report_gh_vat_gh_23_carryover_getfund" model="account.report.expression">
+                        <field name="label">_carryover_getfund</field>
+                        <field name="engine">aggregation</field>
+                        <field name="formula">GH_23.getfund</field>
+                        <field name="subformula">if_below(GHS(0))</field>
+                        <field name="carryover_target">GH_22._applied_carryover_getfund</field>
+                    </record>
+                </field>
+            </record>
+        </field>
+    </record>
+</odoo>
