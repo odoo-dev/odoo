@@ -622,6 +622,28 @@ class HrEmployee(models.Model):
             return self.browse(ctx.get('default_employee_id'))
         return self.env.user.employee_id
 
+    def _fetch_leaves_taken(self, work_entry_types):
+        """Fetch total leave days consumed per (employee, work_entry_type).
+
+        includes confirmed, first-approved and fully-approved requests,
+        matching ``_get_consumed_leaves``.
+
+        :param work_entry_types: ``hr.work.entry.type`` recordset
+        :return: ``{(employee, work_entry_type): consumed_days}``
+        :rtype: dict
+        """
+        if not self or not work_entry_types:
+            return {}
+        groups = self.env['hr.leave'].sudo()._read_group([
+            ('employee_id', 'in', self.ids),
+            ('work_entry_type_id', 'in', work_entry_types.ids),
+            ('state', 'in', ['confirm', 'validate1', 'validate']),
+        ], groupby=['employee_id', 'work_entry_type_id'], aggregates=['number_of_days:sum'])
+        return {
+            (employee, wet): days_sum or 0.0
+            for employee, wet, days_sum in groups
+        }
+
     def _fetch_valid_allocations(self, work_entry_types, reference_date=None):
         """Fetch validated, non-expired allocations for these employees and types in one query.
 

@@ -156,6 +156,7 @@ class HrTimeRule(models.Model):
         employees = self.env['hr.employee'].browse({e.id for e, _ in all_keys})
         types = self.env['hr.work.entry.type'].browse({t.id for _, t in all_keys})
         alloc_cache = employees._fetch_valid_allocations(types, min(emps_by_date))
+        leaves_taken = employees._fetch_leaves_taken(types) if deficit_by_key else {}
 
         alloc_by_key = {}
         alloc_create_vals = []
@@ -184,11 +185,16 @@ class HrTimeRule(models.Model):
         deficit_create_keys = []
         for (employee, alloc_type), deduct in deficit_by_key.items():
             allocations = alloc_cache.get((employee, alloc_type), self.env['hr.leave.allocation'])
+            consumed = leaves_taken.get((employee, alloc_type), 0.0)
             remaining = deduct
             for allocation in allocations:
                 if remaining <= 0:
                     break
-                take = min(remaining, max(0.0, allocation.number_of_days))
+                # distribute consumed leaves across allocations earliest-expiring first
+                alloc_consumed = min(consumed, max(0.0, allocation.number_of_days))
+                consumed -= alloc_consumed
+                available = max(0.0, allocation.number_of_days - alloc_consumed)
+                take = min(remaining, available)
                 if take > 0:
                     allocation.number_of_days -= take
                     alloc_by_key.setdefault((employee, alloc_type), allocation)
@@ -282,11 +288,13 @@ class HrTimeRule(models.Model):
         employees = self.env['hr.employee'].browse({e.id for e, _ in total_deduct})
         types = self.env['hr.work.entry.type'].browse({t.id for _, t in total_deduct})
         alloc_cache = employees._fetch_valid_allocations(types, min(emps_by_date))
+        leaves_taken = employees._fetch_leaves_taken(types)
         skip_keys = set()
         for (employee, alloc_type), deduct in total_deduct.items():
             allocations = alloc_cache.get((employee, alloc_type), self.env['hr.leave.allocation'])
-            positive_total = sum(a.number_of_days for a in allocations if a.number_of_days > 0)
-            available = positive_total
+            total_allocated = sum(a.number_of_days for a in allocations if a.number_of_days > 0)
+            consumed = leaves_taken.get((employee, alloc_type), 0.0)
+            available = total_allocated - consumed
             if alloc_type.allows_negative:
                 existing_negative = sum(abs(a.number_of_days) for a in allocations if a.number_of_days < 0)
                 available += max(0, alloc_type.max_allowed_negative - existing_negative)
