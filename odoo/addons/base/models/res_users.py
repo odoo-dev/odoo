@@ -1595,7 +1595,8 @@ class ChangePasswordOwn(models.TransientModel):
 
 # API keys support
 API_KEY_SIZE = 20  # in bytes
-API_KEY_SUFFIX = '_oak'
+API_KEY_SUFFIX = '_oak'  # O-doo A-pi K-ey
+API_KEY_READONLY_PREFIX = 'ro_'
 INDEX_SIZE = 8  # in hex digits, so 4 bytes, or 20% of the key
 KEY_CRYPT_CONTEXT = CryptContext(
     # default is 29000 rounds which is 25~50ms, which is probably unnecessary
@@ -1619,6 +1620,7 @@ class ResUsersApikeys(models.Model):
     expiration_date = fields.Datetime("Expiration Date", readonly=True)
     index = fields.Char("Identifier", required=True, readonly=True,
         help="First characters of the key, used to identify it (e.g. in the server logs)")
+    readonly = fields.Boolean("Read-only", compute='_compute_readonly', readonly=True)
 
     def init(self):
         table = SQL.identifier(self._table)
@@ -1680,7 +1682,23 @@ class ResUsersApikeys(models.Model):
         if date <= datetime.datetime.now():
             raise ValidationError(_("You cannot set an expiration date in the past."))
 
-    def _generate(self, scope, name, expiration_date):
+    def _compute_readonly(self):
+        self.env.cr.execute(SQL('''
+            SELECT id, substring(key for %(len_ro_prefix)s) = %(ro_prefix)s as "readonly"
+            FROM %(table)s
+            WHERE id = ANY(%(ids)s)
+            ORDER BY id
+        ''',
+            table=SQL.identifier(self._table),
+            ids=self.ids,
+            ro_prefix=API_KEY_READONLY_PREFIX,
+            len_ro_prefix=len(API_KEY_READONLY_PREFIX),
+        ))
+        for record, (record_id, readonly) in zip(self.sorted('id'), self.env.cr.fetchall()):
+            assert record.id == record_id, (record.id, record_id)
+            record.readonly = readonly
+
+    def _generate(self, scope, name, expiration_date, readonly):
         """Generates an api key.
         :param str scope: the scope of the key.
         :param str name: the name of the key, mainly intended to be displayed in the UI.
@@ -1696,6 +1714,8 @@ class ResUsersApikeys(models.Model):
         self._check_expiration_date(expiration_date)
         # no need to clear the LRU when *adding* a key, only when removing
         k = secrets.token_hex(API_KEY_SIZE) + API_KEY_SUFFIX
+        if readonly:
+            k = API_KEY_READONLY_PREFIX + k
         self.env.cr.execute(SQL("""
             INSERT INTO %s (name, user_id, scope, expiration_date, key, index)
             VALUES (%s, %s, %s, %s, %s, %s)
@@ -1728,7 +1748,7 @@ class ResUsersApikeys(models.Model):
             raise UserError(_("Programmatic API keys are not enabled"))
 
     @api.model
-    def generate(self, key, scope, name, expiration_date):
+    def generate(self, key, scope, name, expiration_date, readonly):
         """
         Generate a new API key with an existing API key.
         The provided `key` must be an existing API key that belongs to the current user.
@@ -1743,10 +1763,13 @@ class ResUsersApikeys(models.Model):
         :param str|datetime.datetime expiration_date: the expiration date of the key. String values
             may be either ISO 8601 dates (``"2026-12-30"``) or space-separated datetimes
             (``"2026-12-30 14:30:00"``).
+        :param bool readonly: whether the generated token be granted read/write or
+            read-only accesses.
         :returns: the key.
         :rtype: str
         """
         self._ensure_can_manage_keys_programmatically()
+        # TODO: assert we're not trying to generate a readwrite-token using a readonly one.
 
         with self.env['res.users']._assert_can_auth(user=key[:INDEX_SIZE]):
             if not isinstance(expiration_date, datetime.datetime):
@@ -1771,7 +1794,7 @@ class ResUsersApikeys(models.Model):
             uid = self.env['res.users.apikeys']._check_credentials(scope=scope, key=key)
             if not uid or uid != self.env.uid:
                 raise AccessDenied(_("The provided API key is invalid or does not belong to the current user."))
-            new_key = self._generate(scope, name, expiration_date)
+            new_key = self._generate(scope, name, expiration_date, readonly)
             _logger.info("%s %r generated from %r", self._description, new_key[:INDEX_SIZE], key[:INDEX_SIZE])
 
             return new_key
