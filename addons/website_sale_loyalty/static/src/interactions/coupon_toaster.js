@@ -1,8 +1,14 @@
+import { usePlugin } from "@odoo/owl";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 import { Interaction } from "@web/public/interaction";
 import { registry } from "@web/core/registry";
 
 export class CouponToaster extends Interaction {
     static selector = ".coupon-message";
+
+    setup() {
+        this.notification = usePlugin(NotificationPlugin);
+    }
 
     start() {
         let options = {};
@@ -20,11 +26,11 @@ export class CouponToaster extends Interaction {
         }
 
         if (this.el.classList.contains("coupon-info-message")) {
-            this.services.notification.add(message, Object.assign({ type: "success" }, options));
+            this.notification.add(message, Object.assign({ type: "success" }, options));
         } else if (this.el.classList.contains("coupon-error-message")) {
-            this.services.notification.add(message, Object.assign({ type: "danger" }, options));
+            this.notification.add(message, Object.assign({ type: "danger" }, options));
         } else if (this.el.classList.contains("coupon-warning-message")) {
-            this.services.notification.add(message, Object.assign({ type: "warning" }, options));
+            this.notification.add(message, Object.assign({ type: "warning" }, options));
         }
     }
 }

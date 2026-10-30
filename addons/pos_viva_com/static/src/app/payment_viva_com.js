@@ -200,7 +200,7 @@ export class PaymentVivaCom extends PaymentInterface {
                     // we get a definitive answer.
                     if (!connectionLost) {
                         connectionLost = true;
-                        this.env.services.notification.add(
+                        this.notification.add(
                             _t(
                                 "No internet connection. Waiting for recovery to confirm the payment..."
                             ),

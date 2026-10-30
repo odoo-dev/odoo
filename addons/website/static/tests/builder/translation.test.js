@@ -3,7 +3,7 @@ import { setContent, setSelection } from "@html_editor/../tests/_helpers/selecti
 import { insertText, pasteHtml, pasteText } from "@html_editor/../tests/_helpers/user_actions";
 import { beforeEach, delay, describe, expect, globals, press, test } from "@odoo/hoot";
 import { animationFrame, manuallyDispatchProgrammaticEvent, queryOne } from "@odoo/hoot-dom";
-import { contains, mockService, onRpc } from "@web/../tests/web_test_helpers";
+import { contains, mockService, onRpc, patchWithCleanup } from "@web/../tests/web_test_helpers";
 import { patch } from "@web/core/utils/patch";
 import {
     defineWebsiteModels,
@@ -16,6 +16,7 @@ import { expectElementCount } from "@html_editor/../tests/_helpers/ui_expectatio
 import { uniqueId } from "@web/core/utils/functions";
 import { TranslationPlugin } from "@website/builder/plugins/translation/translation_plugin";
 import { dummyBase64Img } from "@html_builder/../tests/helpers";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 defineWebsiteModels();
 
@@ -794,7 +795,7 @@ test("elements marked as o_dirty should not be translated with 'Translate to' bu
 });
 
 test("trying to translate an element inside a .o_not_editable should add a notification", async () => {
-    mockService("notification", {
+    patchWithCleanup(NotificationPlugin.prototype, {
         add(message, options = {}) {
             expect(message).toBe("This translation is not editable.");
         },
@@ -812,7 +813,7 @@ test("trying to translate an element inside a .o_not_editable should add a notif
 
 test("trying to translate an attribute of an image inside a .o_not_editable should add a notification", async () => {
     expect.assertions(2);
-    mockService("notification", {
+    patchWithCleanup(NotificationPlugin.prototype, {
         add(message, options = {}) {
             expect(message).toBe("This translation is not editable.");
         },

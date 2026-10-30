@@ -1,5 +1,6 @@
-import { toRaw } from "@odoo/owl";
+import { toRaw, usePlugin } from "@odoo/owl";
 import { Domain } from "@web/core/domain";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 import { _t } from "@web/core/l10n/translation";
 import { KeepLast, Mutex } from "@web/core/utils/concurrency";
 import { Model } from "@web/model/model";
@@ -481,9 +482,7 @@ export class HierarchyForest {
 }
 
 export class HierarchyModel extends Model {
-    static services = ["notification"];
-
-    setup(params, { notification }) {
+    setup(params) {
         this.keepLast = new KeepLast();
         this.mutex = new Mutex();
         this.resModel = params.resModel;
@@ -492,7 +491,7 @@ export class HierarchyModel extends Model {
         this.childFieldName = params.childFieldName;
         this.activeFields = params.activeFields;
         this.defaultOrderBy = params.defaultOrderBy;
-        this.notification = notification;
+        this.notification = usePlugin(NotificationPlugin);
         this.config = {
             domain: [],
             ...params.config,

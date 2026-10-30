@@ -25,11 +25,12 @@ import { ComboSuggestion } from "@point_of_sale/app/models/utils/combo_suggestio
 import { session } from "@web/session";
 import { PosDataPlugin } from "@point_of_sale/app/plugins/pos_data_plugin";
 import { PosTicketPrinterPlugin } from "@point_of_sale/app/plugins/pos_ticket_printer_plugin";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 const { DateTime } = luxon;
 
 export class SelfOrder {
-    static serviceDependencies = ["notification", "router", "barcode", "bus_service", "dialog"];
+    static serviceDependencies = ["router", "barcode", "bus_service", "dialog"];
 
     constructor(...args) {
         const self = proxy(this);
@@ -37,13 +38,13 @@ export class SelfOrder {
         return self;
     }
 
-    async setup(env, { notification, router, barcode, bus_service, dialog }) {
+    async setup(env, { router, barcode, bus_service, dialog }) {
         this.data = usePlugin(PosDataPlugin);
         this.ticketPrinter = usePlugin(PosTicketPrinterPlugin);
         this.ticketPrinter.init(env);
 
         // services
-        this.notification = notification;
+        this.notification = usePlugin(NotificationPlugin);
         this.router = router;
         this.env = env;
         this.barcode = barcode;

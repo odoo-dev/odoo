@@ -94,11 +94,12 @@ import { kanbanView } from "@web/views/kanban/kanban_view";
 import { TOUCH_SELECTION_THRESHOLD } from "@web/views/utils";
 import { AnimatedNumber } from "@web/views/view_components/animated_number";
 import { WebClient } from "@web/webclient/webclient";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 const { IrAttachment } = webModels;
 
 async function createFileInput({ mockPost, mockAdd, props }) {
-    mockService("notification", {
+    patchWithCleanup(NotificationPlugin.prototype, {
         add: mockAdd || (() => {}),
     });
     mockService("http", {

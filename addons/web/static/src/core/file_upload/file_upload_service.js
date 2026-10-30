@@ -1,10 +1,10 @@
 import { _t } from "@web/core/l10n/translation";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 import { registry } from "../registry";
 
-import { EventBus, proxy } from "@odoo/owl";
+import { EventBus, proxy, usePlugin } from "@odoo/owl";
 
 export const fileUploadService = {
-    dependencies: ["notification"],
     /**
      * Overridden during tests to return a mocked XHR.
      *
@@ -15,7 +15,8 @@ export const fileUploadService = {
         return new window.XMLHttpRequest();
     },
 
-    start(env, { notification: notificationService }) {
+    start() {
+        const notificationService = usePlugin(NotificationPlugin);
         const uploads = proxy({});
         let nextId = 1;
         const bus = new EventBus();

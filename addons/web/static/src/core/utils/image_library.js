@@ -1,12 +1,12 @@
 export async function saveSingleAttachment(
     env,
-    { attachment, targetRecord, targetFieldName, changeRecordName, setAttachmentId }
+    { attachment, targetRecord, targetFieldName, changeRecordName, setAttachmentId, notification }
 ) {
     const attachmentRecord = (
         await retrieveAttachmentRecords(env, { attachmentIds: [attachment.id] })
     )[0];
     if (!attachmentRecord.raw) {
-        return notifyURLAttachmentUploadFailed(env, { attachmentName: attachmentRecord.name });
+        return notifyURLAttachmentUploadFailed(notification, attachmentRecord.name);
     }
 
     const update_data = {};
@@ -23,7 +23,15 @@ export async function saveSingleAttachment(
 
 export async function saveMultipleAttachments(
     env,
-    { attachments, targetRecord, targetFieldName, convertToWebp, setAttachmentId, forceCreate }
+    {
+        attachments,
+        targetRecord,
+        targetFieldName,
+        convertToWebp,
+        setAttachmentId,
+        forceCreate,
+        notification,
+    }
 ) {
     const imageList = targetRecord.data[targetFieldName];
     const supportedFields = ["image_1920", "image_1024", "image_512", "image_256", "image_128"];
@@ -32,7 +40,7 @@ export async function saveMultipleAttachments(
     });
     for (const attachmentRecord of attachmentRecords) {
         if (!attachmentRecord.raw) {
-            return notifyURLAttachmentUploadFailed(env, { attachmentName: attachmentRecord.name });
+            return notifyURLAttachmentUploadFailed(notification, attachmentRecord.name);
         }
         if (convertToWebp && !["image/gif", "image/svg+xml"].includes(attachmentRecord.mimetype)) {
             await convertToWebpFormat(env, { attachmentRecord });
@@ -135,10 +143,10 @@ async function retrieveAttachmentRecords(env, { attachmentIds }) {
     );
 }
 
-function notifyURLAttachmentUploadFailed(env, { attachmentName }) {
+function notifyURLAttachmentUploadFailed(notification, attachmentName) {
     // URL type attachments are mostly demo records which don't have any ir.attachment raw
     // TODO: make it work with URL type attachments
-    return env.services.notification.add(
+    return notification.add(
         `Cannot add URL type attachment "${attachmentName}". Please try to reupload this image.`,
         {
             type: "warning",

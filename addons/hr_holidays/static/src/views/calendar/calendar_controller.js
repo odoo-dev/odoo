@@ -1,6 +1,7 @@
 import { userHasEmployeeInCurrentCompany } from "@hr_holidays/utils";
 import { AlertDialog, ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { _t } from "@web/core/l10n/translation";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { CalendarController } from "@web/views/calendar/calendar_controller";
@@ -29,6 +30,7 @@ export class TimeOffCalendarController extends CalendarController {
         providePlugins([TimeOffPlugin]);
 
         this.timeOffPlugin = usePlugin(TimeOffPlugin);
+        this.notification = usePlugin(NotificationPlugin);
 
         this.leaveCancelWizard = useLeaveCancelWizard();
         this.newAllocRequest = useNewAllocationRequest();
@@ -36,7 +38,7 @@ export class TimeOffCalendarController extends CalendarController {
         onWillStart(async () => {
             this.hasEmployee = await userHasEmployeeInCurrentCompany(this.orm);
             if (!this.employeeId && !this.hasEmployee) {
-                this.env.services.notification.add(
+                this.notification.add(
                     _t(
                         "You are not linked to an employee in the current company, so you cannot create requests for yourself."
                     ),

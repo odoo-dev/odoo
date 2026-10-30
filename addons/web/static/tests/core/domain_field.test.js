@@ -28,10 +28,11 @@ import {
     mountView,
     mountWithCleanup,
     onRpc,
+    patchWithCleanup,
     serverState,
 } from "@web/../tests/web_test_helpers";
 
-import { registry } from "@web/core/registry";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 import { WebClient } from "@web/webclient/webclient";
 
 class PartnerType extends models.Model {
@@ -47,19 +48,11 @@ class PartnerType extends models.Model {
 defineModels([Partner, Product, Team, Player, Country, Stage, PartnerType]);
 
 function replaceNotificationService() {
-    registry.category("services").add(
-        "notification",
-        {
-            start() {
-                return {
-                    add(message) {
-                        expect.step(message);
-                    },
-                };
-            },
+    patchWithCleanup(NotificationPlugin.prototype, {
+        add(message) {
+            expect.step(message);
         },
-        { force: true }
-    );
+    });
 }
 
 test("The domain editor should not crash the view when given a dynamic filter (allow_expressions=False)", async function () {

@@ -1,5 +1,7 @@
+import { usePlugin } from "@odoo/owl";
 import { Plugin } from "@html_editor/plugin";
 import { _t } from "@web/core/l10n/translation";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 export class VersionErrorPlugin extends Plugin {
     static id = "versionError";
@@ -7,6 +9,7 @@ export class VersionErrorPlugin extends Plugin {
     static dependencies = [];
 
     resources = {};
+    notification = usePlugin(NotificationPlugin);
 
     /**
      * Checks if a snippet is up to date by comparing its versions (vcss, vxml, vjs)
@@ -45,7 +48,7 @@ export class VersionErrorPlugin extends Plugin {
     checkNotifyOutdatedSnippet(editingElement) {
         if (!this.isSnippetUpToDate(editingElement)) {
             this.closeExistingNotification?.();
-            this.closeExistingNotification = this.services.notification.add(
+            this.closeExistingNotification = this.notification.add(
                 _t(
                     "It might cause/have caused problems during the editing. Please drag the new version from the snippet panel to update it."
                 ),

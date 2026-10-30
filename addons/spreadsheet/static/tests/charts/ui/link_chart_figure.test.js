@@ -4,9 +4,10 @@ import { expect, test, beforeEach } from "@odoo/hoot";
 import { getBasicData, defineSpreadsheetModels } from "@spreadsheet/../tests/helpers/data";
 import { createBasicChart } from "@spreadsheet/../tests/helpers/commands";
 import { mountSpreadsheet, createModelAndMountSpreadsheet } from "@spreadsheet/../tests/helpers/ui";
-import { mockService, serverState } from "@web/../tests/web_test_helpers";
+import { mockService, serverState, patchWithCleanup } from "@web/../tests/web_test_helpers";
 import { insertChartInSpreadsheet } from "@spreadsheet/../tests/helpers/chart";
 import { createSpreadsheetWithPivot } from "@spreadsheet/../tests/helpers/pivot";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 defineSpreadsheetModels();
 
@@ -243,7 +244,7 @@ test("can use menus xmlIds instead of menu ids", async function () {
 
 test("Trying to open a menu without an action sends a notification to the user", async function () {
     mockActionService("doAction");
-    mockService("notification", {
+    patchWithCleanup(NotificationPlugin.prototype, {
         add: (message) => {
             expect.step(message);
             return () => {};

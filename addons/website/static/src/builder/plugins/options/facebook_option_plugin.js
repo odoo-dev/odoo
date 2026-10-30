@@ -1,4 +1,6 @@
+import { usePlugin } from "@odoo/owl";
 import { Plugin } from "@html_editor/plugin";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 import { registry } from "@web/core/registry";
 import { _t } from "@web/core/l10n/translation";
 import { getCommonAncestor, selectElements } from "@html_editor/utils/dom_traversal";
@@ -99,6 +101,7 @@ export class DataAttributeListAction extends BuilderAction {
 export class CheckFacebookLinkAction extends BuilderAction {
     static id = "checkFacebookLink";
     setup() {
+        this.notification = usePlugin(NotificationPlugin);
         this.closeNotif = () => {};
     }
     apply({ editingElement, value }) {
@@ -111,7 +114,7 @@ export class CheckFacebookLinkAction extends BuilderAction {
                 if (ok) {
                     this.closeNotif = () => {};
                 } else {
-                    this.closeNotif = this.services.notification.add(
+                    this.closeNotif = this.notification.add(
                         _t("We couldn't find the Facebook page"),
                         { type: "warning" }
                     );
@@ -119,7 +122,7 @@ export class CheckFacebookLinkAction extends BuilderAction {
             });
         } else {
             this.closeNotif();
-            this.closeNotif = this.services.notification.add(
+            this.closeNotif = this.notification.add(
                 _t("You didn't provide a valid Facebook link"),
                 { type: "warning" }
             );

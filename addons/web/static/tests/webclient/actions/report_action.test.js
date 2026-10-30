@@ -6,7 +6,6 @@ import {
     defineActions,
     defineModels,
     getService,
-    mockService,
     models,
     mountWithCleanup,
     onRpc,
@@ -23,6 +22,7 @@ import { ReportAction } from "@web/webclient/actions/reports/report_action";
 import { downloadReport } from "@web/webclient/actions/reports/utils";
 import { WebClient } from "@web/webclient/webclient";
 import { patch } from "@web/core/utils/patch";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 class Partner extends models.Model {
     _rec_name = "display_name";
@@ -158,7 +158,7 @@ test("should trigger a notification if wkhtmltopdf is to upgrade", async () => {
             return Promise.resolve();
         },
     });
-    mockService("notification", {
+    patchWithCleanup(NotificationPlugin.prototype, {
         add: () => expect.step("notify"),
     });
 
@@ -193,7 +193,7 @@ test("should open the report client action if wkhtmltopdf is broken", async () =
             return Promise.resolve();
         },
     });
-    mockService("notification", {
+    patchWithCleanup(NotificationPlugin.prototype, {
         add: () => expect.step("notify"),
     });
 
@@ -241,7 +241,7 @@ test("send context in case of html report", async () => {
             return Promise.resolve();
         },
     });
-    mockService("notification", {
+    patchWithCleanup(NotificationPlugin.prototype, {
         add(message, options) {
             expect.step(options.type || "notification");
         },

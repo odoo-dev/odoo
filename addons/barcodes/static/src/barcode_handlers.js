@@ -1,4 +1,6 @@
+import { usePlugin } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 import { registry } from "@web/core/registry";
 import { getVisibleElements } from "@web/core/utils/ui";
 import { Macro } from "@web/core/macro";
@@ -74,8 +76,9 @@ export const COMMANDS = {
 };
 
 export const barcodeGenericHandlers = {
-    dependencies: ["ui", "barcode", "notification"],
-    start(env, { ui, barcode, notification }) {
+    dependencies: ["ui", "barcode"],
+    start(env, { ui, barcode }) {
+        const notification = usePlugin(NotificationPlugin);
 
         barcode.bus.addEventListener("barcode_scanned", (ev) => {
             const barcode = ev.detail.barcode;

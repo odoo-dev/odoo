@@ -1,8 +1,10 @@
+import { usePlugin } from "@odoo/owl";
 import { Plugin } from "@html_editor/plugin";
 import { closestElement, descendants, selectElements } from "@html_editor/utils/dom_traversal";
 import { mergeAdjacentTextNodes, removeClass, unwrapContents } from "@html_editor/utils/dom";
 import { findInSelection, callbacksForCursorUpdate } from "@html_editor/utils/selection";
 import { _t } from "@web/core/l10n/translation";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 import { LinkPopover } from "./link_popover";
 import { DIRECTIONS, leftPos, nodeSize, rightPos } from "@html_editor/utils/position";
 import { EMAIL_REGEX, URL_REGEX, cleanZWChars, deduceURLfromText } from "./utils";
@@ -420,6 +422,7 @@ export class LinkPlugin extends Plugin {
     };
 
     setup() {
+        this.notification = usePlugin(NotificationPlugin);
         this.initializePopovers();
         this.currentOverlay = this.getActivePopover().overlay;
         this.addDomListener(this.editable, "click", (ev) => {
@@ -832,10 +835,9 @@ export class LinkPlugin extends Plugin {
         const commonAncestor = closestElement(selection.commonAncestorContainer, "A");
         const isNonEditableLink = commonAncestor && !commonAncestor.isContentEditable;
         if (!this.isLinkAllowedOnSelection() && !isNonEditableLink) {
-            this.services.notification.add(
-                _t("Unable to create a link on the current selection."),
-                { type: "danger" }
-            );
+            this.notification.add(_t("Unable to create a link on the current selection."), {
+                type: "danger",
+            });
             return this.dependencies.selection.focusEditable();
         }
         const context = this.getLinkPopoverContext(linkElement, type);

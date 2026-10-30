@@ -13,6 +13,7 @@ import {
     onRpc,
     patchWithCleanup,
 } from "@web/../tests/web_test_helpers";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 async function simulateBarCode(chars) {
     for (const char of chars) {
@@ -57,7 +58,7 @@ test("Button with barcode_trigger", async () => {
         },
     });
 
-    mockService("notification", {
+    patchWithCleanup(NotificationPlugin.prototype, {
         add: (params) => {
             expect.step(params.type);
         },
@@ -88,7 +89,7 @@ test("Two buttons with same barcode_trigger and the same string and action", asy
         },
     });
 
-    mockService("notification", {
+    patchWithCleanup(NotificationPlugin.prototype, {
         add: (params) => {
             expect.step(params.type);
         },

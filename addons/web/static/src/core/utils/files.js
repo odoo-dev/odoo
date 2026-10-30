@@ -8,7 +8,7 @@ import { NotificationPlugin } from "@web/core/notifications/notification_plugin"
 export const DEFAULT_MAX_FILE_SIZE = 128 * 1024 * 1024;
 
 /**
- * @param {Services["notification"]} notificationService
+ * @param {NotificationPlugin} notificationService
  * @param {File} file
  * @param {Number} maxUploadSize
  * @returns {boolean}

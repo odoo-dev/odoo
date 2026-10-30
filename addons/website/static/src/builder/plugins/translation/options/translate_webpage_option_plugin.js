@@ -1,7 +1,8 @@
-import { proxy } from "@odoo/owl";
+import { proxy, usePlugin } from "@odoo/owl";
 import { BuilderAction } from "@html_builder/core/builder_action";
 import { Plugin } from "@html_editor/plugin";
 import { _t } from "@web/core/l10n/translation";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 import { rpc } from "@web/core/network/rpc";
 import { registry } from "@web/core/registry";
 import { uniqueId } from "@web/core/utils/functions";
@@ -20,6 +21,7 @@ export class TranslateToAction extends BuilderAction {
     static dependencies = ["builderActions", "translateWebpageOption", "translation"];
 
     setup() {
+        this.notification = usePlugin(NotificationPlugin);
         this.canTimeout = false;
     }
 
@@ -277,7 +279,7 @@ export class TranslateToAction extends BuilderAction {
     }
 
     showNotification(message, title, type) {
-        this.services.notification.add(message, {
+        this.notification.add(message, {
             title: title,
             type,
             sticky: true,

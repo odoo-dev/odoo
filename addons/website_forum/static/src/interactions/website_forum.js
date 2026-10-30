@@ -8,6 +8,7 @@ import { _t } from "@web/core/l10n/translation";
 import { rpc } from "@web/core/network/rpc";
 import { registry } from "@web/core/registry";
 import { BootstrapInstance } from "@web/core/utils/bootstrap_plugin";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 import { htmlJoin } from "@web/core/utils/html";
 import { Interaction } from "@web/public/interaction";
 import { session } from "@web/session";
@@ -69,6 +70,7 @@ export class WebsiteForum extends Interaction {
 
     setup() {
         this.bootstrap = usePlugin(BootstrapInstance);
+        this.notification = usePlugin(NotificationPlugin);
         this.lastsearch = [];
 
         // welcome message action button
@@ -176,7 +178,7 @@ export class WebsiteForum extends Interaction {
      * @param {string} message
      */
     displayAccessDeniedNotification(message) {
-        this.services.notification.add(message, {
+        this.notification.add(message, {
             title: _t("Access Denied"),
             sticky: false,
             type: "warning",
@@ -279,7 +281,7 @@ export class WebsiteForum extends Interaction {
                 }),
             ]);
         }
-        this.services.notification.add(message, {
+        this.notification.add(message, {
             type: "warning",
             sticky: false,
             title: _t("Karma Error"),
@@ -522,7 +524,7 @@ export class WebsiteForum extends Interaction {
                         currentTarget.closest(".o_wforum_post_comment").remove();
                     })
                     .catch((error) => {
-                        this.services.notification.add(error.data.message, {
+                        this.notification.add(error.data.message, {
                             title: _t("Karma Error"),
                             sticky: false,
                             type: "warning",

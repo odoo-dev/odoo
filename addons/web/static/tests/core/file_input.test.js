@@ -11,13 +11,14 @@ import { animationFrame } from "@odoo/hoot-mock";
 import { FileInput } from "@web/core/file_input/file_input";
 import { Component, signal, xml } from "@odoo/owl";
 import { session } from "@web/session";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 // -----------------------------------------------------------------------------
 // Helpers
 // -----------------------------------------------------------------------------
 
 async function createFileInput({ mockPost, mockAdd, props }) {
-    mockService("notification", {
+    patchWithCleanup(NotificationPlugin.prototype, {
         add: mockAdd || (() => {}),
     });
     mockService("http", {
@@ -226,7 +227,7 @@ test("an upload that ends after the component is destroyed does not call onUploa
             expect.step("onUpload");
         }
     }
-    mockService("notification", { add: () => {} });
+    patchWithCleanup(NotificationPlugin.prototype, { add: () => {} });
     mockService("http", {
         post: async () => {
             await uploadedPromise.promise;

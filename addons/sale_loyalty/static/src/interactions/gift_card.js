@@ -1,8 +1,10 @@
+import { usePlugin } from "@odoo/owl";
 import { Interaction } from "@web/public/interaction";
 import { registry } from "@web/core/registry";
 import { browser } from "@web/core/browser/browser";
 import { rpc, RPCError } from "@web/core/network/rpc";
 import { _t } from "@web/core/l10n/translation";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 
 export class GiftCardCopy extends Interaction {
@@ -32,6 +34,10 @@ export class GiftCardSend extends Interaction {
         "button[type='submit']": { "t-on-click.prevent": this.locked(this.onSubmit, true) },
     };
 
+    setup() {
+        this.notification = usePlugin(NotificationPlugin);
+    }
+
     async onSubmit() {
         if (!this.el.reportValidity()) {
             return;                       // shows native "required"/invalid-email bubble, then aborts
@@ -42,16 +48,15 @@ export class GiftCardSend extends Interaction {
             await this.waitFor(rpc("/gift_card/send", { code, email }));
         } catch (error) {
             if (error instanceof RPCError) {
-                this.services.notification.add(
-                    _t("Could not send the gift card. Please try again later."),
-                    { type: "danger" },
-                );
+                this.notification.add(_t("Could not send the gift card. Please try again later."), {
+                    type: "danger",
+                });
                 return;
             }
             throw error;
         }
         this.protectSyncAfterAsync(() => this.el.reset())();
-        this.services.notification.add(_t("Gift card sent to %s", email), { type: "success" });
+        this.notification.add(_t("Gift card sent to %s", email), { type: "success" });
     }
 }
 

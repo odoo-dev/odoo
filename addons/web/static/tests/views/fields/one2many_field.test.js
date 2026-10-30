@@ -40,6 +40,7 @@ import { Record } from "@web/model/relational_model/record";
 import { useOpenX2ManyRecord, useX2ManyCrud } from "@web/views/fields/relational_utils";
 import { X2ManyField, x2ManyField } from "@web/views/fields/x2many/x2many_field";
 import { WebClient } from "@web/webclient/webclient";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 class Partner extends models.Model {
     name = fields.Char();
@@ -7482,7 +7483,7 @@ test("editable list: onchange that returns a warning", async () => {
             warning,
         };
     });
-    mockService("notification", {
+    patchWithCleanup(NotificationPlugin.prototype, {
         add: (message, params) => {
             expect.step(params.type);
             expect(message).toBe(warning.message);
@@ -12840,7 +12841,7 @@ test("one2many, form view dialog with added custom footer (replace='0')", async 
 
 test.tags("desktop");
 test('Add a line, click on "Save & New" with an invalid form', async () => {
-    mockService("notification", {
+    patchWithCleanup(NotificationPlugin.prototype, {
         add: (message, params) => {
             expect.step(params.type);
             expect(message).toBe("Missing required fields");

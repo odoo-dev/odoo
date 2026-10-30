@@ -41,6 +41,7 @@ export class ImageFieldWithMediaDialog extends ImageField {
             targetRecord: this.props.record,
             targetFieldName: this.props.name,
             changeRecordName: false,
+            notification: this.notification,
         });
     }
 }

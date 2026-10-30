@@ -3,12 +3,13 @@ import { queryFirst, waitFor } from "@odoo/hoot-dom";
 import {
     makeTestApp,
     MockServer,
-    mockService,
     mountWithCleanup,
     serverState,
+    patchWithCleanup,
 } from "@web/../tests/web_test_helpers";
 import { WebClient } from "@web/webclient/webclient";
 import { defineBusModels } from "./bus_test_helpers";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 defineBusModels();
 describe.current.tags("desktop");
@@ -33,7 +34,7 @@ test("receive and display simple notification with specific type", async () => {
 });
 
 test("receive and display simple notification as sticky", async () => {
-    mockService("notification", {
+    patchWithCleanup(NotificationPlugin.prototype, {
         add(_, options) {
             expect(options.sticky).toBe(true);
             expect.step("add notification");

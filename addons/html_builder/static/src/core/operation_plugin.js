@@ -1,5 +1,7 @@
+import { usePlugin } from "@odoo/owl";
 import { Plugin } from "@html_editor/plugin";
 import { _t } from "@web/core/l10n/translation";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 import { useEnv } from "@web/owl2/utils";
 import { Operation } from "./operation";
 
@@ -16,6 +18,7 @@ export class OperationPlugin extends Plugin {
     static shared = ["addLoadingElement", "next", "hasTimedOut"];
 
     setup() {
+        this.notification = usePlugin(NotificationPlugin);
         this._hasTimedOut = false;
         this.operation = new Operation(this.document, () => this.config.extraPreviewDocument);
 
@@ -75,7 +78,7 @@ export class OperationPlugin extends Plugin {
     onTimeout(rollback) {
         rollback();
 
-        this.services.notification.add(
+        this.notification.add(
             _t(
                 "A technical issue occurred in the builder, you should save or discard your changes."
             ),

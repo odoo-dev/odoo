@@ -55,6 +55,7 @@ export class X2ManyImageField extends ImageField {
             targetFieldName: this.props.name,
             setAttachmentId: this.props.setAttachmentId,
             changeRecordName: true,
+            notification: this.notification,
         });
     }
 

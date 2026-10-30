@@ -1,4 +1,6 @@
+import { usePlugin } from "@odoo/owl";
 import { Plugin } from "@html_editor/plugin";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 import { registry } from "@web/core/registry";
 import { _t } from "@web/core/l10n/translation";
 import { getCommonAncestor, selectElements } from "@html_editor/utils/dom_traversal";
@@ -100,6 +102,7 @@ export class InstagramOptionPlugin extends Plugin {
 export class InstagramPageAction extends BuilderAction {
     static id = "instagramPage";
     static dependencies = ["instagramOption"];
+    notification = usePlugin(NotificationPlugin);
     getValue({ editingElement }) {
         return editingElement.dataset["instagramPage"];
     }
@@ -110,7 +113,7 @@ export class InstagramPageAction extends BuilderAction {
         }
         editingElement.dataset["instagramPage"] = value;
         if (value === "") {
-            this.services.notification.add(_t("The Instagram page name is not valid"), {
+            this.notification.add(_t("The Instagram page name is not valid"), {
                 type: "warning",
             });
         }

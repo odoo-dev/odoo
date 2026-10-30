@@ -63,6 +63,7 @@ import { PosPaymentMethodPlugin } from "../plugins/pos_payment_method_plugin";
 import { PosAlertPlugin } from "../plugins/pos_alert_plugin";
 import { PosNumberBufferPlugin } from "@point_of_sale/app/plugins/pos_number_buffer_plugin";
 import { DebugModePlugin } from "@web/core/debug_mode_plugin";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 import { clearLocalStorage } from "../utils/devices_identifier_sequence";
 
 const { DateTime } = luxon;
@@ -92,7 +93,6 @@ export class PosStore extends WithLazyGetterTrap {
         "barcode_reader",
         "ui",
         "dialog",
-        "notification",
         "action",
         "mail.sound_effects",
     ];
@@ -106,10 +106,7 @@ export class PosStore extends WithLazyGetterTrap {
      * @param {import("@web/env").OdooEnv} env
      * @param {import("services").ServiceFactories} services
      */
-    async setup(
-        env,
-        { number_buffer, barcode_reader, ui, dialog, notification, bus_service, action }
-    ) {
+    async setup(env, { number_buffer, barcode_reader, ui, dialog, bus_service, action }) {
         this.data = usePlugin(PosDataPlugin);
         this.alert = usePlugin(PosAlertPlugin);
         this.ticketPrinter = usePlugin(PosTicketPrinterPlugin);
@@ -125,7 +122,7 @@ export class PosStore extends WithLazyGetterTrap {
         this.bus = bus_service;
         this.action = action;
         this.sound = env.services["mail.sound_effects"];
-        this.notification = notification;
+        this.notification = usePlugin(NotificationPlugin);
         this.pushOrderMutex = new Mutex();
         this.router.popStateCallback = this.handleUrlParams.bind(this);
         this.searchProductDBState = null;

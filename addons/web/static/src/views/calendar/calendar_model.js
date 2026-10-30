@@ -1,3 +1,4 @@
+import { usePlugin } from "@odoo/owl";
 import { browser } from "@web/core/browser/browser";
 import { makeContext } from "@web/core/context";
 import { Domain } from "@web/core/domain";
@@ -17,18 +18,19 @@ import { KeepLast } from "@web/core/utils/concurrency";
 import { formatFloat } from "@web/core/utils/numbers";
 import { useDebounced } from "@web/core/utils/timing";
 import { Model } from "@web/model/model";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 import { computeAggregatedValue } from "@web/views/utils";
 
 const { DateTime } = luxon;
 
 export class CalendarModel extends Model {
     static DEBOUNCED_LOAD_DELAY = 600;
-    static services = ["notification", "ui"];
+    static services = ["ui"];
 
-    setup(params, { notification, ui }) {
+    setup(params, { ui }) {
         /** @protected */
         this.keepLast = new KeepLast();
-        this.notification = notification;
+        this.notification = usePlugin(NotificationPlugin);
         this.uiService = ui;
 
         const formViewFromConfig = (this.env.config.views || []).find((view) => view[1] === "form");

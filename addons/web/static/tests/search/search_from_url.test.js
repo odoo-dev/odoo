@@ -6,7 +6,6 @@ import {
     fields,
     getService,
     models,
-    mockService,
     mountView,
     mountWithSearch,
     onRpc,
@@ -23,6 +22,7 @@ import { Domain } from "@web/core/domain";
 import { redirect } from "@web/core/utils/urls";
 import { browser } from "@web/core/browser/browser";
 import { WebClient } from "@web/webclient/webclient";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 class MockPurchaseOrders extends models.Model {
     _name = "mock.purchase.order";
@@ -165,7 +165,7 @@ test("URL with filter + groupBy + orderBy activates filters", async () => {
 });
 
 test("Bad URL with 1 faulty part still gets applied", async () => {
-    mockService("notification", {
+    patchWithCleanup(NotificationPlugin.prototype, {
         add: (message, options) => {
             expect(message).toBe("Warning: Not all shared filters applied");
             expect(options).toEqual({ type: "warning" });
@@ -192,7 +192,7 @@ test("Bad URL with 1 faulty part still gets applied", async () => {
 });
 
 test("Bad URL reverts to default filters", async () => {
-    mockService("notification", {
+    patchWithCleanup(NotificationPlugin.prototype, {
         add: (message, options) => {
             expect(message).toBe("Shared filters couldn't be applied");
             expect(options).toEqual({ type: "danger" });
@@ -368,7 +368,7 @@ test("hotkey sharing after typing in command palette", async () => {
 
 test.tags("desktop"); // Shortcut testing only on computer
 test("hotkey sharing triggers notification", async () => {
-    mockService("notification", {
+    patchWithCleanup(NotificationPlugin.prototype, {
         add: (message, options) => {
             expect(message).toBe("Link copied to clipboard");
             expect(options).toEqual({ type: "success" });

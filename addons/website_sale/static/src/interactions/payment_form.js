@@ -1,3 +1,5 @@
+import { usePlugin } from "@odoo/owl";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 import { patch } from '@web/core/utils/patch';
 import { url, redirect } from "@web/core/utils/urls";
 
@@ -10,6 +12,7 @@ patch(PaymentForm.prototype, {
      */
     setup() {
         super.setup();
+        this.notification = usePlugin(NotificationPlugin);
         const submitButtons = document.querySelectorAll('button[name="o_payment_submit_button"]');
         const boundSubmitForm = this.submitForm.bind(this);
         // Create an event listener for the payment submit buttons located outside the payment form.
@@ -36,7 +39,7 @@ patch(PaymentForm.prototype, {
             history.replaceState( // Avoid redirecting
                 null, "", url(window.location.pathname, Object.fromEntries(params))
             );
-            this.services.notification.add(paymentMsg, { type: paymentMsgType, sticky: true });
+            this.notification.add(paymentMsg, { type: paymentMsgType, sticky: true });
         }
     },
 

@@ -1,6 +1,7 @@
-import { markup } from "@odoo/owl";
+import { markup, usePlugin } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { post } from "@web/core/network/http_service";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 import { rpc, RPCError } from "@web/core/network/rpc";
 import { registry } from "@web/core/registry";
 import { Interaction } from "@web/public/interaction";
@@ -50,6 +51,7 @@ export class PortalComposer extends Interaction {
     }
 
     setup() {
+        this.notification = usePlugin(NotificationPlugin);
         this.options = this.env.portalComposerOptions || PortalComposer.prepareOptions({});
         this.attachments = [];
         this.attachmentButtonEl = this.el.querySelector(".o_portal_chatter_attachment_btn");
@@ -133,7 +135,7 @@ export class PortalComposer extends Interaction {
                                 })
                                 .catch((error) => {
                                     if (error instanceof RPCError) {
-                                        this.services.notification.add(
+                                        this.notification.add(
                                             _t(
                                                 "Could not save file %s",
                                                 markup`<strong>${file.name}</strong>`

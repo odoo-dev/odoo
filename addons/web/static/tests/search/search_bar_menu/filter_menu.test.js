@@ -22,7 +22,6 @@ import {
     getFacetTexts,
     isItemSelected,
     isOptionSelected,
-    mockService,
     models,
     mountWithSearch,
     onRpc,
@@ -31,11 +30,13 @@ import {
     toggleMenuItem,
     toggleMenuItemOption,
     toggleSearchBarMenu,
+    patchWithCleanup,
 } from "@web/../tests/web_test_helpers";
 import { Foo, Partner, defineSearchBarModels } from "./models";
 
 import { SearchBar } from "@web/search/search_bar/search_bar";
 import { SearchBarMenu } from "@web/search/search_bar_menu/search_bar_menu";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 defineSearchBarModels();
 
@@ -1091,7 +1092,7 @@ test("relative date and datetime fields facets display", async () => {
 
 test("Add a custom filter: notification on invalid domain", async () => {
     serverState.debug = "1";
-    mockService("notification", {
+    patchWithCleanup(NotificationPlugin.prototype, {
         add(message, options) {
             expect.step("notification");
             expect(message).toBe("Domain is invalid. Please correct it");

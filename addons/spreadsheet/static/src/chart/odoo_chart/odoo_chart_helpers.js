@@ -1,6 +1,7 @@
 import { navigateTo } from "@spreadsheet/actions/helpers";
 import { Domain } from "@web/core/domain";
 import { _t } from "@web/core/l10n/translation";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 const DataSourceViewTypeMap = {
     list: "list",
@@ -141,13 +142,13 @@ function navigateInOdooMenuOnClick(getters, chartId, getDomainFromChartItem) {
 }
 
 export async function navigateToOdooMenu(env, odooMenuId, newWindow) {
-    const { action: actionService, notification: notificationService } = env.services;
+    const actionService = env.services.action;
     const menu = env.model().getters.getIrMenu(odooMenuId);
     if (!menu) {
         throw new Error(`Cannot find any menu associated with the chart`);
     }
     if (!menu.actionID) {
-        notificationService.add(
+        env.getPlugin(NotificationPlugin).add(
             _t(
                 "The menu linked to this chart doesn't have an corresponding action. Please link the chart to another menu."
             ),

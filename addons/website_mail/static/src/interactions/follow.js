@@ -1,3 +1,5 @@
+import { usePlugin } from "@odoo/owl";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 import { Interaction } from "@web/public/interaction";
 import { registry } from "@web/core/registry";
 
@@ -17,6 +19,7 @@ export class Follow extends Interaction {
     };
 
     setup() {
+        this.notification = usePlugin(NotificationPlugin);
         this.isUser = false;
         this.recaptcha = new ReCaptcha();
     }
@@ -112,7 +115,7 @@ export class Follow extends Interaction {
             const token = tokenCaptcha.token;
 
             if (tokenCaptcha.error) {
-                this.services.notification.add(tokenCaptcha.error, {
+                this.notification.add(tokenCaptcha.error, {
                     type: "danger",
                     sticky: true,
                 });

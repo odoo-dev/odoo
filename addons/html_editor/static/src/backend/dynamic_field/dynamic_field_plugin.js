@@ -1,8 +1,10 @@
+import { usePlugin } from "@odoo/owl";
 import { isHtmlContentSupported } from "@html_editor/core/selection_plugin";
 import { isContentEditable } from "@html_editor/utils/dom_info";
 import { closestElement, traverseNode } from "@html_editor/utils/dom_traversal";
 import { withSequence } from "@html_editor/utils/resource";
 import { _t } from "@web/core/l10n/translation";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 import { FieldSelectorPopover } from "@html_editor/backend/dynamic_field/field_selector_popover";
 import { QWebPlugin } from "@html_editor/others/qweb_plugin";
@@ -83,6 +85,7 @@ export class DynamicFieldPlugin extends Plugin {
     fieldAttribute = "t-out";
 
     setup() {
+        this.notification = usePlugin(NotificationPlugin);
         this.resModel = this.config.dynamicResModel;
 
         this.fieldPopover = this.dependencies.overlay.createOverlay(FieldSelectorPopover, {
@@ -121,7 +124,7 @@ export class DynamicFieldPlugin extends Plugin {
 
     async editField() {
         if (!this.resModel) {
-            this.services.notification.add(
+            this.notification.add(
                 _t("Oops! Select a model for this template before editing fields."),
                 { type: "danger" }
             );
@@ -199,7 +202,7 @@ export class DynamicFieldPlugin extends Plugin {
 
     async insertField() {
         if (!this.resModel) {
-            return this.services.notification.add(
+            return this.notification.add(
                 _t("Oops! Select a model for this template before inserting fields."),
                 { type: "danger" }
             );

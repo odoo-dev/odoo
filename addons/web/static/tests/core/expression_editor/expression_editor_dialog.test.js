@@ -6,8 +6,8 @@ import {
     contains,
     defineModels,
     mountWithCleanup,
-    mockService,
     assignDialogTestEnv,
+    patchWithCleanup,
 } from "@web/../tests/web_test_helpers";
 import {
     Country,
@@ -20,6 +20,7 @@ import {
 } from "@web/../tests/core/tree_editor/condition_tree_editor_test_helpers";
 
 import { ExpressionEditorDialog } from "@web/core/expression_editor_dialog/expression_editor_dialog";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 describe.current.tags("desktop");
 
@@ -69,7 +70,7 @@ test("expr well sent, onConfirm and onClose", async () => {
 
 test("expr well sent but wrong, so notification when onConfirm", async () => {
     const expression = `foo == 'bar' and bar = True`;
-    mockService("notification", {
+    patchWithCleanup(NotificationPlugin.prototype, {
         add(message, options) {
             expect(message).toBe("Expression is invalid. Please correct it");
             expect(options).toEqual({ type: "danger" });

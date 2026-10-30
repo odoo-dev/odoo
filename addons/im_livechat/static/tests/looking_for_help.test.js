@@ -16,7 +16,8 @@ import { describe, expect, test, tick } from "@odoo/hoot";
 import { waitFor } from "@odoo/hoot-dom";
 
 import { rpc } from "@web/core/network/rpc";
-import { Command, mockService, onRpc, serverState } from "@web/../tests/web_test_helpers";
+import { Command, onRpc, serverState, patchWithCleanup } from "@web/../tests/web_test_helpers";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 defineLivechatModels();
 describe.current.tags("desktop");
@@ -112,7 +113,7 @@ test("Show notification when joining a channel that already received help", asyn
         livechat_status: "need_help",
     });
     await start();
-    mockService("notification", {
+    patchWithCleanup(NotificationPlugin.prototype, {
         add: (message, options) => expect.step(`${options.type} - ${message}`),
     });
     await openDiscuss(channel);
@@ -142,7 +143,7 @@ test("Hide 'help already received' notification when channel is not visible", as
         livechat_status: "need_help",
     });
     await start();
-    mockService("notification", {
+    patchWithCleanup(NotificationPlugin.prototype, {
         add: (message, options) => expect.step(`${options.type} - ${message}`),
     });
     await openDiscuss(channel);

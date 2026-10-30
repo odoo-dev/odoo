@@ -1,6 +1,8 @@
+import { usePlugin } from "@odoo/owl";
 import { Interaction } from '@web/public/interaction';
 import { registry } from '@web/core/registry';
 import { _t } from '@web/core/l10n/translation';
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 import { rpc } from '@web/core/network/rpc';
 import wSaleUtils from '@website_sale/js/website_sale_utils';
 import comparisonUtils from '@website_sale/js/comparison_utils';
@@ -15,6 +17,10 @@ export class AddToComparison extends Interaction {
         _root: { 't-on-click': this.addProduct },
         _productEl: { 't-on-product_changed': this.onProductChanged },
     };
+
+    setup() {
+        this.notification = usePlugin(NotificationPlugin);
+    }
 
     /**
      * Add a product to the comparison.
@@ -74,14 +80,11 @@ export class AddToComparison extends Interaction {
             comparisonUtils.getComparisonProductIds().length
             >= comparisonUtils.MAX_COMPARISON_PRODUCTS
         ) {
-            this.services.notification.add(
-                _t("You can compare up to 4 products at a time."),
-                {
-                    type: 'warning',
-                    sticky: false,
-                    title: _t("Too many products to compare"),
-                },
-            );
+            this.notification.add(_t("You can compare up to 4 products at a time."), {
+                type: "warning",
+                sticky: false,
+                title: _t("Too many products to compare"),
+            });
             return true;
         }
         return false;
@@ -95,10 +98,10 @@ export class AddToComparison extends Interaction {
      */
     _checkProductAlreadyInComparison(productId) {
         if (comparisonUtils.getComparisonProductIds().includes(productId)) {
-            this.services.notification.add(
-                _t("This product has already been added to the comparison."),
-                { type: 'warning', sticky: false },
-            );
+            this.notification.add(_t("This product has already been added to the comparison."), {
+                type: "warning",
+                sticky: false,
+            });
             return true;
         }
         return false;

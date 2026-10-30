@@ -1,5 +1,7 @@
+import { usePlugin } from "@odoo/owl";
 import { Plugin } from "@html_editor/plugin";
 import { withSequence } from "@html_editor/utils/resource";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 import { registry } from "@web/core/registry";
 import { getScrollingElement } from "@web/core/utils/scrolling";
 import { _t } from "@web/core/l10n/translation";
@@ -101,6 +103,7 @@ export class AnimateOptionPlugin extends Plugin {
     };
 
     setup() {
+        this.notification = usePlugin(NotificationPlugin);
         this.scrollingElement = getScrollingElement(this.document);
     }
 
@@ -239,7 +242,7 @@ export class AnimateOptionPlugin extends Plugin {
             };
         }
         savePoint();
-        this.services.notification.add(
+        this.notification.add(
             _t(
                 "Cannot apply this option on current text selection. Try clearing the format and try again."
             ),

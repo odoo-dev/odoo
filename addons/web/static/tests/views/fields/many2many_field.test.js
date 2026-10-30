@@ -19,7 +19,6 @@ import {
     patchWithCleanup,
     serverState,
     stepAllNetworkCalls,
-    mockService,
 } from "@web/../tests/web_test_helpers";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { registry } from "@web/core/registry";
@@ -29,6 +28,7 @@ import { Many2XAutocomplete, many2XAutocompleteProps } from "@web/views/fields/r
 import { cookie } from "@web/core/browser/cookie";
 import { t } from "@odoo/owl";
 import { ListRenderer } from "@web/views/list/list_renderer";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 describe.current.tags("desktop");
 
@@ -2075,7 +2075,7 @@ test("test view button warning on opening unsaved record", async () => {
     // Making the field required so that we get a sticky notification
     Turtle._fields.name.required = true;
 
-    mockService("notification", {
+    patchWithCleanup(NotificationPlugin.prototype, {
         add(message, options) {
             expect.step("notification");
             expect(message).toBe("Please save your changes first");

@@ -2,9 +2,10 @@
 
 import { registry } from "@web/core/registry";
 import { _t } from "@web/core/l10n/translation";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 import { rpc } from "@web/core/network/rpc";
 import { user } from "@web/core/user";
-import { markup } from "@odoo/owl";
+import { markup, usePlugin } from "@odoo/owl";
 
 /**
  * Initializes the Google Maps JavaScript API using the dynamic library import
@@ -57,9 +58,8 @@ function initGoogleMapsAPI(key) {
 }
 
 registry.category("services").add("google_maps", {
-    dependencies: ["notification"],
-    start(env, deps) {
-        const notification = deps["notification"];
+    start() {
+        const notification = usePlugin(NotificationPlugin);
         let gMapsAPIKeyProm;
         let gMapsAPILoading;
         let bootstrapLoadedKey;

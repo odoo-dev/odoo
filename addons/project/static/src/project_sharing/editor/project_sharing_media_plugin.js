@@ -1,7 +1,9 @@
+import { usePlugin } from "@odoo/owl";
 import { ImageCropPlugin } from "@html_editor/main/media/image_crop_plugin";
 import { ImageSavePlugin } from "@html_editor/main/media/image_save_plugin";
 import { MediaPlugin } from "@html_editor/main/media/media_plugin";
 import { MAIN_PLUGINS } from "@html_editor/plugin_sets";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 export class ProjectSharingMediaPlugin extends MediaPlugin {
     resources = {
@@ -13,6 +15,8 @@ export class ProjectSharingMediaPlugin extends MediaPlugin {
 }
 
 export class ProjectSharingImageSavePlugin extends ImageSavePlugin {
+    notification = usePlugin(NotificationPlugin);
+
     async createAttachment({ el, imageData, resId }) {
         const response = JSON.parse(
             await this.services.http.post(
@@ -28,7 +32,7 @@ export class ProjectSharingImageSavePlugin extends ImageSavePlugin {
             )
         );
         if (response.error) {
-            this.services.notification.add(response.error, { type: "danger" });
+            this.notification.add(response.error, { type: "danger" });
             el.remove();
         }
         const attachment = response;

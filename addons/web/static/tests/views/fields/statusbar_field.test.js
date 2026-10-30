@@ -25,11 +25,13 @@ import {
     serverState,
     pagerNext,
     pagerPrevious,
+    patchWithCleanup,
 } from "@web/../tests/web_test_helpers";
 import { EventBus } from "@odoo/owl";
 import { range } from "@web/core/utils/numbers";
 import { WebClient } from "@web/webclient/webclient";
 import { patch } from "@web/core/utils/patch";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 class Partner extends models.Model {
     name = fields.Char();
@@ -288,7 +290,7 @@ test("statusbar with tooltip for help text", async () => {
 });
 
 test("statusbar with required modifier", async () => {
-    mockService("notification", {
+    patchWithCleanup(NotificationPlugin.prototype, {
         add() {
             expect.step("Show error message");
             return () => {};

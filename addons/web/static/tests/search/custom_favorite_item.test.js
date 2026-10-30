@@ -15,12 +15,14 @@ import {
     toggleSaveFavorite,
     toggleSearchBarMenu,
     validateSearch,
+    patchWithCleanup,
 } from "@web/../tests/web_test_helpers";
 
 import { useSetupAction } from "@web/search/action_hook";
 import { SearchBar } from "@web/search/search_bar/search_bar";
 import { SearchBarMenu } from "@web/search/search_bar_menu/search_bar_menu";
 import { rpcBus } from "@web/core/network/rpc";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 class Foo extends models.Model {
     bar = fields.Many2one({ relation: "partner" });
@@ -200,7 +202,7 @@ test("save filters created via autocompletion works", async () => {
 });
 
 test("undefined name for filter shows notification and not error", async () => {
-    mockService("notification", {
+    patchWithCleanup(NotificationPlugin.prototype, {
         add(message, options) {
             expect.step("notification");
             expect(message).toBe("A name for your favorite filter is required.");

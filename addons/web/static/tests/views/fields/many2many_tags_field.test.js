@@ -15,14 +15,15 @@ import {
     makeServerError,
     mockOffline,
     MockServer,
-    mockService,
     models,
     mountView,
     mountWithCleanup,
     onRpc,
     selectFieldDropdownItem,
+    patchWithCleanup,
 } from "@web/../tests/web_test_helpers";
 import { WebClient } from "@web/webclient/webclient";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 class Partner extends models.Model {
     _name = "partner";
@@ -1573,7 +1574,7 @@ test("Many2ManyTagsField supports 'create' props to be a Boolean on mobile", asy
 
 test("save a record with an empty many2many_tags required", async () => {
     expect.assertions(3);
-    mockService("notification", {
+    patchWithCleanup(NotificationPlugin.prototype, {
         add: (message, params) => {
             expect(message).toBe("Missing required fields");
             expect(params).toEqual({ type: "danger" });

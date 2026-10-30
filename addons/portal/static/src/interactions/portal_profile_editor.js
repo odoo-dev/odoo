@@ -1,3 +1,5 @@
+import { usePlugin } from "@odoo/owl";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 import { registry } from "@web/core/registry";
 import { Interaction } from "@web/public/interaction";
 import { getDataURLFromFile } from "@web/core/utils/urls";
@@ -20,7 +22,7 @@ export class PortalProfileEditor extends Interaction {
     };
 
     setup() {
-        this.notification = this.services.notification;
+        this.notification = usePlugin(NotificationPlugin);
         this.fileInputEl = this.el.querySelector(".o_file_upload");
         this.profileEl = this.el.querySelector(".o_profile_picture");
         this.editBtnEl = this.el.querySelector(".o_portal_edit");

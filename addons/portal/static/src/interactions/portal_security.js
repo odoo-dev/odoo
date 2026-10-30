@@ -2,6 +2,7 @@ import { onMounted, t, usePlugin, useProps } from "@odoo/owl";
 import { Interaction } from "@web/public/interaction";
 import { registry } from "@web/core/registry";
 import { BootstrapInstance } from "@web/core/utils/bootstrap_plugin";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 import { ConfirmationDialog, confirmationDialogProps } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { renderToMarkup } from "@web/core/utils/render";
 import { InputConfirmationDialog } from "@portal/js/components/input_confirmation_dialog/input_confirmation_dialog";
@@ -54,6 +55,7 @@ export class PortalSecurity extends Interaction {
 
     setup() {
         this.bootstrap = usePlugin(BootstrapInstance);
+        this.notification = usePlugin(NotificationPlugin);
         // Show the "deactivate your account" modal if needed
         const modalEl = document.querySelector(".modal.show#portal_deactivate_account_modal");
         if (modalEl) {
@@ -73,7 +75,7 @@ export class PortalSecurity extends Interaction {
             return;
         }
         await navigator.clipboard.writeText(targetEl.textContent.trim());
-        this.services.notification.add(_t("Copied to clipboard"), { type: "success" });
+        this.notification.add(_t("Copied to clipboard"), { type: "success" });
     }
 
     async onNewApiKeyClick() {

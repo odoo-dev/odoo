@@ -82,6 +82,7 @@ import { X2ManyField, x2ManyField } from "@web/views/fields/x2many/x2many_field"
 import { FormController } from "@web/views/form/form_controller";
 import { AttachDocumentWidget } from "@web/views/widgets/attach_document/attach_document";
 import { WebClient } from "@web/webclient/webclient";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 const fieldsRegistry = registry.category("fields");
 const widgetsRegistry = registry.category("view_widgets");
@@ -12023,7 +12024,7 @@ test(`setting : without field`, async () => {
 });
 
 test(`action button in x2many should display a notification if the record is virtual`, async () => {
-    mockService("notification", {
+    patchWithCleanup(NotificationPlugin.prototype, {
         add(message, { type }) {
             expect.step(`${type}:${message}`);
         },
@@ -13055,7 +13056,7 @@ test(`an empty json object does not pass the required check`, async () => {
     }
     fieldsRegistry.add("my_json", { component: JsonField });
 
-    mockService("notification", {
+    patchWithCleanup(NotificationPlugin.prototype, {
         add(message, params) {
             expect.step("notification");
             expect(message).toBe("Missing required fields");
@@ -13462,7 +13463,7 @@ test(`do not perform button action for records with invalid datas`, async () => 
             expect(params.name).toBe("lovely action");
         },
     });
-    mockService("notification", {
+    patchWithCleanup(NotificationPlugin.prototype, {
         add: (message) => {
             expect.step(`Pop Up: Invalid Field: ${message}`);
         },

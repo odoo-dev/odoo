@@ -26,6 +26,7 @@ import {
     makeActiveField,
 } from "./utils";
 import { OfflinePlugin } from "@web/core/offline/offline_plugin";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 /**
  * @typedef {import("@web/core/context").Context} Context
@@ -115,7 +116,7 @@ const DEFAULT_HOOKS = {
 };
 
 export class RelationalModel extends Model {
-    static services = ["action", "dialog", "notification", "orm"];
+    static services = ["action", "dialog", "orm"];
     static Record = RelationalRecord;
     static Group = Group;
     static DynamicRecordList = DynamicRecordList;
@@ -128,15 +129,15 @@ export class RelationalModel extends Model {
     static withCache = true;
 
     offlinePlugin = usePlugin(OfflinePlugin);
+    notification = usePlugin(NotificationPlugin);
 
     /**
      * @param {RelationalModelParams} params
      * @param {Services} services
      */
-    setup(params, { action, dialog, notification }) {
+    setup(params, { action, dialog }) {
         this.action = action;
         this.dialog = dialog;
-        this.notification = notification;
 
         this.bus = new EventBus();
 

@@ -6,6 +6,7 @@ import { session } from '@web/session';
 import { ReCaptcha } from '@google_recaptcha/js/recaptcha';
 import { isVisible } from "@html_editor/utils/dom_info";
 import { BootstrapInstance } from "@web/core/utils/bootstrap_plugin";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 export class Subscribe extends Interaction {
     static selector = '.js_subscribe';
@@ -16,7 +17,7 @@ export class Subscribe extends Interaction {
     setup() {
         this.bootstrap = usePlugin(BootstrapInstance);
         this._recaptcha = new ReCaptcha();
-        this.notification = this.services['notification'];
+        this.notification = usePlugin(NotificationPlugin);
         if (session.turnstile_site_key) {
             const { TurnStile } = odoo.loader.modules.get(
                 "@website_cf_turnstile/interactions/turnstile"

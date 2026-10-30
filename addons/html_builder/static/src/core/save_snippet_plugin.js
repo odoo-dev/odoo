@@ -1,7 +1,8 @@
 import { Plugin } from "@html_editor/plugin";
 import { withSequence } from "@html_editor/utils/resource";
-import { markup } from "@odoo/owl";
+import { markup, usePlugin } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 import { BLOCKQUOTE_PARENT_HANDLERS } from "@html_builder/core/utils";
 
 /**
@@ -22,6 +23,7 @@ export class SaveSnippetPlugin extends Plugin {
     };
 
     setup() {
+        this.notification = usePlugin(NotificationPlugin);
         this.savableSelector = `[data-snippet], a.btn, ${BLOCKQUOTE_PARENT_HANDLERS}`;
         this.unsavableSelector = [
             ".o_no_save",
@@ -80,7 +82,7 @@ export class SaveSnippetPlugin extends Plugin {
                 "Saved as %s. Find it in your snippets.",
                 markup`<strong>${savedName}</strong>`
             );
-            this.services.notification.add(message, {
+            this.notification.add(message, {
                 type: "success",
                 autocloseDelay: 5000,
             });

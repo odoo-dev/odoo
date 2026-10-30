@@ -1,4 +1,6 @@
+import { usePlugin } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 import { renderToElement } from "@web/core/utils/render";
 import { rpc } from "@web/core/network/rpc";
 import { Interaction } from "@web/public/interaction";
@@ -16,7 +18,7 @@ export class WebsiteEventTrackReminder extends Interaction {
     };
 
     setup() {
-        this.notification = this.services.notification;
+        this.notification = usePlugin(NotificationPlugin);
         this.orm = this.services.orm;
         this.trackId = parseInt(this.el.dataset.trackId);
         this.reminderOn = this.el.dataset.reminderOn;

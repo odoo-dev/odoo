@@ -3,8 +3,8 @@ import { KeepLast } from "@web/core/utils/concurrency";
 
 export class HrEmployeeHierarchyModel extends HierarchyModel {
     /**@override */
-    setup(params, { notification }) {
-        super.setup(params, { notification });
+    setup() {
+        super.setup(...arguments);
         this.KeepLastInCycle = new KeepLast();
     }
 

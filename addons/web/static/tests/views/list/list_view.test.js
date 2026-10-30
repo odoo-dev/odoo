@@ -91,6 +91,7 @@ import { many2XAutocompleteProps } from "@web/views/fields/relational_utils";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { ListController } from "@web/views/list/list_controller";
 import { WebClient } from "@web/webclient/webclient";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 const { ResCompany, ResPartner, ResUsers } = webModels;
 
@@ -6396,7 +6397,7 @@ test.tags("desktop");
 test(`delete all records matching the domain`, async () => {
     Foo._records.push({ id: 5, bar: true, foo: "xxx" });
 
-    mockService("notification", {
+    patchWithCleanup(NotificationPlugin.prototype, {
         add() {
             expect.step("should not display a notification");
         },
@@ -6435,7 +6436,7 @@ test(`delete all records matching the domain (limit reached)`, async () => {
     Foo._records.push({ id: 5, bar: true, foo: "xxx" });
     Foo._records.push({ id: 6, bar: true, foo: "yyy" });
 
-    mockService("notification", {
+    patchWithCleanup(NotificationPlugin.prototype, {
         add() {
             expect.step("notify");
         },
@@ -6569,7 +6570,7 @@ test(`archive all records matching the domain`, async () => {
     Foo._fields.active = fields.Boolean({ default: true });
     Foo._records.push({ id: 5, bar: true, foo: "xxx" });
 
-    mockService("notification", {
+    patchWithCleanup(NotificationPlugin.prototype, {
         add() {
             expect.step("should not display a notification");
         },
@@ -6610,7 +6611,7 @@ test(`archive all records matching the domain (limit reached)`, async () => {
     Foo._records.push({ id: 5, bar: true, foo: "xxx" });
     Foo._records.push({ id: 6, bar: true, foo: "yyy" });
 
-    mockService("notification", {
+    patchWithCleanup(NotificationPlugin.prototype, {
         add() {
             expect.step("notify");
         },
@@ -9852,7 +9853,7 @@ test(`modifiers of other x2many rows a re-evaluated when a subrecord is updated`
 
 test(`leaving unvalid rows in edition`, async () => {
     let warnings = 0;
-    mockService("notification", {
+    patchWithCleanup(NotificationPlugin.prototype, {
         add(message, { type }) {
             if (type === "danger") {
                 warnings++;
@@ -17355,7 +17356,7 @@ test(`Auto save: modify a record and leave action (reject)`, async () => {
         "list,3": `<list editable="top"><field name="foo"/></list>`,
     };
 
-    mockService("notification", {
+    patchWithCleanup(NotificationPlugin.prototype, {
         add(message, _) {
             expect.step(message);
         },
@@ -19944,7 +19945,7 @@ test("open record, with invalid record in list", async () => {
         list: `<list><field name="foo" required="1"/><field name="int_field"/></list>`,
     };
 
-    mockService("notification", {
+    patchWithCleanup(NotificationPlugin.prototype, {
         add() {
             throw new Error("should not display a notification");
         },

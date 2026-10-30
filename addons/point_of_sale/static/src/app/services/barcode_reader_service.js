@@ -1,4 +1,6 @@
+import { usePlugin } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 import { registry } from "@web/core/registry";
 import { Mutex } from "@web/core/utils/concurrency";
 import { session } from "@web/session";
@@ -118,8 +120,9 @@ export class BarcodeReader {
 }
 
 export const barcodeReaderService = {
-    dependencies: ["dialog", "barcode", "notification", "action", "orm"],
+    dependencies: ["dialog", "barcode", "action", "orm"],
     async start(env, deps) {
+        const notification = usePlugin(NotificationPlugin);
         const { dialog, barcode, orm } = deps;
         let barcodeReader = null;
 
@@ -130,7 +133,7 @@ export const barcodeReaderService = {
                     session.nomenclature_id
                 );
                 const parser = new BarcodeParser({ nomenclature });
-                barcodeReader = new BarcodeReader(parser, deps);
+                barcodeReader = new BarcodeReader(parser, { ...deps, notification });
             }
 
             if (session.fallback_nomenclature_id && barcodeReader) {

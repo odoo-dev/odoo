@@ -1,11 +1,13 @@
+import { usePlugin } from "@odoo/owl";
 import { location } from "@web/core/browser/browser";
 import { registry } from "@web/core/registry";
 import { _t, translationIsReady } from "@web/core/l10n/translation";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 import { getOrigin } from "@web/core/utils/urls";
 
 const scssErrorNotificationService = {
-    dependencies: ["notification"],
-    start(env, { notification }) {
+    start() {
+        const notification = usePlugin(NotificationPlugin);
         const origin = getOrigin();
         // Iframe with src "about:blank" origin isn't a valid base URL.
         if (location.origin === "null") {

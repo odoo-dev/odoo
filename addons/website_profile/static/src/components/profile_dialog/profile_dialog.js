@@ -22,6 +22,7 @@ import { isEmail } from "@web/core/utils/strings";
 import { FileUploader } from "@web/views/fields/file_handler";
 import { endPos } from "@html_editor/utils/position";
 import { DebugModePlugin } from "@web/core/debug_mode_plugin";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 export class ProfileDialog extends Component {
     static template = "website_profile.ProfileDialog";
@@ -46,6 +47,7 @@ export class ProfileDialog extends Component {
     setup() {
         super.setup();
         this.orm = useService("orm");
+        this.notification = usePlugin(NotificationPlugin);
         this.profileImgData = null;
         this.state = proxy({
             isProcessing: false,
@@ -158,7 +160,7 @@ export class ProfileDialog extends Component {
             this.props.close();
         } catch (e) {
             const msg = e?.data?.message || e?.message || _t("Update failed.");
-            this.env.services.notification.add(msg, { type: "danger" });
+            this.notification.add(msg, { type: "danger" });
         } finally {
             this.state.isProcessing = false;
         }

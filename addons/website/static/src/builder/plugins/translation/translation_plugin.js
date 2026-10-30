@@ -1,5 +1,7 @@
+import { usePlugin } from "@odoo/owl";
 import { Plugin } from "@html_editor/plugin";
 import { _t } from "@web/core/l10n/translation";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 import { registry } from "@web/core/registry";
 import { shouldEditableMediaBeEditable } from "@html_builder/utils/utils_css";
 import { withSequence } from "@html_editor/utils/resource";
@@ -126,7 +128,7 @@ export class TranslationPlugin extends Plugin {
 
     setup() {
         this.websiteService = this.services.website;
-        this.notificationService = this.services.notification;
+        this.notificationService = usePlugin(NotificationPlugin);
         this.dialogService = this.services.dialog;
         this.nonTranslatedSelector =
             `:not(${this.config.translatedElements.join(", ")})` + `:not(.o_translate_inline)`;

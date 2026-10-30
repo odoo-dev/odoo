@@ -4,6 +4,7 @@ import { registry } from "@web/core/registry";
 import { session } from "@web/session";
 import { Interaction } from "@web/public/interaction";
 import { BootstrapInstance } from "@web/core/utils/bootstrap_plugin";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 export class ModalRegistration extends Interaction {
     static selector = "#modal_attendees_registration,.o_wevent_modal_slot_ticket_registration";
@@ -18,6 +19,7 @@ export class ModalRegistration extends Interaction {
 
     setup() {
         this.bootstrap = usePlugin(BootstrapInstance);
+        this.notification = usePlugin(NotificationPlugin);
         // dynamic get rather than import as we don't depend on this module
         if (session.turnstile_site_key) {
             const { TurnStile } = odoo.loader.modules.get(
@@ -99,7 +101,7 @@ export class ModalRegistration extends Interaction {
         const form = ev.currentTarget;
         this.recaptchaToken = await this.recaptcha.getToken("website_event_registration");
         if (this.recaptchaToken.error) {
-            this.services.notification.add(this.recaptchaToken.error, {
+            this.notification.add(this.recaptchaToken.error, {
                 type: "danger",
                 sticky: true,
             });

@@ -9,6 +9,7 @@ import { ActionpadWidget } from "@point_of_sale/app/screens/product_screen/actio
 import { BackButton } from "@point_of_sale/app/screens/product_screen/action_pad/back_button/back_button";
 import { InvoiceButton } from "@point_of_sale/app/screens/ticket_screen/invoice_button/invoice_button";
 import { PosNumberBufferPlugin } from "@point_of_sale/app/plugins/pos_number_buffer_plugin";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 import { Orderline } from "@point_of_sale/app/components/orderline/orderline";
 import { CenteredIcon } from "@point_of_sale/app/components/centered_icon/centered_icon";
 import { SearchBar } from "@point_of_sale/app/screens/ticket_screen/search_bar/search_bar";
@@ -85,6 +86,7 @@ export class TicketScreen extends Component {
         this.ui = useService("ui");
         this.dialog = useService("dialog");
         this.numberBuffer = usePlugin(PosNumberBufferPlugin);
+        this.notification = usePlugin(NotificationPlugin);
         this.doPrint = useTrackedAsync((_selectedSyncedOrder) => this.print(_selectedSyncedOrder));
         this.numberBuffer.use({
             triggerAtInput: (event) => this._onUpdateSelectedOrderline(event),
@@ -230,12 +232,12 @@ export class TicketScreen extends Component {
                 this.setSelectedOrder(order);
                 this.pos.scanning = !this.pos.scanning;
             } else {
-                this.env.services.notification.add(_t("Invalid QR Code! Please, Scan again!"), {
+                this.notification.add(_t("Invalid QR Code! Please, Scan again!"), {
                     type: "warning",
                 });
             }
         } else {
-            this.env.services.notification.add(_t("Please, Scan again!"), {
+            this.notification.add(_t("Please, Scan again!"), {
                 type: "warning",
             });
         }

@@ -74,6 +74,7 @@ export class X2ManyMediaViewer extends X2ManyField {
             convertToWebp: this.props.convertToWebp,
             forceCreate: this.props.forceCreate,
             setAttachmentId: this.props.setAttachmentId,
+            notification: this.notification,
         });
     }
 

@@ -1,6 +1,8 @@
+import { usePlugin } from "@odoo/owl";
 import { Plugin } from "@html_editor/plugin";
 import { withSequence } from "@html_editor/utils/resource";
 import { _t } from "@web/core/l10n/translation";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 import { AnchorDialog } from "./anchor_dialog";
 import { getElementsWithOption, getSnippetName } from "@html_builder/utils/utils";
 
@@ -45,6 +47,7 @@ export class AnchorPlugin extends Plugin {
     };
 
     setup() {
+        this.notification = usePlugin(NotificationPlugin);
         this.anchorAllowedSelector = this.getResource("anchor_allowed_selectors").join(", ");
         this.anchorExcludedSelector = this.getResource("anchor_excluded_selectors").join(", ");
     }
@@ -133,7 +136,7 @@ export class AnchorPlugin extends Plugin {
         const anchorLink = this.getAnchorLink(element);
         await navigator.clipboard.writeText(anchorLink);
         const message = _t("Anchor copied to clipboard");
-        const closeNotification = this.services.notification.add(message, {
+        const closeNotification = this.notification.add(message, {
             type: "success",
             buttons: [
                 {

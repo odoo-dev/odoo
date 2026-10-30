@@ -1,8 +1,9 @@
 import { userHasEmployeeInCurrentCompany } from "@hr_holidays/utils";
 import { exportTimeOffRecords } from "@hr_holidays/views/hr_leave_export";
 import { HrHolidaysSearchModel } from "@hr_holidays/search/hr_holidays_search_model";
-import { onWillStart } from "@odoo/owl";
+import { onWillStart, usePlugin } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 import { registry } from "@web/core/registry";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { ListController } from "@web/views/list/list_controller";
@@ -26,6 +27,7 @@ export class HolidaysListController extends ListController {
         });
         super.setup();
         this.orm = useService("orm");
+        this.notification = usePlugin(NotificationPlugin);
 
         // Store reference to original button click handler for fallback
         this.onClickViewButton = useViewButtonHandler();
@@ -39,7 +41,7 @@ export class HolidaysListController extends ListController {
             ];
             const ignoreHasEmployee = ignoreActions.includes(this.env.config.actionXmlId);
             if (!hasEmployee && !ignoreHasEmployee) {
-                this.env.services.notification.add(
+                this.notification.add(
                     _t(
                         "You are not linked to an employee in the current company, so you cannot create requests for yourself."
                     ),

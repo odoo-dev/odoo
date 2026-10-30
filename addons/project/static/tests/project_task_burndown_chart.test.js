@@ -1,14 +1,15 @@
-import { describe, expect, test } from "@odoo/hoot";
+import { beforeEach, describe, expect, test } from "@odoo/hoot";
 import { click, queryAll } from "@odoo/hoot-dom";
 import {
     defineModels,
     fields,
-    mockService,
     models,
     mountView,
+    patchWithCleanup,
     toggleMenuItemOption,
     toggleSearchBarMenu,
 } from "@web/../tests/web_test_helpers";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 import { defineProjectModels } from "./project_models";
 
@@ -64,11 +65,13 @@ defineModels([ProjectTaskBurndownChartReport]);
 
 describe.current.tags("desktop");
 
-mockService("notification", () => ({
-    add() {
-        expect.step("notification");
-    },
-}));
+beforeEach(() => {
+    patchWithCleanup(NotificationPlugin.prototype, {
+        add() {
+            expect.step("notification");
+        },
+    });
+});
 
 const mountViewParams = {
     resModel: "project.task.burndown.chart.report",

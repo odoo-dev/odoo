@@ -10,7 +10,6 @@ declare module "services" {
     import { hotkeyService } from "@web/core/hotkeys/hotkey_plugin";
     import { nameService } from "@web/core/name_plugin";
     import { httpService } from "@web/core/network/http_service";
-    import { notificationService } from "@web/core/notifications/notification_plugin";
     import { offlineService } from "@web/core/offline/offline_plugin";
     import { overlayService } from "@web/core/overlay/overlay_plugin";
     import { popoverService } from "@web/core/popover/popover_plugin";
@@ -44,7 +43,6 @@ declare module "services" {
         lazy_session: typeof lazySessionService;
         menu: typeof menuService;
         name: typeof nameService;
-        notification: typeof notificationService;
         offline: typeof offlineService;
         overlay: typeof overlayService;
         popover: typeof popoverService;

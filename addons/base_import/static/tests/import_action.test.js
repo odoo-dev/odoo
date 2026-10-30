@@ -30,6 +30,7 @@ import { ImportBlockUI } from "../src/import_block_ui";
 import { ImportDataProgress } from "../src/import_data_progress/import_data_progress";
 import { IMPORT_LANGUAGE_SEPARATOR } from "@base_import/import_model";
 import { user } from "@web/core/user";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 const FAKE_PREVIEW_HEADERS = ["Foo", "Bar", "Display name"];
 const FAKE_PREVIEW_DATA = [
@@ -584,7 +585,7 @@ describe("Import view", () => {
                 return super.post(route, params);
             },
         });
-        mockService("notification", {
+        patchWithCleanup(NotificationPlugin.prototype, {
             add: (message) => {
                 expect.step(message);
                 return () => {};
@@ -709,7 +710,7 @@ describe("Import view", () => {
     });
 
     test("execute import with option 'use first row as headers'", async () => {
-        mockService("notification", {
+        patchWithCleanup(NotificationPlugin.prototype, {
             add: (message) => {
                 expect.step(message);
                 return () => {};
@@ -1201,7 +1202,7 @@ describe("Import view", () => {
             },
         });
 
-        mockService("notification", {
+        patchWithCleanup(NotificationPlugin.prototype, {
             add: (message) => {
                 expect.step(message);
                 return () => {};
@@ -1624,7 +1625,7 @@ describe("Import view", () => {
                 return true;
             },
         });
-        mockService("notification", {
+        patchWithCleanup(NotificationPlugin.prototype, {
             add: (message) => {
                 expect.step(message);
                 return () => {};

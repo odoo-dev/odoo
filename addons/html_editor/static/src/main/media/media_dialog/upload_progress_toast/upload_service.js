@@ -1,8 +1,9 @@
-import { proxy } from "@odoo/owl";
+import { proxy, usePlugin } from "@odoo/owl";
 import { rpc } from "@web/core/network/rpc";
 import { registry } from "@web/core/registry";
 import { UploadProgressToast } from "./upload_progress_toast";
 import { _t } from "@web/core/l10n/translation";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 import { checkFileSize } from "@web/core/utils/files";
 import { humanNumber } from "@web/core/utils/numbers";
 import { getDataURLFromFile } from "@web/core/utils/urls";
@@ -11,8 +12,8 @@ export const AUTOCLOSE_DELAY = 3000;
 export const AUTOCLOSE_DELAY_LONG = 8000;
 
 export const uploadService = {
-    dependencies: ["notification"],
-    start(env, { notification }) {
+    start() {
+        const notification = usePlugin(NotificationPlugin);
         let fileId = 0;
         const progressToast = proxy({
             files: {},
@@ -170,10 +171,9 @@ export const uploadService = {
                         }
                     } catch {
                         deleteFile(file.id);
-                        env.services.notification.add(
-                            _t('Could not load the file "%s".', sortedFile.name),
-                            { type: "danger" }
-                        );
+                        notification.add(_t('Could not load the file "%s".', sortedFile.name), {
+                            type: "danger",
+                        });
                         continue;
                     }
 

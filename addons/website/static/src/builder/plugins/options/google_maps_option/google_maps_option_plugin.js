@@ -1,3 +1,5 @@
+import { usePlugin } from "@odoo/owl";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 import { registry } from "@web/core/registry";
 import { _t } from "@web/core/l10n/translation";
 import { Plugin } from "@html_editor/plugin";
@@ -60,7 +62,7 @@ export class GoogleMapsOptionPlugin extends Plugin {
         this.websiteService = this.services.website;
         this.dialog = this.services.dialog;
         this.orm = this.services.orm;
-        this.notification = this.services.notification;
+        this.notification = usePlugin(NotificationPlugin);
 
         /** @type {Map<Coordinates, Place>} */
         this.gpsMapCache = new Map();

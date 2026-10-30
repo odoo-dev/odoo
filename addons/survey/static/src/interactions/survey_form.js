@@ -1,5 +1,7 @@
+import { usePlugin } from "@odoo/owl";
 import { cookie } from "@web/core/browser/cookie";
 import { _t } from "@web/core/l10n/translation";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 import { rpc } from "@web/core/network/rpc";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import {
@@ -66,6 +68,7 @@ export class SurveyForm extends Interaction {
 
     setup() {
         this.dialog = this.services.dialog;
+        this.notification = usePlugin(NotificationPlugin);
         this.fadeInOutDelay = 400;
         this.formEl = this.el.querySelector("form.o_survey-fill-form");
         const optionsData = this.el.querySelector("form.o_survey-fill-form").dataset;
@@ -682,7 +685,7 @@ export class SurveyForm extends Interaction {
         }
         if (!result || result.error) {
             this.notificationDestructors.push(
-                this.services.notification.add(
+                this.notification.add(
                     _t("There was an error during the validation of the survey."),
                     { type: "danger", sticky: true }
                 )

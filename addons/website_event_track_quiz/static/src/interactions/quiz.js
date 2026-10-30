@@ -1,8 +1,10 @@
+import { usePlugin } from "@odoo/owl";
 import { Interaction } from "@web/public/interaction";
 import { registry } from "@web/core/registry";
 import { _t } from "@web/core/l10n/translation";
 import { rpc } from "@web/core/network/rpc";
 import { user } from "@web/core/user";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 /**
  * This widget is responsible of displaying quiz questions and propositions. Submitting the quiz will fetch the
@@ -36,6 +38,7 @@ export class Quiz extends Interaction {
     };
 
     setup() {
+        this.notification = usePlugin(NotificationPlugin);
         const questions = this.extractQuestionsAndAnswers();
         const data = this.el.querySelector(".o_quiz_js_quiz").dataset;
         this.track = {
@@ -80,7 +83,7 @@ export class Quiz extends Interaction {
         } else if (alertCode === "quiz_done") {
             message = _t("This quiz is already done. Retaking it is not possible.");
         }
-        this.services.notification.add(message, {
+        this.notification.add(message, {
             type: "warning",
             title: _t("Quiz validation error"),
             sticky: true,

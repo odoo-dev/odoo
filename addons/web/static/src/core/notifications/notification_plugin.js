@@ -1,6 +1,5 @@
-import { Plugin, Resource, types as t, untrack, usePlugin } from "@odoo/owl";
+import { Plugin, Resource, types as t, untrack } from "@odoo/owl";
 import { services } from "@web/core/services";
-import { registry } from "@web/core/registry";
 
 const AUTOCLOSE_DELAY = 4000;
 
@@ -39,6 +38,8 @@ const NotificationOptionWrapperSchema = t.object({
 });
 
 export class NotificationPlugin extends Plugin {
+    // o-spreadsheet has its own NotificationPlugin, plugins are resolved by id
+    static id = "notification";
     /** @private */
     notifId = 0;
     /** @private */
@@ -85,17 +86,3 @@ export class NotificationPlugin extends Plugin {
 }
 
 services.add(NotificationPlugin);
-
-/**
- * -----------------------------------------------------------------------------
- * @todo owl3 migration
- * temporary - to remove when all use of the notification service are removed
- * -----------------------------------------------------------------------------
- */
-export const notificationService = {
-    start() {
-        return usePlugin(NotificationPlugin);
-    },
-};
-
-registry.category("services").add("notification", notificationService);

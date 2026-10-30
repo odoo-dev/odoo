@@ -1,10 +1,12 @@
 import { Plugin } from "@html_editor/plugin";
-import { markup } from "@odoo/owl";
+import { markup, usePlugin } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 import { registry } from "@web/core/registry";
 
 export class SaveSnippetPlugin extends Plugin {
     static id = "mass_mailing.SaveSnippetPlugin";
+    notification = usePlugin(NotificationPlugin);
     resources = {
         custom_snippets_notification_overrides: this.handleCustomSnippetNotification.bind(this),
         clean_for_save_processors: (rootEl, { saveSnippet } = {}) => {
@@ -29,7 +31,7 @@ export class SaveSnippetPlugin extends Plugin {
             "Your custom snippet was successfully saved as %s. Find it in your custom snippets collection.",
             markup`<strong>${savedName}</strong>`
         );
-        this.closeNotification = this.services.notification.add(message, {
+        this.closeNotification = this.notification.add(message, {
             type: "success",
             autocloseDelay: 10000,
         });

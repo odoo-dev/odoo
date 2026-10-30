@@ -152,7 +152,7 @@ export class PaymentMollie extends PaymentInterface {
             } catch {
                 if (!connectionLost) {
                     connectionLost = true;
-                    this.env.services.notification.add(
+                    this.notification.add(
                         _t(
                             "No internet connection. Waiting for recovery to confirm the payment..."
                         ),

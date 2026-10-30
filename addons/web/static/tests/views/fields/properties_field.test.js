@@ -29,7 +29,6 @@ import {
     fields,
     getService,
     makeServerError,
-    mockService,
     models,
     mountView,
     mountWithCleanup,
@@ -40,6 +39,7 @@ import {
     toggleMenuItem,
 } from "@web/../tests/web_test_helpers";
 import { PROPERTY_TYPES } from "@web/views/fields/properties/property_definition";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 async function addPropertyDefinition() {
     await waitFor(".o_property_field_popover");
@@ -298,7 +298,7 @@ test("properties: no access to parent", async () => {
         actionMenus: {},
     });
 
-    mockService("notification", {
+    patchWithCleanup(NotificationPlugin.prototype, {
         add: (message, options) => {
             expect(message).toBe('Oops! You cannot edit the Company "Company 1".');
         },
@@ -3247,7 +3247,7 @@ test("properties: no parent document set", async () => {
         actionMenus: {},
     });
 
-    mockService("notification", {
+    patchWithCleanup(NotificationPlugin.prototype, {
         add: (message, options) => {
             expect.step("notification");
             expect(message).toBe("Oops! A Company is needed to add property fields.");
