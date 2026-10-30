@@ -411,14 +411,7 @@ class MailingList(models.Model):
                 body=body,
                 subtype_id=self.env['ir.model.data']._xmlid_to_res_id('mail.mt_note'),
             )
-        self._post_subscribe_hook(contacts_to_subscribe, contacts_to_unsubscribe)
         return contacts
-
-    def _post_subscribe_hook(self, contacts_in, contacts_out):
-        """
-        Ease custom behavior post (un)subscription through inheritance
-        """
-        pass
 
     # ------------------------------------------------------
     # MAILING
