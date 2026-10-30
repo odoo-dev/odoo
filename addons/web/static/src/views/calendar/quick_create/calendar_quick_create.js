@@ -1,8 +1,9 @@
-import { useAutofocus, useService } from "@web/core/utils/hooks";
+import { useAutofocus } from "@web/core/utils/hooks";
 import { Dialog } from "@web/core/dialog/dialog";
 import { _t } from "@web/core/l10n/translation";
 
-import { Component, signal, t, useProps } from "@odoo/owl";
+import { Component, signal, t, useProps, usePlugin } from "@odoo/owl";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 export class CalendarQuickCreate extends Component {
     static template = "web.CalendarQuickCreate";
@@ -21,7 +22,7 @@ export class CalendarQuickCreate extends Component {
 
     setup() {
         useAutofocus({ ref: this.titleRef });
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
         this.creatingRecord = false;
     }
 

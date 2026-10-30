@@ -3,7 +3,8 @@ import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { checkFileSize } from "@web/core/utils/files";
 import { standardWidgetProps } from "@web/views/widgets/standard_widget_props";
-import { Component, t, useProps } from "@odoo/owl";
+import { Component, t, useProps, usePlugin } from "@odoo/owl";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 export class AttachDocumentWidget extends Component {
     static template = "web.AttachDocument";
@@ -20,7 +21,7 @@ export class AttachDocumentWidget extends Component {
 
     setup() {
         this.http = useService("http");
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
         this.fileInput = document.createElement("input");
         this.fileInput.type = "file";
         this.fileInput.accept = this.props.acceptedFileExtensions || "*";

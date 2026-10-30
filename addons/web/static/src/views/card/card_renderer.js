@@ -11,6 +11,7 @@ import { CardCompiler } from "./card_compiler";
 
 import { Component, computed, onWillUpdateProps, usePlugin, proxy, t, useProps } from "@odoo/owl";
 import { OfflinePlugin } from "@web/core/offline/offline_plugin";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 const formatters = registry.category("formatters");
 
@@ -95,7 +96,7 @@ export class CardRenderer extends Component {
         this.evaluateBooleanExpr = evaluateBooleanExpr;
         this.action = useService("action");
         this.dialog = useService("dialog");
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
         this.offlinePlugin = usePlugin(OfflinePlugin);
 
         const { Compiler, archInfo } = this.props;

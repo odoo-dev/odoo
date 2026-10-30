@@ -13,12 +13,13 @@ import {
     t,
     useListener,
     useProps,
+    usePlugin,
 } from "@odoo/owl";
 import { useHotkey } from "@web/core/hotkeys/hotkey_hook";
 import { _t } from "@web/core/l10n/translation";
 import { useActiveElement } from "@web/core/ui/ui_plugin";
-import { useService } from "@web/core/utils/hooks";
 import { closestScrollableY, scrollTo } from "@web/core/utils/scrolling";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 export const cropperAspectRatios = {
     "0/0": { label: _t("Flexible"), value: 0 },
@@ -47,7 +48,7 @@ export class ImageCrop extends Component {
 
     setup() {
         this.aspectRatios = cropperAspectRatios;
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
         this.media = this.props.media;
         this.document = this.props.document;
 

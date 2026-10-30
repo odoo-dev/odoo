@@ -5,7 +5,7 @@ import { OrderTrackerDropdown } from "@point_of_sale/app/components/order_tracke
 import { CashierName } from "@point_of_sale/app/components/navbar/cashier_name/cashier_name";
 import { SaleDetailsButton } from "@point_of_sale/app/components/navbar/sale_details_button/sale_details_button";
 import { BurgerMenuDialog } from "@point_of_sale/app/components/navbar/burger_menu/burger_menu_dialog";
-import { Component, proxy, signal, useListener } from "@odoo/owl";
+import { Component, proxy, signal, useListener, usePlugin } from "@odoo/owl";
 import { Input } from "@point_of_sale/app/components/inputs/input/input";
 import { isBarcodeScannerSupported } from "@web/core/barcode/barcode_video_scanner";
 import { BarcodePlugin } from "@barcodes/barcode_plugin";
@@ -15,6 +15,7 @@ import { isPrivateIp } from "@point_of_sale/utils";
 import { QrCodeCustomerDisplay } from "@point_of_sale/app/customer_display/customer_display_qr_code_popup";
 import { useAsyncLockedMethod } from "@point_of_sale/app/hooks/hooks";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 export { BurgerMenuDialog };
 
 export class Navbar extends Component {
@@ -33,7 +34,7 @@ export class Navbar extends Component {
         this.ui = useService("ui");
         this.state = proxy({ searchBarOpen: false });
         this.dialog = useService("dialog");
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
         this.dialog = useService("dialog");
         this.isBarcodeScannerSupported = isBarcodeScannerSupported;
         this.timeout = null;

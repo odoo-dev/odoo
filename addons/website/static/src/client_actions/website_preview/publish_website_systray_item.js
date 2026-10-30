@@ -4,9 +4,10 @@ import { rpc } from "@web/core/network/rpc";
 import { registry } from "@web/core/registry";
 import { CheckBox } from "@web/core/checkbox/checkbox";
 import { useService, useBus } from "@web/core/utils/hooks";
-import { Component, proxy, useProps } from "@odoo/owl";
+import { Component, proxy, useProps, usePlugin } from "@odoo/owl";
 import { OptimizeSEODialog } from "@website/components/dialog/seo";
 import { RelativePublishTime } from "./relative_publish_time";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 const websiteSystrayRegistry = registry.category("website_systray");
 
@@ -57,7 +58,7 @@ export class PublishSystrayItem extends Component {
         this.website = useService("website");
         this.orm = useService("orm");
         this.dialogService = useService("dialog");
-        this.notificationService = useService("notification");
+        this.notificationService = usePlugin(NotificationPlugin);
         this.actionService = useService("action");
         this.websiteCustomMenus = useService("website_custom_menus");
 

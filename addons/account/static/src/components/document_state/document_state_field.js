@@ -4,7 +4,8 @@ import { useService } from "@web/core/utils/hooks";
 
 import { SelectionField, selectionField } from "@web/views/fields/selection/selection_field";
 
-import { Component, t, useProps } from "@odoo/owl";
+import { Component, t, useProps, usePlugin } from "@odoo/owl";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 export class DocumentStatePopover extends Component {
     static template = "account.DocumentStatePopover";
@@ -23,7 +24,7 @@ export class DocumentState extends SelectionField {
     setup() {
         super.setup();
         this.popover = useService("popover");
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
     }
 
     get message() {

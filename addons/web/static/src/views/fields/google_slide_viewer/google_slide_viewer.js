@@ -1,9 +1,10 @@
 /** @odoo-module **/
 
+import { usePlugin } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
-import { useService } from "@web/core/utils/hooks";
 import { CharField, charField } from "@web/views/fields/char/char_field";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 export function getGoogleSlideUrl(value, page) {
     let url = false;
@@ -19,7 +20,7 @@ export class GoogleSlideViewer extends CharField {
     static template = "web.GoogleSlideViewer";
     setup() {
         super.setup();
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
         this.page = 1;
     }
 

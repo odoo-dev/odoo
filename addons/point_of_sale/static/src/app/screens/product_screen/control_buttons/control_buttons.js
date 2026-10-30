@@ -1,4 +1,4 @@
-import { Component, useProps, t } from "@odoo/owl";
+import { Component, useProps, t, usePlugin } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { Dialog } from "@web/core/dialog/dialog";
 import { SelectionPopup } from "@point_of_sale/app/components/popups/selection_popup/selection_popup";
@@ -11,6 +11,7 @@ import { _t } from "@web/core/l10n/translation";
 import { makeAwaitable } from "@point_of_sale/app/utils/make_awaitable_dialog";
 import { SelectPartnerButton } from "@point_of_sale/app/screens/product_screen/control_buttons/select_partner_button/select_partner_button";
 import { useAsyncLockedMethod } from "@point_of_sale/app/hooks/hooks";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 export class ControlButtons extends Component {
     static template = "point_of_sale.ControlButtons";
@@ -27,7 +28,7 @@ export class ControlButtons extends Component {
         this.pos = usePos();
         this.ui = useService("ui");
         this.dialog = useService("dialog");
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
         this.clickPrintBill = useAsyncLockedMethod(this.clickPrintBill.bind(this));
     }
     async clickPrintBill() {

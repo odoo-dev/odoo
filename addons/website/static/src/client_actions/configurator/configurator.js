@@ -37,6 +37,7 @@ import {
     replacePreviewIframeLogo,
     scalePreviewIframe,
 } from "@website/client_actions/configurator/preview_iframe";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 export const ROUTES = {
     descriptionScreen: 1,
@@ -686,7 +687,7 @@ export class PaletteSelectionScreen extends Component {
     logoInputRef = signal.ref();
     setup() {
         this.state = useStore();
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
         this.orm = useService("orm");
         this.recommendationCancelled = false;
         this.typingTimeouts = [];

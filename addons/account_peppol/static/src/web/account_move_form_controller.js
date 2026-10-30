@@ -1,13 +1,15 @@
+import { usePlugin } from "@odoo/owl";
 import { patch } from "@web/core/utils/patch";
 import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { AccountMoveFormController } from "@account/components/account_move_form/account_move_form";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 patch(AccountMoveFormController.prototype, {
     setup() {
         super.setup();
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
         this.dialogService = useService("dialog");
     },
 

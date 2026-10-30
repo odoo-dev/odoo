@@ -56,6 +56,7 @@ import { MOVABLE_RECORD_TYPES } from "@web/model/relational_model/dynamic_group_
 import { ActionHelper } from "@web/views/action_helper";
 import { GroupConfigMenu } from "@web/views/view_components/group_config_menu";
 import { MultiCurrencyPopover } from "@web/views/view_components/multi_currency_popover";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 /**
  * @typedef {import('@web/model/relational_model/dynamic_list').DynamicList} DynamicList
@@ -194,7 +195,7 @@ export class ListRenderer extends Component {
     setup() {
         this.uiService = useService("ui");
         this.offlinePlugin = usePlugin(OfflinePlugin);
-        this.notificationService = useService("notification");
+        this.notificationService = usePlugin(NotificationPlugin);
         this.orm = useService("orm");
         const key = this.createViewKey();
         this.keyOptionalFields = `optional_fields,${key}`;

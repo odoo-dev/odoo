@@ -1,8 +1,10 @@
+import { usePlugin } from "@odoo/owl";
 import { patch } from "@web/core/utils/patch";
 import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
 import { AlertDialog, ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { AccountMoveListController } from "@account/views/account_move_list/account_move_list_controller";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 const SALE_MOVE_TYPES = ['out_invoice', 'out_refund', 'out_receipt'];
 
@@ -18,7 +20,7 @@ function isSentInvoice(record) {
 patch(AccountMoveListController.prototype, {
     setup() {
         super.setup();
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
         this.dialogService = useService("dialog");
     },
 

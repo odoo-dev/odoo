@@ -1,10 +1,11 @@
-import { Component, proxy, signal } from "@odoo/owl";
+import { Component, proxy, signal, usePlugin } from "@odoo/owl";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { _t } from "@web/core/l10n/translation";
 import { rpc, rpcBus } from "@web/core/network/rpc";
 import { registry } from "@web/core/registry";
-import { useAutofocus, useService } from "@web/core/utils/hooks";
+import { useAutofocus } from "@web/core/utils/hooks";
 import { useEnv } from "@web/owl2/utils";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 const cogMenuRegistry = registry.category("cogMenu");
 
@@ -28,7 +29,7 @@ export class AddToBoard extends Component {
     autofocusRef = signal.ref();
 
     setup() {
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
         this.state = proxy({ name: this.env.config.getDisplayName() });
 
         useAutofocus({ ref: this.autofocusRef });

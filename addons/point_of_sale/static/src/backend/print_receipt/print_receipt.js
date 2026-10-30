@@ -1,17 +1,18 @@
-import { Component, useProps, proxy } from "@odoo/owl";
+import { Component, useProps, proxy, usePlugin } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { standardWidgetProps } from "@web/views/widgets/standard_widget_props";
 import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
 import { EpsonPrinter } from "@point_of_sale/app/utils/printer/epson_printer";
 import { initLNA } from "@point_of_sale/app/utils/init_lna";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 export class PrintReceipt extends Component {
     static template = "point_of_sale.PrintReceiptButton";
     props = useProps(standardWidgetProps);
 
     setup() {
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
         this.dialog = useService("dialog");
         this.orm = useService("orm");
         this.state = proxy({

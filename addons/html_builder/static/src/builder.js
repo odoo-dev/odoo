@@ -13,6 +13,7 @@ import {
     useProps,
     t,
     useScope,
+    usePlugin,
 } from "@odoo/owl";
 import { useHotkey } from "@web/core/hotkeys/hotkey_hook";
 import { _t } from "@web/core/l10n/translation";
@@ -28,6 +29,7 @@ import { TextTruncateTooltipPlugin } from "@web/core/tooltip/text_truncate_toolt
 import { withSequence } from "@html_editor/utils/resource";
 import { getHtmlStyle } from "@html_editor/utils/formatting";
 import { isVisible } from "@html_builder/utils/utils";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 const TAB_TRANSITION_FALLBACK_DELAY = 400;
 
@@ -94,7 +96,7 @@ export class Builder extends Component {
         useHotkey("control+shift+z", () => this.redo());
         this.orm = useService("orm");
         this.ui = useService("ui");
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
 
         this.snippetModel = useSnippets(this.props.snippetsName);
 

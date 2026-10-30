@@ -10,6 +10,7 @@ import {
     useEffect,
     onMounted,
     onWillUnmount,
+    usePlugin,
 } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { cleanZWChars, deduceLinkUrl, normalizeLinkUrlInput } from "./utils";
@@ -28,6 +29,7 @@ import {
 } from "@html_editor/utils/button_style";
 import { closestElement, trapFocus } from "@html_editor/utils/dom_traversal";
 import { ICON_SELECTOR } from "@html_editor/utils/dom_info";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 export const linkPopoverProps = {
     advancedAttributeOptions: t.array().optional(),
@@ -80,7 +82,7 @@ export class LinkPopover extends Component {
 
     setup() {
         this.ui = useService("ui");
-        this.notificationService = useService("notification");
+        this.notificationService = usePlugin(NotificationPlugin);
         this.uploadService = useService("uploadLocalFiles");
 
         const linkElement = this.props.linkElement;

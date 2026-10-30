@@ -41,6 +41,7 @@ import { OptionalProductPopup } from "@point_of_sale/app/components/popups/optio
 import { useRouterParamsChecker } from "@point_of_sale/app/hooks/pos_router_hook";
 import { debounce } from "@web/core/utils/timing";
 import { useSortable } from "@web/core/utils/sortable_owl";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 const { DateTime } = luxon;
 
@@ -68,7 +69,7 @@ export class ProductScreen extends Component {
         this.pos = usePos();
         this.ui = useService("ui");
         this.dialog = useService("dialog");
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
         this.numberBuffer = usePlugin(PosNumberBufferPlugin);
         this.state = proxy({
             quantityByProductTmplId: {},

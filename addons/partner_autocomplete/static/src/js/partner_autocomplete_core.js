@@ -1,12 +1,13 @@
 /* global checkVATNumber */
 
-import { useScope } from "@odoo/owl";
+import { useScope, usePlugin } from "@odoo/owl";
 import { AssetsLoadingError, loadJS } from "@web/core/assets";
 import { _t } from "@web/core/l10n/translation";
 import { ConnectionLostError } from "@web/core/network/rpc";
 import { KeepLast } from "@web/core/utils/concurrency";
 import { useService } from "@web/core/utils/hooks";
 import { renderToMarkup } from "@web/core/utils/render";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 /**
  * Get list of companies via Autocomplete API
@@ -19,7 +20,7 @@ export function usePartnerAutocomplete() {
     const keepLast = new KeepLast();
 
     const scope = useScope();
-    const notification = useService("notification");
+    const notification = usePlugin(NotificationPlugin);
     const orm = useService("orm");
 
     let lastNoResultsQuery = null;

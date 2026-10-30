@@ -1,7 +1,7 @@
 import { _t } from "@web/core/l10n/translation";
-import { useService } from "@web/core/utils/hooks";
 
-import { Component, useProps, proxy, t } from "@odoo/owl";
+import { Component, useProps, proxy, t, usePlugin } from "@odoo/owl";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 export class UploadDropZone extends Component {
     static template = "account.UploadDropZone";
@@ -18,7 +18,7 @@ export class UploadDropZone extends Component {
     });
 
     setup() {
-        this.notificationService = useService("notification");
+        this.notificationService = usePlugin(NotificationPlugin);
         this.dashboardState = proxy(this.env.dashboardState || {});
     }
 

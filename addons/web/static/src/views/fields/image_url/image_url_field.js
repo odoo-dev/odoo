@@ -1,9 +1,9 @@
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
-import { useService } from "@web/core/utils/hooks";
 import { standardFieldProps } from "../standard_field_props";
 
-import { Component, proxy, t, useEffect, useProps } from "@odoo/owl";
+import { Component, proxy, t, useEffect, useProps, usePlugin } from "@odoo/owl";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 export class ImageUrlField extends Component {
     static template = "web.ImageUrlField";
@@ -16,7 +16,7 @@ export class ImageUrlField extends Component {
     static fallbackSrc = "/web/static/img/placeholder.png";
 
     setup() {
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
         this.state = proxy({
             src: this.props.record.data[this.props.name],
         });

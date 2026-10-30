@@ -24,8 +24,10 @@ import {
     t,
     useEffect,
     useProps,
+    usePlugin,
 } from "@odoo/owl";
 import { deepCopy } from "@web/core/utils/objects";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 export class PropertiesField extends Component {
     static template = "web.PropertiesField";
@@ -43,7 +45,7 @@ export class PropertiesField extends Component {
     });
 
     setup() {
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
         this.orm = useService("orm");
         this.dialogService = useService("dialog");
         this.popover = usePopover(PropertyDefinition, {

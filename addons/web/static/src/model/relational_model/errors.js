@@ -1,6 +1,7 @@
+import { usePlugin } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { _t } from "@web/core/l10n/translation";
-import { useService } from "@web/core/utils/hooks";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 export class FetchRecordError extends Error {
     constructor(resIds) {
@@ -16,7 +17,7 @@ export class FetchRecordError extends Error {
 
 /** @type {import("registries").ErrorHandler} */
 function fetchRecordErrorHandler({ originalError }) {
-    const notification = useService("notification");
+    const notification = usePlugin(NotificationPlugin);
     if (originalError instanceof FetchRecordError) {
         notification.add(originalError.message, { sticky: true, type: "danger" });
         return true;

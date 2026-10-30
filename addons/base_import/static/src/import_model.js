@@ -1,4 +1,4 @@
-import { proxy } from "@odoo/owl";
+import { proxy, usePlugin } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { user } from "@web/core/user";
@@ -10,6 +10,7 @@ import { pick } from "@web/core/utils/objects";
 import { session } from "@web/session";
 import { ImportBlockUI } from "./import_block_ui";
 import { BinaryFileManager } from "./binary_file_manager";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 const mainComponentRegistry = registry.category("main_components");
 
@@ -151,7 +152,7 @@ export class BaseImportModel {
 
         this.languagesInstalled = [];
 
-        this.notificationService = useService("notification");
+        this.notificationService = usePlugin(NotificationPlugin);
     }
 
     //--------------------------------------------------------------------------

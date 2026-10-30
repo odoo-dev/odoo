@@ -1,11 +1,11 @@
-import { t, useProps } from "@odoo/owl";
+import { t, useProps, usePlugin } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
-import { useService } from "@web/core/utils/hooks";
 import { useSubEnv } from "@web/owl2/utils";
 import { useOpenX2ManyRecord, useX2ManyCrud } from "@web/views/fields/relational_utils";
 import { X2ManyField, x2ManyField, x2ManyFieldProps } from "@web/views/fields/x2many/x2many_field";
 import { QuestionPageListRenderer } from "./question_page_list_renderer";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 /**
  * For convenience, we'll prevent closing the question form dialog and
@@ -17,7 +17,7 @@ import { QuestionPageListRenderer } from "./question_page_list_renderer";
 class SurveySaveError extends Error {}
 /** @type {import("registries").ErrorHandler} */
 function SurveySaveErrorHandler({ originalError }) {
-    const notification = useService("notification");
+    const notification = usePlugin(NotificationPlugin);
     if (originalError instanceof SurveySaveError) {
         notification.add(originalError.message, {
             title: _t("Validation Error"),

@@ -1,14 +1,15 @@
-import { markup } from "@odoo/owl";
+import { markup, usePlugin } from "@odoo/owl";
 import { isMobileOS } from "@web/core/browser/feature_detection";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { htmlSprintf } from "@web/core/utils/html";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 registry.category("actions").add("res_partner_to_list_results", (action) => {
     const { notification, next } = action.params;
     const { button, message, type } = notification;
     const actionService = useService("action");
-    const notificationService = useService("notification");
+    const notificationService = usePlugin(NotificationPlugin);
     const onButtonClick = function () {
         this.close(); // Close notification
         return actionService.doAction(button.action);

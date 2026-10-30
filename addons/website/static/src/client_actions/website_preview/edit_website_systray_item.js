@@ -1,10 +1,11 @@
-import { Component, proxy, useProps, t } from "@odoo/owl";
+import { Component, proxy, useProps, t, usePlugin } from "@odoo/owl";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { registry } from "@web/core/registry";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { rpc } from "@web/core/network/rpc";
 import { _t } from "@web/core/l10n/translation";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 const websiteSystrayRegistry = registry.category("website_systray");
 
@@ -22,7 +23,7 @@ export class EditWebsiteSystrayItem extends Component {
 
     setup() {
         this.websiteService = useService("website");
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
         this.websiteContext = proxy(this.websiteService.context);
         // TODO: website service should share a reactive
         useBus(websiteSystrayRegistry, "CONTENT-UPDATED", () => this.checkPendingTranslations());

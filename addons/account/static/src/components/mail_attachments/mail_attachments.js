@@ -1,8 +1,9 @@
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { FileInput } from "@web/core/file_input/file_input";
-import { Component, onWillUnmount, useProps } from "@odoo/owl";
+import { Component, onWillUnmount, useProps, usePlugin } from "@odoo/owl";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 export class MailAttachments extends Component {
     static template = "account.mail_attachments";
@@ -11,7 +12,7 @@ export class MailAttachments extends Component {
 
     setup() {
         this.orm = useService("orm");
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
         this.attachmentIdsToUnlink = new Set();
 
         onWillUnmount(this.onWillUnmount);

@@ -7,6 +7,7 @@ import { usePos } from "@point_of_sale/app/hooks/pos_hook";
 import { serializeDateTime } from "@web/core/l10n/dates";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { downloadPosLogs, downloadIdbErrors } from "../pretty_console_log";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 const { DateTime } = luxon;
 
 export class DebugWidget extends Component {
@@ -17,7 +18,7 @@ export class DebugWidget extends Component {
     setup() {
         this.pos = usePos();
         this.barcodeReader = useService("barcode_reader");
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
         this.numberBuffer = usePlugin(PosNumberBufferPlugin);
         this.dialog = useService("dialog");
         this.state = proxy({

@@ -12,7 +12,6 @@ import { evaluateExpr } from "@web/core/py_js/py";
 import { domainFromTree } from "@web/core/tree_editor/domain_from_tree";
 import { user } from "@web/core/user";
 import { sortBy } from "@web/core/utils/arrays";
-import { useService } from "@web/core/utils/hooks";
 import { deepCopy } from "@web/core/utils/objects";
 import { hashCode } from "@web/core/utils/strings";
 import { SearchArchParser } from "./search_arch_parser";
@@ -29,6 +28,7 @@ import {
     getRelativeDateLabel,
 } from "./utils/dates";
 import { FACET_COLORS, FACET_ICONS } from "./utils/misc";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 const { DateTime } = luxon;
 
@@ -237,7 +237,7 @@ export class SearchModel extends EventBus {
         this.treeProcessor = treeProcessor;
         this.dialog = dialog;
         this.orderByCount = false;
-        this.notificationService = useService("notification");
+        this.notificationService = usePlugin(NotificationPlugin);
 
         // used to manage search items related to date/datetime fields
         this.referenceMoment = DateTime.local();

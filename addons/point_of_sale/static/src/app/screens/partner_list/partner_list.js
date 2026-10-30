@@ -1,4 +1,4 @@
-import { Component, computed, proxy, signal, t, useListener, useProps } from "@odoo/owl";
+import { Component, computed, proxy, signal, t, useListener, useProps, usePlugin } from "@odoo/owl";
 import { Input } from "@point_of_sale/app/components/inputs/input/input";
 import { usePos } from "@point_of_sale/app/hooks/pos_hook";
 import { ResPartner } from "@point_of_sale/app/models/res_partner";
@@ -9,6 +9,7 @@ import { _t } from "@web/core/l10n/translation";
 import { localeCompare, normalize } from "@web/core/l10n/utils";
 import { useService } from "@web/core/utils/hooks";
 import { debounce } from "@web/core/utils/timing";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 export class PartnerList extends Component {
     static components = { PartnerLine, Dialog, Input };
@@ -22,7 +23,7 @@ export class PartnerList extends Component {
     setup() {
         this.pos = usePos();
         this.ui = useService("ui");
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
         this.dialog = useService("dialog");
         this.modalRef = signal.ref();
         this.modalContent = computed(() => this.modalRef()?.querySelector(".modal-body") ?? null);

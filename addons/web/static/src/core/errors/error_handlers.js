@@ -17,6 +17,7 @@ import { registry } from "@web/core/registry";
 import { user } from "@web/core/user";
 import { useService } from "@web/core/utils/hooks";
 import { session } from "@web/session";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 const errorHandlerRegistry = registry.category("error_handlers");
 const errorDialogRegistry = registry.category("error_dialogs");
@@ -32,7 +33,7 @@ export function rpcErrorHandler({ error, originalError }) {
         return false;
     }
 
-    const notification = useService("notification");
+    const notification = usePlugin(NotificationPlugin);
     const dialog = useService("dialog");
 
     if (originalError instanceof RPCError) {

@@ -1,6 +1,6 @@
 import { useLayoutEffect } from "@web/owl2/utils";
 import { FloorPlanBase } from "@pos_restaurant/app/screens/floor_screen/floor_plan_base";
-import { markRaw, onWillUnmount, useListener, proxy } from "@odoo/owl";
+import { markRaw, onWillUnmount, useListener, proxy, usePlugin } from "@odoo/owl";
 import { useDebounced } from "@web/core/utils/timing";
 import { makeDraggableHook } from "@web/core/utils/draggable_hook_builder_owl";
 import { setElementTransform } from "@pos_restaurant/app/services/floor_plan/utils/utils";
@@ -8,6 +8,7 @@ import { calculateBoundsFromTransform } from "@pos_restaurant/app/services/floor
 import { useService } from "@web/core/utils/hooks";
 import { usePos } from "@point_of_sale/app/hooks/pos_hook";
 import { _t } from "@web/core/l10n/translation";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 const TABLE_LINKING_DELAY = 400;
 const TIMER_INTERVAL = 60000;
@@ -21,7 +22,7 @@ export class FloorPlan extends FloorPlanBase {
         this.pos = usePos();
         this.alert = this.pos.alert;
         this.ui = useService("ui");
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
         useListener(window, "resize", useDebounced(this.handleWindowResize.bind(this), 100));
         this.scrollFloorId = null;
 

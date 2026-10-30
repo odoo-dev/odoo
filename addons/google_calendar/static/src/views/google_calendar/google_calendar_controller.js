@@ -1,3 +1,4 @@
+import { usePlugin } from "@odoo/owl";
 import { render } from "@web/owl2/utils";
 import { AttendeeCalendarController } from "@calendar/views/attendee_calendar/attendee_calendar_controller";
 
@@ -6,12 +7,13 @@ import { user } from "@web/core/user";
 import { patch } from "@web/core/utils/patch";
 import { useService } from "@web/core/utils/hooks";
 import { ConfirmationDialog, AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 patch(AttendeeCalendarController.prototype, {
     setup() {
         super.setup(...arguments);
         this.dialog = useService("dialog");
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
     },
 
     async onGoogleSyncCalendar() {

@@ -38,6 +38,7 @@ import { ResourceEditor } from "@website/components/resource_editor/resource_edi
 import { CreatePageMessage } from "./create_page_message";
 import { isHTTPSorNakedDomainRedirection } from "./utils";
 import { WebsiteSystrayItem } from "./website_systray_item";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 const websiteSystrayRegistry = registry.category("website_systray");
 
@@ -72,7 +73,7 @@ export class WebsiteBuilderClientAction extends Component {
     setup() {
         this.reloadContext = null;
         this.orm = useService("orm");
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
         this.dialog = useService("dialog");
         this.websiteService = useService("website");
         this.ui = useService("ui");

@@ -1,7 +1,8 @@
-import { Component, proxy, t, useOnChange, useProps } from "@odoo/owl";
+import { Component, proxy, t, useOnChange, useProps, usePlugin } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { SignatureDialog } from "@web/core/signature/signature_dialog";
 import { useService } from "@web/core/utils/hooks";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 const PLACEHOLDER = "/web/static/img/placeholder.png";
 
@@ -22,7 +23,7 @@ export class SignatureViewer extends Component {
 
     setup() {
         this.dialog = useService("dialog");
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
         this.state = proxy({
             isValid: true,
         });

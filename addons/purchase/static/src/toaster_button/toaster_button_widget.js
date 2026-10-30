@@ -1,7 +1,8 @@
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
-import { Component, t, useProps } from "@odoo/owl";
+import { Component, t, useProps, usePlugin } from "@odoo/owl";
 import { standardWidgetProps } from "@web/views/widgets/standard_widget_props";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 class ButtonWithNotification extends Component {
     static template = "purchase.ButtonWithNotification";
@@ -13,7 +14,7 @@ class ButtonWithNotification extends Component {
     });
     setup() {
         this.orm = useService("orm");
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
     }
 
     async onClick() {

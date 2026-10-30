@@ -3,9 +3,9 @@ import { registry } from "@web/core/registry";
 import { user } from "@web/core/user";
 import { RainbowMan } from "./rainbow_man";
 import { Plugin, usePlugin, useScope } from "@odoo/owl";
-import { useService } from "@web/core/utils/hooks";
 import { services } from "@web/core/services";
 import { OverlayPlugin } from "@web/core/overlay/overlay_plugin";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 const effectRegistry = registry.category("effects");
 
@@ -36,7 +36,7 @@ const effectRegistry = registry.category("effects");
  *    If params.Component is given, its props can be passed with this argument
  */
 function rainbowMan(params = {}) {
-    const notification = useService("notification");
+    const notification = usePlugin(NotificationPlugin);
     let message = params.message;
     if (message instanceof Element) {
         console.log(

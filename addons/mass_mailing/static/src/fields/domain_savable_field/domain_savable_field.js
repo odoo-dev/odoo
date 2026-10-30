@@ -1,9 +1,10 @@
-import { t, useEffect, useProps } from "@odoo/owl";
+import { t, useEffect, useProps, usePlugin } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { domainField, DomainField, domainFieldProps } from "@web/views/fields/domain/domain_field";
 import { MailingFilterFormViewDialog } from "../../components/mailing_filter_form_view_dialog/mailing_filter_form_view_dialog";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 /**
  * Domain field that provides a save button which allows
@@ -29,7 +30,7 @@ export class DomainSavableField extends DomainField {
         super.setup();
         this.actionService = useService("action");
         this.dialogService = useService("dialog");
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
         useEffect(() => {
             this.state.showSaveButton = this.getDomain() !== "[]";
         });

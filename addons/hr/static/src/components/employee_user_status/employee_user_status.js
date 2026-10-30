@@ -1,12 +1,13 @@
 import { registry } from "@web/core/registry";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
-import { Component, useProps } from "@odoo/owl";
+import { Component, useProps, usePlugin } from "@odoo/owl";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { useService } from "@web/core/utils/hooks";
 import { browser } from "@web/core/browser/browser";
 import { _t } from "@web/core/l10n/translation";
 import { UserDeactivationDialog } from "./user_deactivation_dialog";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 // Visual representation of res.users.state, mirrored on the employee.
 const STATUS = {
@@ -28,7 +29,7 @@ export class EmployeeUserStatus extends Component {
 
     setup() {
         this.orm = useService("orm");
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
         this.action = useService("action");
         this.dialog = useService("dialog");
     }

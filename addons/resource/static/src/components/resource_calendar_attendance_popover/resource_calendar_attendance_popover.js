@@ -1,6 +1,6 @@
 import { Record } from "@web/model/record";
 import { FormRenderer } from "@web/views/form/form_renderer";
-import { Component, useProps, types as t, signal } from "@odoo/owl";
+import { Component, useProps, types as t, signal, usePlugin } from "@odoo/owl";
 import { executeButtonCallback, useViewButtons } from "@web/views/view_button/view_button_hook";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
@@ -9,6 +9,7 @@ import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
 import { serializeDate } from "@web/core/l10n/dates";
 import { ResourceCalendarPlugin } from "@resource/plugins/resource_calendar_plugin";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 export class ResourceCalendarAttendancePopover extends Component {
     static template = "resource.ResourceCalendarAttendancePopover";
@@ -44,7 +45,7 @@ export class ResourceCalendarAttendancePopover extends Component {
     });
 
     setup() {
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
         this.orm = useService("orm");
         this.popoverRef = signal(null, { type: t.ref(HTMLElement) });
         this.hasRecurrencyChanged = signal(false, { type: t.boolean() });

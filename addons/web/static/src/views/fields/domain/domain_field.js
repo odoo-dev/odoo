@@ -13,6 +13,7 @@ import { useBus, useOwnedDialogs, useService } from "@web/core/utils/hooks";
 import { useRecordObserver } from "@web/model/relational_model/utils";
 import { SelectCreateDialog } from "@web/views/view_dialogs/select_create_dialog";
 import { standardFieldProps } from "../standard_field_props";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 export const domainFieldProps = {
     ...standardFieldProps,
@@ -35,7 +36,7 @@ export class DomainField extends Component {
 
     setup() {
         this.orm = useService("orm");
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
         this.treeProcessor = useService("tree_processor");
         this.getDefaultLeafDomain = useGetDefaultLeafDomain();
         this.addDialog = useOwnedDialogs();

@@ -13,7 +13,8 @@ import { generateImageVariants } from "@web/core/utils/image_library";
 import { FileUploader } from "../file_handler";
 import { standardFieldProps } from "../standard_field_props";
 
-import { Component, proxy, t, useProps } from "@odoo/owl";
+import { Component, proxy, t, useProps, usePlugin } from "@odoo/owl";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 export const fileTypeMagicWordMap = {
     "/": "jpg",
@@ -50,7 +51,7 @@ export class ImageField extends Component {
     props = useProps(imageFieldProps);
 
     setup() {
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
         this.orm = useService("orm");
         this.isMobile = isMobileOS();
         this.state = proxy({

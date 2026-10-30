@@ -1,9 +1,11 @@
+import { usePlugin } from "@odoo/owl";
 import { AttendeeCalendarActivityListPopover } from "@calendar/views/attendee_calendar/activity/attendee_calendar_activity_list_popover";
 import { AttendeeCalendarCommonRenderer } from "@calendar/views/attendee_calendar/common/attendee_calendar_common_renderer";
 import { patch } from "@web/core/utils/patch";
 import { renderToFragment } from "@web/core/utils/render";
 import { useCalendarPopover } from "@web/views/calendar/hooks/calendar_popover_hook";
 import { useService } from "@web/core/utils/hooks";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 /**
  * Render the pending user activities in the Attendee Calendar day, week and month views.
@@ -20,7 +22,7 @@ patch(AttendeeCalendarCommonRenderer.prototype, {
      */
     setup() {
         super.setup(...arguments);
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
         this.orm = useService("orm");
         this.activityListPopover = useCalendarPopover(AttendeeCalendarActivityListPopover);
     },

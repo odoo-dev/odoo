@@ -15,6 +15,7 @@ import { useSubEnv } from "@web/owl2/utils";
 import { AttendanceInlineForm } from "@hr_attendance/components/attendance_inline_form/attendance_inline_form";
 import { AttendanceVideoStream } from "@hr_attendance/components/attendance_video_stream/attendance_video_stream";
 import { LazySessionPlugin } from "@web/webclient/lazy_session_plugin";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 const { DateTime } = luxon;
 
@@ -35,7 +36,7 @@ export class ActivityMenu extends Component {
     setup() {
         this.ui = useService("ui");
         this.lazySession = usePlugin(LazySessionPlugin);
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
         this.dialogService = useService("dialog");
         const { services } = this.env;
         const datetimePicker = services.datetime_picker;

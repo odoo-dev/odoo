@@ -1,7 +1,6 @@
-import { useService } from "@web/core/utils/hooks";
-
-import { Component, onMounted, onPatched, proxy, signal, t, useProps } from "@odoo/owl";
+import { Component, onMounted, onPatched, proxy, signal, t, useProps, usePlugin } from "@odoo/owl";
 import { useSortable } from "@web/core/utils/sortable_owl";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 export class PropertyDefinitionSelection extends Component {
     static template = "web.PropertyDefinitionSelection";
@@ -20,7 +19,7 @@ export class PropertyDefinitionSelection extends Component {
     addButtonRef = signal.ref();
 
     setup() {
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
 
         // when we create a new option, it's added in the state
         // when we have finished to edit it (blur / enter) we propagate

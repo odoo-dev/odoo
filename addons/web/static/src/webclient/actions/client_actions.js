@@ -1,13 +1,14 @@
-import { markup } from "@odoo/owl";
+import { markup, usePlugin } from "@odoo/owl";
 import { location, browser } from "@web/core/browser/browser";
 import { router } from "@web/core/browser/router";
 import { makeErrorFromResponse, rpc } from "@web/core/network/rpc";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { htmlSprintf } from "@web/core/utils/html";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 export function displayNotificationAction(action) {
-    const notification = useService("notification");
+    const notification = usePlugin(NotificationPlugin);
     const params = action.params || {};
     const options = {
         className: params.className || "",

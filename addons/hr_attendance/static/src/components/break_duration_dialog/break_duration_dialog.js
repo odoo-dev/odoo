@@ -1,8 +1,8 @@
-import { Component, props, proxy, t } from "@odoo/owl";
+import { Component, props, proxy, t, usePlugin } from "@odoo/owl";
 import { Dialog } from "@web/core/dialog/dialog";
 import { _t } from "@web/core/l10n/translation";
-import { useService } from "@web/core/utils/hooks";
 import { sprintf } from "@web/core/utils/strings";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 export class BreakDurationDialog extends Component {
     static template = "hr_attendance.BreakDurationDialog";
@@ -16,7 +16,7 @@ export class BreakDurationDialog extends Component {
     });
 
     setup() {
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
         this.state = proxy({ minutes: 0 });
         this.dialogTitle = _t("Break Duration");
         this.promptText = this.props.employeeName

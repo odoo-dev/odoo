@@ -26,6 +26,7 @@ import { useAutofocus, useService } from "@web/core/utils/hooks";
 import { fuzzyLookup } from "@web/core/utils/search";
 import { useSortable } from "@web/core/utils/sortable_owl";
 import { useDebounced } from "@web/core/utils/timing";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 class DeleteExportListDialog extends Component {
     static components = { Dialog };
@@ -128,7 +129,7 @@ export class ExportDataDialog extends Component {
 
     setup() {
         this.dialog = useService("dialog");
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
         this.orm = useService("orm");
         this.uiService = useService("ui");
         useAutofocus({ ref: this.templateNameRef });

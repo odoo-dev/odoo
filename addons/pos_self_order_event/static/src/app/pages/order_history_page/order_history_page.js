@@ -1,14 +1,15 @@
+import { usePlugin } from "@odoo/owl";
 import { OrdersHistoryPage } from "@pos_self_order/app/pages/order_history_page/order_history_page";
 import { patch } from "@web/core/utils/patch";
 import { _t } from "@web/core/l10n/translation";
-import { useService } from "@web/core/utils/hooks";
 import { rpc } from "@web/core/network/rpc";
 import { browser } from "@web/core/browser/browser";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 patch(OrdersHistoryPage.prototype, {
     async setup() {
         super.setup();
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
     },
 
     async downloadOrderTickets(line) {

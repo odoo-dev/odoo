@@ -14,6 +14,7 @@ import { useRouterParamsChecker } from "@point_of_sale/app/hooks/pos_router_hook
 import { PaymentScreenPaymentLines } from "@point_of_sale/app/screens/payment_screen/payment_lines/payment_lines";
 import { PaymentScreenStatus } from "@point_of_sale/app/screens/payment_screen/payment_status/payment_status";
 import { PosNumberBufferPlugin } from "@point_of_sale/app/plugins/pos_number_buffer_plugin";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 export class PaymentScreen extends Component {
     static template = "point_of_sale.PaymentScreen";
@@ -32,7 +33,7 @@ export class PaymentScreen extends Component {
         this.ui = useService("ui");
         this.dialog = useService("dialog");
         this.invoiceService = useService("account_move");
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
         this.payment_methods_from_config = this.configPaymentMethods || [];
         this.numberBuffer = usePlugin(PosNumberBufferPlugin);
         this.numberBuffer.use(this._getNumberBufferConfig);

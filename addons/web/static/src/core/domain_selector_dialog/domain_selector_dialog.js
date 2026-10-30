@@ -1,11 +1,12 @@
 import { _t } from "@web/core/l10n/translation";
-import { Component, proxy, signal, t, useProps } from "@odoo/owl";
+import { Component, proxy, signal, t, useProps, usePlugin } from "@odoo/owl";
 import { Dialog } from "@web/core/dialog/dialog";
 import { Domain } from "@web/core/domain";
 import { DomainSelector } from "@web/core/domain_selector/domain_selector";
 import { rpc } from "@web/core/network/rpc";
 import { useService } from "@web/core/utils/hooks";
 import { user } from "@web/core/user";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 export class DomainSelectorDialog extends Component {
     static template = "web.DomainSelectorDialog";
@@ -33,7 +34,7 @@ export class DomainSelectorDialog extends Component {
     confirmButtonRef = signal.ref();
 
     setup() {
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
         this.orm = useService("orm");
         this.state = proxy({ domain: this.props.domain });
     }

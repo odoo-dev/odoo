@@ -1,7 +1,8 @@
-import { Component, computed, signal, useProps, t } from "@odoo/owl";
+import { Component, computed, signal, useProps, t, usePlugin } from "@odoo/owl";
 import { Dialog } from "@web/core/dialog/dialog";
 import { useService } from "@web/core/utils/hooks";
 import { _t } from "@web/core/l10n/translation";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 const { DateTime } = luxon;
 
@@ -15,7 +16,7 @@ export class DatabaseDialog extends Component {
     });
 
     setup() {
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
         this.dialog = useService("dialog");
         this.http = useService("http");
 

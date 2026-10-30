@@ -1,9 +1,10 @@
-import { Component, xml, useProps, t } from "@odoo/owl";
+import { Component, xml, useProps, t, usePlugin } from "@odoo/owl";
 import { Dialog } from "@web/core/dialog/dialog";
 import { generateQRCodeDataUrl } from "@point_of_sale/utils";
 import { CopyButton } from "@web/core/copy_button/copy_button";
 import { useService } from "@web/core/utils/hooks";
 import { _t } from "@web/core/l10n/translation";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 export class QrCodeCustomerDisplay extends Component {
     static template = "point_of_sale.QrCodeCustomerDisplay";
@@ -15,7 +16,7 @@ export class QrCodeCustomerDisplay extends Component {
 
     setup() {
         this.ui = useService("ui");
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
         this.dialogService = useService("dialog");
     }
 

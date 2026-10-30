@@ -1,4 +1,4 @@
-import { Component, proxy, useProps, t, signal } from "@odoo/owl";
+import { Component, proxy, useProps, t, signal, usePlugin } from "@odoo/owl";
 import { Stepper } from "@pos_self_order/app/components/combo_stepper/combo_stepper";
 import { useSelfOrder } from "@pos_self_order/app/services/self_order_service";
 import { useScrollShadow } from "@pos_self_order/app/utils/scroll_shadow_hook";
@@ -8,6 +8,7 @@ import { rpc } from "@web/core/network/rpc";
 import { _t } from "@web/core/l10n/translation";
 import { range } from "@web/core/utils/numbers";
 import { useStickyTitleObserver } from "@pos_self_order/app/utils/sticky_title_observer";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 export class EventPage extends Component {
     static template = "pos_self_order_event.EventPage";
@@ -20,7 +21,7 @@ export class EventPage extends Component {
     setup() {
         this.selfOrder = useSelfOrder();
         this.router = useService("router");
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
         this.event = this.props.eventTemplate;
 
         this.state = proxy({

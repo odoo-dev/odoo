@@ -1,4 +1,4 @@
-import { onWillUnmount } from "@odoo/owl";
+import { onWillUnmount, usePlugin } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
@@ -8,11 +8,12 @@ import {
     provideViewButtonHandler,
     useViewButtonHandler,
 } from "@web/views/view_button/view_button_hook";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 export class SelectPrintersWizard extends FormController {
     setup() {
         super.setup();
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
         this.printersCache = useService("report_printers_cache");
         this.onClickViewButton = useViewButtonHandler();
 

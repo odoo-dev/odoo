@@ -8,7 +8,18 @@ import { KeepLast } from "@web/core/utils/concurrency";
 import { user } from "@web/core/user";
 import { useDebounced } from "@web/core/utils/timing";
 import { SearchMedia } from "./search_media";
-import { Component, onWillStart, proxy, signal, t, useListener, useProps, xml } from "@odoo/owl";
+import {
+    Component,
+    onWillStart,
+    proxy,
+    signal,
+    t,
+    useListener,
+    useProps,
+    xml,
+    usePlugin,
+} from "@odoo/owl";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 export const IMAGE_MIMETYPES = [
     "image/jpg",
@@ -249,7 +260,7 @@ export class FileSelector extends Component {
     existingAttachmentsRef = signal.ref();
 
     setup() {
-        this.notificationService = useService("notification");
+        this.notificationService = usePlugin(NotificationPlugin);
         this.orm = useService("orm");
         this.uploadService = useService("upload");
         this.keepLast = new KeepLast();

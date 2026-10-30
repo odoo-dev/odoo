@@ -1,16 +1,16 @@
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { CopyButton } from "@web/core/copy_button/copy_button";
-import { useService } from "@web/core/utils/hooks";
-import { Component, useProps } from "@odoo/owl";
+import { Component, useProps, usePlugin } from "@odoo/owl";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 export class CopyButtonJob extends CopyButton {
     static template = "website_hr_recruitment.CopyButtonJob";
 
     setup() {
         super.setup();
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
     }
 
     showTooltip() {

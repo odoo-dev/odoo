@@ -3,13 +3,13 @@ import { ColorList } from "@web/core/colorlist/colorlist";
 import { _t } from "@web/core/l10n/translation";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { registry } from "@web/core/registry";
-import { useService } from "@web/core/utils/hooks";
 import { BadgeTag } from "@web/core/tags_list/badge_tag";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 import { useTagNavigation } from "@web/core/record_selectors/tag_navigation_hook";
 
-import { Component, signal, t, useProps } from "@odoo/owl";
+import { Component, signal, t, useProps, usePlugin } from "@odoo/owl";
 import { range } from "@web/core/utils/numbers";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 class PropertyTagsColorListPopover extends Component {
     static template = "web.PropertyTagsColorListPopover";
@@ -52,7 +52,7 @@ export class PropertyTags extends Component {
     propertyTagsRef = signal.ref();
 
     setup() {
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
         this.popover = usePopover(this.constructor.components.Popover);
         useTagNavigation(this.propertyTagsRef, {
             delete: (index) => this.deleteTagByIndex(index),

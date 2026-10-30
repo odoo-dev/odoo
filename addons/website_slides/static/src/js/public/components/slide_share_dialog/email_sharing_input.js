@@ -1,9 +1,9 @@
 import { rpc } from "@web/core/network/rpc";
 import { session } from "@web/session";
-import { useService } from "@web/core/utils/hooks";
 import { _t } from "@web/core/l10n/translation";
 
-import { Component, proxy, signal, t, useProps } from "@odoo/owl";
+import { Component, proxy, signal, t, useProps, usePlugin } from "@odoo/owl";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 export class EmailSharingInput extends Component {
     static template = "website_slides.EmailSharingInput";
@@ -17,7 +17,7 @@ export class EmailSharingInput extends Component {
     inputRef = signal.ref();
 
     setup() {
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
         this.isWebsiteUser = session.is_website_user;
         this.state = proxy({
             isDone: false,

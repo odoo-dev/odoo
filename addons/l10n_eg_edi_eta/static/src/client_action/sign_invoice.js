@@ -5,6 +5,7 @@ import { _t } from "@web/core/l10n/translation";
 import { ORM } from "@web/core/orm_plugin";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 function jsonToFormData(params) {
     if (params instanceof FormData) {
@@ -39,7 +40,7 @@ async function initLNA(notification) {
 async function actionGetDrive(actionDescr, type) {
     const { drive_id, sign_host: host } = actionDescr.params;
     const orm = usePlugin(ORM);
-    const notification = useService("notification");
+    const notification = usePlugin(NotificationPlugin);
     const dialog = useService("dialog");
     const action = useService("action");
 

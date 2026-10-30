@@ -1,13 +1,13 @@
-import { Component, useProps } from "@odoo/owl";
+import { Component, useProps, usePlugin } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { browser } from "@web/core/browser/browser";
 import { registry } from "@web/core/registry";
 import { standardWidgetProps } from "@web/views/widgets/standard_widget_props";
-import { useService } from "@web/core/utils/hooks";
 import { downloadFile } from "@web/core/network/download";
 import { Logger } from "@bus/workers/bus_worker_utils";
 import { initLNA } from "@point_of_sale/app/utils/init_lna";
 import { useLayoutEffect } from "@web/owl2/utils";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 export class CashdroAdminButtons extends Component {
     static template = `pos_cashdro.CashdroAdminButtons`;
@@ -15,7 +15,7 @@ export class CashdroAdminButtons extends Component {
 
     setup() {
         super.setup();
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
         this.logger = new Logger("pos_cashdro");
 
         useLayoutEffect(

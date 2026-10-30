@@ -1,9 +1,10 @@
-import { Component, useProps } from "@odoo/owl";
+import { Component, useProps, usePlugin } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { standardWidgetProps } from "@web/views/widgets/standard_widget_props";
 import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
 import { initLNA, getLNATargetAddressSpace } from "@point_of_sale/app/utils/init_lna";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 const PRINTER_FIELDS = ["printer_ip", "name", "printer_type", "use_lna", "paper_size"];
 
@@ -29,7 +30,7 @@ export class TestEPos extends Component {
 
     setup() {
         super.setup();
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
         this.orm = useService("orm");
     }
 

@@ -1,7 +1,8 @@
-import { proxy, signal, t, useListener, useProps } from "@odoo/owl";
+import { proxy, signal, t, useListener, useProps, usePlugin } from "@odoo/owl";
 import { Domain } from "@web/core/domain";
 import { _t } from "@web/core/l10n/translation";
 import { useBus, useService } from '@web/core/utils/hooks';
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 export const ExpenseDocumentDropZone = (T, parentProps) => class ExpenseDocumentDropZone extends T {
     props = useProps({
@@ -55,7 +56,7 @@ export const AbstractExpenseDocumentUpload = (T) => class AbstractExpenseDocumen
     setup() {
         super.setup();
         this.actionService = useService('action');
-        this.notification = useService('notification');
+        this.notification = usePlugin(NotificationPlugin);
         this.orm = useService("orm");
         this.http = useService("http");
         this.uiService = useService("ui");

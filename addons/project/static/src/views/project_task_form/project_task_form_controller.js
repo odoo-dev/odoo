@@ -1,13 +1,13 @@
 import { _t } from "@web/core/l10n/translation";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { HistoryDialog } from "@html_editor/components/history_dialog/history_dialog";
-import { useService } from '@web/core/utils/hooks';
-import { markup, onMounted, useProps, t } from "@odoo/owl";
+import { markup, onMounted, useProps, t, usePlugin } from "@odoo/owl";
 import { formControllerProps } from "@web/views/form/form_controller";
 import { FormControllerWithHTMLExpander } from '@resource/views/form_with_html_expander/form_controller_with_html_expander';
 import { getHtmlFieldMetadata, setHtmlFieldMetadata } from "@html_editor/fields/html_field";
 
 import { ProjectTaskTemplateDropdown } from "../components/project_task_template_dropdown";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 export const subTaskDeleteConfirmationMessage = _t(
     `Deleting a task will also delete its associated sub-tasks. \
@@ -29,7 +29,7 @@ export class ProjectTaskFormController extends FormControllerWithHTMLExpander {
 
     setup() {
         super.setup();
-        this.notifications = useService("notification");
+        this.notifications = usePlugin(NotificationPlugin);
 
         if (this.props.focusTitle) {
             onMounted(() => this.rootRef().querySelector("#name_0")?.focus());

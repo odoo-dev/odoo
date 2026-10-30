@@ -1,8 +1,8 @@
 import { _t } from "@web/core/l10n/translation";
 import { scanBarcode } from "@web/core/barcode/barcode_dialog";
 import { isBarcodeScannerSupported } from "@web/core/barcode/barcode_video_scanner";
-import { Component, t, useProps } from "@odoo/owl";
-import { useService } from "@web/core/utils/hooks";
+import { Component, t, useProps, usePlugin } from "@odoo/owl";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 export class BarcodeScanner extends Component {
     static template = "barcodes.BarcodeScanner";
@@ -12,7 +12,7 @@ export class BarcodeScanner extends Component {
     });
 
     setup() {
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
         this.isBarcodeScannerSupported = isBarcodeScannerSupported();
         this.scanBarcode = () => scanBarcode(this.env, this.facingMode);
     }

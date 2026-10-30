@@ -22,8 +22,10 @@ import {
     useApp,
     useEffect,
     useProps,
+    usePlugin,
 } from "@odoo/owl";
 import wUtils from "@website/js/utils";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 // This replaces \b, because accents(e.g. à, é) are not seen as word boundaries.
 // Javascript \b is not unicode aware, and words beginning or ending by accents won't match \b
@@ -238,7 +240,7 @@ class ImageSelector extends Component {
     setup() {
         this.website = useService("website");
         this.dialogs = useService("dialog");
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
 
         this.seoContext = proxy(seoContext);
 

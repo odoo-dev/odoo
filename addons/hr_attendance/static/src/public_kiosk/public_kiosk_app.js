@@ -18,6 +18,7 @@ import { mountComponent } from "@web/env";
 import { session } from "@web/session";
 import { DocumentationLink } from "@web/views/widgets/documentation_link/documentation_link";
 import { BarcodePlugin } from "@barcodes/barcode_plugin";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 class kioskAttendanceApp extends Component {
     static template = "hr_attendance.public_kiosk_app";
@@ -48,7 +49,7 @@ class kioskAttendanceApp extends Component {
     setup() {
         this.dialogService = useService("dialog");
         this.barcode = usePlugin(BarcodePlugin);
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
         this.ui = useService("ui");
         this.companyImageUrl = url("/web/binary/company_logo", {
             company: this.props.companyId,

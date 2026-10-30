@@ -1,4 +1,4 @@
-import { Component, proxy, t, useProps, useScope } from "@odoo/owl";
+import { Component, proxy, t, useProps, useScope, usePlugin } from "@odoo/owl";
 import { PropertiesGroupByItem } from "@web/search/properties_group_by_item/properties_group_by_item";
 import { SearchBarDropdown } from "../search_bar_dropdown";
 import { dropdownProps } from "@web/core/dropdown/dropdown";
@@ -19,6 +19,7 @@ import { render } from "@web/owl2/utils";
 import { condition } from "@web/core/tree_editor/condition_tree";
 import { domainFromTree } from "@web/core/tree_editor/domain_from_tree";
 import { constructDateRange } from "@web/search/utils/dates";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 const favoriteMenuRegistry = registry.category("favoriteMenu");
 
@@ -56,7 +57,7 @@ export class SearchBarMenu extends Component {
         this.state = proxy({ sharedFavoritesExpanded: false });
         useBus(this.env.searchModel, "update", () => render(this));
         this.dialogService = useService("dialog");
-        this.notificationService = useService("notification");
+        this.notificationService = usePlugin(NotificationPlugin);
 
         // Add Share command
         if (this.env.config.actionId && !this.env.inDialog) {

@@ -1,8 +1,8 @@
-import { useProps } from "@odoo/owl";
+import { useProps, usePlugin } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { usePopover } from "@web/core/popover/popover_hook";
-import { useService } from "@web/core/utils/hooks";
 import { DynamicPlaceholderPopover } from "./dynamic_placeholder_popover";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 export function useDynamicPlaceholder(elementRef) {
     const TRIGGER_KEY = "#";
@@ -14,7 +14,7 @@ export function useDynamicPlaceholder(elementRef) {
         onClose: () => closeCallback?.(),
         onPositioned: (popper, position) => positionCallback?.(popper, position),
     });
-    const notification = useService("notification");
+    const notification = usePlugin(NotificationPlugin);
 
     let modelField = null;
 

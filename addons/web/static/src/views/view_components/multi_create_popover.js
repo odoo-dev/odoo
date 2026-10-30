@@ -1,10 +1,10 @@
-import { Component, t, useProps } from "@odoo/owl";
+import { Component, t, useProps, usePlugin } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { TimePicker } from "@web/core/time_picker/time_picker";
-import { useService } from "@web/core/utils/hooks";
 import { Record } from "@web/model/record";
 import { useCallbackRecorder } from "@web/search/action_hook";
 import { FormRenderer } from "@web/views/form/form_renderer";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 export class MultiCreatePopover extends Component {
     static template = "web.MultiCreatePopover";
@@ -23,7 +23,7 @@ export class MultiCreatePopover extends Component {
     });
 
     setup() {
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
 
         this.multiCreateData = {
             timeRange: this.props.timeRange && { ...this.props.timeRange },

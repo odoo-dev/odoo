@@ -1,10 +1,10 @@
-import { Component, proxy, signal, t, useProps } from "@odoo/owl";
+import { Component, proxy, signal, t, useProps, usePlugin } from "@odoo/owl";
 import { Dialog } from "@web/core/dialog/dialog";
 import { ExpressionEditor } from "@web/core/expression_editor/expression_editor";
 import { evaluateExpr } from "@web/core/py_js/py";
-import { useService } from "@web/core/utils/hooks";
 import { _t } from "@web/core/l10n/translation";
 import { user } from "@web/core/user";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 export class ExpressionEditorDialog extends Component {
     static components = { Dialog, ExpressionEditor };
@@ -20,7 +20,7 @@ export class ExpressionEditorDialog extends Component {
     confirmButtonRef = signal.ref();
 
     setup() {
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
         this.state = proxy({
             expression: this.props.expression,
         });

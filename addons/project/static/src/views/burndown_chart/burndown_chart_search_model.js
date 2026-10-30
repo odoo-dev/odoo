@@ -1,6 +1,7 @@
+import { usePlugin } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
-import { useService } from "@web/core/utils/hooks";
 import { SearchModel } from "@web/search/search_model";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 
 export class BurndownChartSearchModel extends SearchModel {
@@ -9,7 +10,7 @@ export class BurndownChartSearchModel extends SearchModel {
      * @override
      */
     setup(services) {
-        this.notificationService = useService("notification");
+        this.notificationService = usePlugin(NotificationPlugin);
         super.setup(...arguments);
     }
 

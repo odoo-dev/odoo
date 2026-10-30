@@ -1,4 +1,4 @@
-import { Component, proxy, signal, t, useEffect, useEnv, useProps } from "@odoo/owl";
+import { Component, proxy, signal, t, useEffect, useEnv, useProps, usePlugin } from "@odoo/owl";
 import { CheckBox } from "@web/core/checkbox/checkbox";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { makeContext } from "@web/core/context";
@@ -10,6 +10,7 @@ import { Transition } from "@web/core/transition";
 import { user } from "@web/core/user";
 import { useService } from "@web/core/utils/hooks";
 import { useSortable } from "@web/core/utils/sortable_owl";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 export class EmbeddedActionsConfigHandler {
     constructor(parentActionId, currentActiveId, parentResModel, ormService) {
@@ -374,7 +375,7 @@ export function useEmbeddedActions() {
     const orm = useService("orm");
     const actionService = useService("action");
     const dialogService = useService("dialog");
-    const notificationService = useService("notification");
+    const notificationService = usePlugin(NotificationPlugin);
 
     const state = proxy(
         new EmbeddedActionsState(env, orm, actionService, dialogService, notificationService)

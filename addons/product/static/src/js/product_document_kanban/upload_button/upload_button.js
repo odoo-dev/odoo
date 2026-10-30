@@ -1,6 +1,7 @@
 import { _t } from "@web/core/l10n/translation";
-import { Component, useProps, signal, t } from "@odoo/owl";
+import { Component, useProps, signal, t, usePlugin } from "@odoo/owl";
 import { useBus, useService } from "@web/core/utils/hooks";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 export class UploadButton extends Component {
     static template = "product.UploadButton";
@@ -16,7 +17,7 @@ export class UploadButton extends Component {
 
     setup() {
         this.fileUploadService = useService("file_upload");
-        this.notification = useService('notification');
+        this.notification = usePlugin(NotificationPlugin);
         useBus(
             this.fileUploadService.bus,
             "FILE_UPLOAD_LOADED",

@@ -1,4 +1,4 @@
-import { Component, onWillStart, proxy, signal, useProps } from "@odoo/owl";
+import { Component, onWillStart, proxy, signal, useProps, usePlugin } from "@odoo/owl";
 import { useDropzone } from "@web/core/dropzone/dropzone_hook";
 import { FileInput } from "@web/core/file_input/file_input";
 import { _t } from "@web/core/l10n/translation";
@@ -13,6 +13,7 @@ import { ImportDataContent } from "../import_data_content/import_data_content";
 import { ImportDataProgress } from "../import_data_progress/import_data_progress";
 import { ImportDataSidepanel } from "../import_data_sidepanel/import_data_sidepanel";
 import { useImportModel } from "../import_model";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 export class ImportAction extends Component {
     static template = "ImportAction";
@@ -32,7 +33,7 @@ export class ImportAction extends Component {
 
     setup() {
         this.actionService = useService("action");
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
         this.env.config.setDisplayName(this.props.action.name || _t("Import"));
         this.model = useImportModel({
             env: this.env,

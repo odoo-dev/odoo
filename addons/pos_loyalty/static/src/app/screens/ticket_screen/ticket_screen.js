@@ -1,7 +1,8 @@
+import { usePlugin } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { TicketScreen } from "@point_of_sale/app/screens/ticket_screen/ticket_screen";
-import { useService } from "@web/core/utils/hooks";
 import { patch } from "@web/core/utils/patch";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 /**
  * Prevent refunding ewallet/gift card lines.
@@ -9,7 +10,7 @@ import { patch } from "@web/core/utils/patch";
 patch(TicketScreen.prototype, {
     setup() {
         super.setup(...arguments);
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
     },
     async setOrder(order) {
         await super.setOrder(...arguments);

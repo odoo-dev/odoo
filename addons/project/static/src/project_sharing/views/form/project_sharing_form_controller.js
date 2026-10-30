@@ -1,7 +1,7 @@
 import { _t } from "@web/core/l10n/translation";
 import { FormController } from "@web/views/form/form_controller";
-import { useService } from "@web/core/utils/hooks";
-import { useListener } from "@odoo/owl";
+import { useListener, usePlugin } from "@odoo/owl";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 export class ProjectSharingFormController extends FormController {
     static components = {
@@ -10,7 +10,7 @@ export class ProjectSharingFormController extends FormController {
 
     setup() {
         super.setup();
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
         useListener(window, "paste", this.onGlobalPaste.bind(this), { capture: true });
         useListener(window, "drop", this.onGlobalDrop.bind(this), { capture: true });
     }

@@ -5,6 +5,7 @@ import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_d
 
 import { owlPlugins } from "@odoo/o-spreadsheet";
 import { providePlugins, usePlugin } from "@odoo/owl";
+import { NotificationPlugin as WebNotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 const { NotificationPlugin } = owlPlugins;
 
@@ -59,7 +60,7 @@ export function useSpreadsheetNotificationPlugin() {
         );
     }
     const dialog = useService("dialog");
-    const notifications = useService("notification");
+    const notifications = usePlugin(WebNotificationPlugin);
     providePlugins([NotificationPlugin]);
     const notificationPlugin = usePlugin(NotificationPlugin);
     notificationPlugin.updateNotificationCallbacks({

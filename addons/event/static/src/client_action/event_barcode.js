@@ -10,6 +10,7 @@ import { EventRegistrationSummaryDialog } from "./event_registration_summary_dia
 import { scanBarcode } from "@web/core/barcode/barcode_dialog";
 import { standardActionServiceProps } from "@web/webclient/actions/action_plugin";
 import { BarcodePlugin } from "@barcodes/barcode_plugin";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 export class EventScanView extends Component {
     static template = "event.EventScanView";
@@ -20,7 +21,7 @@ export class EventScanView extends Component {
     setup() {
         this.actionService = useService("action");
         this.dialog = useService("dialog");
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
         this.orm = useService("orm");
 
         const { default_event_id, active_model, active_id } = this.props.action.context;

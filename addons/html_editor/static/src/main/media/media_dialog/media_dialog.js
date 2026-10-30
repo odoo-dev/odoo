@@ -3,8 +3,9 @@ import { useService } from "@web/core/utils/hooks";
 import { Dialog } from "@web/core/dialog/dialog";
 import { Notebook } from "@web/core/notebook/notebook";
 
-import { Component, useProps, proxy, signal, t } from "@odoo/owl";
+import { Component, useProps, proxy, signal, t, usePlugin } from "@odoo/owl";
 import { TABS, renderMedia } from "./media_dialog_utils";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 const DEFAULT_SEQUENCE = 50;
 const sequence = (tab) => tab.sequence ?? DEFAULT_SEQUENCE;
@@ -44,7 +45,7 @@ export class MediaDialog extends Component {
         this.modalRef = signal.ref();
 
         this.orm = useService("orm");
-        this.notificationService = useService("notification");
+        this.notificationService = usePlugin(NotificationPlugin);
 
         this.selectedMedia = proxy({});
 

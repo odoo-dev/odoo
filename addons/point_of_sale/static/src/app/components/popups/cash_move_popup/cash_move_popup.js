@@ -1,7 +1,7 @@
 import { _t } from "@web/core/l10n/translation";
 import { useService } from "@web/core/utils/hooks";
 import { parseFloat } from "@web/views/fields/parsers";
-import { Component, onWillStart, proxy, useProps, t } from "@odoo/owl";
+import { Component, onWillStart, proxy, useProps, t, usePlugin } from "@odoo/owl";
 import { usePos } from "@point_of_sale/app/hooks/pos_hook";
 import { CashMoveListPopup } from "@point_of_sale/app/components/popups/cash_move_popup/cash_move_list_popup/cash_move_list_popup";
 import { Dialog } from "@web/core/dialog/dialog";
@@ -10,6 +10,7 @@ import { makeAwaitable } from "@point_of_sale/app/utils/make_awaitable_dialog";
 import { NumberPopup } from "@point_of_sale/app/components/popups/number_popup/number_popup";
 import { CashInput } from "@point_of_sale/app/components/inputs/input/cash_input/cash_input";
 import { logPosMessage } from "@point_of_sale/app/utils/pretty_console_log";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 const { DateTime } = luxon;
 
@@ -23,7 +24,7 @@ export class CashMovePopup extends Component {
     });
     setup() {
         super.setup();
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
         this.pos = usePos();
         this.dialog = useService("dialog");
         this.state = proxy({

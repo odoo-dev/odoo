@@ -1,12 +1,13 @@
+import { usePlugin } from "@odoo/owl";
 import { ProductScreen } from "@point_of_sale/app/screens/product_screen/product_screen";
 import { useBarcodeReader } from "@point_of_sale/app/hooks/barcode_reader_hook";
 import { patch } from "@web/core/utils/patch";
-import { useService } from "@web/core/utils/hooks";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 patch(ProductScreen.prototype, {
     setup() {
         super.setup(...arguments);
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
         useBarcodeReader({
             coupon: this._onCouponScan.bind(this),
         });

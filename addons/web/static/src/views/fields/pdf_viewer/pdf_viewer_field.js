@@ -5,8 +5,18 @@ import { url } from "@web/core/utils/urls";
 import { standardFieldProps } from "../standard_field_props";
 import { FileUploader } from "../file_handler";
 
-import { Component, onWillUpdateProps, proxy, signal, t, useOnChange, useProps } from "@odoo/owl";
+import {
+    Component,
+    onWillUpdateProps,
+    proxy,
+    signal,
+    t,
+    useOnChange,
+    useProps,
+    usePlugin,
+} from "@odoo/owl";
 import { hidePDFJSButtons } from "@web/core/utils/pdfjs";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 export class PdfViewerField extends Component {
     static template = "web.PdfViewerField";
@@ -21,7 +31,7 @@ export class PdfViewerField extends Component {
     iframeViewerPdfRef = signal.ref();
 
     setup() {
-        this.notification = useService("notification");
+        this.notification = usePlugin(NotificationPlugin);
         this.action = useService("action");
         this.state = proxy({
             isValid: true,

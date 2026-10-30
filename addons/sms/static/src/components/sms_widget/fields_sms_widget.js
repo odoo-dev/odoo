@@ -1,10 +1,11 @@
+import { usePlugin } from "@odoo/owl";
 import {
     EmojisTextField,
     emojisTextField,
 } from "@mail/views/web/fields/emojis_text_field/emojis_text_field";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
-import { useService } from "@web/core/utils/hooks";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 
 /**
@@ -15,7 +16,7 @@ export class SmsWidget extends EmojisTextField {
     setup() {
         super.setup();
         this._emojiAdded = () => this.props.record.update({ [this.props.name]: this.targetEditElement.el.value });
-        this.notification = useService('notification');
+        this.notification = usePlugin(NotificationPlugin);
     }
 
     //--------------------------------------------------------------------------

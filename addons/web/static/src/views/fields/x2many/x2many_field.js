@@ -23,7 +23,8 @@ import { ListRenderer } from "@web/views/list/list_renderer";
 import { computeViewClassName } from "@web/views/utils";
 import { ViewButton } from "@web/views/view_button/view_button";
 
-import { Component, t, useProps } from "@odoo/owl";
+import { Component, t, useProps, usePlugin } from "@odoo/owl";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 
 export const x2ManyFieldProps = {
     ...standardFieldProps,
@@ -122,7 +123,7 @@ export class X2ManyField extends Component {
             return selectCreate(p);
         };
         this.action = useService("action");
-        this.notificationService = useService("notification");
+        this.notificationService = usePlugin(NotificationPlugin);
     }
 
     get activeField() {
