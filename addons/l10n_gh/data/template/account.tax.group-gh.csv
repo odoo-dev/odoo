@@ -1,0 +1,8 @@
+"id","name","country_id"
+"tax_group_gh_vat","VAT 15%","base.gh"
+"tax_group_gh_nhil","NHIL 2.5%","base.gh"
+"tax_group_gh_getfund","GETFund Levy 2.5%","base.gh"
+"tax_group_gh_standard","VAT + NHIL + GETFund (20%)","base.gh"
+"tax_group_gh_zero","VAT 0%","base.gh"
+"tax_group_gh_exempt","VAT Exempt","base.gh"
+"tax_group_gh_wht","Withholding Tax","base.gh"

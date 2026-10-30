@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Source: ISO 3166-2:GH, 16 regions (cross-checked on Wikipedia; iso.org returned HTTP 403).
+         GH-BA (Brong-Ahafo) was deleted on 2019-11-22 and is intentionally absent. -->
+
+    <record id="state_gh_af" model="res.country.state">
+        <field name="name">Ahafo</field>
+        <field name="code">AF</field>
+        <field name="country_id" ref="base.gh"/>
+    </record>
+
+    <record id="state_gh_ah" model="res.country.state">
+        <field name="name">Ashanti</field>
+        <field name="code">AH</field>
+        <field name="country_id" ref="base.gh"/>
+    </record>
+
+    <record id="state_gh_bo" model="res.country.state">
+        <field name="name">Bono</field>
+        <field name="code">BO</field>
+        <field name="country_id" ref="base.gh"/>
+    </record>
+
+    <record id="state_gh_be" model="res.country.state">
+        <field name="name">Bono East</field>
+        <field name="code">BE</field>
+        <field name="country_id" ref="base.gh"/>
+    </record>
+
+    <record id="state_gh_cp" model="res.country.state">
+        <field name="name">Central</field>
+        <field name="code">CP</field>
+        <field name="country_id" ref="base.gh"/>
+    </record>
+
+    <record id="state_gh_ep" model="res.country.state">
+        <field name="name">Eastern</field>
+        <field name="code">EP</field>
+        <field name="country_id" ref="base.gh"/>
+    </record>
+
+    <record id="state_gh_aa" model="res.country.state">
+        <field name="name">Greater Accra</field>
+        <field name="code">AA</field>
+        <field name="country_id" ref="base.gh"/>
+    </record>
+
+    <record id="state_gh_ne" model="res.country.state">
+        <field name="name">North East</field>
+        <field name="code">NE</field>
+        <field name="country_id" ref="base.gh"/>
+    </record>
+
+    <record id="state_gh_np" model="res.country.state">
+        <field name="name">Northern</field>
+        <field name="code">NP</field>
+        <field name="country_id" ref="base.gh"/>
+    </record>
+
+    <record id="state_gh_ot" model="res.country.state">
+        <field name="name">Oti</field>
+        <field name="code">OT</field>
+        <field name="country_id" ref="base.gh"/>
+    </record>
+
+    <record id="state_gh_sv" model="res.country.state">
+        <field name="name">Savannah</field>
+        <field name="code">SV</field>
+        <field name="country_id" ref="base.gh"/>
+    </record>
+
+    <record id="state_gh_ue" model="res.country.state">
+        <field name="name">Upper East</field>
+        <field name="code">UE</field>
+        <field name="country_id" ref="base.gh"/>
+    </record>
+
+    <record id="state_gh_uw" model="res.country.state">
+        <field name="name">Upper West</field>
+        <field name="code">UW</field>
+        <field name="country_id" ref="base.gh"/>
+    </record>
+
+    <record id="state_gh_tv" model="res.country.state">
+        <field name="name">Volta</field>
+        <field name="code">TV</field>
+        <field name="country_id" ref="base.gh"/>
+    </record>
+
+    <record id="state_gh_wp" model="res.country.state">
+        <field name="name">Western</field>
+        <field name="code">WP</field>
+        <field name="country_id" ref="base.gh"/>
+    </record>
+
+    <record id="state_gh_wn" model="res.country.state">
+        <field name="name">Western North</field>
+        <field name="code">WN</field>
+        <field name="country_id" ref="base.gh"/>
+    </record>
+
+</odoo>
