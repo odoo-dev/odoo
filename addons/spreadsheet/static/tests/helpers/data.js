@@ -10,6 +10,26 @@ import {
 } from "@web/../tests/web_test_helpers";
 import { mailModels } from "@mail/../tests/mail_test_helpers";
 import { RPCError } from "@web/core/network/rpc";
+import { afterEach, beforeEach } from "@odoo/hoot";
+import { registries } from "@odoo/o-spreadsheet";
+
+// o-spreadsheet registries are module-level singletons that outlive a test:
+// restore their top-level content after each test, like the main registry, so
+// that what services register in them does not leak into the next tests.
+const registriesContent = new Map();
+beforeEach(function registerSpreadsheetRegistriesForCleanup() {
+    for (const registry of Object.values(registries)) {
+        if (registry?.content) {
+            registriesContent.set(registry, { ...registry.content });
+        }
+    }
+});
+afterEach(function restoreSpreadsheetRegistries() {
+    for (const [registry, content] of registriesContent) {
+        registry.content = content;
+    }
+    registriesContent.clear();
+});
 
 /**
  * @typedef {object} ServerData
