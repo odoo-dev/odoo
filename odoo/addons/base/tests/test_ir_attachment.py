@@ -292,6 +292,12 @@ class TestIrAttachment(TransactionCaseWithUserDemo):
         # the attachments of the current user are still reused
         self.assertEqual(Attachment.create_unique([vals]), attachments)
 
+        # RPC calls using the deprecated datas field should emit a warning.
+        with self.assertWarns(UserWarning):
+            attachments.write({
+                'datas': base64.b64encode(b'Updated content'),
+            })
+
     def test_16_from_file_takes_little_memory(self):
         # The biggest file we reliably have is "i18n/base.pot" which is
         # only 1.3MiB. We use tracemalloc to make sure _upload_file uses

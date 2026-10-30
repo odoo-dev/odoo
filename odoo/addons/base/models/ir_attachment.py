@@ -755,7 +755,7 @@ class IrAttachment(models.Model):
         # remove computed field depending of raw
         for field in ('file_size', 'checksum', 'store_fname'):
             vals.pop(field, False)
-        if 'mimetype' in vals or 'raw' in vals:
+        if 'mimetype' in vals or 'raw' in vals or 'datas' in vals:
             vals = self._check_contents(vals)
         res = super().write(vals)
         if 'url' in vals or 'type' in vals:
