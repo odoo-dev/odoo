@@ -10,7 +10,7 @@ Issue fully-digital e-Fapiao (数电发票) from Odoo invoices and handle red le
 confirmation forms (红字确认单) for credit notes, on both the seller and the buyer side.
 
 This module holds the flow, states and screens. It talks to the tax platform
-through a provider module (e.g. China - E-Fapiao (Nuonuo)); install exactly one.
+through a provider module (China - E-Fapiao (Aisino Yunshui)); install exactly one.
     """,
     'depends': ['l10n_cn', 'phone_validation'],
     'data': [
