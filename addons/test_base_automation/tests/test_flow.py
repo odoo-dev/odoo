@@ -1977,6 +1977,12 @@ class TestHttp(common.HttpCase):
             "test_param": "test_value",
         })
 
+        obj.another_field = ""
+        self.url_open(automation.url, data="[{'key': '[{'name': 'abc', 'mobile': '+91 1111 111 111'}]'}]", headers={"Content-Type": "text/plain"})
+        self.assertEqual(json.loads(obj.another_field), {
+            "name": "'[{'name': 'abc', 'mobile': '+91 1111 111 111'}]'",
+        })
+
     def test_webhook_send_and_receive(self):
         model = self.env["ir.model"]._get("base.automation.linked.test")
         obj = self.env[model.model].create({"name": "some name"})
