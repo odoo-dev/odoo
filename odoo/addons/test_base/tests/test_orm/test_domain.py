@@ -339,6 +339,34 @@ class TestDomain(TransactionExpressionCase):
         res_search = self._search(Child, [('tag_ids', 'not any', [('name', '=', 'Urgent')])])
         self.assertEqual(res_search, child_2 + child_3)
 
+    def test_x2many_boolean_values(self):
+        Parent = self.env['test_orm.any.parent']
+        parent_with_child, parent_without_child = Parent.create([
+            {'child_ids': [Command.create({'quantity': 1})]},
+            {},
+        ])
+
+        with_child = Parent.search([('child_ids', '=', True)])
+        without_child = Parent.search([('child_ids', '!=', True)])
+        self.assertIn(parent_with_child, with_child)
+        self.assertNotIn(parent_without_child, with_child)
+        self.assertIn(parent_without_child, without_child)
+        self.assertNotIn(parent_with_child, without_child)
+
+    def test_many2one_boolean_values(self):
+        Message = self.env['test_orm.message']
+        message_with_author, message_without_author = Message.create([
+            {'body': 'with author', 'author': self.env.user.id},
+            {'body': 'without author', 'author': False},
+        ])
+
+        with_author = self._search(Message, [('author', '=', True)])
+        without_author = self._search(Message, [('author', '!=', True)])
+        self.assertIn(message_with_author, with_author)
+        self.assertNotIn(message_without_author, with_author)
+        self.assertIn(message_without_author, without_author)
+        self.assertNotIn(message_with_author, without_author)
+
     def test_any_in_search_field(self):
         Message = self.env.registry['test_orm.message']
         model = self.env[Message._name]

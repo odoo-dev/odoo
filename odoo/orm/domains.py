@@ -1972,6 +1972,17 @@ def _optimize_any_with_rights(condition, model):
     return condition
 
 
+@field_type_optimization(['many2one', 'one2many', 'many2many'], level=OptimizationLevel.FULL)
+def _optimize_relational_boolean_values(condition, model):
+    """Treat True as a non-empty relation for relational fields."""
+    if condition.operator not in ('in', 'not in') or not any(value is True for value in condition.value):
+        return condition
+    if False in condition.value:
+        return Domain.TRUE if condition.operator == 'in' else Domain.FALSE
+    operator = 'any' if condition.operator == 'in' else 'not any'
+    return DomainCondition(condition.field_expr, operator, Domain.TRUE)
+
+
 @field_type_optimization(['many2one'], level=OptimizationLevel.FULL)
 def _optimize_m2o_bypass_comodel_id_lookup(condition, model):
     """Avoid comodel's subquery, if it can be compared with the field directly"""
