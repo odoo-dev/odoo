@@ -2008,7 +2008,12 @@ class Request:
         return params
 
     def get_json_data(self):
-        return json.loads(self.httprequest.get_data(as_text=True))
+        try:
+            json_data = json.loads(self.httprequest.get_data(as_text=True))
+        except Exception as e:
+            json_data = json.loads(json.dumps(self.httprequest.get_data(as_text=True)))
+        return json_data
+
 
     def _get_profiler_context_manager(self):
         """
