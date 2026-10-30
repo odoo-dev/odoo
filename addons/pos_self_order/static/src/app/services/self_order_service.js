@@ -432,6 +432,106 @@ export class SelfOrder {
             newLine.delete();
         }
     }
+
+    getReorderableLines(order) {
+        return order.lines.filter(
+            (line) =>
+                line.qty > 0 &&
+                !line.combo_parent_id &&
+                !line.isTipLine() &&
+                !line.isDeliveryLine &&
+                !line.isServiceFeeLine() &&
+                !line.isDiscountLine
+        );
+    }
+
+    reorder(order) {
+        if (!this.ordering || this.isSelfSnoozed || this.rpcLoading) {
+            return false;
+        }
+
+        const unavailableProducts = new Set();
+        const lines = this.getReorderableLines(order).filter((line) => {
+            const unavailableLine = [line, ...line.combo_line_ids].find(
+                (item) =>
+                    !item.product_id?.self_order_available ||
+                    this.isProductSnoozed(item.product_id.product_tmpl_id)
+            );
+            const invalidCombo = line.combo_line_ids.some(
+                (child) =>
+                    !child.combo_item_id ||
+                    !line.product_id.combo_ids.includes(child.combo_item_id.combo_id)
+            );
+            if (unavailableLine || invalidCombo || !this.isProductAvailable(line.product_id)) {
+                unavailableProducts.add((unavailableLine || line).product_id?.name);
+                return false;
+            }
+            return true;
+        });
+
+        if (unavailableProducts.size) {
+            this.notification.add(
+                _t(
+                    "Some products are no longer available: %s",
+                    [...unavailableProducts].join(", ")
+                ),
+                { type: "warning" }
+            );
+        }
+        if (!lines.length) {
+            return false;
+        }
+
+        const cart = this.currentOrder;
+        if (this.config.use_presets && !cart.preset_id) {
+            const presets = this.availablePresets;
+            const preset =
+                presets.find((preset) => preset === order.preset_id) ||
+                (presets.length === 1 && presets[0]);
+            if (preset) {
+                cart.setPreset(preset);
+            }
+        }
+
+        const getAttributeIds = (line) => [
+            ...new Set([
+                ...line.product_id.product_template_variant_value_ids.map((value) => value.id),
+                ...line.attribute_value_ids.map((value) => value.id),
+            ]),
+        ];
+        const getCustomValues = (line) =>
+            line.custom_attribute_value_ids.map((value) => ({
+                custom_product_template_attribute_value_id:
+                    value.custom_product_template_attribute_value_id.id,
+                custom_value: value.custom_value,
+            }));
+        // Prepare all values before adding lines: the source can also be the active cart.
+        const values = lines.map((line) => ({
+            ...getOrderLineValues(
+                this,
+                line.product_id.product_tmpl_id,
+                line.qty,
+                "",
+                getAttributeIds(line),
+                getCustomValues(line),
+                line.combo_line_ids.map((child) => ({
+                    combo_item_id: child.combo_item_id,
+                    qty: child.qty / line.qty,
+                    configuration: {
+                        attribute_value_ids: getAttributeIds(child),
+                        attribute_custom_values: getCustomValues(child),
+                    },
+                }))
+            ),
+            customer_note: line.customer_note,
+        }));
+        this.resetTip();
+        for (const lineValues of values) {
+            this.models["pos.order.line"].create(lineValues);
+        }
+        return true;
+    }
+
     async confirmationPage(screen_mode, device, access_token) {
         if (!access_token) {
             throw new Error("No access token provided for confirmation page");

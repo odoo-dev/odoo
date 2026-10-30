@@ -43,6 +43,17 @@ export class OrdersHistoryPage extends Component {
         }
     }
 
+    reorder(order) {
+        if (!this.selfOrder.reorder(order)) {
+            return;
+        }
+        if (this.selfOrder.config.use_presets && !this.selfOrder.currentOrder.preset_id) {
+            this.router.navigate("location", {}, { redirectPage: "cart" });
+        } else {
+            this.router.navigate("cart");
+        }
+    }
+
     back() {
         this.router.navigate("default");
     }

@@ -78,6 +78,13 @@
                                 </div>
                             </div>
                         </div>
+                        <button
+                            t-if="this.selfOrder.ordering and this.selfOrder.getReorderableLines(order).length"
+                            class="btn btn-primary align-self-end mt-3"
+                            t-att-disabled="this.selfOrder.rpcLoading or this.selfOrder.isSelfSnoozed"
+                            t-on-click="() => this.reorder(order)">
+                            Reorder
+                        </button>
                     </div>
                 </t>
                 <div t-if="this.orders.length === 0" class="d-flex justify-content-center mt-3">
