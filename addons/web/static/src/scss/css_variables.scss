@@ -258,6 +258,7 @@
     --o-bs-lead-font-weight: #{$lead-font-weight};
     --o-bs-line-height-lg: #{$line-height-lg};
     --o-bs-line-height-sm: #{$line-height-sm};
+    --o-bs-link-shade-percentage: #{o-strip-unit($link-shade-percentage)};
     --o-bs-list-group-active-bg: #{$list-group-active-bg};
     --o-bs-list-group-active-border-color: #{$list-group-active-border-color};
     --o-bs-list-group-bg: #{$list-group-bg};
