@@ -25,7 +25,7 @@
     }
 
     .o-hb-text-effect-options {
-        --o-hb-text-effect-option-bg: $white;
+        --o-hb-text-effect-option-bg: #{$white};
         --o-hb-text-effect-shadow-bg: rgba(0, 0, 0, 0.05);
 
         width: 330px;
