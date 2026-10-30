@@ -18,6 +18,12 @@
                     </page>
                 </notebook>
             </xpath>
+            <xpath expr="//field[@name='image']" position="replace">
+                <div class="d-flex flex-column align-items-center gap-2">
+                    <field name="image" class="oe_avatar" widget="image"/>
+                    <button name="action_adyen_test_display" type="object" string="Test" class="btn-primary text-nowrap" invisible="payment_provider != 'adyen'" groups="point_of_sale.group_pos_manager"/>
+                </div>
+            </xpath>
         </field>
     </record>
 </odoo>
