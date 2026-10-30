@@ -1,2 +1,0 @@
-# Part of Odoo. See LICENSE file for full copyright and licensing details.
-from . import l10n_cn_edi_aisino_login
