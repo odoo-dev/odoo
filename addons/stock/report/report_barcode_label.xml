@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <template id="location_barcode_4x7_label">
+    <template id="barcode_4x7_label">
         <td t-att-style="label['invisible'] and 'visibility:hidden;'">
             <div class="o_label_full o_label_4x7">
                 <t t-if="not label.get('invisible')">
@@ -22,15 +22,12 @@
         </td>
     </template>
 
-    <template id="location_barcode_zpl_label">
-^PW376
+    <template id="barcode_zpl_label">
+^PW457
 ^LL297
-^FO5,60^A0N,30,24^FB366,1,0,C^FH^FD<t t-out="name"/>^FS
+^FO0,60^A0N,30,24^FB457,1,0,C^FH^FD<t t-out="name"/>\&amp;^FS
         <t t-if="barcode_value">
-^FO5,100^BY3^BCN,110,N,N,N^FH^FD<t t-out="barcode_value"/>^FS
-            <t t-if="label['barcode_text']">
-^FO5,215^A0N,22,17^FB366,1,0,C^FH^FD<t t-out="label['barcode_text']"/>^FS
-            </t>
+^FO30,100^BY2^BCN,110,Y,N,N^FH^FD<t t-out="barcode_value"/>^FS
         </t>
     </template>
 </odoo>

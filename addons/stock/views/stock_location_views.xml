@@ -273,7 +273,7 @@
             <field name="binding_view_types">list,form</field>
             <field name="binding_type">report</field>
             <field name="state">code</field>
-            <field name="code">action = env['stock.location.label.layout']._process_location_labels(records, '4x7')</field>
+            <field name="code">action = env['stock.barcode.label.layout']._process_barcode_labels(records, '4x7')</field>
         </record>
 
         <record id="action_print_location_label_zpl" model="ir.actions.server">
@@ -283,7 +283,7 @@
             <field name="binding_view_types">list,form</field>
             <field name="binding_type">report</field>
             <field name="state">code</field>
-            <field name="code">action = env['stock.location.label.layout']._process_location_labels(records, 'zpl')</field>
+            <field name="code">action = env['stock.barcode.label.layout']._process_barcode_labels(records, 'zpl')</field>
         </record>
 
 </odoo>

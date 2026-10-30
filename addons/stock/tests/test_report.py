@@ -4,6 +4,8 @@ from datetime import date, datetime, timedelta
 from re import findall
 from unittest.mock import patch
 
+from markupsafe import escape
+
 from odoo.tests import tagged, Form, TransactionCase
 from odoo import Command
 
@@ -198,6 +200,41 @@ class TestReports(TestReportsCommon):
         ], 'Product name or default code is not correctly encoded as ZPL field data')
         self.assertNotIn(b'^BCN', rendering, 'Barcode command should not be rendered for a product without barcode')
         self.assertEqual(qweb_type, 'text', 'the report type is not good')
+
+    def test_barcode_labels(self):
+        """ Test that locations and operation types share the same barcode labels."""
+        self.stock_location.barcode = 'LOC"001'
+        self.picking_type_in.barcode = 'OPT"001'
+        self.picking_type_out.barcode = False
+        label_layout = self.env['stock.barcode.label.layout']
+        for records, expected_values in [
+            (self.stock_location, [b'WH/Stock', b'LOC_22001']),
+            (self.picking_type_in, [b'Receipts', b'OPT_22001']),
+        ]:
+            action = label_layout._process_barcode_labels(records, 'zpl')
+            rendering, qweb_type = self.env['ir.actions.report']._render_qweb_text(
+                action['report_name'], None, data=action['data'],
+            )
+            self.assertEqual(qweb_type, 'text')
+            self._assert_zpl_contains(rendering, [
+                (b'^XA^CI28', 1),
+                *((value, 1) for value in expected_values),
+                (b'^BCN', 1),
+            ], 'The barcode label is not correctly rendered')
+
+            action = label_layout._process_barcode_labels(records, '4x7')
+            rendering, _qweb_type = self.env['ir.actions.report']._render_qweb_html(
+                action['report_name'], None, data=action['data'],
+            )
+            self.assertIn(escape(records.display_name).encode(), rendering)
+            self.assertIn(escape(records.barcode).encode(), rendering)
+
+        action = label_layout._process_barcode_labels(self.picking_type_out, 'zpl')
+        rendering, _qweb_type = self.env['ir.actions.report']._render_qweb_text(
+            action['report_name'], None, data=action['data'],
+        )
+        self.assertIn(b'Delivery', rendering)
+        self.assertNotIn(b'^BCN', rendering, 'Barcode command should not be rendered for a record without barcode')
 
     def test_report_quantity_1(self):
         product = self.env['product.product'].create({
