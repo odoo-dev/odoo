@@ -118,6 +118,29 @@ class StockQuant(models.Model):
         'res.users', 'Assigned To', help="User assigned to do product count.",
         domain=lambda self: [('all_group_ids', 'in', self.env.ref('stock.group_stock_user').id)])
 
+    @api.model
+    def name_search(self, name='', domain=None, operator='ilike', limit=100):
+        if not self.env.context.get('sort_quant_by_location_package'):
+            return super().name_search(name=name, domain=domain, operator=operator, limit=limit)
+
+        domain = Domain('display_name', operator, name) & Domain(domain or Domain.TRUE)
+        quants = self.search_fetch(domain, ['display_name', 'location_id', 'package_id', 'lot_id'])
+
+        def _sort_key(quant):
+            loc_path = tuple((quant.location_id.complete_name or '').split('/'))
+            return (
+                loc_path,  # source location, then sub-locations
+                1 if quant.package_id else 0,  # no package first, then packages of that location
+                quant.package_id.name or '',
+                quant.lot_id.name or '',
+                quant.id,
+            )
+
+        quants = quants.sorted(key=_sort_key)
+        if limit:
+            quants = quants[:limit]
+        return [(quant.id, quant.display_name) for quant in quants.sudo()]
+
     @api.depends('quantity', 'reserved_quantity')
     def _compute_available_quantity(self):
         for quant in self:
