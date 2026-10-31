@@ -118,6 +118,20 @@ class StockQuant(models.Model):
         'res.users', 'Assigned To', help="User assigned to do product count.",
         domain=lambda self: [('all_group_ids', 'in', self.env.ref('stock.group_stock_user').id)])
 
+    @api.model
+    def name_search(self, name='', domain=None, operator='ilike', limit=100):
+        if not self.env.context.get('sort_quant_by_location_package'):
+            return super().name_search(name=name, domain=domain, operator=operator, limit=limit)
+        domain = Domain(domain or Domain.TRUE)
+        if name:
+            domain &= Domain('display_name', operator, name)
+        quants = self.search(
+            domain,
+            order='location_id asc, package_id asc NULLS FIRST',
+            limit=limit,
+        )
+        return [(quant.id, quant.display_name) for quant in quants]
+
     @api.depends('quantity', 'reserved_quantity')
     def _compute_available_quantity(self):
         for quant in self:
@@ -614,10 +628,10 @@ class StockQuant(models.Model):
                     record.display_name = ''
                     continue
                 name = [record.location_id.display_name]
-                if record.lot_id:
-                    name.append(record.lot_id.display_name)
                 if record.package_id:
                     name.append(record.package_id.display_name)
+                if record.lot_id:
+                    name.append(record.lot_id.display_name)
                 if record.owner_id:
                     name.append(record.owner_id.name)
                 record.display_name = ' - '.join(name)
