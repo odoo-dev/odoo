@@ -7,7 +7,8 @@ import { CalendarController } from "@web/views/calendar/calendar_controller";
 
 import { serializeDate } from "@web/core/l10n/dates";
 
-import { onWillStart, usePlugin, providePlugins } from "@odoo/owl";
+import { onWillStart, providePlugins, usePlugin } from "@odoo/owl";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
 import { useLeaveCancelWizard, useNewAllocationRequest } from "../hooks";
 import { TimeOffPlugin } from "../time_off_plugin";
 import { TimeOffFormViewDialog } from "../view_dialog/form_view_dialog";
@@ -29,6 +30,7 @@ export class TimeOffCalendarController extends CalendarController {
         providePlugins([TimeOffPlugin]);
 
         this.timeOffPlugin = usePlugin(TimeOffPlugin);
+        this.notification = usePlugin(NotificationPlugin);
 
         this.leaveCancelWizard = useLeaveCancelWizard();
         this.newAllocRequest = useNewAllocationRequest();
@@ -36,7 +38,7 @@ export class TimeOffCalendarController extends CalendarController {
         onWillStart(async () => {
             this.hasEmployee = await userHasEmployeeInCurrentCompany(this.orm);
             if (!this.employeeId && !this.hasEmployee) {
-                this.env.services.notification.add(
+                this.notification.add(
                     _t(
                         "You are not linked to an employee in the current company, so you cannot create requests for yourself."
                     ),

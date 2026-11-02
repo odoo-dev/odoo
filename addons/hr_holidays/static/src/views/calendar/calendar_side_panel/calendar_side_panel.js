@@ -1,8 +1,10 @@
 import { CalendarSidePanel } from "@web/views/calendar/calendar_side_panel/calendar_side_panel";
 import { serializeDate, serializeDateTime } from "@web/core/l10n/dates";
 import { Cache } from "@web/core/utils/cache";
-import { useAsyncComputed, useService } from "@web/core/utils/hooks";
-import { computed } from "@odoo/owl";
+import { useAsyncComputed } from "@web/core/utils/hooks";
+import { computed, usePlugin } from "@odoo/owl";
+import { ORM } from "@web/core/orm_plugin";
+import { UIPlugin } from "@web/core/ui/ui_plugin";
 
 export class TimeOffCalendarSidePanel extends CalendarSidePanel {
     static components = {
@@ -13,7 +15,8 @@ export class TimeOffCalendarSidePanel extends CalendarSidePanel {
     setup() {
         super.setup();
 
-        this.orm = useService("orm");
+        this.orm = usePlugin(ORM);
+        this.ui = usePlugin(UIPlugin);
         this.getFormattedDateSpan = function getFormattedDateSpan(start, end) {
             const n = "numeric";
             const s = "short";
@@ -68,7 +71,7 @@ export class TimeOffCalendarSidePanel extends CalendarSidePanel {
     }
 
     async getHolidayData() {
-        if (!this.uiService.isSmall) {
+        if (!this.ui.isSmall()) {
             return [];
         }
         const promises = [];

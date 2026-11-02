@@ -3,7 +3,7 @@
     <div t-name="hr_holidays.LeaveStatsComponent" class="o_leave_stats">
         <div t-if="this.state.employee and this.state.leaves.length !== 0" id="o_leave_stats_employee" class="sub_table px-3 py-2 mb-3">
             <h4 class="d-flex">
-                Summary <t t-out="this.thisYear"/>
+                Summary <t t-out="this.thisYear()"/>
             </h4>
             <div class="d-flex flex-column">
                 <div t-foreach="this.state.leaves" t-as="record_leave" t-key="record_leave.data.id" class="d-flex gap-2">
@@ -28,7 +28,7 @@
 
         <div t-if="this.state.department and this.state.nbEmployee > 0" id="o_leave_stats_department" class="alert alert-info px-3 py-2" role="alert">
             <h4>
-                <t t-out="this.state.department_name"/>
+                <t t-out="this.departmentName()"/>
                 Overlaps
             </h4>
             <p class="mb-0">

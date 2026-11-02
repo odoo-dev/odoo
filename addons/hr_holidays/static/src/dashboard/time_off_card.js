@@ -3,8 +3,9 @@ import { usePopover } from "@web/core/popover/popover_hook";
 import { user } from "@web/core/user";
 import { formatNumber } from "@hr_holidays/views/hooks";
 import { formatDuration } from "@web/views/fields/formatters";
-import { useService } from "@web/core/utils/hooks";
-import { Component, computed, t, useProps } from "@odoo/owl";
+import { Component, computed, t, usePlugin, useProps } from "@odoo/owl";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
+
 export class TimeOffCardPopover extends Component {
     static template = "hr_holidays.TimeOffCardPopover";
 
@@ -17,20 +18,15 @@ export class TimeOffCardPopover extends Component {
         warning: t.any(),
         closest: t.any(),
         unit_of_measure: t.any(),
-        exceeding_duration: t.any(),
-        close: t.any().optional(),
-        allows_negative: t.any(),
-        max_allowed_negative: t.any(),
         errorLeaves: t.any(),
         accrualExcess: t.any(),
         timeOffType: t.any(),
         employeeId: t.any(),
         employeeCompany: t.any(),
-        employeeCountry: t.any(),
     });
 
     setup() {
-        this.actionService = useService("action");
+        this.actionService = usePlugin(ActionPlugin);
     }
 
     async openLeaves() {
@@ -115,18 +111,20 @@ export class TimeOffCard extends Component {
             position: "bottom",
             popoverClass: "bg-view",
         });
-        this.actionService = useService("action");
         this.lang = user.lang;
         this.isDarkTheme = cookie.get("color_scheme") === "dark";
         this.formatNumber = formatNumber;
-        const { data } = this.props;
-        this.errorLeaves = Object.values(data.virtual_excess_data).map((data) => data.leave_id);
-        this.errorLeavesDuration = Object.values(data.virtual_excess_data).reduce(
-            (acc, data) => acc + data.amount,
-            0
-        );
     }
 
+    errorLeaves = computed(() =>
+        Object.values(this.props.data.virtual_excess_data).map((data) => data.leave_id)
+    );
+    errorLeavesDuration = computed(() =>
+        Object.values(this.props.data.virtual_excess_data).reduce(
+            (duration, data) => duration + data.amount,
+            0
+        )
+    );
     warning = computed(() => this.updateWarning());
 
     formatDuration(duration) {
@@ -139,8 +137,8 @@ export class TimeOffCard extends Component {
     updateWarning() {
         const { data } = this.props;
         const errorLeavesSignificant = data.allows_negative
-            ? this.errorLeavesDuration > data.max_allowed_negative
-            : this.errorLeavesDuration > 0;
+            ? this.errorLeavesDuration() > data.max_allowed_negative
+            : this.errorLeavesDuration() > 0;
         const accrualExcess = this.getAccrualExcess(data);
         const closeExpire =
             data.closest_allocation_duration &&
@@ -149,7 +147,7 @@ export class TimeOffCard extends Component {
     }
 
     onClickInfo(ev) {
-        this.popover.open(ev.target, this.getPopoverProps());
+        this.popover.open(ev.currentTarget, this.getPopoverProps());
     }
 
     getPopoverProps() {
@@ -163,15 +161,11 @@ export class TimeOffCard extends Component {
             warning: this.warning(),
             closest: data.closest_allocation_duration,
             unit_of_measure: data.unit_of_measure,
-            exceeding_duration: data.exceeding_duration,
-            allows_negative: data.allows_negative,
-            max_allowed_negative: data.max_allowed_negative,
-            errorLeaves: this.errorLeaves,
+            errorLeaves: this.errorLeaves(),
             accrualExcess: this.getAccrualExcess(data),
             timeOffType: holidayStatusId,
             employeeId: employeeId,
             employeeCompany: data.employee_company,
-            employeeCountry: data.employee_country,
         };
     }
 
