@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="ir_cron_process_timestamp_queue" model="ir.cron">
+        <field name="name">Japan: Prepare Scanned Documents</field>
+        <field name="model_id" ref="model_l10n_jp_account_document_version"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_process_timestamp_queue()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">minutes</field>
+        <field name="active" eval="True"/>
+    </record>
+    <record id="ir_cron_process_document_timestamps" model="ir.cron">
+        <field name="name">Japan: Timestamp Scanned Documents</field>
+        <field name="model_id" ref="model_l10n_jp_account_document_version"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_process_document_timestamps()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">minutes</field>
+        <field name="active" eval="True"/>
+    </record>
+</odoo>

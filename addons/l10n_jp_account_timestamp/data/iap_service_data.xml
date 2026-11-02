@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="iap_service_l10n_jp_timestamp_proxy" model="iap.service">
+        <field name="name">Japan Document Timestamping</field>
+        <field name="technical_name">l10n_jp_timestamp_proxy</field>
+        <field name="description">Obtain timestamp tokens for scanned accounting documents.</field>
+        <field name="unit_name">Credits</field>
+        <field name="integer_balance" eval="False"/>
+    </record>
+</odoo>
