@@ -559,7 +559,7 @@
             <table class="o_ignore_layout_styling table table-borderless mb-0">
                 <tbody>
                     <tr>
-                        <td class="p-0">
+                        <td t-if="address" class="p-0">
                             <t t-call="web.address_layout" custom_layout_address="True"/>
                         </td>
                         <td t-if="not information_block" t-attf-class="align-bottom p-0 {{'ps-2' if address else ''}}">
