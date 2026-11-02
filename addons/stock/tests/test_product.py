@@ -347,6 +347,21 @@ class TestVirtualAvailable(TestStockCommon):
         product = product_form.save()
         self.assertEqual(product.tracking, False)
 
+    def test_group_by_store_by(self):
+        """ Grouping products by tracking must keep the products tracked by
+        quantity apart from the untracked ones. """
+        templates = self.env['product.template'].create([
+            {'name': 'Untracked', 'is_storable': False},
+            {'name': 'By Quantity', 'is_storable': True},
+            {'name': 'By Lots', 'is_storable': True, 'tracking': 'lot'},
+            {'name': 'By Serial', 'is_storable': True, 'tracking': 'serial'},
+        ])
+        groups = self.env['product.template'].formatted_read_group([('id', 'in', templates.ids)], ['store_by'], ['__count'])
+        self.assertEqual(
+            [(group['store_by'], group['__count']) for group in groups],
+            [('untracked', 1), ('quantity', 1), ('lot', 1), ('serial', 1)],
+        )
+
     @skip('TODO: Temporarily skipped as the "none" option was removed from `tracking`.')
     def test_duplicate_service_with_legacy_tracking_keeps_is_storable_false(self):
         """Test that an imported service template with tracking='none' compute the is_storable field to False"""

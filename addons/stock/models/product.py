@@ -841,6 +841,7 @@ class ProductTemplate(models.Model):
         ('serial', 'By Unique Serial Number')],
         string="Tracking", required=True,
         compute='_compute_store_by', inverse='_set_store_by', search='_search_store_by',
+        compute_sql='_compute_sql_store_by', compute_sudo=False,
         help="Ensure the traceability of a storable product in your warehouse.")
     lot_sequence_id = fields.Many2one(
         'ir.sequence', 'Serial/Lot Numbers Sequence', default=lambda self: self.env.ref('stock.sequence_production_lots', raise_if_not_found=False),
@@ -1045,6 +1046,12 @@ class ProductTemplate(models.Model):
     def _compute_store_by(self):
         for template in self:
             template.store_by = (template.tracking or 'quantity') if template.is_storable else 'untracked'
+
+    def _compute_sql_store_by(self, table):
+        return SQL(
+            "CASE WHEN %s THEN COALESCE(%s, 'quantity') ELSE 'untracked' END",
+            table.is_storable, table.tracking,
+        )
 
     def _set_store_by(self):
         for (store_by, product_type), templates in self.grouped(lambda t: (t.store_by, t.type)).items():
