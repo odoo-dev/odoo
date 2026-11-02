@@ -18,6 +18,7 @@ import sys
 import textwrap
 import threading
 import time
+import uuid
 from collections import deque
 from concurrent.futures import ThreadPoolExecutor
 
@@ -118,9 +119,39 @@ def cron_database_list():
 # FileSystem Watcher for autoreload and cache invalidation
 # ----------------------------------------------------------
 
+HOT_RELOAD_EXTENSIONS = ('.js', '.xml', '.css', '.scss')
+
+
+class HotReload:
+    """ Tell browsers that web files changed (``--dev=hot_reload``).
+
+    Browsers long-poll ``/web/hot_reload`` with the token they know. The token
+    changes on every web file change and on every server (re)start, so the
+    browser reloads the page as soon as it sees a new token.
+    """
+    def __init__(self):
+        self.token = uuid.uuid4().hex
+        self._condition = threading.Condition()
+
+    def notify(self):
+        with self._condition:
+            self.token = uuid.uuid4().hex
+            self._condition.notify_all()
+
+    def wait(self, token, timeout):
+        """ Return the current token, at most ``timeout`` seconds after it differs from ``token``. """
+        with self._condition:
+            self._condition.wait_for(lambda: self.token != token, timeout)
+            return self.token
+
+
 class FSWatcherBase:
     def handle_file(self, path):
-        if path.endswith('.py') and not os.path.basename(path).startswith('.~'):
+        if hot_reload and path.endswith(HOT_RELOAD_EXTENSIONS) and not os.path.basename(path).startswith('.~'):
+            _logger.info('hot reload: %s changed, reloading browsers', path)
+            hot_reload.notify()
+            return None
+        if 'reload' in config['dev_mode'] and path.endswith('.py') and not os.path.basename(path).startswith('.~'):
             try:
                 with open(path, 'rb') as file:
                     source = file.read() + b'\n'
@@ -1412,6 +1443,7 @@ class WorkerCron(Worker):
 
 server = None
 server_phoenix = False
+hot_reload = None
 
 
 def load_server_wide_modules():
@@ -1553,7 +1585,7 @@ def preload_registries(dbnames):
 def start(preload=None, stop=False):
     """ Start the odoo http server and cron processor.
     """
-    global server  # noqa: PLW0603
+    global server, hot_reload  # noqa: PLW0603
 
     load_server_wide_modules()
     import odoo  # noqa: PLC0415
@@ -1591,8 +1623,14 @@ def start(preload=None, stop=False):
                 _logger.warning("Could not set ARENA_MAX through mallopt()", exc_info=True)
         server = ThreadedServer(root)
 
+    if 'hot_reload' in config['dev_mode']:
+        if isinstance(server, ThreadedServer):
+            hot_reload = HotReload()
+        else:
+            _logger.warning("Hot reload needs the threaded server (--workers=0); it is disabled")
+
     watcher = None
-    if 'reload' in config['dev_mode'] and not odoo.evented:
+    if ('reload' in config['dev_mode'] or hot_reload) and not odoo.evented:
         if inotify:
             watcher = FSWatcherInotify()
             watcher.start()

@@ -3,11 +3,14 @@
 import logging
 from hashlib import sha256
 
+from werkzeug.exceptions import NotFound
+
 import odoo.tools
 from odoo import http, release
 from odoo.http import request
 from odoo.http.stream import STATIC_CACHE_LONG
 from odoo.modules import Manifest
+from odoo.service import server
 from odoo.tools import translate
 from odoo.tools.misc import file_path
 
@@ -102,6 +105,14 @@ class WebClient(http.Controller):
             'server_version_info': release.version_info,
             'server_serie': release.serie,
         }
+
+    @http.route('/web/hot_reload', type='http', auth='none', methods=['GET'], save_session=False)
+    def hot_reload(self, token):
+        """ Long-poll used by the ``hot_reload`` service: answer with the
+        current token as soon as it differs from ``token`` (or after 20s). """
+        if not server.hot_reload:
+            raise NotFound()
+        return request.make_json_response(server.hot_reload.wait(token, timeout=20))
 
     @http.route('/web/tests', type='http', auth='user', replica=True)
     def unit_tests_suite(self, mod=None, **kwargs):
