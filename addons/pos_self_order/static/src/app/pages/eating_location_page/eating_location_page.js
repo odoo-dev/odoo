@@ -3,6 +3,7 @@ import { useSelfOrder } from "@pos_self_order/app/services/self_order_service";
 import { useService } from "@web/core/utils/hooks";
 import { useScrollShadow } from "../../utils/scroll_shadow_hook";
 import { SIZES } from "@web/core/ui/ui_utils";
+import { _t } from "@web/core/l10n/translation";
 
 export class EatingLocationPage extends Component {
     static template = "pos_self_order.EatingLocationPage";
@@ -22,6 +23,20 @@ export class EatingLocationPage extends Component {
     }
 
     selectPreset(preset) {
+        if (
+            this.selfOrder._isSessionTimeoutEnabled() &&
+            preset.service_at === "table" &&
+            this.selfOrder.isSessionExpired
+        ) {
+            if (this.selfOrder.notification) {
+                this.selfOrder.notification.add(
+                    _t("Your session has expired. Please scan the QR code again to order dine-in."),
+                    { type: "danger" }
+                );
+            }
+            return;
+        }
+
         const order = this.selfOrder.currentOrder;
         // Reset tip when switching to a different preset, as pricelist or fiscal
         // position may differ, which would change the order total and invalidate

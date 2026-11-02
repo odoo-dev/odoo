@@ -14,3 +14,30 @@
     background-position: center;
     background-repeat: no-repeat;
 }
+
+#pos-session-expired-banner,
+.pos-session-expired-banner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 999999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 14px 16px;
+    background-color: #c53030;
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.4;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+}
+
+#pos-session-expired-banner .pos-session-expired-icon,
+.pos-session-expired-banner .pos-session-expired-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+}

@@ -22,6 +22,15 @@ class ResConfigSettings(models.TransientModel):
     pos_self_ordering_pay_after = fields.Selection(related="pos_config_id.self_ordering_pay_after", readonly=False, required=True)
     pos_self_ordering_default_user_id = fields.Many2one(related="pos_config_id.self_ordering_default_user_id", readonly=False)
     pos_self_ordering_primary_color = fields.Char(related="pos_config_id.self_ordering_primary_color", readonly=False)
+    pos_self_order_secure_session = fields.Boolean(
+        related="pos_config_id.self_order_secure_session",
+        readonly=False,
+    )
+    pos_self_order_session_timeout_minutes = fields.Integer(
+        related="pos_config_id.self_order_session_timeout_minutes",
+        readonly=False,
+        string="Session Timeout (minutes)",
+    )
 
     @api.onchange("pos_self_ordering_default_user_id")
     def _onchange_default_user(self):

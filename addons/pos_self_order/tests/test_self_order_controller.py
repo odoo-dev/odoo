@@ -763,3 +763,56 @@ class TestSelfOrderController(SelfOrderCommonTest):
         self.assertFalse(data['lines'])
         self.assertEqual(victim_line.qty, 3)
         self.assertEqual(victim_line.order_id, victim_order)
+
+    def test_secure_table_session_token_and_order_guard(self):
+        self.pos_config.write({
+            'self_ordering_mode': 'mobile',
+            'self_ordering_pay_after': 'meal',
+            'self_ordering_service_mode': 'table',
+            'self_order_secure_session': True,
+            'self_order_session_timeout_minutes': 10,
+        })
+        self.pos_config.with_user(self.pos_user).open_ui()
+        self.pos_config.current_session_id.set_opening_control(0, '')
+
+        # 1. Test token creation via /pos-self/session/create
+        res = self.url_open(
+            '/pos-self/session/create',
+            json.dumps({
+                'jsonrpc': '2.0',
+                'params': {
+                    'config_id': self.pos_config.id,
+                    'table_identifier': self.pos_table_1.identifier,
+                    'access_token': self.pos_config.access_token,
+                },
+            }),
+            method='POST',
+            headers={'Content-Type': 'application/json'},
+        ).json()
+        self.assertEqual(res['result']['status'], 'open')
+        token = res['result']['token']
+        self.assertTrue(self.pos_config._verify_table_session_token(self.pos_table_1.identifier, token))
+
+        # 2. Test invalid / missing token blocks order
+        order_data = self._create_order_data(product=self.cola, qty=1, price_unit=1.0)
+        order_data['table_identifier'] = self.pos_table_1.identifier
+        order_data['order']['preset_id'] = self.in_preset.id
+
+        # Missing token
+        res_fail = self.url_open(
+            '/pos-self-order/process-order/mobile',
+            json.dumps({'jsonrpc': '2.0', 'params': order_data}),
+            method='POST',
+            headers={'Content-Type': 'application/json'},
+        ).json()
+        self.assertIn('Your session has expired', res_fail['error']['data']['message'])
+
+        # With valid token
+        order_data['table_session_token'] = token
+        res_ok = self.url_open(
+            '/pos-self-order/process-order/mobile',
+            json.dumps({'jsonrpc': '2.0', 'params': order_data}),
+            method='POST',
+            headers={'Content-Type': 'application/json'},
+        ).json()
+        self.assertTrue(res_ok.get('result'))

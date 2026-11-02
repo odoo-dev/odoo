@@ -25,6 +25,7 @@ import { ComboSuggestion } from "@point_of_sale/app/models/utils/combo_suggestio
 import { session } from "@web/session";
 import { PosDataPlugin } from "@point_of_sale/app/plugins/pos_data_plugin";
 import { PosTicketPrinterPlugin } from "@point_of_sale/app/plugins/pos_ticket_printer_plugin";
+import { getTableSessionStorageKey } from "@pos_self_order/app/utils";
 
 const { DateTime } = luxon;
 
@@ -81,11 +82,16 @@ export class SelfOrder {
             formatCurrency: (amount) => this.formatMonetary(amount),
         };
 
+        this._isSessionExpired = false;
         this.initData();
         if (this.config.self_ordering_mode === "kiosk") {
             await this.initKioskData();
         } else {
             await this.initMobileData();
+        }
+
+        if (this._isSessionTimeoutEnabled()) {
+            await this._initTableSession();
         }
 
         this.data.connectWebSocket("SESSION_STATE_CHANGED", () => {
@@ -459,6 +465,12 @@ export class SelfOrder {
     }
 
     async confirmOrder() {
+        if (this._isSessionTimeoutEnabled()) {
+            if (!this._checkOrderPermission()) {
+                return;
+            }
+        }
+
         const payAfter = this.config.self_ordering_pay_after; // each, meal
         const device = this.config.self_ordering_mode; // kiosk, mobile
         const service = this.selfService; // table, counter, delivery
@@ -837,6 +849,12 @@ export class SelfOrder {
     }
 
     async _sendDraftOrderToServer() {
+        if (this._isSessionTimeoutEnabled()) {
+            if (!this._checkOrderPermission()) {
+                return false;
+            }
+        }
+
         const order = this.currentOrder;
         const hasTipLine = this.config.tip_product_id && order.lines.some((l) => l.isTipLine());
         // tip is excluded from `changes`, so a tip-only update still needs a sync
@@ -1281,6 +1299,222 @@ export class SelfOrder {
             return `url('/web/image/ir.attachment/${imageId}/raw')`;
         }
         return "none";
+    }
+
+    get isSessionExpired() {
+        if (!this._isSessionExpired || !this._isDineInOrder()) {
+            return false;
+        }
+        return Boolean(this._isSessionExpired);
+    }
+
+    _isSessionTimeoutEnabled() {
+        return (
+            this.config &&
+            this.config.self_order_secure_session &&
+            this.config.self_ordering_mode === "mobile" &&
+            this.config.self_ordering_pay_after === "meal"
+        );
+    }
+
+    _getStoredSession(tableIdentifier) {
+        if (!tableIdentifier) {
+            return null;
+        }
+        try {
+            const raw = localStorage.getItem(
+                getTableSessionStorageKey(this.config.id, tableIdentifier)
+            );
+            return raw ? JSON.parse(raw) : null;
+        } catch (err) {
+            console.warn("Failed to read stored table session from localStorage:", err);
+            return null;
+        }
+    }
+
+    _saveStoredSession(tableIdentifier, data) {
+        if (!tableIdentifier) {
+            return;
+        }
+        try {
+            localStorage.setItem(
+                getTableSessionStorageKey(this.config.id, tableIdentifier),
+                JSON.stringify(data)
+            );
+        } catch (err) {
+            console.warn("Failed to save table session to localStorage:", err);
+        }
+    }
+
+    _clearStoredSession(tableIdentifier) {
+        if (!tableIdentifier) {
+            return;
+        }
+        try {
+            localStorage.removeItem(getTableSessionStorageKey(this.config.id, tableIdentifier));
+        } catch (err) {
+            console.warn("Failed to remove table session from localStorage:", err);
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Session Initialization / Scan
+    // -------------------------------------------------------------------------
+
+    async _initTableSession() {
+        const tableIdentifier = this.currentTableIdentifier;
+        if (!tableIdentifier) {
+            return;
+        }
+
+        // Check if current URL was loaded from a QR scan flag (&qr=1)
+        const url = new URL(window.location.href);
+        const hasScanParam = url.searchParams.has("qr");
+        if (hasScanParam) {
+            url.searchParams.delete("qr");
+            window.history.replaceState({}, "", url.toString());
+        }
+
+        // If a fresh QR scan was detected via URL parameter:
+        if (hasScanParam) {
+            await this._createAndStoreSession(tableIdentifier);
+            return;
+        }
+
+        // --- NOT a fresh QR scan (e.g. page refresh / direct navigation) ---
+        const stored = this._getStoredSession(tableIdentifier);
+
+        // Case 1: No localStorage entry found for this table -> block and show expired banner
+        if (!stored) {
+            this._onSessionExpired();
+            return;
+        }
+
+        // Case 2: Check expiry date directly from localStorage
+        const expiresAtMs = stored.expires_at || 0;
+        const now = Date.now();
+
+        // If time already expired in localStorage
+        if (!expiresAtMs || now >= expiresAtMs) {
+            this._onSessionExpired();
+            return;
+        }
+
+        // Active session: use local storage data directly (no server requests)
+        this._expiresAtMs = expiresAtMs;
+        this._isSessionExpired = false;
+        this._startSessionTimer();
+    }
+
+    async _createAndStoreSession(tableIdentifier) {
+        try {
+            const res = await rpc("/pos-self/session/create", {
+                config_id: this.config.id,
+                table_identifier: tableIdentifier,
+                access_token: this.access_token,
+            });
+
+            if (!res || res.status !== "open" || !res.token) {
+                return;
+            }
+
+            const expiresAtMs = res.expires_at_ms;
+
+            this._expiresAtMs = expiresAtMs;
+            this._isSessionExpired = false;
+
+            this._saveStoredSession(tableIdentifier, {
+                token: res.token,
+                expires_at: expiresAtMs,
+            });
+
+            this._startSessionTimer();
+        } catch (err) {
+            console.error("Failed to obtain HMAC table session token:", err);
+            this.handleErrorNotification(err);
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Local Session Countdown (No Server Polling)
+    // -------------------------------------------------------------------------
+
+    _startSessionTimer() {
+        if (this._sessionTimer) {
+            clearInterval(this._sessionTimer);
+        }
+
+        this._sessionTimer = setInterval(() => {
+            if (this._isSessionExpired) {
+                clearInterval(this._sessionTimer);
+                this._sessionTimer = null;
+                return;
+            }
+
+            const now = Date.now();
+            if (this._expiresAtMs && now >= this._expiresAtMs) {
+                this._onSessionExpired();
+            }
+        }, 1_000);
+    }
+
+    _onSessionExpired() {
+        this._isSessionExpired = true;
+
+        if (this._sessionTimer) {
+            clearInterval(this._sessionTimer);
+            this._sessionTimer = null;
+        }
+    }
+
+    _isDineInOrder() {
+        if (!this.config) {
+            return false;
+        }
+        if (this.config.use_presets) {
+            const preset = this.currentOrder?.preset_id;
+            if (preset) {
+                return preset.service_at === "table";
+            }
+        }
+        return this.config.self_ordering_service_mode === "table";
+    }
+
+    _checkOrderPermission() {
+        if (!this._isDineInOrder()) {
+            return true;
+        }
+
+        const tableIdentifier = this.currentTableIdentifier;
+        const stored = this._getStoredSession(tableIdentifier);
+
+        let isBlocked = false;
+
+        // Block if no localStorage key found, or token/expires_at missing
+        if (!stored || !stored.token || !stored.expires_at) {
+            isBlocked = true;
+        } else {
+            // Block if time is expired
+            const expiresAtMs = stored.expires_at;
+            if (isNaN(expiresAtMs) || Date.now() >= expiresAtMs) {
+                isBlocked = true;
+            }
+        }
+
+        if (isBlocked || this._isSessionExpired) {
+            this._onSessionExpired();
+            if (this.notification) {
+                this.notification.add(
+                    _t(
+                        "Your session has expired. Please scan the QR code again to continue ordering."
+                    ),
+                    { type: "danger" }
+                );
+            }
+            return false;
+        }
+
+        return true;
     }
 }
 

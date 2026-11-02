@@ -1,6 +1,9 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import base64
 import uuid
+import hashlib
+import hmac
+import time
 import zipfile
 from io import BytesIO
 from urllib.parse import unquote
@@ -9,7 +12,7 @@ import qrcode
 import qrcode.image.svg
 
 from odoo import _, api, fields, models, release
-from odoo.exceptions import AccessError, UserError
+from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.fields import Domain
 
 
@@ -99,6 +102,74 @@ class PosConfig(models.Model):
     )
     has_paper = fields.Boolean("Has paper", default=True)
     self_ordering_primary_color = fields.Char(string="Color", default=lambda self: self.env.company.email_secondary_color)
+    self_order_secure_session = fields.Boolean(
+        "Secure Table Sessions",
+        default=True,
+        help=(
+            "Enable HMAC-secured table sessions for mobile self-order with pay-after-meal. "
+            "Requires both mobile mode and pay-after-meal to take effect."
+        ),
+    )
+    self_order_session_timeout_minutes = fields.Integer(
+        "Session Timeout (min)",
+        default=10,
+        help="After this many minutes from scanning the QR code, the session expires and the customer must scan the QR code again.",
+    )
+    self_order_session_version = fields.Integer(
+        "Session Secret Version",
+        default=1,
+        help="Incremented to invalidate all active table tokens at once (e.g. on config change or POS session close).",
+    )
+
+    def _is_secure_table_session_enabled(self):
+        self.ensure_one()
+        return (
+            self.self_order_secure_session
+            and self.self_ordering_mode == 'mobile'
+            and self.self_ordering_pay_after == 'meal'
+        )
+
+    # ---- HMAC Token Management ----
+
+    def _get_table_session_secret(self):
+        self.ensure_one()
+        db_uuid = self.env['ir.config_parameter'].sudo().get_str('database.uuid', default='')
+        return f"{self.id}:{self.access_token}:{self.self_order_session_version}:{db_uuid}".encode()
+
+    def _generate_table_session_token(self, table_identifier):
+        self.ensure_one()
+        timeout_seconds = (self.self_order_session_timeout_minutes or 10) * 60
+        expires_at = int(time.time()) + timeout_seconds
+        message = f"{self.id}:{table_identifier}:{expires_at}".encode()
+        secret = self._get_table_session_secret()
+        signature = hmac.new(secret, message, hashlib.sha256).hexdigest()
+        token = f"{expires_at}.{signature}"
+        return token, expires_at
+
+    def _verify_table_session_token(self, table_identifier, token):
+        self.ensure_one()
+        if not token or '.' not in token:
+            return False
+        try:
+            expires_at_str, signature = token.split('.', 1)
+            expires_at = int(expires_at_str)
+        except Exception:
+            return False
+
+        message = f"{self.id}:{table_identifier}:{expires_at}".encode()
+        secret = self._get_table_session_secret()
+        expected_sig = hmac.new(secret, message, hashlib.sha256).hexdigest()
+
+        if not hmac.compare_digest(signature, expected_sig):
+            return False
+
+        return not time.time() > expires_at
+
+    @api.constrains('self_order_session_timeout_minutes')
+    def _check_session_timeout_values(self):
+        for rec in self:
+            if rec.self_order_session_timeout_minutes <= 0:
+                raise ValidationError(_("Session timeout must be greater than 0 minutes."))
 
     @api.model
     def _load_pos_self_data_fields(self, pos_config_id):
@@ -114,7 +185,7 @@ class PosConfig(models.Model):
             'status', 'self_ordering_image_background_ids', 'preparation_printer_ids',
             'receipt_printer_ids', 'use_order_printer', 'other_devices', 'pos_snooze_ids', 'self_ordering_primary_color',
             'logo', 'receipt_address', 'phone', 'email', 'website', 'tip_product_id', 'module_pos_discount',
-            'iface_group_by_categ',
+            'iface_group_by_categ', 'self_order_secure_session', 'self_order_session_timeout_minutes',
         ]
 
     def _update_access_token(self):
@@ -207,6 +278,9 @@ class PosConfig(models.Model):
                 vals['self_ordering_service_mode'] = 'table'
 
         res = super().write(vals)
+        if any(f in vals for f in ('self_ordering_mode', 'self_ordering_pay_after', 'self_order_secure_session')):
+            for rec in self:
+                rec.sudo().self_order_session_version += 1
         self._ensure_public_attachments()
         self._prepare_self_order_custom_btn()
         return res
@@ -294,6 +368,8 @@ class PosConfig(models.Model):
                 table = self.env["restaurant.table"].search([("active", "=", True), ("id", "=", table_id)], limit=1)
                 if table:
                     extra_params += f"&table_identifier={table.identifier}"
+                    if self._is_secure_table_session_enabled():
+                        extra_params += "&qr=1"
 
         return f"{base_route}?access_token={self.access_token}{extra_params}"
 

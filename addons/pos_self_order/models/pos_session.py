@@ -44,6 +44,10 @@ class PosSession(models.Model):
 
     def close_session_from_ui(self, payment_method_closing={}, opening_notes=None, closing_notes=None):
         result = super().close_session_from_ui(payment_method_closing, opening_notes, closing_notes)
+        for session in self:
+            config = session.config_id
+            if config._is_secure_table_session_enabled():
+                config.sudo().self_order_session_version += 1
         self.config_id.notify_session_state_changed()
         return result
 
