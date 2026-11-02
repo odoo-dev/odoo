@@ -1,0 +1,5 @@
+id,name,model_id,group_id/id,operation,domain
+access_document_version_readonly,Japan evidence read,l10n_jp.account.document.version,account.group_account_readonly,r,
+access_document_version_manager,Japan evidence manager,l10n_jp.account.document.version,account.group_account_manager,cru,
+document_version_company,Japan evidence companies,l10n_jp.account.document.version,,crud,"[('company_id', 'in', company_ids)]"
+document_version_move,Japan evidence accounting access,l10n_jp.account.document.version,,crud,"[('move_id', 'access', 'read')]"

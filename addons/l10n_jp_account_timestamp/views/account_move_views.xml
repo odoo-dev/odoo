@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_move_form" model="ir.ui.view">
+        <field name="name">account.move.form.inherit.l10n_jp_account_timestamp</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='other_info']/parent::notebook" position="inside">
+                <page name="l10n_jp_evidence" string="Scanned Documents" groups="account.group_account_manager" invisible="country_code != 'JP'">
+                    <div class="alert alert-info" role="alert">
+                        Preserve invoice scans and replacements. The scheduled action prepares active scans, or open a document and click Prepare PDF.
+                        OCR fills the bill fields separately; it is not required for timestamping.
+                    </div>
+                    <button name="action_l10n_jp_add_evidence" type="object" string="Upload Scanned Document" class="btn-primary mb-3"/>
+                    <field name="l10n_jp_document_version_ids" readonly="1">
+                        <list create="0" delete="0" decoration-danger="state in ('error', 'unverified')">
+                            <field name="name"/>
+                            <field name="state" widget="badge"/>
+                            <field name="received_at"/>
+                            <field name="create_date" string="Uploaded On"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>
