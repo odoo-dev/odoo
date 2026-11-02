@@ -1435,11 +1435,13 @@
                                                readonly="display_type in ('line_section', 'line_note') or tax_line_id or (parent.move_type in ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt') and account_type in ('asset_receivable', 'liability_payable'))"/>
                                         <field name="debit"
                                                sum="Total Debit"
+                                               decoration-muted="debit == 0"
                                                invisible="display_type in ('line_section', 'line_subsection', 'line_note')"
                                                readonly="parent.move_type in ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt') and display_type in ('line_section', 'line_note', 'product')"
                                         />
                                         <field name="credit"
                                                sum="Total Credit"
+                                               decoration-muted="credit == 0"
                                                invisible="display_type in ('line_section', 'line_subsection', 'line_note')"
                                                readonly="parent.move_type in ('out_invoice', 'out_refund', 'in_invoice', 'in_refund', 'out_receipt', 'in_receipt') and display_type in ('line_section', 'line_note', 'product')"
                                         />
