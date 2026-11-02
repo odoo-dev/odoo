@@ -3,6 +3,7 @@
 from odoo import api, fields, models, release
 from odoo.http import request
 from odoo.http.requestlib import DEFAULT_MAX_CONTENT_LENGTH
+from odoo.service import server
 from odoo.tools import config
 from odoo.tools.misc import hmac, str2bool
 
@@ -151,6 +152,8 @@ class IrHttp(models.AbstractModel):
         }
         if request.session.debug:
             session_info['bundle_params']['debug'] = request.session.debug
+        if server.hot_reload:
+            session_info['hot_reload_token'] = server.hot_reload.token
         if is_internal_user:
             # We need sudo since a user may not have access to ancestor companies
             # We use `_get_company_ids` because it is cached and we sudo it because env.user return a sudo user.
@@ -213,6 +216,8 @@ class IrHttp(models.AbstractModel):
         }
         if request.session.debug:
             session_info['bundle_params']['debug'] = request.session.debug
+        if server.hot_reload:
+            session_info['hot_reload_token'] = server.hot_reload.token
         return session_info
 
     @classmethod
