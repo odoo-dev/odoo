@@ -436,7 +436,12 @@ def safe_eval(expr, /, context=None, *, mode="eval", filename=None):
         __builtins__=dict(_BUILTINS),
     )
 
-    c = _compile_safe_codeobj(expr, filename, mode, unsafe_policy())
+    policy = unsafe_policy()
+    c = _compile_safe_codeobj(expr, filename, mode, policy)
+    if policy:
+        # the code object may come from the cache: make sure its monitoring is
+        # still enabled, in case something has reset it since it was compiled
+        add_monitoring(c)
     try:
         # empty locals dict makes the eval behave like top-level code
         return unsafe_eval(c, globals_dict, None)
