@@ -104,7 +104,7 @@ class PosConfig(models.Model):
     self_ordering_primary_color = fields.Char(string="Color", default=lambda self: self.env.company.email_secondary_color)
     self_order_secure_session = fields.Boolean(
         "Secure Table Sessions",
-        default=True,
+        default=False,
         help=(
             "Enable HMAC-secured table sessions for mobile self-order with pay-after-meal. "
             "Requires both mobile mode and pay-after-meal to take effect."
@@ -112,7 +112,7 @@ class PosConfig(models.Model):
     )
     self_order_session_timeout_minutes = fields.Integer(
         "Session Timeout (min)",
-        default=10,
+        default=0,
         help="After this many minutes from scanning the QR code, the session expires and the customer must scan the QR code again.",
     )
     self_order_session_version = fields.Integer(
@@ -123,10 +123,12 @@ class PosConfig(models.Model):
 
     def _is_secure_table_session_enabled(self):
         self.ensure_one()
-        return (
+        return bool(
             self.self_order_secure_session
+            and self.self_order_session_timeout_minutes > 0
             and self.self_ordering_mode == 'mobile'
             and self.self_ordering_pay_after == 'meal'
+            and self.self_ordering_service_mode == 'table'
         )
 
     # ---- HMAC Token Management ----
@@ -153,7 +155,7 @@ class PosConfig(models.Model):
         try:
             expires_at_str, signature = token.split('.', 1)
             expires_at = int(expires_at_str)
-        except Exception:
+        except (ValueError, TypeError, AttributeError):
             return False
 
         message = f"{self.id}:{table_identifier}:{expires_at}".encode()
@@ -168,8 +170,10 @@ class PosConfig(models.Model):
     @api.constrains('self_order_session_timeout_minutes')
     def _check_session_timeout_values(self):
         for rec in self:
-            if rec.self_order_session_timeout_minutes <= 0:
+            if rec.self_order_secure_session and rec.self_order_session_timeout_minutes <= 0:
                 raise ValidationError(_("Session timeout must be greater than 0 minutes."))
+            elif rec.self_order_session_timeout_minutes < 0:
+                raise ValidationError(_("Session timeout cannot be negative."))
 
     @api.model
     def _load_pos_self_data_fields(self, pos_config_id):
@@ -194,6 +198,9 @@ class PosConfig(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+        for vals in vals_list:
+            if 'self_order_session_timeout_minutes' in vals and 'self_order_secure_session' not in vals:
+                vals['self_order_secure_session'] = bool(vals['self_order_session_timeout_minutes'] > 0)
         self._prepare_self_order_splash_screen(vals_list, is_new=True)
         pos_config_ids = super().create(vals_list)
         pos_config_ids._ensure_public_attachments()
@@ -238,7 +245,17 @@ class PosConfig(models.Model):
                     'pos_config_ids': [(4, record.id)],
                 })
 
+    def _bump_self_order_session_version(self):
+        for record in self:
+            self.env.cr.execute(
+                "UPDATE pos_config SET self_order_session_version = COALESCE(self_order_session_version, 0) + 1 WHERE id = %s",
+                (record.id,)
+            )
+        self.invalidate_recordset(['self_order_session_version'])
+
     def write(self, vals):
+        if 'self_order_session_timeout_minutes' in vals and 'self_order_secure_session' not in vals:
+            vals['self_order_secure_session'] = bool(vals['self_order_session_timeout_minutes'] > 0)
         self._prepare_self_order_splash_screen([vals])
         product_delivery_template = self.env.ref('pos_self_order.product_delivery_template', raise_if_not_found=False)
         if (
@@ -247,6 +264,14 @@ class PosConfig(models.Model):
             and not product_delivery_template.active
         ):
             product_delivery_template.active = True
+
+        fields_to_monitor = ('self_ordering_mode', 'self_ordering_pay_after', 'self_order_secure_session', 'self_ordering_service_mode', 'self_order_session_timeout_minutes')
+        records_to_bump = self.env['pos.config']
+        if not self.env.context.get('skip_session_version_bump'):
+            for record in self:
+                if any(f in vals and record[f] != vals[f] for f in fields_to_monitor):
+                    records_to_bump |= record
+
         for record in self:
             mode = vals.get('self_ordering_mode', record.self_ordering_mode)
 
@@ -278,9 +303,8 @@ class PosConfig(models.Model):
                 vals['self_ordering_service_mode'] = 'table'
 
         res = super().write(vals)
-        if any(f in vals for f in ('self_ordering_mode', 'self_ordering_pay_after', 'self_order_secure_session')):
-            for rec in self:
-                rec.sudo().self_order_session_version += 1
+        if records_to_bump:
+            records_to_bump._bump_self_order_session_version()
         self._ensure_public_attachments()
         self._prepare_self_order_custom_btn()
         return res

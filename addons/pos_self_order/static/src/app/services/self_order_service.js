@@ -1309,11 +1309,13 @@ export class SelfOrder {
     }
 
     _isSessionTimeoutEnabled() {
-        return (
+        return Boolean(
             this.config &&
-            this.config.self_order_secure_session &&
-            this.config.self_ordering_mode === "mobile" &&
-            this.config.self_ordering_pay_after === "meal"
+                this.config.self_order_secure_session &&
+                this.config.self_order_session_timeout_minutes > 0 &&
+                this.config.self_ordering_mode === "mobile" &&
+                this.config.self_ordering_pay_after === "meal" &&
+                this.config.self_ordering_service_mode === "table"
         );
     }
 

@@ -47,7 +47,7 @@ class PosSession(models.Model):
         for session in self:
             config = session.config_id
             if config._is_secure_table_session_enabled():
-                config.sudo().self_order_session_version += 1
+                config._bump_self_order_session_version()
         self.config_id.notify_session_state_changed()
         return result
 
