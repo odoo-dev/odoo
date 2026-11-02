@@ -283,7 +283,7 @@ class Probe(threading.Thread):
         if stalled or (now - self.stack_since > STACK_STALL and not self.stack_reported):
             self.reported_queries.update((row['pid'], row['query_start']) for row in stalled)
             self.stack_reported = self.stack_reported or now - self.stack_since > STACK_STALL
-            _logger.warning(
+            _logger.info(
                 "perf_probe stall stack_age=%.0fs test=%s srv_waits=%s backends=%s frames=%s", now - self.stack_since,
                 odoo.modules.module.current_test, ','.join(f'{k}:{v}' for k, v in collections.Counter(
                     f"{row['wait_event_type']}:{row['wait_event']}" if row['wait_event_type'] else 'CPU'

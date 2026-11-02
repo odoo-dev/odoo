@@ -5,7 +5,6 @@
 """
 from __future__ import annotations
 
-import contextlib
 import datetime
 import itertools
 import logging
@@ -43,8 +42,6 @@ MAX_REMOVED_MODULES = 50
 
 
 def _probe_timed(kind, name, min_wall=0.0):
-    if not tools.config['test_enable']:
-        return contextlib.nullcontext()
     from odoo.tests import perf_probe  # noqa: PLC0415
     return perf_probe.timed(kind, name, min_wall)
 

@@ -7,7 +7,6 @@ from functools import wraps
 from inspect import getmembers
 from copy import deepcopy
 
-import contextlib
 import logging
 import re
 
@@ -15,7 +14,7 @@ from odoo import Command, api, models
 from odoo.exceptions import AccessError, UserError, RedirectWarning
 from odoo.fields import Domain
 from odoo.modules import get_resource_from_path
-from odoo.tools import config as odoo_config, file_open, float_compare, get_lang, groupby, SQL
+from odoo.tools import file_open, float_compare, get_lang, groupby, SQL
 from odoo.tools.translate import _, code_translations, TranslationImporter
 
 _logger = logging.getLogger(__name__)
@@ -202,12 +201,8 @@ class AccountChartTemplate(models.AbstractModel):
         if template_code in {'syscohada', 'syscebnl'} and template_code != company.chart_template:
             raise UserError(_("The %s chart template shouldn't be selected directly. Instead, you should directly select the chart template related to your country.", template_code))
 
-        if not odoo_config['test_enable']:
-            probe = contextlib.nullcontext()
-        else:
-            from odoo.tests import perf_probe  # noqa: PLC0415
-            probe = perf_probe.timed('chart_load', f'{template_code}/{company.id}')
-        with probe:
+        from odoo.tests import perf_probe  # noqa: PLC0415
+        with perf_probe.timed('chart_load', f'{template_code}/{company.id}'):
             return self._load(template_code, company, install_demo, force_create)
 
     def _load(self, template_code, company, install_demo, force_create=True ):

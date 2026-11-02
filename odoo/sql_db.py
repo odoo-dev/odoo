@@ -472,7 +472,7 @@ class Cursor(_CursorProtocol):
         _slow_local.active = True
         try:
             query = (self._obj.query or b'').decode(errors='replace')
-            _slow_logger.warning("slow query %.3fs rowcount=%s: %s", delay, self._obj.rowcount, query[:500])
+            _slow_logger.info("slow query %.3fs rowcount=%s: %s", delay, self._obj.rowcount, query[:500])
             if (
                 _slow_explain_budget <= 0 or self._cnx.autocommit
                 or not _re_readonly.match(query) or _re_not_readonly.search(query)
@@ -489,7 +489,7 @@ class Cursor(_CursorProtocol):
                 finally:
                     explain_cr.execute("ROLLBACK TO SAVEPOINT perf_probe_explain")
                     explain_cr.execute("RELEASE SAVEPOINT perf_probe_explain")
-            _slow_logger.warning("slow query plan (%.3fs):\n%s", delay, "\n".join(plan[:80]))
+            _slow_logger.info("slow query plan (%.3fs):\n%s", delay, "\n".join(plan[:80]))
         except Exception:  # noqa: BLE001
             _slow_logger.warning("slow query explain failed", exc_info=True)
         finally:
