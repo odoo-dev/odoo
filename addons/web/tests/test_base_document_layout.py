@@ -240,6 +240,20 @@ class TestBaseDocumentLayout(TestBaseDocumentLayoutHelpers):
         doc_layout_2 = self.env['base.document.layout'].create({'company_id': self.company.id})
         self.assertTrue('street_2_detail' in doc_layout_2.company_details)
 
+    def test_company_address_list_compact_when_long(self):
+        """Test that a company block of more than 5 lines switches to a smaller font,
+        so it still fits in the header of the layouts."""
+        self.company.write({
+            'company_details': '<p>YourCompany<br>Rue de la Loi 16<br>1000 Brussels<br>Belgium</p>',
+            'vat': 'BE0477472701',
+        })
+        address_list = str(self.env['ir.qweb']._render('web.company_address_list', {'company': self.company}))
+        self.assertNotIn('class="small lh-sm"', address_list)
+
+        self.company.company_details = '<p>YourCompany<br>Rue de la Loi 16<br>1000 Brussels<br>Belgium</p><p>RPM Brussels</p>'
+        address_list = str(self.env['ir.qweb']._render('web.company_address_list', {'company': self.company}))
+        self.assertIn('class="small lh-sm"', address_list)
+
     def test_extract_primary_secondary_on_svg(self):
         svg = BinaryBytes(b'<svg xmlns="http://www.w3.org/2000/svg"/>')
         primary, secondary = self.env['base.document.layout'].extract_image_primary_secondary_colors(svg)

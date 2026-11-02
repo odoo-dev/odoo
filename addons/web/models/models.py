@@ -16,7 +16,7 @@ from odoo import api, models
 from odoo.fields import Command, Date, Domain
 from odoo.api import NewId
 from odoo.models import regex_order, READ_GROUP_DISPLAY_FORMAT, READ_GROUP_NUMBER_GRANULARITY, READ_GROUP_TIME_GRANULARITY, BaseModel
-from odoo.tools import DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT, BinaryBytes, BinaryValue, date_utils, get_lang, unique, OrderedSet
+from odoo.tools import DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT, BinaryBytes, BinaryValue, date_utils, get_lang, html2plaintext, unique, OrderedSet
 from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.tools.date_utils import all_timezones
 from odoo.tools.misc import LazyDict
@@ -2474,6 +2474,11 @@ class ResCompany(models.Model):
         data = self._get_asset_style_raw()
         if data.content != asset_attachment.raw.content:
             asset_attachment.raw = data
+
+    @api.model
+    def _get_report_line_count(self, html):
+        text = html2plaintext(' '.join(str(html).split()))
+        return len([line for line in text.splitlines() if line.strip()])
 
 
 class RecordSnapshot(dict):

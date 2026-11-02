@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <template id="report_layout" inherit_id="web.report_layout">
+        <xpath expr="//html" position="before">
+            <t t-if="env and env.context.get('snailmail_layout')">
+                <t t-set="snailmail_paperformat" t-value="env['ir.actions.report'].get_paperformat()"/>
+                <t t-set="data_report_margin_top" t-value="data_report_margin_top or snailmail_paperformat.margin_top"/>
+                <t t-set="data_report_header_spacing" t-value="data_report_header_spacing or snailmail_paperformat.header_spacing"/>
+                <t t-set="data_report_margin_bottom" t-value="data_report_margin_bottom or snailmail_paperformat.margin_bottom"/>
+            </t>
+        </xpath>
         <xpath expr="//head" position="inside">
             <t t-if="env and env.context.get('snailmail_layout')" t-call-assets="snailmail.report_assets_snailmail" t-autoprefix="true"/>
         </xpath>
