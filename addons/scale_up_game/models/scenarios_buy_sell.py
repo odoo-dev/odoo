@@ -56,19 +56,19 @@ class BsCreateProduct(models.AbstractModel):
 
     def _texts(self, session):
         return {
-            'objective': _("Marc found a new vendor, Wood Corner, for office furniture. Put their Large Desk "
+            'objective': _("Purchasing found a new vendor, Wood Corner, for office furniture. Put their Large Desk "
                            "in our catalog so we can buy and sell it."),
-            'briefing': _("Boss, Marc visited Wood Corner. Can you add their Large Desk to our catalog?"),
+            'briefing': _("Boss, purchasing found a new vendor. Can you add their Large Desk to our catalog?"),
             'chat': [
-                {'who': 'marc', 'text': _("We visited Wood Corner, a new vendor of office furniture. Here is their Large Desk.")},
+                {'who': 'bot', 'text': _("Hi boss! I'm OdooBot. Purchasing just visited Wood Corner, a new vendor of office furniture. Here is their Large Desk.")},
                 {'who': 'ceo', 'text': _("How much do they cost?")},
-                {'who': 'marc', 'text': _("$140 each, but $100 if we order a minimum of 10 desks. We can sell them at $220.")},
+                {'who': 'bot', 'text': _("$140 each, but $100 if we order a minimum of 10 desks. We can sell them at $220.")},
                 {'who': 'ceo', 'text': _("Sounds good! I'll create the product in our catalog.")},
             ],
             'hints': {
                 'create': [
                     _("Where does Odoo keep everything you buy and sell?"),
-                    _("Use the terminal and create a new product named Large Desk."),
+                    _("Click the computer on your desk and create a new product named Large Desk."),
                 ],
                 'details': [
                     _("A desk is a physical thing you keep in stock. What are its price and cost?"),
@@ -107,7 +107,7 @@ class BsPurchase(models.AbstractModel):
             issues.append(_("The order has no Large Desk line."))
         else:
             if not any(self._eq(l.product_qty, 10.0) for l in lines):
-                issues.append(_("Sophia said 9 to 12 sales a month: order 10 desks."))
+                issues.append(_("The sales team expects 9 to 12 sales a month: order 10 desks."))
             if not any(self._eq(l.price_unit, 100.0) for l in lines):
                 issues.append(_("The agreed price for 10 desks is $100 each."))
         return issues
@@ -134,14 +134,15 @@ class BsPurchase(models.AbstractModel):
                            "with a real purchase order."),
             'briefing': _("Boss, we should stock up on Large Desks. Can you order them from Wood Corner?"),
             'chat': [
-                {'who': 'ceo', 'text': _("Sophia, I'm planning to purchase Large Desks. What are your monthly sales estimates?")},
-                {'who': 'sophia', 'text': _("Between 9 and 12.")},
+                {'who': 'bot', 'text': _("Boss, the Large Desk is in the catalog. How many should we order from Wood Corner?")},
+                {'who': 'ceo', 'text': _("OdooBot, what are the monthly sales estimates?")},
+                {'who': 'bot', 'text': _("The sales team expects between 9 and 12 a month.")},
                 {'who': 'ceo', 'text': _("Ok, I'll purchase 10 desks to start with.")},
             ],
             'hints': {
                 'create': [
                     _("Which Odoo document asks a vendor for a price and then commits to buy?"),
-                    _("Use the terminal to create a new request for quotation."),
+                    _("Click the computer on your desk and create a new request for quotation."),
                 ],
                 'details': [
                     _("Who are we buying from, what, how many, at what agreed price?"),

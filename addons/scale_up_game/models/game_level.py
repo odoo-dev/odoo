@@ -26,7 +26,7 @@ class ScaleUpGameLevel(models.Model):
     # Playable sub-level: name of a `scale.up.game.scenario.<scenario>` model, or
     # 'restock_shelf' (the POC, handled directly by the session model).
     scenario = fields.Char(help="Scenario implementation. Empty for a group.")
-    scene = fields.Char(default='office', help="3D scene of this level: office, dock or warehouse.")
+    scene = fields.Char(default='office', help="3D scene of this level: office_pov (admin's point of view), office, dock or warehouse.")
     max_stars = fields.Integer(default=2, help="Stars a player can earn (bonus stars included).")
 
     # Restock-shelf (POC) scenario configuration
@@ -43,6 +43,13 @@ class ScaleUpGameLevel(models.Model):
     initial_stock_done = fields.Boolean(readonly=True, copy=False)
 
     _code_uniq = models.Constraint('unique(code)', 'The level code must be unique.')
+
+    @api.model
+    def _remove_obsolete_levels(self):
+        """Remove levels that only existed as an experiment (and their attempts)."""
+        levels = self.with_context(active_test=False).search([('code', 'in', ['bs_create_product_pov'])])
+        self.env['scale.up.game.session'].sudo().search([('level_id', 'in', levels.ids)]).unlink()
+        levels.sudo().unlink()
 
     # ------------------------------------------------------------------
     # Menu

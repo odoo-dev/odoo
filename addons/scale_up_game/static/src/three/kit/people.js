@@ -54,6 +54,7 @@ export const PEOPLE = {
         jacket: "#44505e", shirt: "#dfe6ec", tie: null, trousers: "#39434f", shoes: "#232323",
         hiVis: true,
     },
+    bot: { name: "OdooBot", role: "Your Odoo assistant", icon: "🤖" },
     phone: { name: "Incoming call", role: "", icon: "📞" },
     mail: { name: "Inbox", role: "", icon: "✉️" },
     doc: { name: "On your desk", role: "", icon: "📄" },

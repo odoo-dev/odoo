@@ -3,6 +3,14 @@ $su-purple: #714b67;
 $su-teal: #017e84;
 
 .o_su_dialogue {
+    // Theme tokens: Odoo's light/dark bundles flip the $o-gray-* scale at compile time.
+    --su-surface: #{$o-gray-100};
+    --su-text: #{$o-gray-900};
+    --su-muted: #{$o-gray-600};
+    --su-soft: #{$o-gray-200};
+    --su-border: #{$o-gray-300};
+    --su-accent: color-mix(in srgb, #017e84 60%, var(--su-text));
+    --su-accent-2: color-mix(in srgb, #714b67 55%, var(--su-text));
     position: absolute;
     inset: 0;
     z-index: 5;
@@ -12,6 +20,11 @@ $su-teal: #017e84;
     padding: 0 16px 28px;
     cursor: pointer;
     background: linear-gradient(to bottom, rgba(16, 22, 30, 0) 45%, rgba(16, 22, 30, 0.45) 100%);
+}
+
+.o_su_dlg_avatar {
+    grid-area: portrait; align-self: start; width: 64px; height: 64px; border-radius: 50%;
+    object-fit: cover; background: var(--su-soft);
 }
 
 .o_su_dlg_box {
@@ -26,26 +39,27 @@ $su-teal: #017e84;
     max-width: 760px;
     padding: 16px 18px 12px;
     border-radius: 16px;
-    background: #fff;
+    background: var(--su-surface);
+    color: var(--su-text);
     box-shadow: 0 10px 34px rgba(0, 0, 0, 0.35);
     animation: o_su_dlg_in 0.18s ease-out;
 
-    .o_su_portrait { grid-area: portrait; align-self: start; border-radius: 50%; background: #eef1f5; }
+    .o_su_portrait { grid-area: portrait; align-self: start; border-radius: 50%; background: var(--su-soft); }
     .o_su_dlg_body { grid-area: body; }
     .o_su_dlg_foot {
         grid-area: foot; display: flex; align-items: center; justify-content: space-between;
-        font-size: 0.72rem; color: #8a929c;
+        font-size: 0.72rem; color: var(--su-muted);
     }
-    .o_su_dlg_who { font-size: 0.9rem; color: $su-teal; }
-    .o_su_dlg_role { margin-left: 8px; font-size: 0.72rem; color: #8a929c; font-weight: 600; }
+    .o_su_dlg_who { font-size: 0.9rem; color: var(--su-accent); }
+    .o_su_dlg_role { margin-left: 8px; font-size: 0.72rem; color: var(--su-muted); font-weight: 600; }
     .o_su_dlg_text {
-        margin: 2px 0 6px; font-size: 1rem; line-height: 1.45; color: #22272f; min-height: 2.9em;
+        margin: 2px 0 6px; font-size: 1rem; line-height: 1.45; color: var(--su-text); min-height: 2.9em;
     }
-    .o_su_dlg_next { font-weight: 700; color: $su-purple; }
+    .o_su_dlg_next { font-weight: 700; color: var(--su-accent-2); }
     .o_su_dlg_skip {
         position: absolute; top: 8px; right: 10px; border: 0; background: transparent;
-        color: #9aa2ac; font-size: 0.72rem; font-weight: 700; cursor: pointer;
-        &:hover { color: $su-purple; }
+        color: var(--su-muted); font-size: 0.72rem; font-weight: 700; cursor: pointer;
+        &:hover { color: var(--su-accent-2); }
     }
 }
 
@@ -77,7 +91,52 @@ $su-teal: #017e84;
 }
 
 .o_su_game .o_su_storybtn {
-    margin: 6px 0; border: 1px solid #d6dbe1; background: #fff; color: #5a6470;
+    margin: 6px 0; border: 1px solid var(--su-border); background: var(--su-surface); color: var(--su-muted);
     border-radius: 999px; padding: 4px 12px; font-size: 0.78rem; font-weight: 600; cursor: pointer;
-    &:hover { border-color: $su-purple; color: $su-purple; }
+    &:hover { border-color: var(--su-accent-2); color: var(--su-accent-2); }
+}
+
+// Player-perspective briefing: OdooBot's messages sit in the office view,
+// while the player's replies use the familiar outgoing-message placement.
+.o_su_dialogue--pov {
+    align-items: flex-start;
+    padding: 0;
+    background: linear-gradient(to bottom, rgba(16, 22, 30, 0.2), rgba(16, 22, 30, 0) 38%);
+
+    // OdooBot speaks from just above its head (left), Admin answers from the
+    // bottom centre; same card style, a tail points at whoever is speaking.
+    .o_su_dlg_box {
+        position: absolute;
+        left: 24px;
+        bottom: 47%;
+        width: 440px;
+        max-width: 60%;
+        margin: 0;
+        border: 2px solid rgba(1, 126, 132, 0.3);
+        .o_su_dlg_text { min-height: 2.9em; }
+        &::after {
+            content: ""; position: absolute; left: 150px; bottom: -12px;
+            border: 12px solid transparent; border-top-color: var(--su-surface); border-bottom: 0;
+            filter: drop-shadow(0 3px 2px rgba(0, 0, 0, 0.18));
+        }
+    }
+    .o_su_dlg_who, .o_su_dlg_next { color: var(--su-accent); }
+    .o_su_dlg_box--player {
+        left: 50%;
+        bottom: 28px;
+        transform: translateX(-50%);
+        width: 560px;
+        max-width: 92%;
+        grid-template-columns: 104px 1fr;
+        padding: 20px 22px 14px;
+        border-color: rgba(113, 75, 103, 0.3);
+        .o_su_dlg_avatar { width: 104px; height: 104px; }
+        .o_su_dlg_text { font-size: 1.15rem; }
+        .o_su_dlg_who, .o_su_dlg_next { color: var(--su-accent-2); }
+        &::after { display: none; }
+    }
+}
+
+@media (max-width: 760px) {
+    .o_su_dialogue--pov .o_su_dlg_box:not(.o_su_dlg_box--player) { max-width: 92%; }
 }

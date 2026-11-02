@@ -3,6 +3,15 @@ $su-teal: #017e84;
 $su-orange: #e8742c;
 
 .o_su_game {
+    // Theme tokens: Odoo's light/dark bundles flip the $o-gray-* scale at compile time.
+    --su-surface: #{$o-gray-100};
+    --su-text: #{$o-gray-900};
+    --su-muted: #{$o-gray-600};
+    --su-soft: #{$o-gray-200};
+    --su-border: #{$o-gray-300};
+    --su-accent: color-mix(in srgb, #017e84 60%, var(--su-text));
+    --su-accent-2: color-mix(in srgb, #714b67 55%, var(--su-text));
+
     position: relative;
     width: 100%;
     height: 100%;
@@ -16,7 +25,7 @@ $su-orange: #e8742c;
 
     .o_su_loading, .o_su_fatal {
         position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-        padding: 12px 20px; border-radius: 10px; background: rgba(255, 255, 255, 0.92);
+        padding: 12px 20px; border-radius: 10px; background: var(--su-surface); color: var(--su-text);
         box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15); text-align: center;
     }
     .o_su_fatal { color: #a12a2a; max-width: 420px; }
@@ -24,7 +33,7 @@ $su-orange: #e8742c;
     // ---- Mission card -------------------------------------------------
     .o_su_mission {
         position: absolute; top: 12px; left: 12px; width: 300px; max-width: 80%;
-        border-radius: 12px; background: rgba(255, 255, 255, 0.94);
+        border-radius: 12px; background: var(--su-surface); color: var(--su-text);
         box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18); font-size: 0.85rem; overflow: hidden;
     }
     .o_su_mission_head {
@@ -36,23 +45,23 @@ $su-orange: #e8742c;
     .o_su_dot { width: 9px; height: 9px; border-radius: 50%; background: rgba(255, 255, 255, 0.35); }
     .o_su_dot--done { background: #5ff5e8; }
     .o_su_mission_body { padding: 10px 12px 12px; }
-    .o_su_label { font-size: 0.68rem; letter-spacing: 0.08em; font-weight: 700; color: $su-teal; margin-bottom: 2px; }
+    .o_su_label { font-size: 0.68rem; letter-spacing: 0.08em; font-weight: 700; color: var(--su-accent); margin-bottom: 2px; }
     .o_su_story { margin: 0 0 8px; line-height: 1.4; }
     .o_su_issues {
-        margin: 6px 0; padding: 6px 8px; border-radius: 8px; background: #fff3e8; color: #a14a12;
+        margin: 6px 0; padding: 6px 8px; border-radius: 8px; background: color-mix(in srgb, #e8742c 18%, var(--su-surface)); color: color-mix(in srgb, #e8742c 55%, var(--su-text));
         border-left: 3px solid $su-orange;
     }
     .o_su_hintbox {
-        margin: 6px 0; padding: 7px 9px; border-radius: 8px; background: #e6f6f6; color: #0b5559;
+        margin: 6px 0; padding: 7px 9px; border-radius: 8px; background: color-mix(in srgb, #017e84 16%, var(--su-surface)); color: color-mix(in srgb, #017e84 45%, var(--su-text));
         border-left: 3px solid $su-teal; line-height: 1.35;
     }
     .o_su_hintbtn {
-        border: 1px solid $su-teal; background: #fff; color: $su-teal; border-radius: 999px;
+        border: 1px solid var(--su-accent); background: var(--su-surface); color: var(--su-accent); border-radius: 999px;
         padding: 4px 14px; font-weight: 600; cursor: pointer;
         &:hover { background: $su-teal; color: #fff; }
     }
     .o_su_stock {
-        margin: 0 0 8px; padding: 6px 8px; border-radius: 8px; background: #f3f0f5;
+        margin: 0 0 8px; padding: 6px 8px; border-radius: 8px; background: var(--su-soft); color: var(--su-text);
     }
     .o_su_stock_row { display: flex; justify-content: space-between; gap: 8px; font-size: 0.8rem; }
     .o_su_validating {
@@ -60,7 +69,7 @@ $su-orange: #e8742c;
         padding: 8px 22px; border-radius: 999px; background: $su-purple; color: #fff;
         font-weight: 700; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
     }
-    .o_su_small { margin-top: 6px; font-size: 0.75rem; color: #666; }
+    .o_su_small { margin-top: 6px; font-size: 0.75rem; color: var(--su-muted); }
 
     .o_su_complete {
         position: absolute; top: 14px; left: 50%; transform: translateX(-50%);
@@ -79,12 +88,12 @@ $su-orange: #e8742c;
         display: flex; flex-direction: column; align-items: center; gap: 4px;
     }
     .o_su_bubble {
-        position: relative; width: 210px; padding: 8px 12px; border-radius: 14px; background: #fff;
-        color: #2b2f38; font-size: 0.82rem; line-height: 1.35; text-align: center;
+        position: relative; width: 210px; padding: 8px 12px; border-radius: 14px; background: var(--su-surface);
+        color: var(--su-text); font-size: 0.82rem; line-height: 1.35; text-align: center;
         box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
         &::after {
             content: ""; position: absolute; left: 50%; bottom: -7px; margin-left: -7px;
-            border: 7px solid transparent; border-bottom: 0; border-top-color: #fff;
+            border: 7px solid transparent; border-bottom: 0; border-top-color: var(--su-surface);
         }
     }
     .o_su_chip {
@@ -104,10 +113,10 @@ $su-orange: #e8742c;
 
     .o_su_menu {
         position: absolute; left: 70px; top: -20px; display: flex; flex-direction: column; gap: 6px;
-        min-width: 190px; padding: 8px; border-radius: 12px; background: #fff;
+        min-width: 190px; padding: 8px; border-radius: 12px; background: var(--su-surface);
         box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28); pointer-events: auto;
     }
-    .o_su_menu_title { font-size: 0.7rem; letter-spacing: 0.08em; font-weight: 700; color: $su-teal; }
+    .o_su_menu_title { font-size: 0.7rem; letter-spacing: 0.08em; font-weight: 700; color: var(--su-accent); }
     .o_su_menu_btn {
         border: 0; border-radius: 8px; padding: 8px 14px; background: $su-purple; color: #fff;
         font-weight: 600; cursor: pointer; white-space: nowrap;
@@ -119,36 +128,36 @@ $su-orange: #e8742c;
     // ---- Level sub-levels: back button, chat, answer, stars ------------
     .o_su_back {
         position: absolute; top: 12px; right: 12px; z-index: 2; border: 0; border-radius: 999px;
-        padding: 6px 14px; background: rgba(255, 255, 255, 0.94); color: $su-purple; font-weight: 700;
+        padding: 6px 14px; background: var(--su-surface); color: var(--su-accent-2); font-weight: 700;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18); cursor: pointer;
-        &:hover { background: #fff; }
+        &:hover { background: var(--su-soft); }
     }
     .o_su_mission_body { max-height: 62vh; overflow-y: auto; }
     .o_su_chat { margin: 6px 0; display: flex; flex-direction: column; gap: 4px; }
     .o_su_chat_msg {
-        padding: 5px 9px; border-radius: 10px; background: #eef3f6; font-size: 0.8rem; line-height: 1.25;
-        .o_su_chat_who { display: block; font-size: 0.68rem; font-weight: 700; color: $su-teal; }
+        padding: 5px 9px; border-radius: 10px; background: var(--su-soft); color: var(--su-text); font-size: 0.8rem; line-height: 1.25;
+        .o_su_chat_who { display: block; font-size: 0.68rem; font-weight: 700; color: var(--su-accent); }
     }
     .o_su_answer {
         margin: 8px 0; display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
         .o_su_label { width: 100%; }
-        input { flex: 1; min-width: 80px; padding: 4px 8px; border: 1px solid #b9c4cc; border-radius: 6px; }
+        input { flex: 1; min-width: 80px; padding: 4px 8px; border: 1px solid var(--su-border); border-radius: 6px; background: var(--su-surface); color: var(--su-text); }
     }
     .o_su_stars { font-size: 1.4rem; margin: 2px 0 6px; }
-    .o_su_star { color: #d4d9de; }
+    .o_su_star { color: var(--su-border); }
     .o_su_star--on { color: #f2b200; }
 
     // ---- Completion recap ---------------------------------------------
     .o_su_summary {
         position: absolute; left: 16px; bottom: 16px; width: 310px; max-width: 85%;
-        padding: 14px 16px; border-radius: 14px; background: #fff; font-size: 0.85rem;
+        padding: 14px 16px; border-radius: 14px; background: var(--su-surface); color: var(--su-text); font-size: 0.85rem;
         box-shadow: 0 8px 26px rgba(0, 0, 0, 0.3); animation: o_su_rise 0.4s ease-out;
-        h3 { margin: 0 0 6px; color: $su-teal; }
+        h3 { margin: 0 0 6px; color: var(--su-accent); }
         ol { padding-left: 20px; margin: 6px 0; }
     }
     .o_su_summary_close {
         position: absolute; top: 8px; right: 10px; border: 0; background: transparent;
-        cursor: pointer; font-size: 1rem; color: #888;
+        cursor: pointer; font-size: 1rem; color: var(--su-muted);
     }
 
     .o_su_toast {

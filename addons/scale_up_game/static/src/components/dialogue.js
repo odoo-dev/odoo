@@ -39,6 +39,8 @@ export class Dialogue extends Component {
         lines: t.array(),
         onDone: t.function(),
         onSpeaker: t.function().optional(() => () => {}),
+        playerPov: t.boolean().optional(false),
+        adminAvatarUrl: t.string().optional(),
     });
 
     setup() {
@@ -56,12 +58,29 @@ export class Dialogue extends Component {
         return personLook(this.line.who);
     }
 
+    get displayName() {
+        return this.props.playerPov && this.line.who === "ceo" ? "Admin (You)" : this.look.name;
+    }
+
+    get displayRole() {
+        return this.look.role;
+    }
+
+    /** The player's own profile picture (POV levels), instead of a drawn avatar. */
+    get playerAvatar() {
+        return this.props.playerPov && this.isPlayerLine ? this.props.adminAvatarUrl : null;
+    }
+
     get typing() {
         return this.state.shown.length < this.line.text.length;
     }
 
     get isLast() {
         return this.state.index >= this.props.lines.length - 1;
+    }
+
+    get isPlayerLine() {
+        return this.line.who === "ceo";
     }
 
     _type() {

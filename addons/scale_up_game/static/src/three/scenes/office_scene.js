@@ -120,17 +120,17 @@ export class OfficeScene extends BaseScene {
         this.board.group.position.set(2.5, 1.8, -2.58);
         this.scene.add(this.board.group);
 
-        const win = makeWindow(this, { w: 1.7, h: 1.15 });
-        win.position.set(-2.2, 1.8, -2.58);
-        this.scene.add(win);
+        this.window = makeWindow(this, { w: 1.7, h: 1.15 });
+        this.window.position.set(-2.2, 1.8, -2.58);
+        this.scene.add(this.window);
 
-        const cabinet = makeCabinet(this);
-        cabinet.position.set(-3.5, 0, -2.3);
-        this.scene.add(cabinet);
+        this.cabinet = makeCabinet(this);
+        this.cabinet.position.set(-3.5, 0, -2.3);
+        this.scene.add(this.cabinet);
 
-        const plant = makePlant(this);
-        plant.position.set(3.9, 0, -2.1);
-        this.scene.add(plant);
+        this.plant = makePlant(this);
+        this.plant.position.set(3.9, 0, -2.1);
+        this.scene.add(this.plant);
     }
 
     _addPerson(key, spot, rotY) {
@@ -180,10 +180,10 @@ export class OfficeScene extends BaseScene {
         ctx.font = "bold 34px sans-serif";
         ctx.textAlign = "left";
         ctx.fillText(game.group_name || "Level", 20, 43);
-        ctx.font = "26px sans-serif";
+        ctx.font = "21px sans-serif";
         game.steps.slice(0, 5).forEach((step, i) => {
             ctx.fillStyle = step.done ? "#017e84" : "#8a8f99";
-            ctx.fillText(`${step.done ? "✔" : "○"} ${step.label}`.slice(0, 36), 20, 108 + i * 40);
+            ctx.fillText(`${step.done ? "✔" : "○"} ${step.label}`.slice(0, 42), 20, 108 + i * 40);
         });
         texture.needsUpdate = true;
     }

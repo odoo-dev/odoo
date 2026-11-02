@@ -7,7 +7,8 @@
             <button type="button" class="o_su_back" t-on-click="() => this.props.onExit()">‹ Levels</button>
 
             <Dialogue t-if="this.state.chatting and this.state.game" t-key="this.state.game.session_id"
-                      lines="this.state.game.chat" onDone="this.onStoryDone" onSpeaker="this.onSpeaker"/>
+                lines="this.state.game.chat" onDone="this.onStoryDone" onSpeaker="this.onSpeaker"
+                playerPov="this.state.game.scene_key === 'office_pov'" adminAvatarUrl="this.adminAvatarUrl"/>
             <div t-if="this.state.loading" class="o_su_loading">Loading warehouse…</div>
             <div t-if="this.state.error" class="o_su_fatal" role="alert">
                 <strong>Can't start the game</strong>

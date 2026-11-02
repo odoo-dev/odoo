@@ -3,6 +3,9 @@
     <!-- Level structure. Loaded on every update (not noupdate): the module owns it.
          A level without parent is a menu group; its children are playable sub-levels. -->
 
+    <!-- Drop the first 3D version of sub-level 1 and the temporary "Office POV" copy -->
+    <function model="scale.up.game.level" name="_remove_obsolete_levels"/>
+
     <!-- Buy & Sell: 9 independent sub-levels, one per card of the board game -->
     <record id="level_group_buy_sell" model="scale.up.game.level">
         <field name="name">Buy &amp; Sell</field>
@@ -16,7 +19,7 @@
         <field name="name">Create a product</field>
         <field name="code">bs_create_product</field>
         <field name="scenario">bs_create_product</field>
-        <field name="scene">office</field>
+        <field name="scene">office_pov</field>
         <field name="sequence">10</field>
         <field name="description">Put the Large Desk of a new vendor in your catalog.</field>
     </record>
@@ -25,7 +28,7 @@
         <field name="name">Purchase large desks</field>
         <field name="code">bs_purchase</field>
         <field name="scenario">bs_purchase</field>
-        <field name="scene">office</field>
+        <field name="scene">office_pov</field>
         <field name="sequence">20</field>
         <field name="description">Order the first batch of desks from Wood Corner.</field>
     </record>

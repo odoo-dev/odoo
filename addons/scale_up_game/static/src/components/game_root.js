@@ -1,9 +1,12 @@
 import { useService } from "@web/core/utils/hooks";
+import { user } from "@web/core/user";
 import { loadJS } from "@web/core/assets";
+import { session } from "@web/session";
 import { Component, onMounted, onWillUnmount, proxy, signal, t, useProps } from "@odoo/owl";
 import { WarehouseScene, SCENE_OBJECT_IDS } from "@scale_up_game/three/scene";
 import { DockScene } from "@scale_up_game/three/scenes/dock_scene";
 import { OfficeScene } from "@scale_up_game/three/scenes/office_scene";
+import { OfficePovScene } from "@scale_up_game/three/scenes/office_pov_scene";
 import { Dialogue } from "@scale_up_game/components/dialogue";
 import { setupInteractions } from "@scale_up_game/three/interactions";
 
@@ -71,7 +74,7 @@ export class GameRoot extends Component {
             if (this.destroyed) {
                 return;
             }
-            const SceneClass = { office: OfficeScene, dock: DockScene }[game.scene_key] || WarehouseScene;
+            const SceneClass = { office: OfficeScene, office_pov: OfficePovScene, dock: DockScene }[game.scene_key] || WarehouseScene;
             this.scene = new SceneClass(window.THREE, this.containerRef(), {
                 onFrame: () => this.updateOverlay(),
                 onActivity: (label) => {
@@ -205,6 +208,10 @@ export class GameRoot extends Component {
         if (initial && stage !== "done" && game.chat.length) {
             this.state.chatting = true;
         }
+    }
+
+    get adminAvatarUrl() {
+        return `/web/image/res.users/${user.userId}/avatar_128`;
     }
 
     get showTip() {

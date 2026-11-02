@@ -4,7 +4,21 @@
     <t t-name="scale_up_game.Portrait">
         <svg class="o_su_portrait" t-att-width="this.props.size" t-att-height="this.props.size" viewBox="0 0 64 64">
             <circle cx="32" cy="32" r="31" t-att-fill="this.look.jacket || '#5a6b7d'" opacity="0.18"/>
-            <t t-if="this.look.icon">
+            <t t-if="this.props.who === 'bot'">
+                <!-- OdooBot -->
+                <circle cx="32" cy="32" r="31" fill="#e9eef3"/>
+                <line x1="32" y1="9" x2="32" y2="16" stroke="#714b67" stroke-width="2.5"/>
+                <circle cx="32" cy="8" r="3.5" fill="#ff9f1c"/>
+                <rect x="9" y="26" width="5" height="12" rx="2.5" fill="#714b67"/>
+                <rect x="50" y="26" width="5" height="12" rx="2.5" fill="#714b67"/>
+                <rect x="13" y="15" width="38" height="33" rx="15" fill="#f6f4f7" stroke="#cfc7d3" stroke-width="1.5"/>
+                <rect x="17" y="23" width="30" height="17" rx="8.5" fill="#1b2230"/>
+                <ellipse cx="25.5" cy="31.5" rx="3.2" ry="4" fill="#5ff5e8"/>
+                <ellipse cx="38.5" cy="31.5" rx="3.2" ry="4" fill="#5ff5e8"/>
+                <rect x="22" y="52" width="20" height="8" rx="4" fill="#714b67"/>
+                <rect x="26" y="52" width="12" height="3" rx="1.5" fill="#ff9f1c"/>
+            </t>
+            <t t-elif="this.look.icon">
                 <text x="32" y="43" text-anchor="middle" font-size="30" t-out="this.look.icon"/>
             </t>
             <t t-else="">
@@ -30,13 +44,14 @@
     </t>
 
     <t t-name="scale_up_game.Dialogue">
-        <div class="o_su_dialogue" t-on-click="this.advance">
-            <div class="o_su_dlg_box" t-att-key="this.state.index">
-                <Portrait who="this.line.who" size="64"/>
+        <div t-att-class="'o_su_dialogue' + (this.props.playerPov ? ' o_su_dialogue--pov' : '')" t-on-click="this.advance">
+            <div t-att-class="'o_su_dlg_box' + (this.props.playerPov and this.isPlayerLine ? ' o_su_dlg_box--player' : '')" t-att-key="this.state.index">
+                <img t-if="this.playerAvatar" class="o_su_dlg_avatar" t-att-src="this.playerAvatar" alt=""/>
+                <Portrait t-else="" who="this.line.who" size="64"/>
                 <div class="o_su_dlg_body">
                     <div class="o_su_dlg_who">
-                        <strong t-out="this.look.name"/>
-                        <span t-if="this.look.role" class="o_su_dlg_role" t-out="this.look.role"/>
+                        <strong t-out="this.displayName"/>
+                        <span t-if="this.displayRole" class="o_su_dlg_role" t-out="this.displayRole"/>
                     </div>
                     <p class="o_su_dlg_text" t-out="this.state.shown"/>
                 </div>
