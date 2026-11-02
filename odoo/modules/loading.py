@@ -42,7 +42,7 @@ MAX_REMOVED_MODULES = 50
 
 
 def _probe_timed(kind, name, min_wall=0.0):
-    from odoo.tests import perf_probe  # noqa: PLC0415
+    from odoo.tools import perf_probe  # noqa: PLC0415
     return perf_probe.timed(kind, name, min_wall)
 
 

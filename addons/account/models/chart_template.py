@@ -201,7 +201,7 @@ class AccountChartTemplate(models.AbstractModel):
         if template_code in {'syscohada', 'syscebnl'} and template_code != company.chart_template:
             raise UserError(_("The %s chart template shouldn't be selected directly. Instead, you should directly select the chart template related to your country.", template_code))
 
-        from odoo.tests import perf_probe  # noqa: PLC0415
+        from odoo.tools import perf_probe  # noqa: PLC0415
         with perf_probe.timed('chart_load', f'{template_code}/{company.id}'):
             return self._load(template_code, company, install_demo, force_create)
 

@@ -19,7 +19,7 @@ import sys
 import warnings
 
 import odoo.modules
-from odoo.tests import perf_probe
+from odoo.tools import perf_probe
 from . import case, query_probe
 from .common import HttpCase
 from .result import stats_logger
