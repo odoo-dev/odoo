@@ -3,6 +3,8 @@ import io
 import logging
 from unittest import skipIf
 
+from lxml import etree
+
 import odoo.tests
 from odoo import tools
 from odoo.exceptions import UserError
@@ -640,6 +642,29 @@ class TestReportsRendering(TestReportsRenderingCommon):
             '--javascript-delay', '1000',
             '--orientation', 'landscape',
         ])
+
+    def test_report_specific_paperformat_args_from_headers(self):
+        """
+            Documents printed together share their margins: the largest margins
+            set by their headers are kept, and the root html tag overrides them.
+        """
+        headers = [
+            etree.Element('div', {'data-report-margin-top': '40', 'data-report-header-spacing': '40', 'data-report-margin-bottom': '22'}),
+            etree.Element('div', {'data-report-margin-top': '46', 'data-report-header-spacing': '46', 'data-report-margin-bottom': '20'}),
+        ]
+        Report = self.env['ir.actions.report']
+        self.assertEqual(Report._get_specific_paperformat_args(headers, etree.Element('html')), {
+            'data-report-margin-top': '46',
+            'data-report-header-spacing': '46',
+            'data-report-margin-bottom': '22',
+        })
+        root = etree.Element('html', {'data-report-margin-top': '30', 'data-report-landscape': 'True'})
+        self.assertEqual(Report._get_specific_paperformat_args(headers, root), {
+            'data-report-margin-top': '30',
+            'data-report-header-spacing': '46',
+            'data-report-margin-bottom': '22',
+            'data-report-landscape': 'True',
+        })
 
 
 @odoo.tests.tagged('post_install', '-at_install', '-standard', 'pdf_rendering')

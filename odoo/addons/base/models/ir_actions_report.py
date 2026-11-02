@@ -253,12 +253,7 @@ class IrActionsReport(models.Model):
             body = ''.join(lxml.html.tostring(c, encoding='unicode') for c in body_parent.getchildren())
             bodies.append(body)
 
-        # Get paperformat arguments set in the root html tag. They are prioritized over
-        # paperformat-record arguments.
-        specific_paperformat_args = {}
-        for attribute in root.items():
-            if attribute[0].startswith('data-report-'):
-                specific_paperformat_args[attribute[0]] = attribute[1]
+        specific_paperformat_args = self._get_specific_paperformat_args(header_node, root)
 
         header = self.env['ir.qweb']._render(layout.id, {
             'subst': True,
@@ -276,6 +271,26 @@ class IrActionsReport(models.Model):
         }) if len(footer_node) else None
 
         return bodies, res_ids, header, footer, specific_paperformat_args
+
+    @api.model
+    def _get_specific_paperformat_args(self, headers, root):
+        '''Get the paperformat arguments set in the headers (by the external layout) and in the
+        root html tag. They are prioritized over paperformat-record arguments.
+
+        Documents printed together share their margins, so the largest one from the headers is
+        kept, and the root html tag wins over all of them.
+        '''
+        specific_paperformat_args = {}
+        for header in headers:
+            for name, value in header.items():
+                if name in ('data-report-margin-top', 'data-report-header-spacing', 'data-report-margin-bottom'):
+                    value = max(value, specific_paperformat_args.get(name, value), key=float)
+                if name.startswith('data-report-'):
+                    specific_paperformat_args[name] = value
+        for name, value in root.items():
+            if name.startswith('data-report-'):
+                specific_paperformat_args[name] = value
+        return specific_paperformat_args
 
     @api.model
     def _get_report_from_name(self, report_name):
