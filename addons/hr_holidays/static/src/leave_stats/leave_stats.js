@@ -1,20 +1,23 @@
 import { serializeDateTime, serializeDate } from "@web/core/l10n/dates";
 import { registry } from "@web/core/registry";
-import { useService } from "@web/core/utils/hooks";
 import { useRecordObserver } from "@web/model/relational_model/utils";
 import { formatFloatTime } from "@web/views/fields/formatters";
-import { Component, onWillStart, proxy, useProps } from "@odoo/owl";
+import { Component, computed, onWillStart, proxy, usePlugin, useProps } from "@odoo/owl";
 import { standardWidgetProps } from "@web/views/widgets/standard_widget_props";
 import { _t } from "@web/core/l10n/translation";
+import { ORM } from "@web/core/orm_plugin";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 const { DateTime } = luxon;
 
 export class LeaveStatsComponent extends Component {
     static template = "hr_holidays.LeaveStatsComponent";
     props = useProps(standardWidgetProps);
+    thisYear = computed(() => this.state.date_from.toFormat("yyyy"));
+    departmentName = computed(() => this.state.department?.display_name.split("/").pop());
 
     setup() {
-        this.orm = useService("orm");
-        this.action = useService("action");
+        this.orm = usePlugin(ORM);
+        this.action = usePlugin(ActionPlugin);
         this.state = proxy({
             leaves: [],
             departmentLeavesIds: [],
@@ -23,7 +26,6 @@ export class LeaveStatsComponent extends Component {
             department: null,
             employee: null,
             type: null,
-            department_name: null,
         });
         this.date_format = { year: "numeric", month: "2-digit", day: "2-digit" };
         this.hour_format = { hour: "2-digit", minute: "2-digit" };
@@ -69,10 +71,6 @@ export class LeaveStatsComponent extends Component {
                 this.state.department_name = department_name_array.pop();
             }
         });
-    }
-
-    get thisYear() {
-        return this.state.date_from.toFormat("yyyy");
     }
 
     async loadDepartmentLeaves(department, employee) {

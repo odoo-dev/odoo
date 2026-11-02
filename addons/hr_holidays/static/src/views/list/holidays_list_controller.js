@@ -1,10 +1,12 @@
 import { userHasEmployeeInCurrentCompany } from "@hr_holidays/utils";
 import { exportTimeOffRecords } from "@hr_holidays/views/hr_leave_export";
 import { HrHolidaysSearchModel } from "@hr_holidays/search/hr_holidays_search_model";
-import { onWillStart } from "@odoo/owl";
+import { onWillStart, usePlugin } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
+import { NotificationPlugin } from "@web/core/notifications/notification_plugin";
+import { ORM } from "@web/core/orm_plugin";
 import { registry } from "@web/core/registry";
-import { useBus, useService } from "@web/core/utils/hooks";
+import { useBus } from "@web/core/utils/hooks";
 import { ListController } from "@web/views/list/list_controller";
 import { listView } from "@web/views/list/list_view";
 import {
@@ -30,7 +32,12 @@ export class HolidaysListController extends ListController {
             });
         }
         super.setup();
-        this.orm = useService("orm");
+        this.orm = usePlugin(ORM);
+        this.notification = usePlugin(NotificationPlugin);
+        this.actionFilters = {
+            action_approve: (record) => record.data.can_approve || record.data.can_validate,
+            action_refuse: (record) => record.data.can_refuse,
+        };
 
         // Store reference to original button click handler for fallback
         this.onClickViewButton = useViewButtonHandler();
@@ -44,7 +51,7 @@ export class HolidaysListController extends ListController {
             ];
             const ignoreHasEmployee = ignoreActions.includes(this.env.config.actionXmlId);
             if (!hasEmployee && !ignoreHasEmployee) {
-                this.env.services.notification.add(
+                this.notification.add(
                     _t(
                         "You are not linked to an employee in the current company, so you cannot create requests for yourself."
                     ),
@@ -52,17 +59,6 @@ export class HolidaysListController extends ListController {
                 );
             }
         });
-    }
-
-    /**
-     * Returns permission filters for holiday/leave actions.
-     * Each filter checks if a record has the required permissions for the specific action.
-     */
-    get actionFilters() {
-        return {
-            action_approve: (record) => record.data.can_approve || record.data.can_validate,
-            action_refuse: (record) => record.data.can_refuse,
-        };
     }
 
     /**
@@ -79,8 +75,7 @@ export class HolidaysListController extends ListController {
             const eligibleRecords = this.model.root.selection.filter(filter);
             if (actionName === "action_adjust_corresponding_payslip") {
                 return this.onClickViewButton(params);
-            }
-            else if (eligibleRecords.length) {
+            } else if (eligibleRecords.length) {
                 this.executeAction(actionName, eligibleRecords);
             } else {
                 this.onClickViewButton(params);

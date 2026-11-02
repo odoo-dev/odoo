@@ -1,13 +1,13 @@
 import { useNewAllocationRequest } from "@hr_holidays/views/hooks";
-import { Component, onWillStart, proxy, types as t, usePlugin, useProps } from "@odoo/owl";
-import { DateTimeInput } from "@web/core/datetime/datetime_input";
-import { useService } from "@web/core/utils/hooks";
+import { Component, onWillStart, proxy, t, usePlugin, useProps } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
+import { ORM } from "@web/core/orm_plugin";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 import { TimeOffPlugin } from "../views/time_off_plugin";
 import { TimeOffCard } from "./time_off_card";
 
 export class TimeOffDashboard extends Component {
-    static components = { TimeOffCard, DateTimeInput };
+    static components = { TimeOffCard };
     static template = "hr_holidays.TimeOffDashboard";
 
     props = useProps({
@@ -15,12 +15,11 @@ export class TimeOffDashboard extends Component {
     });
 
     setup() {
-        this.orm = useService("orm");
-        this.actionService = useService("action");
+        this.orm = usePlugin(ORM);
+        this.actionService = usePlugin(ActionPlugin);
         this.newAllocRequest = useNewAllocationRequest();
+        this.date = luxon.DateTime.now();
         this.state = proxy({
-            date: luxon.DateTime.now(),
-            today: luxon.DateTime.now(),
             holidays: [],
             allocationsNumber: "",
         });
@@ -41,12 +40,12 @@ export class TimeOffDashboard extends Component {
     async loadDashboardData(date = false) {
         const context = this.getContext();
         if (date) {
-            this.state.date = date;
+            this.date = date;
         }
         const dashboardData = await this.orm.call(
             "hr.employee",
             "get_time_off_dashboard_data",
-            [this.state.date],
+            [this.date],
             { context }
         );
         this.state.holidays = dashboardData["allocation_data"];

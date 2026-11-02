@@ -1,5 +1,6 @@
 import { CalendarYearRenderer } from "@web/views/calendar/calendar_year/calendar_year_renderer";
-import { useService } from "@web/core/utils/hooks";
+import { usePlugin } from "@odoo/owl";
+import { ORM } from "@web/core/orm_plugin";
 import { useMandatoryDays } from "../../hooks";
 import { useCalendarPopover } from "@web/views/calendar/hooks/calendar_popover_hook";
 import { TimeOffCalendarYearPopover } from "./calendar_year_popover";
@@ -8,7 +9,7 @@ import { getLeaveLastMoment } from "../utils";
 export class TimeOffCalendarYearRenderer extends CalendarYearRenderer {
     setup() {
         super.setup();
-        this.orm = useService("orm");
+        this.orm = usePlugin(ORM);
         this.mandatoryDays = useMandatoryDays(this.props);
         this.mandatoryDaysList = [];
         this.mandatoryDayPopover = useCalendarPopover(TimeOffCalendarYearPopover);

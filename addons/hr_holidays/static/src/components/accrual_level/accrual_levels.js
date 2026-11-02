@@ -1,9 +1,12 @@
-import { Component, onWillStart, proxy, signal, useProps } from "@odoo/owl";
+import { Component, computed, onWillStart, proxy, signal, usePlugin, useProps } from "@odoo/owl";
 
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
+import { localization } from "@web/core/l10n/localization";
 import { _t } from "@web/core/l10n/translation";
+import { ORM } from "@web/core/orm_plugin";
 import { registry } from "@web/core/registry";
-import { useService } from "@web/core/utils/hooks";
+import { ActionPlugin } from "@web/webclient/actions/action_plugin";
 
 import { useRecordObserver } from "@web/model/relational_model/utils";
 
@@ -13,11 +16,25 @@ export class AccrualLevels extends Component {
     static template = "hr_holidays.AccrualLevels";
     props = useProps(standardFieldProps);
     hoveredMilestoneId = signal(false);
+    milestones = computed(() =>
+        this.props.record.data[this.props.name].records.map((record) => ({
+            id: record.id,
+            resId: record.evalContext.id,
+            data: this.state.data.find((level) => level.id === record.evalContext.id),
+            onDelete: () => this.deleteMilestone(record.id),
+        }))
+    );
+    durationTypes = {
+        day: _t("day(s)"),
+        month: _t("month(s)"),
+        year: _t("year(s)"),
+        hour: _t("hour(s)"),
+    };
 
     setup() {
-        this.orm = useService("orm");
-        this.action = useService("action");
-        this.dialog = useService("dialog");
+        this.orm = usePlugin(ORM);
+        this.action = usePlugin(ActionPlugin);
+        this.dialog = usePlugin(DialogPlugin);
         this.state = proxy({});
 
         useRecordObserver(async (record) => {
@@ -40,31 +57,13 @@ export class AccrualLevels extends Component {
         });
     }
 
-    get milestones() {
-        return this.props.record.data[this.props.name].records.map((record) => ({
-            id: record.id,
-            resId: record.evalContext.id,
-            data: this.state.data.filter((r) => r.id === record.evalContext.id)[0],
-            onDelete: () => this.deleteMilestone(record.id),
-        }));
-    }
-
-    get durationTypes() {
-        return {
-            day: _t("day(s)"),
-            month: _t("month(s)"),
-            year: _t("year(s)"),
-            hour: _t("hour(s)"),
-        };
-    }
-
     getFullDay(day) {
         return luxon.Info.weekdays()[day];
     }
 
     getFullMonth(month) {
         return luxon.DateTime.fromFormat(month, "M", {
-            locale: this.env.model.config.context.lang.replace("_", "-"),
+            locale: localization.code.replace("_", "-"),
         }).toLocaleString({ month: "long" });
     }
 
@@ -82,7 +81,7 @@ export class AccrualLevels extends Component {
                 return luxon.DateTime.fromFormat(
                     `${planRecord._values.carryover_day} ${planRecord._values.carryover_month} 2020`,
                     "d M y",
-                    { locale: this.env.model.config.context.lang.replace("_", "-") }
+                    { locale: localization.code.replace("_", "-") }
                 ).toLocaleString({ day: "numeric", month: "long" });
         }
     }
@@ -107,7 +106,7 @@ export class AccrualLevels extends Component {
             additionalContext: {
                 active_id: this.props.record.evalContext.id,
             },
-            onClose: () => this.env.model.root.load(),
+            onClose: () => this.props.record.model.root.load(),
         });
     }
 
