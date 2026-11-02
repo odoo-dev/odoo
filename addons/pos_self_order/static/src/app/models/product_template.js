@@ -12,6 +12,10 @@ patch(ProductTemplate.prototype, {
         );
     },
 
+    get hasUoMs() {
+        return this.uom_ids.length;
+    },
+
     showComboSelectionPage() {
         const selectedCombos = [];
         for (const combo of this.combo_ids) {
