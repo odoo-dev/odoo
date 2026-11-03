@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates>
+    <t t-name="l10n_in.HsnCodeDigitRadio" t-inherit="web.RadioField" t-inherit-mode="primary">
+        <xpath expr="//label[hasclass('o_form_label')]" position="after">
+            <i t-if="this.descriptions[item[0]]"
+               class="oi text-muted ms-1"
+               data-icon="info"
+               role="img"
+               t-att-aria-label="this.descriptions[item[0]]"
+               t-att-data-tooltip="this.descriptions[item[0]]"/>
+        </xpath>
+    </t>
+</templates>

@@ -139,7 +139,7 @@
                                      help="HSN/SAC Digit Validation for GST Compliance based on your Aggregate Annual Turnover (AATO)."
                                      company_dependent="1"
                                      invisible="l10n_in_gst_registration_type == 'composition'">
-                                <field name="l10n_in_hsn_code_digit"/>
+                                <field name="l10n_in_hsn_code_digit" class="o_field_radio" widget="l10n_in_hsn_code_digit_radio" options="{'horizontal': true}"/>
                             </setting>
                         </t>
                     </block>
