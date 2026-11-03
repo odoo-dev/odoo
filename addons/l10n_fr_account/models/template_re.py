@@ -12,6 +12,13 @@ class AccountChartTemplate(models.AbstractModel):
             'parent': 'fr_comp',
         }
 
+    @template('re', 'account.tax')
+    def _get_re_account_tax(self):
+        return {
+            'tva_specifique': {'active': True},
+            'tva_super_reduite': {'active': True},
+        }
+
     def _deref_account_tags(self, template_code, tax_data):
         if template_code == 're':
             template_code = 'fr_comp'
