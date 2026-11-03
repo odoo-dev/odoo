@@ -16,10 +16,9 @@ from . import (
     product_product,
     product_template,
     res_company,
+    res_groups,
     res_partner,
     sale_order,
     sale_order_line,
     utm_campaign,
 )
-
-from . import res_groups

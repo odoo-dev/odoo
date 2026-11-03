@@ -40,7 +40,9 @@ class ChooseDeliveryCarrier(models.TransientModel):
     )
     weight_uom_name = fields.Char(default=_get_default_weight_uom, readonly=True)
     is_loading_prices = fields.Boolean(default=False)
-    show_delivery_rates_button = fields.Integer("Number of carriers", compute="_compute_show_delivery_rates_button")
+    show_delivery_rates_button = fields.Integer(
+        "Number of carriers", compute="_compute_show_delivery_rates_button"
+    )
 
     @api.onchange("carrier_id", "carrier_prices")
     def _onchange_carrier_id(self):
@@ -124,9 +126,7 @@ class ChooseDeliveryCarrier(models.TransientModel):
         self.ensure_one()
 
         try:
-            vals = carrier.with_context(order_weight=self.total_weight).rate_shipment(
-                self.order_id
-            )
+            vals = carrier.with_context(order_weight=self.total_weight).rate_shipment(self.order_id)
             if vals.get("success"):
                 return {
                     "delivery_message": vals.get("warning_message", False),
@@ -158,6 +158,6 @@ class ChooseDeliveryCarrier(models.TransientModel):
         })
 
     def get_wizard_carrier_rate(self, carrier_id):
-        """Compute delivery prices for a single carier"""
-        carrier = self.env['delivery.carrier'].browse(carrier_id)
+        """Compute delivery prices for a single carrier."""
+        carrier = self.env["delivery.carrier"].browse(carrier_id)
         return self._get_carrier_delivery_rate(carrier)

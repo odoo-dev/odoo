@@ -9,12 +9,9 @@ from odoo.addons.sale.tests.common import SaleCommon
 
 @tagged("post_install", "-at_install")
 class TestAccessRightsControllers(HttpCase, SaleCommon):
-    _test_user_groups = (
-        'product.group_product_manager',
-        'sales_team.group_sale_salesman',
-    )
+    _test_user_groups = ("product.group_product_manager", "sales_team.group_sale_salesman")
 
-    _test_user_name = 'Test Sales User'
+    _test_user_name = "Test Sales User"
 
     @classmethod
     def setUpClass(cls):
@@ -22,7 +19,7 @@ class TestAccessRightsControllers(HttpCase, SaleCommon):
 
         cls.user_portal = cls._create_new_portal_user()
 
-    @mute_logger('odoo.addons.base.models.ir_access')
+    @mute_logger("odoo.addons.base.models.ir_access")
     def test_access_controller(self):
         private_so = self.sale_order
         portal_so = self.sale_order.copy()
@@ -71,12 +68,9 @@ class TestAccessRightsControllers(HttpCase, SaleCommon):
 
 @tagged("post_install", "-at_install")
 class TestSalesControllers(HttpCase, SaleCommon):
-    _test_user_groups = (
-        'product.group_product_manager',
-        'sales_team.group_sale_salesman',
-    )
+    _test_user_groups = ("product.group_product_manager", "sales_team.group_sale_salesman")
 
-    _test_user_name = 'Test Sales User'
+    _test_user_name = "Test Sales User"
 
     @classmethod
     def setUpClass(cls):

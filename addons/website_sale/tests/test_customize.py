@@ -16,11 +16,11 @@ class TestCustomize(
     HttpCaseWithWebsiteUser,
 ):
     _test_user_groups = (
-        'base.group_user',
-        'product.group_product_manager',  # product.attribute / product.template setup
+        "base.group_user",
+        "product.group_product_manager",  # product.attribute / product.template setup
     )
 
-    _test_user_name = 'Test User'
+    _test_user_name = "Test User"
 
     @classmethod
     def setUpClass(cls):
@@ -234,9 +234,12 @@ class TestCustomize(
             product_template.website_url, "website_sale.no_variant_attribute", login="demo"
         )
 
-        sol = self.env["sale.order.line"].sudo().search([
-            ("product_id", "=", product_template.product_variant_id.id)
-        ])
+        sol = (
+            self
+            .env["sale.order.line"]
+            .sudo()
+            .search([("product_id", "=", product_template.product_variant_id.id)])
+        )
         self.assertTrue(sol)
         self.assertEqual(
             sol.product_no_variant_attribute_value_ids,

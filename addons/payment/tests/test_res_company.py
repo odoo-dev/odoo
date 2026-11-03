@@ -16,7 +16,9 @@ class TestResCompany(PaymentCommon):
             ("module_state", "=", "installed"),
         ])
 
-        new_company = self.env["res.company"].create({"name": "New Company"})  # don't use company fixture, testing company creation
+        new_company = self.env["res.company"].create({
+            "name": "New Company"
+        })  # don't use company fixture, testing company creation
         self.assertEqual(new_company.create_date, self.env.cr.now())
         new_company_providers_count = self.env["payment.provider"].search_count([
             ("company_id", "=", new_company.id),
@@ -42,8 +44,5 @@ class TestResCompany(PaymentCommon):
             return provider_create(provider_model, vals_list)
 
         with patch.object(PaymentProvider, "create", capture_provider_create):
-            self.env["res.company"].create([
-                {"name": "New Company 1"},
-                {"name": "New Company 2"},
-            ])
+            self.env["res.company"].create([{"name": "New Company 1"}, {"name": "New Company 2"}])
         self.assertEqual(provider_create_batch_sizes, [2 * installed_provider_count])

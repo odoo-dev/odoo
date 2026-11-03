@@ -13,12 +13,12 @@ from odoo.addons.website_sale_collect.tests.common import ClickAndCollectCommon
 @tagged("post_install", "-at_install")
 class TestSaleOrder(ClickAndCollectCommon):
     _test_user_groups = (
-        'base.group_user',
-        'product.group_product_manager',
-        'sales_team.group_sale_manager',  # FIXME: use sales_team.group_sale_salesman
+        "base.group_user",
+        "product.group_product_manager",
+        "sales_team.group_sale_manager",  # FIXME: use sales_team.group_sale_salesman
     )
 
-    _test_user_name = 'Test Sales & Product Manager'
+    _test_user_name = "Test Sales & Product Manager"
 
     @classmethod
     def setUpClass(cls):
@@ -66,11 +66,16 @@ class TestSaleOrder(ClickAndCollectCommon):
         self.assertEqual(so.warehouse_id, warehouse_2)
 
     def test_fiscal_position_id_is_computed_from_pickup_location_partner(self):
-        fp_be = self.env["account.fiscal.position"].sudo().create({
-            "name": "Test BE fiscal position",
-            "country_id": self.country_be.id,
-            "auto_apply": True,
-        })
+        fp_be = (
+            self
+            .env["account.fiscal.position"]
+            .sudo()
+            .create({
+                "name": "Test BE fiscal position",
+                "country_id": self.country_be.id,
+                "auto_apply": True,
+            })
+        )
         self.default_partner.country_id = self.country_us
         self.warehouse.partner_id.country_id = self.country_be
         warehouse_shipping_partner = self.env["res.partner"].create({
@@ -81,11 +86,16 @@ class TestSaleOrder(ClickAndCollectCommon):
         self.assertEqual(so.fiscal_position_id, fp_be)
 
     def test_setting_pickup_location_assigns_correct_fiscal_position(self):
-        fp_be = self.env["account.fiscal.position"].sudo().create({
-            "name": "Test BE fiscal position",
-            "country_id": self.country_be.id,
-            "auto_apply": True,
-        })
+        fp_be = (
+            self
+            .env["account.fiscal.position"]
+            .sudo()
+            .create({
+                "name": "Test BE fiscal position",
+                "country_id": self.country_be.id,
+                "auto_apply": True,
+            })
+        )
         so = self._create_in_store_delivery_order()
         self.default_partner.country_id = self.country_be
         warehouse = self._create_warehouse()
@@ -102,11 +112,16 @@ class TestSaleOrder(ClickAndCollectCommon):
         self.assertEqual(so.fiscal_position_id, fp_be)
 
     def test_selecting_not_in_store_dm_resets_fiscal_position(self):
-        fp_us = self.env["account.fiscal.position"].sudo().create({
-            "name": "Test US fiscal position",
-            "country_id": self.country_us.id,
-            "auto_apply": True,
-        })
+        fp_us = (
+            self
+            .env["account.fiscal.position"]
+            .sudo()
+            .create({
+                "name": "Test US fiscal position",
+                "country_id": self.country_us.id,
+                "auto_apply": True,
+            })
+        )
         so = self._create_in_store_delivery_order()
         pickup_location_data = json.dumps({
             "id": self.warehouse.id,
@@ -225,19 +240,24 @@ class TestSaleOrder(ClickAndCollectCommon):
         self.website.sudo().company_id = company_2
         warehouse_2 = self._create_warehouse(company_id=company_2.id)
         self.in_store_dm.warehouse_ids = [Command.link(warehouse_2.id)]
-        _, fp_company_2 = self.env["account.fiscal.position"].sudo().create([
-            {
-                "name": "Company 1 fiscal position",
-                "country_id": warehouse_2.partner_id.country_id.id,
-                "auto_apply": True,
-            },
-            {
-                "name": "Company 2 fiscal position",
-                "country_id": warehouse_2.partner_id.country_id.id,
-                "company_id": company_2.id,
-                "auto_apply": True,
-            },
-        ])
+        _, fp_company_2 = (
+            self
+            .env["account.fiscal.position"]
+            .sudo()
+            .create([
+                {
+                    "name": "Company 1 fiscal position",
+                    "country_id": warehouse_2.partner_id.country_id.id,
+                    "auto_apply": True,
+                },
+                {
+                    "name": "Company 2 fiscal position",
+                    "country_id": warehouse_2.partner_id.country_id.id,
+                    "company_id": company_2.id,
+                    "auto_apply": True,
+                },
+            ])
+        )
         so = self._create_in_store_delivery_order(warehouse_id=warehouse_2.id)
         pickup_location_data = json.dumps({
             "id": warehouse_2.id,
@@ -297,10 +317,7 @@ class TestSaleOrder(ClickAndCollectCommon):
     def test_switching_from_in_store_restores_delivery_address(self):
         """Switching away from click-and-collect must restore the pickup address parent."""
         so = self._create_in_store_delivery_order()
-        self.free_delivery.write({
-            "is_published": True,
-            "country_ids": self.country_us.ids,
-        })
+        self.free_delivery.write({"is_published": True, "country_ids": self.country_us.ids})
         self.partner.country_id = self.country_us
         pickup_partner = self.env["res.partner"].create({
             **self.dummy_partner_address_values,

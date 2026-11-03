@@ -279,7 +279,7 @@ export class SaleOrderTemplateLineListRenderer extends ProductLabelSectionAndNot
             const left = await this.props.list.leaveEditMode();
             if (!left) {
                 return;
-            }            
+            }
             const recordMap = this._getRecordsToRecompute(
                 record,
                 previous ? previous.dataset.id : null

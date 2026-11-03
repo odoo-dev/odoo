@@ -58,9 +58,12 @@ class TestProcessingFlows(IyzicoCommon, PaymentHttpCommon):
         url = self._build_url(
             f"{const.PAYMENT_RETURN_ROUTE}?{url_encode({'tx_ref': tx.reference})}"
         )
-        with patch(
-            "odoo.addons.payment.models.payment_provider.PaymentProvider._send_api_request",
-            return_value=self.payment_data,
-        ), patch("odoo.addons.payment.models.payment_transaction.PaymentTransaction._record"):
+        with (
+            patch(
+                "odoo.addons.payment.models.payment_provider.PaymentProvider._send_api_request",
+                return_value=self.payment_data,
+            ),
+            patch("odoo.addons.payment.models.payment_transaction.PaymentTransaction._record"),
+        ):
             response = self._make_http_post_request(url, data=self.return_data)
         self.assertEqual(response.status_code, 403)

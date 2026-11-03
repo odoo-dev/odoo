@@ -219,8 +219,12 @@ class ProductTemplate(models.Model):
 
     def _get_product_accounts(self):
         accounts = super()._get_product_accounts()
-        accounts['invoices_to_issue'] = self._get_category_account('property_account_invoices_to_issue_id', 'account_invoices_to_issue_id')
-        accounts['invoiced_not_delivered'] = self._get_category_account('property_account_invoiced_not_delivered_id', 'account_invoiced_not_delivered_id')
+        accounts["invoices_to_issue"] = self._get_category_account(
+            "property_account_invoices_to_issue_id", "account_invoices_to_issue_id"
+        )
+        accounts["invoiced_not_delivered"] = self._get_category_account(
+            "property_account_invoiced_not_delivered_id", "account_invoiced_not_delivered_id"
+        )
         return accounts
 
     @api.model

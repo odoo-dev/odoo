@@ -7,11 +7,11 @@ from odoo.addons.sale.tests.common import SaleCommon
 @tagged("post_install", "-at_install")
 class TestSaleSections(SaleCommon):
     _test_user_groups = (
-        'product.group_product_manager',
-        'sales_team.group_sale_manager',  # FIXME: use sales_team.group_sale_salesman
+        "product.group_product_manager",
+        "sales_team.group_sale_manager",  # FIXME: use sales_team.group_sale_salesman
     )
 
-    _test_user_name = 'Test Sales & Product Manager'
+    _test_user_name = "Test Sales & Product Manager"
 
     @classmethod
     def setUpClass(cls):

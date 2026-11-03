@@ -53,10 +53,7 @@ class ProductProduct(models.Model):
         ])
         if to_date:
             to_date = fields.Datetime.to_datetime(to_date)
-            domain = Domain.AND([
-                domain,
-                Domain("order_id.commitment_date", "<=", to_date.date()),
-            ])
+            domain = Domain.AND([domain, Domain("order_id.commitment_date", "<=", to_date.date())])
         order_line_model = self.env["sale.order.line"].sudo()
         if to_date and to_date.date() < fields.Date.context_today(self):
             order_lines = order_line_model.search(domain).with_context(
@@ -72,9 +69,7 @@ class ProductProduct(models.Model):
             return res
 
         order_lines = order_line_model._read_group(
-            domain,
-            ["product_id", "product_uom_id"],
-            ["product_uom_qty:sum", "qty_invoiced:sum"],
+            domain, ["product_id", "product_uom_id"], ["product_uom_qty:sum", "qty_invoiced:sum"]
         )
         for product, line_uom, qty_sold, qty_invoiced in order_lines:
             to_invoice = line_uom._compute_quantity(

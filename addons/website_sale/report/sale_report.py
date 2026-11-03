@@ -15,17 +15,19 @@ class SaleReport(models.Model):
 
     def _select_dict(self, table):
         return super()._select_dict(table) | {
-            'website_id': table.order_id.website_id.id,
-            'is_abandoned_cart': SQL(
+            "website_id": table.order_id.website_id.id,
+            "is_abandoned_cart": SQL(
                 """
                 %s <= (timezone('utc', now()) - ((COALESCE(%s, '1.0') || ' hour')::INTERVAL))
                 AND %s IS NOT NULL
                 AND %s = 'draft'
                 AND %s != %s""",
-                table.order_id.date_order, table.order_id.website_id.cart_abandoned_delay,
+                table.order_id.date_order,
+                table.order_id.website_id.cart_abandoned_delay,
                 table.order_id.website_id.id,
                 table.order_id.state,
-                table.order_id.partner_id, self.env.ref("base.public_partner").id,
+                table.order_id.partner_id,
+                self.env.ref("base.public_partner").id,
             ),
         }
 

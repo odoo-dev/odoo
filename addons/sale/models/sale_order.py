@@ -571,15 +571,11 @@ class SaleOrder(models.Model):
         for order in self:
             if order.state != "draft":
                 continue
-            order = order.with_company(order.company_id)
+            order = order.with_company(order.company_id).with_context(lang=order._get_lang())  # noqa: PLW2901
             if order.terms_type == "html" and order.env.company.invoice_terms_html:
                 baseurl = html_keep_url(order._get_note_url() + "/terms")
-                context = {"lang": order.partner_id.lang or self.env.user.lang}
                 order.note = order.env._("Terms & Conditions: %s", baseurl)
-                del context
             elif not is_html_empty(order.env.company.invoice_terms):
-                if order.partner_id.lang:
-                    order = order.with_context(lang=order.partner_id.lang)
                 order.note = order.env.company.invoice_terms
 
     def _inverse_note(self):
@@ -627,13 +623,13 @@ class SaleOrder(models.Model):
     @api.depends("partner_id")
     def _compute_payment_term_id(self):
         for order in self:
-            order = order.with_company(order.company_id)
+            order = order.with_company(order.company_id)  # noqa: PLW2901
             order.payment_term_id = order.partner_id.property_payment_term_id
 
     @api.depends("partner_id", "company_id")
     def _compute_preferred_payment_method_line_id(self):
         for order in self:
-            order = order.with_company(order.company_id)
+            order = order.with_company(order.company_id)  # noqa: PLW2901
             order.preferred_payment_method_line_id = (
                 order.partner_id.property_inbound_payment_method_line_id
             )
@@ -646,7 +642,7 @@ class SaleOrder(models.Model):
             if not order.partner_id:
                 order.pricelist_id = False
                 continue
-            order = order.with_company(order.company_id)
+            order = order.with_company(order.company_id)  # noqa: PLW2901
             order.pricelist_id = order.partner_id.property_product_pricelist
 
     @api.depends("pricelist_id", "company_id")
@@ -1161,13 +1157,13 @@ class SaleOrder(models.Model):
     @api.depends("company_id", "partner_id", "amount_total")
     def _compute_partner_credit_warning(self):
         for order in self:
-            order = order.with_company(order.company_id)
+            order = order.with_company(order.company_id)  # noqa: PLW2901
             order.partner_credit_warning = ""
             show_warning = (
                 order.state in ("draft", "sent") and order.company_id.account_use_credit_limit
             )
             if show_warning:
-                order.partner_credit_warning = self.env[
+                order.partner_credit_warning = order.env[
                     "account.move"
                 ]._build_credit_warning_message(
                     order.sudo(),  # ensure access to `credit` & `credit_limit` fields
@@ -1752,7 +1748,7 @@ class SaleOrder(models.Model):
         pending_email_orders = self.search([("pending_email_template_id", "!=", False)])
         self.env["ir.cron"]._commit_progress(remaining=len(pending_email_orders))
         for order in pending_email_orders:
-            order = (
+            order = (  # noqa: PLW2901
                 order.with_prefetch()
             )  # Avoid pre-fetching after each cache invalidation due to committing.
             order._send_order_notification_mail(
@@ -2059,8 +2055,8 @@ class SaleOrder(models.Model):
         invoice_item_sequence = 0  # Incremental sequencing to keep the lines order on the invoice.
         for order in self:
             if order.partner_invoice_id.lang:
-                order = order.with_context(lang=order.partner_invoice_id.lang)
-            order = order.with_company(order.company_id)
+                order = order.with_context(lang=order.partner_invoice_id.lang)  # noqa: PLW2901
+            order = order.with_company(order.company_id)  # noqa: PLW2901
 
             invoice_vals = order._prepare_invoice()
             invoiceable_lines = order._get_invoiceable_lines(final)

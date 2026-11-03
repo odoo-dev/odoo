@@ -68,7 +68,7 @@ class ProductPricelist(models.Model):
                 # case as module install are done with OdooBot (company 1)
                 # YTI FIXME: The fix is not at the correct place
                 # It be set when we actually create the pricelist
-                self = self.with_context(default_company_id=vals["company_id"])
+                self = self.with_context(default_company_id=vals["company_id"])  # noqa: PLW0642
         return super().create(vals_list)
 
     # === BUSINESS METHODS ===#

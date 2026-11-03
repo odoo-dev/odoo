@@ -85,10 +85,7 @@
         "templates/generate_primary_template.xml",
         "security/ir.access.csv",
     ],
-    "demo": [
-        "data/demo.xml",
-        "data/product_attribute_category_demo.xml",
-    ],
+    "demo": ["data/demo.xml", "data/product_attribute_category_demo.xml"],
     "application": True,
     "post_init_hook": "_post_init_hook",
     "uninstall_hook": "uninstall_hook",
@@ -166,9 +163,7 @@
             "website_sale/static/src/js/website_sale_utils.js",
             ("remove", "website_sale/static/src/**/*.edit.*"),
         ],
-        "website.assets_wysiwyg": [
-            "website_sale/static/src/scss/website_sale.editor.scss",
-        ],
+        "website.assets_wysiwyg": ["website_sale/static/src/scss/website_sale.editor.scss"],
         "website.assets_editor": [
             "website_sale/static/src/js/systray_items/*.js",
             "website_sale/static/src/xml/website_sale_editor_previews.xml",
@@ -177,8 +172,8 @@
             "web/static/lib/bootstrap/scss/_variables.scss",
             "website_sale/static/src/website_builder/**/*.edit.*",
         ],
-        'website.assets_inside_builder_iframe_tests': [
-            'website_sale/static/src/website_builder/**/*.edit.xml',
+        "website.assets_inside_builder_iframe_tests": [
+            "website_sale/static/src/website_builder/**/*.edit.xml"
         ],
         "web.assets_tests": [
             "website_sale/static/tests/tours/**/*",

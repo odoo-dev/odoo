@@ -80,16 +80,20 @@ class TestProductPublicCategory(TransactionCase):
         categories[2].check_access("read")
         # prefetch as public user
         categories[0].website_url
-        self.assertRecordValues(categories.sudo(), [
-            {"website_url": f"/shop/category/1-{categories[0].id}"},
-            {"website_url": "#"},
-            {"website_url": f"/shop/category/1-{categories[0].id}/1-2-{categories[2].id}"},
-        ])
+        self.assertRecordValues(
+            categories.sudo(),
+            [
+                {"website_url": f"/shop/category/1-{categories[0].id}"},
+                {"website_url": "#"},
+                {"website_url": f"/shop/category/1-{categories[0].id}/1-2-{categories[2].id}"},
+            ],
+        )
 
     def test_category_is_published_depends_on_website(self):
         category = self.categories[0].child_id[1]
-        website_1, website_2 = self.env['website'].create([
-            {'name': 'Test Website 1'}, {'name': 'Test Website 2'}
+        website_1, website_2 = self.env["website"].create([
+            {"name": "Test Website 1"},
+            {"name": "Test Website 2"},
         ])
         self.assertTrue(category.with_context(host_id=website_1.id).is_published)
         category.invalidate_recordset(["is_published", "has_published_products"])

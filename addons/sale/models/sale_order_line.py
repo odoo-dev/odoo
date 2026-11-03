@@ -448,7 +448,7 @@ class SaleOrderLine(models.Model):
         name_per_id = self._additional_name_per_id()
         for so_line in self.sudo():
             if so_line.order_partner_id.lang:
-                so_line = so_line.with_context(lang=so_line.order_id._get_lang())
+                so_line = so_line.with_context(lang=so_line.order_id._get_lang())  # noqa: PLW2901
 
             description = (so_line.name or "").split("\n", 1)[0]
             default_name = so_line._get_sale_order_line_multiline_description_sale()
@@ -479,8 +479,8 @@ class SaleOrderLine(models.Model):
         if operator in Domain.NEGATIVE_OPERATORS:
             return NotImplemented
         domain = Domain("product_id.product_tmpl_id", operator, value)
-        if operator == 'in' and False in value:  # relation may be falsy
-            domain |= Domain('product_id', '=', False)
+        if operator == "in" and False in value:  # relation may be falsy
+            domain |= Domain("product_id", "=", False)
         return domain
 
     @api.depends("product_id")
@@ -524,7 +524,7 @@ class SaleOrderLine(models.Model):
 
             lang = line.order_id._get_lang()
             if lang != self.env.lang:
-                line = line.with_context(lang=lang)
+                line = line.with_context(lang=lang)  # noqa: PLW2901
 
             if line.product_id:
                 line.name = line._get_sale_order_line_multiline_description_sale()
@@ -748,7 +748,7 @@ class SaleOrderLine(models.Model):
 
     def _get_custom_compute_tax_cache_key(self):
         """Provide a hook method to modify the cache key used during taxes computation."""
-        return tuple()
+        return ()
 
     @api.depends("product_id", "product_uom_id", "product_uom_qty")
     def _compute_pricelist_item_id(self):
@@ -794,7 +794,7 @@ class SaleOrderLine(models.Model):
             if force_recompute and not line.product_id and manual_price:
                 continue
 
-            line = line.with_context(sale_write_from_compute=True)
+            line = line.with_context(sale_write_from_compute=True)  # noqa: PLW2901
             if not line.product_uom_id or not line.product_id:
                 line.price_unit = 0.0
                 line.technical_price_unit = 0.0
@@ -986,7 +986,7 @@ class SaleOrderLine(models.Model):
             }
         else:
             even_share = self.currency_id.round(combo_product_price / len(combo_base_prices))
-            combo_prices = {combo_id: even_share for combo_id in combo_base_prices}
+            combo_prices = dict.fromkeys(combo_base_prices, even_share)
         # Compute the delta between the combo product's price and the sum of its combo prices.
         # Ideally, this should be 0, but division in python isn't perfect, so we may need to adjust
         # the combo prices to make the delta 0.
@@ -1028,7 +1028,7 @@ class SaleOrderLine(models.Model):
                 # to the existing sales price.
                 continue
 
-            line = line.with_company(line.company_id)
+            line = line.with_company(line.company_id)  # noqa: PLW2901
             pricelist_price = line._get_pricelist_price()
             base_price = line._get_pricelist_price_before_discount()
 
@@ -1306,7 +1306,16 @@ class SaleOrderLine(models.Model):
                     or invoice_line.move_id.payment_state == "invoicing_legacy"
                 ) and line._affects_qty_invoiced(invoice_line):
                     if line.is_downpayment:
-                        if not line.currency_id.is_zero(sum(invoice_lines.filtered(lambda l: l.move_id.state != 'cancel' or l.move_id.payment_state == 'invoicing_legacy').mapped('balance'))):
+                        if not line.currency_id.is_zero(
+                            sum(
+                                invoice_lines.filtered(
+                                    lambda invl: (
+                                        invl.move_id.state != "cancel"
+                                        or invl.move_id.payment_state == "invoicing_legacy"
+                                    )
+                                ).mapped("balance")
+                            )
+                        ):
                             invoiced_qties[line] = 1
                             line.qty_invoiced = 1
                         else:
@@ -1576,9 +1585,7 @@ class SaleOrderLine(models.Model):
 
             line.untaxed_amount_to_invoice = amount_to_invoice
 
-    @api.depends(
-        "discount", "price_total", "product_uom_qty", "qty_invoiced_posted"
-    )
+    @api.depends("discount", "price_total", "product_uom_qty", "qty_invoiced_posted")
     def _compute_amount_to_invoice(self):
         for line in self:
             if line.product_uom_qty:
@@ -1628,12 +1635,12 @@ class SaleOrderLine(models.Model):
             ])
         return domain
 
-    def _search_deferred_revenue(self, operator, value):
+    def _search_deferred_revenue(self, operator, value):  # noqa: ARG002
         if operator != "in":
             return NotImplemented
         return [("id", "in", self._get_accrual_line_ids("deferred").ids)]
 
-    def _search_invoice_to_be_issued(self, operator, value):
+    def _search_invoice_to_be_issued(self, operator, value):  # noqa: ARG002
         if operator != "in":
             return NotImplemented
         return [("id", "in", self._get_accrual_line_ids("invoice_issued").ids)]
@@ -1659,9 +1666,9 @@ class SaleOrderLine(models.Model):
             accrual_entry_date=fields.Date.to_string(accrual_entry_date)
         )
         if mode == "deferred":
-            order_lines = order_lines.filtered(lambda l: l.amount_to_invoice_at_date < 0)
+            order_lines = order_lines.filtered(lambda sol: sol.amount_to_invoice_at_date < 0)
         elif mode == "invoice_issued":
-            order_lines = order_lines.filtered(lambda l: l.amount_to_invoice_at_date > 0)
+            order_lines = order_lines.filtered(lambda sol: sol.amount_to_invoice_at_date > 0)
         return order_lines
 
     @api.depends("order_id.partner_id", "product_id")
@@ -2270,7 +2277,7 @@ class SaleOrderLine(models.Model):
 
     @api.model
     def _date_in_the_past(self):
-        if not "accrual_entry_date" in self.env.context:
+        if "accrual_entry_date" not in self.env.context:
             return False
         accrual_date = fields.Date.from_string(self.env.context["accrual_entry_date"])
         return accrual_date and accrual_date < fields.Date.context_today(self)

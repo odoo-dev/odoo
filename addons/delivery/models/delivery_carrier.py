@@ -1,7 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-import re
 import json
+import re
 
 import psycopg2
 
@@ -53,10 +53,14 @@ class DeliveryCarrier(models.Model):
         default="rate_and_ship",
     )
     prod_environment = fields.Boolean(
-        string="Environment", help="Set to True if your credentials are certified for production.",
-        compute="_compute_prod_environment", store=True
+        string="Environment",
+        help="Set to True if your credentials are certified for production.",
+        compute="_compute_prod_environment",
+        store=True,
     )
-    support_test_environment = fields.Boolean(string="Test Environment", compute="_compute_support_test_environment")
+    support_test_environment = fields.Boolean(
+        string="Test Environment", compute="_compute_support_test_environment"
+    )
     debug_logging = fields.Boolean(
         string="Debug logging", help="Log requests in order to ease debugging"
     )
@@ -190,8 +194,15 @@ class DeliveryCarrier(models.Model):
         "CHECK(shipping_insurance >= 0 AND shipping_insurance <= 100)",
         "The shipping insurance must be a percentage between 0 and 100.",
     )
-    delivery_cost = fields.Monetary(string="Cost", readonly=True, compute="_compute_delivery_cost", currency_field="delivery_currency_id")
-    delivery_currency_id = fields.Many2one(comodel_name="res.currency", compute="_compute_delivery_currency_id")
+    delivery_cost = fields.Monetary(
+        string="Cost",
+        readonly=True,
+        compute="_compute_delivery_cost",
+        currency_field="delivery_currency_id",
+    )
+    delivery_currency_id = fields.Many2one(
+        comodel_name="res.currency", compute="_compute_delivery_currency_id"
+    )
 
     @api.constrains("must_have_tag_ids", "excluded_tag_ids")
     def _check_tags(self):
@@ -208,7 +219,10 @@ class DeliveryCarrier(models.Model):
     @api.depends("delivery_type")
     def _compute_support_test_environment(self):
         for carrier in self:
-            carrier.support_test_environment = carrier.delivery_type not in ['fixed', 'base_on_rule']
+            carrier.support_test_environment = carrier.delivery_type not in [
+                "fixed",
+                "base_on_rule",
+            ]
 
     @api.depends("support_test_environment")
     def _compute_prod_environment(self):
@@ -441,7 +455,7 @@ class DeliveryCarrier(models.Model):
             )
             # apply margin on computed price
             res["price"] = order.currency_id.round(self._apply_margins(res["price"], order))
-            # save the real price in case a free_over rule overide it to 0
+            # save the real price in case a free_over rule override it to 0
             res["carrier_price"] = res["price"]
             # free when order is large enough
             amount_without_delivery = order._compute_amount_total_without_delivery()
@@ -578,7 +592,7 @@ class DeliveryCarrier(models.Model):
 
     def _get_price_available(self, order):
         self.ensure_one()
-        self = self.sudo()
+        self = self.sudo()  # noqa: PLW0642
         order = order.sudo()
         total = weight = volume = quantity = wv = 0
         for line in order.order_line:
@@ -644,11 +658,11 @@ class DeliveryCarrier(models.Model):
     @api.depends("delivery_currency_id")
     @api.depends_context("carrier_prices_dumped", "formatted_display_name")
     def _compute_display_name(self):
-        """Change display name for the carrier selection in SO"""
-        carrier_prices_dumped = self.env.context.get("carrier_prices_dumped")
-        formatted_display_name = self.env.context.get('formatted_display_name')
-
+        """Change display name for the carrier selection in SO."""
         super()._compute_display_name()
+
+        carrier_prices_dumped = self.env.context.get("carrier_prices_dumped")
+        formatted_display_name = self.env.context.get("formatted_display_name")
 
         if not formatted_display_name or not carrier_prices_dumped:
             return
@@ -662,13 +676,15 @@ class DeliveryCarrier(models.Model):
             delivery_vals = carrier_prices.get(str(carrier.id), {})
 
             if delivery_vals and "display_price" in delivery_vals:
-                formatted_price = carrier.delivery_currency_id.format(delivery_vals.get("display_price", 0.0))
+                formatted_price = carrier.delivery_currency_id.format(
+                    delivery_vals.get("display_price", 0.0)
+                )
                 carrier.display_name = f"{carrier.display_name}\t--{formatted_price}--"
 
     @api.depends("delivery_currency_id")
     @api.depends_context("carrier_prices_dumped")
     def _compute_delivery_cost(self):
-        """Provide Cost column for the list view for carriers from SO selection"""
+        """Provide Cost column for the list view for carriers from SO selection."""
         carrier_prices_dumped = self.env.context.get("carrier_prices_dumped")
 
         if not carrier_prices_dumped:

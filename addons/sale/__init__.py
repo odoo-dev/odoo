@@ -26,8 +26,5 @@ def _setup_downpayment_account(env):
 
 def _setup_accrual_accounts(env):
     env["account.chart.template"]._load_pre_defined_data({
-        "res.company": {
-            "account_invoices_to_issue_id",
-            "account_invoiced_not_delivered_id",
-        }
+        "res.company": {"account_invoices_to_issue_id", "account_invoiced_not_delivered_id"}
     })

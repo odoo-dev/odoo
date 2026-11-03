@@ -69,30 +69,29 @@ class AuthorizeTest(AuthorizeCommon):
             })
         self.assertEqual(amount_data, None)  # Amount validation is skipped.
 
-    @mute_logger('odoo.addons.payment_authorize.models.authorize_request')
+    @mute_logger("odoo.addons.payment_authorize.models.authorize_request")
     def test_get_transaction_details_raises_on_timeout(self):
         """Transport failures fetching details should raise ValidationError."""
         authorize_api = AuthorizeAPI(self.authorize)
-        with patch(
-            'odoo.addons.payment_authorize.models.authorize_request.requests.post',
-            side_effect=requests.exceptions.Timeout(),
+        with (
+            patch(
+                "odoo.addons.payment_authorize.models.authorize_request.requests.post",
+                side_effect=requests.exceptions.Timeout(),
+            ),
+            self.assertRaises(ValidationError),
         ):
-            with self.assertRaises(ValidationError):
-                authorize_api.get_transaction_details('60012345678')
+            authorize_api.get_transaction_details("60012345678")
 
     def test_amount_validation_is_skipped_when_transaction_details_request_fails(self):
         """Test that a ValidationError fetching details skips amount validation."""
-        tx = self._create_transaction('direct')
+        tx = self._create_transaction("direct")
         with patch(
-            'odoo.addons.payment_authorize.models.authorize_request.AuthorizeAPI'
-            '.get_transaction_details',
-            side_effect=ValidationError(''),
+            "odoo.addons.payment_authorize.models.authorize_request.AuthorizeAPI"
+            ".get_transaction_details",
+            side_effect=ValidationError(""),
         ):
             amount_data = tx._extract_amount_data({
-                'response': {
-                    'x_response_code': '1',
-                    'x_trans_id': '60012345678',
-                },
+                "response": {"x_response_code": "1", "x_trans_id": "60012345678"}
             })
         self.assertEqual(amount_data, None)  # Amount validation is skipped.
 

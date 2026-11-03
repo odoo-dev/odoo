@@ -8,16 +8,16 @@ from odoo.addons.base.tests.common import BaseCommon
 @tagged("post_install", "-at_install")
 class TestWebsiteSaleSettings(BaseCommon):
     _test_user_groups = (
-        'base.group_user',
-        'website.group_website_designer',  # read/write website config in the test body
+        "base.group_user",
+        "website.group_website_designer",  # read/write website config in the test body
     )
 
-    _test_user_name = 'Test User'
+    _test_user_name = "Test User"
 
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.company = cls.env.ref('base.test_company')
+        cls.company = cls.env.ref("base.test_company")
         cls._test_user.company_ids |= cls.company
         cls.website = cls.env["website"].create({
             "name": "Test Website",

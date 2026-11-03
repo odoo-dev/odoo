@@ -205,9 +205,9 @@ class WebsiteSale(payment_portal.PaymentPortal):
         Returns the attribute-only reset (used by the attribute filter form) and the
         full reset extending it with the tag, price and ribbon filters.
         """
-        reset_attribute_value_params = {
-            attr: 0 for attr in request.session.get("attribute_value_params", {})
-        }
+        reset_attribute_value_params = dict.fromkeys(
+            request.session.get("attribute_value_params", {}), 0
+        )
         reset_filters = {
             **reset_attribute_value_params,
             "tags": 0,
@@ -1790,7 +1790,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
         sale_order_id = request.session.get("sale_last_order_id")
         if sale_order_id:
             sale_order = self.env["sale.order"].sudo().browse(sale_order_id)
-            filename = "%s.pdf" % (f"Order - {sale_order.name}" or "Order")
+            filename = "%s.pdf" % (f"Order - {sale_order.name}")
             pdf, _ = (
                 self
                 .env["ir.actions.report"]

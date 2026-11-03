@@ -23,10 +23,10 @@ class SaleReport(models.Model):
     def _selection_target_model(self):
         return [
             (model.model, model.name)
-            for model
-            in self.env['ir.model'].sudo().search_fetch(
-                [('transient', '=', False)], ['model', 'name']
-            )
+            for model in self
+            .env["ir.model"]
+            .sudo()
+            .search_fetch([("transient", "=", False)], ["model", "name"])
             if model.model in self.env
         ]
 
@@ -123,64 +123,136 @@ class SaleReport(models.Model):
     @property
     def _table_sql(self) -> SQL:
         today = fields.Date.today()
-        query = self.env['sale.order.line'].sudo().with_context(date_to=today)._search(self._order_line_domain())
+        query = (
+            self
+            .env["sale.order.line"]
+            .sudo()
+            .with_context(date_to=today)
+            ._search(self._order_line_domain())
+        )
         query.groupby = SQL(", ").join(self._groupby_list(query.table))
         return query.subselect(*self._select_dict_to_list(self._select_dict(query.table)))
 
     def _order_line_domain(self):
-        return Domain('display_type', '=', False)
+        return Domain("display_type", "=", False)
 
     def _select_dict_to_list(self, select_dict):
-        return [SQL("%s AS %s", select_dict.get(fname, SQL("NULL")), SQL.identifier(fname)) for fname, field in self._fields.items() if field.store]
+        return [
+            SQL("%s AS %s", select_dict.get(fname, SQL("NULL")), SQL.identifier(fname))
+            for fname, field in self._fields.items()
+            if field.store
+        ]
 
     def _select_dict(self, table: TableSQL):
-        uom_ratio = SQL("(COALESCE(%s, 1) / NULLIF(COALESCE(%s, 1), 0.0))", table.product_uom_id.factor, table.product_id.uom_id.factor)
+        uom_ratio = SQL(
+            "(COALESCE(%s, 1) / NULLIF(COALESCE(%s, 1), 0.0))",
+            table.product_uom_id.factor,
+            table.product_id.uom_id.factor,
+        )
         order_rate = self._case_value_or_one(table.order_id.currency_rate)
         rate = SQL("%s / %s", table.consolidation_rate, order_rate)
         return {
-            'id': SQL("MIN(%s)", table.id),
-            'product_id': table.product_id,
-            'line_name': table.name,
-            'line_invoice_status': SQL("%s", table.invoice_status),
-            'product_uom_id': SQL("CASE WHEN %s IS NULL THEN %s ELSE %s END", table.product_id, table.product_id.uom_id, table.product_uom_id),
-            'product_uom_qty': SQL("CASE WHEN %s IS NOT TRUE THEN SUM(%s * %s) ELSE 0 END", table.is_downpayment, table.product_uom_qty, uom_ratio),
-            'qty_delivered': SQL("CASE WHEN %s IS NOT TRUE THEN SUM(%s * %s) ELSE 0 END", table.is_downpayment, table.qty_delivered, uom_ratio),
-            'qty_to_deliver': SQL("CASE WHEN %s IS NOT TRUE THEN SUM((%s - %s) * %s) ELSE 0 END", table.is_downpayment, table.product_uom_qty, table.qty_delivered, uom_ratio),
-            'qty_invoiced': SQL("CASE WHEN %s IS NOT TRUE THEN SUM(%s * %s) ELSE 0 END", table.is_downpayment, table.qty_invoiced, uom_ratio),
-            'qty_to_invoice': SQL("CASE WHEN %s IS NOT TRUE THEN SUM(%s * %s) ELSE 0 END", table.is_downpayment, table.qty_to_invoice, uom_ratio),
-            'price_unit': SQL("CASE WHEN %s IS NOT TRUE THEN AVG(%s * %s) ELSE 0 END", table.is_downpayment, table.price_unit, rate),
-            'price_total': SQL("CASE WHEN %s IS NOT TRUE THEN SUM(%s * %s) ELSE 0 END", table.is_downpayment, table.price_total, rate),
-            'price_subtotal': SQL("CASE WHEN %s IS NOT TRUE THEN SUM(%s * %s) ELSE 0 END", table.is_downpayment, table.price_subtotal, rate),
-            'untaxed_amount_to_invoice': SQL("SUM(%s * %s)", table.untaxed_amount_to_invoice, rate),
-            'untaxed_amount_invoiced': SQL("SUM(%s * %s)", table.untaxed_amount_invoiced, rate),
-            'untaxed_delivered_amount': SQL("SUM(%s * %s * %s)", table.price_unit, table.qty_delivered, rate),
-            'nbr': SQL("COUNT(*)"),
-            'name': table.order_id.name,
-            'date': SQL("%s", table.order_id.date_order),
-            'state': table.order_id.state,
-            'invoice_status': table.order_id.invoice_status,
-            'partner_id': table.order_id.partner_id,
-            'user_id': table.order_id.user_id,
-            'company_id': table.order_id.company_id,
-            'campaign_id': table.order_id.campaign_id,
-            'medium_id': table.order_id.medium_id,
-            'source_id': table.order_id.source_id,
-            'utm_reference': table.order_id.utm_reference,
-            'categ_id': table.product_id.categ_id,
-            'pricelist_id': table.order_id.pricelist_id,
-            'team_id': table.order_id.team_id,
-            'product_tmpl_id': table.product_id.product_tmpl_id,
-            'commercial_partner_id': table.order_id.partner_id.commercial_partner_id,
-            'country_id': table.order_id.partner_id.country_id,
-            'industry_id': table.order_id.partner_id.industry_id,
-            'state_id': table.order_id.partner_id.state_id,
-            'partner_zip': SQL("%s", table.order_id.partner_id.zip),
-            'weight': SQL("SUM(%s * %s * %s)", table.product_id.weight, table.product_uom_qty, uom_ratio),
-            'volume': SQL("SUM(%s * %s * %s)", table.product_id.volume, table.product_uom_qty, uom_ratio),
-            'discount': table.discount,
-            'discount_amount': SQL("SUM(%s * %s * %s / 100.0 * %s)", table.price_unit, table.product_uom_qty, table.discount, rate),
-            'currency_id': SQL("%s", self.env.company.currency_id.id),
-            'order_reference': SQL("concat('sale.order', ',', %s)", table.order_id),
+            "id": SQL("MIN(%s)", table.id),
+            "product_id": table.product_id,
+            "line_name": table.name,
+            "line_invoice_status": SQL("%s", table.invoice_status),
+            "product_uom_id": SQL(
+                "CASE WHEN %s IS NULL THEN %s ELSE %s END",
+                table.product_id,
+                table.product_id.uom_id,
+                table.product_uom_id,
+            ),
+            "product_uom_qty": SQL(
+                "CASE WHEN %s IS NOT TRUE THEN SUM(%s * %s) ELSE 0 END",
+                table.is_downpayment,
+                table.product_uom_qty,
+                uom_ratio,
+            ),
+            "qty_delivered": SQL(
+                "CASE WHEN %s IS NOT TRUE THEN SUM(%s * %s) ELSE 0 END",
+                table.is_downpayment,
+                table.qty_delivered,
+                uom_ratio,
+            ),
+            "qty_to_deliver": SQL(
+                "CASE WHEN %s IS NOT TRUE THEN SUM((%s - %s) * %s) ELSE 0 END",
+                table.is_downpayment,
+                table.product_uom_qty,
+                table.qty_delivered,
+                uom_ratio,
+            ),
+            "qty_invoiced": SQL(
+                "CASE WHEN %s IS NOT TRUE THEN SUM(%s * %s) ELSE 0 END",
+                table.is_downpayment,
+                table.qty_invoiced,
+                uom_ratio,
+            ),
+            "qty_to_invoice": SQL(
+                "CASE WHEN %s IS NOT TRUE THEN SUM(%s * %s) ELSE 0 END",
+                table.is_downpayment,
+                table.qty_to_invoice,
+                uom_ratio,
+            ),
+            "price_unit": SQL(
+                "CASE WHEN %s IS NOT TRUE THEN AVG(%s * %s) ELSE 0 END",
+                table.is_downpayment,
+                table.price_unit,
+                rate,
+            ),
+            "price_total": SQL(
+                "CASE WHEN %s IS NOT TRUE THEN SUM(%s * %s) ELSE 0 END",
+                table.is_downpayment,
+                table.price_total,
+                rate,
+            ),
+            "price_subtotal": SQL(
+                "CASE WHEN %s IS NOT TRUE THEN SUM(%s * %s) ELSE 0 END",
+                table.is_downpayment,
+                table.price_subtotal,
+                rate,
+            ),
+            "untaxed_amount_to_invoice": SQL("SUM(%s * %s)", table.untaxed_amount_to_invoice, rate),
+            "untaxed_amount_invoiced": SQL("SUM(%s * %s)", table.untaxed_amount_invoiced, rate),
+            "untaxed_delivered_amount": SQL(
+                "SUM(%s * %s * %s)", table.price_unit, table.qty_delivered, rate
+            ),
+            "nbr": SQL("COUNT(*)"),
+            "name": table.order_id.name,
+            "date": SQL("%s", table.order_id.date_order),
+            "state": table.order_id.state,
+            "invoice_status": table.order_id.invoice_status,
+            "partner_id": table.order_id.partner_id,
+            "user_id": table.order_id.user_id,
+            "company_id": table.order_id.company_id,
+            "campaign_id": table.order_id.campaign_id,
+            "medium_id": table.order_id.medium_id,
+            "source_id": table.order_id.source_id,
+            "utm_reference": table.order_id.utm_reference,
+            "categ_id": table.product_id.categ_id,
+            "pricelist_id": table.order_id.pricelist_id,
+            "team_id": table.order_id.team_id,
+            "product_tmpl_id": table.product_id.product_tmpl_id,
+            "commercial_partner_id": table.order_id.partner_id.commercial_partner_id,
+            "country_id": table.order_id.partner_id.country_id,
+            "industry_id": table.order_id.partner_id.industry_id,
+            "state_id": table.order_id.partner_id.state_id,
+            "partner_zip": SQL("%s", table.order_id.partner_id.zip),
+            "weight": SQL(
+                "SUM(%s * %s * %s)", table.product_id.weight, table.product_uom_qty, uom_ratio
+            ),
+            "volume": SQL(
+                "SUM(%s * %s * %s)", table.product_id.volume, table.product_uom_qty, uom_ratio
+            ),
+            "discount": table.discount,
+            "discount_amount": SQL(
+                "SUM(%s * %s * %s / 100.0 * %s)",
+                table.price_unit,
+                table.product_uom_qty,
+                table.discount,
+                rate,
+            ),
+            "currency_id": SQL("%s", self.env.company.currency_id.id),
+            "order_reference": SQL("concat('sale.order', ',', %s)", table.order_id),
         }
 
     def _groupby_list(self, table: TableSQL):
@@ -199,7 +271,7 @@ class SaleReport(models.Model):
             table.product_id.product_tmpl_id.id,
             table.order_id.partner_id.id,
         ]
-        if table.consolidation_rate != SQL('1'):
+        if table.consolidation_rate != SQL("1"):
             groupby_list.append(table.consolidation_rate)
         return groupby_list
 

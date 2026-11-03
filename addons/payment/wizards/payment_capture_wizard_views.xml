@@ -29,7 +29,7 @@
                     <label for="amount_to_capture" class="oe_inline"/>
                     <div class="o_row">
                         <field name="amount_to_capture" class="oe_inline"/>
-                        <i 
+                        <i
                             class="oi oe_inline"
                             data-icon="info"
                             invisible="support_partial_capture"

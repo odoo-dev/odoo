@@ -48,11 +48,7 @@ class StockWarehouse(models.Model):
         :rtype: dict
         """
         self.ensure_one()
-        result = {
-            "opening_hours": {},
-            "next_open_date": "",
-            "closing_dates": [],
-        }
+        result = {"opening_hours": {}, "next_open_date": "", "closing_dates": []}
         if self.opening_hours:
             tz = ZoneInfo(self.opening_hours.company_id.tz or self.env.company.tz or "UTC")
             result.update({
@@ -90,9 +86,10 @@ class StockWarehouse(models.Model):
         :return: A mapping of partner id to its warehouse's formatted opening hours.
         :rtype: dict
         """
-        warehouses = self.search([
-            ('partner_id', 'in', partner_ids), ('opening_hours', '!=', False)
-        ], order='sequence ASC, id ASC')
+        warehouses = self.search(
+            [("partner_id", "in", partner_ids), ("opening_hours", "!=", False)],
+            order="sequence ASC, id ASC",
+        )
         opening_hours_by_partner = {}
         for warehouse in warehouses:
             if warehouse.partner_id.id in opening_hours_by_partner:
@@ -121,8 +118,8 @@ class StockWarehouse(models.Model):
         if estimated_dates:  # Take into account the estimated delivery dates
             candidate_dates = OrderedSet(day for day in working_dates if day >= estimated_dates[0])
             if candidate_dates:
-                next_open_date = next(iter(
-                    candidate_dates & estimated_dates or candidate_dates)
+                next_open_date = next(
+                    iter(candidate_dates & estimated_dates or candidate_dates)
                 ).isoformat()
         elif working_dates:
             first_interval = next(iter(work_intervals))

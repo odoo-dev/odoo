@@ -296,7 +296,7 @@ class PaymentTransaction(models.Model):
         :return: The dict of provider-specific create values.
         :rtype: dict
         """
-        return dict()
+        return {}
 
     def write(self, vals):
         if not self.env.context.get("payment_safe_write"):
@@ -391,10 +391,7 @@ class PaymentTransaction(models.Model):
                 "payment_backend_action": True,
                 "default_suggested_amount": (
                     self.env.context.get("suggested_amount", 0.0)
-                    if all(
-                        tx.provider_id.sudo().support_manual_capture == "partial"
-                        for tx in self
-                    )
+                    if all(tx.provider_id.sudo().support_manual_capture == "partial" for tx in self)
                     else 0.0
                 ),
             },
@@ -642,7 +639,7 @@ class PaymentTransaction(models.Model):
         :return: The dict of provider-specific processing values.
         :rtype: dict
         """
-        return dict()
+        return {}
 
     def _get_specific_rendering_values(self, processing_values):  # noqa: ARG002
         """Return a dict of provider-specific values used to render the redirect form.
@@ -655,7 +652,7 @@ class PaymentTransaction(models.Model):
         :return: The dict of provider-specific rendering values.
         :rtype: dict
         """
-        return dict()
+        return {}
 
     def _get_mandate_values(self):
         """Return a dict of module-specific values used to create a mandate.
@@ -669,7 +666,7 @@ class PaymentTransaction(models.Model):
         :rtype: dict
         """
         self.ensure_one()
-        return dict()
+        return {}
 
     # === LIFECYCLE METHODS - OUTBOUND REQUESTS === #
 
@@ -1072,7 +1069,7 @@ class PaymentTransaction(models.Model):
         :return: Data to create a payment token.
         :rtype: dict
         """
-        return dict()
+        return {}
 
     def _set_pending(self, *, state_message=None, extra_allowed_states=()):
         """Update the transactions' state to `pending`.
@@ -1190,8 +1187,7 @@ class PaymentTransaction(models.Model):
             :rtype: tuple(recordset)
             """
             return transactions_.partitioned(
-                lambda _tx: _tx.state in allowed_states,
-                lambda _tx: _tx.state == target_state,
+                lambda _tx: _tx.state in allowed_states, lambda _tx: _tx.state == target_state
             )
 
         txs_to_process, txs_already_processed, txs_wrong_state = classify_by_state(self)

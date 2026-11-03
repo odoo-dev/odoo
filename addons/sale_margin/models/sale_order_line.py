@@ -45,7 +45,7 @@ class SaleOrderLine(models.Model):
                 line.purchase_price = 0.0
                 continue
             if line.product_id:
-                line = line.with_company(line.company_id)
+                line = line.with_company(line.company_id)  # noqa: PLW2901
 
                 # Convert the cost to the line UoM
                 product_cost = line.product_id.uom_id._compute_price(

@@ -9,13 +9,13 @@ from odoo.addons.website_sale.tests.common import WebsiteSaleCommon
 @tagged("post_install", "-at_install")
 class TestEcommerceAccess(HttpCaseWithUserDemo, WebsiteSaleCommon):
     _test_user_groups = (
-        'base.group_user',
-        'product.group_product_manager',
-        'sales_team.group_sale_manager',  # FIXME: use sales_team.group_sale_salesman
-        'website.group_website_designer',  # website config (ecommerce_access) + website.menu
+        "base.group_user",
+        "product.group_product_manager",
+        "sales_team.group_sale_manager",  # FIXME: use sales_team.group_sale_salesman
+        "website.group_website_designer",  # website config (ecommerce_access) + website.menu
     )
 
-    _test_user_name = 'Test Sales & Product Manager'
+    _test_user_name = "Test Sales & Product Manager"
 
     @classmethod
     def setUpClass(cls):
@@ -66,10 +66,15 @@ class TestEcommerceAccess(HttpCaseWithUserDemo, WebsiteSaleCommon):
     def test_shop_hides_products_of_categories_not_in_shop(self):
         # Unpublish the published demo products to keep the test products on
         # the first /shop page.
-        self.env["product.template"].search([("website_published", "=", True)]).website_published = False
+        self.env["product.template"].search([
+            ("website_published", "=", True)
+        ]).website_published = False
         Category = self.env["product.public.category"]
         hidden_category = Category.create({"name": "Hidden", "not_in_shop": True})
-        hidden_subcategory = Category.create({"name": "Hidden Sub", "parent_id": hidden_category.id})
+        hidden_subcategory = Category.create({
+            "name": "Hidden Sub",
+            "parent_id": hidden_category.id,
+        })
         shown_subcategory = Category.create({"name": "Shown Sub", "parent_id": hidden_category.id})
         shown_subcategory.not_in_shop = False
         visible_category = Category.create({"name": "Visible"})

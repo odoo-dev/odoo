@@ -33,11 +33,9 @@ Allows customers to check in-store stock, pay on site, and pick up their orders 
             ("remove", "website_sale_collect/static/src/js/location_selector/store_locator.js"),
             "website_sale_collect/static/src/js/pickup_location_many2one/**/*",
         ],
-        "web.assets_tests": [
-            "website_sale_collect/static/tests/tours/**/*",
-        ],
+        "web.assets_tests": ["website_sale_collect/static/tests/tours/**/*"],
         "website.website_builder_assets": [
-            "website_sale_collect/static/src/js/location_selector/store_locator.js",
+            "website_sale_collect/static/src/js/location_selector/store_locator.js"
         ],
     },
     "post_init_hook": "post_init_hook",

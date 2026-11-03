@@ -197,7 +197,7 @@ class PaymentTransaction(models.Model):
                 "type": "INDIVIDUAL",
                 "individual_detail": {
                     # Xendit requires the given names and rejects empty values.
-                    "given_names": partner_first_name or partner_last_name or "Customer",
+                    "given_names": partner_first_name or partner_last_name or "Customer"
                 },
             },
             "success_return_url": f"{redirect_url}?{success_url_params}",
@@ -222,11 +222,7 @@ class PaymentTransaction(models.Model):
             payload["customer"]["mobile_number"] = re.sub(r"[^\d+]", "", phone)
         if self.operation != "validation" and self.tokenize and self.payment_method_code == "card":
             payload["allow_save_payment_method"] = "FORCED"
-            payload["channel_properties"] = {
-                "cards": {
-                    "card_on_file_type": "CUSTOMER_UNSCHEDULED",
-                }
-            }
+            payload["channel_properties"] = {"cards": {"card_on_file_type": "CUSTOMER_UNSCHEDULED"}}
         return payload
 
     def _send_payment_request(self):

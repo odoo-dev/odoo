@@ -2,7 +2,7 @@
 
 from odoo import api, fields, models
 from odoo.exceptions import ValidationError
-from odoo.tools import format_amount, float_compare
+from odoo.tools import float_compare, format_amount
 
 
 class PaymentCaptureWizard(models.TransientModel):
@@ -83,10 +83,9 @@ class PaymentCaptureWizard(models.TransientModel):
                 wizard.amount_to_capture = (
                     min(remaining_amount, wizard.available_amount)
                     if float_compare(
-                        remaining_amount,
-                        0.0,
-                        precision_rounding=wizard.currency_id.rounding,
-                    ) > 0
+                        remaining_amount, 0.0, precision_rounding=wizard.currency_id.rounding
+                    )
+                    > 0
                     else wizard.available_amount
                 )
             else:
@@ -137,9 +136,9 @@ class PaymentCaptureWizard(models.TransientModel):
                     )
                 )
 
-            if (
-                not wizard.support_partial_capture
-                and wizard.amount_to_capture not in (0.0, wizard.available_amount)
+            if not wizard.support_partial_capture and wizard.amount_to_capture not in (
+                0.0,
+                wizard.available_amount,
             ):
                 raise ValidationError(
                     wizard.env._(
@@ -154,7 +153,7 @@ class PaymentCaptureWizard(models.TransientModel):
         self.ensure_one()
 
         if not self.amount_to_capture and not self.release_remaining:
-            return
+            return None
         remaining_amount_to_capture = self.amount_to_capture
         processed_txs_sudo = self.env["payment.transaction"].sudo()
         for source_tx in self.transaction_ids.filtered(lambda tx: tx.state == "authorized"):

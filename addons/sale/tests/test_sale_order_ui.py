@@ -9,11 +9,11 @@ from odoo.addons.product.tests.common import ProductVariantsCommon
 @tagged("post_install", "-at_install")
 class TestSaleOrderUI(HttpCase, ProductVariantsCommon):
     _test_user_groups = (
-        'product.group_product_manager',
-        'sales_team.group_sale_manager',  # FIXME: use sales_team.group_sale_salesman
+        "product.group_product_manager",
+        "sales_team.group_sale_manager",  # FIXME: use sales_team.group_sale_salesman
     )
 
-    _test_user_name = 'Test Sales & Product Manager'
+    _test_user_name = "Test Sales & Product Manager"
 
     def test_sale_order_keep_uom_on_variant_wizard_quantity_change(self):
         so = self.env["sale.order"].create({

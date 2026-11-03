@@ -2,10 +2,7 @@
 
 from odoo.addons.payment.const import SENSITIVE_KEYS as PAYMENT_SENSITIVE_KEYS
 
-SENSITIVE_KEYS = {
-    "client_secret",
-    "secret",
-}
+SENSITIVE_KEYS = {"client_secret", "secret"}
 PAYMENT_SENSITIVE_KEYS.update(SENSITIVE_KEYS)  # Add Stripe-specific keys to the global set.
 
 API_VERSION = "2019-05-16"  # The API version of Stripe implemented in this module

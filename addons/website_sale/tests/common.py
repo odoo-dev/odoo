@@ -137,7 +137,7 @@ class WebsiteSaleCommon(DeliveryCommon):
         :rtype: public.product.category
         """
         categs = cls.env["product.public.category"].create(list_vals)
-        for i in range(0, len(categs) - 1):
+        for i in range(len(categs) - 1):
             categs[i].parent_id = categs[i + 1]
         return categs
 

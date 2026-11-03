@@ -38,7 +38,7 @@ class ResPartner(models.Model):
             while partner:
                 if partner in self:
                     partner.loyalty_card_count += count
-                partner = partner.parent_id
+                partner = partner.parent_id  # noqa: PLW2901
 
     def action_view_loyalty_cards(self):
         action = self.env["ir.actions.act_window"]._for_xml_id("loyalty.loyalty_card_action")

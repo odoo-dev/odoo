@@ -133,6 +133,7 @@ class SaleOrder(models.Model):
                 with self.env.registry.cursor() as cr:
                     order = self.with_env(self.env(cr=cr))
                     order._delete_order_on_gelato(data["id"])
+
         except UserError as exc:
             raise UserError(
                 self.env._(

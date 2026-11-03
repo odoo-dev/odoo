@@ -31,9 +31,7 @@ class TestSaleOrderComboLinkedLines(SaleCommon):
             },
         ])
         cls.combo_product = cls._create_product(
-            name="Meal Menu",
-            type="combo",
-            combo_ids=[Command.set(cls.combos.ids)],
+            name="Meal Menu", type="combo", combo_ids=[Command.set(cls.combos.ids)]
         )
         cls.regular_product = cls._create_product(name="Regular product")
         cls.empty_order = cls.env["sale.order"].create({
@@ -89,8 +87,7 @@ class TestSaleOrderComboLinkedLines(SaleCommon):
         order, _combo_line, item_lines = self._create_combo_line_with_items()
         self.assertEqual(len(order.order_line), 3)
 
-        with Form(order) as order_form:
-            with order_form.order_line.edit(0) as line_form:
-                line_form.product_template_id = self.regular_product.product_tmpl_id
+        with Form(order) as order_form, order_form.order_line.edit(0) as line_form:
+            line_form.product_template_id = self.regular_product.product_tmpl_id
 
         self.assertFalse(item_lines.exists(), "Orphan combo item lines must be deleted")

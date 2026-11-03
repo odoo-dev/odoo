@@ -12,11 +12,11 @@ from odoo.addons.sale.tests.common import SaleCommon
 @tagged("post_install", "-at_install")
 class TestAccessRights(SaleCommon, MailCommon):
     _test_user_groups = (
-        'product.group_product_manager',
-        'sales_team.group_sale_manager',  # FIXME: use sales_team.group_sale_salesman
+        "product.group_product_manager",
+        "sales_team.group_sale_manager",  # FIXME: use sales_team.group_sale_salesman
     )
 
-    _test_user_name = 'Test Sales & Product Manager'
+    _test_user_name = "Test Sales & Product Manager"
 
     @classmethod
     def setUpClass(cls):
@@ -25,14 +25,19 @@ class TestAccessRights(SaleCommon, MailCommon):
         cls.user_portal = cls._create_new_portal_user()
         cls.user_internal = cls._create_new_internal_user()
 
-        cls.sale_user2 = cls.env["res.users"].sudo().create({
-            "name": "salesman_2",
-            "login": "salesman_2",
-            "email": "default_user_salesman_2@example.com",
-            "signature": "--\nMark",
-            "notification_type": "email",
-            "group_ids": [(6, 0, cls.group_sale_salesman.ids)],
-        })
+        cls.sale_user2 = (
+            cls
+            .env["res.users"]
+            .sudo()
+            .create({
+                "name": "salesman_2",
+                "login": "salesman_2",
+                "email": "default_user_salesman_2@example.com",
+                "signature": "--\nMark",
+                "notification_type": "email",
+                "group_ids": [(6, 0, cls.group_sale_salesman.ids)],
+            })
+        )
 
         # Create the SO with a specific salesperson
         cls.sale_order.user_id = cls.sale_user
@@ -68,7 +73,7 @@ class TestAccessRights(SaleCommon, MailCommon):
             "Sales manager should be able to delete the SO",
         )
 
-    @mute_logger('odoo.addons.base.models.ir_access')
+    @mute_logger("odoo.addons.base.models.ir_access")
     def test_access_sales_person(self):
         """Test Salesperson's access rights."""
         SaleOrder = self.env["sale.order"].with_user(self.sale_user2)
@@ -120,7 +125,7 @@ class TestAccessRights(SaleCommon, MailCommon):
         with self.mock_mail_gateway(mail_unlink_sent=False):
             composer.action_send_and_print()
 
-    @mute_logger('odoo.addons.base.models.ir_access')
+    @mute_logger("odoo.addons.base.models.ir_access")
     def test_access_portal_user(self):
         """Test portal user's access rights."""
         SaleOrder = self.env["sale.order"].with_user(self.user_portal)
@@ -143,7 +148,7 @@ class TestAccessRights(SaleCommon, MailCommon):
         with self.assertRaises(AccessError):
             so_as_portal_user.unlink()
 
-    @mute_logger('odoo.addons.base.models.ir_access')
+    @mute_logger("odoo.addons.base.models.ir_access")
     def test_access_employee(self):
         """Test classic employee's access rights."""
         SaleOrder = self.env["sale.order"].with_user(self.user_internal)
@@ -178,28 +183,31 @@ class TestAccessRights(SaleCommon, MailCommon):
         self.assertTrue(sale_order.state == "sale")
 
     def test_access_invoice_from_sale_order(self):
-        """ Test access rights on invoices created from sale orders when the current user has no
+        """Test access rights on invoices created from sale orders when the current user has no
         accounting access rights but is the default salesperson related to the created invoice.
 
         Cash rounding can trigger access checks on accounting records; this test ensures
         the salesperson retains read/write access via the default user_id relation.
         """
         # Enable cash rounding in the settings, create one and set it as default for invoices
-        admin_user = self.env.ref('base.user_admin')
-        self.env.user.group_ids += self.env.ref('account.group_cash_rounding')
-        rounding = self.env['account.cash.rounding'].with_user(admin_user).create({
-            'name': 'rounding',
-        })
-        self.env['ir.default'].with_user(admin_user).set('account.move', 'invoice_cash_rounding_id', rounding.id)
+        admin_user = self.env.ref("base.user_admin")
+        self.env.user.group_ids += self.env.ref("account.group_cash_rounding")
+        rounding = (
+            self.env["account.cash.rounding"].with_user(admin_user).create({"name": "rounding"})
+        )
+        self.env["ir.default"].with_user(admin_user).set(
+            "account.move", "invoice_cash_rounding_id", rounding.id
+        )
         # Create a sale order as a salesperson that has no accounting access rights
-        sale_order = self.env['sale.order'].with_user(self.sale_user).create({
-            'partner_id': self.partner.id,
-            'order_line': [
-                Command.create({
-                    'product_id': self.product.id,
-                }),
-            ],
-        })
+        sale_order = (
+            self
+            .env["sale.order"]
+            .with_user(self.sale_user)
+            .create({
+                "partner_id": self.partner.id,
+                "order_line": [Command.create({"product_id": self.product.id})],
+            })
+        )
         # Salesperson confirms the SO and creates the related invoice
         sale_order.action_confirm()
         invoice = sale_order._create_invoices().with_user(self.sale_user)

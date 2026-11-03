@@ -132,7 +132,7 @@ class LoyaltyCard(models.Model):
             return f"{int(points)} {self.point_name or ''}"
         return f"{points:.2f} {self.point_name or ''}"
 
-    # Meant to be overriden
+    # Meant to be overridden
     def _compute_use_count(self):
         self.use_count = 0
 
@@ -166,7 +166,7 @@ class LoyaltyCard(models.Model):
         ).partner_id
 
     def _get_signature(self):
-        """To be overriden."""
+        """To be overridden."""
         self.ensure_one()
 
     def _has_source_order(self):
@@ -179,13 +179,13 @@ class LoyaltyCard(models.Model):
         self.ensure_one()
         default_template = self._get_default_template()
         compose_form = self.env.ref("mail.email_compose_message_wizard_form", False)
-        ctx = dict(
-            default_model="loyalty.card",
-            default_res_ids=self.ids,
-            default_template_id=default_template and default_template.id,
-            default_composition_mode="comment",
-            force_email=True,
-        )
+        ctx = {
+            "default_model": "loyalty.card",
+            "default_res_ids": self.ids,
+            "default_template_id": default_template and default_template.id,
+            "default_composition_mode": "comment",
+            "force_email": True,
+        }
         return {
             "name": self.env._("Compose Email"),
             "type": "ir.actions.act_window",
@@ -205,7 +205,7 @@ class LoyaltyCard(models.Model):
         ):
             return []
         # Ideally one per program, but multiple is supported
-        create_comm_per_program = dict()
+        create_comm_per_program = {}
         for program in self.program_id:
             create_comm_per_program[program] = program.communication_plan_ids.filtered(
                 lambda c: c.trigger == "create"
@@ -237,7 +237,7 @@ class LoyaltyCard(models.Model):
         """
         if self.env.context.get("loyalty_no_mail", False):
             return
-        milestones_per_program = dict()
+        milestones_per_program = {}
         for program in self.program_id:
             milestones_per_program[program] = program.communication_plan_ids.filtered(
                 lambda c: c.trigger == "points_reach"

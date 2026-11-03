@@ -130,7 +130,7 @@ class SaleOrder(models.Model):
                     ))
             if new_lines:
                 # Add new SO lines
-                self.update(dict(order_line=new_lines))
+                self.update({"order_line": new_lines})
 
     def _get_matrix(self, product_template):
         """Return the matrix of the given product, updated with current SOLines quantities.
@@ -159,8 +159,10 @@ class SaleOrder(models.Model):
             for line in lines:
                 for cell in line:
                     if not cell.get("name", False):
-                        line = order_lines.filtered(lambda line: has_ptavs(line, cell["ptav_ids"]))
-                        if line and not line.combo_item_id:
+                        soline = order_lines.filtered(
+                            lambda line: has_ptavs(line, cell["ptav_ids"])
+                        )
+                        if soline and not soline.combo_item_id:
                             cell.update({"qty": sum(line.mapped("product_uom_qty"))})
         return matrix
 

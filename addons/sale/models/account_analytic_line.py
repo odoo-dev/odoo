@@ -22,7 +22,7 @@ class AccountAnalyticLine(models.Model):
         compute="_compute_so_line",
         store=True,
         readonly=False,
-        init_storage=lambda model: None,
+        init_storage=lambda model: None,  # noqa: ARG005
         index="btree_not_null",
         domain=lambda self: str(self._domain_so_line()),
     )
@@ -32,7 +32,7 @@ class AccountAnalyticLine(models.Model):
         compute="_compute_order_id",
         store=True,
         readonly=False,
-        init_storage=lambda model: None,
+        init_storage=lambda model: None,  # noqa: ARG005
         index=True,
     )
 

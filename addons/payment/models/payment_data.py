@@ -63,7 +63,7 @@ class PaymentData(models.Model):
                 tx = payment_data.transaction_id
                 txs_to_lock = tx | tx.source_transaction_id  # Processing might update the source tx
                 locked_txs = txs_to_lock.try_lock_for_update()
-                payment_data = payment_data.try_lock_for_update()
+                payment_data = payment_data.try_lock_for_update()  # noqa: PLW2901
                 if locked_txs != txs_to_lock or not payment_data:  # Not all locks were acquired
                     IrCron._rollback_progress()  # Release whichever locks were acquired
                     continue  # Skip for now; will be retried on the next run

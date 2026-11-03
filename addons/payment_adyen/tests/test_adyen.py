@@ -309,7 +309,7 @@ class AdyenTest(AdyenCommon, PaymentHttpCommon):
             patch("odoo.addons.payment.utils.check_access_token", return_value="dummy_token"),
             patch(
                 "odoo.addons.payment.models.payment_provider.PaymentProvider._send_api_request",
-                return_value=dict(),
+                return_value={},
             ) as mock_make_request,
         ):
             self.make_jsonrpc_request(

@@ -6,9 +6,15 @@ from odoo import api, fields, models
 class SaleOrder(models.Model):
     _inherit = "sale.order"
 
-    margin = fields.Monetary("Margin", compute="_compute_margin", store=True, groups="base.group_user")
+    margin = fields.Monetary(
+        "Margin", compute="_compute_margin", store=True, groups="base.group_user"
+    )
     margin_percent = fields.Float(
-        "Margin (%)", compute="_compute_margin", store=True, aggregator="avg", groups="base.group_user"
+        "Margin (%)",
+        compute="_compute_margin",
+        store=True,
+        aggregator="avg",
+        groups="base.group_user",
     )
 
     @api.depends("order_line.margin", "amount_untaxed")

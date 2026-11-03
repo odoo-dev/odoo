@@ -18,7 +18,7 @@ class UtmCampaign(models.Model):
         compute="_compute_sale_invoiced_amount",
         compute_sudo=True,
         groups="sales_team.group_sale_salesman",
-        currency_field='currency_id',
+        currency_field="currency_id",
     )
     currency_id = fields.Many2one(
         "res.currency",
@@ -28,7 +28,7 @@ class UtmCampaign(models.Model):
         compute_sudo=True,
     )
 
-    @api.depends_context('company')
+    @api.depends_context("company")
     def _compute_currency_id(self):
         self.currency_id = self.env.company.currency_id
 
@@ -37,7 +37,9 @@ class UtmCampaign(models.Model):
 
     def _compute_quotation_count(self):
         quotation_data = self.env["sale.order"]._read_group(
-            [("campaign_id", "in", self.ids), ("state", "!=", "cancel")], ["campaign_id"], ["__count"]
+            [("campaign_id", "in", self.ids), ("state", "!=", "cancel")],
+            ["campaign_id"],
+            ["__count"],
         )
         data_map = {campaign.id: count for campaign, count in quotation_data}
         for campaign in self:
@@ -96,7 +98,10 @@ class UtmCampaign(models.Model):
             "sale.action_quotations_with_onboarding"
         )
         action["domain"] = [("campaign_id", "=", self.id)]
-        action["context"] = {"default_campaign_id": self.id, "search_default_filter_not_cancelled": 1}
+        action["context"] = {
+            "default_campaign_id": self.id,
+            "search_default_filter_not_cancelled": 1,
+        }
         return action
 
     def action_redirect_to_invoiced(self):

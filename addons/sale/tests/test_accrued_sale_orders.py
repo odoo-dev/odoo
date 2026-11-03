@@ -68,7 +68,11 @@ class TestAccruedSaleOrders(TestSaleCommon):
         cls.wizard = (
             cls
             .env["account.accrued.orders.wizard"]
-            .with_context({"active_model": "sale.order", "active_ids": cls.sale_order.ids, 'default_accrual_type': 'invoice_to_be_issued'})
+            .with_context({
+                "active_model": "sale.order",
+                "active_ids": cls.sale_order.ids,
+                "default_accrual_type": "invoice_to_be_issued",
+            })
             .create({"account_id": cls.account_expense.id, "date": fields.Date.today()})
         )
 

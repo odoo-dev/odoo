@@ -10,7 +10,4 @@ class AccountInvoiceReport(models.Model):
     source_id = fields.Many2one(comodel_name="utm.source", string="Source", readonly=True)
 
     def _select_list(self, table):
-        return super()._select_list(table) + [
-            table.move_id.team_id,
-            table.move_id.source_id,
-        ]
+        return super()._select_list(table) + [table.move_id.team_id, table.move_id.source_id]

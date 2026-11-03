@@ -401,9 +401,8 @@ class TestSaleToInvoice(TestSaleCommon):
         )
         reversal_action = move_reversal.reverse_moves()
         reverse_move = self.env["account.move"].browse(reversal_action["res_id"])
-        with Form(reverse_move) as form_reverse:
-            with form_reverse.invoice_line_ids.edit(0) as line_form:
-                line_form.price_unit = 20.0
+        with Form(reverse_move) as form_reverse, form_reverse.invoice_line_ids.edit(0) as line_form:
+            line_form.price_unit = 20.0
         reverse_move.action_post()
 
         self.assertEqual(
@@ -412,16 +411,25 @@ class TestSaleToInvoice(TestSaleCommon):
             "The downpayment line amount should be equal to the sum of the invoice and credit note amount",
         )
 
-        payment = self.env['sale.advance.payment.inv'].with_context(self.context).create({})
+        payment = self.env["sale.advance.payment.inv"].with_context(self.context).create({})
         payment.create_invoices()
         invoice = max(self.sale_order.invoice_ids)
-        invoice_downpayment_line = invoice.invoice_line_ids.filtered('is_downpayment')
-        self.assertEqual(len(invoice_downpayment_line), 1,
-                         "The downpayment line should exist in the final invoice.")
-        self.assertEqual(invoice_downpayment_line.quantity, -1,
-                         "The downpayment line qty should be -1 for the final invoice.")
-        self.assertEqual(invoice_downpayment_line.price_unit, downpayment_line.price_unit,
-                         "The downpayment line price unit should match the price unit on the sale order.")
+        invoice_downpayment_line = invoice.invoice_line_ids.filtered("is_downpayment")
+        self.assertEqual(
+            len(invoice_downpayment_line),
+            1,
+            "The downpayment line should exist in the final invoice.",
+        )
+        self.assertEqual(
+            invoice_downpayment_line.quantity,
+            -1,
+            "The downpayment line qty should be -1 for the final invoice.",
+        )
+        self.assertEqual(
+            invoice_downpayment_line.price_unit,
+            downpayment_line.price_unit,
+            "The downpayment line price unit should match the price unit on the sale order.",
+        )
 
     def test_downpayment_reference_after_reverse_and_create_invoice(self):
         """Test that the down payment line shows the re-issued invoice reference
@@ -2187,40 +2195,41 @@ class TestSaleToInvoice(TestSaleCommon):
 
     def test_invoice_line_name_partner_specific_code_not_duplicated(self):
         """Preserve an existing description containing a customer-specific product code."""
-        product = self.company_data['product_order_no']
-        self.env['product.supplierinfo'].create({
-            'partner_id': self.partner_a.id,
-            'product_tmpl_id': product.product_tmpl_id.id,
-            'product_code': 'CUSTOM-CODE',
+        product = self.company_data["product_order_no"]
+        self.env["product.supplierinfo"].create({
+            "partner_id": self.partner_a.id,
+            "product_tmpl_id": product.product_tmpl_id.id,
+            "product_code": "CUSTOM-CODE",
         })
-        so = self.env['sale.order'].create({
-            'partner_id': self.partner_a.id,
-            'order_line': [Command.create({'product_id': product.id, 'product_uom_qty': 1})],
+        so = self.env["sale.order"].create({
+            "partner_id": self.partner_a.id,
+            "order_line": [Command.create({"product_id": product.id, "product_uom_qty": 1})],
         })
         # Existing descriptions may still contain the product name and code.
         so.order_line.name = product.with_context(partner_id=self.partner_a.id).display_name
         so.action_confirm()
         invoice = so._create_invoices()
         self.assertEqual(
-            invoice.invoice_line_ids.name, so.order_line.name,
+            invoice.invoice_line_ids.name,
+            so.order_line.name,
             "Invoicing shouldn't duplicate the product name when the order line "
             "already used a partner-specific product code",
         )
 
     def test_invoice_line_name_standard_code_not_duplicated(self):
         """Preserve an existing description containing the standard product name."""
-        product = self.company_data['product_order_no']
-        self.env['product.supplierinfo'].create({
-            'partner_id': self.partner_a.id,
-            'product_tmpl_id': product.product_tmpl_id.id,
-            'product_code': 'CUSTOM-CODE',
+        product = self.company_data["product_order_no"]
+        self.env["product.supplierinfo"].create({
+            "partner_id": self.partner_a.id,
+            "product_tmpl_id": product.product_tmpl_id.id,
+            "product_code": "CUSTOM-CODE",
         })
-        so = self.env['sale.order'].create({
-            'partner_id': self.partner_a.id,
-            'order_line': [Command.create({'product_id': product.id, 'product_uom_qty': 1})],
+        so = self.env["sale.order"].create({
+            "partner_id": self.partner_a.id,
+            "order_line": [Command.create({"product_id": product.id, "product_uom_qty": 1})],
         })
         so.order_line.name = product.display_name
-        self.assertNotIn('CUSTOM-CODE', so.order_line.name)
+        self.assertNotIn("CUSTOM-CODE", so.order_line.name)
         so.action_confirm()
         invoice = so._create_invoices()
         self.assertEqual(invoice.invoice_line_ids.name, so.order_line.name)
@@ -2229,23 +2238,26 @@ class TestSaleToInvoice(TestSaleCommon):
         """Product codes defined for the customer in another company must not
         be used when invoicing, as the order line never used them.
         """
-        product = self.company_data['product_order_no']
-        other_company = self.env['res.company'].create({'name': 'Other Company'})
-        self.env['product.supplierinfo'].create([{
-            'partner_id': self.partner_a.id,
-            'product_tmpl_id': product.product_tmpl_id.id,
-            'product_code': code,
-            'company_id': company.id,
-        } for code, company in (('CUSTOM-CODE', self.env.company), ('OTHER-CODE', other_company))])
-        so = self.env['sale.order'].create({
-            'partner_id': self.partner_a.id,
-            'order_line': [Command.create({'product_id': product.id, 'product_uom_qty': 1})],
+        product = self.company_data["product_order_no"]
+        other_company = self.env["res.company"].create({"name": "Other Company"})
+        self.env["product.supplierinfo"].create([
+            {
+                "partner_id": self.partner_a.id,
+                "product_tmpl_id": product.product_tmpl_id.id,
+                "product_code": code,
+                "company_id": company.id,
+            }
+            for code, company in (("CUSTOM-CODE", self.env.company), ("OTHER-CODE", other_company))
+        ])
+        so = self.env["sale.order"].create({
+            "partner_id": self.partner_a.id,
+            "order_line": [Command.create({"product_id": product.id, "product_uom_qty": 1})],
         })
         # Preserve an existing description using the product name for this company.
         so.order_line.name = product.with_context(
-            partner_id=self.partner_a.id, company_id=so.company_id.id,
+            partner_id=self.partner_a.id, company_id=so.company_id.id
         ).display_name
-        self.assertNotIn('OTHER-CODE', so.order_line.name)
+        self.assertNotIn("OTHER-CODE", so.order_line.name)
         so.action_confirm()
         invoice = so._create_invoices()
         self.assertEqual(invoice.invoice_line_ids.name, so.order_line.name)

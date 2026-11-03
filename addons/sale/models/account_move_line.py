@@ -201,9 +201,11 @@ class AccountMoveLine(models.Model):
                     len(sale_line_values_to_create) - 1
                 )  # save the index of the value to create sale line
 
-        self.check_access('write')
+        self.check_access("write")
         # create the sale lines in batch
-        new_sale_lines = self.env["sale.order.line"].sudo().create(sale_line_values_to_create).sudo(self.env.su)
+        new_sale_lines = (
+            self.env["sale.order.line"].sudo().create(sale_line_values_to_create).sudo(self.env.su)
+        )
 
         # build result map by replacing index with newly created record of sale.order.line
         result = {}

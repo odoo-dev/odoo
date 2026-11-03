@@ -27,6 +27,7 @@ class LoyaltyProgram(models.Model):
                 default_values = program_default_values[program_type]
                 defaults.update({k: v for k, v in default_values.items() if k in fields})
         return defaults
+
     name = fields.Char(string="Program Name", translate=True, required=True)
     active = fields.Boolean(default=True)
     sequence = fields.Integer(copy=False)
@@ -531,7 +532,7 @@ class LoyaltyProgram(models.Model):
 
     def _get_valid_products(self, products):
         """Return a dict containing the products that match per rule of the program."""
-        rule_products = dict()
+        rule_products = {}
         for rule in self.rule_ids:
             domain = rule._get_valid_product_domain()
             if domain:
@@ -569,16 +570,17 @@ class LoyaltyProgram(models.Model):
         if "reward_ids" in vals and self._fields["reward_ids"].convert_to_cache(
             vals["reward_ids"], self.browse()
         ):
-            self = self.with_context(loyalty_skip_reward_check=True)
+            self = self.with_context(loyalty_skip_reward_check=True)  # noqa: PLW0642
             # We need add the program type to the context to avoid getting the default value
             # ('discount') for reward type when calling the `default_get` method of
             # `loyalty.reward`.
             if "program_type" in vals:
-                self = self.with_context(program_type=vals["program_type"])
+                self = self.with_context(program_type=vals["program_type"])  # noqa: PLW0642
                 res = super().write(vals)
             else:
+                # TODO LOTI use grouped
                 for program in self:
-                    program = program.with_context(program_type=program.program_type)
+                    program = program.with_context(program_type=program.program_type)  # noqa: PLW2901
                     super(LoyaltyProgram, program).write(vals)
                 res = True
         else:

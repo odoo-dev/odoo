@@ -79,4 +79,4 @@ class PaymentProvider(models.Model):
 
     @api.model
     def _get_pay_on_delivery_provider_codes(self):
-        return {'cash_on_delivery'}
+        return {"cash_on_delivery"}

@@ -9,13 +9,13 @@ from odoo.addons.website_sale.tests.common import WebsiteSaleCommon
 @tagged("post_install", "-at_install")
 class WebsiteSaleVisitorTests(WebsiteSaleCommon):
     _test_user_groups = (
-        'base.group_user',
-        'product.group_product_manager',
-        'sales_team.group_sale_manager',  # FIXME: use sales_team.group_sale_salesman
-        'website.group_website_designer',  # website.visitor / website.track access
+        "base.group_user",
+        "product.group_product_manager",
+        "sales_team.group_sale_manager",  # FIXME: use sales_team.group_sale_salesman
+        "website.group_website_designer",  # website.visitor / website.track access
     )
 
-    _test_user_name = 'Test Sales & Product Manager'
+    _test_user_name = "Test Sales & Product Manager"
 
     def setUp(self):
         super().setUp()
@@ -73,14 +73,19 @@ class WebsiteSaleVisitorTests(WebsiteSaleCommon):
         """Test that a product is not displayed anymore after
         changing it company.
         """
-        new_company = self.env.ref('base.test_company')
+        new_company = self.env.ref("base.test_company")
 
         product = self.env["product.product"].create({
             "name": "Test Product",
             "website_published": True,
             "sale_ok": True,
         })
-        snippet_filter = self.env.ref("website_sale.dynamic_filter_newest_arrivals").sudo().with_context(website_id=self.website.id)
+        snippet_filter = (
+            self.env
+            .ref("website_sale.dynamic_filter_newest_arrivals")
+            .sudo()
+            .with_context(website_id=self.website.id)
+        )
 
         with self.mock_request():
             res = snippet_filter._prepare_values(limit=16, search_domain=[])
@@ -101,7 +106,7 @@ class WebsiteSaleVisitorTests(WebsiteSaleCommon):
         - displayed after visiting it
         - not displayed after changing it company.
         """
-        new_company = self.env.ref('base.test_company')
+        new_company = self.env.ref("base.test_company")
         public_user = self.env.ref("base.public_user")
 
         product = self.env["product.product"].create({
@@ -112,7 +117,12 @@ class WebsiteSaleVisitorTests(WebsiteSaleCommon):
 
         self.website = self.website.with_user(public_user).with_context(website_id=self.website.id)
 
-        snippet_filter = self.env.ref("website_sale.dynamic_filter_latest_viewed_products").sudo().with_context(website_id=self.website.id)
+        snippet_filter = (
+            self.env
+            .ref("website_sale.dynamic_filter_latest_viewed_products")
+            .sudo()
+            .with_context(website_id=self.website.id)
+        )
 
         # BEFORE VISITING THE PRODUCT
         res = snippet_filter._prepare_values(limit=16, search_domain=[])

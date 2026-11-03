@@ -6,9 +6,7 @@ from odoo.http import Controller, request, route
 
 
 class SaleProductConfiguratorController(Controller):
-    @route(
-        route="/sale/product_configurator/get_values", type="jsonrpc", auth="user", replica=True
-    )
+    @route(route="/sale/product_configurator/get_values", type="jsonrpc", auth="user", replica=True)
     def sale_product_configurator_get_values(
         self,
         product_template_id,
@@ -431,7 +429,9 @@ class SaleProductConfiguratorController(Controller):
             )
         else:
             price, pricelist_rule_id = 0.0, False
-        if kwargs.get("show_packaging", True) and self.env["res.groups"]._is_feature_enabled("uom.group_uom"):
+        if kwargs.get("show_packaging", True) and self.env["res.groups"]._is_feature_enabled(
+            "uom.group_uom"
+        ):
             basic_information["available_uoms"] = product_or_template._get_available_uoms().read([
                 "id",
                 "display_name",

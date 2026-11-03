@@ -129,7 +129,7 @@ class SaleOrderDiscount(models.TransientModel):
 
     def _create_discount_lines(self):
         self.ensure_one()
-        self = self.with_context(lang=self.sale_order_id._get_lang())
+        self = self.with_context(lang=self.sale_order_id._get_lang())  # noqa: PLW0642
 
         discount_product = self._get_discount_product()
 
@@ -165,7 +165,7 @@ class SaleOrderDiscount(models.TransientModel):
 
     def action_apply_discount(self):
         self.ensure_one()
-        self = self.with_company(self.company_id)
+        self = self.with_company(self.company_id)  # noqa: PLW0642
         if self.discount_type == "sol_discount":
             self._get_discountable_order_lines().write({"discount": self.discount_percentage * 100})
         else:

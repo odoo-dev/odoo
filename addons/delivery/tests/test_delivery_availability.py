@@ -9,11 +9,11 @@ from odoo.addons.delivery.tests.common import DeliveryCommon
 @tagged("post_install", "-at_install")
 class TestDeliveryAvailability(DeliveryCommon):
     _test_user_groups = (
-        'product.group_product_manager',
-        'sales_team.group_sale_manager',  # FIXME: use sales_team.group_sale_salesman
+        "product.group_product_manager",
+        "sales_team.group_sale_manager",  # FIXME: use sales_team.group_sale_salesman
     )
 
-    _test_user_name = 'Test Sales & Product Manager'
+    _test_user_name = "Test Sales & Product Manager"
 
     @classmethod
     def setUpClass(cls):
@@ -269,16 +269,16 @@ class TestDeliveryAvailability(DeliveryCommon):
 
         self.carrier.active = False
 
-        sale_order = self.env['sale.order'].create({
-            'partner_id': self.partner.id,
-            'order_line': [
+        sale_order = self.env["sale.order"].create({
+            "partner_id": self.partner.id,
+            "order_line": [
                 Command.create({
-                    'product_id': self.product.id,
-                    'product_uom_qty': 10,
-                    'price_unit': 10.0,
-                }),
+                    "product_id": self.product.id,
+                    "product_uom_qty": 10,
+                    "price_unit": 10.0,
+                })
             ],
         })
 
         action = sale_order.action_open_delivery_wizard()
-        self.assertEqual(action['context']['default_carrier_id'], False)
+        self.assertEqual(action["context"]["default_carrier_id"], False)

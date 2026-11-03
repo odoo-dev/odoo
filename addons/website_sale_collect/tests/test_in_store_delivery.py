@@ -13,12 +13,12 @@ from odoo.addons.website_sale_stock.models.delivery_carrier import DeliveryCarri
 @tagged("post_install", "-at_install")
 class TestInStoreDeliveryController(PaymentHttpCommon, ClickAndCollectCommon):
     _test_user_groups = (
-        'base.group_user',
-        'product.group_product_manager',
-        'sales_team.group_sale_manager',  # FIXME: use sales_team.group_sale_salesman
+        "base.group_user",
+        "product.group_product_manager",
+        "sales_team.group_sale_manager",  # FIXME: use sales_team.group_sale_salesman
     )
 
-    _test_user_name = 'Test Sales & Product Manager'
+    _test_user_name = "Test Sales & Product Manager"
 
     def setUp(self):
         super().setUp()
@@ -34,12 +34,15 @@ class TestInStoreDeliveryController(PaymentHttpCommon, ClickAndCollectCommon):
 
     def test_product_page_pickup_locations_without_cart(self):
         """Without a cart, the website's in-store delivery method is used."""
-        with self.mock_request(), patch.object(
-            DeliveryCarrier,
-            "_get_pickup_locations",
-            autospec=True,
-            return_value={"pickup_locations": []},
-        ) as mock_get_pickup_locations:
+        with (
+            self.mock_request(),
+            patch.object(
+                DeliveryCarrier,
+                "_get_pickup_locations",
+                autospec=True,
+                return_value={"pickup_locations": []},
+            ) as mock_get_pickup_locations,
+        ):
             self.InStoreController.website_sale_get_pickup_locations(
                 product_id=self.storable_product.id
             )
@@ -47,11 +50,14 @@ class TestInStoreDeliveryController(PaymentHttpCommon, ClickAndCollectCommon):
 
     def test_product_page_pickup_locations_with_cart_set_in_store_dm(self):
         self.cart.carrier_id = self.free_delivery
-        with self.mock_request(sale_order_id=self.cart.id), patch.object(
-            DeliveryCarrier,
-            "_get_pickup_locations",
-            autospec=True,
-            return_value={"pickup_locations": []},
+        with (
+            self.mock_request(sale_order_id=self.cart.id),
+            patch.object(
+                DeliveryCarrier,
+                "_get_pickup_locations",
+                autospec=True,
+                return_value={"pickup_locations": []},
+            ),
         ):
             self.InStoreController.website_sale_get_pickup_locations(
                 product_id=self.storable_product.id

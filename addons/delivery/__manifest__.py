@@ -40,7 +40,7 @@ The system is able to add and compute the shipping line.
             ("remove", "delivery/static/src/backend/**/*"),
         ],
         "web.assets_backend": ["delivery/static/src/backend/**/*"],
-        'web.assets_tests': ["delivery/static/tests/tours/*.js"],
+        "web.assets_tests": ["delivery/static/tests/tours/*.js"],
     },
     "post_init_hook": "post_init_hook",
     "uninstall_hook": "uninstall_hook",

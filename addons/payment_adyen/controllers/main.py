@@ -296,6 +296,7 @@ class AdyenController(http.Controller):
         :return: The computed signature
         :rtype: str
         """
+
         def _to_escaped_string(_value):
             """Escape payload values that are using illegal symbols and cast them to string.
 

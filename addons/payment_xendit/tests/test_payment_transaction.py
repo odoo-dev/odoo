@@ -203,9 +203,7 @@ class TestPaymentTransaction(PaymentHttpCommon, XenditCommon):
             auth_url = tx._xendit_get_pending_authentication_url()
         self.assertEqual(auth_url, self.payment_request_requires_action_data["actions"][0]["value"])
         mock_req.assert_called_once_with(
-            "GET",
-            "v3/payment_requests/pr-64a8d9c614802d6c402cd82d",
-            api_version="2024-11-11",
+            "GET", "v3/payment_requests/pr-64a8d9c614802d6c402cd82d", api_version="2024-11-11"
         )
 
     def test_get_pending_authentication_url_when_not_pending(self):
@@ -295,9 +293,7 @@ class TestPaymentTransaction(PaymentHttpCommon, XenditCommon):
             auth_url = tx._xendit_get_pending_authentication_url()
         self.assertEqual(auth_url, self.payment_request_requires_action_data["actions"][0]["value"])
         mock_req.assert_called_once_with(
-            "GET",
-            "v3/payment_requests/pr-64a8d9c614802d6c402cd82d",
-            api_version="2024-11-11",
+            "GET", "v3/payment_requests/pr-64a8d9c614802d6c402cd82d", api_version="2024-11-11"
         )
 
     def test_no_item_missing_from_token_charge_payload(self):
@@ -371,9 +367,7 @@ class TestPaymentTransaction(PaymentHttpCommon, XenditCommon):
         ) as mock_req:
             tx._xendit_sync_from_provider()
         mock_req.assert_called_once_with(
-            "GET",
-            "v3/payment_requests/pr-64a8d9c614802d6c402cd82d",
-            api_version="2024-11-11",
+            "GET", "v3/payment_requests/pr-64a8d9c614802d6c402cd82d", api_version="2024-11-11"
         )
 
     def test_sync_from_provider_checks_session_for_redirect_operation(self):
@@ -595,9 +589,7 @@ class TestPaymentTransaction(PaymentHttpCommon, XenditCommon):
                 self.payment_request_notification_data
             )
         mock_req.assert_called_once_with(
-            "GET",
-            "v3/payment_tokens/pt-6275md8ac5f00da60017cdc669",
-            api_version="2024-11-11",
+            "GET", "v3/payment_tokens/pt-6275md8ac5f00da60017cdc669", api_version="2024-11-11"
         )
         self.assertEqual(tx.token_id.payment_details, "2151")
 

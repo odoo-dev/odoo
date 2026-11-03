@@ -10,12 +10,12 @@ from odoo.addons.website_sale.tests.common import WebsiteSaleCommon
 @tagged("post_install", "-at_install")
 class TestSaleOrder(WebsiteSaleCommon):
     _test_user_groups = (
-        'base.group_user',
-        'product.group_product_manager',
-        'sales_team.group_sale_manager',  # FIXME: use sales_team.group_sale_salesman
+        "base.group_user",
+        "product.group_product_manager",
+        "sales_team.group_sale_manager",  # FIXME: use sales_team.group_sale_salesman
     )
 
-    _test_user_name = 'Test Sales & Product Manager'
+    _test_user_name = "Test Sales & Product Manager"
 
     def test_delivery_methods_match_order_company(self):
         company_1 = self.env["res.company"].sudo().create({"name": "Test Company 1"})
@@ -56,7 +56,7 @@ class TestSaleOrder(WebsiteSaleCommon):
         self.assertEqual(self.cart.website_id, invoice.website_id)
 
     def test_change_company_on_sale_order(self):
-        company = self.env.ref('base.test_company')
+        company = self.env.ref("base.test_company")
         self.env.user.sudo().company_ids |= company
         self.cart.action_confirm()
         with self.assertRaises(UserError):

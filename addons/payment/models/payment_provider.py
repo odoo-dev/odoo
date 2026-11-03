@@ -1115,7 +1115,7 @@ class PaymentProvider(models.Model):
         :return: The basic HTTP Auth, if any.
         :rtype: tuple
         """
-        return tuple()
+        return ()
 
     def _log_request(self, method, url, payload, *, reference=None):
         """Log the request.

@@ -134,10 +134,7 @@ class TestSalePayment(AccountPaymentCommon, MailCase, PaymentHttpCommon, SaleCom
         amount."""
         self.sale_order.prepayment_percent = 0.5  # This should not impact the 'full amount' option.
         with MockRequest(self.env):
-            tx_values = CustomerPortal()._get_payment_values(
-                self.sale_order,
-                is_down_payment=False,
-            )
+            tx_values = CustomerPortal()._get_payment_values(self.sale_order, is_down_payment=False)
         self.assertEqual(tx_values["amount"], self.sale_order.amount_total)
 
     def test_confirmed_transactions_confirms_so_with_multiple_transaction(self):

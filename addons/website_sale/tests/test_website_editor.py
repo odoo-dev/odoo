@@ -7,7 +7,6 @@ import logging
 from unittest.mock import Mock, patch
 
 import requests
-
 from PIL import Image
 
 from odoo.exceptions import ValidationError
@@ -372,28 +371,29 @@ class TestProductVideoUpload(HttpCase):
 
     def test_video_upload_invalid(self):
         # Try to upload invalid video data (e.g., empty src)
-        with MockRequest(self.product.env, website=self.website):
-            with self.assertRaises(ValidationError):
-                self.WebsiteSaleController.add_product_media(
-                    [{"video_url": "", "name": "Invalid Video"}],
-                    "video",
-                    self.product.id,
-                    self.product.product_tmpl_id.id,
-                )
+        with (
+            MockRequest(self.product.env, website=self.website),
+            self.assertRaises(ValidationError),
+        ):
+            self.WebsiteSaleController.add_product_media(
+                [{"video_url": "", "name": "Invalid Video"}],
+                "video",
+                self.product.id,
+                self.product.product_tmpl_id.id,
+            )
 
     def test_video_upload_thumbnail_invalid(self):
         # Try to upload a video with invalid thumbnailUrl data
-        with MockRequest(self.product.env, website=self.website):
-            with self.assertRaises(binascii.Error):
-                self.WebsiteSaleController.add_product_media(
-                    [
-                        {
-                            "name": "Invalid Video",
-                            "video_url": self.video_data["embed_url"],
-                            "image_1920": "not-a-valid-image",
-                        }
-                    ],
-                    "video",
-                    self.product.id,
-                    self.product.product_tmpl_id.id,
-                )
+        with MockRequest(self.product.env, website=self.website), self.assertRaises(binascii.Error):
+            self.WebsiteSaleController.add_product_media(
+                [
+                    {
+                        "name": "Invalid Video",
+                        "video_url": self.video_data["embed_url"],
+                        "image_1920": "not-a-valid-image",
+                    }
+                ],
+                "video",
+                self.product.id,
+                self.product.product_tmpl_id.id,
+            )

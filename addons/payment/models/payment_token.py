@@ -81,7 +81,7 @@ class PaymentToken(models.Model):
         :return: The dict of provider-specific create values.
         :rtype: dict
         """
-        return dict()
+        return {}
 
     def write(self, vals):
         if "active" in vals:

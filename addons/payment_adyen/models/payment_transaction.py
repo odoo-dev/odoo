@@ -190,10 +190,7 @@ class PaymentTransaction(models.Model):
             "reference": self.reference,
         }
         response_content = self._send_api_request(
-            "POST",
-            "/payments/{}/refunds",
-            json=data,
-            endpoint_param=source_tx.provider_reference,
+            "POST", "/payments/{}/refunds", json=data, endpoint_param=source_tx.provider_reference
         )
         self._record(response_content)
 

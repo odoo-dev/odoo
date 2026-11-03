@@ -9,9 +9,9 @@ from odoo.addons.sale.tests.common import SaleCommon
 
 
 class TestSaleCouponCommon(SaleCommon):
-    _test_user_groups = ('sales_team.group_sale_salesman',)
+    _test_user_groups = ("sales_team.group_sale_salesman",)
 
-    _test_user_name = 'Test Sales User'
+    _test_user_name = "Test Sales User"
 
     @classmethod
     def setUpClass(cls):
@@ -265,9 +265,9 @@ class TestSaleCouponCommon(SaleCommon):
 
 
 class TestSaleCouponNumbersCommon(TestSaleCouponCommon):
-    _test_user_groups = ('sales_team.group_sale_salesman',)
+    _test_user_groups = ("sales_team.group_sale_salesman",)
 
-    _test_user_name = 'Test Sales User'
+    _test_user_name = "Test Sales User"
 
     @classmethod
     def setUpClass(cls):

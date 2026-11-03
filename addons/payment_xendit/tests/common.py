@@ -57,7 +57,7 @@ class XenditCommon(PaymentCommon):
                     "masked_card_number": "520000XXXXXX2151",
                     "cardholder_first_name": "John",
                     "cardholder_last_name": "Doe",
-                },
+                }
             },
             "status": "ACTIVE",
         }

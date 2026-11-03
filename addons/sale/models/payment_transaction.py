@@ -160,7 +160,7 @@ class PaymentTransaction(models.Model):
         #   * logged in users receive the invoice
         #   * the mail and notifications are not sent by the public user
         for tx in self.with_user(SUPERUSER_ID):
-            tx = tx.with_company(tx.company_id).with_context(company_id=tx.company_id.id)
+            tx = tx.with_company(tx.company_id).with_context(company_id=tx.company_id.id)  # noqa: PLW2901
             invoice_to_send = tx.invoice_ids.filtered(
                 lambda i: not i.is_move_sent and i.state == "posted" and i._is_ready_to_be_sent()
             )
@@ -177,7 +177,9 @@ class PaymentTransaction(models.Model):
                 if mail_template.exists():
                     send_context["mail_template"] = mail_template
 
-            tx.env['account.move.send']._generate_and_send_invoices_post_commit(invoice_to_send, **send_context)
+            tx.env["account.move.send"]._generate_and_send_invoices_post_commit(
+                invoice_to_send, **send_context
+            )
 
     def _cron_send_invoice(self):
         """Send invoices that where not ready to be send directly after posting."""
@@ -202,7 +204,7 @@ class PaymentTransaction(models.Model):
 
     def _invoice_sale_orders(self):
         for tx in self.filtered(lambda tx: tx.sale_order_ids):
-            tx = tx.with_company(tx.company_id)
+            tx = tx.with_company(tx.company_id)  # noqa: PLW2901
 
             confirmed_orders = tx.sale_order_ids.filtered(lambda so: so.state == "sale")
             if confirmed_orders:

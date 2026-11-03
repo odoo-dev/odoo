@@ -9,12 +9,12 @@ from odoo.addons.product.tests.common import ProductVariantsCommon
 @tagged("post_install", "-at_install")
 class TestWebsiteSaleCartNotification(HttpCase, ProductVariantsCommon):
     _test_user_groups = (
-        'base.group_user',
-        'product.group_product_manager',
-        'website.group_website_designer',  # qweb view activation + website config
+        "base.group_user",
+        "product.group_product_manager",
+        "website.group_website_designer",  # qweb view activation + website config
     )
 
-    _test_user_name = 'Test Product Manager'
+    _test_user_name = "Test Product Manager"
 
     @classmethod
     def setUpClass(cls):

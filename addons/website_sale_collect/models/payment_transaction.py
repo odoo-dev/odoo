@@ -15,11 +15,7 @@ class PaymentTransaction(models.Model):
         :param sale.order order: The current cart linked to the transaction.
         """
         status_message = super()._get_status_message(order=order, **kwargs)
-        if (
-            order
-            and order.website_id
-            and self.provider_id.custom_mode == "on_site"
-        ):
+        if order and order.website_id and self.provider_id.custom_mode == "on_site":
             if (
                 commitment_date := order.commitment_date
             ) and order.commitment_date.date() != order.date_order.date():

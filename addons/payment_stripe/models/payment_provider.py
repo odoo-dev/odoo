@@ -458,7 +458,7 @@ class PaymentProvider(models.Model):
         base_url = self.company_id.get_base_url()
         return_url = OnboardingController._onboarding_return_url
         refresh_url = OnboardingController._onboarding_refresh_url
-        return_params = dict(provider_id=self.id, menu_id=menu_id)
+        return_params = {"provider_id": self.id, "menu_id": menu_id}
         refresh_params = dict(**return_params, account_id=connected_account_id)
 
         payload = {

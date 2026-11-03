@@ -1,7 +1,8 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo.tools import frozendict
 from types import MappingProxyType
+
+from odoo.tools import frozendict
 
 # Routes for ECPay redirection and webhook.
 PAYMENT_RETURN_ROUTE = "/payment/ecpay/return"

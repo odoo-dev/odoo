@@ -44,12 +44,7 @@ class TestSnippets(HttpCase):
 
     def test_02_snippet_products_grid_edition(self):
         self.env["product.product"].create([
-            {
-                "name": "Test Product",
-                "website_published": True,
-                "sale_ok": True,
-                "list_price": 500,
-            },
+            {"name": "Test Product", "website_published": True, "sale_ok": True, "list_price": 500},
             {
                 "name": "Test Product 2",
                 "website_published": True,
@@ -115,11 +110,7 @@ class TestSnippets(HttpCase):
 
     def test_website_sale_floating_snippets(self):
         products = self.env["product.product"].create([
-            {
-                "name": "Floating Snippets Product A",
-                "website_published": True,
-                "sale_ok": True,
-            },
+            {"name": "Floating Snippets Product A", "website_published": True, "sale_ok": True},
             {
                 "name": "Floating Snippets Product B",
                 "website_published": True,

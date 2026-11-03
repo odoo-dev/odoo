@@ -982,7 +982,7 @@ class SaleOrder(models.Model):
 
     def _get_reward_line_values(self, reward, coupon, **kwargs):
         self.ensure_one()
-        self = self.with_context(lang=self._get_lang())
+        self = self.with_context(lang=self._get_lang())  # noqa: PLW0642
         reward = reward.with_context(lang=self._get_lang())
         if reward.reward_type == "discount":
             return self._get_reward_values_discount(reward, coupon, **kwargs)
@@ -1497,7 +1497,7 @@ class SaleOrder(models.Model):
             # Some rules may split their points per unit / money spent
             #  (i.e. gift cards 2x50$ must result in two 50$ codes)
             rule_points = []
-            program_result = result.setdefault(program, dict())
+            program_result = result.setdefault(program, {})
             for rule in program.rule_ids:
                 # prevent bottomless ewallet spending
                 if program.program_type == "ewallet" and not program.trigger_product_ids:
@@ -1850,4 +1850,6 @@ class SaleOrder(models.Model):
                     if mail_template.exists():
                         send_context["mail_template"] = mail_template
 
-                self.env['account.move.send']._generate_and_send_invoices_post_commit(invoice, **send_context)
+                self.env["account.move.send"]._generate_and_send_invoices_post_commit(
+                    invoice, **send_context
+                )

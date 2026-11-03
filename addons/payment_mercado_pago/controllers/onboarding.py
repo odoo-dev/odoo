@@ -34,9 +34,7 @@ class MercadoPagoOnboardingController(Controller):
         csrf_token = data.get("csrf_token")  # Could be missing if authorization was cancelled.
         provider = self.env["payment.provider"].browse(provider_id).exists()
         if not provider or provider.code != "mercado_pago":
-            raise ValidationError(
-                self.env._("Could not find Mercado Pago provider %s", provider)
-            )
+            raise ValidationError(self.env._("Could not find Mercado Pago provider %s", provider))
 
         # Verify the CSRF token.
         if not request.validate_csrf(csrf_token):

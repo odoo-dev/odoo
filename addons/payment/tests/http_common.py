@@ -16,6 +16,7 @@ class PaymentHttpCommon(PaymentCommon, HttpCase):
     Only use if you effectively want to test controllers.
     If you only want to test 'models' code, the PaymentCommon should be sufficient.
     """
+
     # Helpers #
     ###########
 
@@ -102,7 +103,7 @@ class PaymentHttpCommon(PaymentCommon, HttpCase):
         token_ids = []
         payment_method_ids = []
         for p_o_input in payment_options_inputs:
-            data = dict()
+            data = {}
             for key, val in p_o_input.items():
                 if key.startswith("data-"):
                     data[key[5:]] = val

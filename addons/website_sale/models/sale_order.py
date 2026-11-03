@@ -101,7 +101,7 @@ class SaleOrder(models.Model):
     @api.depends("website_id", "date_order", "order_line", "state", "partner_id")
     def _compute_abandoned_cart(self):
         for order in self:
-            # a quotation can be considered as an abandonned cart if it is linked to a website,
+            # a quotation can be considered as an abandoned cart if it is linked to a website,
             # is in the 'draft' state and has an expiration date
             if order.website_id and order.state == "draft" and order.date_order:
                 public_partner_id = order.website_id.user_id.partner_id
@@ -523,7 +523,7 @@ class SaleOrder(models.Model):
         :return: values used by the cart service to give feedback to the customer.
         """
         self.ensure_one()
-        self = self.with_company(self.company_id)
+        self = self.with_company(self.company_id)  # noqa: PLW0642
 
         self._check_not_partially_paid()  # Prevent modifying the cart if it's partially paid
 
@@ -531,7 +531,7 @@ class SaleOrder(models.Model):
         if not uom_id or not product._has_multiple_uoms():
             # Fall back on product uom if uom is not specified or if multi-uom is not
             # allowed/supported for that product.
-            uom_id = product._get_main_uom().id  # type: ignore
+            uom_id = product._get_main_uom().id
         elif uom_id not in product._get_available_uoms().ids:
             raise ValidationError(
                 self.env._("This product is not available (anymore) in this unit of measure.")
@@ -540,9 +540,7 @@ class SaleOrder(models.Model):
         if existing_sol := self._cart_find_product_line(product_id, uom_id=uom_id, **kwargs)[:1]:
             # If a matching line is found, update the existing line instead.
             return self._cart_update_line_quantity(
-                line_id=existing_sol.id,  # type: ignore
-                quantity=existing_sol.product_uom_qty + quantity,
-                **kwargs,
+                line_id=existing_sol.id, quantity=existing_sol.product_uom_qty + quantity, **kwargs
             )
 
         quantity, warning = self._verify_updated_quantity(

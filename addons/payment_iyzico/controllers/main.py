@@ -84,10 +84,7 @@ class IyzicoController(http.Controller):
             verified_payment_data = tx_sudo._send_api_request(
                 "POST",
                 "payment/iyzipos/checkoutform/auth/ecom/detail",
-                json={
-                    "locale": (request.env.lang == "tr_TR" and "tr") or "en",
-                    "token": token,
-                },
+                json={"locale": (request.env.lang == "tr_TR" and "tr") or "en", "token": token},
             )
             if verified_payment_data.get("basketId") != tx_sudo.reference:
                 raise Forbidden

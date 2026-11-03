@@ -10,12 +10,12 @@ from odoo.addons.website_sale_stock.tests.common import WebsiteSaleStockCommon
 @tagged("post_install", "-at_install")
 class TestWebsiteSaleStockProductCombo(HttpCase, WebsiteSaleStockCommon):
     _test_user_groups = (
-        'base.group_user',
-        'product.group_product_manager',
-        'sales_team.group_sale_manager',  # FIXME: use sales_team.group_sale_salesman
+        "base.group_user",
+        "product.group_product_manager",
+        "sales_team.group_sale_manager",  # FIXME: use sales_team.group_sale_salesman
     )
 
-    _test_user_name = 'Test Sales & Product Manager'
+    _test_user_name = "Test Sales & Product Manager"
 
     def test_get_max_quantity_with_max(self):
         product_a = self._create_product(is_storable=True, allow_out_of_stock_order=False)

@@ -217,8 +217,6 @@ class TestProcessingFlows(XenditCommon, PaymentHttpCommon):
         self._run_processing()
 
         make_request_mock.assert_called_once_with(
-            "GET",
-            f"v3/payment_requests/{tx.provider_reference}",
-            api_version="2024-11-11",
+            "GET", f"v3/payment_requests/{tx.provider_reference}", api_version="2024-11-11"
         )
         self.assertEqual(tx.state, "done")

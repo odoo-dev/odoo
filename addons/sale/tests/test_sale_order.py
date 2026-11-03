@@ -21,16 +21,16 @@ class TestSaleOrder(SaleCommon):
     #   If you need the accounting setup, use other classes (TestSaleToInvoice probably)
 
     _test_user_groups = (
-        'product.group_product_manager',
-        'sales_team.group_sale_manager',  # FIXME: use sales_team.group_sale_salesman
+        "product.group_product_manager",
+        "sales_team.group_sale_manager",  # FIXME: use sales_team.group_sale_salesman
         # FIXME: grants write on res.company, needed by sale.order.discount._get_discount_product
         # which lazily auto-creates the company's discount product on first use (business logic,
         # not test setup). Prefer the user-level group 'base.group_user' once that flow no longer
         # requires res.company write access.
-        'base.group_erp_manager',
+        "base.group_erp_manager",
     )
 
-    _test_user_name = 'Test Sales & Product Manager'
+    _test_user_name = "Test Sales & Product Manager"
 
     @classmethod
     def setUpClass(cls):
@@ -349,7 +349,9 @@ class TestSaleOrder(SaleCommon):
             "Customer should not be added automatically in followers",
         )
 
-        self.env.ref("base.group_user").sudo()._apply_group(self.env.ref("sale.group_auto_done_setting"))
+        self.env.ref("base.group_user").sudo()._apply_group(
+            self.env.ref("sale.group_auto_done_setting")
+        )
         self.sale_order.action_confirm()
         self.assertEqual(self.sale_order.state, "sale")
         self.assertTrue(self.sale_order.locked)
@@ -405,13 +407,18 @@ class TestSaleOrder(SaleCommon):
 
     def test_tax_amount_rounding(self):
         """Check order amounts are rounded according to settings."""
-        tax_a = self.env["account.tax"].sudo().create({
-            "name": "Test tax",
-            "type_tax_use": "sale",
-            "price_include_override": "tax_excluded",
-            "amount_type": "percent",
-            "amount": 15.0,
-        })
+        tax_a = (
+            self
+            .env["account.tax"]
+            .sudo()
+            .create({
+                "name": "Test tax",
+                "type_tax_use": "sale",
+                "price_include_override": "tax_excluded",
+                "amount_type": "percent",
+                "amount": 15.0,
+            })
+        )
 
         # Test Round per Line (default)
         self.env.company.sudo().tax_calculation_rounding_method = "round_per_line"
@@ -461,7 +468,9 @@ class TestSaleOrder(SaleCommon):
 
     def test_order_auto_lock_with_public_user(self):
         public_user = self.env.ref("base.public_user")
-        self.env.ref("base.group_user").sudo()._apply_group(self.env.ref("sale.group_auto_done_setting"))
+        self.env.ref("base.group_user").sudo()._apply_group(
+            self.env.ref("sale.group_auto_done_setting")
+        )
         self.sale_order.with_user(public_user.id).sudo().action_confirm()
 
         self.assertFalse(public_user.has_group("sale.group_auto_done_setting"))
@@ -473,7 +482,10 @@ class TestSaleOrder(SaleCommon):
 
         self.sale_order._send_order_notification_mail(self.confirmation_email_template)
         self.assertFalse(
-            self.env["ir.cron.trigger"].sudo().search_count([("cron_id", "=", self.async_emails_cron.id)]),
+            self
+            .env["ir.cron.trigger"]
+            .sudo()
+            .search_count([("cron_id", "=", self.async_emails_cron.id)]),
             msg="The email should be sent synchronously when the system parameter is not set.",
         )
 
@@ -487,7 +499,10 @@ class TestSaleOrder(SaleCommon):
             msg="The email template should be saved on the sales order.",
         )
         self.assertTrue(
-            self.env["ir.cron.trigger"].sudo().search_count([("cron_id", "=", self.async_emails_cron.id)]),
+            self
+            .env["ir.cron.trigger"]
+            .sudo()
+            .search_count([("cron_id", "=", self.async_emails_cron.id)]),
             msg="The asynchronous email sending cron should be triggered.",
         )
 
@@ -503,7 +518,10 @@ class TestSaleOrder(SaleCommon):
             msg="The email template should be removed from the sales order.",
         )
         self.assertFalse(
-            self.env["ir.cron.trigger"].sudo().search_count([("cron_id", "=", self.async_emails_cron.id)]),
+            self
+            .env["ir.cron.trigger"]
+            .sudo()
+            .search_count([("cron_id", "=", self.async_emails_cron.id)]),
             msg="The email should be sent synchronously when requested by the cron.",
         )
 
@@ -612,55 +630,90 @@ class TestSaleOrder(SaleCommon):
         #         |----> Branch X
         #                   |----> Branch XX
         company = self.env.company
-        branch_x = self.env["res.company"].sudo().create({
-            "name": "Branch X",
-            "country_id": company.country_id.id,
-            "parent_id": company.id,
-        })
-        branch_xx = self.env["res.company"].sudo().create({
-            "name": "Branch XX",
-            "country_id": company.country_id.id,
-            "parent_id": branch_x.id,
-        })
+        branch_x = (
+            self
+            .env["res.company"]
+            .sudo()
+            .create({
+                "name": "Branch X",
+                "country_id": company.country_id.id,
+                "parent_id": company.id,
+            })
+        )
+        branch_xx = (
+            self
+            .env["res.company"]
+            .sudo()
+            .create({
+                "name": "Branch XX",
+                "country_id": company.country_id.id,
+                "parent_id": branch_x.id,
+            })
+        )
         self.env.user.company_ids += branch_x + branch_xx
         # create taxes for the parent company and its branches
-        tax_groups = self.env["account.tax.group"].sudo().create([
-            {"name": "Tax Group", "company_id": company.id},
-            {"name": "Tax Group X", "company_id": branch_x.id},
-            {"name": "Tax Group XX", "company_id": branch_xx.id},
-        ])
-        tax_a = self.env["account.tax"].sudo().create({
-            "name": "Tax A",
-            "type_tax_use": "sale",
-            "amount_type": "percent",
-            "amount": 10,
-            "tax_group_id": tax_groups[0].id,
-            "company_id": company.id,
-        })
-        tax_b = self.env["account.tax"].sudo().create({
-            "name": "Tax B",
-            "type_tax_use": "sale",
-            "amount_type": "percent",
-            "amount": 15,
-            "tax_group_id": tax_groups[0].id,
-            "company_id": company.id,
-        })
-        tax_x = self.env["account.tax"].sudo().create({
-            "name": "Tax X",
-            "type_tax_use": "sale",
-            "amount_type": "percent",
-            "amount": 20,
-            "tax_group_id": tax_groups[1].id,
-            "company_id": branch_x.id,
-        })
-        tax_xx = self.env["account.tax"].sudo().create({
-            "name": "Tax XX",
-            "type_tax_use": "sale",
-            "amount_type": "percent",
-            "amount": 25,
-            "tax_group_id": tax_groups[2].id,
-            "company_id": branch_xx.id,
-        })
+        tax_groups = (
+            self
+            .env["account.tax.group"]
+            .sudo()
+            .create([
+                {"name": "Tax Group", "company_id": company.id},
+                {"name": "Tax Group X", "company_id": branch_x.id},
+                {"name": "Tax Group XX", "company_id": branch_xx.id},
+            ])
+        )
+        tax_a = (
+            self
+            .env["account.tax"]
+            .sudo()
+            .create({
+                "name": "Tax A",
+                "type_tax_use": "sale",
+                "amount_type": "percent",
+                "amount": 10,
+                "tax_group_id": tax_groups[0].id,
+                "company_id": company.id,
+            })
+        )
+        tax_b = (
+            self
+            .env["account.tax"]
+            .sudo()
+            .create({
+                "name": "Tax B",
+                "type_tax_use": "sale",
+                "amount_type": "percent",
+                "amount": 15,
+                "tax_group_id": tax_groups[0].id,
+                "company_id": company.id,
+            })
+        )
+        tax_x = (
+            self
+            .env["account.tax"]
+            .sudo()
+            .create({
+                "name": "Tax X",
+                "type_tax_use": "sale",
+                "amount_type": "percent",
+                "amount": 20,
+                "tax_group_id": tax_groups[1].id,
+                "company_id": branch_x.id,
+            })
+        )
+        tax_xx = (
+            self
+            .env["account.tax"]
+            .sudo()
+            .create({
+                "name": "Tax XX",
+                "type_tax_use": "sale",
+                "amount_type": "percent",
+                "amount": 25,
+                "tax_group_id": tax_groups[2].id,
+                "company_id": branch_xx.id,
+            })
+        )
         # create several products with different taxes combination
         product_all_taxes = self.env["product.product"].create({
             "name": "Product all taxes",
@@ -872,17 +925,13 @@ class TestSaleOrder(SaleCommon):
         )
 
     def test_amount_to_invoice_at_date_with_uom(self):
-        self.env.user.group_ids += self.env.ref('uom.group_uom')
-        uom_dozens = self.env.ref('uom.product_uom_dozen')
+        self.env.user.group_ids += self.env.ref("uom.group_uom")
+        uom_dozens = self.env.ref("uom.product_uom_dozen")
 
-        product_data = {
-            'name': 'SuperProduct',
-            'type': 'consu',
-            'list_price': 100,
-        }
-        product = self.env['product.product'].create(product_data)
+        product_data = {"name": "SuperProduct", "type": "consu", "list_price": 100}
+        product = self.env["product.product"].create(product_data)
 
-        so_form = Form(self.env['sale.order'])
+        so_form = Form(self.env["sale.order"])
         so_form.partner_id = self.partner
         with so_form.order_line.new() as so_line:
             so_line.product_id = product
@@ -1018,11 +1067,11 @@ class TestSaleOrderInvoicing(AccountTestInvoicingCommon, SaleCommon):
 @tagged("post_install", "-at_install")
 class TestSalesTeam(SaleCommon):
     _test_user_groups = (
-        'product.group_product_manager',
-        'sales_team.group_sale_manager',  # FIXME: use sales_team.group_sale_salesman
+        "product.group_product_manager",
+        "sales_team.group_sale_manager",  # FIXME: use sales_team.group_sale_salesman
     )
 
-    _test_user_name = 'Test Sales & Product Manager'
+    _test_user_name = "Test Sales & Product Manager"
 
     @classmethod
     def setUpClass(cls):
@@ -1151,30 +1200,38 @@ class TestSalesTeam(SaleCommon):
         company_a = self.env["res.company"].sudo().create({"name": "A"})
         company_b = self.env["res.company"].sudo().create({"name": "B"})
         self.env.user.company_ids += company_a + company_b
-        tax_group_a = self.env["account.tax.group"].sudo().create({
-            "name": "A",
-            "company_id": company_a.id,
-        })
-        tax_group_b = self.env["account.tax.group"].sudo().create({
-            "name": "B",
-            "company_id": company_b.id,
-        })
+        tax_group_a = (
+            self.env["account.tax.group"].sudo().create({"name": "A", "company_id": company_a.id})
+        )
+        tax_group_b = (
+            self.env["account.tax.group"].sudo().create({"name": "B", "company_id": company_b.id})
+        )
         country = self.env["res.country"].search([], limit=1)
 
-        tax_a = self.env["account.tax"].sudo().create({
-            "name": "A",
-            "amount": 10,
-            "company_id": company_a.id,
-            "tax_group_id": tax_group_a.id,
-            "country_id": country.id,
-        })
-        tax_b = self.env["account.tax"].sudo().create({
-            "name": "B",
-            "amount": 10,
-            "company_id": company_b.id,
-            "tax_group_id": tax_group_b.id,
-            "country_id": country.id,
-        })
+        tax_a = (
+            self
+            .env["account.tax"]
+            .sudo()
+            .create({
+                "name": "A",
+                "amount": 10,
+                "company_id": company_a.id,
+                "tax_group_id": tax_group_a.id,
+                "country_id": country.id,
+            })
+        )
+        tax_b = (
+            self
+            .env["account.tax"]
+            .sudo()
+            .create({
+                "name": "B",
+                "amount": 10,
+                "company_id": company_b.id,
+                "tax_group_id": tax_group_b.id,
+                "country_id": country.id,
+            })
+        )
 
         sale_order = self.env["sale.order"].create({
             "partner_id": self.partner.id,
@@ -1209,31 +1266,48 @@ class TestSalesTeam(SaleCommon):
         self.env.user.company_ids += root_company + root_company.child_ids
 
         country = self.env["res.country"].search([], limit=1)
-        basic_tax_group = self.env["account.tax.group"].sudo().create({
-            "name": "basic group",
-            "country_id": country.id,
-        })
-        tax_b0 = self.env["account.tax"].sudo().create({
-            "name": "B0 tax",
-            "company_id": root_company.id,
-            "amount": 10,
-            "tax_group_id": basic_tax_group.id,
-            "country_id": country.id,
-        })
-        tax_b1 = self.env["account.tax"].sudo().create({
-            "name": "B1 tax",
-            "company_id": root_company.child_ids[0].id,
-            "amount": 11,
-            "tax_group_id": basic_tax_group.id,
-            "country_id": country.id,
-        })
-        tax_b2 = self.env["account.tax"].sudo().create({
-            "name": "B2 tax",
-            "company_id": root_company.child_ids[1].id,
-            "amount": 20,
-            "tax_group_id": basic_tax_group.id,
-            "country_id": country.id,
-        })
+        basic_tax_group = (
+            self
+            .env["account.tax.group"]
+            .sudo()
+            .create({"name": "basic group", "country_id": country.id})
+        )
+        tax_b0 = (
+            self
+            .env["account.tax"]
+            .sudo()
+            .create({
+                "name": "B0 tax",
+                "company_id": root_company.id,
+                "amount": 10,
+                "tax_group_id": basic_tax_group.id,
+                "country_id": country.id,
+            })
+        )
+        tax_b1 = (
+            self
+            .env["account.tax"]
+            .sudo()
+            .create({
+                "name": "B1 tax",
+                "company_id": root_company.child_ids[0].id,
+                "amount": 11,
+                "tax_group_id": basic_tax_group.id,
+                "country_id": country.id,
+            })
+        )
+        tax_b2 = (
+            self
+            .env["account.tax"]
+            .sudo()
+            .create({
+                "name": "B2 tax",
+                "company_id": root_company.child_ids[1].id,
+                "amount": 20,
+                "tax_group_id": basic_tax_group.id,
+                "country_id": country.id,
+            })
+        )
 
         sale_order = self.env["sale.order"].create({
             "partner_id": self.partner.id,
@@ -1286,16 +1360,25 @@ class TestSalesTeam(SaleCommon):
 
     def test_recompute_taxes(self):
         """Test the action that can be triggered after a fiscal position change."""
-        special_tax = self.env["account.tax"].sudo().create({
-            "name": "special_tax_10",
-            "amount_type": "percent",
-            "amount": 25.0,
-            "include_base_amount": True,
-            "price_include_override": "tax_included",
-        })
+        special_tax = (
+            self
+            .env["account.tax"]
+            .sudo()
+            .create({
+                "name": "special_tax_10",
+                "amount_type": "percent",
+                "amount": 25.0,
+                "include_base_amount": True,
+                "price_include_override": "tax_included",
+            })
+        )
 
-        mapping_a = self.env["account.fiscal.position"].sudo().create({"name": "Special Tax Reduction"})
-        mapping_b = self.env["account.fiscal.position"].sudo().create({"name": "Special Tax Reduction"})
+        mapping_a = (
+            self.env["account.fiscal.position"].sudo().create({"name": "Special Tax Reduction"})
+        )
+        mapping_b = (
+            self.env["account.fiscal.position"].sudo().create({"name": "Special Tax Reduction"})
+        )
         self.env["account.tax"].sudo().create({
             "name": "tax_a",
             "amount_type": "percent",
@@ -1316,12 +1399,17 @@ class TestSalesTeam(SaleCommon):
             "original_tax_ids": special_tax,
         })
 
-        sales_tax = self.env["account.tax"].sudo().create({
-            "name": "VAT 20%",
-            "amount_type": "percent",
-            "amount": 20.0,
-            "price_include_override": "tax_included",
-        })
+        sales_tax = (
+            self
+            .env["account.tax"]
+            .sudo()
+            .create({
+                "name": "VAT 20%",
+                "amount_type": "percent",
+                "amount": 20.0,
+                "price_include_override": "tax_included",
+            })
+        )
 
         # taxes and standard price need to be set on the product, as they will be
         # recomputed when changing the fiscal position.

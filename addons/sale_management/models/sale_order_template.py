@@ -103,22 +103,22 @@ class SaleOrderTemplate(models.Model):
     @api.depends_context("uid")
     @api.depends("team_ids", "share_template", "team_ids.member_ids", "team_ids.user_id")
     def _compute_user_has_access(self):
-        accessible = self.filtered_domain(self._search_user_has_access('in', {True}))
+        accessible = self.filtered_domain(self._search_user_has_access("in", {True}))
         accessible.user_has_access = True
         (self - accessible).user_has_access = False
 
     def _search_user_has_access(self, operator, value):
-        if operator != 'in':
+        if operator != "in":
             return NotImplemented
 
         return (
-            Domain("share_template", '!=', False)
+            Domain("share_template", "!=", False)
             & (
-                Domain("team_ids", '=', False)
-                | Domain("team_ids.member_ids", 'in', self.env.user.ids)
-                | Domain("team_ids.user_id", 'in', self.env.user.ids)
+                Domain("team_ids", "=", False)
+                | Domain("team_ids.member_ids", "in", self.env.user.ids)
+                | Domain("team_ids.user_id", "in", self.env.user.ids)
             )
-        ) | Domain("create_uid", 'in', self.env.user.ids)
+        ) | Domain("create_uid", "in", self.env.user.ids)
 
     @api.depends("sale_order_template_line_ids")
     def _compute_has_productless_lines(self):

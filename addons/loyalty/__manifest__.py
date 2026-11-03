@@ -20,7 +20,7 @@
         "views/loyalty_rule_views.xml",
         "views/portal_templates.xml",
         "views/res_partner_views.xml",
-        'security/ir.access.csv',
+        "security/ir.access.csv",
     ],
     "demo": ["data/loyalty_demo.xml"],
     "assets": {

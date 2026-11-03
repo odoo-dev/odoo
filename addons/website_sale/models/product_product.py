@@ -108,7 +108,7 @@ class ProductProduct(models.Model):
     def _delete_extra(self):
         yield from super()._delete_extra()
 
-        if 'website_sale' in self.env.registry.uninstalling_modules:
+        if "website_sale" in self.env.registry.uninstalling_modules:
             return
         # delete variant images
         for product in self:
@@ -540,7 +540,10 @@ class ProductProduct(models.Model):
                 or website.company_id.email_formatted
             )
             email_template.with_user(website.salesperson_id).sudo().with_context(
-                customer_name=partner.name, lang=partner.lang, website_id=website.id, product_price=product_price,
+                customer_name=partner.name,
+                lang=partner.lang,
+                website_id=website.id,
+                product_price=product_price,
             ).send_mail(
                 product.id,
                 force_send=True,

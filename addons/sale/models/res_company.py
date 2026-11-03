@@ -14,16 +14,24 @@ class ResCompany(models.Model):
     _check_company_auto = True
 
     account_invoices_to_issue_id = fields.Many2one(
-        'account.account',
-        string='Invoices to be Issued Account',
-        **company_default_for('account_invoices_to_issue_id', 'product.category', 'property_account_invoices_to_issue_id'),
+        "account.account",
+        string="Invoices to be Issued Account",
+        **company_default_for(
+            "account_invoices_to_issue_id",
+            "product.category",
+            "property_account_invoices_to_issue_id",
+        ),
         check_company=True,
     )
 
     account_invoiced_not_delivered_id = fields.Many2one(
-        'account.account',
-        string='Invoiced Not Delivered Account',
-        **company_default_for('account_invoiced_not_delivered_id', 'product.category', 'property_account_invoiced_not_delivered_id'),
+        "account.account",
+        string="Invoiced Not Delivered Account",
+        **company_default_for(
+            "account_invoiced_not_delivered_id",
+            "product.category",
+            "property_account_invoiced_not_delivered_id",
+        ),
         check_company=True,
     )
 
@@ -124,11 +132,14 @@ class ResCompany(models.Model):
 
     def _get_accrual_candidate_lines(self, date=False):
         candidates = super()._get_accrual_candidate_lines(date=date)
-        extra_domain = Domain([
-            ('company_id', '=', self.id),
-            ('product_id.is_storable', '=', True),
-        ])
-        order_lines = self.env['sale.order.line']._get_accrual_line_ids(date=date, extra_domain=extra_domain)
-        candidates['invoice_to_be_issued'] = order_lines.filtered(lambda l: l.amount_to_invoice_at_date > 0)
-        candidates['invoiced_not_delivered'] = order_lines.filtered(lambda l: l.amount_to_invoice_at_date < 0)
+        extra_domain = Domain([("company_id", "=", self.id), ("product_id.is_storable", "=", True)])
+        order_lines = self.env["sale.order.line"]._get_accrual_line_ids(
+            date=date, extra_domain=extra_domain
+        )
+        candidates["invoice_to_be_issued"] = order_lines.filtered(
+            lambda l: l.amount_to_invoice_at_date > 0
+        )
+        candidates["invoiced_not_delivered"] = order_lines.filtered(
+            lambda l: l.amount_to_invoice_at_date < 0
+        )
         return candidates

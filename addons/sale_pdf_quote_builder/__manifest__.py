@@ -16,7 +16,7 @@
         "views/sale_pdf_form_field_views.xml",
         "views/sale_pdf_quote_builder_menus.xml",
         "wizards/res_config_settings_views.xml",
-        'security/ir.access.csv',
+        "security/ir.access.csv",
     ],
     "demo": ["data/sale_pdf_quote_builder_demo.xml"],
     "auto_install": True,

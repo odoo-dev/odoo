@@ -1,17 +1,14 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo.fields import Command
-from odoo.tests import tagged, HttpCase
+from odoo.tests import HttpCase, tagged
 
 from odoo.addons.delivery.tests.common import DeliveryCommon
 
 
 @tagged("post_install", "-at_install")
 class TestChooseDeliveryCarrier(DeliveryCommon, HttpCase):
-    _test_user_groups = (
-        "product.group_product_manager",
-        "sales_team.group_sale_salesman",
-    )
+    _test_user_groups = ("product.group_product_manager", "sales_team.group_sale_salesman")
 
     _test_user_name = "Test Sales & Product Manager"
 

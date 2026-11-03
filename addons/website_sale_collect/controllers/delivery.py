@@ -49,7 +49,7 @@ class InStoreDelivery(LocationSelector):
 
     @route()
     def shop_set_delivery_method(self, dm_id=None, **kwargs):
-        """Override of `website_sale` to keep the selection in the session"""
+        """Override of `website_sale` to keep the selection in the session."""
         if not request.cart:
             request.session[CLICK_AND_COLLECT_SESSION_CACHE_KEY] = {
                 "type": "delivery",

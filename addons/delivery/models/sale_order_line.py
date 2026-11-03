@@ -35,11 +35,9 @@ class SaleOrderLine(models.Model):
         return self.is_delivery
 
     def _get_accrual_domain(self, date=False):
-        """ Reused by account.accrued.orders.wizard and stock_account's
-        Stock Valuation report. """
-        domain = super()._get_accrual_domain(date)
-        domain = Domain.AND([domain, [('is_delivery', '=', False)]])
-        return domain
+        """Reused by account.accrued.orders.wizard and stock_account's
+        Stock Valuation report."""
+        return Domain.AND([super()._get_accrual_domain(date), [("is_delivery", "=", False)]])
 
     def _get_invalid_delivery_weight_lines(self):
         """Retrieve lines containing physical products with no weight defined."""

@@ -129,7 +129,7 @@ class ProductPublicCategory(models.Model):
             # Only take the current category and its 4 closest parents to avoid having too long
             # URLs. This number should stay in sync with the category route computation.
             category_slugs = [slug(cat) for cat in category.parents_and_self[-5:]]
-            category.website_url = f"{SHOP_PATH}/category/{"/".join(category_slugs)}"
+            category.website_url = f"{SHOP_PATH}/category/{'/'.join(category_slugs)}"
         super(ProductPublicCategory, self - assignable_categories)._compute_website_url()
 
     @api.depends_context("company", "website_id")

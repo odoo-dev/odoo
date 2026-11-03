@@ -331,7 +331,7 @@ class Website(models.Model):
 
     def _compute_pricelist_ids(self):
         for website in self:
-            website = website.with_company(website.company_id)
+            website = website.with_company(website.company_id)  # noqa: PLW2901
             ProductPricelist = website.env["product.pricelist"]  # with correct company in env
             website.pricelist_ids = ProductPricelist.sudo().search_fetch(
                 ProductPricelist._get_website_pricelists_domain(website)
@@ -411,7 +411,7 @@ class Website(models.Model):
 
     def _get_configurator_preview_urls(self):
         return super()._get_configurator_preview_urls() | {
-            style['preview_url']
+            style["preview_url"]
             for mapping in (const.SHOP_PAGE_STYLE_MAPPING, const.PRODUCT_PAGE_STYLE_MAPPING)
             for style in mapping.values()
         }

@@ -134,7 +134,7 @@ class MollieTest(MollieCommon, PaymentHttpCommon):
             side_effect=ValidationError("Service Unavailable"),
         ):
             response = self._make_http_get_request(url, params=self.payment_data)
-        self.assertTrue(response.url.endswith('/payment/status'))
+        self.assertTrue(response.url.endswith("/payment/status"))
 
     @mute_logger("odoo.addons.payment_mollie.controllers.main")
     def test_webhook_notification_is_rejected_when_payment_data_unavailable(self):

@@ -52,7 +52,7 @@ class ResPartner(models.Model):
             while partner:
                 if partner.id in self_ids:
                     partner.sale_order_count += count
-                partner = partner.parent_id
+                partner = partner.parent_id  # noqa: PLW2901
 
     def _compute_application_statistics_hook(self):
         data_list = super()._compute_application_statistics_hook()
@@ -106,10 +106,11 @@ class ResPartner(models.Model):
                 "any",
                 [("commercial_partner_id", "in", commercial_partners.ids)],
             ),
-            ("order_line", "any", [
-                "|", ("untaxed_amount_to_invoice", ">", 0),
-                     ("invoice_status", "=", "no"),
-            ]),
+            (
+                "order_line",
+                "any",
+                ["|", ("untaxed_amount_to_invoice", ">", 0), ("invoice_status", "=", "no")],
+            ),
             ("state", "=", "sale"),
             ("invoicing_closed", "=", False),
         ])

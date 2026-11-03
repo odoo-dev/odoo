@@ -12,7 +12,7 @@ class TestWebsiteSaleTechnicalPage(TestWebsiteTechnicalPage):
 
     def _set_extra_info_active(self, active):
         """Activate or deactivate the 'extra_info' view."""
-        view = self.env.ref('base.default_website').viewref("website_sale.extra_info")
+        view = self.env.ref("base.default_website").viewref("website_sale.extra_info")
         view.active = active
 
     def test_routes_with_extra_info_toggle(self):

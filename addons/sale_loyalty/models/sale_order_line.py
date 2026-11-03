@@ -38,7 +38,7 @@ class SaleOrderLine(models.Model):
         # In case of a free product, retrieving the tax on the line instead of the product won't
         # affect the behavior.
         for line in reward_lines:
-            line = line.with_company(line.company_id)
+            line = line.with_company(line.company_id)  # noqa: PLW2901
             fpos = (
                 line.order_id.fiscal_position_id
                 or line.order_id.fiscal_position_id._get_fiscal_position(line.order_partner_id)

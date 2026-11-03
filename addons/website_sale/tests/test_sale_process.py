@@ -17,13 +17,13 @@ _logger = logging.getLogger(__name__)
 @tagged("post_install", "-at_install")
 class TestSaleProcess(HttpCaseWithUserDemo, WebsiteSaleCommon, HttpCaseWithWebsiteUser):
     _test_user_groups = (
-        'base.group_user',
-        'product.group_product_manager',
-        'sales_team.group_sale_manager',  # FIXME: use sales_team.group_sale_salesman
-        'website.group_website_designer',  # website config + website.rewrite
+        "base.group_user",
+        "product.group_product_manager",
+        "sales_team.group_sale_manager",  # FIXME: use sales_team.group_sale_salesman
+        "website.group_website_designer",  # website config + website.rewrite
     )
 
-    _test_user_name = 'Test Sales & Product Manager'
+    _test_user_name = "Test Sales & Product Manager"
 
     @classmethod
     def setUpClass(cls):
@@ -65,11 +65,7 @@ class TestSaleProcess(HttpCaseWithUserDemo, WebsiteSaleCommon, HttpCaseWithWebsi
                 Command.set(cls.chair_floor_protection.ids)
             ]
 
-        cls.env["account.journal"].create({
-            "name": "Cash - Test",
-            "type": "cash",
-            "code": "CASH-T",
-        })
+        cls.env["account.journal"].create({"name": "Cash - Test", "type": "cash", "code": "CASH-T"})
 
         # Avoid Shipping/Billing address page
         cls.env.ref("base.partner_admin").write(cls.dummy_partner_address_values)
@@ -101,12 +97,17 @@ class TestSaleProcess(HttpCaseWithUserDemo, WebsiteSaleCommon, HttpCaseWithWebsi
 
         self.env.company.sudo().country_id = self.country_us
         tax_group = self.env["account.tax.group"].sudo().create({"name": "Tax 15%"})
-        tax = self.env["account.tax"].sudo().create({
-            "name": "Tax 15%",
-            "amount": 15,
-            "type_tax_use": "sale",
-            "tax_group_id": tax_group.id,
-        })
+        tax = (
+            self
+            .env["account.tax"]
+            .sudo()
+            .create({
+                "name": "Tax 15%",
+                "amount": 15,
+                "type_tax_use": "sale",
+                "tax_group_id": tax_group.id,
+            })
+        )
         # storage box
         self.product_product_7 = self.env["product.product"].create({
             "name": "Storage Box Test",

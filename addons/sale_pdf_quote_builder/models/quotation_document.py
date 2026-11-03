@@ -53,7 +53,7 @@ class QuotationDocument(models.Model):
     )
 
     def _access_domain(self, operation):
-        if not self.env['ir.attachment'].has_access(operation):
+        if not self.env["ir.attachment"].has_access(operation):
             return Domain.FALSE
         return super()._access_domain(operation)
 

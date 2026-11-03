@@ -202,7 +202,7 @@ class StripeTest(StripeCommon, PaymentHttpCommon):
 
     def test_country_mapping_stripe_connect(self):
         """Test that La Réunion (and other french territories) is supported by Stripe Connect."""
-        mapped_country_company = self.add_company('base.test_company', {"name": "Mapped Company"})
+        mapped_country_company = self.add_company("base.test_company", {"name": "Mapped Company"})
         with (
             patch.object(
                 self.env.registry["payment.provider"],
@@ -236,8 +236,8 @@ class StripeTest(StripeCommon, PaymentHttpCommon):
             self.assertEqual(mock.call_count, 0)
 
     def test_sensitive_values_are_redacted_from_logs(self):
-        """ Test that all Stripe sensitive values are redacted from the logged API requests and
-        responses. """
+        """Test that all Stripe sensitive values are redacted from the logged API requests and
+        responses."""
         # Only rely on Stripe's sensitive keys, not on those added by other installed providers.
         original_sensitive_keys = set(PAYMENT_SENSITIVE_KEYS)
         PAYMENT_SENSITIVE_KEYS.clear()
@@ -246,17 +246,18 @@ class StripeTest(StripeCommon, PaymentHttpCommon):
         def restore_sensitive_keys():
             PAYMENT_SENSITIVE_KEYS.clear()
             PAYMENT_SENSITIVE_KEYS.update(original_sensitive_keys)
+
         self.addCleanup(restore_sensitive_keys)
 
-        sensitive_values = {key: f'dummy_{key}_KJtHgNwt2KS3' for key in ('client_secret', 'secret')}
+        sensitive_values = {key: f"dummy_{key}_KJtHgNwt2KS3" for key in ("client_secret", "secret")}
         response = requests.Response()
         response.status_code = 200
         response._content = json.dumps(sensitive_values).encode()
 
         with self.assertLogs(
-            'odoo.addons.payment.models.payment_provider', level='INFO'
+            "odoo.addons.payment.models.payment_provider", level="INFO"
         ) as log_catcher:
-            self.stripe._log_request('POST', 'https://dummy.url', sensitive_values)
+            self.stripe._log_request("POST", "https://dummy.url", sensitive_values)
             self.stripe._log_response(response)
 
         request_log, response_log = log_catcher.output

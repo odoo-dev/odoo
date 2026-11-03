@@ -56,9 +56,7 @@ class PaymentStatus(http.Controller):
         if not tx:
             return {"payment_not_found": True}
         notification_access_token = payment_utils.generate_access_token(tx.id)
-        notification_channel = (
-            f"payment_transaction_channel:{tx.id},{notification_access_token}"
-        )
+        notification_channel = f"payment_transaction_channel:{tx.id},{notification_access_token}"
         return {
             "tx": tx,
             "notification_channel": notification_channel,
