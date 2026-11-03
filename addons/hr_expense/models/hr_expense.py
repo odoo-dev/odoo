@@ -1281,6 +1281,11 @@ class HrExpense(models.Model):
         return self.same_receipt_expense_ids._get_records_action(
             name=_("Expenses with a similar receipt to %(other_expense_name)s", other_expense_name=self.name),
         )
+    def action_show_duplicate_expense_ids(self):
+        self.ensure_one()
+        return self.duplicate_expense_ids._get_records_action(
+            name=_("Expenses with a similar fields to %(other_expense_name)s", other_expense_name=self.name),
+        )
 
     @api.model
     def get_expense_dashboard(self):
