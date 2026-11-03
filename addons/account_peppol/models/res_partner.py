@@ -240,12 +240,18 @@ class ResPartner(models.Model):
         return res
 
     def _compute_peppol_endpoint(self):
-        partners_to_recompute = self.browse([partner.id for partner in self if partner._origin not in self])
-        super(ResPartner, partners_to_recompute)._compute_peppol_endpoint()
+        no_recompute = self._get_no_recompute_peppol_partners_list()
+        super(ResPartner, self.filtered(lambda partner: partner not in no_recompute))._compute_peppol_endpoint()
 
     def _compute_peppol_eas(self):
-        partners_to_recompute = self.browse([partner.id for partner in self if partner._origin not in self])
-        super(ResPartner, partners_to_recompute)._compute_peppol_eas()
+        no_recompute = self._get_no_recompute_peppol_partners_list()
+        super(ResPartner, self.filtered(lambda partner: partner not in no_recompute))._compute_peppol_eas()
+
+    def _get_no_recompute_peppol_partners_list(self):
+        '''Get list of partners that should not be recomputed when _compute_peppol_endpoint and _compute_peppol_eas are called'''
+        return self.env["res.company"].sudo().search([
+            ('account_peppol_proxy_state', 'in', self.env['account_edi_proxy_client.user']._get_can_send_domain()),
+        ]).partner_id
 
     # -------------------------------------------------------------------------
     # BUSINESS ACTIONS

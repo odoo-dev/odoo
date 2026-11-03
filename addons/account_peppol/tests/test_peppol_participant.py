@@ -388,3 +388,28 @@ class TestPeppolParticipant(PeppolConnectorCommon):
             p_rec = partner_form.save()
             self.assertEqual(p_rec.commercial_partner_id, p_rec)
             self.assertEqual(p_rec.commercial_partner_id.name, "test")
+
+    def test_registered_company_keeps_peppol_identifiers(self):
+        self.env.company.write({
+            'country_id': self.env.ref('base.be').id,
+            'vat': 'BE0477472701',
+        })
+        with self._mock_requests([
+            self._mock_can_connect(),
+            self._mock_connect(peppol_state='sender'),
+        ]):
+            wizard = self.env['peppol.registration'].create({
+                'peppol_eas': '0088',
+                'peppol_endpoint': '88888888888',
+                'phone_number': '+32483123456',
+                'contact_email': 'yourcompany@test.example.com',
+            })
+            wizard.button_register_peppol_participant()
+        self.assertEqual(self.env.company.account_peppol_proxy_state, 'sender')
+
+        company_partner = self.env.company.partner_id
+        registered_values = [{'peppol_eas': '0088', 'peppol_endpoint': '88888888888'}]
+
+        # Changing the VAT on the saved company must not recompute the identifiers
+        self.env.company.vat = 'BE0475646428'
+        self.assertRecordValues(company_partner, registered_values)
