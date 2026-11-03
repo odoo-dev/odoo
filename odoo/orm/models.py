@@ -2451,7 +2451,7 @@ class BaseModel(metaclass=MetaModel):
         self.env.cr.execute(query)
         self.invalidate_model(['parent_path'])
 
-    def _check_removed_columns(self, log=False):
+    def _check_removed_columns(self, log=False, columns=None):
         if self._abstract:
             return
         # iterate on the database columns to drop the NOT NULL constraints of
@@ -2460,24 +2460,34 @@ class BaseModel(metaclass=MetaModel):
         cr = self.env.cr
         cols = [name for name, field in self._fields.items()
                      if field.store and field.column_type]
-        cr.execute(SQL(
-            """ SELECT a.attname, a.attnotnull
-                  FROM pg_class c, pg_attribute a
-                 WHERE c.relname=%s
-                   AND c.relnamespace = current_schema::regnamespace
-                   AND c.oid=a.attrelid
-                   AND a.attisdropped=%s
-                   AND pg_catalog.format_type(a.atttypid, a.atttypmod) NOT IN ('cid', 'tid', 'oid', 'xid')
-                   AND a.attname NOT IN %s """,
-            self._table, False, tuple(cols),
-        ))
+        if columns is None:
+            cr.execute(SQL(
+                """ SELECT a.attname, a.attnotnull
+                      FROM pg_class c, pg_attribute a
+                     WHERE c.relname=%s
+                       AND c.relnamespace = current_schema::regnamespace
+                       AND c.oid=a.attrelid
+                       AND a.attisdropped=%s
+                       AND pg_catalog.format_type(a.atttypid, a.atttypmod) NOT IN ('cid', 'tid', 'oid', 'xid')
+                       AND a.attname NOT IN %s """,
+                self._table, False, tuple(cols),
+            ))
+            rows = [(row['attname'], row['attnotnull']) for row in cr.dictfetchall()]
+        else:
+            # reuse the result of sql.table_columns() (user columns only)
+            cols = set(cols)
+            rows = [
+                (name, row['is_nullable'] == 'NO')
+                for name, row in columns.items()
+                if name not in cols
+            ]
 
-        for row in cr.dictfetchall():
+        for attname, attnotnull in rows:
             if log:
                 _logger.debug("column %s is in the table %s but not in the corresponding object %s",
-                              row['attname'], self._table, self._name)
-            if row['attnotnull']:
-                sql.drop_not_null(cr, self._table, row['attname'])
+                              attname, self._table, self._name)
+            if attnotnull:
+                sql.drop_not_null(cr, self._table, attname)
 
     def _auto_init(self) -> None:
         """ Initialize the database schema of ``self``:
@@ -2505,13 +2515,17 @@ class BaseModel(metaclass=MetaModel):
 
         cr = self.env.cr
         update_custom_fields = self.env.context.get('update_custom_fields', False)
-        must_create_table = not sql.table_exists(cr, self._table)
         parent_path_compute = False
         # parent_path is compared character by character (see
         # _parent_store_update), whatever the collation of the database
         parent_path_type = SQL('varchar COLLATE "C"')
 
         if self._auto:
+            # one introspection query gives both the table existence and its
+            # columns (a model table always has at least the column 'id')
+            columns = sql.table_columns(cr, self._table)
+            must_create_table = not columns and not sql.table_exists(cr, self._table)
+            columns_stale = must_create_table
             if must_create_table:
                 def make_type(field):
                     typ = field.stored_sql_column_type
@@ -2540,18 +2554,24 @@ class BaseModel(metaclass=MetaModel):
                         (self._table, self._table))
 
             if self._parent_store:
-                if not sql.column_exists(cr, self._table, 'parent_path'):
+                if columns_stale:
+                    columns = sql.table_columns(cr, self._table)
+                    columns_stale = False
+                if 'parent_path' not in columns:
                     sql.create_column(self.env.cr, self._table, 'parent_path', parent_path_type)
                     parent_path_compute = True
+                    columns_stale = True
                 elif sql.column_collation(cr, self._table, 'parent_path') != 'C':
                     sql.convert_column(cr, self._table, 'parent_path', parent_path_type)
+                    columns_stale = True
                 self._check_parent_path()
 
             if not must_create_table:
-                self._check_removed_columns(log=False)
+                self._check_removed_columns(log=False, columns=None if columns_stale else columns)
 
             # update the database schema for fields
-            columns = sql.table_columns(cr, self._table)
+            if columns_stale:
+                columns = sql.table_columns(cr, self._table)
 
             for field in sorted(self._fields.values(), key=lambda f: f.column_order):
                 if not field.store:

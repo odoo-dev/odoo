@@ -1082,6 +1082,7 @@ class Registry(Mapping[str, type["BaseModel"]]):
         }
 
         # create or update foreign keys
+        added = []
         for key, val in self._foreign_keys.items():
             table1, column1 = key
             table2, column2, ondelete, model, module = val
@@ -1089,13 +1090,27 @@ class Registry(Mapping[str, type["BaseModel"]]):
             spec = existing.get(key)
             if spec is None:
                 sql.add_foreign_key(cr, table1, column1, table2, column2, ondelete)
-                conname = sql.get_foreign_keys(cr, table1, column1, table2, column2, ondelete)[0]
-                model.env['ir.model.constraint']._reflect_constraint(model, conname, 'f', None, module)
+                added.append(key)
             elif (spec[1], spec[2], spec[3]) != (table2, column2, deltype):
                 sql.drop_constraint(cr, table1, spec[0])
                 sql.add_foreign_key(cr, table1, column1, table2, column2, ondelete)
-                conname = sql.get_foreign_keys(cr, table1, column1, table2, column2, ondelete)[0]
-                model.env['ir.model.constraint']._reflect_constraint(model, conname, 'f', None, module)
+                added.append(key)
+
+        if not added:
+            return
+
+        # retrieve the names of the new foreign keys in one query, and reflect
+        # them (same order as one-by-one creation)
+        cr.execute(query, [tuple({table for table, column in added})])
+        created = defaultdict(list)
+        for name, table1, column1, table2, column2, deltype in cr.fetchall():
+            created[table1, column1, table2, column2, deltype].append(name)
+        for key in added:
+            table1, column1 = key
+            table2, column2, ondelete, model, module = self._foreign_keys[key]
+            deltype = sql._CONFDELTYPES[ondelete.upper()]
+            conname = sorted(created[table1, column1, table2, column2, deltype])[0]
+            model.env['ir.model.constraint']._reflect_constraint(model, conname, 'f', None, module)
 
     def check_tables_exist(self, cr: Cursor) -> None:
         """
