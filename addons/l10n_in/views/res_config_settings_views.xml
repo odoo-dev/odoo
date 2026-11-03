@@ -145,7 +145,7 @@
                     </block>
                 </div>
             </xpath>
-            <block id="print_vendor_checks_setting_container" position="inside">
+            <block id="payment_setting_container" position="inside">
                 <setting id="vendor_payment_order_file"
                          company_dependent="1"
                          help="Generate Vendor Payment Order file(csv file), upload to your bank to make the payments"
@@ -165,7 +165,7 @@
             <xpath expr="//setting[@id='qr_code_invoices']" position="attributes">
                 <attribute name="invisible" separator="or" add="country_code == 'IN'"/>
             </xpath>
-            <block id="pay_invoice_online_setting_container" position="inside">
+            <block id="payment_setting_container" position="inside">
                 <setting string="UPI ID"
                          help="Add a payment QR-code to your invoices."
                          company_dependent="1"

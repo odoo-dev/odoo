@@ -38,6 +38,9 @@
                                 </div>
                             </setting>
                         </block>
+                        <block title="Country Settings" id="country_settings_container">
+                            <!-- To be filled with the current company localization settings -->
+                        </block>
                         <block title="Electronic Invoicing" id="peppol" invisible="not is_account_peppol_eligible">
                             <div id="account_peppol_install" class="col-12 col-lg-12 o_setting_box">
                                 <div class="o_setting_left_pane">
@@ -107,7 +110,7 @@
                             <setting id="tax_exigibility" company_dependent="1" help="Allow to configure taxes using cash basis" title="Select this if the taxes should use cash basis, which will create an entry for such taxes on a given account during reconciliation."
                                 documentation="/applications/finance/accounting/taxation/taxes/cash_basis_taxes.html"
                                 invisible="vat_disabled">
-                                <field name="tax_exigibility"/>
+                                <field name="tax_exigibility" readonly="not is_root_company"/>
                                 <div class="content-group" invisible="not tax_exigibility" groups="account.group_account_user">
                                     <div class="row mt16">
                                         <label for="tax_cash_basis_journal_id" class="col-lg-3 o_light_label"/>
@@ -129,7 +132,7 @@
                                 <div class="content-group">
                                     <div class="row mt16">
                                         <label for="currency_id" class="col-lg-3 o_light_label"/>
-                                        <field name="currency_id" options="{'no_create_edit': True, 'no_open': True}" context="{'active_test': False}"/>
+                                        <field name="currency_id" options="{'no_create_edit': True, 'no_open': True}" context="{'active_test': False}" readonly="not is_root_company"/>
                                         <field name="group_multi_currency" invisible="1"/> <!-- drives the "not group_multi_currency" invisible modifier on the exchange-rate settings -->
                                     </div>
                                     <div class="mt8">
@@ -224,7 +227,7 @@
                                 </div>
                             </setting>
                         </block>
-                        <block title="Customer Payments" id="pay_invoice_online_setting_container">
+                        <block title="Payments" id="payment_setting_container">
                             <setting help="Let your customers pay their invoices on your portal"
                                 documentation="/applications/finance/accounting/receivables/customer_payments/online_payment.html">
                                 <field name="module_account_payment"/>
@@ -259,11 +262,6 @@
                                 <field name="qr_code" class="oe_inline"/>
                             </setting>
                         </block>
-                        <block title="Vendor Bills" id="account_vendor_bills">
-                            <setting id="autopost_bills" help="Propose auto-validating bills for a vendor after the AI achieves three consecutive accurate results">
-                                <field name="autopost_bills"/>
-                            </setting>
-                        </block>
                         <block title="Vendor Payments" id="print_vendor_checks_setting_container">
                             <setting id="print_checks" groups="account.group_account_user" string="Checks" company_dependent="1" help="Print checks to pay your vendors"
                                 documentation="/applications/finance/accounting/payables/pay/check.html">
@@ -272,6 +270,11 @@
                             <setting id="sepa_payments" title="If you check this box, you will be able to register your payment using SEPA / ISO20022." company_dependent="1" help="Pay your bills in one-click using Euro SEPA Service / ISO20022"
                                 documentation="/applications/finance/accounting/payables/pay/sepa.html">
                                 <field name="module_account_iso20022" widget="upgrade_boolean"/>
+                            </setting>
+                        </block>
+                        <block title="Vendor Bills" id="account_vendor_bills">
+                            <setting id="autopost_bills" help="Propose auto-validating bills for a vendor after the AI achieves three consecutive accurate results">
+                                <field name="autopost_bills"/>
                             </setting>
                         </block>
 
@@ -403,7 +406,7 @@
                         </block>
                         <block title="Storno Accounting" id="storno" groups="account.group_account_user" invisible="not display_account_storno">
                             <setting id="enable_storno_accounting" company_dependent="1" help="Use negative numbers to reverse original entries">
-                                <field name="account_storno"/>
+                                <field name="account_storno" readonly="not is_root_company"/>
                             </setting>
                         </block>
                         <block title="Accounting Firms mode">
