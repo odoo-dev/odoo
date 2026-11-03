@@ -111,17 +111,24 @@ export class Thread extends Record {
             data.id > 0 &&
             (!thread || fieldNames.some((fieldName) => thread[fieldName] === undefined))
         ) {
-            await this.store.fetchStoreData("mail.thread", {
-                thread_model: data.model,
-                thread_id: data.id,
-                request_list: fieldNames,
-            });
+            await this.fetchMissingData(data, fieldNames);
             thread = this.get(data);
             if (!thread?.exists()) {
                 return;
             }
         }
         return thread;
+    }
+    static async fetchMissingData(data, fieldNames) {
+        // the "mail.thread" store handler only serves internal users
+        if (this.store.self_user?.share !== false) {
+            return;
+        }
+        await this.store.fetchStoreData("mail.thread", {
+            thread_model: data.model,
+            thread_id: data.id,
+            request_list: fieldNames,
+        });
     }
 
     autofocus = 0;
