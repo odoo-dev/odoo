@@ -6,7 +6,7 @@
         <field name="inherit_id" ref="account.res_config_settings_view_form"/>
         <field name="arch" type="xml">
             <xpath expr="//div[@id='account_peppol_install']" position="replace">
-                <setting id="account_peppol" help="Allow sending and receiving invoices through the Peppol network">
+                <setting id="account_peppol" string="Peppol" help="Allow sending and receiving invoices through the Peppol network">
                     <div invisible="account_is_token_out_of_sync">
                         <!-- Info in case of sender. -->
                         <div invisible="peppol_use_parent_company or account_peppol_proxy_state != 'sender'">
@@ -64,9 +64,6 @@
                         <div class="d-flex gap-1 action_buttons" colspan="3">
                             <!-- Not yet registered on Peppol -->
                             <div invisible="peppol_use_parent_company or account_peppol_proxy_state != 'not_registered'">
-                                <div class="text-muted">
-                                    Allow sending and receiving invoices through the Peppol network
-                                </div>
                                 <button name="action_open_peppol_form"
                                         type="object"
                                         string="Activate Peppol"
@@ -115,7 +112,7 @@
                         </div>
                     </div>
                 </setting>
-                <setting
+                <setting id="account_peppol_journal"
                     invisible="account_is_token_out_of_sync or peppol_use_parent_company or peppol_participation_role != 'sending_and_receiving'">
                     <div class="row" name="peppol_journal_config">
                         <label string="Incoming Accounting Journal"

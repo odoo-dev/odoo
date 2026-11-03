@@ -5,7 +5,7 @@
         <field name="model">res.config.settings</field>
         <field name="inherit_id" ref="account.res_config_settings_view_form"/>
         <field name="arch" type="xml">
-            <setting id="sepa_payments" position="after">
+            <block id="country_settings_container" position="inside">
                 <setting id="wise_payment_settings" string="U.S. Direct Deposit (via Wise)" company_dependent="1" help="Initiate payments in one-click using a Wise Business account"
                     invisible="country_code != 'US'" documentation="/applications/finance/fiscal_localizations/united_states.html#pay-by-direct-deposit">
                     <field name="module_l10n_us_direct_deposit" widget="upgrade_boolean"/>
@@ -15,7 +15,7 @@
                         </div>
                     </div>
                 </setting>
-            </setting>
+            </block>
         </field>
     </record>
 </odoo>

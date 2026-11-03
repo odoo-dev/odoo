@@ -5,111 +5,97 @@
         <field name="model">res.config.settings</field>
         <field name="inherit_id" ref="account_peppol.res_config_settings_view_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//block[@id='peppol']" position="attributes">
+            <xpath expr="//setting[@id='account_peppol']" position="attributes">
+                <attribute name="invisible" add="country_code == 'FR'" separator="or"/>
+            </xpath>
+            <xpath expr="//setting[@id='account_peppol_journal']" position="attributes">
                 <attribute name="invisible" add="country_code == 'FR'" separator="or"/>
             </xpath>
 
-            <xpath expr="//block[@id='peppol']" position="after">
-                <block title="Approved Platform" id="pdp" invisible="country_code != 'FR'">
-                    <div id="l10n_fr_pdp" class="col-12 o_setting_box">
-                        <div class="o_setting_right_pane border-0">
-                            <div invisible="routing_scheme == '0225' or peppol_use_parent_company or account_peppol_proxy_state not in ('sender', 'receiver', 'smp_registration')">
-                                Your French e-invoicing ID <field name="account_peppol_edi_identification" class="oe_inline o_form_label" readonly="1"/>
-                                <field name="account_peppol_proxy_state" class="oe_inline o_form_label text-lowercase" readonly="1"/>
-                                <span class="ps-2" invisible="account_peppol_edi_mode == 'prod'">
-                                    (<field class="oe_inline o_form_label text-uppercase" name="account_peppol_edi_mode" />)
-                                </span>
-                            </div>
-                            <div invisible="routing_scheme != '0225' or peppol_use_parent_company or account_peppol_proxy_state not in ('sender', 'receiver', 'smp_registration')">
-                                Your French e-invoicing ID <field name="account_peppol_edi_identification" class="oe_inline o_form_label" readonly="1"/><span> </span>
-                                <field invisible="account_peppol_proxy_state == 'smp_registration'" name="account_peppol_proxy_state" class="oe_inline o_form_label text-lowercase" readonly="1"/>
-                                <span invisible="account_peppol_proxy_state != 'smp_registration'" class="o_form_label"> is waiting to be activated</span>
-                                <span invisible="account_peppol_proxy_state == 'smp_registration'" class="o_form_label"> invoices and credit notes.</span>
-                                <span class="ps-2" invisible="account_peppol_edi_mode == 'prod'">
-                                    (<field class="oe_inline o_form_label text-uppercase" name="account_peppol_edi_mode" />)
-                                </span>
-                                <p invisible="account_peppol_proxy_state not in ('smp_registration', 'receiver') or not l10n_fr_pdp_annuaire_start_date">
-                                    You are registered on the annuaire starting on <field class="oe_inline o_form_label text-uppercase" name="l10n_fr_pdp_annuaire_start_date" options="{'numeric': True}"/>
-                                </p>
-                                <p invisible="l10n_fr_pdp_annuaire_start_date or routing_scheme != '0225' or account_peppol_proxy_state != 'smp_registration'">
-                                    For information: French administration annuaire can be updated once a day so your validation should be done tomorrow. If you requested a migration from another PA, registration may take up to two weeks, depending on their response time.
-                                </p>
-                                <p invisible="account_peppol_proxy_state != 'receiver' or l10n_fr_pdp_registered" class="text-warning">
-                                    <i class="oi" data-icon="warning"/>You can only send and receive <span class="o_form_label">unregulated</span> messages currently.
-                                </p>
-                            </div>
-                            <div invisible="peppol_use_parent_company or account_peppol_proxy_state != 'rejected'">
-                                You registration has been rejected, the reason has been sent to you via email.
-                                Please contact our support if you need further assistance.
-                            </div>
+            <block id="country_settings_container" position="inside">
+                <setting id="l10n_fr_pdp" string="Approved Platform" class="col-12" invisible="country_code != 'FR'">
+                    <div invisible="routing_scheme == '0225' or peppol_use_parent_company or account_peppol_proxy_state not in ('sender', 'receiver', 'smp_registration')">
+                        Your French e-invoicing ID <field name="account_peppol_edi_identification" class="oe_inline o_form_label" readonly="1"/>
+                        <field name="account_peppol_proxy_state" class="oe_inline o_form_label text-lowercase" readonly="1"/>
+                        <span class="ps-2" invisible="account_peppol_edi_mode == 'prod'">
+                            (<field class="oe_inline o_form_label text-uppercase" name="account_peppol_edi_mode" />)
+                        </span>
+                    </div>
+                    <div invisible="routing_scheme != '0225' or peppol_use_parent_company or account_peppol_proxy_state not in ('sender', 'receiver', 'smp_registration')">
+                        Your French e-invoicing ID <field name="account_peppol_edi_identification" class="oe_inline o_form_label" readonly="1"/><span> </span>
+                        <field invisible="account_peppol_proxy_state == 'smp_registration'" name="account_peppol_proxy_state" class="oe_inline o_form_label text-lowercase" readonly="1"/>
+                        <span invisible="account_peppol_proxy_state != 'smp_registration'" class="o_form_label"> is waiting to be activated</span>
+                        <span invisible="account_peppol_proxy_state == 'smp_registration'" class="o_form_label"> invoices and credit notes.</span>
+                        <span class="ps-2" invisible="account_peppol_edi_mode == 'prod'">
+                            (<field class="oe_inline o_form_label text-uppercase" name="account_peppol_edi_mode" />)
+                        </span>
+                        <p invisible="account_peppol_proxy_state not in ('smp_registration', 'receiver') or not l10n_fr_pdp_annuaire_start_date">
+                            You are registered on the annuaire starting on <field class="oe_inline o_form_label text-uppercase" name="l10n_fr_pdp_annuaire_start_date" options="{'numeric': True}"/>
+                        </p>
+                        <p invisible="l10n_fr_pdp_annuaire_start_date or routing_scheme != '0225' or account_peppol_proxy_state != 'smp_registration'">
+                            For information: French administration annuaire can be updated once a day so your validation should be done tomorrow. If you requested a migration from another PA, registration may take up to two weeks, depending on their response time.
+                        </p>
+                        <p invisible="account_peppol_proxy_state != 'receiver' or l10n_fr_pdp_registered" class="text-warning">
+                            <i class="oi" data-icon="warning"/>You can only send and receive <span class="o_form_label">unregulated</span> messages currently.
+                        </p>
+                    </div>
+                    <div invisible="peppol_use_parent_company or account_peppol_proxy_state != 'rejected'">
+                        You registration has been rejected, the reason has been sent to you via email.
+                        Please contact our support if you need further assistance.
+                    </div>
 
-                            <div invisible="peppol_use_parent_company or account_peppol_proxy_state == 'not_registered'">
-                                <div class="row">
-                                    <label string="Contact Email"
-                                           for="account_peppol_contact_email"
-                                           class="col-lg-3 o_light_label"/>
-                                    <field name="account_peppol_contact_email"
-                                           required="account_peppol_proxy_state in ('sender', 'smp_registration', 'receiver')"/>
-                                </div>
-                            </div>
-                            <div invisible="peppol_use_parent_company or account_peppol_proxy_state not in ('smp_registration', 'receiver')">
-                                <div class="row">
-                                    <label string="Incoming Invoices Journal"
-                                           for="account_peppol_purchase_journal_id"
-                                           class="col-lg-3 o_light_label"/>
-                                    <field name="account_peppol_purchase_journal_id"
-                                           required="peppol_purchase_journal_required"/>
-                                </div>
-                            </div>
-
-                            <div class="d-flex gap-1 action_buttons mt-2"
-                                 invisible="account_peppol_proxy_state not in ('sender', 'smp_registration', 'receiver')">
-                                <button string="Disconnect French electronic invoicing"
-                                        name="button_peppol_deregister"
-                                        type="object"
-                                        class="btn-primary me-1"
-                                        invisible="routing_scheme != '0225' and account_peppol_proxy_state in ('smp_registration', 'receiver')"/>
-                                <button string="Disconnect"
-                                        name="button_peppol_deregister"
-                                        type="object"
-                                        class="btn-secondary me-1"
-                                        invisible="routing_scheme == '0225' or account_peppol_proxy_state not in ('smp_registration', 'receiver')"/>
-                                <button string="Complete Registration"
-                                    name="button_peppol_reregister"
-                                    type="object"
-                                    class="btn-primary"
-                                    invisible="routing_scheme == '0225' or account_peppol_proxy_state not in ('smp_registration', 'receiver')"/>
-                            </div>
-
-                            <div class="d-flex gap-1 action_buttons" colspan="3">
-                                <div invisible="peppol_use_parent_company or account_peppol_proxy_state not in ('not_registered', 'in_verification')">
-                                    <div class="text-muted">
-                                        Allow sending and receiving invoices through the approved platform (AP)
-                                    </div>
-                                    <button name="action_open_peppol_form"
-                                            type="object"
-                                            string="Activate Electronic Invoicing"
-                                            class="oe_highlight mt-2"/>
-                                </div>
-                            </div>
-
-                            <br/>
-                            <div id="l10n_fr_pdp_" class="col-12 o_setting_box"
-                                 invisible="routing_scheme != '0225' or account_peppol_proxy_state not in ('sender', 'receiver')">
-                                <field name="l10n_fr_pdp_send_to_ppf"/>
-                                <span class="text-muted">
-                                    Enable e-reporting &amp; sending of invoices to the PPF
-                                </span>
-                                <br/>
-                                <label string="E-Reporting Frequency"
-                                        for="l10n_fr_pdp_periodicity"
-                                        class="col-lg-3 o_light_label"/>
-                                <field name="l10n_fr_pdp_periodicity"/>
-                            </div>
+                    <div invisible="peppol_use_parent_company or account_peppol_proxy_state == 'not_registered'">
+                        <div class="row">
+                            <label string="Contact Email"
+                                   for="account_peppol_contact_email"
+                                   class="col-lg-3 o_light_label"/>
+                            <field name="account_peppol_contact_email"
+                                   required="account_peppol_proxy_state in ('sender', 'smp_registration', 'receiver')"/>
                         </div>
                     </div>
+                    <div invisible="peppol_use_parent_company or account_peppol_proxy_state not in ('smp_registration', 'receiver')">
+                        <div class="row">
+                            <label string="Incoming Invoices Journal"
+                                   for="account_peppol_purchase_journal_id"
+                                   class="col-lg-3 o_light_label"/>
+                            <field name="account_peppol_purchase_journal_id"
+                                   required="peppol_purchase_journal_required"/>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-1 action_buttons mt-2"
+                         invisible="account_peppol_proxy_state not in ('sender', 'smp_registration', 'receiver')">
+                        <button string="Disconnect French electronic invoicing"
+                                name="button_peppol_deregister"
+                                type="object"
+                                class="btn-primary me-1"
+                                invisible="routing_scheme != '0225' and account_peppol_proxy_state in ('smp_registration', 'receiver')"/>
+                        <button string="Disconnect"
+                                name="button_peppol_deregister"
+                                type="object"
+                                class="btn-secondary me-1"
+                                invisible="routing_scheme == '0225' or account_peppol_proxy_state not in ('smp_registration', 'receiver')"/>
+                        <button string="Complete Registration"
+                            name="button_peppol_reregister"
+                            type="object"
+                            class="btn-primary"
+                            invisible="routing_scheme == '0225' or account_peppol_proxy_state not in ('smp_registration', 'receiver')"/>
+                    </div>
+
+                    <div class="d-flex gap-1 action_buttons" colspan="3">
+                        <div invisible="peppol_use_parent_company or account_peppol_proxy_state not in ('not_registered', 'in_verification')">
+                            <div class="text-muted">
+                                Allow sending and receiving invoices through the approved platform (AP)
+                            </div>
+                            <button name="action_open_peppol_form"
+                                    type="object"
+                                    string="Activate Electronic Invoicing"
+                                    class="oe_highlight mt-2"/>
+                        </div>
+                    </div>
+
                     <!-- Registering using the branch company -->
-                    <div class="o_setting_right_pane border-0" invisible="not peppol_use_parent_company">
+                    <div invisible="not peppol_use_parent_company">
                         <div>
                             You are sending from <field name="peppol_parent_company_name" class="oe_inline o_form_label" readonly="1"/>.
                         </div>
@@ -153,8 +139,19 @@
                             </div>
                         </div>
                     </div>
-                </block>
-            </xpath>
+                </setting>
+                <setting id="l10n_fr_pdp_" string="E-Reporting"
+                         help="Enable e-reporting &amp; sending of invoices to the PPF"
+                         invisible="country_code != 'FR' or routing_scheme != '0225' or account_peppol_proxy_state not in ('sender', 'receiver')">
+                    <field name="l10n_fr_pdp_send_to_ppf"/>
+                    <div class="mt-2">
+                        <label string="E-Reporting Frequency"
+                               for="l10n_fr_pdp_periodicity"
+                               class="col-lg-3 o_light_label"/>
+                        <field name="l10n_fr_pdp_periodicity"/>
+                    </div>
+                </setting>
+            </block>
 
         </field>
     </record>

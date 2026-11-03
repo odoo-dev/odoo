@@ -6,14 +6,15 @@
             <field name="model">res.config.settings</field>
             <field name="inherit_id" ref="l10n_tw.res_config_settings_view_form"/>
             <field name="arch" type="xml">
-                <xpath expr="//block[@id='l10n_tw_edi']" position="inside">
+                <xpath expr="//block[@id='country_settings_container']" position="inside">
                     <setting string="Set up ECPay"
                              help="Configure the API credentials to issue and manage Taiwanese electronic invoices through ECPay"
                              title="- Staging mode: Run transactions in the ECPay test environment.\n
                                     - Credentials Used: Your ECPay e-Invoice API keys (Merchant ID, HashKey, and HashIV).\n\n
                                     Refer to the documentation for test credentials and help finding the API Keys"
                              documentation="/applications/finance/fiscal_localizations/taiwan.html#accounting"
-                             company_dependent="1">
+                             company_dependent="1"
+                             invisible="country_code != 'TW'">
                         <div class="content-group">
                             <div class="row">
                                 <label for="l10n_tw_edi_ecpay_staging_mode" class="col-lg-4 o_light_label"/>

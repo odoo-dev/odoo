@@ -9,7 +9,8 @@
                 <setting
                     id="l10n_pl_edi_register"
                     help="By checking this box, I authorize Odoo to send and receive my invoices through the KSeF in the FA(3) format."
-                    company_dependent="1">
+                    company_dependent="1"
+                    invisible="country_code != 'PL'">
                     <field name="l10n_pl_edi_register"/>
                     <div class="content-group mt-2">
                         <div class="row" invisible="not l10n_pl_edi_register">

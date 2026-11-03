@@ -160,6 +160,9 @@ class ResConfigSettings(models.TransientModel):
     # Technical field to hide country specific fields from accounting configuration
     country_code = fields.Char(related='company_id.account_fiscal_country_id.code', readonly=True)
 
+    # Technical field to display company dependent icon in locas
+    display_company_dependent_icon = fields.Boolean(compute='_compute_display_company_dependent_icon')
+
     # Storno Accounting
     account_storno = fields.Boolean(string="Storno accounting", readonly=False, related='company_id.account_storno')
     display_account_storno = fields.Boolean(related='company_id.display_account_storno')
@@ -241,6 +244,24 @@ class ResConfigSettings(models.TransientModel):
         readonly=False, check_company=True,
     )
 
+    @api.model
+    def _get_view_cache_key(self, view_id=None, view_type='form', **options):
+        """The override of _get_view, using the country name of the current company,
+        changing the architecture to set the title of a setting block to this country name,
+        makes the view cache dependent on the company.
+        Different companies could be each in a different country"""
+        key = super()._get_view_cache_key(view_id, view_type, **options)
+        return key + (self.env.company,)
+
+    @api.model
+    def _get_view(self, view_id=None, view_type='form', **options):
+        arch, view = super()._get_view(view_id, view_type, **options)
+        if view_type == 'form':
+            country = self.env.company.country_id
+            for block in arch.xpath("//block[@id='country_settings_container']"):
+                block.set('title', self.env._("%s", country.name) if country else self.env._("Country Settings"))
+        return arch, view
+
     @api.depends('country_code')
     def _compute_is_account_peppol_eligible(self):
         # we want to show Peppol settings only to customers that are eligible for Peppol,
@@ -281,6 +302,13 @@ class ResConfigSettings(models.TransientModel):
     def _compute_module_account_loan_extract(self):
         for config in self:
             config.module_account_loan_extract = config.module_account_extract and self.env['ir.module.module']._get('account_loans_extract').state == 'installed'
+
+    @api.depends('company_id')
+    def _compute_display_company_dependent_icon(self):
+        # Used in locas
+        multi_companies = len(self.env.user._get_company_ids()) > 1
+        for config in self:
+            config.display_company_dependent_icon = multi_companies
 
     @api.onchange('group_analytic_accounting')
     def onchange_analytic_accounting(self):
