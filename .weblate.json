@@ -2387,11 +2387,6 @@
                 "new_base": "addons/project_account/i18n/project_account.pot"
             },
             {
-                "name": "project_hr_expense",
-                "filemask": "addons/project_hr_expense/i18n/*.po",
-                "new_base": "addons/project_hr_expense/i18n/project_hr_expense.pot"
-            },
-            {
                 "name": "project_hr_skills",
                 "filemask": "addons/project_hr_skills/i18n/*.po",
                 "new_base": "addons/project_hr_skills/i18n/project_hr_skills.pot"
@@ -2430,11 +2425,6 @@
                 "name": "project_purchase_stock",
                 "filemask": "addons/project_purchase_stock/i18n/*.po",
                 "new_base": "addons/project_purchase_stock/i18n/project_purchase_stock.pot"
-            },
-            {
-                "name": "project_sale_expense",
-                "filemask": "addons/project_sale_expense/i18n/*.po",
-                "new_base": "addons/project_sale_expense/i18n/project_sale_expense.pot"
             },
             {
                 "name": "project_sms",
@@ -2560,16 +2550,6 @@
                 "name": "sale_edi_ubl",
                 "filemask": "addons/sale_edi_ubl/i18n/*.po",
                 "new_base": "addons/sale_edi_ubl/i18n/sale_edi_ubl.pot"
-            },
-            {
-                "name": "sale_expense",
-                "filemask": "addons/sale_expense/i18n/*.po",
-                "new_base": "addons/sale_expense/i18n/sale_expense.pot"
-            },
-            {
-                "name": "sale_expense_margin",
-                "filemask": "addons/sale_expense_margin/i18n/*.po",
-                "new_base": "addons/sale_expense_margin/i18n/sale_expense_margin.pot"
             },
             {
                 "name": "sale_gelato",
@@ -2745,11 +2725,6 @@
                 "name": "spreadsheet_dashboard_event_sale",
                 "filemask": "addons/spreadsheet_dashboard_event_sale/i18n/*.po",
                 "new_base": "addons/spreadsheet_dashboard_event_sale/i18n/spreadsheet_dashboard_event_sale.pot"
-            },
-            {
-                "name": "spreadsheet_dashboard_hr_expense",
-                "filemask": "addons/spreadsheet_dashboard_hr_expense/i18n/*.po",
-                "new_base": "addons/spreadsheet_dashboard_hr_expense/i18n/spreadsheet_dashboard_hr_expense.pot"
             },
             {
                 "name": "spreadsheet_dashboard_hr_timesheet",
