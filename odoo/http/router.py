@@ -84,6 +84,29 @@ def db_list(force: bool = False, host: str | None = None) -> list[str]:
     return db_filter(dbs, host)
 
 
+def _dbfilter_host_domain(host: str) -> tuple[str, str]:
+    #        host
+    #     -----------
+    # www.example.com:80
+    #     -------
+    #     domain
+    host = host.partition(':')[0].removeprefix('www.')
+    return host, host.partition('.')[0]
+
+
+def dbfilter_dbname(host: str) -> str | None:
+    """ Return the database that a literal dbfilter, such as ``^%d$``, gives
+    for the host, without listing the databases. ``None`` when the dbfilter
+    is not a literal: then only listing the databases can tell. """
+    dbfilter = config['dbfilter']
+    literal = dbfilter.removeprefix('^').removesuffix('$')
+    fixed = literal.replace('%h', '').replace('%d', '')
+    if dbfilter != f'^{literal}$' or re.escape(fixed) != fixed:
+        return None
+    host, domain = _dbfilter_host_domain(host)
+    return literal.replace('%h', host).replace('%d', domain)
+
+
 def db_filter(dbs: Iterable[str], host: str | None = None) -> list[str]:
     """
     Return the subset of ``dbs`` that match the dbfilter or the dbname
@@ -98,17 +121,9 @@ def db_filter(dbs: Iterable[str], host: str | None = None) -> list[str]:
     """
 
     if config['dbfilter']:
-        #        host
-        #     -----------
-        # www.example.com:80
-        #     -------
-        #     domain
         if host is None:
             host = request.httprequest.environ.get('HTTP_HOST', '')
-        host = host.partition(':')[0]
-        host = host.removeprefix('www.')
-        domain = host.partition('.')[0]
-
+        host, domain = _dbfilter_host_domain(host)
         dbfilter_re = re.compile(
             config["dbfilter"].replace(R"%h", re.escape(host))
                               .replace(R"%d", re.escape(domain)))
