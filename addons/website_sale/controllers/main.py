@@ -796,6 +796,8 @@ class WebsiteSale(payment_portal.PaymentPortal):
             order.order_line.filtered(lambda sol: sol.product_id and not sol.product_id.active).unlink()
             values['suggested_products'] = order._cart_accessories()
             values.update(self._get_express_shop_payment_values(order))
+            # Explain why the checkout is disabled if some combos are outdated.
+            order._set_outdated_combo_warnings()
 
         values.update(self._cart_values(**post))
         return request.render("website_sale.cart", values)
@@ -2101,6 +2103,10 @@ class WebsiteSale(payment_portal.PaymentPortal):
                 "Some products in your cart are not available for purchase in your"
                 " country. Please remove them or contact us."
             )
+            return request.redirect('/shop/cart')
+
+        # Check that the cart does not contain combos modified since they were added to it.
+        if order_sudo._set_outdated_combo_warnings():
             return request.redirect('/shop/cart')
 
     def _check_addresses(self, order_sudo):

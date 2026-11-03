@@ -775,7 +775,28 @@ class SaleOrder(models.Model):
 
         :rtype: bool
         """
-        return bool(self.order_line) and not self._get_zero_priced_lines()
+        return (
+            bool(self.order_line)
+            and not self._get_zero_priced_lines()
+            and not self._get_outdated_combo_lines()
+        )
+
+    def _set_outdated_combo_warnings(self):
+        """ Warn the customer about the combos modified since they were added to the cart.
+
+        :return: Whether the cart contains outdated combos.
+        :rtype: bool
+        """
+        self.ensure_one()
+        if outdated_combo_lines := self._get_outdated_combo_lines():
+            outdated_combo_lines.shop_warning = self.env._(
+                "This combo has changed since it was added to your cart."
+            )
+            self.shop_warning = self.env._(
+                "Some combos in your cart have changed since you added them. Please remove them"
+                " and add them again."
+            )
+        return bool(outdated_combo_lines)
 
     def _check_cart_is_ready_to_be_paid(self):
         """ Whether the cart is valid and the user can proceed to the payment
