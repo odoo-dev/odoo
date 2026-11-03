@@ -9,6 +9,11 @@ from stdnum import luhn
 class AccountMove(models.Model):
     _inherit = 'account.move'
 
+    @api.depends('delivery_date')
+    def _compute_show_delivery_date(self):
+        for move in self:
+            move.show_delivery_date = (move.move_type == 'out_invoice')
+
     def _get_invoice_reference_se_ocr2(self, reference):
         self.ensure_one()
         return reference + luhn.calc_check_digit(reference)
@@ -75,3 +80,13 @@ class AccountMove(models.Model):
                     luhn.validate(invoice.payment_reference)
                 except Exception:
                     raise ValidationError(_("Vendor require OCR Number as payment reference. Payment reference isn't a valid OCR Number."))
+
+    def _post(self, soft=True):
+        # EXTENDS
+        posted = super(AccountMove, self)._post(soft)
+
+        for move in self:
+            if move.move_type == 'out_invoice' and not move.delivery_date:
+                move.delivery_date = move.invoice_date
+
+        return posted
