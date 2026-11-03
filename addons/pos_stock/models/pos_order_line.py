@@ -18,7 +18,7 @@ class PosOrderLine(models.Model):
         another document, e.g. the delivery of a settled sale order. See `pos_sale_stock`.
         """
         self.ensure_one()
-        return self._get_qty_based_on_product_uom()
+        return self._get_qty_in_product_uom()
 
     def write(self, vals):
         if vals.get('pack_lot_line_ids'):

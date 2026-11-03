@@ -173,6 +173,10 @@ export class ProductTemplate extends ProductTemplateAccounting {
         return this.cachedValues[key];
     }
 
+    getUomPriceFactor(uom) {
+        return uom ? uom.getFactorTo(this.uom_id) : 1;
+    }
+
     onUpdate() {
         this.cachedValues = {};
     }

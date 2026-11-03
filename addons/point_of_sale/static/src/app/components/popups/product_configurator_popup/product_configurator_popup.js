@@ -96,10 +96,6 @@ export class UomSelection extends Component {
         availableUoMs: t.array(t.instanceOf(UomUom)),
         setSelected: t.function(),
     });
-
-    onChange(value) {
-        this.props.setSelected(value);
-    }
 }
 
 export class ProductConfiguratorPopup extends Component {
@@ -260,7 +256,7 @@ export class ProductConfiguratorPopup extends Component {
                     return acc;
                 }, []),
             price_extra: this.priceExtra,
-            uom_id: this.state.selectedUomId,
+            product_uom_id: this.state.selectedUomId,
         };
     }
 
@@ -302,8 +298,7 @@ export class ProductConfiguratorPopup extends Component {
         const info = product.getTaxDetails({ overridedValues });
         const uom = this.pos.models["uom.uom"].get(this.state.selectedUomId);
         const total = this.pos.formatCurrency(
-            (info?.raw_total_included_currency || 0.0) *
-                (uom && uom.id !== product.uom_id.id ? uom.relative_factor : 1)
+            (info?.raw_total_included_currency || 0.0) * product.getUomPriceFactor(uom)
         );
         return `${this.props.productTemplate.display_name} | ${total}`;
     }

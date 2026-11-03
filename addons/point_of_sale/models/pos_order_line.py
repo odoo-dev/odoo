@@ -218,9 +218,12 @@ class PosOrderLine(models.Model):
         for line in self:
             line.tax_ids_after_fiscal_position = line.order_id.fiscal_position_id.map_tax(line.tax_ids)
 
-    def _get_qty_based_on_product_uom(self):
+    def _get_qty_in_product_uom(self):
         self.ensure_one()
-        return self.qty * self.product_uom_id.relative_factor if self.product_id.uom_id != self.product_uom_id else self.qty
+        uom = self.product_uom_id
+        if not uom or uom == self.product_id.uom_id:
+            return self.qty
+        return uom._compute_quantity(self.qty, self.product_id.uom_id, round=False)
 
     def _prepare_reference_vals(self):
         return {
@@ -236,7 +239,7 @@ class PosOrderLine(models.Model):
             product = line.product_id
             cost_currency = product.sudo().cost_currency_id
             product_cost = line._get_product_cost(at_closing)
-            line.total_cost = line._get_qty_based_on_product_uom() * cost_currency._convert(
+            line.total_cost = line._get_qty_in_product_uom() * cost_currency._convert(
                 from_amount=product_cost,
                 to_currency=line.currency_id,
                 company=line.company_id or self.env.company,

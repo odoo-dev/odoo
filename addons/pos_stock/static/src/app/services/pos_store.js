@@ -39,8 +39,6 @@ patch(PosStore.prototype, {
         if (values.product_id.tracking === "lot") {
             const productTemplate = values.product_id.product_tmpl_id;
             const related_lines = [];
-            const isDifferentUom =
-                selectedOrderline.product_uom_id.id !== productTemplate.uom_id.id;
             const price =
                 productTemplate.getPrice(
                     order.pricelist_id,
@@ -50,7 +48,7 @@ patch(PosStore.prototype, {
                     values.product_id,
                     selectedOrderline,
                     related_lines
-                ) * (isDifferentUom ? selectedOrderline.product_uom_id.relative_factor : 1);
+                ) * productTemplate.getUomPriceFactor(selectedOrderline.product_uom_id);
             related_lines
                 .filter((line) => line.price_type === "original")
                 .forEach((line) => line.setUnitPrice(price));

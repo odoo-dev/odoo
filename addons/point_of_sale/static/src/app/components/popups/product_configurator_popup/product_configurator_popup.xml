@@ -155,7 +155,7 @@
                     type="radio"
                     name="uom"
                     t-attf-id="uom-{{uom.id}}"
-                    t-on-change="() => this.onChange(uom)"
+                    t-on-change="() => this.props.setSelected(uom)"
                     />
                 <label
                     role="button"

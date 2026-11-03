@@ -24,7 +24,9 @@ export class AttributeSelection extends Component {
             this.props.productTemplate.uom_id,
             ...this.props.productTemplate.uom_ids,
         ];
-        this.selectUom(this.props.productTemplate.uom_id);
+        if (!this.selectedValues.selectedUoMValue) {
+            this.selectUom(this.props.productTemplate.uom_id);
+        }
     }
 
     get selectedValues() {
@@ -40,7 +42,7 @@ export class AttributeSelection extends Component {
         return this.selectedValues.isValueSelected(attribute, value);
     }
     isUomSelected(uom) {
-        return this.selectedValues.selectedUoMValue?.id == uom.id;
+        return this.selectedValues.selectedUoMValue?.id === uom.id;
     }
 
     selectAttribute(attribute, value) {

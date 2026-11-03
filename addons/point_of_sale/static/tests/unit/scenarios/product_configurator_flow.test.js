@@ -400,7 +400,7 @@ test("test packaging product orderline with product configurator", async () => {
 
     // Add a Steel desk product in Units
     await Utils.clickDisplayedProduct("Steel desk");
-    await Utils.selectUomOption("Units", true);
+    await Utils.selectUomOption("Units");
     await Utils.confirmDialog("Add");
     expect(store.getOrder().lines.length).toBe(1);
     expect(store.getOrder().lines[0].priceIncl).toBe(875);
@@ -408,14 +408,14 @@ test("test packaging product orderline with product configurator", async () => {
     // Change the existing line to Pack of 6 via configurator
     const firstOrderlineEl = Utils.getOrderlineElByPrice("Steel desk", "875");
     await Utils.longPressOrderline(firstOrderlineEl);
-    await Utils.selectUomOption("Pack of 6", true);
+    await Utils.selectUomOption("Pack of 6");
     await Utils.confirmDialog("Add");
     expect(store.getOrder().lines.length).toBe(1);
     expect(store.getOrder().lines[0].priceIncl).toBe(5250);
 
     // Add another Steel desk in Pack of 6 and verify line quantity merges
     await Utils.clickDisplayedProduct("Steel desk");
-    await Utils.selectUomOption("Pack of 6", true);
+    await Utils.selectUomOption("Pack of 6");
     await Utils.confirmDialog("Add");
     expect(store.getOrder().lines.length).toBe(1);
     expect(store.getOrder().lines[0].getQuantity()).toBe(2);
@@ -423,14 +423,14 @@ test("test packaging product orderline with product configurator", async () => {
 
     // Add a Steel desk in Units as a new orderline
     await Utils.clickDisplayedProduct("Steel desk");
-    await Utils.selectUomOption("Units", true);
+    await Utils.selectUomOption("Units");
     await Utils.confirmDialog("Add");
     expect(store.getOrder().lines.length).toBe(2);
     expect(store.getOrder().lines[1].priceIncl).toBe(875);
 
     // Add another Steel desk in Units to merge with the existing Units line
     await Utils.clickDisplayedProduct("Steel desk");
-    await Utils.selectUomOption("Units", true);
+    await Utils.selectUomOption("Units");
     await Utils.confirmDialog("Add");
     expect(store.getOrder().lines.length).toBe(2);
     expect(store.getOrder().lines[1].getQuantity()).toBe(2);

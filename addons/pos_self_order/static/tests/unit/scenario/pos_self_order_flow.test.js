@@ -1440,7 +1440,7 @@ test("test packaging product for self order", async () => {
     await Utils.selectLocation("Out");
     await Utils.clickCategory("Category 2");
     await Utils.clickProduct("Steel desk");
-    await Utils.selectUomOption("Units", true);
+    await Utils.selectUomOption("Units");
     await Utils.clickBtn("Add to cart");
     expect(store.currentOrder.lines.length).toBe(1);
     expect(store.currentOrder.lines[0].priceIncl).toBe(875);
@@ -1448,7 +1448,7 @@ test("test packaging product for self order", async () => {
     expect(store.currentOrder.lines[0].product_uom_id.id).toBe(1);
 
     await Utils.clickProduct("Steel desk");
-    await Utils.selectUomOption("Pack of 6", true);
+    await Utils.selectUomOption("Pack of 6");
     await Utils.clickBtn("Add to cart");
     expect(store.currentOrder.lines.length).toBe(2);
     expect(store.currentOrder.lines[1].priceIncl).toBe(5250);
@@ -1456,7 +1456,7 @@ test("test packaging product for self order", async () => {
     expect(store.currentOrder.lines[1].product_uom_id.id).toBe(2);
 
     await Utils.clickProduct("Steel desk");
-    await Utils.selectUomOption("Units", true);
+    await Utils.selectUomOption("Units");
     await Utils.clickBtn("Add to cart");
     expect(store.currentOrder.lines.length).toBe(2);
     expect(store.currentOrder.lines[0].priceIncl).toBe(1750);
@@ -1464,7 +1464,7 @@ test("test packaging product for self order", async () => {
     expect(store.currentOrder.lines[0].product_uom_id.id).toBe(1);
 
     await Utils.clickProduct("Steel desk");
-    await Utils.selectUomOption("Pack of 6", true);
+    await Utils.selectUomOption("Pack of 6");
     await Utils.clickBtn("Add to cart");
     expect(store.currentOrder.lines.length).toBe(2);
     expect(store.currentOrder.lines[1].priceIncl).toBe(10500);

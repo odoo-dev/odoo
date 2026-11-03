@@ -180,7 +180,7 @@ class StockMove(models.Model):
                                 move._update_reserved_quantity(qty, move.location_id, lot_id=existing_lot)
 
     def _get_lot_line_qty(self, line, move, lines_data):
-        return 1 if line.product_id.tracking == 'serial' else abs(line._get_qty_based_on_product_uom())
+        return 1 if line.product_id.tracking == 'serial' else abs(line._get_qty_in_product_uom())
 
     @api.depends("product_id")
     def _compute_description_picking(self):

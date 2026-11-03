@@ -269,8 +269,6 @@ export class PosOrderline extends PosOrderlineAccounting {
 
     recomputeUnitPrice() {
         const productTemplate = this.product_id.product_tmpl_id;
-        const isDifferentUom = productTemplate.uom_id.id !== this.product_uom_id?.id;
-        const factor = isDifferentUom ? this.product_uom_id?.relative_factor || 1 : 1;
         this.setUnitPrice(
             productTemplate.getPrice(
                 this.order_id.pricelist_id,
@@ -278,7 +276,7 @@ export class PosOrderline extends PosOrderlineAccounting {
                 this.getPriceExtra(),
                 false,
                 this.product_id
-            ) * factor
+            ) * productTemplate.getUomPriceFactor(this.product_uom_id)
         );
     }
 
@@ -288,9 +286,6 @@ export class PosOrderline extends PosOrderlineAccounting {
         );
         const price = ProductPrice.round(this.price_unit || 0);
         const product = orderline.getProduct();
-        const isDifferentUom =
-            orderline.product_uom_id && orderline.product_uom_id.id !== product.uom_id.id;
-        const factor = isDifferentUom ? orderline.product_uom_id.relative_factor || 1 : 1;
         const order_line_price =
             product.getPrice(
                 orderline.order_id.pricelist_id,
@@ -298,7 +293,7 @@ export class PosOrderline extends PosOrderlineAccounting {
                 0,
                 false,
                 product
-            ) * (isDifferentUom ? factor : 1);
+            ) * product.getUomPriceFactor(orderline.product_uom_id);
 
         const isSameCustomerNote =
             (Boolean(orderline.getCustomerNote()) === false &&

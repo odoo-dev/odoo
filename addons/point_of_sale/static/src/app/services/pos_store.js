@@ -992,12 +992,10 @@ export class PosStore extends WithLazyGetterTrap {
                 values[0].is_custom ||
                 values[0].attribute_id.display_type === "multi"
         );
-        const skip_configure =
+        const skipConfigure =
             opts.code && this.models["product.uom"].getBy("barcode", opts.code?.code);
-        if (
-            hasConfigurableAttributes ||
-            (pTemplate.uom_ids.length && !skip_configure && !opts.hideUoMSelection)
-        ) {
+        const skipUom = pTemplate.skipUomSelection() || opts.hideUoMSelection;
+        if (hasConfigurableAttributes || (pTemplate.uom_ids.length && !skipUom && !skipConfigure)) {
             const forceVariantValue =
                 opts.forceVariantValue ||
                 (variantProduct ? variantProduct.product_template_attribute_value_ids : undefined);
@@ -1398,7 +1396,7 @@ export class PosStore extends WithLazyGetterTrap {
                 }
 
                 let price_unit = values.price_unit;
-                const uom = this.models["uom.uom"].get(payload.uom_id);
+                const uom = this.models["uom.uom"].get(payload.product_uom_id);
                 const isDifferentUom = uom && uom.id !== productTemplate.uom_id.id;
                 if (isDifferentUom) {
                     price_unit =
@@ -1408,7 +1406,7 @@ export class PosStore extends WithLazyGetterTrap {
                             values.price_extra + payload.price_extra,
                             false,
                             values.product_id
-                        ) * (uom.relative_factor || 1);
+                        ) * productTemplate.getUomPriceFactor(uom);
                 }
                 Object.assign(values, {
                     attribute_value_ids: payload.attribute_value_ids.map((id) => [

@@ -420,7 +420,7 @@ export class SelfOrder {
         selectedValues = {},
         customValues = {},
         comboValues = {},
-        product_uom_id = null
+        uom = null
     ) {
         this.resetTip();
         const values = getOrderLineValues(
@@ -431,7 +431,7 @@ export class SelfOrder {
             selectedValues,
             customValues,
             comboValues,
-            product_uom_id
+            uom
         );
         const newLine = this.models["pos.order.line"].create(values);
         const lineToMerge = this.currentOrder.lines.find(
@@ -1162,15 +1162,18 @@ export class SelfOrder {
         return result;
     }
 
-    getProductPriceInfo(productTemplate, product, product_uom_id = null, priceExtra = 0) {
+    getProductPriceInfo(productTemplate, product, uom = null, priceExtra = 0) {
         const order = this.currentOrder;
         const pricelist = order.preset_id?.pricelist_id || this.config.pricelist_id;
         const productVariant = product || productTemplate.product_variant_ids[0];
-        const isDifferentUom = productTemplate.uom_id.id !== product_uom_id?.id;
-        const factor = isDifferentUom ? product_uom_id?.relative_factor || 1 : 1;
         const price =
-            productTemplate.getPrice(pricelist, 1 * factor, priceExtra, false, productVariant) *
-            factor;
+            productTemplate.getPrice(
+                pricelist,
+                1 * productTemplate.getUomPriceFactor(uom),
+                priceExtra,
+                false,
+                productVariant
+            ) * productTemplate.getUomPriceFactor(uom);
         const taxesData = (productVariant || productTemplate).getTaxDetails({
             overridedValues: {
                 price,

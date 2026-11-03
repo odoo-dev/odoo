@@ -431,7 +431,7 @@ class PosOrder(models.Model):
                 # Lines without a combo parent are priced on their own. A line whose combo
                 # parent doesn't belong to this order is never reached by _compute_combo_price,
                 # so it is priced the same way instead of keeping its frontend price.
-                self._compute_line_price(line, line.price_unit if line.product_uom_id != line.product_id.uom_id else False)
+                self._compute_line_price(line)
 
         # Then process service fee lines using the now-computed applicable lines
         self._compute_service_fee_price()
@@ -452,7 +452,8 @@ class PosOrder(models.Model):
         pricelist = self.pricelist_id
         selected_attributes = line.attribute_value_ids
         product = line.product_id.with_context(line.product_id._get_product_price_context(selected_attributes))
-        price = price or pricelist._get_product_price(product, 1.0, currency=self.currency_id)
+        factor = line.product_uom_id._compute_quantity(1.0, line.product_id.uom_id, round=False)
+        price = price or pricelist._get_product_price(product, line.qty * factor, currency=self.currency_id) * factor
         line.price_unit = price
         line.tax_ids = line.product_id.taxes_id._filter_taxes_by_company(self.company_id)
         self._compute_line_subtotals(line)
