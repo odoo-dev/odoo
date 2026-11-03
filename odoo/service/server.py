@@ -55,6 +55,7 @@ except ImportError:
         return None
 
 from odoo import api, sql_db
+from odoo.http.handoff import RegistryHandoff
 from odoo.http.server import HTTPSocket
 from odoo.modules.registry import Registry
 from odoo.orm.cache import log_ormcache_stats
@@ -789,6 +790,9 @@ class PreforkServer(CommonServer):
         self.generation = 0
         self.queue = collections.deque()
         self.servers_gevent = {}
+        self.handoff = None
+        if config['http_enable'] and os.environ.get('ODOO_REGISTRY_HANDOFF'):
+            self.handoff = RegistryHandoff(self.population)
 
     def signal_handler(self, sig, frame):
         if len(self.queue) < 5 or sig == signal.SIGCHLD:
@@ -1150,6 +1154,7 @@ class Worker:
         self.watchdog_pipe = pipe_new()
         self.eintr_pipe = pipe_new()
         self.wakeup_fd_r, self.wakeup_fd_w = self.eintr_pipe
+        self.extra_wait_fds = ()
         # Can be set to None if no watchdog is desired.
         self.watchdog_timeout = multi.timeout
         self.ppid = os.getpid()
@@ -1182,7 +1187,7 @@ class Worker:
 
     def sleep(self):
         try:
-            select.select([self.multi.socket, self.wakeup_fd_r], [], [], self.multi.beat)
+            select.select([self.multi.socket, self.wakeup_fd_r, *self.extra_wait_fds], [], [], self.multi.beat)
             # clear wakeup pipe if we were interrupted
             empty_pipe(self.wakeup_fd_r)
         except OSError as e:
@@ -1286,19 +1291,76 @@ class WorkerHTTP(Worker):
         sock_timeout = os.environ.get("ODOO_HTTP_SOCKET_TIMEOUT")
         self.sock_timeout = float(sock_timeout) if sock_timeout else 2
 
-    def process_request(self, client, addr):
+        self.handoff = multi.handoff
+        self.handoff_slot = None
+        self.published_dbs = None
+        if self.handoff:
+            self.handoff_slot = self.handoff.acquire_slot()
+            if self.handoff_slot is not None:
+                self.extra_wait_fds = (self.handoff.reader(self.handoff_slot),)
+
+    def close(self):
+        if self.handoff_slot is not None:
+            self.handoff.release_slot(self.handoff_slot)
+        super().close()
+
+    def start(self):
+        super().start()
+        self.publish_databases()
+
+    def stop(self):
+        if self.handoff_slot is not None:
+            # Stop being a candidate, then serve what was sent before that. The
+            # lock is kept: it goes away with the process.
+            self.handoff.lock(self.handoff_slot, blocking=True)
+            self.handoff.forget(self.handoff_slot)
+            while self.process_received():
+                pass
+        super().stop()
+
+    def publish_databases(self):
+        if self.handoff_slot is not None:
+            dbs = frozenset(Registry.registries)
+            if dbs != self.published_dbs:
+                room = max(Registry.registries.count - len(dbs), 0)
+                self.handoff.publish(self.handoff_slot, dbs, room)
+                self.published_dbs = dbs
+
+    def send_connection(self, dbname, sock, raw):
+        registries = Registry.registries
+        would_evict = len(registries) >= registries.count
+        return self.handoff.send(dbname, sock, raw, self.handoff_slot, would_evict=would_evict)
+
+    def process_request(self, client, addr, prelude=b'', handoff_dbname=None):
         client.setblocking(1)
         client.settimeout(self.sock_timeout)
         client.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
         # Prevent fd inherientence close_on_exec
         flags = fcntl.fcntl(client, fcntl.F_GETFD) | fcntl.FD_CLOEXEC
         fcntl.fcntl(client, fcntl.F_SETFD, flags)
-        http_socket = HTTPSocket(client, addr)
+        # a connection is handed off only once: the table can be outdated, and
+        # the request must end up being served
+        handoff = self.send_connection if self.handoff and not prelude else None
+        http_socket = HTTPSocket(client, addr, prelude=prelude, handoff=handoff, handoff_dbname=handoff_dbname)
         http_socket.process_request()
 
         self.request_count += 1
 
-    def process_work(self):
+    def process_received(self):
+        """ Serve a connection from the inbox, return whether there was one. """
+        received = self.handoff.receive(self.handoff_slot)
+        if not received:
+            return False
+        client, dbname, prelude = received
+        with client:
+            try:
+                addr = client.getpeername()
+            except OSError:  # the client is gone
+                return True
+            contextvars.Context().run(self.process_request, client, addr, prelude, dbname)
+        return True
+
+    def process_accepted(self):
         try:
             client, addr = self.multi.socket.accept()
         except (BlockingIOError, ConnectionAbortedError):
@@ -1306,6 +1368,21 @@ class WorkerHTTP(Worker):
         else:
             with client:
                 contextvars.Context().run(self.process_request, client, addr)
+
+    def process_work(self):
+        if self.handoff_slot is None:
+            self.process_accepted()
+            return
+        # While we hold the lock, nothing can be added to the inbox. So when it
+        # is empty it is safe to accept a connection and be busy for a while.
+        if not self.handoff.lock(self.handoff_slot):
+            return  # a connection is on its way
+        try:
+            if not self.process_received():
+                self.process_accepted()
+            self.publish_databases()
+        finally:
+            self.handoff.unlock(self.handoff_slot)
 
 
 class WorkerCron(Worker):

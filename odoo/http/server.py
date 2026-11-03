@@ -18,6 +18,7 @@ import odoo
 import odoo.release
 from odoo.tools import config
 
+from .handoff import HandedOff
 from .router import root
 from .server_log import _logger, http_log, reset_thread_info
 
@@ -92,11 +93,14 @@ class HTTPSocket:
         'conn',
         'h11request',
         'h11response',
+        'handoff',
+        'handoff_dbname',
         'ip',
+        'raw',
         'sock',
     )
 
-    def __init__(self, client_sock, client_addr, *, prelude=b''):
+    def __init__(self, client_sock, client_addr, *, prelude=b'', handoff=None, handoff_dbname=None):
         self.sock = client_sock
         self.addr = client_addr
         self.ip = client_addr[0]  # until we find the X-Forwarded-For header
@@ -110,6 +114,13 @@ class HTTPSocket:
 
         self.h11request = None
         self.h11response = None
+
+        # A callable (dbname, sock, raw) -> bool that tries to give the
+        # connection to another worker, with what we have read from it.
+        self.handoff = handoff
+        self.raw = bytearray()
+        # The database the sending worker resolved for this request.
+        self.handoff_dbname = handoff_dbname
 
     def _log(self, level, msg, *args, req=None, res=None, **kwargs):
         kwargs.setdefault('extra', {}).setdefault('remote_addr', self.ip)
@@ -160,6 +171,10 @@ class HTTPSocket:
             'wsgi.multiprocess': config['workers'] and not odoo.evented,
             'wsgi.run_once': False,
         }
+        if self.handoff:
+            environ['odoo.registry_handoff'] = self._handoff
+        if self.handoff_dbname:
+            environ['odoo.handoff_dbname'] = self.handoff_dbname
         if environ['wsgi.multithread'] or odoo.evented:
             # cannot use websocket in prefork HTTP workers
             environ['socket'] = self.sock
@@ -189,6 +204,9 @@ class HTTPSocket:
 
         return environ
 
+    def _handoff(self, dbname):
+        return self.handoff(dbname, self.sock, bytes(self.raw))
+
     def process_request(self):
         reset_thread_info()
 
@@ -197,12 +215,15 @@ class HTTPSocket:
             event = self.conn.next_event()
             while event is h11.NEED_DATA:
                 try:
-                    self.conn.receive_data(self.sock.recv(RECV_SIZE))
+                    data = self.sock.recv(RECV_SIZE)
                 except ConnectionError:
                     return
                 except TimeoutError as exc:
                     e = "Timed out"
                     raise h11.RemoteProtocolError(e, HTTPStatus.REQUEST_TIMEOUT) from exc
+                if self.handoff:
+                    self.raw += data
+                self.conn.receive_data(data)
                 event = self.conn.next_event()
             if type(event) is h11.ConnectionClosed:
                 return
@@ -251,7 +272,10 @@ class HTTPSocket:
         # start_response() with the http response line and headers, then
         # return an iterable object containing the body.
         wsgi_environ = self._make_environ()
-        wsgi_response = root(wsgi_environ, self.start_response)
+        try:
+            wsgi_response = root(wsgi_environ, self.start_response)
+        except HandedOff:
+            return
         assert self.h11response
 
         if self.conn.our_state is h11.SWITCHED_PROTOCOL:

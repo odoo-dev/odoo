@@ -47,6 +47,7 @@ from .dispatcher import (
     _dispatchers,
     conceal_debug_traceback,
 )
+from .handoff import HandedOff
 from .requestlib import (
     HTTPRequest,
     Request,
@@ -274,6 +275,12 @@ class Application:
                 if self.get_static_file(httprequest.path):
                     response = serve_static(request)
                 elif request.db:
+                    if (
+                        request.db not in Registry.registries
+                        and (handoff := environ.get('odoo.registry_handoff'))
+                        and handoff(request.db)
+                    ):
+                        raise HandedOff
                     try:
                         with _get_profiler_context_manager(request):
                             response = serve_db(request)
@@ -515,6 +522,9 @@ def _set_session_and_dbname(request: Request) -> None:
         session.can_save = False  # stateless
         if db_filter([header_dbname], host=host):
             dbname = header_dbname
+    elif handoff_dbname := request.httprequest.environ.get('odoo.handoff_dbname'):
+        # another worker just did the query below and gave us the request
+        dbname = handoff_dbname
     else:
         all_dbs = db_list(force=True, host=host)
         if len(all_dbs) == 1:
