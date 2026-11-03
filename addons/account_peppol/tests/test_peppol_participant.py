@@ -388,3 +388,19 @@ class TestPeppolParticipant(PeppolConnectorCommon):
             p_rec = partner_form.save()
             self.assertEqual(p_rec.commercial_partner_id, p_rec)
             self.assertEqual(p_rec.commercial_partner_id.name, "test")
+
+    def test_peppol_check_eas_endpoint_changing_vat(self):
+        company = self.env.company
+        company.write({
+            'account_peppol_proxy_state': 'sender',
+            'peppol_eas': '0208',
+            'peppol_endpoint': '0239843188',
+        })
+        partner = company.partner_id
+        self.assertEqual(partner.peppol_eas, '0208')
+        self.assertEqual(partner.peppol_endpoint, '0239843188')
+
+        partner.write({'vat': 'BE0477472702'})
+
+        self.assertEqual(partner.peppol_eas, '0208')
+        self.assertEqual(partner.peppol_endpoint, '0239843188')
