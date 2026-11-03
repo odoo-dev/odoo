@@ -287,12 +287,12 @@ class AccountPaymentTermLine(models.Model):
     delay_type = fields.Selection([
             ('days_after', 'Days after invoice date'),
             ('days_after_end_of_month', 'Days after end of month'),
-            ('days_after_end_of_next_month', 'Days after end of next month'),
             ('days_end_of_month_on_the', 'Days end of month on the'),
+            ('months_after_invoice_date_on_the', 'Months after invoice date on the'),
         ], required=True, default='days_after')
     display_days_next_month = fields.Boolean(compute='_compute_display_days_next_month')
     days_next_month = fields.Char(
-        string='Days on the next month',
+        string='Day of month',
         readonly=False,
         default='10',
         size=2,
@@ -305,8 +305,6 @@ class AccountPaymentTermLine(models.Model):
         due_date = fields.Date.from_string(date_ref) or fields.Date.context_today(self)
         if self.delay_type == 'days_after_end_of_month':
             return date_utils.end_of(due_date, 'month') + relativedelta(days=self.nb_days)
-        elif self.delay_type == 'days_after_end_of_next_month':
-            return date_utils.end_of(due_date + relativedelta(months=1), 'month') + relativedelta(days=self.nb_days)
         elif self.delay_type == 'days_end_of_month_on_the':
             try:
                 days_next_month = int(self.days_next_month)
@@ -317,13 +315,26 @@ class AccountPaymentTermLine(models.Model):
                 return date_utils.end_of(due_date + relativedelta(days=self.nb_days), 'month')
 
             return due_date + relativedelta(days=self.nb_days) + relativedelta(months=1, day=days_next_month)
+        elif self.delay_type == 'months_after_invoice_date_on_the':
+            try:
+                days_next_month = int(self.days_next_month)
+            except ValueError:
+                days_next_month = 1
+
+            target_date = due_date + relativedelta(months=self.nb_days)
+            if days_next_month < due_date.day:
+                target_date += relativedelta(months=1)
+            return target_date + relativedelta(day=days_next_month)
         return due_date + relativedelta(days=self.nb_days)
 
-    @api.constrains('days_next_month')
+    @api.constrains('days_next_month', 'delay_type')
     def _check_valid_char_value(self):
         for record in self:
             if record.days_next_month and record.days_next_month.removeprefix('-').isnumeric():
-                if not (0 <= int(record.days_next_month) <= 31):
+                days_next_month = int(record.days_next_month)
+                if record.delay_type == 'months_after_invoice_date_on_the' and not (1 <= days_next_month <= 31):
+                    raise ValidationError(_('The day of the month must be between 1 and 31.'))
+                if not (0 <= days_next_month <= 31):
                     raise ValidationError(_('The days added must be between 0 and 31.'))
             else:
                 raise ValidationError(_('The days added must be a number and has to be between 0 and 31.'))
@@ -331,7 +342,7 @@ class AccountPaymentTermLine(models.Model):
     @api.depends('delay_type')
     def _compute_display_days_next_month(self):
         for record in self:
-            record.display_days_next_month = record.delay_type == 'days_end_of_month_on_the'
+            record.display_days_next_month = record.delay_type in ('days_end_of_month_on_the', 'months_after_invoice_date_on_the')
 
     @api.constrains('value', 'value_amount')
     def _check_percent(self):
