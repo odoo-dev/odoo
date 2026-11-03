@@ -1,4 +1,4 @@
-import { markRaw, t, Plugin, usePlugin, assertType } from "@odoo/owl";
+import { markRaw, t, Plugin, usePlugin, assertType, signal, untrack, useOnChange } from "@odoo/owl";
 import { Popover } from "@web/core/popover/popover";
 import { registry } from "@web/core/registry";
 import { OverlayPlugin } from "@web/core/overlay/overlay_plugin";
@@ -26,6 +26,18 @@ export const PopoverOptionSchema = t.object({
 export class PopoverPlugin extends Plugin {
     /** @private */
     overlay = usePlugin(OverlayPlugin);
+
+    /** @private */
+    popoverCount = signal(0);
+
+    setup() {
+        useOnChange(
+            () => [this.popoverCount() >= 1],
+            (isOpen) => {
+                document.body.classList.toggle("o-popover-open", isOpen);
+            }
+        );
+    }
 
     /**
      * Signals the manager to add a popover.
@@ -65,11 +77,15 @@ export class PopoverPlugin extends Plugin {
             },
             {
                 scope: options.scope,
-                onRemove: options.onClose,
+                onRemove: (...args) => {
+                    untrack(() => this.popoverCount.set(this.popoverCount() - 1));
+                    return options.onClose?.(...args);
+                },
                 rootId: target.getRootNode()?.host?.id,
                 sequence: options.sequence,
             }
         );
+        untrack(() => this.popoverCount.set(this.popoverCount() + 1));
 
         return remove;
     }
