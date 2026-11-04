@@ -10,6 +10,11 @@
                 </div>
                 <div class="container o_self_container mt-auto cart_container">
                     <h1 class="ms-3 ms-sm-0 mb-3 ">Your Order</h1>
+                    <button t-if="this.canManageCustomerDetails" type="button"
+                        class="o_self_customer_details btn btn-link mb-3"
+                        t-on-click="this.editCustomerDetails">
+                        Your details
+                    </button>
                     <div class="order_box d-flex flex-column bg-white px-3 px-kiosk-p-4 rounded-4 border border-light shadow-sm">
                         <t t-set="display_change_quantity" t-value="this.isCheckout and Object.keys(this.selfOrder.currentOrder.changes).length &gt; 0"/>
                         <t t-foreach="this.lines" t-as="line" t-key="line.uuid">
@@ -156,3 +161,4 @@
         </div>
     </t>
 </templates>
+

@@ -14,11 +14,14 @@
                     <input t-if="this.preset.needsName || this.preset.needsPartner"
                         t-ref="this.autofocusRef"
                         type="text"
+                        autocomplete="name"
                         class="form-control form-control-lg"
                         placeholder="Name"
                         t-model.proxy="this.state.name"/>
                     <input t-if="this.preset.needsEmail || this.preset.needsPartner"
                         type="text"
+                        autocomplete="email"
+                        inputmode="email"
                         class="form-control form-control-lg"
                         placeholder="Email"
                         t-model.proxy="this.state.email"/>
@@ -45,6 +48,7 @@
                                 </t>
                             </SelectMenu>
                             <input type="tel"
+                                t-att-value="this.state.phoneLocal"
                                 class="form-control form-control-lg"
                                 placeholder="Phone"
                                 t-on-input="this.onPhoneInput" />
@@ -81,6 +85,26 @@
                         </t>
                     </t>
                 </div>
+                <div t-if="this.customerMemory.enabled" class="o_self_remember_details mt-3 border-top pt-3">
+                    <label class="d-flex align-items-start gap-2">
+                        <input type="checkbox" class="form-check-input mt-1"
+                            t-att-checked="this.customerMemoryState.remember"
+                            t-att-disabled="this.state.isSubmitting"
+                            t-on-change="this.onRememberCustomerChange"/>
+                        <span>Remember my details on this device</span>
+                    </label>
+                    <p class="small text-muted mt-1 mb-1">
+                        Your contact details and address will be filled in for 30 days in this browser.
+                    </p>
+                    <button t-if="this.customerMemoryState.hasSaved" type="button"
+                        class="o_self_forget_details btn btn-link p-0"
+                        t-att-disabled="this.state.isSubmitting"
+                        t-on-click="this.forgetCustomerDetails">
+                        Forget saved details
+                    </button>
+                    <p t-if="this.customerMemoryState.error" class="text-danger small mt-1 mb-0"
+                        role="alert" t-out="this.customerMemoryState.error"/>
+                </div>
                 <div class="w-100 d-flex mt-3">
                     <button class="btn btn-secondary flex-grow-1 me-1"
                         t-on-click="this.props.close">
@@ -102,3 +126,4 @@
         </Dialog>
     </t>
 </templates>
+

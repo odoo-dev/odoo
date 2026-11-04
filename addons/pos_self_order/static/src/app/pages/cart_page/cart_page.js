@@ -60,6 +60,23 @@ export class CartPage extends Component {
             !history.state?.fromLanding || this.selfOrder.config.self_ordering_pay_after === "each";
     }
 
+    get canManageCustomerDetails() {
+        const preset = this.selfOrder.currentOrder.preset_id;
+        return (
+            this.selfOrder.config.self_ordering_mode === "mobile" &&
+            Boolean(preset?.needsName || preset?.needsEmail || preset?.needsPhone || preset?.needsPartner)
+        );
+    }
+
+    async editCustomerDetails() {
+        const infos = await makeAwaitable(this.dialog, PresetInfoPopup, {});
+        if (infos) {
+            const order = this.selfOrder.currentOrder;
+            order.email = order.partner_id?.email || infos.email;
+            order.mobile = order.partner_id?.phone || infos.phone;
+        }
+    }
+
     onClickBack() {
         if (this.selfOrder.currentOrder.unsentLines.length) {
             this.router.navigate("product_list");
@@ -694,3 +711,4 @@ export class CartPage extends Component {
     }
 */
 }
+

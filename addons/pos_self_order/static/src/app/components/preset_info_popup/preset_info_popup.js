@@ -8,6 +8,8 @@ import { AddressAutoComplete } from "@google_address_autocomplete/address_autoco
 import { makeAwaitable } from "@point_of_sale/app/utils/make_awaitable_dialog";
 import { PillsSelectionPopup } from "@pos_self_order/app/components/pills_selection_popup/pills_selection_popup";
 import { _t } from "@web/core/l10n/translation";
+import { session } from "@web/session";
+import { createCustomerMemory } from "../../utils/customer_memory";
 
 class NoPrefillSelectMenu extends SelectMenu {
     updateInputValue(value = null) {
@@ -136,6 +138,67 @@ export class PresetInfoPopup extends Component {
             isSubmitting: false,
         });
         this.addressRecord = this.makeAddressRecord();
+        this.customerMemory = createCustomerMemory({
+            mode: this.selfOrder.config.self_ordering_mode,
+            database: session.db,
+            configId: this.selfOrder.config.id,
+            getStorage: () => window.localStorage,
+        });
+        const saved = this.customerMemory.read();
+        this.customerMemoryState = proxy({
+            remember: Boolean(saved && !partner),
+            hasSaved: Boolean(saved),
+            error: "",
+        });
+        // Keep the current order's customer authoritative and validate restored
+        // values through the same form as newly entered details.
+        if (this.customerMemory.enabled && partner?.phone) {
+            this.onPhoneInput({ target: { value: partner.phone } });
+        } else if (saved && !partner) {
+            const { phoneCountryId, phoneLocal, countryId, stateId, ...details } = saved;
+            Object.assign(this.state, details);
+            const phoneCountry = this.countries.find((c) => c.id === phoneCountryId);
+            if (phoneCountry) {
+                this.state.phoneCountryId = phoneCountry.id;
+                this.state.phoneLocal = phoneLocal;
+            }
+            const country = this.countries.find((c) => c.id === countryId);
+            if (country) {
+                this.state.countryId = country.id;
+                this.state.stateId = this.states.find((s) => s.id === stateId)?.id || null;
+            }
+        }
+    }
+
+    onRememberCustomerChange(event) {
+        this.customerMemoryState.remember = event.target.checked;
+        this.customerMemoryState.error = "";
+        if (!event.target.checked) {
+            this.forgetCustomerDetails();
+        }
+    }
+
+    forgetCustomerDetails() {
+        const removed = this.customerMemory.forget();
+        this.customerMemoryState.remember = false;
+        this.customerMemoryState.hasSaved = !removed;
+        this.customerMemoryState.error = removed
+            ? ""
+            : _t("We could not remove saved details. Clear this site's data in your browser.");
+        // Forgetting removes future prefills without discarding current edits.
+    }
+
+    rememberCustomerDetails() {
+        if (!this.customerMemory.enabled || !this.customerMemoryState.remember) {
+            return;
+        }
+        const saved = this.customerMemory.save(this.state);
+        if (!saved) {
+            this.selfOrder.notification.add(
+                _t("Your details could not be remembered on this device."),
+                { type: "warning" }
+            );
+        }
     }
 
     async setInformations() {
@@ -173,6 +236,7 @@ export class PresetInfoPopup extends Component {
                 this.selfOrder.currentOrder.floating_order_name = this.state.name;
             }
 
+            this.rememberCustomerDetails();
             this.props.getPayload({ ...this.state, phone: this.getFullPhone() });
             this.props.close();
         } finally {
