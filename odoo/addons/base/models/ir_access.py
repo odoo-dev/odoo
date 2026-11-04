@@ -61,6 +61,41 @@ class AccessInfo(typing.NamedTuple):
     domain: Domain | str
 
 
+class AccessTable:
+    """ Cached value of ``ir.access._get_all_access()``: the raw access data
+    grouped by model name.  The domains are parsed and optimized the first time
+    the accesses of a model are requested.  This only depends on the access data
+    and on the fields definitions (basic optimization is transaction-independent),
+    both of which invalidate the 'stable' cache that holds this object.
+    """
+    __slots__ = ('_evaluated', '_raw')
+
+    def __init__(self, raw: dict[str, tuple]):
+        self._raw = raw
+        self._evaluated: dict[str, tuple[AccessInfo, ...]] = {}
+
+    def get_for(self, env, model_name: str) -> tuple[AccessInfo, ...]:
+        """ Return the ``AccessInfo`` of the given model. """
+        try:
+            return self._evaluated[model_name]
+        except KeyError:
+            pass
+        raws = self._raw.get(model_name)
+        if not raws:
+            return ()
+        model = env(su=True)[model_name]
+        infos = []
+        for access_id, group_id, operation, domain in raws:
+            domain = (domain or "").strip()
+            try:
+                domain = Domain(ast.literal_eval(domain)) if domain else Domain.TRUE
+                domain = domain.optimize(model)
+            except ValueError:
+                _logger.debug("_get_all_access: failed to evaluate domain", exc_info=True)
+            infos.append(AccessInfo(access_id, group_id, operation, domain))
+        return self._evaluated.setdefault(model_name, tuple(infos))
+
+
 class IrAccess(models.Model):
     """ Access control records with domains. """
     _name = 'ir.access'
@@ -280,30 +315,30 @@ class IrAccess(models.Model):
     #
 
     @api.ormcache(cache='stable')
-    def _get_all_access(self) -> dict[str, tuple[AccessInfo, ...]]:
-        """Return all the active access records as ``AccessInfo`` objects, grouped by model name."""
-        accesses = self.sudo().search_fetch(
-            [('active', '=', True)],
-            ['model_id', 'group_id', 'operation', 'domain'],
-            order='id',
-        )
-        # group accesses by model, and pre-evaluate domains if possible
-        result = defaultdict(list)
-        env = self.env(su=True)
-        for access in accesses:
-            model_name = access.model_id.model
-            if model_name not in self.env.registry:
-                continue
-            domain = (access.domain or "").strip()
-            try:
-                domain = Domain(ast.literal_eval(domain)) if domain else Domain.TRUE
-                domain = domain.optimize(env[model_name])
-            except ValueError:
-                _logger.debug("_get_all_access: failed to evaluate domain", exc_info=True)
-            info = AccessInfo(access.id, access.group_id.id, access.operation, domain)
-            result[model_name].append(info)
+    def _get_all_access(self) -> AccessTable:
+        """Return all the active access records as ``AccessInfo`` objects, grouped by model name.
 
-        return frozendict({model_name: tuple(infos) for model_name, infos in result.items()})
+        The domains of a model are parsed and optimized lazily, the first time
+        the accesses of that model are requested (see :class:`AccessTable`).
+        """
+        # fetch everything in one query, without building records
+        self.flush_model(['active', 'model_id', 'group_id', 'operation', 'domain'])
+        self.env['ir.model'].flush_model(['model'])
+        rows = self.env.execute_query(SQL(
+            """ SELECT m.model, a.id, a.group_id, a.operation, a.domain
+                FROM ir_access a JOIN ir_model m ON m.id = a.model_id
+                WHERE a.active ORDER BY a.id """,
+        ))
+        registry = self.env.registry
+        result = defaultdict(list)
+        for model_name, access_id, group_id, operation, domain in rows:
+            if model_name in registry:
+                result[model_name].append((access_id, group_id or False, operation, domain))
+        return AccessTable({model_name: tuple(raws) for model_name, raws in result.items()})
+
+    def _get_model_access(self, model_name: str) -> tuple[AccessInfo, ...]:
+        """ Return the active accesses of the given model as ``AccessInfo`` objects. """
+        return self._get_all_access().get_for(self.env, model_name)
 
     def _get_access_context(self) -> Iterator:
         """ Return the context values that the evaluation of the access domain depends on. """
@@ -354,7 +389,7 @@ class IrAccess(models.Model):
         # groups that imply some group having some access record for model
         groups = self.env['res.groups'].sudo()
         model = self.env[model_name]
-        for access in self._get_all_access().get(model_name, ()):
+        for access in self._get_model_access(model_name):
             if not (access.group_id and access.operation in operations):
                 continue
             # extract the necessary 'access' conditions from the access' domain
@@ -513,7 +548,7 @@ class IrAccess(models.Model):
 
         accesses = [
             access
-            for access in self._get_all_access().get(model._name, ())
+            for access in self._get_model_access(model._name)
             if access.operation in operations
         ]
         group_ids = set(self.env.user._get_group_ids())
