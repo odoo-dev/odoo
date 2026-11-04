@@ -1,4 +1,3 @@
-from collections import defaultdict
 from datetime import UTC
 
 from odoo import Command, api, fields, models
@@ -102,12 +101,12 @@ class PosOrderLine(models.Model):
             'partner_id': self.order_id.partner_id.id,
             'company_id': self.order_id.company_id,
             'reference_ids': self.order_id.stock_reference_ids,
-            'pos_order_line_ids': [self.id],
+            'pos_order_line_ids': self.ids,
             'never_product_template_attribute_value_ids': self.attribute_value_ids.filtered(lambda a: a.attribute_id.create_variant == 'no_variant')
         }
 
     def _launch_stock_rule_from_pos_order_lines(self):
-        procurements = defaultdict(list)
+        procurements = []
         for line in self:
             line = line.with_company(line.company_id)
             if line.product_id.type != 'consu':
@@ -123,24 +122,12 @@ class PosOrderLine(models.Model):
                 line.order_id.stock_reference_ids = [Command.set(reference_ids.ids)]
 
             values = line._prepare_procurement_values()
-            line_uom = line.product_uom_id
-            quant_uom = line.product_id.uom_id
-            product_qty, procurement_uom = line_uom._adjust_uom_quantities(product_qty, quant_uom)
-
-            procurement_uom = line.product_id.uom_id
-            procurements[line.id].append(
-                self.env['stock.rule'].Procurement(
-                line.product_id, product_qty, procurement_uom,
+            procurements.append(self.env['stock.rule'].Procurement(
+                line.product_id, product_qty, line.product_id.uom_id,
                 line.order_id.partner_id.property_stock_customer,
-                line.name, line.order_id.name, line.order_id.company_id, values)
-            )
+                line.name, line.order_id.name, line.order_id.company_id, values))
         if procurements:
-            procurements_list = [
-                procurement
-                for procurements_group in procurements.values()
-                for procurement in procurements_group
-            ]
-            self.env['stock.rule'].run(procurements_list)
+            self.env['stock.rule'].run(procurements)
 
         # This next block is currently needed only because the scheduler trigger is done by picking confirmation rather than stock.move confirmation
         orders = self.mapped('order_id')
@@ -148,10 +135,6 @@ class PosOrderLine(models.Model):
             pickings_to_confirm = order.picking_ids
             if pickings_to_confirm:
                 # Trigger the Scheduler for Pickings
-                order_lines = self.env['pos.order.line'].browse(procurements.keys())
-                for line, move in zip(order_lines, pickings_to_confirm.move_ids):
-                    line.move_ids |= move
-                    move.packaging_uom_id = line.product_uom_id
                 tracked_lines = order.lines.filtered(lambda line: line.product_id.tracking in ['lot', 'serial'])
                 lines_by_tracked_product = tracked_lines.grouped('product_id')
                 pickings_to_confirm.action_confirm()
