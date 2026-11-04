@@ -3386,3 +3386,182 @@ class TestAccrualAllocations(TestHrHolidaysCommon):
             # employee must be back-filled with 5 * 2 = 10 days.
             self.assertEqual(children_allocations[0].number_of_days, 10.0)
             self.assertEqual(children_allocations[1].number_of_days, 10.0)
+
+    def test_second_yearly_milestone_future_balance_after_monthly_transition(self):
+        """
+        Regression test for OPW-6383841.
+
+        Accrual plan with:
+        - First milestone: 1.25 days monthly from allocation creation
+        - Second milestone: 30 days yearly on January 1st, after 1 year
+        Allocation start date: 01/08/2025
+
+        After the second milestone becomes active, the prorated yearly accrual must
+        remain in the balance until the next yearly accrual date.
+        """
+        accrual_plan = self.env['hr.leave.accrual.plan'].with_context(tracking_disable=True).create({
+            'name': 'Monthly then Yearly',
+            'transition_mode': 'immediately',
+            'accrued_gain_time': 'start',
+            'carryover_date': 'year_start',
+            'level_ids': [
+                Command.create({
+                    'start_count': 0,
+                    'added_value': 1.25,
+                    'added_value_type': 'day',
+                    'frequency': 'monthly',
+                    'first_day': '1',
+                    'action_with_unused_accruals': 'all',
+                }),
+                Command.create({
+                    'start_count': 1,
+                    'start_type': 'year',
+                    'added_value': 30,
+                    'added_value_type': 'day',
+                    'frequency': 'yearly',
+                    'yearly_month': 'jan',
+                    'yearly_day': '1',
+                    'action_with_unused_accruals': 'all',
+                }),
+            ],
+        })
+        with freeze_time('2025-08-01'):
+            allocation = self.env['hr.leave.allocation'].with_user(self.user_hrmanager_id).with_context(tracking_disable=True).create({
+                'name': 'Accrual allocation',
+                'accrual_plan_id': accrual_plan.id,
+                'employee_id': self.employee_emp.id,
+                'holiday_status_id': self.leave_type.id,
+                'number_of_days': 0,
+                'allocation_type': 'accrual',
+                'date_from': datetime.date(2025, 8, 1),
+            })
+            allocation.action_validate()
+
+        with freeze_time('2026-07-15'):
+            allocation._update_accrual()
+            # 12 months * 1.25 days
+            self.assert_virtual_leaves_equal(self.leave_type, 15, self.employee_emp, datetime.date(2026, 7, 15), digits=2)
+            # + 30 days prorated from 01/08 to 01/01 (153 / 365 days)
+            self.assert_virtual_leaves_equal(self.leave_type, 27.58, self.employee_emp, datetime.date(2026, 8, 1), digits=2)
+            # Shouldn't change until 01/01/27
+            self.assert_virtual_leaves_equal(self.leave_type, 27.58, self.employee_emp, datetime.date(2026, 9, 1), digits=2)
+            self.assert_virtual_leaves_equal(self.leave_type, 27.58, self.employee_emp, datetime.date(2026, 12, 1), digits=2)
+            # New accrual for the entire 2027 year
+            self.assert_virtual_leaves_equal(self.leave_type, 57.58, self.employee_emp, datetime.date(2027, 1, 1), digits=2)
+
+    def test_second_yearly_milestone_future_balance_after_monthly_transition2(self):
+        accrual_plan = self.env['hr.leave.accrual.plan'].with_context(tracking_disable=True).create({
+            'name': 'Monthly then Yearly',
+            'transition_mode': 'end_of_accrual',
+            'accrued_gain_time': 'start',
+            'carryover_date': 'year_start',
+            'level_ids': [
+                Command.create({
+                    'start_count': 0,
+                    'added_value': 1.25,
+                    'added_value_type': 'day',
+                    'frequency': 'monthly',
+                    'first_day': '1',
+                    'action_with_unused_accruals': 'all',
+                }),
+                Command.create({
+                    'start_count': 1,
+                    'start_type': 'year',
+                    'added_value': 30,
+                    'added_value_type': 'day',
+                    'frequency': 'yearly',
+                    'yearly_month': 'jan',
+                    'yearly_day': '1',
+                    'action_with_unused_accruals': 'all',
+                }),
+            ],
+        })
+        with freeze_time('2025-07-15'):
+            allocation = self.env['hr.leave.allocation'].with_user(self.user_hrmanager_id).with_context(tracking_disable=True).create({
+                'name': 'Accrual allocation',
+                'accrual_plan_id': accrual_plan.id,
+                'employee_id': self.employee_emp.id,
+                'holiday_status_id': self.leave_type.id,
+                'number_of_days': 0,
+                'allocation_type': 'accrual',
+                'date_from': datetime.date(2025, 7, 15),
+            })
+            allocation.action_validate()
+
+        with freeze_time('2026-07-15'):
+            allocation._update_accrual()
+            # 12 months * 1.25 days + 1.25 / 2
+            self.assert_virtual_leaves_equal(self.leave_type, 15.69, self.employee_emp, datetime.date(2026, 7, 15), digits=2)
+            # + 30 days prorated from 01/08/26 to 01/01/27 (153 / 365 days)
+            self.assert_virtual_leaves_equal(self.leave_type, 28.27, self.employee_emp, datetime.date(2026, 8, 1), digits=2)
+            # Shouldn't change until 01/01/27
+            self.assert_virtual_leaves_equal(self.leave_type, 28.27, self.employee_emp, datetime.date(2026, 9, 1), digits=2)
+            self.assert_virtual_leaves_equal(self.leave_type, 28.27, self.employee_emp, datetime.date(2026, 12, 1), digits=2)
+            # New accrual for the entire 2027 year
+            self.assert_virtual_leaves_equal(self.leave_type, 58.27, self.employee_emp, datetime.date(2027, 1, 1), digits=2)
+
+        with freeze_time('2026-08-01'):
+            allocation._update_accrual()
+            self.assert_virtual_leaves_equal(self.leave_type, 28.26, self.employee_emp, datetime.date(2026, 8, 1), digits=2)
+
+        with freeze_time('2026-09-01'):
+            allocation._update_accrual()
+            self.assert_virtual_leaves_equal(self.leave_type, 28.26, self.employee_emp, datetime.date(2026, 8, 1), digits=2)
+
+        with freeze_time('2027-01-01'):
+            allocation._update_accrual()
+            self.assert_virtual_leaves_equal(self.leave_type, 58.26, self.employee_emp, datetime.date(2027, 1, 1), digits=2)
+
+    def test_second_yearly_milestone_future_balance_after_monthly_transition3(self):
+        accrual_plan = self.env['hr.leave.accrual.plan'].with_context(tracking_disable=True).create({
+            'name': 'Monthly then Yearly',
+            'transition_mode': 'immediately',
+            'accrued_gain_time': 'start',
+            'carryover_date': 'year_start',
+            'level_ids': [
+                Command.create({
+                    'start_count': 0,
+                    'added_value': 30,
+                    'added_value_type': 'day',
+                    'frequency': 'yearly',
+                    'action_with_unused_accruals': 'all',
+                    'yearly_month': 'jan',
+                    'yearly_day': '1',
+                }),
+                Command.create({
+                    'start_count': 1,
+                    'start_type': 'year',
+                    'added_value': 1.25,
+                    'added_value_type': 'day',
+                    'frequency': 'monthly',
+                    'action_with_unused_accruals': 'all',
+                }),
+            ],
+        })
+        with freeze_time('2025-08-15'):
+            allocation = self.env['hr.leave.allocation'].with_user(self.user_hrmanager_id).with_context(tracking_disable=True).create({
+                'name': 'Accrual allocation',
+                'accrual_plan_id': accrual_plan.id,
+                'employee_id': self.employee_emp.id,
+                'holiday_status_id': self.leave_type.id,
+                'number_of_days': 0,
+                'allocation_type': 'accrual',
+                'date_from': datetime.date(2025, 8, 15),
+            })
+            allocation.action_validate()
+
+        with freeze_time('2026-08-01'):
+            allocation._update_accrual()
+            self.assert_virtual_leaves_equal(self.leave_type, 30, self.employee_emp, datetime.date(2026, 8, 1), digits=2)
+            # + 30 days prorated from 01/08 to 01/01 (153 / 365 days)
+            self.assert_virtual_leaves_equal(self.leave_type, 30.69, self.employee_emp, datetime.date(2026, 8, 15), digits=2)
+            self.assert_virtual_leaves_equal(self.leave_type, 30.69 + 1.25, self.employee_emp, datetime.date(2026, 9, 1), digits=2)
+            self.assert_virtual_leaves_equal(self.leave_type, 30.69 + 4 * 1.25, self.employee_emp, datetime.date(2026, 12, 1), digits=2)
+
+        with freeze_time('2026-08-15'):
+            allocation._update_accrual()
+            self.assert_virtual_leaves_equal(self.leave_type, 30.69, self.employee_emp, datetime.date(2026, 8, 15), digits=2)
+
+        with freeze_time('2026-09-01'):
+            allocation._update_accrual()
+            self.assert_virtual_leaves_equal(self.leave_type, 30.69 + 1.25, self.employee_emp, datetime.date(2026, 9, 1), digits=2)

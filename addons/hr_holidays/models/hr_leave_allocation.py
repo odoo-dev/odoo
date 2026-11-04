@@ -512,6 +512,7 @@ class HolidaysAllocation(models.Model):
                 if log:
                     allocation._message_log(body=first_allocation)
             (current_level, current_level_idx) = (False, 0)
+            on_level_transition = False
             current_level_maximum_leave = 0.0
             # all subsequent runs, at every loop:
             # get current level and normal period boundaries, then set nextcall, adjusted for level transition and carryover
@@ -532,13 +533,27 @@ class HolidaysAllocation(models.Model):
                 # There are 2 cases where nextcall could be closer than the normal period:
                 # 1. Passing from one level to another, if mode is set to 'immediately'
                 on_level_transition = False
-                if current_level_idx < (len(level_ids) - 1) and allocation.accrual_plan_id.transition_mode == 'immediately':
+                transition_mode = allocation.accrual_plan_id.transition_mode
+                if current_level_idx < (len(level_ids) - 1) and transition_mode == 'immediately':
                     next_level = level_ids[current_level_idx + 1]
                     current_level_last_date = allocation.date_from + get_timedelta(next_level.start_count, next_level.start_type)
                     if allocation.nextcall != current_level_last_date:
                         nextcall = min(nextcall, current_level_last_date)
                     else:
                         on_level_transition = True
+                        nextcall = next_level._get_next_date(allocation.nextcall)
+                elif transition_mode == 'end_of_accrual':
+                    if current_level_idx < (len(level_ids) - 1):
+                        next_level = level_ids[current_level_idx + 1]
+                        # If nextcall ends on level transition, same as when 'immediately'
+                        if allocation.nextcall == period_end == next_level._get_level_transition_date(allocation.date_from):
+                            nextcall = next_level._get_next_date(allocation.nextcall)
+                    if current_level_idx > 0:
+                        previous_level = level_ids[current_level_idx - 1]
+                        on_level_transition = (
+                            allocation.lastcall < current_level._get_level_transition_date(allocation.date_from)
+                            and allocation.nextcall == previous_level._get_next_date(allocation.lastcall)
+                        )
                 # 2. On carry-over date
                 carryover_date = allocation._get_carryover_date(allocation.nextcall)
                 if allocation.nextcall < carryover_date < nextcall:
@@ -579,7 +594,8 @@ class HolidaysAllocation(models.Model):
             # if plan.accrued_gain_time == 'start', process next period and set flag 'already_accrued', this will skip adding days
             # once, preventing double allocation.
             if allocation.accrual_plan_id.accrued_gain_time == 'start':
-                # Computing `is_accrual_date` (wether allocation.lastcall is an accrual date) and the parameters needed for `_add_days_to_allocation`
+                # Computing `is_accrual_date` (wether allocation.lastcall is an accrual date) and the parameters needed for `_add_days_to_allocation`m
+                is_accrual_date = False
                 if allocation.accrual_plan_id.transition_mode == 'immediately':
                     level_starts = {level._get_level_transition_date(allocation.date_from): level for level in level_ids}
                     current_level = level_starts.get(allocation.lastcall) or current_level\
@@ -591,15 +607,14 @@ class HolidaysAllocation(models.Model):
                     period_end = current_level._get_next_date(allocation.lastcall)
                     end_date = min(period_end, level_ids[current_level_idx + 1]._get_level_transition_date(allocation.date_from))\
                         if current_level_idx < len(level_ids) - 1 else period_end
-                    is_accrual_date = period_start == allocation.lastcall or allocation.lastcall in level_starts
+                    is_accrual_date = allocation.lastcall in level_starts
                 else:
                     current_level = current_level or first_level
                     period_start = current_level._get_previous_date(allocation.lastcall)
                     period_end = current_level._get_next_date(allocation.lastcall)
                     end_date = period_end
-                    is_accrual_date = period_start == allocation.lastcall
 
-                if is_accrual_date:
+                if is_accrual_date or period_start == allocation.lastcall or on_level_transition:
                     if current_level.cap_accrued_time:
                         current_level_maximum_leave = current_level.maximum_leave if current_level.added_value_type == "day" else current_level.maximum_leave / (allocation.employee_id.sudo().resource_id.calendar_id.hours_per_day or HOURS_PER_DAY)
                     leaves_taken = _get_leaves_taken(allocation)
