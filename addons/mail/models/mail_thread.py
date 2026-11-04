@@ -2,6 +2,7 @@
 
 import ast
 import base64
+import codecs
 import datetime
 import dateutil
 import email
@@ -1673,6 +1674,16 @@ class MailThread(models.AbstractModel):
                     # although the payload might be in UTF8
                     part.set_charset('utf-8')
                 encoding = part.get_content_charset()  # None if attachment
+                if part.get_content_maintype() == 'text' and encoding:
+                    try:
+                        codecs.lookup(encoding)
+                    except LookupError:
+                        _logger.warning(
+                            "Message has an unknown charset %r, assuming UTF-8",
+                            encoding,
+                        )
+                        part.set_charset('utf-8')
+                        encoding = 'utf-8'
 
                 # Correcting MIME type for PDF files
                 if part.get('Content-Type', '').startswith('pdf;'):

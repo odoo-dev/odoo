@@ -297,6 +297,17 @@ class TestMailgateway(MailGatewayCommon):
                 )
 
     @mute_logger('odoo.addons.mail.models.mail_thread')
+    def test_message_process_unknown_body_charset(self):
+        """Incoming text body with an invalid charset should be decoded as UTF-8."""
+        record = self.format_and_process(
+            test_mail_data.MAIL_UNKNOWN_BODY_CHARSET,
+            self.email_from,
+            f'groups@{self.alias_domain}',
+            subject='Invalid body charset',
+        )
+        self.assertIn('DTE recibido: período', record.message_ids.body)
+
+    @mute_logger('odoo.addons.mail.models.mail_thread')
     def test_message_process_cid(self):
         origin_message_parse_extract_payload = MailThread._message_parse_extract_payload
 
