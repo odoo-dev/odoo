@@ -5,6 +5,7 @@ __all__ = [
 ]
 import csv
 import io
+import json
 import logging
 import os.path
 import pprint
@@ -15,8 +16,10 @@ import warnings
 import zoneinfo
 from datetime import datetime, timedelta, UTC, tzinfo
 
+import psycopg2.extensions
 from dateutil.relativedelta import relativedelta
 from lxml import etree, builder
+from psycopg2.extras import Json as PsycopgJson
 try:
     import jingtrang
 except ImportError:
@@ -24,7 +27,9 @@ except ImportError:
 
 from .binary import BinaryBytes
 from .config import config
-from .misc import file_open, file_path, SKIPPED_ELEMENT_TYPES
+from .constants import IN_MAX
+from .misc import file_open, file_path, split_every, SKIPPED_ELEMENT_TYPES
+from .sql import SQL
 from .safe_eval import _UNSAFE_ATTRIBUTES
 from odoo.exceptions import ValidationError
 
@@ -768,6 +773,8 @@ def convert_csv_import(
         'install_filename': fname,
         'noupdate': noupdate,
     }
+    if _bulk_load_csv(env[model].with_context(**context), module, fields, datas, mode == 'update', noupdate):
+        return
     result = env[model].with_context(**context).load(fields, datas)
     if any(msg['type'] == 'error' for msg in result['messages']):
         # Report failed import and abort module install
@@ -778,6 +785,290 @@ def convert_csv_import(
             file=fname,
             message=warning_msg,
         ))
+
+
+# Below this number of rows, the regular import is fast enough.
+BULK_LOAD_MIN_ROWS = 1000
+BULK_LOAD_FIELD_TYPES = frozenset({
+    'boolean', 'char', 'date', 'float', 'integer', 'many2one', 'selection', 'text',
+})
+# methods of the regular import that are bypassed by the bulk load
+BULK_LOAD_BYPASSED_METHODS = (
+    'create', '_create', 'write', 'load', '_load_records', '_load_records_create', '_load_records_write',
+)
+
+
+def _bulk_load_csv(model, module, header, rows, update, noupdate):
+    """ Fast path of :func:`convert_csv_import` for large files of simple records.
+
+    The regular import converts and creates the records through ``load()``,
+    which takes seconds for catalogs of tens of thousands of rows (product
+    codes, cities, ...). When the model does not customize the creation of its
+    records and all the columns are plain stored fields, the rows are converted
+    here and inserted with ``COPY``; the ORM then processes the computed fields,
+    the constraints and the external ids of the new records in batch. Existing
+    records are only written when their values differ from the file.
+
+    :return: whether the file has been loaded; when ``False``, nothing has been
+        written and the regular import must be used
+    """
+    if len(rows) < BULK_LOAD_MIN_ROWS or not _bulk_load_supported_model(model):
+        return False
+    columns = _bulk_load_columns(model, header)
+    if columns is None:
+        return False
+    id_index, fields = columns
+
+    # convert the rows; anything unexpected is left to the regular import,
+    # which also reports errors properly
+    prefix = f'{module}.'
+    converters = [(index, field.name, _bulk_load_converter(model, module, field)) for index, field in fields]
+    xml_ids = []
+    vals_list = []
+    try:
+        for row in rows:
+            xml_id = row[id_index]
+            xml_ids.append(xml_id if '.' in xml_id else prefix + xml_id)
+            vals_list.append({fname: convert(row[index]) for index, fname, convert in converters})
+    except (IndexError, KeyError, ValueError):
+        return False
+    if (
+        len(set(xml_ids)) != len(xml_ids)
+        or not all(xml_id.startswith(prefix) and xml_id != prefix for xml_id in xml_ids)
+    ):
+        return False
+
+    imd = model.env['ir.model.data']
+    existing = {
+        f'{row_module}.{name}': (row_model, res_id, row_noupdate, record_id)
+        for _id, row_module, name, row_model, res_id, row_noupdate, record_id
+        in imd._lookup_xmlids(xml_ids, model)
+    }
+    if any(row_model != model._name or not record_id for row_model, _res_id, _noupdate, record_id in existing.values()):
+        return False
+
+    given_fnames = [fname for _index, fname, _convert in converters]
+    defaults = {
+        fname: value
+        for fname, value in model._add_missing_default_values(dict.fromkeys(given_fnames, False)).items()
+        if fname not in given_fnames
+    }
+    if any(not (field := model._fields[fname]).store or not field.column_type for fname in defaults):
+        return False
+
+    to_create = []          # [(xml_id, vals)]
+    to_check = {}           # {record_id: vals}
+    for xml_id, vals in zip(xml_ids, vals_list):
+        if not (row := existing.get(xml_id)):
+            to_create.append((xml_id, vals))
+        elif not (update and row[2]):
+            to_check[row[1]] = vals
+
+    model.env.flush_all()
+    for record_id in _bulk_load_changed_ids(model, to_check):
+        model.browse(record_id)._load_records_write(to_check[record_id])
+
+    if to_create:
+        ids = _bulk_load_create(model, to_create, defaults)
+        # like _update_xmlids(), without its upsert and cache updates per row
+        # as these external ids are known to be new
+        imd.flush_model()
+        model.env.execute_query(SQL(
+            """ INSERT INTO ir_model_data (module, name, model, res_id, noupdate)
+                SELECT %s, UNNEST(%s::varchar[]), %s, UNNEST(%s::int[]), %s """,
+            module, [xml_id[len(prefix):] for xml_id, _vals in to_create], model._name, ids, bool(noupdate),
+        ))
+    # the existing external ids already target the right records
+    if not model.pool.ready:
+        model.pool.loaded_xmlids.update(xml_ids)
+    _logger.debug(
+        "%s: bulk loaded %d records, %d new", model.env.context.get('install_filename'), len(xml_ids), len(to_create),
+    )
+    return True
+
+
+def _bulk_load_supported_model(model):
+    if (
+        model._abstract or not model._auto or model._inherits or model._parent_store
+        or model._check_company_auto or any(field.precompute for field in model._fields.values())
+    ):
+        return False
+    # Generic overrides on 'base' are ignored: the supported field types cannot
+    # be affected by them (html sanitization, AI fields, ...)
+    return not any(
+        method in vars(cls)
+        for cls in type(model).__mro__[1:]
+        if not cls.__module__.startswith('odoo.orm.') and getattr(cls, '_name', None) != 'base'
+        for method in BULK_LOAD_BYPASSED_METHODS
+    )
+
+
+def _bulk_load_columns(model, header):
+    """ Return the index of the ``id`` column and the fields of the other
+    columns as ``(id_index, [(index, field)])``, or ``None`` if a column cannot
+    be bulk loaded.
+    """
+    from odoo.orm.models import LOG_ACCESS_COLUMNS  # noqa: PLC0415
+
+    id_index = None
+    fields = []
+    for index, name in enumerate(header):
+        if name == 'id':
+            id_index = index
+            continue
+        fname, _sep, subfield = name.replace(':', '/').partition('/')
+        field = model._fields.get(fname)
+        if (
+            field is None
+            or field.type not in BULK_LOAD_FIELD_TYPES
+            or not field.store
+            or not field.column_type
+            or fname in LOG_ACCESS_COLUMNS
+            or field.compute
+            or field.inverse
+            or field.company_dependent
+            or callable(field.translate)
+            or subfield != ('id' if field.type == 'many2one' else '')
+        ):
+            return None
+        fields.append((index, field))
+    if id_index is None or len({field for _index, field in fields}) != len(fields):
+        return None
+    return id_index, fields
+
+
+def _bulk_load_converter(model, module, field):
+    """ Return a function converting a CSV cell to a value for ``create()``
+    like ``ir.fields.converter`` does. It raises ``ValueError`` or ``KeyError``
+    for the values it does not handle.
+    """
+    from odoo.fields import Date  # noqa: PLC0415
+
+    match field.type:
+        case 'char' | 'text':
+            return lambda value: value or False
+        case 'boolean':
+            booleans = {'': False, '0': False, 'false': False, 'no': False, '1': True, 'true': True, 'yes': True}
+            return lambda value: booleans[value.lower()]
+        case 'integer':
+            return lambda value: int(value) if value else False
+        case 'float':
+            return lambda value: float(value) if value else False
+        case 'date':
+            return lambda value: Date.to_date(value) if value else False
+        case 'selection':
+            keys = {str(key).lower(): key for key in field.get_values(model.env)}
+            return lambda value: keys[value.lower()] if value else False
+        case 'many2one':
+            imd = model.env['ir.model.data']
+
+            def convert(value):
+                if not value:
+                    return False
+                res_model, res_id = imd._xmlid_to_res_model_res_id(value if '.' in value else f'{module}.{value}')
+                if res_model != field.comodel_name:
+                    raise ValueError(value)
+                return res_id
+            return convert
+    raise ValueError(field.type)
+
+
+def _bulk_load_changed_ids(model, vals_by_id):
+    """ Return the ids in ``vals_by_id`` whose record differs from the given
+    values in database.
+    """
+    if not vals_by_id:
+        return []
+    fields = [model._fields[fname] for fname in next(iter(vals_by_id.values()))]
+    if not fields:
+        return []
+
+    def normalize(value):
+        if isinstance(value, PsycopgJson):
+            value = value.adapted
+        if isinstance(value, dict):
+            return value.get('en_US')
+        return value or None
+
+    changed = []
+    for ids in split_every(IN_MAX, vals_by_id):
+        for record_id, *db_values in model.env.execute_query(SQL(
+            "SELECT id, %s FROM %s WHERE id IN %s",
+            SQL(', ').join(SQL.identifier(field.name) for field in fields),
+            SQL.identifier(model._table),
+            tuple(ids),
+        )):
+            vals = vals_by_id[record_id]
+            if any(
+                normalize(db_value) != normalize(field.convert_to_column_insert(vals[field.name], model, vals))
+                for field, db_value in zip(fields, db_values)
+            ):
+                changed.append(record_id)
+    return changed
+
+
+def _bulk_load_create(model, to_create, defaults):
+    """ Insert the given records, and return their ids. """
+    from odoo.orm.models import LOG_ACCESS_COLUMNS  # noqa: PLC0415
+
+    env = model.env
+    ids = [id_ for id_, in env.execute_query(SQL(
+        "SELECT nextval(pg_get_serial_sequence(%s, 'id')) FROM generate_series(1, %s)",
+        model._table, len(to_create),
+    ))]
+
+    def copy_value(value):
+        if isinstance(value, PsycopgJson):
+            return json.dumps(value.adapted)
+        if isinstance(value, bool):
+            return 't' if value else 'f'
+        return value
+
+    fields = [model._fields[fname] for fname in to_create[0][1]]
+    constant_fnames = list(defaults)
+    constant_values = [
+        copy_value(model._fields[fname].convert_to_column_insert(value, model, defaults))
+        for fname, value in defaults.items()
+    ]
+    if model._log_access:
+        constant_fnames += LOG_ACCESS_COLUMNS
+        constant_values += [env.uid, env.cr.now(), env.uid, env.cr.now()]
+
+    buffer = io.StringIO()
+    writer = csv.writer(buffer, quoting=csv.QUOTE_NOTNULL)
+    for id_, (_xml_id, vals) in zip(ids, to_create):
+        writer.writerow([
+            id_,
+            *(copy_value(field.convert_to_column_insert(vals[field.name], model, vals)) for field in fields),
+            *constant_values,
+        ])
+    buffer.seek(0)
+    query = env.cr.mogrify(SQL(
+        "COPY %s (%s) FROM STDIN WITH (FORMAT csv)",
+        SQL.identifier(model._table),
+        SQL(', ').join(map(SQL.identifier, ['id', *(field.name for field in fields), *constant_fnames])),
+    )).decode()
+    # COPY is not compatible with async callbacks (gevent)
+    callback = psycopg2.extensions.get_wait_callback()
+    psycopg2.extensions.set_wait_callback(None)
+    try:
+        env.cr.copy_expert(query, buffer)
+    finally:
+        psycopg2.extensions.set_wait_callback(callback)
+    env.transaction._wrote__ = True
+
+    # the inverses of many2one fields don't know about the new records
+    fnames = [*(field.name for field in fields), *defaults]
+    for fname in fnames:
+        for inverse in env.registry.field_inverses[model._fields[fname]]:
+            env[inverse.model_name].invalidate_model([inverse.name], flush=False)
+
+    records = model.browse(ids)
+    records.modified(model._fields, create=True)
+    records._validate_fields(fnames)
+    if cache_name := model._clear_cache_name:
+        env.transaction.invalidate_ormcache(cache_name)
+    return ids
 
 
 def convert_xml_import(
