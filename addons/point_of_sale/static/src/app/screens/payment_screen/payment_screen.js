@@ -398,6 +398,12 @@ export class PaymentScreen extends Component {
             return;
         }
 
+        try {
+            await this.pos.syncAllOrders({ orders: [this.currentOrder] });
+        } catch {
+            // Ignore sync errors here
+        }
+
         this.numberBuffer.capture();
         let isPaymentSuccessful = false;
         if (line.payment_method_id.useBankQrCode) {

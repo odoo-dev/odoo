@@ -637,6 +637,19 @@ export class PosStore extends WithLazyGetterTrap {
             order.setPricelist(this.models["product.pricelist"].get(currentPricelistId));
         });
 
+        this.models["pos.payment"].addEventListener("update", ({ id, fields }) => {
+            if (!fields.includes("transaction_id")) {
+                return;
+            }
+            const order = this.models["pos.payment"].get(id)?.pos_order_id;
+            // Defer the sync until the record has been marked dirty by the model layer.
+            queueMicrotask(() => {
+                if (order?.isDirty()) {
+                    this.syncAllOrders({ orders: [order] });
+                }
+            });
+        });
+
         await this.processProductAttributes();
         this.comboSuggestion = new ComboSuggestion(
             this.models,

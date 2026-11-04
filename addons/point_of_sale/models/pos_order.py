@@ -566,9 +566,14 @@ class PosOrder(models.Model):
             if orm_command == 0:
                 payment_method_id = self.env['pos.payment.method'].browse(new_pm[2].get('payment_method_id'))
                 amount = formatLang(self.env, new_pm[2].get('amount'), currency_obj=self.currency_id)
-                message_list.append(_("Added %(payment_method)s with %(amount)s",
+                new_tnx_id = new_pm[2].get('transaction_id')
+                transaction_info = _(" (Transaction ID: %(tnx_id)s)", tnx_id=new_tnx_id) if new_tnx_id else ""
+                message_list.append(_(
+                    "Added %(payment_method)s with %(amount)s%(transaction_info)s",
                     payment_method=payment_method_id.name,
-                    amount=amount))
+                    amount=amount,
+                    transaction_info=transaction_info,
+                ))
             elif orm_command == 1:
                 pm_id = self.env['pos.payment'].browse(new_pm[1])
                 old_pm = pm_id.payment_method_id.name
@@ -578,25 +583,62 @@ class PosOrder(models.Model):
 
                 if new_pm[2].get('payment_method_id'):
                     new_payment_method = self.env['pos.payment.method'].browse(new_pm[2].get('payment_method_id'))
-                if new_pm[2].get('amount'):
-                    new_amount = formatLang(self.env, new_pm[2].get('amount'), currency_obj=pm_id.currency_id)
+                if 'amount' in new_pm[2]:
+                    new_amount = formatLang(self.env, new_pm[2]['amount'], currency_obj=pm_id.currency_id)
+
+                old_tnx_id = pm_id.transaction_id or ""
+                new_tnx_id = new_pm[2].get('transaction_id') or ""
+                transaction_changed = 'transaction_id' in new_pm[2] and new_tnx_id != old_tnx_id
+                if transaction_changed and old_tnx_id:
+                    transaction_info = _(
+                        " (Transaction ID changed from %(old_tnx_id)s to %(new_tnx_id)s)",
+                        old_tnx_id=old_tnx_id,
+                        new_tnx_id=new_tnx_id or _("None"),
+                    )
+                elif transaction_changed:
+                    transaction_info = _(" (Transaction ID: %(new_tnx_id)s)", new_tnx_id=new_tnx_id)
+                else:
+                    transaction_info = ""
 
                 if new_payment_method and new_amount:
-                    message_list.append(_("%(old_pm)s changed to %(new_pm)s and from %(old_amount)s to %(new_amount)s",
+                    message_list.append(_(
+                        "%(old_pm)s changed to %(new_pm)s and from %(old_amount)s to %(new_amount)s%(transaction_info)s",
                         old_pm=old_pm,
                         new_pm=new_payment_method.name,
-                        old_amount=old_amount,
-                        new_amount=new_amount))
-                elif new_payment_method:
-                    message_list.append(_("%(old_pm)s changed to %(new_pm)s for %(old_amount)s",
-                        old_pm=old_pm,
-                        new_pm=new_payment_method.name,
-                        old_amount=old_amount))
-                elif new_amount:
-                    message_list.append(_("Amount for %(old_pm)s changed from %(old_amount)s to %(new_amount)s",
                         old_amount=old_amount,
                         new_amount=new_amount,
-                        old_pm=old_pm))
+                        transaction_info=transaction_info,
+                    ))
+                elif new_payment_method:
+                    message_list.append(_(
+                        "%(old_pm)s changed to %(new_pm)s for %(old_amount)s%(transaction_info)s",
+                        old_pm=old_pm,
+                        new_pm=new_payment_method.name,
+                        old_amount=old_amount,
+                        transaction_info=transaction_info,
+                    ))
+                elif new_amount:
+                    message_list.append(_(
+                        "Amount for %(old_pm)s changed from %(old_amount)s to %(new_amount)s%(transaction_info)s",
+                        old_amount=old_amount,
+                        new_amount=new_amount,
+                        old_pm=old_pm,
+                        transaction_info=transaction_info,
+                    ))
+                elif transaction_changed:
+                    if old_tnx_id:
+                        message_list.append(_(
+                            "Transaction ID for %(payment_method)s changed from %(old_tnx_id)s to %(new_tnx_id)s",
+                            payment_method=old_pm,
+                            old_tnx_id=old_tnx_id,
+                            new_tnx_id=new_tnx_id or _("None"),
+                        ))
+                    else:
+                        message_list.append(_(
+                            "Transaction ID for %(payment_method)s set to %(new_tnx_id)s",
+                            payment_method=old_pm,
+                            new_tnx_id=new_tnx_id,
+                        ))
             elif orm_command == 2:
                 pm_id = self.env['pos.payment'].browse(new_pm[1])
                 amount = formatLang(self.env, pm_id.amount, currency_obj=pm_id.currency_id)
