@@ -99,8 +99,7 @@ export function getMediaManagertDialogProps(recordInfo) {
             ["res_id", "=", recordInfo.resId || -1],
         ],
         context: {
-            kanban_view_ref: "ai.mediamanager_media_kanban_ai", // todo : the ai version should be replaced by the ai override
-            //kanban_view_ref: "html_editor.mediamanager_media_kanban",
+            kanban_view_ref: "html_editor.mediamanager_media_kanban",
             search_view_ref: "html_editor.mediamanager_media_search",
         },
     };
