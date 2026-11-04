@@ -3604,7 +3604,7 @@ class BaseModel(metaclass=MetaModel):
         group_ids = {*self.env.user._get_group_ids(), False}
         # some domains have been pre-evaluated, evaluate only if needed
         eval_context = None
-        for access in IrAccess._get_all_access().get(self._name, ()):
+        for access in IrAccess._get_model_access(self._name):
             if access.operation in operations and access.group_id in group_ids:
                 domain = access.domain
                 if not isinstance(domain, Domain):
