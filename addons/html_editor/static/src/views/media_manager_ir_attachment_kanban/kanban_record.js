@@ -1,10 +1,18 @@
 import { KanbanRecord, kanbanRecordProps } from "@web/views/kanban/kanban_record";
 import { useService } from "@web/core/utils/hooks";
+import { user } from "@web/core/user";
 
 import { proxy, t, useProps } from "@odoo/owl";
 import { IMAGE_MIMETYPES } from "@html_editor/main/media/media_manager/helpers";
 
-export const LS_IS_STARRED_KEY = "ir-attachment-record-is-starred";
+const LS_IS_STARRED_KEY_PREFIX = "ir-attachment-record-is-starred";
+/**
+ * Starred attachments are stored per company, so that favorites of one
+ * organisation do not leak into (or collide with) another one.
+ */
+export function getStarredStorageKey() {
+    return `${LS_IS_STARRED_KEY_PREFIX}-${user.activeCompany.id}`;
+}
 export const MediaManagerkanbanRecordProps = {
     ...kanbanRecordProps,
     canMultiSelect: t.any().optional(true),
@@ -47,12 +55,12 @@ export class MediaManagerKanbanRecord extends KanbanRecord {
     }
 
     getLocalStorageStarredState() {
-        const allStarredItems = JSON.parse(localStorage.getItem(LS_IS_STARRED_KEY)) || [];
+        const allStarredItems = JSON.parse(localStorage.getItem(getStarredStorageKey())) || [];
         return allStarredItems.includes(this.props.record.data.id);
     }
 
     updateLocalStorageStarredState() {
-        const allStarredItems = JSON.parse(localStorage.getItem(LS_IS_STARRED_KEY)) || [];
+        const allStarredItems = JSON.parse(localStorage.getItem(getStarredStorageKey())) || [];
         if (this.state.starred) {
             allStarredItems.push(this.props.record.data.id);
         } else {
@@ -61,7 +69,7 @@ export class MediaManagerKanbanRecord extends KanbanRecord {
                 allStarredItems.splice(index, 1);
             }
         }
-        localStorage.setItem(LS_IS_STARRED_KEY, JSON.stringify(allStarredItems));
+        localStorage.setItem(getStarredStorageKey(), JSON.stringify(allStarredItems));
     }
 
     onGlobalClick(ev, _newWindow) {
