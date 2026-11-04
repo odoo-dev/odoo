@@ -6,6 +6,8 @@ import typing
 import zipfile
 from collections.abc import Buffer
 
+from .lru import LRU
+
 try:
     import magic
 except ImportError:
@@ -43,9 +45,27 @@ def _odoo_guess_mimetype(bin_data: Buffer, default: str = 'application/octet-str
     return default
 
 
+# libmagic is deterministic for a given content, but costly on text-like
+# buffers (~5 ms each whatever their size, all soft-magic rules are tried),
+# and the same small contents are sniffed over and over (attachments, images,
+# their resized variants). Memoize the result by exact content for small
+# buffers; the key is the content itself, so the result is always identical.
+_MAGIC_CACHE_MAX_SIZE = 64 * 1024
+_magic_cache = LRU(1024)
+
+
 def _magic_guess_mimetype(bin_data: Buffer) -> str:
     magic_data = bytes(bin_data)
-    mimetype = magic.from_buffer(magic_data, mime=True)
+    if len(magic_data) <= _MAGIC_CACHE_MAX_SIZE:
+        mimetype = _magic_cache.get(magic_data)
+        if mimetype is None:
+            mimetype = _magic_cache[magic_data] = _magic_guess_mimetype_uncached(magic_data)
+        return mimetype
+    return _magic_guess_mimetype_uncached(magic_data)
+
+
+def _magic_guess_mimetype_uncached(bin_data: bytes) -> str:
+    mimetype = magic.from_buffer(bin_data, mime=True)
 
     # magic.from_buffer() doesn't properly detect DOC, XLS, and PPT documents.
     if mimetype in _olecf_mimetypes:

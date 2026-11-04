@@ -1,8 +1,12 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import base64
 import binascii
+import functools
+import hashlib
 import io
+import threading
 import typing
+from collections import OrderedDict
 
 from PIL import Image, ImageOps
 # We can preload Ico too because it is considered safe
@@ -26,6 +30,47 @@ _lt = LazyTranslate('base')
 # Preload PIL with the minimal subset of image formats we need
 Image.preinit()
 Image._initialized = 2
+
+# In-process memo of deterministic image processing results, keyed on the
+# source content digest and the processing parameters.  Tests and data files
+# process the same images (avatars, logos, ...) over and over; decoding and
+# re-encoding them is pure CPU waste.  Bounded LRU, never persisted.
+_MEMO_MAX_ENTRIES = 512
+_MEMO_MAX_BYTES = 64 * 1024 * 1024
+_MEMO_MAX_SOURCE = 16 * 1024 * 1024
+_memo = OrderedDict()
+_memo_lock = threading.Lock()
+_memo_bytes = 0
+
+
+def _memo_key(source: Buffer, *params) -> tuple | None:
+    source = memoryview(source)
+    if source.nbytes > _MEMO_MAX_SOURCE:
+        return None
+    return (hashlib.sha1(source).digest(), source.nbytes, *params)
+
+
+def _memo_get(key):
+    with _memo_lock:
+        try:
+            value = _memo[key]
+        except KeyError:
+            return None
+        _memo.move_to_end(key)
+        return value
+
+
+def _memo_put(key, value, nbytes: int):
+    global _memo_bytes  # noqa: PLW0603
+    with _memo_lock:
+        if key in _memo:
+            return
+        _memo[key] = (value, nbytes)
+        _memo_bytes += nbytes
+        while len(_memo) > _MEMO_MAX_ENTRIES or _memo_bytes > _MEMO_MAX_BYTES:
+            _key, (_value, size) = _memo.popitem(last=False)
+            _memo_bytes -= size
+
 
 # Maps only the 6 first bits of the base64 data, accurate enough
 # for our purpose and faster than decoding the full blob first
@@ -304,6 +349,20 @@ def image_process(
         # no operations have been requested
         return source
 
+    key = None
+    if not colorize or isinstance(colorize, tuple):  # colorize(None) is random
+        key = _memo_key(source, tuple(size) if size else size, verify_resolution,
+                        quality, expand, crop, colorize, output_format, padding)
+        if key is not None and (hit := _memo_get(key)) is not None:
+            return hit[0]
+
+    result = _image_process(source, size, verify_resolution, quality, expand, crop, colorize, output_format, padding)
+    if key is not None and isinstance(result, bytes) and result is not source:
+        _memo_put(key, result, len(result))
+    return result
+
+
+def _image_process(source, size, verify_resolution, quality, expand, crop, colorize, output_format, padding):
     image = ImageProcess(source, verify_resolution)
     if size:
         if crop:
@@ -418,6 +477,12 @@ def image_fix_orientation(image: Image.Image) -> Image.Image:
     :rtype: ~PIL.Image.Image
     """
     getexif = getattr(image, 'getexif', None) or getattr(image, '_getexif', None)  # support PIL < 6.0
+    if getexif and image.format == 'PNG' and not _png_has_trailing_chunks(image):
+        # PngImageFile.getexif() decodes the whole image (load()) only to read
+        # the metadata chunks placed after the image data; when there are
+        # none, self.info is already complete and the generic getexif() gives
+        # the exact same result without decoding the pixels.
+        getexif = functools.partial(Image.Image.getexif, image)
     if getexif:
         exif = getexif()
         if exif:
@@ -426,6 +491,35 @@ def image_fix_orientation(image: Image.Image) -> Image.Image:
                 image = image.transpose(method)
             return image
     return image
+
+
+def _png_has_trailing_chunks(image: Image.Image) -> bool:
+    """Return whether the PNG file of ``image`` has chunks other than IDAT/IEND
+    after its first IDAT chunk (only those are parsed by ``load()``), or if
+    the file can't be walked."""
+    fp = getattr(image, 'fp', None)
+    # Pillow >= 11 stores the core image in ``_im`` and its ``im`` property
+    # asserts when the image is not loaded yet: never touch it here.
+    attrs = vars(image)
+    core_im = attrs['_im'] if '_im' in attrs else attrs.get('im')
+    if core_im is not None or not isinstance(fp, io.BytesIO):
+        return True
+    data = fp.getbuffer()
+    try:
+        pos, size, seen_idat = 8, len(data), False
+        while pos + 8 <= size:
+            length = int.from_bytes(data[pos:pos + 4])
+            ctype = bytes(data[pos + 4:pos + 8])
+            if ctype == b'IDAT':
+                seen_idat = True
+            elif ctype == b'IEND':
+                return False
+            elif seen_idat:
+                return True
+            pos += length + 12
+        return True
+    finally:
+        data.release()
 
 
 def binary_to_image(source: Buffer) -> Image.Image:

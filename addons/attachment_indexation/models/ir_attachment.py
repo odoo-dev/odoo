@@ -9,6 +9,7 @@ import zipfile
 from lxml import etree
 
 from odoo import api, models
+from odoo.tools.binary import BinaryBytes
 from odoo.tools.lru import LRU
 
 _logger = logging.getLogger(__name__)
@@ -217,6 +218,11 @@ class IrAttachment(models.Model):
 
     def _index_pdf(self, bin_data):
         '''Index PDF documents'''
+        # Cheap exact prefilter: every libmagic (and odoo fallback) rule that
+        # yields application/pdf requires the '%PDF-' signature, so content
+        # without it cannot be a PDF; skip the costly content sniffing then.
+        if type(bin_data) is BinaryBytes and b'%PDF-' not in bin_data.content:
+            return ""
         if bin_data.mimetype != 'application/pdf':
             return ""
         try:

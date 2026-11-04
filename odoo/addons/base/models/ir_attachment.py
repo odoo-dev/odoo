@@ -509,6 +509,16 @@ class IrAttachment(models.Model):
         # Can be set to 0 to skip the resize
         max_resolution = ICP.get_str('base.image_autoresize_max_px') or '1920x1920'
         if str2bool(max_resolution, True):
+            quality = ICP.get_int('base.image_autoresize_quality', 80) if subtype == 'jpeg' else None
+            # same content and settings always give the same result: skip the
+            # decoding (PIL loads the whole image to read EXIF) when known
+            key = image._memo_key(raw, 'autoresize', max_resolution, subtype, quality)
+            hit = key and image._memo_get(key)
+            if hit:
+                output = hit[0]
+                if output is not None:
+                    values['raw'] = BinaryBytes(output, filename=raw.filename)
+                return values
             try:
                 img = image.ImageProcess(raw, verify_resolution=False)
 
@@ -521,11 +531,15 @@ class IrAttachment(models.Model):
                 if w > nw or h > nh:
                     img = img.resize(nw, nh)
                     if subtype == 'jpeg':  # Do not affect PNGs color palette
-                        quality = ICP.get_int('base.image_autoresize_quality', 80)
                         output = img.image_quality(quality)
                     else:
                         output = img.image_quality()
                     values['raw'] = BinaryBytes(output, filename=raw.filename)
+                    if key:
+                        output = bytes(output)
+                        image._memo_put(key, output, len(output))
+                elif key:
+                    image._memo_put(key, None, 0)
             except UserError as e:
                 # Catch error during test where we provide fake image
                 # raise UserError(_("This file could not be decoded as an image file. Please try with a different file."))
