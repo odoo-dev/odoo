@@ -33,12 +33,7 @@ export class MediaManagerDialog extends SelectCreateDialog {
         console.groupEnd();
         super.setup();
         this.state.records = [];
-        // this.state = proxy({
-        //     resIds: [],
-        // });
         this.orm = useService("orm");
-
-        // const { thread = {}, model, resId } = this.props.chatterParams || this.props; // todo : I don't think we need this
 
         this.onSelectionChanged = (resIds, records) => {
             this.superOnSelectionChanged(resIds);
@@ -77,81 +72,6 @@ export class MediaManagerDialog extends SelectCreateDialog {
             this.executeOnceAndClose(() => this.props.onSelected(resIds, records));
         }
     }
-
-    // /**
-    //  * Pastes document/s share links.
-    //  * @param {Array} resIds - List of resIDs of the selected records (documents).
-    //  */
-    // async pasteDocumentsLink(resIds) {
-    //     let response;
-    //     try {
-    //         response = await this.orm.read("documents.document", resIds, [
-    //             "display_name",
-    //             "access_url",
-    //         ]);
-    //     } catch (error) {
-    //         this.notification.add(
-    //             _t("Failed to paste link(s): ") + (error.data?.message || error.toString()),
-    //             { type: "danger" }
-    //         );
-    //         this.props.close();
-    //         return;
-    //     }
-    //     if (this.props.chatterParams.isFromFullComposer) {
-    //         this.props.chatterParams.addDocumentsBus.trigger("PASTE_SHARE_LINKS", {
-    //             links: response,
-    //         });
-    //     } else {
-    //         this.addToThread(this.model, this.resId);
-    //         const shareLinks = response
-    //             .map(({ display_name, access_url }) => `${display_name}: ${access_url}`)
-    //             .join("\n");
-    //         this.props.chatterParams.composer.composerText += `\n${shareLinks}`;
-    //     }
-    //     this.notification.add(_t("Link(s) pasted!"), { type: "success" });
-    //     this.props.close();
-    // }
-
-    // /**
-    //  * Adds the document (as an attachment) to the composer.
-    //  * @param {Array} resIds - List of resIDs of the selected records (documents).
-    //  */
-    // async addDocumentsAttachment(resIds) {
-    //     let processedAttachments;
-    //     try {
-    //         // Temporary linked to the composer with id 0 to be garbage collected if not re-linked to the thread
-    //         // (similar to what is done when uploading a file)
-    //         const attachmentRecords = await this.orm.call(
-    //             "documents.document",
-    //             "add_documents_attachment",
-    //             [resIds, "mail.compose.message", 0]
-    //         );
-    //         processedAttachments = await this._processAttachments(attachmentRecords);
-    //     } catch (error) {
-    //         this.notification.add(
-    //             _t("Failed to add document(s): ") + (error.data?.message || error.toString()),
-    //             { type: "danger" }
-    //         );
-    //         this.props.close();
-    //         return;
-    //     }
-    //     const thread = this.props.chatterParams?.thread || this.addToThread(this.model, this.resId);
-    //     const composer = this.props.chatterParams?.composer || thread.composer;
-    //
-    //     const attachmentIds = [];
-    //     for (const { name, ...attachmentRecord } of processedAttachments) {
-    //         const extension = name.slice(Math.max(0, name.lastIndexOf(".") + 1));
-    //         composer.attachments.push({
-    //             name,
-    //             extension,
-    //             has_thumbnail: false,
-    //             ...attachmentRecord,
-    //         });
-    //         attachmentIds.push(attachmentRecord.id);
-    //     }
-    //     this.props.chatterParams.saveRecordHandler?.(attachmentIds);
-    //     this.props.close();
-    // }
 }
 
 export function getMediaManagertDialogProps(recordInfo) {
@@ -177,7 +97,6 @@ export function getMediaManagertDialogProps(recordInfo) {
             "&",
             ["res_model", "=", recordInfo.resModel],
             ["res_id", "=", recordInfo.resId || -1],
-            // ...queryHelper.imagesDomain,
         ],
         context: {
             kanban_view_ref: "ai.mediamanager_media_kanban_ai", // todo : the ai version should be replaced by the ai override
