@@ -582,15 +582,34 @@ class ResGroups(models.Model):
     @api.ormcache(cache='groups')
     def _get_group_definitions(self):
         """ Return the definition of all the groups as a :class:`~odoo.tools.SetDefinitions`. """
-        groups = self.sudo().search([], order='id')
-        id_to_refs = groups._get_external_ids()
+        # Plain SQL: this is rebuilt after every 'groups' cache invalidation
+        # (module loads, test cache layers); going through the ORM recomputed
+        # disjoint_ids, which itself re-entered this method.
+        self.env['res.groups'].flush_model(['implied_ids'])
+        self.env['ir.model.data'].flush_model(['model', 'res_id', 'module', 'name'])
+        group_ids = [gid for gid, in self.env.execute_query(SQL("SELECT id FROM res_groups ORDER BY id"))]
+        id_to_refs = defaultdict(list)
+        for res_id, xid in self.env.execute_query(SQL(
+            "SELECT res_id, module || '.' || name FROM ir_model_data WHERE model = 'res.groups' ORDER BY id",
+        )):
+            id_to_refs[res_id].append(xid)
+        supersets = defaultdict(list)
+        for gid, hid in self.env.execute_query(SQL("SELECT gid, hid FROM res_groups_implied_rel")):
+            supersets[gid].append(hid)
+        # same as _compute_disjoint_ids: the user type groups are pairwise disjoint
+        xid_to_id = {xid: gid for gid in group_ids for xid in id_to_refs[gid]}
+        user_type_ids = [
+            gid
+            for xid in ('base.group_user', 'base.group_portal', 'base.group_public')
+            if (gid := xid_to_id.get(xid))
+        ]
         data = {
-            group.id: {
-                'refs': id_to_refs[group.id] or [str(group.id)],
-                'supersets': group.implied_ids.ids,
-                'disjoints': group.disjoint_ids.ids,
+            gid: {
+                'refs': id_to_refs[gid] or [str(gid)],
+                'supersets': supersets[gid],
+                'disjoints': [other for other in user_type_ids if other != gid] if gid in user_type_ids else [],
             }
-            for group in groups
+            for gid in group_ids
         }
         return SetDefinitions(data)
 
