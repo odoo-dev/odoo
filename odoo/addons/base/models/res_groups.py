@@ -544,6 +544,28 @@ class ResGroups(models.Model):
     @api.model
     @api.ormcache('self.env.lang', cache='groups')
     def _get_view_group_hierarchy(self):
+        # Derive the closures from the group definitions instead of going
+        # through the computed fields all_implied_ids, all_implied_by_ids and
+        # disjoint_ids (same values, see their compute methods): this is rebuilt
+        # after every 'groups' cache invalidation.
+        definitions = self._get_group_definitions()
+        user_type_ids = self._get_user_type_groups().ids
+        groups = self.search([])
+
+        def all_implied_ids(gid):
+            return [gid, *definitions.get_superset_ids([gid])]
+
+        def all_implied_by_ids(gid):
+            return [gid, *definitions.get_subset_ids([gid])]
+
+        def disjoint_ids(gid):
+            return [other for other in user_type_ids if other != gid] if gid in user_type_ids else []
+
+        def sort_key(group, privilege_group_ids):
+            if not group.privilege_id:
+                return (0, group.sequence, group.id)
+            return (len(privilege_group_ids.intersection(all_implied_ids(group.id))), group.sequence, group.id)
+
         return {
             'groups': {
                 group.id: {
@@ -551,12 +573,12 @@ class ResGroups(models.Model):
                     'name': group.name,
                     'comment': group.comment,
                     'privilege_id': group.privilege_id.id,
-                    'disjoint_ids': group.disjoint_ids.ids,
+                    'disjoint_ids': disjoint_ids(group.id),
                     'implied_ids': group.implied_ids.ids,
-                    'all_implied_ids': group.all_implied_ids.ids,
-                    'all_implied_by_ids': group.all_implied_by_ids.ids,
+                    'all_implied_ids': all_implied_ids(group.id),
+                    'all_implied_by_ids': all_implied_by_ids(group.id),
                 }
-                for group in self.search([])
+                for group in groups
             },
             'privileges': {
                 privilege.id: {
@@ -565,7 +587,8 @@ class ResGroups(models.Model):
                     'category_id': privilege.category_id.id,
                     'description': privilege.description,
                     'placeholder': privilege.placeholder,
-                    'group_ids': [group.id for group in privilege.group_ids.sorted(lambda g: (len(g.all_implied_ids & privilege.group_ids) if g.privilege_id else 0, g.sequence, g.id))]
+                    'group_ids': [group.id for group in privilege.group_ids.sorted(
+                        lambda g, pg=set(privilege.group_ids.ids): sort_key(g, pg))],
                 }
                 for privilege in self.env['res.groups.privilege'].search([])
             },
