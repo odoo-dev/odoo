@@ -34,15 +34,35 @@ _CONFDELTYPES = {
 }
 
 
+# validated identifier code strings, keyed by (name, subname)
+_IDENTIFIER_CODES: dict[tuple[str, str | None], str] = {}
+
+
 class _SQLMeta(type):
     @staticmethod
     def identifier(name: str, subname: str | None = None, to_flush: Field | None = None) -> SQL:
         """ Return an SQL object that represents an identifier. """
-        assert name.isidentifier() or IDENT_RE.match(name), f"{name!r} invalid for SQL.identifier()"
-        if subname is None:
-            return SQL(f'"{name}"', to_flush=to_flush)  # pylint: disable=sql-injection
-        assert subname.isidentifier() or IDENT_RE.match(subname), f"{subname!r} invalid for SQL.identifier()"
-        return SQL(f'"{name}"."{subname}"', to_flush=to_flush)  # pylint: disable=sql-injection
+        key = (name, subname)
+        code = _IDENTIFIER_CODES.get(key)
+        if code is None:
+            assert name.isidentifier() or IDENT_RE.match(name), f"{name!r} invalid for SQL.identifier()"
+            if subname is None:
+                code = f'"{name}"'
+            else:
+                assert subname.isidentifier() or IDENT_RE.match(subname), f"{subname!r} invalid for SQL.identifier()"
+                code = f'"{name}"."{subname}"'
+            if len(_IDENTIFIER_CODES) > 100_000:
+                _IDENTIFIER_CODES.clear()
+            _IDENTIFIER_CODES[key] = code
+        # build the object directly: same result as SQL(code, to_flush=to_flush)
+        sql = object.__new__(LiteralSQL)
+        if to_flush is None:
+            sql._LiteralSQL__sql_tuple = (code, (), ())
+        elif getattr(to_flush.__class__, '__iter__', None) is not None:
+            sql._LiteralSQL__sql_tuple = (code, (), tuple(to_flush))
+        else:
+            sql._LiteralSQL__sql_tuple = (code, (), (to_flush,))
+        return sql
 
 
 class SQL(metaclass=_SQLMeta):
@@ -89,9 +109,7 @@ class SQL(metaclass=_SQLMeta):
         ...
 
     def __new__(cls, *a, **kw):
-        if cls is SQL:
-            cls = LiteralSQL  # noqa: PLW0642
-        return object.__new__(cls)
+        return object.__new__(LiteralSQL if cls is SQL else cls)
 
     _sql_tuple: tuple[str, tuple, tuple[Field, ...]]
     """ The tuple used to execute the query: (code, params, to_flush) """
@@ -183,14 +201,29 @@ class LiteralSQL(SQL):
             return SQL()
         if len(args) == 1 and isinstance(args[0], SQL):
             return args[0]
-        code, params, to_flush = self.__sql_tuple
-        if not params:
-            return SQL(code.join(("%s",) * len(args)), *args, to_flush=to_flush)  # pylint: disable=sql-injection
-        # general case: alternate args with self
-        items = [self] * (len(args) * 2 - 1)
+        sep_code, sep_params, sep_to_flush = self.__sql_tuple
+        # build the result directly; same result as the equivalent SQL() call
+        # (codes are joined as-is since '%%' escapes are preserved by SQL())
+        code_list = []
+        params_list = []
+        to_flush_list = []
         for index, arg in enumerate(args):
-            items[index * 2] = arg
-        return SQL("%s" * len(items), *items)  # pylint: disable=sql-injection
+            if index and sep_params:
+                params_list.extend(sep_params)
+                to_flush_list.extend(sep_to_flush)
+            if isinstance(arg, SQL):
+                arg_code, arg_params, arg_to_flush = arg._sql_tuple
+                code_list.append(arg_code)
+                params_list.extend(arg_params)
+                to_flush_list.extend(arg_to_flush)
+            else:
+                code_list.append("%s")
+                params_list.append(arg)
+        if not sep_params:
+            to_flush_list.extend(sep_to_flush)
+        sql = object.__new__(LiteralSQL)
+        sql.__sql_tuple = (sep_code.join(code_list), tuple(params_list), tuple(to_flush_list))
+        return sql
 
 
 def existing_tables(cr: Cursor, tablenames: Iterable[str]) -> list[str]:
