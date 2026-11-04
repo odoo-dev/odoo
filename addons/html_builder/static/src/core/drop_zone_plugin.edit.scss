@@ -75,7 +75,8 @@
 }
 
 :not(.oe_structure):not([data-oe-type="html"]),
-.o_drop_inner_empty {
+.o_drop_inner_empty:not(.oe_structure),
+.o_drop_inner_empty:has(> .o_inner_dropzone) {
     /* "Inner content" drop zones. */
     > .oe_drop_zone.oe_insert:not(.oe_grid_zone):not(.oe_sanitized_drop_zone) {
         height: var(--o-we-inner-content-dropzone-size);
@@ -125,7 +126,8 @@
     }
 }
 
-.o_drop_inner_empty > .oe_drop_zone.oe_insert[data-editor-message] {
+.o_drop_inner_empty:not(.oe_structure)
+> .oe_drop_zone.oe_insert[data-editor-message] {
     &:not(.oe_vertical):not(.oe_grid_zone):not(.oe_sanitized_drop_zone) {
         display: flex;
         align-items: center;
