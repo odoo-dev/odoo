@@ -18,11 +18,6 @@ import { closestElement } from "@html_editor/utils/dom_traversal";
 import { fuzzyLookup } from "@web/core/utils/search";
 import { FORMATTABLE_TAGS } from "@html_editor/utils/formatting";
 import { MediaDialog } from "@html_editor/main/media/media_dialog/media_dialog";
-import {
-    getMediaManagertDialogProps,
-    MediaManagerDialog,
-} from "@html_editor/main/media/media_manager/media_manager_dialog";
-import { loadImage } from "@html_editor/utils/image_processing";
 
 export const ATTACHMENT_PENDING_RECORD_ID = "o_attachment_pending_record_id";
 
@@ -156,11 +151,14 @@ export class MediaPlugin extends Plugin {
             )}, A, LI) > :is(${ICON_SELECTOR})`,
     };
 
-    setup() {
-        this.availableTabs = [
-            ...Object.values(TABS),
-            ...this.getResource("media_dialog_extra_tabs"),
-        ];
+    /**
+     * Computed on demand (resources are ready before any plugin setup) rather
+     * than in `setup`: other plugins may read it before this plugin is set up,
+     * e.g. the powerbox reading the keywords of `getInsertMediaPowerboxItem`
+     * when this plugin is placed after it (see WebsiteMediaPlugin).
+     */
+    get availableTabs() {
+        return [...Object.values(TABS), ...this.getResource("media_dialog_extra_tabs")];
     }
 
     getInsertMediaPowerboxItem() {
@@ -169,7 +167,7 @@ export class MediaPlugin extends Plugin {
             {
                 categoryId: "media",
                 commandId: "insertMedia",
-                // Evaluation is deferred because this.availableTabs is only ready after setup.
+                // Evaluation is deferred because resources are not ready yet when this is built.
                 get keywords() {
                     return self.availableTabs.map((tab) => tab.title);
                 },
@@ -177,7 +175,7 @@ export class MediaPlugin extends Plugin {
             {
                 categoryId: "media",
                 commandId: "insertMediaOLD",
-                // Evaluation is deferred because this.availableTabs is only ready after setup.
+                // Evaluation is deferred because resources are not ready yet when this is built.
                 get keywords() {
                     return self.availableTabs.map((tab) => tab.title);
                 },
@@ -288,36 +286,8 @@ export class MediaPlugin extends Plugin {
 
     openMediaDialog(params = {}, editableEl = null) {
         console.warn("open media dialog ", params, editableEl);
-        const recordInfo = this.getRecordInfo(editableEl);
-        const { resModel, resId, field, type } = recordInfo;
-        let imageToReplace = params.node || null;
+        const { resModel, resId, field, type } = this.getRecordInfo(editableEl);
 
-        if (!params.useOldMediaDialog) {
-            return this.dependencies.dialog.addDialog(MediaManagerDialog, {
-                ...getMediaManagertDialogProps(recordInfo),
-                onSelected: async (resIds, records) => {
-                    console.warn("onSelected");
-                    console.log(resIds, records);
-                    if (!records.length) {
-                        return;
-                    }
-                    const elements = [];
-                    for (const record of records) {
-                        const imageEl = await loadImage(record.local_url);
-                        imageEl.alt = record.display_name ?? "";
-                        elements.push(imageEl);
-                    }
-
-                    const promises = [];
-                    for (const el of elements) {
-                        promises.push(this.onSaveMediaDialog(el, imageToReplace));
-                        imageToReplace = null;
-                    }
-                    await Promise.all(promises);
-                },
-                multiSelect: !imageToReplace,
-            });
-        }
         const oldSave =
             params.save ||
             ((...args) => {

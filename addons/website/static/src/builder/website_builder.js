@@ -206,7 +206,8 @@ export class WebsiteBuilder extends Component {
                   ...registry.category("website-plugins").getAll(),
               ];
         const builderPluginsToRemove = [
-            // Currently empty.
+            // Replaced by WebsiteMediaPlugin.
+            "MediaManagerPlugin",
         ];
         const pluginsBlockedInTranslationMode = [
             "PowerboxPlugin",
