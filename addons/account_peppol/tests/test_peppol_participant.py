@@ -388,3 +388,41 @@ class TestPeppolParticipant(PeppolConnectorCommon):
             p_rec = partner_form.save()
             self.assertEqual(p_rec.commercial_partner_id, p_rec)
             self.assertEqual(p_rec.commercial_partner_id.name, "test")
+
+    def test_partner_fields_not_recomputed_when_valid(self):
+        """
+        Test that changing partner details does not overwrite peppol_eas and peppol_endpoint if the partner is already
+        verified/registered on Peppol.
+        """
+
+        partner = self.env['res.partner'].create({
+            'name': 'Registered peppol customer',
+            'country_id': self.env.ref('base.be').id,
+            'peppol_eas': '0208',
+            'peppol_endpoint': '0123456789',
+            'peppol_verification_state': 'valid',
+        })
+
+        partner.write({
+            'vat': 'BE0987654321',
+        })
+
+        self.assertEqual(partner.peppol_eas, "0208")
+        self.assertEqual(partner.peppol_endpoint, "0123456789")
+
+    def test_partner_fields_recomputed_when_not_valid(self):
+        """
+        Test that changing partner details does overwrite peppol_eas and peppol_endpoint if the partner is not
+        verified/registered on Peppol.
+        """
+
+        partner = self.env['res.partner'].create({
+            'name': 'Registered peppol customer',
+            'country_id': self.env.ref('base.be').id,
+            'peppol_endpoint': "12345674",
+            'peppol_verification_state': 'not_verified',
+        })
+
+        partner.country_id = self.env.ref('base.ba')
+
+        self.assertEqual(partner.peppol_eas, '0184')

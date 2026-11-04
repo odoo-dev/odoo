@@ -268,6 +268,8 @@ class ResPartner(models.Model):
         """ If the EAS changes and a valid endpoint is available, set it. Otherwise, keep the existing value."""
         for partner in self:
             partner.peppol_endpoint = sanitize_peppol_endpoint(partner.peppol_endpoint, partner.peppol_eas)
+            if getattr(partner, 'peppol_verification_state', None) == 'valid':
+                continue
             country_code = partner._deduce_country_code()
             if country_code in EAS_MAPPING:
                 field = EAS_MAPPING[country_code].get(partner.peppol_eas)
@@ -283,6 +285,8 @@ class ResPartner(models.Model):
         """
         for partner in self:
             partner.peppol_eas = partner.peppol_eas
+            if getattr(partner, 'peppol_verification_state', None) == 'valid':
+                continue
             country_code = partner._deduce_country_code()
             if country_code in EAS_MAPPING:
                 eas_to_field = EAS_MAPPING[country_code]
