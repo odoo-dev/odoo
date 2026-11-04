@@ -17,6 +17,48 @@ from functools import partial
 from odoo.tools.misc import OrderedSet
 
 
+def _sub_line_start_keyword(regex, keyword, repl, content):
+    """ Same result as ``regex.sub(repl, content)``, for a MULTILINE ``regex``
+    of the form ``^(?P<space>\\s*)<keyword>...`` (``keyword`` being a literal
+    that starts with a non-space character).
+
+    Such a match can only start at the earliest line start of the whitespace
+    run preceding an occurrence of ``keyword``.  Instead of scanning the whole
+    content with the regex (one attempt per character, for every step of the
+    transpilation), only those candidate positions are tried, in order, and
+    with the same non-overlapping rule as ``re.sub``.
+    """
+    find = content.find
+    pos = find(keyword)
+    if pos < 0:
+        return content
+    parts = []
+    last = 0  # end of the previous match: re.sub resumes scanning there
+    while pos >= 0:
+        # start of the whitespace run that precedes the keyword
+        lo = pos
+        while lo > last and content[lo - 1].isspace():
+            lo -= 1
+        # earliest line start in [lo, pos], where '^' can match
+        if lo == 0 or content[lo - 1] == '\n':
+            match = regex.match(content, lo)
+        elif (newline := find('\n', lo, pos)) >= 0:
+            match = regex.match(content, newline + 1)
+        else:
+            match = None  # the keyword does not start its line
+        if match is None:
+            pos = find(keyword, pos + 1)
+            continue
+        parts.append(content[last:match.start()])
+        parts.append(repl(match) if callable(repl) else match.expand(repl))
+        last = match.end()
+        pos = find(keyword, last)
+    if not parts:
+        return content
+    parts.append(content[last:])
+    return ''.join(parts)
+
+
 def transpile_javascript(url, content):
     """
     Transpile the code from native JS modules to custom odoo modules.
@@ -137,7 +179,7 @@ def convert_export_function(content):
 
     """
     repl = r"\g<space>__exports.\g<identifier> = \g<identifier>; \g<type> \g<identifier>"
-    return EXPORT_FCT_RE.sub(repl, content)
+    return _sub_line_start_keyword(EXPORT_FCT_RE, 'export', repl, content)
 
 EXPORT_CLASS_RE = re.compile(r"""
     ^
@@ -161,7 +203,7 @@ def convert_export_class(content):
 
     """
     repl = r"\g<space>const \g<identifier> = __exports.\g<identifier> = \g<type> \g<identifier>"
-    return EXPORT_CLASS_RE.sub(repl, content)
+    return _sub_line_start_keyword(EXPORT_CLASS_RE, 'export', repl, content)
 
 
 EXPORT_FCT_DEFAULT_RE = re.compile(r"""
@@ -191,7 +233,7 @@ def convert_export_function_default(content):
 
     """
     repl = r"""\g<space>__exports[Symbol.for("default")] = \g<identifier>; \g<type> \g<identifier>"""
-    return EXPORT_FCT_DEFAULT_RE.sub(repl, content)
+    return _sub_line_start_keyword(EXPORT_FCT_DEFAULT_RE, 'export', repl, content)
 
 EXPORT_CLASS_DEFAULT_RE = re.compile(r"""
     ^
@@ -215,7 +257,7 @@ def convert_export_class_default(content):
 
     """
     repl = r"""\g<space>const \g<identifier> = __exports[Symbol.for("default")] = \g<type> \g<identifier>"""
-    return EXPORT_CLASS_DEFAULT_RE.sub(repl, content)
+    return _sub_line_start_keyword(EXPORT_CLASS_DEFAULT_RE, 'export', repl, content)
 
 
 GETTEXT_RE = re.compile(r"""
@@ -279,7 +321,7 @@ def convert_variable_export(content):
 
     """
     repl = r"\g<space>\g<type> \g<identifier> = __exports.\g<identifier>"
-    return EXPORT_VAR_RE.sub(repl, content)
+    return _sub_line_start_keyword(EXPORT_VAR_RE, 'export', repl, content)
 
 
 EXPORT_DEFAULT_VAR_RE = re.compile(r"""
@@ -304,7 +346,7 @@ def convert_variable_export_default(content):
 
     """
     repl = r"""\g<space>\g<type> \g<identifier> = __exports[Symbol.for("default")]"""
-    return EXPORT_DEFAULT_VAR_RE.sub(repl, content)
+    return _sub_line_start_keyword(EXPORT_DEFAULT_VAR_RE, 'export', repl, content)
 
 
 EXPORT_OBJECT_RE = re.compile(r"""
@@ -330,7 +372,7 @@ def convert_object_export(content):
         object_process = "{" + ", ".join([convert_as(val) for val in matchobj["object"][1:-1].split(",")]) + "}"
         space = matchobj["space"]
         return f"{space}Object.assign(__exports, {object_process})"
-    return EXPORT_OBJECT_RE.sub(repl, content)
+    return _sub_line_start_keyword(EXPORT_OBJECT_RE, 'export', repl, content)
 
 
 EXPORT_FROM_RE = re.compile(r"""
@@ -363,7 +405,7 @@ def convert_from_export(content):
             'space': matchobj['space'],
             'path': matchobj['path'],
         }
-    return EXPORT_FROM_RE.sub(repl, content)
+    return _sub_line_start_keyword(EXPORT_FROM_RE, 'export', repl, content)
 
 
 EXPORT_STAR_FROM_RE = re.compile(r"""
@@ -386,7 +428,7 @@ def convert_star_from_export(content):
         Object.assign(__exports, require("some/path.js"))
     """
     repl = r"\g<space>Object.assign(__exports, require(\g<path>))"
-    return EXPORT_STAR_FROM_RE.sub(repl, content)
+    return _sub_line_start_keyword(EXPORT_STAR_FROM_RE, 'export', repl, content)
 
 
 EXPORT_DEFAULT_RE = re.compile(r"""
@@ -422,7 +464,7 @@ def convert_default_export(content):
     new_content = convert_export_class_default(new_content)
     new_content = convert_variable_export_default(new_content)
     repl = r"""\g<space>__exports[Symbol.for("default")] ="""
-    return EXPORT_DEFAULT_RE.sub(repl, new_content)
+    return _sub_line_start_keyword(EXPORT_DEFAULT_RE, 'export', repl, new_content)
 
 
 IMPORT_BASIC_RE = re.compile(r"""
@@ -449,7 +491,7 @@ def convert_basic_import(content):
     def repl(matchobj):
         new_object = matchobj["object"].replace(" as ", ": ")
         return f"{matchobj['space']}const {new_object} = require({matchobj['path']})"
-    return IMPORT_BASIC_RE.sub(repl, content)
+    return _sub_line_start_keyword(IMPORT_BASIC_RE, 'import', repl, content)
 
 
 IMPORT_LEGACY_DEFAULT_RE = re.compile(r"""
@@ -476,7 +518,7 @@ def convert_legacy_default_import(content):
         const module_name = require("addon.module_name")
     """
     repl = r"""\g<space>const \g<identifier> = require(\g<path>)"""
-    return IMPORT_LEGACY_DEFAULT_RE.sub(repl, content)
+    return _sub_line_start_keyword(IMPORT_LEGACY_DEFAULT_RE, 'import', repl, content)
 
 
 IMPORT_DEFAULT = re.compile(r"""
@@ -501,7 +543,7 @@ def convert_default_import(content):
         const something = require("some/path")[Symbol.for("default")]
     """
     repl = r"""\g<space>const \g<identifier> = require(\g<path>)[Symbol.for("default")]"""
-    return IMPORT_DEFAULT.sub(repl, content)
+    return _sub_line_start_keyword(IMPORT_DEFAULT, 'import', repl, content)
 
 
 IS_PATH_LEGACY_RE = re.compile(r"""(?P<quote>["'`])([^@\."'`][^"'`]*)(?P=quote)""")
@@ -539,7 +581,7 @@ def convert_default_and_named_import(content):
 {matchobj['space']}const {new_object} = {matchobj['default_export']}"""
         new_object = f"""{{ [Symbol.for("default")]: {matchobj['default_export']},{new_object[1:]}"""
         return f"{matchobj['space']}const {new_object} = require({matchobj['path']})"
-    return IMPORT_DEFAULT_AND_NAMED_RE.sub(repl, content)
+    return _sub_line_start_keyword(IMPORT_DEFAULT_AND_NAMED_RE, 'import', repl, content)
 
 
 RELATIVE_REQUIRE_RE = re.compile(r"""
@@ -599,7 +641,7 @@ def convert_star_import(content):
         const name = require("some/path")
     """
     repl = r"\g<space>const \g<identifier> = require(\g<path>)"
-    return IMPORT_STAR.sub(repl, content)
+    return _sub_line_start_keyword(IMPORT_STAR, 'import', repl, content)
 
 
 IMPORT_DEFAULT_AND_STAR = re.compile(r"""
@@ -627,7 +669,7 @@ def convert_default_and_star_import(content):
     """
     repl = r"""\g<space>const \g<named_exports_alias> = require(\g<path>);
 \g<space>const \g<default_export> = \g<named_exports_alias>[Symbol.for("default")]"""
-    return IMPORT_DEFAULT_AND_STAR.sub(repl, content)
+    return _sub_line_start_keyword(IMPORT_DEFAULT_AND_STAR, 'import', repl, content)
 
 
 IMPORT_UNNAMED_RELATIVE_RE = re.compile(r"""
@@ -649,7 +691,7 @@ def convert_unnamed_relative_import(content):
         require("some/path")
     """
     repl = r"\g<space>require(\g<path>)"
-    return IMPORT_UNNAMED_RELATIVE_RE.sub(repl, content)
+    return _sub_line_start_keyword(IMPORT_UNNAMED_RELATIVE_RE, 'import', repl, content)
 
 
 URL_INDEX_RE = re.compile(r"""
