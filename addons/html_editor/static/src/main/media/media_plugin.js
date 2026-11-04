@@ -10,8 +10,6 @@ import {
     paragraphRelatedElementsSelector,
 } from "@html_editor/utils/dom_info";
 import { _t } from "@web/core/l10n/translation";
-// import { MediaDialog } from "./media_dialog/media_dialog";
-// import { MediaManager } from "./media_manager/media_manager";
 import { TABS } from "./media_dialog/media_dialog_utils";
 import { isHtmlContentSupported } from "@html_editor/core/selection_plugin";
 import { boundariesOut, rightPos } from "@html_editor/utils/position";
@@ -317,29 +315,7 @@ export class MediaPlugin extends Plugin {
                     }
                     await Promise.all(promises);
                 },
-                // resModel,
-                // resId,
                 multiSelect: !imageToReplace,
-                // field,
-                // validateCallback: async (elements) => {
-                //     // todo : make sure we reproduce the all the necessary old save behaviour
-                //     const promises = [];
-                //     for (const el of elements) {
-                //         promises.push(this.onSaveMediaDialog(el, imageToReplace));
-                //         imageToReplace = null;
-                //     }
-                //     await Promise.all(promises);
-                // },
-                // useMediaLibrary: !!(
-                //     field &&
-                //     ((resModel === "ir.ui.view" && field === "arch") || type === "html")
-                // ), // @todo @phoenix: should be removed and moved to config.mediaModalParams
-                // media: params.node,
-                // onAttachmentChange: this.config.onAttachmentChange || (() => {}),
-                // noImages: !this.config.allowImage,
-                // extraTabs: this.getResource("media_dialog_extra_tabs"),
-                // ...this.config.mediaModalParams,
-                // ...params,
             });
         }
         const oldSave =
