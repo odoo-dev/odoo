@@ -20,7 +20,7 @@ from odoo.fields import Command, Domain
 from odoo.tools import BinaryBytes, frozendict, reset_cached_properties, split_every, sql, unique, OrderedSet, SQL
 from odoo.tools.constants import IN_MAX
 from odoo.tools.safe_eval import expr_eval, safe_eval, datetime, dateutil, time
-from odoo.tools.translate import FIELD_TRANSLATE, LazyTranslate, _
+from odoo.tools.translate import FIELD_TRANSLATE, LazyTranslate, StoredTranslations, _
 
 
 _lt = LazyTranslate(__name__)
@@ -1642,19 +1642,48 @@ class IrModelFields(models.Model):
         :param model_name: the name of the field's model
         :return: {field_name: {id, help, field_description, [selection]}}
         """
-        fields = self.sudo().browse(self._get_ids(model_name).values())
-        result = {
-            field.name: {
-                'id': field.id,
-                'help': field.help,
-                'field_description': field.field_description,
+        # Plain SQL instead of browsing the records: this is recomputed after
+        # every 'stable' cache invalidation, and prefetching every column of
+        # ir.model.fields and their selection_ids through the ORM dominates.
+        # The translated columns use the same fallback as the ORM (Field.to_sql).
+        field_ids = list(self._get_ids(model_name).values())
+        if not field_ids:
+            return frozendict()
+
+        def translated(field, column):
+            langs = StoredTranslations.fallback_langs(field.translation_lang(self.env))
+            return SQL("COALESCE(%s)", SQL(", ").join(SQL("%s->>%s", column, lang) for lang in langs))
+
+        self.flush_model(['name', 'ttype', 'help', 'field_description'])
+        rows = self.env.execute_query(SQL(
+            "SELECT id, name, ttype, %s, %s FROM ir_model_fields WHERE id = ANY(%s)",
+            translated(self._fields['help'], SQL.identifier('help')),
+            translated(self._fields['field_description'], SQL.identifier('field_description')),
+            field_ids,
+        ))
+        rows_by_id = {row[0]: row for row in rows}
+        result = {}
+        selection_fields = {}
+        for field_id in field_ids:  # same order as the browsed records
+            if (row := rows_by_id.get(field_id)) is None:
+                continue
+            _id, name, ttype, help_, description = row
+            result[name] = {
+                'id': field_id,
+                'help': help_ if help_ is not None else False,
+                'field_description': description if description is not None else False,
             }
-            for field in fields
-        }
-        for field in fields.filtered(lambda field: field.ttype in ('selection', 'reference')):
-            result[field.name]['selection'] = [
-                (sel.value, sel.name) for sel in field.selection_ids
-            ]
+            if ttype in ('selection', 'reference'):
+                result[name]['selection'] = selection_fields[field_id] = []
+        if selection_fields:
+            Selection = self.env['ir.model.fields.selection']
+            Selection.flush_model(['field_id', 'value', 'name', 'sequence'])
+            for field_id, value, name in self.env.execute_query(SQL(
+                "SELECT field_id, value, %s FROM ir_model_fields_selection WHERE field_id = ANY(%s) ORDER BY sequence, id",
+                translated(Selection._fields['name'], SQL.identifier('name')),
+                list(selection_fields),
+            )):
+                selection_fields[field_id].append((value, name if name is not None else False))
         return frozendict(result)
 
 
