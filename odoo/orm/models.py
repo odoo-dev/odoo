@@ -2523,7 +2523,7 @@ class BaseModel(metaclass=MetaModel):
         if self._auto:
             # one introspection query gives both the table existence and its
             # columns (a model table always has at least the column 'id')
-            columns = sql.table_columns(cr, self._table)
+            columns = sql.table_columns_prefetched(cr, self._table)
             must_create_table = not columns and not sql.table_exists(cr, self._table)
             columns_stale = must_create_table
             if must_create_table:

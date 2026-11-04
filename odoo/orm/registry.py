@@ -12,7 +12,7 @@ import threading
 import time
 import typing
 import warnings
-from collections import defaultdict, deque
+from collections import Counter, defaultdict, deque
 from collections.abc import Mapping
 from contextlib import closing, ExitStack
 from functools import partial
@@ -895,9 +895,17 @@ class Registry(Mapping[str, type["BaseModel"]]):
             self._foreign_keys: dict[tuple[str, str], tuple[str, str, str, BaseModel, str]] = {}
             self._is_install: bool = install
 
-            for model in models:
-                model._auto_init()
-                model.init()
+            # load the columns of all model tables in one catalog query; each
+            # table's columns are consumed by its model's _auto_init(), and
+            # forgotten if the table is altered before (see odoo.tools.sql)
+            tables = Counter(model._table for model in models if model._auto)
+            sql.table_columns_prefetch(cr, [table for table, count in tables.items() if count == 1])
+            try:
+                for model in models:
+                    model._auto_init()
+                    model.init()
+            finally:
+                sql.table_columns_prefetch_clear(cr)
 
             env['ir.model']._reflect_models(model_names)
             env['ir.model.fields']._reflect_fields(model_names)

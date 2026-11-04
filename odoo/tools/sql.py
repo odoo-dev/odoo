@@ -291,6 +291,7 @@ SQL_ORDER_BY_TYPE = defaultdict(lambda: 16, {
 
 def create_model_table(cr: Cursor, tablename: str, comment: str | None = None, columns: Iterable[tuple[str, SQL, str | None]] = ()):
     """ Create the table for a model. """
+    _forget_table_columns(cr, tablename)
     colspecs = [
         SQL('id SERIAL NOT NULL'),
         *(SQL("%s %s", SQL.identifier(colname), coldef) for colname, coldef, _ in columns),
@@ -314,6 +315,109 @@ def create_model_table(cr: Cursor, tablename: str, comment: str | None = None, c
     _schema.debug("Table %r: created", tablename)
 
 
+# The information_schema helpers (_pg_char_max_length, _pg_truetypid,
+# _pg_truetypmod) are inlined below: same result, but much cheaper to plan
+# than the SQL functions and the namespace joins (this query runs for every
+# model table at every module load).
+_TABLE_COLUMNS_QUERY = """
+        SELECT c.relname AS table_name,
+               a.attname AS column_name,
+               coalesce(bt.typname, t.typname) AS udt_name,
+               CASE WHEN t.typtype = 'd' THEN
+                        CASE WHEN t.typtypmod = -1 THEN NULL
+                             WHEN t.typbasetype IN (1042, 1043) THEN t.typtypmod - 4
+                             WHEN t.typbasetype IN (1560, 1562) THEN t.typtypmod
+                        END
+                    ELSE
+                        CASE WHEN a.atttypmod = -1 THEN NULL
+                             WHEN a.atttypid IN (1042, 1043) THEN a.atttypmod - 4
+                             WHEN a.atttypid IN (1560, 1562) THEN a.atttypmod
+                        END
+               END AS character_maximum_length,
+               CASE WHEN a.attnotnull OR t.typtype = 'd' AND t.typnotnull THEN 'NO'
+                    ELSE 'YES'
+               END AS is_nullable
+          FROM pg_class c
+          JOIN pg_attribute a
+            ON a.attrelid = c.oid
+          JOIN pg_type t
+            ON a.atttypid = t.oid
+     LEFT JOIN pg_type bt
+            ON t.typtype = 'd'::"char"
+           AND t.typbasetype = bt.oid
+         WHERE c.relname IN %s
+           AND c.relnamespace = current_schema::regnamespace
+           AND c.relkind IN ('r', 'v', 'f', 'p')
+           AND a.attnum > 0
+           AND NOT a.attisdropped
+           AND (pg_has_role(c.relowner, 'USAGE'::text) OR has_column_privilege(c.oid, a.attnum, 'SELECT, INSERT, UPDATE, REFERENCES'))
+    """
+
+# key in cr.cache of the columns prefetched by table_columns_prefetch()
+_TABLE_COLUMNS_PREFETCH = 'sql.table_columns_prefetch'
+
+
+def _table_columns_bulk(cr: Cursor, tablenames: tuple[str, ...]) -> dict[str, dict[str, dict]]:
+    """ Return ``{tablename: table_columns(cr, tablename)}`` (only for the existing tables). """
+    cr.execute(SQL(_TABLE_COLUMNS_QUERY, tablenames))
+    result = defaultdict(dict)
+    for table_name, column_name, udt_name, character_maximum_length, is_nullable in cr.fetchall():
+        result[table_name][column_name] = {
+            'column_name': column_name,
+            'udt_name': udt_name,
+            'character_maximum_length': character_maximum_length,
+            'is_nullable': is_nullable,
+        }
+    return result
+
+
+def table_columns_prefetch(cr: Cursor, tablenames: Iterable[str]) -> None:
+    """ Load the columns of the given tables in one query, for the next calls
+    of :func:`table_columns_prefetched` on the same cursor. The prefetched
+    columns of a table are forgotten when it is modified by the DDL helpers of
+    this module, and when they are consumed.
+    """
+    tablenames = tuple(tablenames)
+    if not tablenames:
+        return
+    data = _table_columns_bulk(cr, tablenames)
+    # tables inheriting from another table (e.g. ir_act_window INHERITS
+    # ir_actions) also change when their parent is altered: never prefetch them
+    cr.execute(SQL("""
+        SELECT c.relname
+          FROM pg_inherits i
+          JOIN pg_class c ON c.oid = i.inhrelid
+         WHERE c.relname IN %s
+           AND c.relnamespace = current_schema::regnamespace
+    """, tablenames))
+    excluded = {row[0] for row in cr.fetchall()}
+    cr.cache[_TABLE_COLUMNS_PREFETCH] = {
+        name: dict(data.get(name, ()))
+        for name in tablenames
+        if name not in excluded
+    }
+
+
+def table_columns_prefetch_clear(cr: Cursor) -> None:
+    cr.cache.pop(_TABLE_COLUMNS_PREFETCH, None)
+
+
+def table_columns_prefetched(cr: Cursor, tablename: str) -> dict[str, dict]:
+    """ Same as :func:`table_columns`, but consumes the prefetched value if any. """
+    prefetch = cr.cache.get(_TABLE_COLUMNS_PREFETCH)
+    if prefetch:
+        columns = prefetch.pop(tablename, None)
+        if columns is not None:
+            return columns
+    return table_columns(cr, tablename)
+
+
+def _forget_table_columns(cr: Cursor, tablename: str) -> None:
+    prefetch = cr.cache.get(_TABLE_COLUMNS_PREFETCH)
+    if prefetch:
+        prefetch.pop(tablename, None)
+
+
 def table_columns(cr: Cursor, tablename: str) -> dict[str, tuple[str, str, int, str]]:
     """ Return a dict mapping column names to their configuration. The latter is
         a dict with the data from the table ``information_schema.columns``.
@@ -321,32 +425,11 @@ def table_columns(cr: Cursor, tablename: str) -> dict[str, tuple[str, str, int, 
     # Do not select the field `character_octet_length` from `information_schema.columns`
     # because specific access right restriction in the context of shared hosting (Heroku, OVH, ...)
     # might prevent a postgres user to read this field.
-    query = """
-        SELECT a.attname AS column_name,
-               coalesce(bt.typname, t.typname) AS udt_name,
-               information_schema._pg_char_max_length(information_schema._pg_truetypid(a.*, t.*), information_schema._pg_truetypmod(a.*, t.*)) AS character_maximum_length,
-               CASE WHEN a.attnotnull OR t.typtype = 'd' AND t.typnotnull THEN 'NO'
-                    ELSE 'YES'
-               END AS is_nullable
-          FROM pg_attribute a
-          JOIN pg_class c
-            ON a.attrelid = c.oid
-          JOIN pg_namespace nc
-            ON c.relnamespace = nc.oid
-          JOIN pg_type t
-            ON a.atttypid = t.oid
-     LEFT JOIN (pg_type bt JOIN pg_namespace nbt ON bt.typnamespace = nbt.oid)
-            ON t.typtype = 'd'::"char"
-           AND t.typbasetype = bt.oid
-         WHERE nc.nspname = current_schema
-           AND a.attnum > 0
-           AND NOT a.attisdropped
-           AND c.relkind IN ('r', 'v', 'f', 'p')
-           AND (pg_has_role(c.relowner, 'USAGE'::text) OR has_column_privilege(c.oid, a.attnum, 'SELECT, INSERT, UPDATE, REFERENCES'))
-           AND c.relname=%s
-    """
-    cr.execute(SQL(query, tablename))
-    return {row['column_name']: row for row in cr.dictfetchall()}
+    # The information_schema helpers (_pg_char_max_length, _pg_truetypid,
+    # _pg_truetypmod) are inlined below: same result, but much cheaper to plan
+    # than the SQL functions and the namespace joins (this query runs for every
+    # model table at every module load).
+    return _table_columns_bulk(cr, (tablename,)).get(tablename, {})
 
 
 def column_exists(cr: Cursor, tablename: str, columnname: str) -> bool:
@@ -399,6 +482,7 @@ def create_column(
     comment: str | None = None,
 ):
     """ Create a column with the given type and optionally initialize existing rows. """
+    _forget_table_columns(cr, tablename)
     queries = [SQL(
         "ALTER TABLE %s ADD COLUMN %s %s%s",
         SQL.identifier(tablename),
@@ -426,6 +510,7 @@ def create_column(
 
 def rename_column(cr: Cursor, tablename: str, columnname1: str, columnname2: str):
     """ Rename the given column. """
+    _forget_table_columns(cr, tablename)
     cr.execute(SQL(
         "ALTER TABLE %s RENAME COLUMN %s TO %s",
         SQL.identifier(tablename),
@@ -457,6 +542,7 @@ def convert_column_translatable(cr: Cursor, tablename: str, columnname: str, col
 
 
 def _convert_column(cr: Cursor, tablename: str, columnname: str, columntype: str | SQL, using: SQL):
+    _forget_table_columns(cr, tablename)
     if not isinstance(columntype, SQL):
         columntype = SQL.identifier(columntype)
     query = SQL(
@@ -505,6 +591,7 @@ def get_depending_views(cr: Cursor, table: str, column: str) -> list[tuple[str, 
 
 def set_not_null(cr: Cursor, tablename: str, columnname: str):
     """ Add a NOT NULL constraint on the given column. """
+    _forget_table_columns(cr, tablename)
     query = SQL(
         "ALTER TABLE %s ALTER COLUMN %s SET NOT NULL",
         SQL.identifier(tablename), SQL.identifier(columnname),
@@ -515,6 +602,7 @@ def set_not_null(cr: Cursor, tablename: str, columnname: str):
 
 def drop_not_null(cr: str, tablename: str, columnname: str):
     """ Drop the NOT NULL constraint on the given column. """
+    _forget_table_columns(cr, tablename)
     cr.execute(SQL(
         "ALTER TABLE %s ALTER COLUMN %s DROP NOT NULL",
         SQL.identifier(tablename), SQL.identifier(columnname),
@@ -596,17 +684,16 @@ def get_foreign_keys(cr: Cursor, tablename1: str, columnname1: str, tablename2: 
 
 def index_exists(cr: Cursor, indexname: str) -> bool:
     """ Return whether the given index exists. """
-    cr.execute(SQL("SELECT 1 FROM pg_indexes WHERE indexname=%s"
-                   " AND schemaname = current_schema", indexname))
+    cr.execute(SQL("SELECT 1 FROM pg_class c WHERE c.relname = %s AND c.relkind IN ('i', 'I')"
+                   " AND c.relnamespace = current_schema::regnamespace", indexname))
     return bool(cr.rowcount)
 
 
 def index_definition(cr: Cursor, indexname: str) -> tuple[str, str | None] | tuple[None, None]:
     """ Read the index definition from the database """
     cr.execute(SQL("""
-        SELECT idx.indexdef, d.description
+        SELECT pg_get_indexdef(c.oid) AS indexdef, d.description
         FROM pg_class c
-        JOIN pg_indexes idx ON c.relname = idx.indexname
         LEFT JOIN pg_description d ON c.oid = d.objoid
         WHERE c.relname = %s AND c.relkind = 'i'
           AND c.relnamespace = current_schema::regnamespace
