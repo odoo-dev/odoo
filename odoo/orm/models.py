@@ -224,6 +224,16 @@ def get_public_method(model: BaseModel, name: str) -> callable:
     return method
 
 
+@functools.cache
+def _plain_column_to_sql() -> frozenset:
+    """ The implementations of ``Field.to_sql`` that return the plain column
+    identifier ``"alias"."name"`` (flushing the field) for a stored column field
+    that is neither translated, company-dependent nor ``compute_sql``. """
+    from .fields_relational import Many2one  # noqa: PLC0415
+    from .fields_textual import BaseString  # noqa: PLC0415
+    return frozenset({Field.to_sql, BaseString.to_sql, Many2one.to_sql})
+
+
 class MetaModel(type):
     """ The metaclass of all model classes.
         Its main purpose is to register the models per module.
@@ -3244,8 +3254,25 @@ class BaseModel(metaclass=MetaModel):
         if column_fields:
             # the query may involve several tables: we need fully-qualified names
             sql_terms = [SQL.identifier(self._table, 'id')]
+            table = query.table
+            model = table._model
+            alias = table._alias
             for field in column_fields:
-                sql = query.table[field.name]
+                if (
+                    model is not None
+                    and type(field).to_sql in _plain_column_to_sql()
+                    and not field.translate
+                    and not field.company_dependent
+                    and not field.compute_sql
+                    and model._fields.get(field.name) is field
+                ):
+                    # fast path, same result as below: field.to_sql() is the
+                    # plain column identifier flushing only the field itself,
+                    # which is removed from to_flush right after
+                    model.check_field_access(field, 'read')
+                    sql_terms.append(SQL.identifier(alias, field.name))
+                    continue
+                sql = table[field.name]
                 # flushing is necessary to retrieve the en_US value of fields without a translation
                 # otherwise, re-create the SQL without flushing
                 if not field.translate:
