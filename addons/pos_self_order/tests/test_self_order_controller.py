@@ -1,12 +1,14 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import json
+import time
 import uuid
 from datetime import datetime, timedelta
 from unittest.mock import patch
 
 import odoo.tests
 from odoo import Command, fields
+from odoo.tools import mute_logger
 
 from odoo.addons.pos_self_order.tests.self_order_common_test import SelfOrderCommonTest
 
@@ -764,6 +766,7 @@ class TestSelfOrderController(SelfOrderCommonTest):
         self.assertEqual(victim_line.qty, 3)
         self.assertEqual(victim_line.order_id, victim_order)
 
+    @mute_logger('odoo.http')
     def test_secure_table_session_token_and_order_guard(self):
         self.pos_config.write({
             'self_ordering_mode': 'mobile',
@@ -816,3 +819,51 @@ class TestSelfOrderController(SelfOrderCommonTest):
             headers={'Content-Type': 'application/json'},
         ).json()
         self.assertTrue(res_ok.get('result'))
+
+        # Tampered signature fails
+        order_data['table_session_token'] = token + "_tampered"
+        res_tampered = self.url_open(
+            '/pos-self-order/process-order/mobile',
+            json.dumps({'jsonrpc': '2.0', 'params': order_data}),
+            method='POST',
+            headers={'Content-Type': 'application/json'},
+        ).json()
+        self.assertIn('Your session has expired', res_tampered['error']['data']['message'])
+
+        # Expired token fails
+        expired_token = f"{int(time.time()) - 60}.invalidsignature"
+        order_data['table_session_token'] = expired_token
+        res_expired = self.url_open(
+            '/pos-self-order/process-order/mobile',
+            json.dumps({'jsonrpc': '2.0', 'params': order_data}),
+            method='POST',
+            headers={'Content-Type': 'application/json'},
+        ).json()
+        self.assertIn('Your session has expired', res_expired['error']['data']['message'])
+
+        # Token from another table fails for pos_table_1
+        pos_table_2 = self.env['restaurant.table'].create({
+            'table_number': 2,
+            'floor_id': self.pos_table_1.floor_id.id,
+            'seats': 4,
+        })
+        token_table_2, _ = self.pos_config._generate_table_session_token(pos_table_2.identifier)
+        order_data['table_session_token'] = token_table_2
+        res_other_table = self.url_open(
+            '/pos-self-order/process-order/mobile',
+            json.dumps({'jsonrpc': '2.0', 'params': order_data}),
+            method='POST',
+            headers={'Content-Type': 'application/json'},
+        ).json()
+        self.assertIn('Your session has expired', res_other_table['error']['data']['message'])
+
+        # Session version bump invalidates existing tokens
+        order_data['table_session_token'] = token
+        self.pos_config._bump_self_order_session_version()
+        res_after_bump = self.url_open(
+            '/pos-self-order/process-order/mobile',
+            json.dumps({'jsonrpc': '2.0', 'params': order_data}),
+            method='POST',
+            headers={'Content-Type': 'application/json'},
+        ).json()
+        self.assertIn('Your session has expired', res_after_bump['error']['data']['message'])

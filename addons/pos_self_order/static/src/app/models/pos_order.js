@@ -89,16 +89,14 @@ patch(PosOrder.prototype, {
         }
 
         const configId = this.config?.id;
-        let tableIdentifier = null;
-        try {
-            const url = new URL(window.location.href);
-            tableIdentifier = url.searchParams.get("table_identifier");
-        } catch (err) {
-            console.warn("Could not parse table_identifier from URL:", err);
-        }
-
+        let tableIdentifier = this.self_ordering_table_id?.identifier || this.table_id?.identifier;
         if (!tableIdentifier) {
-            tableIdentifier = this.self_ordering_table_id?.identifier || this.table_id?.identifier;
+            try {
+                const url = new URL(window.location.href);
+                tableIdentifier = url.searchParams.get("table_identifier");
+            } catch (err) {
+                console.warn("Could not parse table_identifier from URL:", err);
+            }
         }
 
         if (configId && tableIdentifier) {

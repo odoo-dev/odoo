@@ -32,8 +32,8 @@
                 </div>
             </div>
         </div>
-        <div t-if="this.selfOrder.isSessionExpired" id="pos-session-expired-banner" class="pos-session-expired-banner">
-            <span class="pos-session-expired-icon">⏱️</span>
+        <div t-if="this.selfOrder.isSessionExpired()" class="o_pos_self_order_session_expired_banner">
+            <span class="o_pos_self_order_session_expired_icon">⏱️</span>
             <span>Your session has expired. Please <strong>scan the QR code again</strong> to continue ordering.</span>
         </div>
         <div class="o_pos_landing_footer position-absolute bottom-0 end-0 d-flex w-100 ">

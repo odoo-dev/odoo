@@ -28,5 +28,6 @@ export const shouldShowMissingDetails = (product, selectedValues) => {
 };
 
 export function getTableSessionStorageKey(configId, tableIdentifier) {
-    return `pos_table_session_${configId}_${tableIdentifier}_${odoo.info?.db}`;
+    const db = odoo.info?.db || odoo.__session_info__?.db || "";
+    return `pos_table_session_${configId}_${tableIdentifier}${db ? `_${db}` : ""}`;
 }

@@ -17,7 +17,7 @@ class PosSelfKiosk(http.Controller):
         if not pos_config.exists() or not pos_config._is_secure_table_session_enabled():
             return {'status': 'disabled'}
 
-        if not access_token or not pos_config.access_token or not consteq(pos_config.access_token, access_token):
+        if not access_token or not isinstance(access_token, str) or not pos_config.access_token or not consteq(pos_config.access_token, access_token):
             return {'status': 'error', 'message': 'Invalid access token'}
 
         table = request.env["restaurant.table"].sudo().search(
@@ -25,7 +25,7 @@ class PosSelfKiosk(http.Controller):
         )
         if not table:
             return {'status': 'error', 'message': 'Table not found'}
-        if table.parent_id:
+        while table.parent_id:
             table = table.parent_id
 
         if pos_config.floor_ids and table.floor_id not in pos_config.floor_ids:

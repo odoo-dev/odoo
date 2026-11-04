@@ -41,14 +41,12 @@ class PosSelfOrderController(http.Controller):
             is_dine_in = pos_config.self_ordering_service_mode == 'table'
 
         if pos_config._is_secure_table_session_enabled() and table and is_dine_in:
-            if table.parent_id:
+            while table.parent_id:
                 table = table.parent_id
 
             token = table_session_token or (order and order.get('table_session_token'))
             if not token or not pos_config._verify_table_session_token(table.identifier, token):
-                raise UserError(
-                    request.env._("Your session has expired. Please scan the QR code again to continue ordering.")
-                )
+                raise Unauthorized("Your session has expired. Please scan the QR code again to continue ordering.")
 
         if order and isinstance(order, dict) and 'table_session_token' in order:
             order.pop('table_session_token', None)

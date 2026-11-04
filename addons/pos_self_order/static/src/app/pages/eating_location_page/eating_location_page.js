@@ -26,7 +26,7 @@ export class EatingLocationPage extends Component {
         if (
             this.selfOrder._isSessionTimeoutEnabled() &&
             preset.service_at === "table" &&
-            this.selfOrder.isSessionExpired
+            this.selfOrder.isSessionExpired()
         ) {
             if (this.selfOrder.notification) {
                 this.selfOrder.notification.add(

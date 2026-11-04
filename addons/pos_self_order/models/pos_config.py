@@ -165,9 +165,9 @@ class PosConfig(models.Model):
         if not hmac.compare_digest(signature, expected_sig):
             return False
 
-        return not time.time() > expires_at
+        return time.time() <= expires_at
 
-    @api.constrains('self_order_session_timeout_minutes')
+    @api.constrains('self_order_secure_session', 'self_order_session_timeout_minutes')
     def _check_session_timeout_values(self):
         for rec in self:
             if rec.self_order_secure_session and rec.self_order_session_timeout_minutes <= 0:
@@ -247,11 +247,7 @@ class PosConfig(models.Model):
 
     def _bump_self_order_session_version(self):
         for record in self:
-            self.env.cr.execute(
-                "UPDATE pos_config SET self_order_session_version = COALESCE(self_order_session_version, 0) + 1 WHERE id = %s",
-                (record.id,)
-            )
-        self.invalidate_recordset(['self_order_session_version'])
+            record.with_context(skip_session_version_bump=True).sudo().self_order_session_version += 1
 
     def write(self, vals):
         if 'self_order_session_timeout_minutes' in vals and 'self_order_secure_session' not in vals:
@@ -264,13 +260,6 @@ class PosConfig(models.Model):
             and not product_delivery_template.active
         ):
             product_delivery_template.active = True
-
-        fields_to_monitor = ('self_ordering_mode', 'self_ordering_pay_after', 'self_order_secure_session', 'self_ordering_service_mode', 'self_order_session_timeout_minutes')
-        records_to_bump = self.env['pos.config']
-        if not self.env.context.get('skip_session_version_bump'):
-            for record in self:
-                if any(f in vals and record[f] != vals[f] for f in fields_to_monitor):
-                    records_to_bump |= record
 
         for record in self:
             mode = vals.get('self_ordering_mode', record.self_ordering_mode)
@@ -301,6 +290,13 @@ class PosConfig(models.Model):
 
             elif mode == 'mobile' and vals.get('self_ordering_pay_after') == 'meal':
                 vals['self_ordering_service_mode'] = 'table'
+
+        fields_to_monitor = ('self_ordering_mode', 'self_ordering_pay_after', 'self_order_secure_session', 'self_ordering_service_mode', 'self_order_session_timeout_minutes')
+        records_to_bump = self.env['pos.config']
+        if not self.env.context.get('skip_session_version_bump'):
+            for record in self:
+                if any(f in vals and record[f] != vals[f] for f in fields_to_monitor):
+                    records_to_bump |= record
 
         res = super().write(vals)
         if records_to_bump:

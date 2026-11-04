@@ -1301,7 +1301,7 @@ export class SelfOrder {
         return "none";
     }
 
-    get isSessionExpired() {
+    isSessionExpired() {
         if (!this._isSessionExpired || !this._isDineInOrder()) {
             return false;
         }
