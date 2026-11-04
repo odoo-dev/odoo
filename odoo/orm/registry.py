@@ -36,7 +36,7 @@ from odoo.tools.misc import Collector
 from odoo.tools.version_tag_reset import reset_classes_tp_versions_used
 
 from .utils import SUPERUSER_ID
-from . import model_classes
+from . import model_classes, signaling
 
 if typing.TYPE_CHECKING:
     from collections.abc import Callable, Collection, Iterable, Iterator, MutableMapping
@@ -336,10 +336,14 @@ class Registry(Mapping[str, type["BaseModel"]]):
         # constraint checks
         self.not_null_fields: set[Field] = set()
 
-        # Inter-process signaling:
-        # The `orm_signaling_...` sequence indicates that the corresponding
-        # cache is invalid if the sequence is different. The 'registry' sequence
-        # applies to the whole registry which must be rebuilt.
+        # Inter-process signaling, see `odoo.orm.signaling`:
+        # A cache is invalid if its token in shared memory is different from
+        # the sequence below. The 'registry' sequence applies to the whole
+        # registry which must be rebuilt.
+        self._signaling_slots = {
+            name: signaling.slot_index(db_name, name)
+            for name in ('registry', *_CACHES_BY_KEY)
+        }
         self.registry_sequence: int = -1
         self.registry_caches__: dict[str, tuple[int, MutableMapping]] = {}
         self.registry_cache_lock = threading.RLock()
@@ -1132,70 +1136,39 @@ class Registry(Mapping[str, type["BaseModel"]]):
         return model._table in self._ordinary_tables
 
     def setup_signaling(self) -> None:
-        """ Setup the inter-process signaling on this registry. """
+        """ Setup the inter-process signaling on this registry. This reads the
+        tokens before loading anything, so that a change is not missed. """
         assert self.registry_sequence < 0 and not self.registry_caches__, "Setup signaling already performed"
-        with self.cursor() as cr:
-            # The `orm_signaling_registry` sequence indicates when the registry
-            # must be reloaded.
-            # The `orm_signaling_...` sequences indicates when caches must
-            # be invalidated (i.e. cleared).
-            signaling_tables = tuple(f'orm_signaling_{cache_name}' for cache_name in ['registry', *_CACHES_BY_KEY])
-            cr.execute("SELECT table_name FROM information_schema.tables"
-                       " WHERE table_name IN %s AND table_schema = current_schema", [signaling_tables])
+        signaling.ensure_listener()
+        db_registry_sequence, db_cache_sequences = self.get_sequences(None)
+        self.registry_sequence = db_registry_sequence
+        self.registry_caches__ = {
+            name: (db_cache_sequences.get(name) or 0, LRU(cache_size))
+            for name, cache_size in _REGISTRY_CACHES.items()
+        }
 
-            existing_sig_tables = tuple(s[0] for s in cr.fetchall())  # could be a set but not efficient with such a little list
-            # signaling was previously using sequence but this doesn't work with replication
-            # https://www.postgresql.org/docs/current/logical-replication-restrictions.html
-            # this is the reason why insert only tables are used.
-            for table_name in signaling_tables:
-                if table_name not in existing_sig_tables:
-                    cr.execute(SQL(
-                        "CREATE TABLE %s (id SERIAL PRIMARY KEY, date TIMESTAMP DEFAULT now())",
-                        SQL.identifier(table_name),
-                    ))
-                    cr.execute(SQL("INSERT INTO %s DEFAULT VALUES", SQL.identifier(table_name)))
+        _logger.debug("Multiprocess load registry signaling: [Registry: %s] %s",
+                      db_registry_sequence, ' '.join('[Cache %s: %s]' % cs for cs in db_cache_sequences.items()))
 
-            db_registry_sequence, db_cache_sequences = self.get_sequences(cr)
-            self.registry_sequence = db_registry_sequence
-            self.registry_caches__ = {
-                name: (db_cache_sequences.get(name) or 0, LRU(cache_size))
-                for name, cache_size in _REGISTRY_CACHES.items()
-            }
+    def get_sequences(self, cr: BaseCursor | None) -> tuple[int, dict[str, int]]:
+        """ Return the current tokens of the registry and of its caches. """
+        sequences = {name: signaling.tokens[index] for name, index in self._signaling_slots.items()}
+        return sequences.pop('registry'), sequences
 
-            _logger.debug("Multiprocess load registry signaling: [Registry: %s] %s",
-                          db_registry_sequence, ' '.join('[Cache %s: %s]' % cs for cs in db_cache_sequences.items()))
-
-    def get_sequences(self, cr: BaseCursor) -> tuple[int, dict[str, int]]:
-        signaling_tables = tuple(f'orm_signaling_{cache_name}' for cache_name in ['registry', *_CACHES_BY_KEY])
-        signaling_selects = SQL(', ').join([SQL('( SELECT max(id) FROM %s)', SQL.identifier(signaling_table)) for signaling_table in signaling_tables])
-        cr.execute(SQL("SELECT (now() AT TIME ZONE 'UTC'), %s", signaling_selects))
-        row = cr.fetchone()
-        assert row is not None, "No result when reading signaling sequences"
-        now, registry_sequence, *cache_sequences_values = row
-        cache_sequences = dict(zip(_CACHES_BY_KEY, cache_sequences_values))
-        if cr._now is None:
-            cr._now = now
-        return registry_sequence, cache_sequences
-
-    def _signal_changes(self, cr: BaseCursor, names: Collection[str]) -> None:
-        """ Notifies other processes if registry or cache has been invalidated. """
+    def _signal_changes(self, names: Collection[str], token: int) -> None:
+        """ Notifies other processes that the transaction committed the
+        invalidation of the registry or caches. """
         if not names:
             return
         if 'registry' in names:
             _logger.info("Registry changed, signaling through the database")
-            cr.execute("INSERT INTO orm_signaling_registry DEFAULT VALUES")
-            # If another process concurrently updates the registry, the sequence
-            # will actually be out-of-date, and the next call to
-            # _check_signaling() will detect that and trigger a registry reload.
-            return
-
-        names = sorted(names)
-        _logger.info("Caches invalidated, signaling through the database: %s", names)
-        # If another process concurrently updates the cache, the sequences
-        # will actually be out-of-date, and the next call to
-        # _check_signaling() will detect use the new sequence.
-        for cache_name in names:
-            cr.execute(SQL("INSERT INTO %s DEFAULT VALUES", SQL.identifier(f'orm_signaling_{cache_name}')))
+            names = ['registry']
+        else:
+            names = sorted(names)
+            _logger.info("Caches invalidated, signaling through the database: %s", names)
+        for name in names:
+            signaling.tokens[self._signaling_slots[name]] = token
+        signaling.notify(f"{self.db_name}:{token}:{','.join(names)}")
 
     def cursor(self, /, readonly: bool = False) -> BaseCursor:
         """ Return a new cursor for the database. The cursor itself may be used

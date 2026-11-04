@@ -57,6 +57,7 @@ except ImportError:
 from odoo import api, sql_db
 from odoo.http.server import HTTPSocket
 from odoo.modules.registry import Registry
+from odoo.orm import signaling
 from odoo.orm.cache import log_ormcache_stats
 from odoo.release import nt_service_name
 from odoo.tools import OrderedSet, config, gc, osutil, profiler
@@ -785,6 +786,7 @@ class PreforkServer(CommonServer):
         self.socket = None
         self.workers_http = {}
         self.workers_cron = {}
+        self.signaling_listener = signaling.Listener()
         self.workers = {}
         self.generation = 0
         self.queue = collections.deque()
@@ -882,6 +884,11 @@ class PreforkServer(CommonServer):
                     msg = "Worker (%s): dead"
                     self.logger.critical(msg, wpid)
                     raise Exception(msg % wpid)  # noqa: TRY002
+                # it may have committed without signaling it
+                if wpid in self.workers.keys() | self.servers_gevent.keys() and (
+                    os.WEXITSTATUS(status) if os.WIFEXITED(status) else os.WTERMSIG(status) not in (signal.SIGTERM, signal.SIGINT)
+                ):
+                    signaling.notify_clear_all()
                 self.worker_pop(wpid)
             except OSError as e:
                 if e.errno == errno.ECHILD:
@@ -898,6 +905,7 @@ class PreforkServer(CommonServer):
                 self.worker_kill(pid, signal.SIGQUIT)  # dump stack
                 time.sleep(0.1)
                 self.worker_kill(pid, signal.SIGKILL)
+                signaling.notify_clear_all()
 
     def process_spawn(self):
         # Before spawning any process, check the registry signaling
@@ -934,10 +942,20 @@ class PreforkServer(CommonServer):
             # map of fd -> worker
             fds = {w.watchdog_pipe[0]: w for w in self.workers.values()}
             fd_in = list(fds) + [self.pipe[0]]
+            # listen to the cache invalidations of other servers
+            listener = self.signaling_listener
+            if listener.conn is None and not config['test_enable']:
+                listener.connect()
+            signaling_fd = listener.conn.fileno() if listener.conn else None
+            if signaling_fd is not None:
+                fd_in.append(signaling_fd)
             # check for ping or internal wakeups
             ready = select.select(fd_in, [], [], self.beat)
             # update worker watchdogs
             for fd in ready[0]:
+                if fd == signaling_fd:
+                    listener.poll()
+                    continue
                 if fd in fds:
                     fds[fd].watchdog_time = time.time()
                 empty_pipe(fd)
@@ -1107,6 +1125,7 @@ class PreforkServer(CommonServer):
     def run(self, preload, stop):
         self.start()
 
+        signaling.listening = True  # see sleep()
         rc = preload_registries(preload)
 
         if stop:

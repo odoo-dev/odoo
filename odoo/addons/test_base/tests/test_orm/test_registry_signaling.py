@@ -117,45 +117,6 @@ class TestOrmCache(TransactionCase):
             transaction.invalidate_ormcache('default')
         self.assertNotIn(lookup(XMLID), ('val1', 'sp1'))  # computed
 
-    def test_signaling_gc(self):
-        cr = self.env.cr
-        cr.execute('SELECT last_value FROM orm_signaling_registry_id_seq')
-        sequence_start = cr.fetchone()[0]
-
-        def assertSignalCount(expected_count, expected_max_id, message):
-            cr.execute("SELECT count(*), max(id) FROM orm_signaling_registry")
-            count, max_id = cr.fetchone()
-            self.assertEqual(expected_count, count, message)
-            self.assertEqual(expected_max_id, max_id - sequence_start, message)
-
-        cr.execute('DELETE FROM orm_signaling_registry')
-
-        for _ in range(7):
-            cr.execute("INSERT INTO orm_signaling_registry (date) VALUES (NOW() - interval '2 hours')")
-
-        cr.execute("INSERT INTO orm_signaling_registry DEFAULT VALUES")
-
-        assertSignalCount(8, 8, "8 signals were inserted")
-        self.env['ir.autovacuum']._gc_orm_signaling()
-        assertSignalCount(8, 8, "less than 10 signals, no deletion")
-
-        for _ in range(5):
-            cr.execute("INSERT INTO orm_signaling_registry DEFAULT VALUES")
-
-        assertSignalCount(13, 13, "5 more signals were inserted")
-        self.env['ir.autovacuum']._gc_orm_signaling()
-        assertSignalCount(10, 13, "more than 10 signals, some should have been deleted")
-
-        for _ in range(7):
-            cr.execute("INSERT INTO orm_signaling_registry DEFAULT VALUES")
-
-        assertSignalCount(17, 20, "7 more signals were inserted")
-        self.env['ir.autovacuum']._gc_orm_signaling()
-        assertSignalCount(13, 20, "Keeping the 13 signals having less than one hour")
-
-        # reset sequence to avoid side effects
-        cr.execute(f"SELECT setval('orm_signaling_registry_id_seq', {sequence_start})")
-
 
 class TestOrmCacheSignaling(BaseCase):
     @classmethod
@@ -226,7 +187,7 @@ class TestOrmCacheSignaling(BaseCase):
 
         for key, (value, _data) in self.old_sequences.items():
             if key == 'assets':
-                self.assertEqual(value + 1, registry.registry_caches__[key][0], "Assets cache sequence should have changed")
+                self.assertNotEqual(value, registry.registry_caches__[key][0], "Assets cache sequence should have changed")
             elif '.' not in key:  # sequences of sub-caches don't matter
                 self.assertEqual(value, registry.registry_caches__[key][0], f"other registry sequence shouldn't have changed {key}")
 
@@ -264,7 +225,7 @@ class TestOrmCacheSignaling(BaseCase):
 
         for key, (value, _data) in self.old_sequences.items():
             if key in ('assets', 'default'):
-                self.assertEqual(value + 1, registry.registry_caches__[key][0], "Assets and default cache sequence should have changed")
+                self.assertNotEqual(value, registry.registry_caches__[key][0], "Assets and default cache sequence should have changed")
             elif '.' not in key:  # sequences of sub-caches don't matter
                 self.assertEqual(value, registry.registry_caches__[key][0], f"other registry sequence shouldn't have changed {key}")
 

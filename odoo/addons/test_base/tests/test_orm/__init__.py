@@ -36,6 +36,7 @@ from . import (
     test_read_grouping_sets,
     test_registry,
     test_registry_signaling,
+    test_signaling,
     test_schema,
     test_search,
     test_search_order,

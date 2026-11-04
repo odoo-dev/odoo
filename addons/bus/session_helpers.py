@@ -6,6 +6,7 @@ import typing
 
 from odoo.api import SUPERUSER_ID, Environment
 from odoo.http.session import session_store
+from odoo.orm import signaling
 from odoo.sql_db import SQL
 from odoo.tools.lru import LRU
 from odoo.tools.misc import consteq
@@ -36,8 +37,7 @@ def _get_session_token_query_params(cr, uids):
     """
     where = SQL("res_users.id IN %s", tuple(uids))
     if cached := _query_params_by_dbname.get(cr.dbname):
-        cr.execute("SELECT MAX(id) FROM orm_signaling_registry")
-        if cached["registry_sequence"] == cr.fetchone()[0]:
+        if cached["registry_sequence"] == signaling.tokens[signaling.slot_index(cr.dbname, 'registry')]:
             return {**cached["query_params"], "where": where}
     env = Environment(cr, SUPERUSER_ID, {})
     params = env["res.users"]._get_session_token_query_params()

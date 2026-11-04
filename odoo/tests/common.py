@@ -1354,7 +1354,7 @@ class TransactionCase(BaseCase):
         super().setUpClass()
         cls.registry = Registry(get_db_name())
 
-        def signal_changes(cr, names):
+        def signal_changes(names, token):
             if 'registry' in names:
                 if not cls.registry.ready:
                     _logger.info('Skipping signal changes during tests')

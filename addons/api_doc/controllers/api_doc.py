@@ -94,7 +94,7 @@ class DocController(http.Controller):
             )
 
         # Cache key
-        db_registry_sequence, _ = self.env.registry.get_sequences(self.env.cr)
+        db_registry_sequence = self.env.registry.registry_sequence
         unique = hmac(
             self.env(su=True),
             scope='/doc/index.json',
@@ -201,7 +201,7 @@ class DocController(http.Controller):
         ir_model = self.env['ir.model']._get(model_name)
 
         # Client cache
-        db_registry_sequence, _ = self.env.registry.get_sequences(self.env.cr)
+        db_registry_sequence = self.env.registry.registry_sequence
         unique = hmac(
             self.env(su=True),
             scope='/doc/<model_name>.json',

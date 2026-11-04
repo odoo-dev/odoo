@@ -15,13 +15,16 @@ from datetime import UTC
 from weakref import ref as weakref
 from zoneinfo import ZoneInfo
 
+from psycopg2.extensions import TRANSACTION_STATUS_IDLE
+
 from odoo.exceptions import AccessError, UserError
-from odoo.sql_db import BaseCursor
+from odoo.sql_db import BaseCursor, Cursor
 from odoo.tools import clean_context, frozendict, reset_cached_properties, OrderedSet, SQL
 from odoo.tools.lru import LRU
 from odoo.tools.translate import get_translation, get_translated_module, LazyGettext
 from odoo.tools.misc import StackMap, SENTINEL
 
+from . import signaling
 from .registry import _CACHES_BY_KEY, _REGISTRY_CACHES, Registry
 from .utils import SUPERUSER_ID
 
@@ -581,7 +584,7 @@ class Transaction:
     __slots__ = (
         '_Transaction__file_open_tmp_paths', '_recent_envs',
         '_registry_caches__', '_registry_invalidated', '_registry_sequence',
-        '_state_stack__', '_weak_envs', '_wrote__',
+        '_state_stack__', '_weak_envs', '_fill_registry_caches', '_wrote__',
         'access_read', 'default_env',
         'field_data', 'field_data_patches', 'field_dirty',
         'ormcaches__', 'protected', 'registry', 'tocompute',
@@ -607,6 +610,7 @@ class Transaction:
         # indicates whether updates were done in this transaction,
         # if so, rollback should not update the parent ormcache
         self._wrote__: bool = False
+        self._fill_registry_caches: bool = True
         # There is always one more ormcache layer than the number of state
         # stacks. Therefore the parent of a cache layer when the state stack is
         # empty is the mapping referenced in registry_caches unless that cache
@@ -737,9 +741,18 @@ class Transaction:
             self._registry_caches__ = registry.registry_caches__.copy()
         for name, (seq, data) in self._registry_caches__.items():
             self.ormcaches__[name] = CacheLayer(data)
+        self._fill_registry_caches = True
         if not registry.ready:
             _logger_signaling.debug("Skip signaling check, registry not ready")
             return
+
+        # The data of this transaction may be older than the tokens read below:
+        # its snapshot was already taken, or it comes from a replica. What it
+        # computes must not go in the caches of the registry, because nothing
+        # would invalidate it.
+        self._fill_registry_caches = not isinstance(cr, Cursor) or not (
+            cr.readonly or cr._cnx.info.transaction_status != TRANSACTION_STATUS_IDLE
+        )
 
         db_registry_sequence, db_cache_sequences = registry.get_sequences(cr)
         changes = ''
@@ -911,6 +924,12 @@ class Transaction:
             self._registry_caches__.clear()
             self._check_signaling(env.cr)
 
+    def _update_registry_caches(self) -> None:
+        """ Move the values computed in the transaction to the registry. """
+        if self._fill_registry_caches:
+            for layer in self.ormcaches__.values():
+                layer.update_parent()
+
     @contextmanager
     def committing(self):
         """ Context for committing the connection. """
@@ -921,14 +940,14 @@ class Transaction:
             _logger_signaling.debug("no cursor to flush signaling", stack_info=True)
             self.flush()
             yield
-            for layer in self.ormcaches__.values():
-                layer.update_parent()
+            self._update_registry_caches()
             self.reset()
             return
         cr = env.cr
         cr.flush()  # flush remaining changes
 
         # Signal changes
+        token = signaling.new_token()
         push_caches = {}
         names = set()
         if self._registry_invalidated:
@@ -940,7 +959,11 @@ class Transaction:
             if name in _CACHES_BY_KEY:
                 names.add(name)
             layer.parent = LRU(_REGISTRY_CACHES[name])
-            push_caches[name] = (seq + 1, layer.parent)
+            # Its values may be older than a concurrent invalidation, which the
+            # new token would hide from this worker.
+            layer.data.clear()
+            # the sequences of sub-caches are not signaled
+            push_caches[name] = (token if name in _CACHES_BY_KEY else seq + 1, layer.parent)
 
         # Propagate the cache to the registry after the commit.
         # We lock the registry so that another transaction cannot start checking
@@ -952,15 +975,16 @@ class Transaction:
         else:
             lock = nullcontext()
         with lock:
-            # signal changes just before committing to consume the sequence as late as possible
-            registry._signal_changes(cr, names)
             # commit
-            yield
+            try:
+                yield
+            finally:
+                # also on failure: it may have succeeded, and a useless invalidation is harmless
+                registry._signal_changes(names, token)
 
             # Update caches
             registry.registry_caches__.update(push_caches)
-            for layer in self.ormcaches__.values():
-                layer.update_parent()
+            self._update_registry_caches()
 
             # Skip resetting the registry because the transaction should leave
             # the registry in a correct state. Don't increment the sequence on
@@ -1037,8 +1061,7 @@ class Transaction:
         if not self._wrote__:
             # if we rollback on a transaction that did not write anything, we
             # can still push the cached values to the parent layer
-            for layer in self.ormcaches__.values():
-                layer.update_parent()
+            self._update_registry_caches()
 
         env = self.default_env or next(iter(self.envs), None)
         cr = env.cr if env is not None else None
