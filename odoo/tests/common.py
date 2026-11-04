@@ -170,6 +170,31 @@ def release_test_lock(check_acquired=False):
             exit(f'Could not re-acquire the registry lock during {tag}, exiting...')
 
 
+class _PromotingCacheLayer(CacheLayer):
+    """ Per-test isolation layer for ormcaches that also stores its entries in
+    the layer of the class savepoint (``target``) as long as the transaction
+    did not write anything since the test started. Those entries are computed
+    on the same database state as the class savepoint, so they remain valid
+    for the next tests of the class, which would recompute them otherwise.
+    Promotion stops for good at the first write, cache invalidation (the layer
+    is replaced) or shared use of the cursor (see flushing_cursor).
+    """
+    __slots__ = ('target', 'transaction')
+
+    def __init__(self, parent, target, transaction):
+        super().__init__(parent)
+        self.target = target
+        self.transaction = transaction
+
+    def __setitem__(self, key, value):
+        self.data[key] = value
+        if self.target is not None:
+            if self.transaction._wrote__:
+                self.target = None
+            else:
+                self.target[key] = value
+
+
 @contextmanager
 def flushing_cursor(cr: Cursor):
     """ Simulate a commit on a cursor (without comitting) and reset on exit.
@@ -179,6 +204,13 @@ def flushing_cursor(cr: Cursor):
     cursor inside the block, it will be flushed on exit and then reset.
     """
     assert isinstance(odoo.modules.module.current_test, TransactionCase), "only available for TransactionCase"
+
+    if cr.transaction is not None:
+        # the main cursor is shared with other cursors from now on: stop
+        # promoting ormcache entries to the class layer (see _PromotingCacheLayer)
+        for layer in cr.transaction.ormcaches__.values():
+            if isinstance(layer, _PromotingCacheLayer):
+                layer.target = None
 
     if _disable_flushing_cursor:
         # execution of wkhtml happens in parallel, we don't want to flush the
@@ -1523,6 +1555,9 @@ class TransactionCase(BaseCase):
         for callback in [cr.precommit, cr.postcommit, cr.prerollback, cr.postrollback]:
             self.addCleanup(_reset, callback, deque(callback._funcs), deepcopy(callback.data))
 
+        transaction = self.env.transaction
+        # runs after the rollback: never propagate caches on class rollback
+        self.addCleanup(setattr, transaction, '_wrote__', True)
         self.addCleanup(self.savepoint.rollback)
 
         # To keep tests isolated, add a CacheLayer.
@@ -1531,9 +1566,17 @@ class TransactionCase(BaseCase):
         # - L3: this isolation layer
         # flushing_cursor() may push data from the current to the parent layer
         # (from L3 to L2) and we need L1 to be unaffected by tests.
-        transaction = self.env.transaction
+        # Entries computed before the test writes anything are also stored in
+        # the class layer (the savepoint state), so that the next tests of the
+        # class reuse them (_PromotingCacheLayer).
+        class_layers = transaction._state_stack__[-1].ormcaches__ if transaction._state_stack__ else {}
         for name, layer in transaction.ormcaches__.items():
-            transaction.ormcaches__[name] = CacheLayer(layer)
+            target = class_layers.get(name)
+            if target is not None and layer.parent is target:
+                transaction.ormcaches__[name] = _PromotingCacheLayer(layer, target, transaction)
+            else:
+                transaction.ormcaches__[name] = CacheLayer(layer)
+        transaction._wrote__ = False
 
     @classmethod
     def add_class_company(cls, xmlid, values=None):
