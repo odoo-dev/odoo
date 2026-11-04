@@ -5,6 +5,7 @@ helpers and classes to write tests.
 """
 from __future__ import annotations
 
+import atexit
 import base64
 import binascii
 import concurrent.futures
@@ -1889,6 +1890,10 @@ class ChromeBrowser:
     ):
         headless_switches = {
             '--headless': '',
+            # HTTP cache (content-hashed, immutable asset bundles) and V8 code
+            # cache shared by all the browsers of this process; the profile
+            # (cookies, local storage, ...) stays private to each browser
+            '--disk-cache-dir': _chrome_disk_cache_dir(),
             '--disable-extensions': '',  # Disable all chrome extensions
             '--disable-component-extensions-with-background-pages': '',  # Disable built-in extensions (e.g., PDF viewer, Hangouts...)
             '--disable-background-networking': '',  # Stop background requests (telemetry, updates, safe browsing)
@@ -2597,6 +2602,16 @@ class Screencaster:
             concat_script_path.unlink()
             shutil.rmtree(self.frames_dir, ignore_errors=True)
             self._logger.runbot('Screencast in: %s', outfile)
+
+
+@cache
+def _chrome_disk_cache_dir() -> str:
+    """ Return a temporary Chrome disk cache directory, shared by all the
+    browsers started by this process and removed at exit.
+    """
+    path = tempfile.mkdtemp(suffix='_chrome_odoo_cache')
+    atexit.register(shutil.rmtree, path, ignore_errors=True)
+    return path
 
 
 @cache
