@@ -1,7 +1,9 @@
 import { _t } from "@web/core/l10n/translation";
 import { omit } from "@web/core/utils/objects";
-import { IMAGE_MIMETYPES } from "@html_editor/main/media/media_manager/helpers";
-import { user } from "@web/core/user";
+import {
+    getRecordDomain,
+    MY_MEDIA_DOMAIN,
+} from "@html_editor/main/media/media_manager/domain_helper";
 
 import { useService } from "@web/core/utils/hooks";
 import {
@@ -85,19 +87,12 @@ export function getMediaManagertDialogProps(recordInfo) {
         filters: [
             // todo link this to the search bar filters somehow
             { label: "uploaded last week", domain: [["create_date", ">", lastWeekDate]] },
-            { label: "uploaded by me", domain: [["create_uid", "=", user.userId]] },
+            { label: "uploaded by me", domain: MY_MEDIA_DOMAIN },
             { label: "favorites", customKey: "starred" },
         ],
         noCreate: true,
-        domain: [
-            ["mimetype", "in", IMAGE_MIMETYPES],
-            ["type", "=", "binary"], // todo : this prevent webp url to be shown, should we change that ?
-            "|",
-            ["public", "=", true],
-            "&",
-            ["res_model", "=", recordInfo.resModel],
-            ["res_id", "=", recordInfo.resId || -1],
-        ],
+        // todo : BINARY_DOMAIN prevents webp url to be shown, should we change that ?
+        domain: getRecordDomain(recordInfo.resModel, recordInfo.resId),
         context: {
             kanban_view_ref: "html_editor.mediamanager_media_kanban",
             search_view_ref: "html_editor.mediamanager_media_search",
