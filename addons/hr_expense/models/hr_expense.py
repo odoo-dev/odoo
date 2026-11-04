@@ -1276,6 +1276,12 @@ class HrExpense(models.Model):
             expenses += expense
         return expenses.ids
 
+    def action_show_duplicate_expense_ids(self):
+        self.ensure_one()
+        return self.duplicate_expense_ids._get_records_action(
+            name=self.env._("Expenses with same criteria to %(other_expense_name)s", other_expense_name=self.name),
+        )
+
     def action_show_same_receipt_expense_ids(self):
         self.ensure_one()
         return self.same_receipt_expense_ids._get_records_action(
