@@ -45,11 +45,11 @@ class PosPaymentMethod(models.Model):
 
     def _get_dpopay_base_url(self, is_token=False):
         self.ensure_one()
-        host = (self.dpopay_test_mode and 'api-dev.network.global') or 'api.network.global'
+        host = "127.0.0.1:8000" # (self.dpopay_test_mode and 'api-dev.network.global') or 'api.network.global'
 
         if is_token:
-            return f'https://{host}/v1'
-        return f'https://{host}/ngenius-webapi/payments/push/v1/tid:{self.dpopay_tid}/mid:{self.dpopay_mid}'
+            return f'http://{host}/v1'
+        return f'http://{host}/ngenius-webapi/payments/push/v1/tid:{self.dpopay_tid}/mid:{self.dpopay_mid}'
 
     def _dpopay_headers(self, token_expired=False):
         self.ensure_one()
