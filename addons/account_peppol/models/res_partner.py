@@ -75,9 +75,32 @@ class ResPartner(models.Model):
             if not is_demo and partner.available_peppol_eas and 'odemo' in partner.available_peppol_eas:
                 partner.available_peppol_eas = [eas for eas in partner.available_peppol_eas if eas != 'odemo']
 
+    def _compute_peppol_eas(self):
+        # EXTENDS 'account_edi_ubl_cii'
+        partners_to_skip = self._get_peppol_registered_partners()
+        partners_to_recompute = self.browse([
+            partner.id for partner in self if partner._origin not in partners_to_skip
+        ])
+        super(ResPartner, partners_to_recompute)._compute_peppol_eas()
+
+    def _compute_peppol_endpoint(self):
+        # EXTENDS 'account_edi_ubl_cii'
+        partners_to_skip = self._get_peppol_registered_partners()
+        partners_to_recompute = self.browse([
+            partner.id for partner in self if partner._origin not in partners_to_skip
+        ])
+        super(ResPartner, partners_to_recompute)._compute_peppol_endpoint()
+
     # -------------------------------------------------------------------------
     # HELPERS
     # -------------------------------------------------------------------------
+
+    def _get_peppol_registered_partners(self):
+        can_send =  self.env['account_edi_proxy_client.user']._get_can_send_domain()
+        companies = self.env['res.company'].search([
+            ('account_peppol_proxy_state', 'in', can_send),
+        ])
+        return companies.mapped('partner_id')
 
     def _log_verification_state_update(self, company, old_value, new_value):
         # log the update of the peppol verification state
@@ -238,14 +261,6 @@ class ResPartner(models.Model):
         if res:
             res._update_peppol_state_per_company()
         return res
-
-    def _compute_peppol_endpoint(self):
-        partners_to_recompute = self.browse([partner.id for partner in self if partner._origin not in self])
-        super(ResPartner, partners_to_recompute)._compute_peppol_endpoint()
-
-    def _compute_peppol_eas(self):
-        partners_to_recompute = self.browse([partner.id for partner in self if partner._origin not in self])
-        super(ResPartner, partners_to_recompute)._compute_peppol_eas()
 
     # -------------------------------------------------------------------------
     # BUSINESS ACTIONS
