@@ -224,15 +224,23 @@ class ProductProduct(models.Model):
         moves_in_res_past = defaultdict(float)
         moves_out_res_past = defaultdict(float)
         if dates_in_the_past:
-            # Calculate the moves that were done before now to calculate back in time (as most questions will be recent ones)
-            domain_move_in_done = [('state', '=', 'done'), ('date', '>', to_date)] + domain_move_in_done
-            domain_move_out_done = [('state', '=', 'done'), ('date', '>', to_date)] + domain_move_out_done
+            if self.env.context.get('strict'):
+                line_domain = [('product_id', 'in', self.ids), ('state', '=', 'done'), ('move_id.date', '>', to_date)]
+                Line = self.env['stock.move.line'].with_context(active_test=False)
 
-            for product, quantity in MoveLine._read_group(domain_move_in_done, ['product_id'], ['quantity_product_uom:sum']):
-                moves_in_res_past[product.id] += quantity
+                for res, loc_domain in ((moves_in_res_past, domain_move_in_loc), (moves_out_res_past, domain_move_out_loc)):
+                    for product, qty in Line._read_group(line_domain + loc_domain, ['product_id'], ['quantity_product_uom:sum']):
+                        res[product.id] += qty
+            else:
+                # Calculate the moves that were done before now to calculate back in time (as most questions will be recent ones)
+                domain_move_in_done = [('state', '=', 'done'), ('date', '>', to_date)] + domain_move_in_done
+                domain_move_out_done = [('state', '=', 'done'), ('date', '>', to_date)] + domain_move_out_done
+                groupby = ['product_id', 'product_uom']
+                for product, uom, quantity in Move._read_group(domain_move_in_done, groupby, ['quantity:sum']):
+                    moves_in_res_past[product.id] += uom._compute_quantity(quantity, product.uom_id)
 
-            for product, quantity in MoveLine._read_group(domain_move_out_done, ['product_id'], ['quantity_product_uom:sum']):
-                moves_out_res_past[product.id] += quantity
+                for product, uom, quantity in Move._read_group(domain_move_out_done, groupby, ['quantity:sum']):
+                    moves_out_res_past[product.id] += uom._compute_quantity(quantity, product.uom_id)
 
         res = dict()
         for product in self.with_context(prefetch_fields=False):
