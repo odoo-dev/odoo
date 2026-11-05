@@ -251,7 +251,7 @@ class TestEventSale(TestEventSaleCommon):
                 'price_unit': 10,
             })]
         })
-        customer_so.action_confirm()
+        customer_so.with_context(event_sale_registration=True).action_confirm()
 
         registrations = self.env['event.registration'].search([
             ('sale_order_id', '=', customer_so.id)
@@ -590,7 +590,7 @@ class TestEventSale(TestEventSaleCommon):
         self.assertEqual(event.registration_ids.state, 'cancel')
         # After canceling the sale order, we set it back to draft and confirm it again. This should create new registrations.
         self.sale_order.action_draft()
-        self.sale_order.action_confirm()
+        self.sale_order.with_context(event_sale_registration=True).action_confirm()
         self.assertEqual(len(event.registration_ids), 2)
         self.assertEqual(event.registration_ids.mapped('state'), ['cancel', 'draft'])
 
