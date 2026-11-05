@@ -210,6 +210,7 @@ export default class OrderPaymentValidation {
         // continue working even offline.
         await this.pos.checkPreparationStateAndSentOrderInPreparation(this.order, {
             orderDone: true,
+            showNotification: true,
         });
 
         if (this.canPrintReceipt) {

@@ -1,10 +1,37 @@
 import { test, expect } from "@odoo/hoot";
-import { mountWithCleanup, onRpc, patchWithCleanup } from "@web/../tests/web_test_helpers";
-import { setupPosEnv, getFilledOrder } from "@point_of_sale/../tests/unit/utils";
+import {
+    contains,
+    mountWithCleanup,
+    onRpc,
+    patchWithCleanup,
+} from "@web/../tests/web_test_helpers";
+import { setupPosEnv, getFilledOrder, mountPosApp } from "@point_of_sale/../tests/unit/utils";
+import { waitFor } from "@odoo/hoot-dom";
 import { definePosModels } from "@point_of_sale/../tests/unit/data/generate_model_definitions";
 import { PaymentScreen } from "@point_of_sale/app/screens/payment_screen/payment_screen";
 
 definePosModels();
+
+test("payment validation shows the kitchen confirmation", async () => {
+    const store = await setupPosEnv();
+    patchWithCleanup(store.ticketPrinter, {
+        async printOrderChanges() {
+            return true;
+        },
+    });
+    const order = await getFilledOrder(store);
+    store.config.set_tip_after_payment = false;
+    store.navigate("PaymentScreen", { orderUuid: order.uuid });
+    await mountPosApp(store);
+
+    await contains(".paymentmethod:contains('Cash')").click();
+    await contains(".validation-button:contains('Validate')").click();
+    await waitFor(".o_notification:contains('sent to the kitchen')");
+    expect(".o_notification_content").toHaveText(
+        "3 Category 1 and 2 Category 2, sent to the kitchen"
+    );
+    expect(order.state).toBe("paid");
+});
 
 function patchNotifications(store) {
     const notifications = [];
