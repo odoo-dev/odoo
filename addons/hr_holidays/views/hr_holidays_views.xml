@@ -130,4 +130,9 @@
         parent="menu_hr_holidays_configuration"
         groups="base.group_no_one"/>
 
+    <menuitem id="hr_holidays_menu_config_activity_type"
+        action="action_open_graph"
+        parent="menu_hr_holidays_configuration"
+        groups="base.group_no_one"/>
+
 </odoo>
