@@ -963,7 +963,7 @@ class HrExpense(models.Model):
                         is_all_approver
                         or expense.employee_id.id in expenses_employee_ids_under_user_ones
                         or expense.employee_id.expense_manager_id == user
-                        or (expense.state in {'draft', 'submitted'} and expense.employee_id.user_id == user)
+                        or (expense.employee_id.user_id == user and expense._can_be_reset_by_employee())
                 )
             )
 
@@ -1413,6 +1413,11 @@ class HrExpense(models.Model):
         # If it's not linked to an existing bill, then the field is not required
         existing_bill_is_set = self.existing_bill_id or not self.has_existing_bill
         return has_rights and existing_bill_is_set
+
+    def _can_be_reset_by_employee(self):
+        """ Check whether the employee owning the given expense can reset it to draft themselves """
+        self.ensure_one()
+        return self.state in {'draft', 'submitted', 'refused'}
 
     def action_approve(self):
         """ Approve an expense, pops a wizard if a duplicated expense is found to confirm they are all valid expenses """
