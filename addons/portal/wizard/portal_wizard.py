@@ -148,6 +148,7 @@ class PortalWizardUser(models.TransientModel):
         group_public = self.env.ref('base.group_public')
 
         self._update_partner_email()
+        self._update_user_login()
         user_sudo = self.user_id.sudo()
 
         if not user_sudo:
@@ -195,6 +196,7 @@ class PortalWizardUser(models.TransientModel):
             raise UserError(_('You should first grant the portal access to the partner "%s".', self.partner_id.name))
 
         self._update_partner_email()
+        self._update_user_login()
         self.with_context(active_test=True)._send_email()
 
         return self.action_refresh_modal()
@@ -245,6 +247,21 @@ class PortalWizardUser(models.TransientModel):
         email_normalized = email_normalize(self.email)
         if self.email_state == 'ok' and email_normalize(self.partner_id.email) != email_normalized:
             self.partner_id.write({'email': email_normalized})
+
+    def _update_user_login(self):
+        """Set the login of the existing portal user to the invitation email.
+
+        The invitation tells the customer to sign in with their login. If the login is a previous email of the contact,
+        it must be replaced by the email the invitation is sent to. Logins that are not emails are kept.
+        The new login is checked to be unique by `_assert_user_email_uniqueness` beforehand.
+        """
+        user_sudo = self.user_id.sudo()
+        if not user_sudo or user_sudo._is_internal() or self.email_state != 'ok':
+            return
+        email_normalized = email_normalize(self.email)
+        login_normalized = email_normalize(user_sudo.login)
+        if login_normalized and login_normalized != email_normalized:
+            user_sudo.write({'login': email_normalized})
 
     def _get_similar_users_domain(self, portal_users_with_email):
         """ Returns the domain needed to find the users that have the same email
