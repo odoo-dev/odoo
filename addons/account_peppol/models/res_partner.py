@@ -240,11 +240,11 @@ class ResPartner(models.Model):
         return res
 
     def _compute_peppol_endpoint(self):
-        partners_to_recompute = self.browse([partner.id for partner in self if partner._origin not in self])
+        partners_to_recompute = self.browse([partner.id for partner in self if partner in self._get_not_registered_partners()])
         super(ResPartner, partners_to_recompute)._compute_peppol_endpoint()
 
     def _compute_peppol_eas(self):
-        partners_to_recompute = self.browse([partner.id for partner in self if partner._origin not in self])
+        partners_to_recompute = self.browse([partner.id for partner in self if partner in self._get_not_registered_partners()])
         super(ResPartner, partners_to_recompute)._compute_peppol_eas()
 
     # -------------------------------------------------------------------------
@@ -313,6 +313,9 @@ class ResPartner(models.Model):
         frontend_writable_fields.update({'peppol_eas', 'peppol_endpoint'})
 
         return frontend_writable_fields
+
+    def _get_not_registered_partners(self):
+        return self.env['res.company'].search([('account_peppol_proxy_state', 'in', ('not_registered', 'rejected'))]).mapped('partner_id')
 
     @api.model
     def _get_peppol_proxy_identification_info(self, peppol_eas, peppol_endpoint):
