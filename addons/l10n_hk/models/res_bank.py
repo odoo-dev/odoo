@@ -12,6 +12,17 @@ class ResPartnerBank(models.Model):
 
     proxy_type = fields.Selection(selection_add=[('id', "FPS ID"), ('mobile', "Mobile Number"), ('email', "Email Address")],
                                   ondelete={'id': 'set default', 'mobile': 'set default', 'email': 'set default'})
+    l10n_hk_branch_code = fields.Char(
+        string="Branch Code",
+        help="Code of the branch holding the account. With the Bank Code, it identifies the bank in payment files.",
+    )
+
+    @api.constrains('l10n_hk_branch_code')
+    def _check_l10n_hk_branch_code(self):
+        for bank in self.filtered('l10n_hk_branch_code'):
+            # Only ASCII digits: full-width digits typed with Chinese input methods are rejected by the banks
+            if not re.fullmatch(r'[0-9]{3}', bank.l10n_hk_branch_code):
+                raise ValidationError(_("Branch Code must consist of 3 digits."))
 
     @api.constrains('proxy_type', 'proxy_value', 'partner_id')
     def _check_hk_proxy(self):
@@ -25,6 +36,12 @@ class ResPartnerBank(models.Model):
                 raise ValidationError(_("Invalid Mobile! Please enter a valid mobile number with format +852-67891234 for account number %s.", bank.account_number))
             if bank.proxy_type == 'email' and (not bank.proxy_value or not single_email_re.match(bank.proxy_value)):
                 raise ValidationError(_("Invalid Email! Please enter a valid email address for account number %s.", bank.account_number))
+
+    @api.onchange('proxy_value')
+    def _onchange_hk_proxy_value(self):
+        # Vendors paid by FPS proxy may have no account number to give: reuse the proxy so the account can be saved
+        if self.country_code == 'HK' and self.proxy_type not in ('none', False) and not self.account_number:
+            self.account_number = self.proxy_value
 
     @api.model
     def _get_emv_qr_code_names(self):

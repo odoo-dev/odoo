@@ -6,6 +6,20 @@
         <field name="model">res.partner.bank</field>
         <field name="inherit_id" ref="base.view_partner_bank_form"/>
         <field name="arch" type="xml">
+            <xpath expr="//field[@name='clearing_number']/.." position="after">
+                <field name="l10n_hk_branch_code" invisible="country_code != 'HK'"/>
+            </xpath>
+            <!-- FPS identifiers are also used to pay vendors, so they are shown outside of the QR settings for HK accounts -->
+            <field name="holder_name" position="after">
+                <field name="proxy_type" invisible="country_code != 'HK'" widget="dynamic_selection" options="{'available_field': 'country_proxy_keys'}"/>
+                <field name="proxy_value" invisible="country_code != 'HK' or proxy_type in ('none', False)" required="country_code == 'HK' and proxy_type not in ('none', False)"/>
+            </field>
+            <xpath expr="//page[@name='emv_qr_settings']//field[@name='proxy_type']" position="attributes">
+                <attribute name="invisible">country_code == 'HK'</attribute>
+            </xpath>
+            <xpath expr="//page[@name='emv_qr_settings']//field[@name='proxy_value']" position="attributes">
+                <attribute name="invisible">country_code == 'HK'</attribute>
+            </xpath>
             <field name="include_reference" position="after">
                 <p invisible="country_code != 'HK'">
                     <widget name="documentation_link" path="/applications/finance/fiscal_localizations/hong_kong.html" label="Documentation"/>
