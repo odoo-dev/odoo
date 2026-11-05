@@ -1,5 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from datetime import datetime
 from urllib.parse import urlsplit
 
 from werkzeug.exceptions import NotFound
@@ -203,10 +204,28 @@ class LivechatController(http.Controller):
 
     @http.route("/im_livechat/history", type="jsonrpc", auth="public")
     @add_guest_to_context
-    def history_pages(self, pid, channel_id, page_history=None):
-        if channel := request.env["discuss.channel"].search([("id", "=", channel_id)]):
-            if pid in channel.sudo().channel_member_ids.partner_id.ids:
-                request.env["res.partner"].browse(pid)._bus_send_history_message(channel, page_history)
+    def history_pages(self, pid, channel_id, page_history, request_id):
+        if channel := self.env["discuss.channel"].search_fetch([
+            ("id", "=", channel_id),
+            ("livechat_agent_partner_ids", "=", pid),
+        ]):
+            valid_pages = []
+            for page in page_history if isinstance(page_history, list) else []:
+                if (
+                    not isinstance(page, dict)
+                    or not all(isinstance(page.get(key), str) for key in ("title", "url", "visit_datetime"))
+                    or not page["url"].lower().startswith(("http://", "https://"))
+                ):
+                    continue
+                try:
+                    datetime.fromisoformat(page["visit_datetime"])
+                except ValueError:
+                    continue
+                valid_pages.append(page)
+            self.env["res.partner"].browse(pid)._bus_send(
+                "im_livechat.history/response",
+                {"channel_id": channel.id, "page_history": valid_pages[:3], "request_id": request_id},
+            )
 
     @http.route("/im_livechat/email_livechat_transcript", type="jsonrpc", auth="user")
     @add_guest_to_context
