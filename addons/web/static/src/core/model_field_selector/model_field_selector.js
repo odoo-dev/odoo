@@ -1,13 +1,14 @@
 import { Component, onWillStart, onWillUpdateProps, proxy, t, useProps } from "@odoo/owl";
-import { usePopover } from "@web/core/popover/popover_hook";
+import { Dropdown } from "@web/core/dropdown/dropdown";
+import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";
 import { KeepLast } from "@web/core/utils/concurrency";
 import { useService } from "@web/core/utils/hooks";
-import { hasTouch } from "@web/core/browser/feature_detection";
 import { ModelFieldSelectorPopover } from "./model_field_selector_popover";
 
 export class ModelFieldSelector extends Component {
     static template = "web._ModelFieldSelector";
     static components = {
+        Dropdown,
         Popover: ModelFieldSelectorPopover,
     };
     props = useProps({
@@ -27,18 +28,19 @@ export class ModelFieldSelector extends Component {
 
     setup() {
         this.fieldService = useService("field");
-        this.popover = usePopover(this.constructor.components.Popover, {
-            popoverClass: "o_popover_field_selector",
+        this.dropdownState = useDropdownState({
             onClose: async () => {
-                if (this.newPath !== null) {
+                const newPath = this.newPath;
+                // close can be triggered twice (e.g. escape), only apply the path once
+                this.newPath = null;
+                if (newPath !== null) {
                     const fieldInfo = await this.fieldService.loadFieldInfo(
                         this.props.resModel,
-                        this.newPath
+                        newPath
                     );
-                    this.props.update(this.newPath, fieldInfo);
+                    this.props.update(newPath, fieldInfo);
                 }
             },
-            useBottomSheet: this.isBottomSheet,
         });
         this.keepLast = new KeepLast();
         this.state = proxy({ isInvalid: false, displayNames: [] });
@@ -51,12 +53,9 @@ export class ModelFieldSelector extends Component {
         });
     }
 
-    get isBottomSheet() {
-        return hasTouch();
-    }
-
     getPopoverProps() {
         return {
+            close: () => this.dropdownState.close(),
             resModel: this.props.resModel,
             path: this.props.path,
             readProperty: this.props.readProperty,
@@ -79,8 +78,14 @@ export class ModelFieldSelector extends Component {
         if (this.props.readonly) {
             return;
         }
+        if (this.dropdownState.isOpen) {
+            this.dropdownState.close();
+            return;
+        }
         this.newPath = null;
-        this.popover.open(currentTarget, this.getPopoverProps());
+        // computed once, so that re-rendering the selector doesn't update the open popover
+        this.popoverProps = this.getPopoverProps();
+        this.dropdownState.open();
     }
 
     async updateState(params, isConcurrent) {
@@ -94,9 +99,9 @@ export class ModelFieldSelector extends Component {
     }
 
     clear() {
-        if (this.popover.isOpen) {
+        if (this.dropdownState.isOpen) {
             this.newPath = "";
-            this.popover.close();
+            this.dropdownState.close();
             return;
         }
         this.props.update("", { resModel: this.props.resModel, fieldDef: null });

@@ -61,6 +61,10 @@ class Page {
         return _t("Select a field");
     }
 
+    get previousPageName() {
+        return "Go to " + (this.previousPage?.previousPage?.selectedField?.string || _t("Fields"));
+    }
+
     focus(direction) {
         if (!this.fieldNames.length) {
             return;
@@ -161,10 +165,11 @@ export class ModelFieldSelectorPopover extends Component {
             const focusedElement = root.querySelector(
                 ".o_model_field_selector_popover_item.active"
             );
-            if (focusedElement) {
+            if (focusedElement && !this.focusedByMouse) {
                 // current page can be empty (e.g. after a search)
                 focusedElement.scrollIntoView({ block: "center" });
             }
+            this.focusedByMouse = false;
             if (page !== focusedPage) {
                 focusedPage = page;
                 if (this.props.showSearchInput) {
@@ -296,6 +301,14 @@ export class ModelFieldSelectorPopover extends Component {
                 this.loadNewPath(ev.currentTarget.value);
                 break;
             }
+        }
+    }
+
+    onItemMouseMove(fieldName) {
+        if (this.state.page.focusedFieldName !== fieldName) {
+            // the hovered item is already visible: don't scroll it to the center
+            this.focusedByMouse = true;
+            this.state.page.focusedFieldName = fieldName;
         }
     }
 

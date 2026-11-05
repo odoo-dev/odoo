@@ -3,44 +3,44 @@
 
     <t t-name="web.ModelFieldSelectorPopover">
         <div class="o_model_field_selector_popover d-flex flex-column" tabindex="-1" t-ref="this.rootRef" t-on-keydown="this.onInputKeydown">
-            <div class="border-bottom p-2 text-dark fw-bolder">
-                <div class="d-flex justify-content-between align-items-center">
-                    <t t-if="this.state.page.previousPage">
-                        <i class="o_model_field_selector_popover_prev_page btn btn-hover-dark oi ms-n2"
-                        data-icon="arrow_back"
-                           data-tooltip="Previous"
-                           role="img"
-                           aria-label="Previous"
-                           t-on-click="() => this.goToPreviousPage()"
-                        />
-                    </t>
-                    <div class="o_model_field_selector_popover_title px-2 text-truncate">
+            <div class="d-flex gap-2 align-items-center border-bottom p-2">
+            <!-- <t t-out="this.state.page.title"/> -->
+                <!-- <div class="d-flex justify-content-between align-items-center"> -->
+                    <!-- <div class="o_model_field_selector_popover_title px-2 text-truncate">
                         <t t-out="this.state.page.title"/>
-                    </div>
-                    <i class="o_model_field_selector_popover_close btn btn-hover-dark me-n2 oi"
+                    </div> -->
+                    <!-- <i class="o_model_field_selector_popover_close btn btn-hover-dark me-n2 oi"
                        data-icon="times"
                        data-tooltip="Close"
                        role="img"
                        aria-label="Close"
                        t-on-click="() => this.props.close()"
+                    /> -->
+                <!-- </div> -->
+                <button t-if="this.state.page.previousPage" class="btn btn-secondary d-flex p-1" t-on-click="() => this.goToPreviousPage()" t-att-data-tooltip="this.state.page.previousPageName">
+                    <i class="o_model_field_selector_popover_prev_page oi"
+                        data-icon="arrow_back"
+                        role="img"
+                        t-att-aria-label="this.state.page.previousPageName"
                     />
+                </button>
+                <div t-if="this.props.showSearchInput" class="o_model_field_selector_popover_search flex-grow-1">
+                    <input type="text"
+                            placeholder='Search for a field'
+                            class="o_input p-1 border rounded-1 bg-view"
+                            t-att-value="this.state.page.query"
+                            t-on-input="(ev) => this.debouncedSearchFields(ev.target.value)" />
                 </div>
-                <t t-if="this.props.showSearchInput">
-                    <div class="o_model_field_selector_popover_search mt-1">
-                        <input type="text"
-                               placeholder='Search...'
-                               class="o_input p-1 border rounded-1 bg-view"
-                               t-att-value="this.state.page.query"
-                               t-on-input="(ev) => this.debouncedSearchFields(ev.target.value)" />
-                    </div>
-                </t>
             </div>
-            <div class="o_model_field_selector_popover_body overflow-auto">
-                <ul class="o_model_field_selector_popover_page list-unstyled mb-0">
+            <div class="o_model_field_selector_popover_body p-2 overflow-y-auto">
+                <ul class="o_model_field_selector_popover_page p-0">
                     <t t-foreach="this.fieldNames" t-as="fieldName" t-key="fieldName">
                         <t t-set="fieldDef" t-value="this.state.page.fieldDefs[fieldName]" />
-                        <li class="o_model_field_selector_popover_item d-flex border-bottom" t-att-class="{ 'active': fieldName === this.state.page.focusedFieldName }" t-att-data-name="fieldName">
-                            <button t-attf-class="o_model_field_selector_popover_item_name btn btn-light flex-fill border-0 rounded-0 text-break text-start fw-normal" t-on-click="() => this.selectField(fieldDef)">
+                        <li class="o_model_field_selector_popover_item d-flex" t-att-class="{ 'active': fieldName === this.state.page.focusedFieldName }" t-att-data-name="fieldName">
+                            <button class="o_model_field_selector_popover_item_name o-dropdown-item dropdown-item flex-fill text-break text-start fw-normal"
+                                t-att-class="{ 'focus': fieldName === this.state.page.focusedFieldName }"
+                                t-on-mousemove="() => this.onItemMouseMove(fieldName)"
+                                t-on-click="() => this.selectField(fieldDef)">
                                 <t t-out="fieldDef.string" />
                                 <t t-if="fieldDef.record_name"> (<t t-out="fieldDef.record_name" />)</t>
                                 <div t-if="this.props.isDebugMode" class="o_model_field_selector_popover_item_title text-break text-muted small"><t t-out="fieldName"/> (<t t-out="fieldDef.type"/>)</div>
