@@ -1,5 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from datetime import timedelta
+
 from freezegun import freeze_time
 
 from odoo import fields, _
@@ -167,6 +169,17 @@ class TestLivechatBasicFlowHttpCase(HttpCase, TestLivechatCommon):
     def test_channel_visitor_data(self):
         self.maxDiff = None
         channel = self._common_basic_flow()
+        self.env["website.track"].create([
+            {
+                "visitor_id": self.visitor.id,
+                "page_id": self.page_1.id,
+                "visit_datetime": self.base_datetime - timedelta(minutes=30),
+            },
+            {
+                "visitor_id": self.visitor.id,
+                "url": "/random-url",
+            },
+        ])
         self._reset_bus()
         guest = self.env["mail.guest"].search([], order="id desc", limit=1)
         operator_member = channel.with_user(self.operator).self_member_id
@@ -303,8 +316,8 @@ class TestLivechatBasicFlowHttpCase(HttpCase, TestLivechatCommon):
                     {"id": self.env.ref("base.default_website").id, "name": "My Website"}
                 ],
                 "website.page": [
-                    {"id": self.page_1.id, "name": "Test Page 1"},
-                    {"id": self.page_2.id, "name": "Test Page 2"},
+                    {"id": self.page_1.id, "name": "Test Page 1", "website_absolute_url": self.page_1.website_absolute_url},
+                    {"id": self.page_2.id, "name": "Test Page 2", "website_absolute_url": self.page_2.website_absolute_url},
                 ],
                 "website.track": [
                     {
@@ -336,6 +349,7 @@ class TestLivechatBasicFlowHttpCase(HttpCase, TestLivechatCommon):
                         "id": self.visitor.id,
                         "lang_id": self.env.ref("base.lang_en").id,
                         "last_track_ids": self.track_ids.ids[::-1],
+                        "track_count": 4,
                         "partner_id": False,
                         "website_id": self.env.ref("base.default_website").id,
                     }
