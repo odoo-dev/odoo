@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="#stylesheet"?>
+<!DOCTYPE root [
+<!ATTLIST xsl:stylesheet
+id ID #REQUIRED>
+]>
+<root version ="304" kod= "QAIME_1"  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation= "QAIME_1.xsd" >
+<xsl:stylesheet id="stylesheet" version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" > <xsl:template match="xsl:stylesheet" /> <xsl:template match="/root"> <html> <head> <style> body {background-color: white; font-family:  Arial, sans-serif; } .paper {padding:5px; } table {width: 100%; font-size: 16px; } table tr td {padding: 10px 15px; text-align: left; width:50%; } .products table {border-collapse: collapse; font-size: 14px; } .products table th, #products table td  {border: 1px solid #000; padding: 10px; } .products table td {width:auto; border: 1px solid #000; text-align:center; } .products table th {text-align:center; } .noPadding {padding: 40px 0px; } .total tr :nth-child(odd) {width:40%; } .total tr :nth-child(even) {width:10%; } </style> </head> <body> <table class="paper"> <tr> <td>Alan tərəfin VÖEN-i:</td> <td><xsl:value-of select="qaimeKime"/></td> </tr> <tr> <td>Alan tərəfin adı:</td> <td><xsl:value-of select="qaimeKimeAd"/></td> </tr> <tr> <td>Satan tərəfin VÖEN-i:</td> <td><xsl:value-of select="qaimeKimden"/></td> </tr> <tr> <td>Qeyd</td> <td><xsl:value-of select="des"/></td> </tr> <tr> <td>Əlavə qeyd</td> <td><xsl:value-of select="des2"/></td> </tr> <tr> <td>Obyektin adı</td> <td><xsl:value-of select="ma"/></td> </tr> <tr> <td>Obyektin kodu</td> <td><xsl:value-of select="mk"/></td> </tr> <tr> <td class="products noPadding" colspan="2"> <table> <thead> <th>Mal kodu</th> <th>Mal adı</th> <th>Bar kod</th> <th>Ölçü vahidi</th> <th>Malın miqdarı</th> <th>Malın buraxılış qiyməti</th> <th>Cəmi qiyməti</th> <th>Aksiz dərəcəsi</th> <th>Aksiz məbləği</th> <th>Cəmi məbləğ</th> <th>ƏDV-yə cəlb edilən məbləğ</th> <th>ƏDV-yə cəlb edilməyən məbləğ</th> <th>ƏDV-dən azad olunan</th> <th>ƏDV-yə 0 dərəcə ilə cəlb edilən məbləğ</th> <th>Ödənilməli ƏDV</th> <th>Yol vergisi məbləği</th> <th>Yekun məbləğ</th> </thead> <tbody class="productTable"> <xsl:for-each select="product/qaimeTable/row"> <tr> <td><xsl:value-of select="c1"/></td> <td><xsl:value-of select="c2"/></td> <td><xsl:value-of select="c17"/></td> <td><xsl:value-of select="c3"/></td> <td><xsl:value-of select="c4"/></td> <td><xsl:value-of select="c5"/></td> <td><xsl:value-of select="c6"/></td> <td><xsl:value-of select="c7"/></td> <td><xsl:value-of select="c8"/></td> <td><xsl:value-of select="c9"/></td> <td><xsl:value-of select="c10"/></td> <td><xsl:value-of select="c11"/></td> <td><xsl:value-of select="c12"/></td> <td><xsl:value-of select="c13"/></td> <td><xsl:value-of select="c14"/></td> <td><xsl:value-of select="c15"/></td> <td><xsl:value-of select="c16"/></td> </tr> </xsl:for-each> </tbody> </table> </td> </tr> </table> <table class="total"> <tr> <td>Malların cəmi qiyməti</td> <td><xsl:value-of select="product/qaimeYekunTable/row/c1"/></td> <td>Malların cəmi məbləği</td> <td><xsl:value-of select="product/qaimeYekunTable/row/c3"/></td> </tr> <tr> <td>Malların aksiz cəmi məbləği</td> <td><xsl:value-of select="product/qaimeYekunTable/row/c2"/></td> <td>Malların ƏDV-yə cəlb edilən cəmi məbləği</td> <td><xsl:value-of select="product/qaimeYekunTable/row/c4"/></td> </tr> <tr> <td>Malların cəmi ödənilməli ƏDV məbləği</td> <td><xsl:value-of select="product/qaimeYekunTable/row/c8"/></td> <td>Malların  ƏDV-yə cəlb edilməyən cəmi məbləği </td> <td><xsl:value-of select="product/qaimeYekunTable/row/c5"/></td> </tr> <tr> <td>ƏDV-dən azad olunan</td> <td><xsl:value-of select="product/qaimeYekunTable/row/c6"/></td> <td>Malların  ƏDV-yə 0 dərəcə ilə cəlb edilən cəmi məbləği</td> <td><xsl:value-of select="product/qaimeYekunTable/row/c7"/></td> </tr> <tr> <td>Yekun məbləğ</td> <td><xsl:value-of select="product/qaimeYekunTable/row/c9"/></td> <td></td> <td></td> </tr> </table> </body> </html> </xsl:template> </xsl:stylesheet>	<qaimeKime>0000000000</qaimeKime>
+	<qaimeKimden>0000000000</qaimeKimden>
+	<ds></ds>
+	<dn></dn>
+	<des>1</des>
+	<des2>1</des2>
+	<ma>11</ma>
+	<mk>1</mk>
+	<product>
+		<qaimeTable>
+			<row no = '0'>
+				<c1>2921430000</c1>
+				<c2>test1</c2>
+				<c3>kilo</c3>
+				<c4>10</c4>
+				<c5>10</c5>
+				<c6>1000.0000</c6>
+				<c7>10</c7>
+				<c8>10</c8>
+				<c9>110.0000</c9>
+				<c10>50</c10>
+				<c11>30</c11>
+				<c12>20</c12>
+				<c13>10</c13>
+				<c14>9.0000</c14>
+				<c15>10</c15>
+				<c16>129.0000</c16>
+				<c17>0</c17>
+				<productId>0</productId>
+			</row>
+			<row no = '1'>
+				<c1>2921440000</c1>
+				<c2>test2</c2>
+				<c3>qramm</c3>
+				<c4>20</c4>
+				<c5>20</c5>
+				<c6>400.0000</c6>
+				<c7>20</c7>
+				<c8>20</c8>
+				<c9>420.0000</c9>
+				<c10>200</c10>
+				<c11>100</c11>
+				<c12>70</c12>
+				<c13>50</c13>
+				<c14>36.0000</c14>
+				<c15>20</c15>
+				<c16>476.0000</c16>
+				<c17>0</c17>
+				<productId>0</productId>
+			</row>
+		</qaimeTable>
+		<qaimeYekunTable>
+			<row>
+				<c1>500.00</c1>
+				<c2>30</c2>
+				<c3>530.00</c3>
+				<c4>250</c4>
+				<c5>130</c5>
+				<c6>90</c6>
+				<c7>60</c7>
+				<c8>45.00</c8>
+				<c9>605.00</c9>
+				<c10>30</c10>
+			</row>
+		</qaimeYekunTable>
+	</product>
+</root>

@@ -1,0 +1,6 @@
+from . import test_eqf_export
+from . import test_report_rendering
+from . import test_sale_tax
+from . import test_simplified_tax_group
+from . import test_tit_report
+from . import test_withholding_tax_report
