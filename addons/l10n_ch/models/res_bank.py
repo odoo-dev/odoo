@@ -73,7 +73,7 @@ class ResPartnerBank(models.Model):
             except ValidationError:
                 valid_qr_iban = False
             if valid_qr_iban:
-                record.l10n_ch_qr_iban = record.sanitized_account_number
+                record.l10n_ch_qr_iban = record.account_number
             else:
                 record.l10n_ch_qr_iban = None
 
@@ -114,7 +114,7 @@ class ResPartnerBank(models.Model):
         # and must then be 27 characters-long, with mod10r check digit as the 27th one)
         reference_type = 'NON'
         reference = ''
-        acc_number = self.sanitized_account_number
+        acc_number = self.account_number
 
         if self.l10n_ch_qr_iban:
             # _check_for_qr_code_errors ensures we can't have a QR-IBAN without a QR-reference here

@@ -12,7 +12,7 @@
         </xpath>
         <xpath expr="//p[@name='payment_communication']//t[@t-if='o.partner_bank_id']" position="replace">
             <t t-if="account_number">
-                <br/> on this account: <span t-out="account_number" class="fw-bold"/>
+                <br/> on this account: <span t-out="formatted_account_number" class="fw-bold"/>
             </t>
         </xpath>
     </template>
@@ -23,7 +23,7 @@
         </xpath>
         <xpath expr="//div[@id='payment_term']//p[@name='payment_communication']" position="inside">
             <t t-if="account_number">
-                <br/> on this account: <span t-out="account_number" class="fw-bold"/>
+                <br/> on this account: <span t-out="formatted_account_number" class="fw-bold"/>
             </t>
         </xpath>
     </template>
