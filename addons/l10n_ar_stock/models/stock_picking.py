@@ -1,5 +1,30 @@
+import logging
+from datetime import timedelta
+
+import requests
+from lxml import etree
+
 from odoo import api, fields, models
 from odoo.exceptions import UserError
+
+from odoo.addons.l10n_ar.tools.partner_identifiers import (
+    AR_CUIT_AFIP_CODE,
+    AR_STATE_TO_CI_AFIP_CODE,
+)
+
+_logger = logging.getLogger(__name__)
+
+COT_URLS = {
+    'testing': 'https://cot.test.arba.gov.ar/TransporteBienes/SeguridadCliente/presentarRemitos.do',
+    'production': 'https://cot.arba.gov.ar/TransporteBienes/SeguridadCliente/presentarRemitos.do',
+}
+COT_DOCUMENT_TYPES = {
+    '89': 'LE',
+    '90': 'LC',
+    '94': 'PAS',
+    '96': 'DNI',
+    **dict.fromkeys(AR_STATE_TO_CI_AFIP_CODE.values(), 'CI'),
+}
 
 
 class StockPicking(models.Model):
@@ -21,6 +46,46 @@ class StockPicking(models.Model):
         readonly=True,
         copy=False,
     )
+    l10n_ar_cot_departure_date = fields.Datetime(
+        string="Transport Departure Date",
+        compute='_compute_l10n_ar_cot_departure_date',
+        store=True,
+        readonly=False,
+        copy=False,
+        help="Argentina: Must be between today and 30 days from today when generating the COT.",
+    )
+    l10n_ar_cot_license_plate = fields.Char(
+        string="Vehicle License Plate",
+        size=7,
+        copy=False,
+        help="Argentina: Enter 3 letters followed by 3 numbers, or 2 letters followed by 3 numbers and 2 letters.",
+    )
+    l10n_ar_cot_carrier_id = fields.Many2one(
+        comodel_name='res.partner',
+        string="Carrier",
+        copy=False,
+        help="Argentina: Contact transporting the goods, its CUIT is reported in the COT.",
+    )
+    l10n_ar_cot_non_finished_product = fields.Boolean(
+        string="Non Finished Product?",
+        copy=False,
+    )
+    l10n_ar_cot_amount = fields.Float(
+        string="Net Amount of the Goods",
+        default=0.0,
+        copy=False,
+        help="Argentina: Enter the declared net amount of the goods.",
+    )
+    l10n_ar_cot_number = fields.Char(
+        string="COT Number",
+        readonly=True,
+        copy=False,
+    )
+    l10n_ar_cot_error = fields.Text(
+        string="COT Error",
+        readonly=True,
+        copy=False,
+    )
 
     # === COMPUTE METHODS === #
 
@@ -37,6 +102,11 @@ class StockPicking(models.Model):
                 picking.state == 'done' and has_doc_type and not picking.l10n_ar_delivery_guide_number
             )
             picking.l10n_ar_allow_send_delivery_guide = picking.l10n_ar_delivery_guide_number and picking.picking_type_id.code == 'outgoing'
+
+    @api.depends('scheduled_date')
+    def _compute_l10n_ar_cot_departure_date(self):
+        for picking in self:
+            picking.l10n_ar_cot_departure_date = picking.scheduled_date
 
     # === BUSINESS METHODS === #
 
@@ -187,6 +257,173 @@ class StockPicking(models.Model):
                 pdf_content, _unused = report_sudo._render_qweb_pdf(pdf_action, picking.id)
                 pdf_contents[picking.id] = pdf_content
             return pdf_contents
+
+    def l10n_ar_action_generate_cot(self):
+        """ Send the COT file to ARBA and store the COT number, or the errors returned by ARBA. """
+        self.ensure_one()
+        emission_date = fields.Date.context_today(self)
+        self._l10n_ar_check_cot(emission_date)
+
+        company = self.company_id
+        # ARBA rejects a sequence of 0 and a file name it already processed
+        sequence = int(f'{fields.Datetime.now():%H%M%S}') or 1
+        file_name = f'TB_{company.vat}_000000_{emission_date:%Y%m%d}_{sequence:06d}.txt'
+        txt_content = self._l10n_ar_get_cot_txt(emission_date).encode('ISO-8859-1', errors='replace')
+        self.message_post(
+            body=self.env._("The COT file has been sent to ARBA."),
+            attachments=[(file_name, txt_content)],
+        )
+
+        if company.l10n_ar_arba_cot_environment == 'demo':
+            response_content = self._l10n_ar_get_cot_demo_response(file_name)
+        else:
+            try:
+                response = requests.post(
+                    COT_URLS[company.l10n_ar_arba_cot_environment],
+                    data={'user': company.vat, 'password': company.sudo().l10n_ar_arba_cit},
+                    files={'file': (file_name, txt_content)},
+                    timeout=30,
+                )
+                response.raise_for_status()
+            except requests.exceptions.RequestException as error:
+                _logger.warning("ARBA COT request failed: %s", error)
+                self.l10n_ar_cot_error = self.env._("The connection with ARBA failed, please try again later.\n%s", error)
+                return
+            response_content = response.content
+        self._l10n_ar_process_cot_response(response_content)
+
+    def _l10n_ar_check_cot(self, emission_date):
+        self.ensure_one()
+        company = self.company_id
+        recipient = self.partner_id.commercial_partner_id
+        origin = self.picking_type_id.warehouse_id.partner_id
+        products = self.move_ids.filtered('quantity').product_id
+        errors = []
+        if self.l10n_ar_cot_number:
+            errors.append(self.env._("The COT has already been generated."))
+        if not self.l10n_ar_delivery_guide_number:
+            errors.append(self.env._("The delivery guide must be generated before the COT."))
+        if not company.vat:
+            errors.append(self.env._("The company has no CUIT."))
+        if company.l10n_ar_arba_cot_environment != 'demo' and not company.sudo().l10n_ar_arba_cit:
+            errors.append(self.env._("The ARBA CIT is not configured in the Inventory settings."))
+        if not self.l10n_ar_cot_departure_date:
+            errors.append(self.env._("The Transport Departure Date is missing."))
+        elif not emission_date <= fields.Datetime.context_timestamp(self, self.l10n_ar_cot_departure_date).date() <= emission_date + timedelta(days=30):
+            errors.append(self.env._("The Transport Departure Date must be between today and 30 days from today."))
+        if not self.l10n_ar_cot_license_plate:
+            errors.append(self.env._("The Vehicle License Plate is missing."))
+        if not self.l10n_ar_cot_carrier_id.vat:
+            errors.append(self.env._("The carrier or its CUIT is missing."))
+        if not self.l10n_ar_cot_non_finished_product and self.l10n_ar_cot_amount <= 0 and recipient.vat != company.vat:
+            errors.append(self.env._("The Net Amount of the Goods must be greater than 0."))
+        if recipient.l10n_ar_afip_responsibility_type_id.code != '5' and recipient.l10n_ar_afip_code != AR_CUIT_AFIP_CODE:
+            errors.append(self.env._("The customer %s has no CUIT.", recipient.display_name))
+        for partner in (self.partner_id, origin):
+            if not (partner.street and partner.zip and partner.city and partner.state_id):
+                errors.append(self.env._(
+                    "The street, zip, city and state of the address %s are required.",
+                    partner.display_name or self.picking_type_id.warehouse_id.display_name,
+                ))
+        if no_reference := products.filtered(lambda product: not product.default_code):
+            errors.append(self.env._("Products without Reference: %s", ", ".join(no_reference.mapped('display_name'))))
+        if no_arba_code := products.filtered(lambda product: not product.l10n_ar_arba_code):
+            errors.append(self.env._("Products without ARBA Code: %s", ", ".join(no_arba_code.mapped('display_name'))))
+        if no_unit_code := products.uom_id.filtered(lambda uom: not uom.l10n_ar_arba_unit_code):
+            errors.append(self.env._("Units of measure without ARBA Unit of Measure Code: %s", ", ".join(no_unit_code.mapped('name'))))
+        if errors:
+            raise UserError(self.env._("The COT cannot be generated:\n%s", "\n".join(f"- {error}" for error in errors)))
+
+    def _l10n_ar_get_cot_unique_code(self):
+        self.ensure_one()
+        document_type = self.env['l10n_latam.document.type'].browse(self.l10n_ar_cai_data['document_type_id'])
+        return document_type.code.zfill(3) + self.l10n_ar_delivery_guide_number.replace('-', '')
+
+    def _l10n_ar_get_cot_txt(self, emission_date):
+        self.ensure_one()
+
+        def get_address(partner):
+            # The street number stays in the street, 'S/N' as suffix lets ARBA accept an empty number
+            return [partner.street[:40], '', 'S/N', '', '', '', partner.zip, partner.city[:50], partner.state_id.code]
+
+        company = self.company_id
+        recipient = self.partner_id.commercial_partner_id
+        has_cuit = recipient.l10n_ar_afip_code == AR_CUIT_AFIP_CODE
+        document_type = not has_cuit and COT_DOCUMENT_TYPES.get(recipient.l10n_ar_afip_code)
+        departure_date = fields.Datetime.context_timestamp(self, self.l10n_ar_cot_departure_date)
+        remito = [
+            '02',
+            f'{emission_date:%Y%m%d}',
+            self._l10n_ar_get_cot_unique_code(),
+            f'{departure_date:%Y%m%d}',
+            '',
+            'E',
+            '1' if recipient.l10n_ar_afip_responsibility_type_id.code == '5' else '0',
+            document_type or '',
+            str(recipient._get_id_number_sanitize()) if document_type else '',
+            recipient.vat if has_cuit else '',
+            recipient.name[:50],
+            '0',
+            *get_address(self.partner_id),
+            '',
+            'SI',
+            company.vat,
+            company.name[:50],
+            '1',
+            *get_address(self.picking_type_id.warehouse_id.partner_id),
+            self.l10n_ar_cot_carrier_id.vat,
+            '', '', '', '',
+            self.l10n_ar_cot_license_plate,
+            '',
+            '1' if self.l10n_ar_cot_non_finished_product else '0',
+            str(round(self.l10n_ar_cot_amount * 100)) if self.l10n_ar_cot_amount else '',
+        ]
+        products = []
+        for move in self.move_ids.filtered('quantity'):
+            product = move.product_id
+            quantity = str(round(move.quantity_product_uom * 100))
+            products.append([
+                '03',
+                product.l10n_ar_arba_code,
+                product.uom_id.l10n_ar_arba_unit_code,
+                quantity,
+                product.default_code[:25],
+                product.name[:40],
+                product.uom_id.name[:20],
+                quantity,
+            ])
+        records = [['01', company.vat], remito, *products, ['04', '1']]
+        return ''.join('|'.join(record) + '\n' for record in records)
+
+    def _l10n_ar_get_cot_demo_response(self, file_name):
+        self.ensure_one()
+        return (
+            f'<TBCOMPROBANTE><cuitEmpresa>{self.company_id.vat}</cuitEmpresa><nombreArchivo>{file_name}</nombreArchivo>'
+            f'<validacionesRemitos><remito><numeroUnico>{self._l10n_ar_get_cot_unique_code()}</numeroUnico>'
+            f'<procesado>SI</procesado><cot>{self.id:014d}</cot></remito></validacionesRemitos></TBCOMPROBANTE>'
+        ).encode()
+
+    def _l10n_ar_process_cot_response(self, response_content):
+        self.ensure_one()
+        attachments = [(f'COT - {self.l10n_ar_delivery_guide_number}.xml', response_content)]
+        try:
+            root = etree.fromstring(response_content)
+        except etree.XMLSyntaxError:
+            self.l10n_ar_cot_error = self.env._("ARBA returned an invalid response.")
+            self.message_post(body=self.l10n_ar_cot_error, attachments=attachments)
+            return
+
+        cot_number = root.findtext('.//remito/cot')
+        if cot_number and root.findtext('.//remito/procesado') == 'SI':
+            self.write({'l10n_ar_cot_number': cot_number, 'l10n_ar_cot_error': False})
+            self.message_post(body=self.env._("COT %s generated successfully.", cot_number), attachments=attachments)
+            return
+
+        errors = [f"[{error.findtext('codigo')}] {error.findtext('descripcion')}" for error in root.iter('error')]
+        if root.tag == 'TBError':
+            errors.append(f"[{root.findtext('codigoError')}] {root.findtext('mensajeError')}")
+        self.l10n_ar_cot_error = "\n".join(errors) or self.env._("ARBA did not return a COT number.")
+        self.message_post(body=self.env._("The COT generation failed."), attachments=attachments)
 
     def _l10n_ar_handle_cron_failures(self, errors):
         """ Dequeue failed records: log in chatter, notify users, clear cron field. """
