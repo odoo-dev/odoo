@@ -194,6 +194,9 @@ class ProductTemplate(models.Model):
             '|',
             ('pricelist_id', '=', False),
             ('pricelist_id.active', '=', True),
+            '|',
+            ('product_id', '=', False),
+            ('product_id.active', '=', True),
         ]
 
     def _domain_pricelist_rule_ids(self):
