@@ -27,7 +27,7 @@ class HrLeave(models.Model):
         for leave in leaves_with_active_employee:
             project, task = leave.employee_id.company_id.internal_project_id, leave.employee_id.company_id.leave_timesheet_task_id
 
-            if not project or not task or leave.holiday_status_id.time_type == 'other':
+            if not project or leave.holiday_status_id.time_type == 'other':
                 continue
 
             leave_ids.append(leave.id)
@@ -94,7 +94,6 @@ class HrLeave(models.Model):
             ("date_to", ">=", min_date),
             ("date_from", "<=", max_date),
             ("company_id.internal_project_id", "!=", False),
-            ("company_id.leave_timesheet_task_id", "!=", False),
         ])
         if global_leaves:
             global_leaves._generate_public_time_off_timesheets(self.employee_id)

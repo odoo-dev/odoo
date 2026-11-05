@@ -200,7 +200,7 @@ class ResourceCalendarLeaves(models.Model):
         }
 
     def _generate_timesheeets(self):
-        results_with_leave_timesheet = self.filtered(lambda r: not r.resource_id and r.company_id.internal_project_id and r.company_id.leave_timesheet_task_id)
+        results_with_leave_timesheet = self.filtered(lambda r: not r.resource_id and r.company_id.internal_project_id)
         if results_with_leave_timesheet:
             results_with_leave_timesheet._timesheet_create_lines()
 

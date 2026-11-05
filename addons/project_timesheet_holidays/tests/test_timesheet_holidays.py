@@ -169,6 +169,32 @@ class TestTimesheetHolidays(TestCommonTimesheet):
 
         self.assertEqual(len(holiday.timesheet_ids), 0, 'No timesheet should be created for a leave of worked time type')
 
+    def test_generate_timesheets_without_timeoff_task(self):
+        """ Time off timesheets are generated on the internal project when no time off task is set. """
+        self.env.company.leave_timesheet_task_id = False
+
+        public_holiday = self.env['resource.calendar.leaves'].create({
+            'name': 'Public Holiday',
+            'calendar_id': self.employee_working_calendar.id,
+            'date_from': datetime(2018, 2, 7, 7, 0),  # Wednesday
+            'date_to': datetime(2018, 2, 7, 18, 0),
+        })
+        holiday = self.Requests.with_user(self.user_employee).create({
+            'name': 'Time Off without task',
+            'employee_id': self.empl_employee.id,
+            'holiday_status_id': self.hr_leave_type_with_ts.id,
+            'request_date_from': self.leave_start_datetime,
+            'request_date_to': self.leave_end_datetime,
+        })
+        holiday.with_user(SUPERUSER_ID).action_approve()
+
+        public_holiday_timesheets = public_holiday.timesheet_ids.filtered(lambda t: t.employee_id == self.empl_employee)
+        self.assertEqual(len(holiday.timesheet_ids), 2, 'Monday and Tuesday should be timesheeted for the time off')
+        self.assertEqual(len(public_holiday_timesheets), 1, 'Wednesday should be timesheeted for the public holiday')
+        timesheets = holiday.timesheet_ids | public_holiday_timesheets
+        self.assertEqual(timesheets.project_id, self.internal_project)
+        self.assertFalse(timesheets.task_id)
+
     @freeze_time('2018-02-05')  # useful to be able to cancel the validated time off
     def test_cancel_validate_holidays(self):
         holiday = self.Requests.with_user(self.user_employee).create({
