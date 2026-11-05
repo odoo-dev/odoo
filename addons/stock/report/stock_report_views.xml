@@ -54,6 +54,54 @@
             <field name="binding_model_id" ref="model_stock_package_history"/>
             <field name="binding_type">report</field>
         </record>
+        <record id="action_report_location_barcode_label_pdf" model="ir.actions.report">
+            <field name="name">Location Barcode (PDF)</field>
+            <field name="model">stock.location</field>
+            <field name="report_name">stock.report_location_barcode_label_pdf</field>
+            <field name="paperformat_id" ref="product.paperformat_label_sheet"/>
+            <field name="binding_model_id" ref="model_stock_location"/>
+            <field name="binding_view_types">list,form</field>
+        </record>
+        <record id="action_report_location_barcode_label_zpl" model="ir.actions.report">
+            <field name="name">Location Barcode (ZPL)</field>
+            <field name="model">stock.location</field>
+            <field name="report_type">qweb-text</field>
+            <field name="report_name">stock.report_location_barcode_label_zpl</field>
+            <field name="binding_model_id" ref="model_stock_location"/>
+            <field name="binding_view_types">list,form</field>
+        </record>
+        <record id="action_report_picking_type_barcode_label_pdf" model="ir.actions.report">
+            <field name="name">Operation type (PDF)</field>
+            <field name="model">stock.picking.type</field>
+            <field name="report_name">stock.report_picking_type_barcode_label_pdf</field>
+            <field name="paperformat_id" ref="product.paperformat_label_sheet"/>
+            <field name="binding_model_id" ref="model_stock_picking_type"/>
+            <field name="binding_view_types">list,kanban,form</field>
+        </record>
+        <record id="action_report_picking_type_barcode_label_zpl" model="ir.actions.report">
+            <field name="name">Operation type (ZPL)</field>
+            <field name="model">stock.picking.type</field>
+            <field name="report_type">qweb-text</field>
+            <field name="report_name">stock.report_picking_type_barcode_label_zpl</field>
+            <field name="binding_model_id" ref="model_stock_picking_type"/>
+            <field name="binding_view_types">list,kanban,form</field>
+        </record>
+        <record id="action_report_package_type_barcode_label_pdf" model="ir.actions.report">
+            <field name="name">Package Type (PDF)</field>
+            <field name="model">stock.package.type</field>
+            <field name="report_name">stock.report_package_type_barcode_label_pdf</field>
+            <field name="paperformat_id" ref="product.paperformat_label_sheet"/>
+            <field name="binding_model_id" ref="model_stock_package_type"/>
+            <field name="binding_view_types">list,form</field>
+        </record>
+        <record id="action_report_package_type_barcode_label_zpl" model="ir.actions.report">
+            <field name="name">Package Type (ZPL)</field>
+            <field name="model">stock.package.type</field>
+            <field name="report_type">qweb-text</field>
+            <field name="report_name">stock.report_package_type_barcode_label_zpl</field>
+            <field name="binding_model_id" ref="model_stock_package_type"/>
+            <field name="binding_view_types">list,form</field>
+        </record>
         <record id="action_report_stock_rule" model="ir.actions.report">
             <field name="name">Product Routes Report</field>
             <field name="model">product.template</field>
