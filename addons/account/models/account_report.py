@@ -147,6 +147,42 @@ class AccountReport(models.Model):
         readonly=False, store=True, depends=['root_report_id', 'section_main_report_ids'],
     )
 
+    # TODO lost: add constraints
+    inherit_report_id = fields.Many2one(
+        comodel_name='account.report',
+        string="Inherit From",
+        help="This report will inherit the lines and columns of the selected report. "
+             "This is useful to create a report that is similar to another one, but with some differences.",
+        domain="[('id', '!=', id),]",
+    )
+    inherit_report_ids = fields.Many2many(
+        comodel_name='account.report',
+        compute='_compute_inherit_report_ids',
+        help="This report inheritance chain.",
+        readonly=True,
+    )
+    inheriting_report_ids = fields.Many2many(
+        comodel_name='account.report',
+        help="All the reports that depends on this report through inheritance.",
+        compute='_compute_inheriting_report_ids',
+        readonly=True,
+    )
+    inherit_mode = fields.Selection(
+        string="Inherit Mode",
+        selection=[('extend', "Extend"), ('primary', "Primary")],
+        default='extend',
+        help="Extend: The lines and columns of the selected report will be added to this report. "
+             "Primary: The lines and columns of the selected report will replace the lines and columns of this report.",
+    )
+    inherit_removed_lines = fields.Char(
+        string="Removed Lines Codes",
+        help="A list of line codes that should be removed from the inherited report.",
+    )
+    inherit_removed_columns = fields.Char(
+        string="Removed Columns Labels",
+        help="A list of column labels that should be removed from the inherited report.",
+    )
+
     #  FILTERS =======================================================================================================================================
     # Those fields control the display of menus on the report
 
@@ -268,6 +304,15 @@ class AccountReport(models.Model):
         for report in self:
             report.user_groupby = report.user_groupby or report.groupby
 
+    # TODO lost:
+    def _compute_inherit_report_ids(self):
+        for report in self:
+            pass
+
+    def _compute_inheriting_report_ids(self):
+        for report in self:
+            pass
+
     @api.constrains('root_report_id')
     def _validate_root_report_id(self):
         for report in self:
@@ -386,6 +431,10 @@ class AccountReport(models.Model):
             else:
                 report.display_name = False
 
+    def _sync_report_inheritance(self):
+        pass
+
+
 
 class AccountReportLine(models.Model):
     _name = 'account.report.line'
@@ -444,6 +493,10 @@ class AccountReportLine(models.Model):
     external_formula = fields.Char(string="External Formula Shortcut", help="Internal field to shorten expression_ids creation for the external engine", inverse='_inverse_external_formula', store=False)
     horizontal_split_side = fields.Selection(string="Horizontal Split Side", selection=[('left', "Left"), ('right', "Right")], compute='_compute_horizontal_split_side', readonly=False, store=True, recursive=True)
     tax_tags_formula = fields.Char(string="Tax Tags Formula Shortcut", help="Internal field to shorten expression_ids creation for the tax_tags engine", inverse='_inverse_aggregation_tax_formula', store=False)
+
+    # TODO lost: add constraints
+    inherit_line_id = fields.Many2one(string="Inherit From", comodel_name='account.report.line', help="This line will inherit the expressions of the selected line. This is useful to create a line that is similar to another one, but with some differences.")
+    inheriting_line_ids = fields.One2many(string="Inheriting Lines", comodel_name='account.report.line', inverse_name='inherit_line_id')
 
     _code_uniq = models.Constraint(
         'unique (report_id, code)',
