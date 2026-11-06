@@ -26,22 +26,34 @@ class StockLot(models.Model):
         company_id = self.env.company
         self.company_currency_id = company_id.currency_id
         at_date = fields.Datetime.to_datetime(self.env.context.get('to_date'))
+        has_warehouse = bool(self.env.context.get('warehouse_id'))
         lots = self.with_context(owners=[False, self.env.company.partner_id.id])
         total_value_by_lot_id = defaultdict(float)
         valued_quantity_by_lot_id = defaultdict(float)
-
         for company in self.env.companies:
             lots = lots.with_company(company.id).with_context(allowed_company_ids=company.ids)
-
+            # batch-compute quantities and costs of all lots at once instead of per chunk/lot
+            lots.mapped('product_qty')
+            if not at_date:
+                lots.mapped('standard_price')
+            qty_available_by_lot_id = {}
+            if has_warehouse:
+                qty_available_by_lot_id = {
+                    lot.id: lot.product_qty for lot in lots.with_context(warehouse_id=False)
+                }
             for lot in lots:
                 if not lot.lot_valuated:
                     continue
                 valuated_product = lot.product_id.with_context(at_date=at_date, lot_id=lot.id)
                 qty_valued = lot.product_qty
-                qty_available = lot.with_context(warehouse_id=False).product_qty
+                qty_available = qty_available_by_lot_id.get(lot.id, qty_valued) if has_warehouse else qty_valued
                 if valuated_product.uom_id.is_zero(qty_valued):
                     continue
-                elif valuated_product.cost_method == 'standard' or valuated_product.uom_id.is_zero(qty_available):
+                elif (
+                    valuated_product.cost_method == 'standard'
+                    or valuated_product.uom_id.is_zero(qty_available)
+                    or (valuated_product.cost_method == 'average' and not at_date)
+                ):
                     total_value = lot.standard_price * qty_valued
                     total_value_by_lot_id[lot.id] += company.currency_id._convert(total_value, self.env.company.currency_id)
                     valued_quantity_by_lot_id[lot.id] += qty_valued
