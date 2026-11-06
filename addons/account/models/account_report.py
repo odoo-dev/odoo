@@ -353,23 +353,8 @@ class AccountReport(models.Model):
         '''
         new_reports = super().copy(default=default)
         for old_report, new_report in zip(self, new_reports):
-            code_mapping = {}
             for line in old_report.line_ids.filtered(lambda x: not x.parent_id):
-                line._copy_hierarchy(new_report, code_mapping=code_mapping)
-
-            # Replace line codes by their copy in aggregation formulas
-            for expression in new_report.line_ids.expression_ids:
-                if expression.engine == 'aggregation':
-                    copied_formula = f" {expression.formula} "  # Add spaces so that the lookahead/lookbehind of the regex can work (we can't do a | in those)
-                    for old_code, new_code in code_mapping.items():
-                        copied_formula = re.sub(f"(?<=\\W){old_code}(?=\\W)", new_code, copied_formula)
-                    expression.formula = copied_formula.strip()  # Remove the spaces introduced for lookahead/lookbehind
-                    # Repeat the same logic for the subformula, if it is set.
-                    if expression.subformula:
-                        copied_subformula = f" {expression.subformula} "
-                        for old_code, new_code in code_mapping.items():
-                            copied_subformula = re.sub(f"(?<=\\W){old_code}(?=\\W)", new_code, copied_subformula)
-                        expression.subformula = copied_subformula.strip()
+                line._copy_hierarchy(new_report)
 
             old_report.column_ids.copy({'report_id': new_report.id})
         return new_reports
@@ -531,49 +516,25 @@ class AccountReportLine(models.Model):
         for line in self.filtered(lambda x: x.parent_id == x):
             raise ValidationError(_('Line "%s" defines itself as its parent.', line.name))
 
-    def _copy_hierarchy(self, copied_report, parent=None, code_mapping=None):
+    def _copy_hierarchy(self, copied_report, parent=None):
         ''' Copy the whole hierarchy from this line by copying each line children recursively and adapting the
         formulas with the new copied codes.
 
         :param copied_report: The copy of the report.
         :param parent: The parent line in the hierarchy (a copy of the original parent line).
-        :param code_mapping: A dictionary keeping track of mapping old_code -> new_code
         '''
         self.ensure_one()
 
         copied_line = self.copy({
             'report_id': copied_report.id,
             'parent_id': parent and parent.id,
-            'code': self._get_copied_code(),
+            'code': self.code,
         })
-
-        # Keep track of old_code -> new_code in a mutable dict
-        if code_mapping is None:
-            code_mapping = {}
-        if self.code:
-            code_mapping[self.code] = copied_line.code
-
-        # Copy children
-        for line in self.children_ids:
-            line._copy_hierarchy(copied_report, parent=copied_line, code_mapping=code_mapping)
 
         # Update aggregation expressions, so that they use the copied lines
         for expression in self.expression_ids:
             copy_defaults = {'report_line_id': copied_line.id}
             expression.copy(copy_defaults)
-
-    def _get_copied_code(self):
-        '''Look for an unique copied code.
-
-        :return: an unique code for the copied account.report.line
-        '''
-        self.ensure_one()
-        if not self.code:
-            return False
-        code = self.code + '_COPY'
-        while self.search_count([('code', '=', code)]) > 0:
-            code += '_COPY'
-        return code
 
     def _inverse_domain_formula(self):
         self._create_report_expression(engine='domain')
