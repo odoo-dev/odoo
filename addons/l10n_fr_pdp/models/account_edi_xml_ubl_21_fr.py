@@ -91,6 +91,14 @@ class AccountEdiXmlUbl21Fr(models.AbstractModel):
                 '_text': f"#{code}#{default_content}",
             })
 
+        # [BOI-TVA-BASE-20-50-10] Option for tax payment based on debits
+        document_node['cbc:Note'].append({
+            '_text': 'Option pour le paiement de la taxe d\'après les débits'
+        })
+        document_node['cac:InvoicePeriod'] = {
+            'cbc:DescriptionCode': { '_text': 3 }
+        }
+
         # [BR-FR-MAP-18] EN16931 caps the Note (BT-22) to 1024 characters.
         for note in document_node['cbc:Note']:
             if isinstance(note['_text'], str):
