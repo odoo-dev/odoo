@@ -9,6 +9,7 @@
                 <field name="l10n_es_show_irpf_rate" invisible="1"/>
             </xpath>
             <xpath expr="//field[@name='line_ids']/list/field[@name='partner_id']" position="after">
+                <field name="l10n_es_employee_id"/>
                 <field name="l10n_es_irpf_rate"
                        column_invisible="not parent.l10n_es_show_irpf_rate"
                        invisible="l10n_es_irpf_rate == 0"/>

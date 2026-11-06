@@ -6,11 +6,11 @@
     'category': 'Accounting/Localizations',
     'summary': 'Withholding tax for salaries using the personal IRPF rate of each partner',
     'description': """Personal IRPF withholding rate""",
-    'depends': ['l10n_es', 'account'],
+    'depends': ['l10n_es', 'account', 'hr'],
     'auto_install': True,
     'data': [
         'views/account_views.xml',
-        'views/partner_view.xml',
+        'views/hr_employee_views.xml',
     ],
     'post_init_hook': '_post_init_hook',
     'author': 'Odoo S.A.',
