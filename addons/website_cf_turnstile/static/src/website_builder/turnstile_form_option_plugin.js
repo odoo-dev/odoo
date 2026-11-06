@@ -7,17 +7,16 @@ import { FormOptionPlugin } from "@website/builder/plugins/form/form_option_plug
 export class TurnstileFormOptionPlugin extends Plugin {
     static id = "turnstileFormOption";
     static dependencies = ["websiteBridge"];
-    static shared = ["hasTurnstileKey"];
+    /** @type {import("plugins").WebsiteResources} */
     resources = {
         builder_actions: {
             FormToggleTurnstileLegalAction,
         },
+        builder_options_render_context: {
+            hasTurnstileKey: !!this.dependencies.websiteBridge.getSession().turnstile_site_key,
+        },
         content_editable_selectors: ".s_website_form form .s_website_form_turnstile",
     };
-
-    hasTurnstileKey() {
-        return !!this.dependencies.websiteBridge.getSession().turnstile_site_key;
-    }
 }
 
 export class FormToggleTurnstileLegalAction extends BuilderAction {
@@ -38,26 +37,9 @@ export class FormToggleTurnstileLegalAction extends BuilderAction {
     }
 }
 
-function moveTurnstileBeforeSubmit(formEl) {
-    const turnstileEl = formEl.querySelector(".s_website_form_turnstile");
-    const submitEl = formEl.querySelector(".s_website_form_submit");
-    if (turnstileEl && submitEl) {
-        submitEl.insertAdjacentElement("beforebegin", turnstileEl);
-    }
-}
-
 patch(FormOptionPlugin.prototype, {
-    async applyFormModel(el) {
-        const result = await super.applyFormModel(...arguments);
-        moveTurnstileBeforeSubmit(el);
-        return result;
-    },
-    addField(editingElement) {
-        super.addField(...arguments);
-        const formEl = editingElement.closest("form");
-        if (formEl) {
-            moveTurnstileBeforeSubmit(formEl);
-        }
+    get fieldAnchorSelectors() {
+        return [...super.fieldAnchorSelectors, ".s_website_form_turnstile"];
     },
 });
 

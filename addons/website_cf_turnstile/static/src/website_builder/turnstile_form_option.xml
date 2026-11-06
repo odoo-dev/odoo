@@ -2,14 +2,17 @@
 <templates xml:space="preserve">
 
 <t t-name="website_cf_turnstile.TurnstileFormOption">
-    <BuilderRow t-if="this.hasTurnstileKey()" label.translate="Show Turnstile Policy">
+    <BuilderRow label.translate="Show Turnstile Policy">
         <BuilderCheckbox action="'formToggleTurnstileLegal'" preview="false"/>
     </BuilderRow>
 </t>
 
 <t t-inherit="website.BuilderOptions" t-inherit-mode="extension">
     <xpath expr="//form_option" position="after">
-        <turnstile_form_option selector=".s_website_form" applyTo="form"/>
+        <turnstile_form_option t-if="this.hasTurnstileKey"
+            template="website_cf_turnstile.TurnstileFormOption"
+            selector=".s_website_form"
+            applyTo="form"/>
     </xpath>
 </t>
 
