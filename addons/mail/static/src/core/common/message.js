@@ -29,7 +29,7 @@ import {
     usePlugin,
     useProps,
 } from "@odoo/owl";
-import { MessageSearchState } from "@mail/core/common/message_search_hook";
+import { MessageSearchState, useMessageSearch } from "@mail/core/common/message_search_hook";
 
 import { isMobileOS } from "@web/core/browser/feature_detection";
 import { Dropdown } from "@web/core/dropdown/dropdown";
@@ -148,6 +148,7 @@ export class Message extends Component {
         useForwardRefsToParent("messageRefs", (props) => props.message.id, this.rootRef);
         this.messageBody = signal.ref(HTMLDivElement);
         this.messageContentRef = signal.ref(HTMLDivElement);
+        this.defaultMessageSearch = useMessageSearch();
         this.richBodyRef = signal.ref(HTMLDivElement);
         this.messageActions = useMessageActions(this.messageActionsParams);
         this.shadowBody = signal.ref(HTMLDivElement);
@@ -240,8 +241,7 @@ export class Message extends Component {
                         "span",
                         this.message.showTranslation
                             ? this.message.richTranslationValue
-                            : this.props.messageSearch?.highlight(this.message.richBody) ??
-                                  this.message.richBody
+                            : this.messageSearch.highlight(this.message.richBody)
                     );
                     const roots = this.prepareMessageBody(bodyEl) ?? [];
                     shadowRoot.appendChild(bodyEl);
@@ -486,6 +486,10 @@ export class Message extends Component {
             this.message.subtype_id.description.toLowerCase() !==
                 this.message.bodyTextContentInline.toLowerCase()
         );
+    }
+
+    get messageSearch() {
+        return this.props.messageSearch ?? this.defaultMessageSearch;
     }
 
     get messageTypeText() {
