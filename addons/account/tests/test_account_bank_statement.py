@@ -1472,3 +1472,21 @@ class TestAccountBankStatementLine(AccountTestInvoicingCommon):
 
         transaction = self.create_bank_transaction(1, '2020-01-10', journal=self.bank_journal_1)
         assert transaction.date == transaction.move_id.date == fields.Date.from_string('2020-01-10')
+
+    def test_default_get_from_branch_with_parent_statement(self):
+        """ With only a branch selected, the last transaction of a parent journal can belong to a statement of the parent company """
+        branch = self._create_company(name='Branch', parent_id=self.env.company.id)
+        self.env.user.company_ids |= branch
+        branch_env = self.env(context={**self.env.context, 'allowed_company_ids': branch.ids})
+
+        st_line = branch_env['account.bank.statement.line'].create({
+            'date': '2019-01-03',
+            'payment_ref': 'branch_line',
+            'journal_id': self.bank_journal_1.id,
+            'amount': 100.0,
+        })
+        statement = self.env['account.bank.statement'].sudo().create({'line_ids': [Command.set(st_line.ids)]})
+        self.assertEqual(statement.company_id, self.env.company)
+
+        defaults = branch_env['account.bank.statement.line'].with_context(default_journal_id=self.bank_journal_1.id).default_get(['journal_id', 'date'])
+        self.assertEqual(defaults['date'], fields.Date.from_string('2019-01-03'))
