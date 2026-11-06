@@ -3,6 +3,7 @@
 from datetime import date
 from psycopg2.errors import CheckViolation
 
+from odoo import Command
 from odoo.tests import tagged
 from odoo.tests.common import freeze_time
 from odoo.exceptions import AccessError, ValidationError
@@ -1023,3 +1024,58 @@ class TestHrVersion(TestHrCommon):
         self.assertEqual(version_1.date_end, date(2023, 12, 31))
         self.assertEqual(version_2.date_start, date(2024, 1, 1))
         self.assertFalse(version_2.date_end)
+
+    def test_certifications_between_versions(self):
+        """ Certificates are now in a field of the employee version, so each version should have independent certificates. """
+
+        cert_type = self.env['hr.skill.type'].create({
+            'name': 'Test Certified',
+            'is_certification': True,
+        })
+
+        cert_level0 = self.env['hr.skill.level'].create({
+            'name': 'NOT OK',
+            'skill_type_id': cert_type.id,
+            'level_progress': 0,
+        })
+        cert_level1 = self.env['hr.skill.level'].create({
+            'name': 'OK',
+            'skill_type_id': cert_type.id,
+            'level_progress': 100,
+        })
+
+        cert_1, cert_2 = self.env['hr.skill'].create([
+            {'name': 'Certification 1', 'skill_type_id': cert_type.id},
+            {'name': 'Certification 2', 'skill_type_id': cert_type.id},
+        ])
+
+        employee = self.env['hr.employee'].create({
+            'name': 'Joaozinho das firula',
+            'date_version': '2026-01-01',
+        })
+
+        version_1 = employee.version_id
+        employee.write({
+            'certification_ids': [Command.create({
+                'employee_id': employee.id,
+                'skill_id': cert_1.id,
+                'skill_level_id': cert_level0.id,
+                'skill_type_id': cert_type.id,
+                'valid_from': '2026-01-01',
+            })],
+        })
+
+        version_2 = employee.create_version({'date_version': '2026-06-06'})
+        version_2.write({
+            'certification_ids': [Command.create({
+                'employee_id': employee.id,
+                'skill_id': cert_2.id,
+                'skill_level_id': cert_level1.id,
+                'skill_type_id': cert_type.id,
+                'valid_from': '2026-06-06',
+            })],
+        })
+
+        self.assertIn(cert_1, version_1.certification_ids.skill_id)
+        self.assertIn(cert_2, version_2.certification_ids.skill_id)
+        self.assertNotIn(cert_2, version_1.certification_ids.skill_id)
