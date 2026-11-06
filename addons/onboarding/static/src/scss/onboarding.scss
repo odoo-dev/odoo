@@ -36,10 +36,24 @@
 
         flex: 1 1 0;
 
-        @for $i from 1 through 5 {
-            &.o_onboarding_step__todo:nth-child(#{$i}) {
-                @include print-variable('o-onboarding-animation-delay', $i * .15s);
-            }
+        &.o_onboarding_step__todo:nth-child(1) {
+            --o-onboarding-animation-delay: calc(.15s * 1);
+        }
+
+        &.o_onboarding_step__todo:nth-child(2) {
+            --o-onboarding-animation-delay: calc(.15s * 2);
+        }
+
+        &.o_onboarding_step__todo:nth-child(3) {
+            --o-onboarding-animation-delay: calc(.15s * 3);
+        }
+
+        &.o_onboarding_step__todo:nth-child(4) {
+            --o-onboarding-animation-delay: calc(.15s * 4);
+        }
+
+        &.o_onboarding_step__todo:nth-child(5) {
+            --o-onboarding-animation-delay: calc(.15s * 5);
         }
 
         &:first-child, &:last-child {

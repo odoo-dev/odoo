@@ -3,12 +3,22 @@
        https://github.com/bkrem/react-d3-tree/issues/284
        https://bugs.webkit.org/show_bug.cgi?id=23113
        Trick here is moving the opacity classname to the parent svg, so that no opacity on foreignobject and safari doesn't reset position. */
-    @each $opacity_class, $opacity_value in ("opacity-25": .25, "opacity-50": .5, "opacity-75": .75) {
-        &:has(foreignObject .#{$opacity_class}) {
-            opacity: #{$opacity_value};
-            foreignObject .#{$opacity_class} {
-                opacity: 100% !important;
-            }
+    &:has(foreignObject .opacity-25) {
+        opacity: 0.25;
+        foreignObject .opacity-25 {
+            opacity: 100% !important;
+        }
+    }
+    &:has(foreignObject .opacity-50) {
+        opacity: 0.5;
+        foreignObject .opacity-50 {
+            opacity: 100% !important;
+        }
+    }
+    &:has(foreignObject .opacity-75) {
+        opacity: 0.75;
+        foreignObject .opacity-75 {
+            opacity: 100% !important;
         }
     }
 }
