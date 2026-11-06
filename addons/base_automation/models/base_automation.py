@@ -135,7 +135,7 @@ class BaseAutomation(models.Model):
     model_id = fields.Many2one(
         "ir.model", string="Model", domain=[("abstract", "=", False)], required=True, ondelete="cascade", tracking=True
     )
-    model_name = fields.Char(related="model_id.model", string="Model Name", readonly=True, inverse="_inverse_model_name")
+    model_name = fields.Char(related="model_id.model", string="Model Name", ui_readonly=True, inverse="_inverse_model_name")
     model_is_mail_thread = fields.Boolean(related="model_id.is_mail_thread")
     action_server_ids = fields.One2many("ir.actions.server", "base_automation_id",
         context={'default_usage': 'base_automation'},

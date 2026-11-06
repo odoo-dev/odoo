@@ -582,6 +582,8 @@ class Field[T, C]:
 
             if not isinstance(self.readonly, bool):
                 self._setup_warning(f'property readonly should be a boolean ({self.readonly})')
+            if self.readonly and self.inverse:
+                self._setup_warning('readonly with an inverse')
 
             self._setup_done = True
             # column_type might be changed during Field.setup
@@ -1695,7 +1697,7 @@ class Field[T, C]:
             and (self.inherited_field or self).compute
             and not all(rec.env.is_protected(self, rec) for rec in records)
         ):
-            raise Exception(f"Cannot write on a readonly field {self}")
+            _logger.warning(f"Cannot write on a readonly field {self}", stack_info=True)
         # discard recomputation of self on records
         records.env.remove_to_compute(self, records)
 
