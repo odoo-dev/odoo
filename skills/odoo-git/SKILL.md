@@ -136,12 +136,28 @@ a question; a missing section is a review round trip.
 ## Branches and pull requests
 
 - Target: a bug affecting supported stable versions goes to the oldest
-  affected supported stable version where the fix meets stable policy. Find
-  the oldest affected version by checking the older stable branches for the
-  faulty code; ask the author which versions are still supported when
-  unsure. Fix bugs specific to master on master. A feature or any unstable
-  change goes to master; a localization goes to either. A fix merged in a
-  stable version is forward-ported to the newer versions by the bots.
+  affected supported stable version where the fix meets stable policy, not
+  to the version where the bug was reported or seen; ask the author which
+  versions are still supported when unsure. Fix bugs specific to master on
+  master. A feature or any unstable change goes to master; a localization
+  goes to either. A fix merged in a stable version is forward-ported to the
+  newer versions by the bots; nothing ports it to an older one.
+- Find the oldest affected version from git:
+  - When the commit that brought the faulty code is known, the oldest
+    version that has it is the oldest branch listed by `git branch -r
+    --contains <sha> --list '<remote>/*'`, `<remote>` being the remote of
+    the Odoo repository. A forward-port is a new commit on each version,
+    and a `git blame` on a recent version often lands on one. Its
+    `X-original-commit` trailer names the commit of the previous hop:
+    follow the trailers until a commit has none, and run the command on
+    that commit.
+  - Otherwise, try to reproduce the bug on the oldest supported version
+    that has the feature, then on the next one up, and stop at the first
+    version where it reproduces: that version is the target. The newer
+    ones need no check.
+  - Take the list of versions from the server, `git ls-remote --heads
+    <remote>`, never from memory nor from the branches the clone fetches:
+    a new saas or major branch is created several times a year.
 - One pull request per patch: never open the same patch against several
   branches. If the forward-port needs manual help, do it in the forward-port
   PR the bot opened.
