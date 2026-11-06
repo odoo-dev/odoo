@@ -1,3 +1,4 @@
+from . import html_editor_media_tag
 from . import ir_attachment
 from . import ir_http
 from . import ir_qweb_fields

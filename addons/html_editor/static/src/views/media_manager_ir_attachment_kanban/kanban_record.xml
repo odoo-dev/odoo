@@ -24,6 +24,10 @@
                     <t t-set-slot="content">
                         <DropdownItem onSelected="() => this.previewRecord()">Preview image</DropdownItem>
                         <hr />
+                        <t t-if="this.showMenu">
+                            <t t-call="{{ this.templates[this.constructor.MENU_ATTRIBUTE] }}" t-call-context="this.renderingContext"/>
+                            <hr />
+                        </t>
                         <DropdownItem onSelected="() => this.deleteItem()"><span class="oi" data-icon="delete"></span> Delete</DropdownItem>
                     </t>
                 </Dropdown>

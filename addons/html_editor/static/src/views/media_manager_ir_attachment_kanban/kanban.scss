@@ -31,8 +31,14 @@
             }
         }
         .o_kanban_details_wrapper {
+            display: flex;
+            flex-direction: column;
             min-height: 54px;
             padding: 8px 8px 0;
+        }
+        .o_media_tags .o_field_tags {
+            flex-wrap: nowrap;
+            overflow: hidden;
         }
         .o_record_box_star, .o_record_box_star_bg {
             font-size: 14px;
@@ -47,6 +53,14 @@
             left: 0;
             right: 0;
             height: auto;
+            // Keep the tags visible on the card; the other details only show on hover.
+            &:has(.o_media_tags) {
+                display: block;
+                background-color: transparent;
+                .o_kanban_details_wrapper {
+                    display: none;
+                }
+            }
         }
         &:hover{
             .o_record_box_star, .o_record_box_star_bg {
@@ -54,6 +68,10 @@
             }
             .o_record_main {
                 display: block;
+                background-color: rgba(255, 255, 255, 0.5);
+                .o_kanban_details_wrapper {
+                    display: flex;
+                }
             }
             aside.o_kanban_image img {
                 scale: 1.3;
@@ -135,4 +153,7 @@
         right: 30px;
         padding-top: 30px;
     }
+}
+.o_media_tags_menu {
+    width: 220px;
 }
