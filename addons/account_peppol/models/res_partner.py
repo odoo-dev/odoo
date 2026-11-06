@@ -248,14 +248,10 @@ class ResPartner(models.Model):
         return self - registered_companies.partner_id
 
     def _compute_peppol_endpoint(self):
-        #partners_to_recompute = (self.browse([partner.id for partner in self if partner._origin not in self])
-        #                         .filtered(lambda partner: partner.account_peppol_proxy_state == 'not_registered'))
         partners_to_recompute = self._get_non_registered_partners()
         super(ResPartner, partners_to_recompute)._compute_peppol_endpoint()
 
     def _compute_peppol_eas(self):
-        #partners_to_recompute = (self.browse([partner.id for partner in self if partner._origin not in self])
-        #                        .filtered(lambda partner: partner.peppol_verification_state in ('not_verified', 'not_valid')))
         partners_to_recompute = self._get_non_registered_partners()
         super(ResPartner, partners_to_recompute)._compute_peppol_eas()
 
