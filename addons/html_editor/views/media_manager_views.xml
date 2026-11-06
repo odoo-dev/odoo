@@ -7,6 +7,7 @@
             <field name="arch" type="xml">
                 <search string="Media">
                     <field name="name" filter_domain="[('name','ilike',self)]" string="Attachment"/>
+                    <field name="media_tag_ids"/>
                     <field name="create_date"/>
                     <filter name="my_media_filter"
                             string="My Media(s)"
@@ -18,6 +19,7 @@
                     <field name="type"/>
                     <group>
                         <filter name="owner" string="Owner" domain="[]" context="{'group_by':'create_uid'}"/>
+                        <filter name="media_tags" string="Tags" domain="[]" context="{'group_by':'media_tag_ids'}"/>
                         <filter string="Type" name="type" domain="[]" context="{'group_by':'type'}" groups="base.group_no_one"/>
                         <filter string="Company" name="company" domain="[]" context="{'group_by':'company_id'}" groups="base.group_multi_company"/>
                         <filter string="Creation Date" name="creation_month" domain="[]" context="{'group_by':'create_date'}"/>
@@ -42,6 +44,12 @@
                     <field name="image_height"/>
                     <field name="url"/>
                     <templates>
+                        <t t-name="menu">
+                            <!-- o-navigable keeps the input as the active dropdown item, so the focus stays on it while the suggestions update -->
+                            <div class="o_media_tags_menu o-navigable px-3 py-1">
+                                <field name="media_tag_ids" widget="media_tags" options="{'color_field': 'color', 'no_create_edit': True}" placeholder="Add a tag..."/>
+                            </div>
+                        </t>
                         <t t-name="card" class="o_kanban_attachment">
                             <aside class="o_kanban_image">
                                 <div class="o_kanban_image_wrapper">
@@ -56,7 +64,10 @@
                                 </div>
                             </aside>
                             <main class="position-absolute" >
-                                <div class="o_kanban_details_wrapper d-flex flex-column">
+                                <div t-if="record.media_tag_ids.raw_value.length" class="o_media_tags px-2 pt-1">
+                                    <field name="media_tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
+                                </div>
+                                <div class="o_kanban_details_wrapper">
                                     <div class="text-truncate" t-att-title="record.display_name.raw_value">
                                         <field name="display_name" />
                                     </div>

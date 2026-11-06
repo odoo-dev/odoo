@@ -30,6 +30,13 @@ class IrAttachment(models.Model):
         index='btree_not_null',
         ondelete='cascade',
     )
+    media_tag_ids = fields.Many2many(
+        'html_editor.media.tag',
+        relation='html_editor_media_tag_ir_attachment_rel',
+        column1='attachment_id',
+        column2='tag_id',
+        string="Media Tags",
+    )
 
     def _compute_local_url(self):
         for attachment in self:
