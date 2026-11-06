@@ -139,6 +139,8 @@ class HrVersion(models.Model):
     departure_apply_immediately = fields.Boolean(related='departure_id.apply_immediately', groups="hr.group_hr_user")
     departure_apply_date = fields.Date(related='departure_id.apply_date', groups="hr.group_hr_user")
 
+    certification_ids = fields.Many2many('hr.employee.skill', domain=[('is_certification', '=', True)])
+
     resource_calendar_id = fields.Many2one(
         'resource.calendar', required=True, default=lambda self: self.env.company.resource_calendar_id, inverse='_inverse_resource_calendar_id', string="Working Hours", index='btree_not_null', tracking=1,
         domain="['|', ('company_id', '=', False), ('company_id.id', 'parent_of', company_id)]")

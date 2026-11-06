@@ -390,7 +390,7 @@ class HrEmployee(models.Model):
     current_employee_skill_ids = fields.One2many('hr.employee.skill',
         compute='_compute_current_employee_skill_ids', readonly=False)
     skill_ids = fields.Many2many('hr.skill', compute='_compute_skill_ids', store=True, groups="hr.group_hr_user")
-    certification_ids = fields.One2many('hr.employee.skill', compute='_compute_certification_ids', readonly=False)
+    certification_ids = fields.Many2many('hr.employee.skill', related="version_id.certification_ids", inherited=True, readonly=False)
     display_certification_page = fields.Boolean(compute="_compute_display_certification_page")
 
     _barcode_uniq = models.Constraint(
@@ -448,11 +448,6 @@ class HrEmployee(models.Model):
     def _compute_skill_ids(self):
         for employee in self:
             employee.skill_ids = employee.employee_skill_ids.skill_id
-
-    @api.depends('employee_skill_ids')
-    def _compute_certification_ids(self):
-        for employee in self:
-            employee.certification_ids = employee.employee_skill_ids.filtered('is_certification')
 
     def _compute_display_certification_page(self):
         self.display_certification_page = bool(self.env['hr.skill.type'].search_count([('is_certification', '=', True)], limit=1))
@@ -2186,8 +2181,7 @@ class HrEmployee(models.Model):
     def _pop_employee_skill_commands(self, vals):
         """ Gather the commands written on any of the skill fields of the employee, as they all target
         `employee_skill_ids` and must go through `hr.employee.skill._get_transformed_commands`. """
-        return vals.pop('current_employee_skill_ids', []) + vals.pop('certification_ids', []) \
-            + vals.get('employee_skill_ids', [])
+        return vals.pop('current_employee_skill_ids', []) + vals.get('employee_skill_ids', [])
 
     def _get_current_skills_summary(self):
         """ Snapshot of the current skills of the employees, see `_log_skill_changes`. """
@@ -3425,6 +3419,21 @@ class HrEmployee(models.Model):
                 })
         return working_periods
 
+    @api.model
+    def _apply_many2many_changes(self, ids, commands):
+        """Return the ids of an x2many field after applying the changes needed for the version."""
+        ids = list(ids)
+        for command in commands:
+            if command[0] == Command.LINK and command[1] not in ids:
+                ids.append(command[1])
+            elif command[0] in (Command.UNLINK, Command.DELETE) and command[1] in ids:
+                ids.remove(command[1])
+            elif command[0] == Command.SET:
+                ids = list(command[2])
+            elif command[0] == Command.CLEAR:
+                ids = []
+        return ids
+
     def get_multi_version_changes(self, version_changes):
         """Return a human-readable preview of changes to apply on several versions (web client).
 
@@ -3438,6 +3447,10 @@ class HrEmployee(models.Model):
         for field_name in version_changes:
             new_value = version_changes[field_name]
             field = self.env['ir.model.fields'].search([('model', '=', 'hr.version'), ('name', '=', field_name)])
+
+            if field['ttype'] == 'many2many':
+                new_value = self._apply_many2many_changes(self[field_name].ids, new_value)
+
             if field['relation']:
                 new_value = self.env[field['relation']].search([('id', 'in', new_value)])
             tracking_values = self._create_mail_tracking_values(
