@@ -39,6 +39,13 @@
                     <field name="sequence" widget="handle"/>
                 </xpath>
                 <xpath expr="//field[@name='bom_id']" position="replace"/>
+                <xpath expr="//field[@name='workcenter_id']" position="attributes">
+                    <attribute name="widget">badge</attribute>
+                    <attribute name="decoration-danger">is_outside_manufacturing_line</attribute>
+                </xpath>
+                <xpath expr="//field[@name='workcenter_id']" position="after">
+                    <field name="is_outside_manufacturing_line" column_invisible="True"/> <!-- drives decoration-danger of workcenter_id -->
+                </xpath>
                 <xpath expr="//field[@name='time_total']" position="attributes">
                     <attribute name="sum">Total Duration</attribute>
                 </xpath>
@@ -190,8 +197,8 @@
 
         <menuitem id="menu_mrp_routing_action"
           action="mrp_routing_action"
+          groups="-group_mrp_routings"
           parent="menu_mrp_configuration"
-          groups="group_mrp_routings"
           sequence="100"/>
 
     </data>

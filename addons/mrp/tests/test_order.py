@@ -210,6 +210,7 @@ class TestMrpOrder(TestMrpCommon, MailCase):
         mo_form = Form(self.env['mrp.production'])
         mo_form.bom_id = self.bom_3
         mo = mo_form.save()
+        mo._create_missing_operation_workorders()  # work orders are otherwise created one at a time
         self.assertEqual(len(mo.workorder_ids), 3)
         self.assertListEqual(mo.workorder_ids.mapped('sequence'), [0, 1, 2])
         self.assertEqual(mo.workorder_ids[0].operation_id.bom_id.type, 'phantom')    # Kit operations should go first
@@ -2122,9 +2123,10 @@ class TestMrpOrder(TestMrpCommon, MailCase):
         mo_3.bom_id = self.bom_3
         mo_3 = mo_3.save()
 
-        self.assertEqual(len(mo_3.workorder_ids), 2)
+        self.assertEqual(len(mo_3.workorder_ids), 1, "only the first operation gets its work order upfront")
 
         mo_3.button_plan()
+        self.assertEqual(len(mo_3.workorder_ids), 2, "planning creates the work orders of all operations")
         self.assertEqual(mo_3.state, 'draft')
         self.assertEqual(mo_3.workorder_ids[0].state, 'ready')  # No matter the MO Reservation state, the first WO is always ready
 
@@ -2139,8 +2141,8 @@ class TestMrpOrder(TestMrpCommon, MailCase):
         self.assertEqual(mo_1.product_id, self.product_6)
         self.assertEqual(mo_2.product_id, self.product_6)
         self.assertEqual(len(self.bom_3.operation_ids), 2)
-        self.assertEqual(len(mo_1.workorder_ids), 2)
-        self.assertEqual(len(mo_2.workorder_ids), 2)
+        self.assertEqual(len(mo_1.workorder_ids), 1)
+        self.assertEqual(len(mo_2.workorder_ids), 1)
 
         (mo_1 | mo_2).action_confirm()
         (mo_1 | mo_2).button_plan()
@@ -2186,6 +2188,7 @@ class TestMrpOrder(TestMrpCommon, MailCase):
         mo_form.bom_id = bom
         mo_form.date_start = date_start
         mo = mo_form.save()
+        mo._create_missing_operation_workorders()  # work orders are otherwise created one at a time
 
         mo.workorder_ids[0].duration_expected = 240
         mo.workorder_ids[1].duration_expected = 60
@@ -2363,6 +2366,7 @@ class TestMrpOrder(TestMrpCommon, MailCase):
         mo = Form(self.env['mrp.production'])
         mo.bom_id = bom
         mo = mo.save()
+        mo._create_missing_operation_workorders()  # work orders are otherwise created one at a time
 
         self.assertEqual(list(mo.workorder_ids.mapped("state")), ["ready", "ready"])  # default is ready
 
@@ -2869,6 +2873,7 @@ class TestMrpOrder(TestMrpCommon, MailCase):
 
         self.assertEqual(mo.state, 'draft')
         mo.action_confirm()
+        mo._create_missing_operation_workorders()  # work orders are otherwise created one at a time
 
         wo_1, wo_2, wo_3 = mo.workorder_ids
         self.assertEqual(mo.state, 'confirmed')
@@ -3817,6 +3822,7 @@ class TestMrpOrder(TestMrpCommon, MailCase):
         mo_form = Form(self.env['mrp.production'])
         mo_form.bom_id = self.bom_3
         mo = mo_form.save()
+        mo._create_missing_operation_workorders()  # work orders are otherwise created one at a time
         mo.workorder_ids[1].unlink()
         mo.action_confirm()
         self.assertEqual(mo.state, 'confirmed')
@@ -5392,6 +5398,7 @@ class TestMrpOrder(TestMrpCommon, MailCase):
             'product_qty': 1.0,
         })
         mo.action_confirm()
+        mo._create_missing_operation_workorders()  # work orders are otherwise created one at a time
         cancelled_workorder = mo.workorder_ids.filtered(lambda wo: wo.operation_id == cancelled_operation)
         cancelled_workorder.action_cancel()
         self.assertEqual(cancelled_workorder.state, 'cancel')

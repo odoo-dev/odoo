@@ -19,7 +19,7 @@ registry.category("web_tour.tours").add("test_manufacture_from_bom", {
             run: "click",
         },
         {
-            trigger: 'button[aria-checked="true"]:contains("Draft")',
+            trigger: '.oe_title .o_field_badge[name="state"]:contains("Draft")',
         },
     ],
 });

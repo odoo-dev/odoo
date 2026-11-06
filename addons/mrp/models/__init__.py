@@ -5,6 +5,7 @@ from . import res_config_settings
 from . import mrp_bom
 from . import mrp_routing
 from . import mrp_workcenter
+from . import mrp_manufacturing_line
 from . import mrp_production
 from . import mrp_unbuild
 from . import mrp_workorder

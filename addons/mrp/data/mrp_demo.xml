@@ -35,6 +35,72 @@
             <field name="resource_calendar_id" ref="mrp.mrp_workcenter_calendar"/>
         </record>
 
+        <record id="mrp_workcenter_cutting" model="mrp.workcenter">
+            <field name="name">CNC Cutting</field>
+            <field name="code">CUT</field>
+            <field name="sequence">2</field>
+            <field name="costs_hour">45</field>
+            <field name="resource_calendar_id" ref="mrp.mrp_workcenter_calendar"/>
+        </record>
+
+        <record id="mrp_workcenter_sanding" model="mrp.workcenter">
+            <field name="name">Sanding Station</field>
+            <field name="code">SAND</field>
+            <field name="sequence">3</field>
+            <field name="costs_hour">25</field>
+            <field name="resource_calendar_id" ref="mrp.mrp_workcenter_calendar"/>
+        </record>
+
+        <record id="mrp_workcenter_painting" model="mrp.workcenter">
+            <field name="name">Paint Booth</field>
+            <field name="code">PAINT</field>
+            <field name="sequence">4</field>
+            <field name="costs_hour">35</field>
+            <field name="resource_calendar_id" ref="mrp.mrp_workcenter_calendar"/>
+        </record>
+
+        <record id="mrp_workcenter_quality" model="mrp.workcenter">
+            <field name="name">Quality Control</field>
+            <field name="code">QC</field>
+            <field name="sequence">5</field>
+            <field name="costs_hour">30</field>
+            <field name="resource_calendar_id" ref="mrp.mrp_workcenter_calendar"/>
+        </record>
+
+        <record id="mrp_workcenter_packing" model="mrp.workcenter">
+            <field name="name">Packing</field>
+            <field name="code">PACK</field>
+            <field name="sequence">6</field>
+            <field name="costs_hour">20</field>
+            <field name="resource_calendar_id" ref="mrp.mrp_workcenter_calendar"/>
+        </record>
+
+        <!-- Resource: mrp.manufacturing.line -->
+
+        <record id="mrp_manufacturing_line_woodworking" model="mrp.manufacturing.line">
+            <field name="name">Woodworking Line</field>
+            <field name="sequence">1</field>
+            <field name="color">3</field>
+            <field name="workcenter_ids" eval="[Command.set([
+                ref('mrp_workcenter_cutting'),
+                ref('mrp_workcenter_1'),
+                ref('mrp_workcenter_sanding'),
+                ref('mrp_workcenter_3'),
+            ])]"/>
+        </record>
+
+        <record id="mrp_manufacturing_line_finishing" model="mrp.manufacturing.line">
+            <field name="name">Finishing Line</field>
+            <field name="sequence">2</field>
+            <field name="color">10</field>
+            <field name="workcenter_ids" eval="[Command.set([
+                ref('mrp_workcenter_painting'),
+                ref('mrp_workcenter_2'),
+                ref('mrp_workcenter_quality'),
+                ref('mrp_workcenter_packing'),
+            ])]"/>
+        </record>
+
         <!-- Resource: mrp.bom -->
 
         <record id="mrp_bom_manufacture" model="mrp.bom">
@@ -42,6 +108,7 @@
             <field name="uom_id" ref="uom.product_uom_unit"/>
             <field name="sequence">1</field>
             <field name="produce_delay">10</field>
+            <field name="manufacturing_line_id" ref="mrp_manufacturing_line_woodworking"/>
         </record>
         <record id="mrp_routing_workcenter_0" model="mrp.routing.workcenter">
             <field name="bom_id" ref="mrp_bom_manufacture"/>
@@ -326,6 +393,7 @@
             <field name="product_tmpl_id" ref="product_product_plastic_laminate_product_template"/>
             <field name="uom_id" ref="uom.product_uom_unit"/>
             <field name="sequence">1</field>
+            <field name="manufacturing_line_id" ref="mrp_manufacturing_line_woodworking"/>
         </record>
         <record id="mrp_routing_workcenter_1" model="mrp.routing.workcenter">
             <field name="bom_id" ref="mrp_bom_plastic_laminate"/>

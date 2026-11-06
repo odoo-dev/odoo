@@ -1096,6 +1096,7 @@ class TestMrpProductionBackorder(TestMrpCommon):
         mo = mo_form.save()
         mo.picking_type_id.create_backorder = 'ask'
         mo.action_confirm()
+        mo._create_missing_operation_workorders()  # work orders are otherwise created one at a time
         original_names = mo.workorder_ids.mapped('name')
         self.assertEqual(original_names, ['Cutting Machine', 'Weld Machine'])
 
@@ -1170,6 +1171,7 @@ class TestMrpWorkorderBackorder(TransactionCase):
         mo = mo_form.save()
         mo.picking_type_id.create_backorder = 'ask'
         mo.action_confirm()
+        mo._create_missing_operation_workorders()  # work orders are otherwise created one at a time
         op_1, op_2 = mo.workorder_ids
         with Form(mo) as fmo:
             fmo.qty_producing = 10

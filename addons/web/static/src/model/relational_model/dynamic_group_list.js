@@ -1,8 +1,9 @@
 //@ts-check
 
 import { Domain } from "@web/core/domain";
+import { x2ManyCommands } from "@web/core/orm_plugin";
 import { DynamicList } from "./dynamic_list";
-import { getGroupServerValue } from "./utils";
+import { getBasicEvalContext, getFieldsSpec, getGroupServerValue } from "./utils";
 
 export const MOVABLE_RECORD_TYPES = ["char", "boolean", "integer", "selection", "many2one"];
 
@@ -334,6 +335,9 @@ export class DynamicGroupList extends DynamicList {
         if (!recordsToUpdate.length) {
             return resequenceTargetGroup();
         }
+        if (["many2many", "one2many"].includes(targetGroup.groupByField.type)) {
+            return this._moveRecordsToX2ManyGroup(moved, refId, targetGroup);
+        }
 
         // step 1: move the records to their new position
         const sourceGroups = new Set(moved.map(({ group }) => group));
@@ -381,6 +385,106 @@ export class DynamicGroupList extends DynamicList {
         });
         if (!targetGroup.isFolded) {
             proms.push(resequenceTargetGroup());
+        }
+        return Promise.all(proms);
+    }
+
+    /**
+     * Moves records to a group of a x2many groupby. A record is displayed in the
+     * group of each of its related records: moving it removes the related record
+     * of its origin group from the field and adds the one of the target group.
+     * The record thus leaves its origin group, but stays in the other ones.
+     *
+     * @param {{ record: RelationalRecord, group: Group, index: number }[]} moved
+     * @param {string|null} refId
+     * @param {Group} targetGroup
+     */
+    async _moveRecordsToX2ManyGroup(moved, refId, targetGroup) {
+        const fieldName = targetGroup.groupByField.name;
+        const movedIds = moved.map(({ record }) => record.id);
+        const toMove = moved.filter(({ group }) => group !== targetGroup);
+
+        // step 1: move the records to their new position; a record already in the
+        // target group (through another related record) is only removed from its origin
+        const sourceGroups = new Set(moved.map(({ group }) => group));
+        const groupsToReload = [...sourceGroups].filter(
+            (group) =>
+                group !== targetGroup && group.list.count > group.list.offset + group.list.limit
+        );
+        for (const group of sourceGroups) {
+            group._removeRecords(movedIds);
+        }
+        // computed after the removals, as the target group may itself be a source group
+        const targetResIds = new Set(targetGroup.list.records.map((r) => r.resId));
+        const refIndex = targetGroup.list.records.findIndex((r) => r.id === refId);
+        const added = [];
+        for (const { record } of moved) {
+            if (!targetResIds.has(record.resId)) {
+                targetResIds.add(record.resId);
+                targetGroup._addRecord(record, refIndex + 1 + added.length);
+                added.push(record.id);
+            }
+        }
+        const revert = () => {
+            targetGroup._removeRecords(added);
+            for (const { record, group, index } of moved) {
+                group._addRecord(record, index);
+            }
+        };
+
+        // step 2: unlink the origin group value and link the target group one, with
+        // the commands of a record gathered if it was moved from several groups
+        const commandsByResId = new Map();
+        for (const { record, group } of toMove) {
+            if (!commandsByResId.has(record.resId)) {
+                commandsByResId.set(record.resId, []);
+            }
+            if (group.value) {
+                commandsByResId.get(record.resId).push(x2ManyCommands.unlink(group.value));
+            }
+        }
+        const resIds = [...commandsByResId.keys()];
+        const valsList = resIds.map((resId) => {
+            const commands = commandsByResId.get(resId);
+            if (targetGroup.value) {
+                commands.push(x2ManyCommands.link(targetGroup.value));
+            }
+            return { [fieldName]: commands };
+        });
+        const [{ activeFields, fields, config }] = toMove.map(({ record }) => record);
+        const kwargs = {
+            context: this.context,
+            specification: getFieldsSpec(activeFields, fields, getBasicEvalContext(config)),
+        };
+        let values;
+        try {
+            values = await this.model.orm.webSaveMulti(this.resModel, resIds, valsList, kwargs);
+        } catch (e) {
+            revert();
+            throw e;
+        }
+        // update every card of the saved records, including the ones in other groups
+        const valuesById = Object.fromEntries(values.map((vals) => [vals.id, vals]));
+        for (const record of this.records) {
+            if (record.resId in valuesById) {
+                record._setData(valuesById[record.resId]);
+            }
+        }
+        for (const { record } of toMove) {
+            if (record.resId in valuesById) {
+                record._setData(valuesById[record.resId]);
+            }
+        }
+
+        // step 3: reload the truncated source groups and resequence the target group
+        const proms = groupsToReload.map((group) => {
+            const { offset, limit, orderBy, domain } = group.list;
+            return group.list._load(offset, limit, orderBy, domain);
+        });
+        if (!targetGroup.isFolded && added.length) {
+            proms.push(
+                targetGroup.list._resequence(targetGroup.list.records, this.resModel, added, refId)
+            );
         }
         return Promise.all(proms);
     }

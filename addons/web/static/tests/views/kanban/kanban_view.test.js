@@ -1357,7 +1357,7 @@ test("Open new card in form view, without reloading the kanban view", async () =
 });
 
 test.tags("desktop");
-test("kanban grouped by many2many: a multi drag leaves the other columns alone", async () => {
+test("kanban grouped by many2many: a multi drag moves the cards to the target column", async () => {
     Partner._records[0].category_ids = [6]; // yop, int_field 10
     Partner._records[1].category_ids = [6]; // blip, int_field 9
     Partner._records[2].category_ids = [6]; // gnap, int_field 17
@@ -1398,17 +1398,16 @@ test("kanban grouped by many2many: a multi drag leaves the other columns alone",
     await contains(".o_kanban_group:eq(1) .o_kanban_record:eq(0)").click();
     expect(".o_record_selected").toHaveCount(3);
 
-    // a record can't change column when grouped by a many2many, so only the two selected
-    // cards of the dragged column come along: the third one is left where it is, and no
-    // record is written
+    // the card of the other column comes along: its column value is replaced by the
+    // one of the target column, while the other columns are left alone
     await contains(".o_kanban_group:eq(0) .o_kanban_record:eq(1)").dragAndDrop(
         ".o_kanban_group:eq(0) .o_kanban_record:eq(2)"
     );
 
-    expect.verifySteps([["web_resequence", [3, 2, 1]]]);
-    expect(getKanbanRecordTexts(0)).toEqual(["gnap", "blip", "yop"]);
-    expect(getKanbanRecordTexts(1)).toEqual(["blip"]);
-    expect(".o_record_selected").toHaveCount(3);
+    expect.verifySteps(["web_save_multi", ["web_resequence", [3, 2, 1, 4]]]);
+    expect(getKanbanRecordTexts(0)).toEqual(["gnap", "blip", "yop", "blip"]);
+    expect(getKanbanRecordTexts(1)).toEqual([]);
+    expect(MockServer.env["partner"].find((p) => p.id === 4).category_ids).toEqual([6]);
 });
 
 test("prevent deletion when grouped by many2many field", async () => {
@@ -2157,9 +2156,13 @@ test("prevent drag and drop if grouped by date/datetime field", async () => {
 });
 
 test.tags("desktop");
-test("prevent drag and drop if grouped by many2many field", async () => {
+test("drag and drop records when grouped by many2many field", async () => {
     Partner._records[0].category_ids = [6, 7];
     Partner._records[3].category_ids = [7];
+
+    onRpc("web_save_multi", ({ args }) => {
+        expect.step(["web_save_multi", args[0], args[1]]);
+    });
 
     await mountView({
         type: "kanban",
@@ -2172,58 +2175,56 @@ test("prevent drag and drop if grouped by many2many field", async () => {
                     </t>
                 </templates>
             </kanban>`,
-        searchViewArch: `
-            <search>
-                <filter name="group_by_state" domain="[]" string="GroupBy State" context="{ 'group_by': 'state' }"/>
-            </search>`,
         groupBy: ["category_ids"],
     });
 
-    expect(".o_kanban_group").toHaveCount(2);
-    expect(".o_kanban_group:first-child .o_column_title:first").toHaveText("gold\n(2)", {
-        message: "first column should have correct title",
-    });
-    expect(".o_kanban_group:last-child .o_column_title:first").toHaveText("silver\n(3)", {
-        message: "second column should have correct title",
-    });
-    expect(".o_kanban_group:first-child .o_kanban_record").toHaveCount(2);
-    expect(".o_kanban_group:last-child .o_kanban_record").toHaveCount(3);
+    expect(queryAllTexts(".o_kanban_group .o_column_title")).toEqual(["gold\n(2)", "silver\n(3)"]);
+    expect(getKanbanRecordTexts(0)).toEqual(["yop", "blip"]);
+    expect(getKanbanRecordTexts(1)).toEqual(["yop", "gnap", "blip"]);
 
-    // drag&drop a record in another column
-    await contains(".o_kanban_group:first-child .o_kanban_record").dragAndDrop(
-        ".o_kanban_group:nth-child(2)"
+    // drag&drop blip (gold) in silver: gold is replaced by silver on the record
+    await contains(".o_kanban_group:eq(0) .o_kanban_record:eq(1)").dragAndDrop(
+        ".o_kanban_group:eq(1)"
     );
-
-    expect(".o_kanban_group:first-child .o_kanban_record").toHaveCount(2);
-    expect(".o_kanban_group:last-child .o_kanban_record").toHaveCount(3);
-
-    // Sanity check: groupby a non m2m field and check dragdrop is working
-    await toggleSearchBarMenu();
-    await toggleMenuItem("GroupBy State");
-
-    expect(".o_kanban_group").toHaveCount(3);
-    expect(queryAllTexts(".o_kanban_group .o_column_title")).toEqual([
-        "ABC\n(1)",
-        "DEF\n(1)",
-        "GHI\n(2)",
+    expect.verifySteps([
+        [
+            "web_save_multi",
+            [2],
+            [
+                {
+                    category_ids: [
+                        [3, 6, false],
+                        [4, 7, false],
+                    ],
+                },
+            ],
+        ],
     ]);
-    expect(".o_kanban_group:first-child .o_kanban_record").toHaveCount(1, {
-        message: "first column should have 1 record",
-    });
-    expect(".o_kanban_group:last-child .o_kanban_record").toHaveCount(2, {
-        message: "last column should have 2 records",
-    });
+    expect(queryAllTexts(".o_kanban_group .o_column_title")).toEqual(["gold\n(1)", "silver\n(4)"]);
+    expect(getKanbanRecordTexts(0)).toEqual(["yop"]);
+    expect(getKanbanRecordTexts(1)).toEqual(["yop", "gnap", "blip", "blip"]);
 
-    await contains(".o_kanban_group:first-child .o_kanban_record").dragAndDrop(
-        ".o_kanban_group:last-child"
-    );
-
-    expect(".o_kanban_group:first-child .o_kanban_record").toHaveCount(0, {
-        message: "first column should not contain records",
-    });
-    expect(".o_kanban_group:last-child .o_kanban_record").toHaveCount(3, {
-        message: "last column should contain 3 records",
-    });
+    // drag&drop yop (gold) in silver, where it already is: it only leaves gold
+    await contains(".o_kanban_group:eq(0) .o_kanban_record").dragAndDrop(".o_kanban_group:eq(1)");
+    expect.verifySteps([
+        [
+            "web_save_multi",
+            [1],
+            [
+                {
+                    category_ids: [
+                        [3, 6, false],
+                        [4, 7, false],
+                    ],
+                },
+            ],
+        ],
+    ]);
+    expect(getKanbanRecordTexts(0)).toEqual([]);
+    expect(getKanbanRecordTexts(1)).toEqual(["yop", "gnap", "blip", "blip"]);
+    const partners = MockServer.env["partner"];
+    expect(partners.find((p) => p.id === 1).category_ids).toEqual([7]);
+    expect(partners.find((p) => p.id === 2).category_ids).toEqual([7]);
 });
 
 test("completely prevent drag and drop if records_draggable set to false", async () => {

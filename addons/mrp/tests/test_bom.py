@@ -182,6 +182,7 @@ class TestBoM(TestMrpCommon):
         mrp_order_form.bom_id = self.env['mrp.bom']  # Check form
         mrp_order_form.bom_id = test_bom
         mrp_order = mrp_order_form.save()
+        mrp_order._create_missing_operation_workorders()  # work orders are otherwise created one at a time
         self.assertEqual(mrp_order.bom_id, test_bom)
         self.assertEqual(len(mrp_order.workorder_ids), 2)
         self.assertEqual(mrp_order.workorder_ids.operation_id, test_bom.operation_ids[:2])
@@ -191,6 +192,7 @@ class TestBoM(TestMrpCommon):
         mrp_order_form = Form(self.env['mrp.production'])
         mrp_order_form.product_id = self.product_7_2
         mrp_order = mrp_order_form.save()
+        mrp_order._create_missing_operation_workorders()  # work orders are otherwise created one at a time
         self.assertEqual(mrp_order.bom_id, test_bom)
         self.assertEqual(len(mrp_order.workorder_ids), 2)
         self.assertEqual(mrp_order.workorder_ids.operation_id, test_bom.operation_ids[0] | test_bom.operation_ids[2])
@@ -1953,6 +1955,7 @@ class TestBoM(TestMrpCommon):
         mo_form.bom_id = bom
         mo_1 = mo_form.save()
         mo_1.action_confirm()
+        mo_1._create_missing_operation_workorders()  # work orders are otherwise created one at a time
         self.assertRecordValues(mo_1.move_raw_ids, [
             {'operation_id': bom.operation_ids[0].id, 'workorder_id': mo_1.workorder_ids[0].id},
             {'operation_id': bom.operation_ids[1].id, 'workorder_id': mo_1.workorder_ids[1].id},
@@ -2548,6 +2551,7 @@ class TestBoM(TestMrpCommon):
         mo_form = Form(self.env['mrp.production'])
         mo_form.product_id = self.product_1
         mo_order = mo_form.save()
+        mo_order._create_missing_operation_workorders()  # work orders are otherwise created one at a time
 
         # no never values, so only the first bom line should be used
         self.assertEqual(len(mo_order.move_raw_ids), 1, "Only one move with no never_product_template_attribute_value_ids should be created")
@@ -2559,6 +2563,7 @@ class TestBoM(TestMrpCommon):
 
         # one never values, the two first bom line should match
         mo_order.never_product_template_attribute_value_ids = tmpl_attr_line_radio.product_template_value_ids[0]
+        mo_order._create_missing_operation_workorders()  # work orders are otherwise created one at a time
         self.assertEqual(len(mo_order.move_raw_ids), 2)
         self.assertEqual(mo_order.move_raw_ids.product_id, self.product_2 + self.product_3)
         self.assertEqual(len(mo_order.workorder_ids), 2)
@@ -2568,6 +2573,7 @@ class TestBoM(TestMrpCommon):
 
         # two never values, the first and fourth bom line should match
         mo_order.never_product_template_attribute_value_ids = tmpl_attr_line_radio.product_template_value_ids[1] + tmpl_attr_line_radio.product_template_value_ids[2]
+        mo_order._create_missing_operation_workorders()  # work orders are otherwise created one at a time
         self.assertEqual(len(mo_order.move_raw_ids), 3)
         self.assertEqual(mo_order.move_raw_ids.product_id, self.product_2 + product + self.product_8)
         self.assertEqual(len(mo_order.workorder_ids), 3)
@@ -2698,25 +2704,26 @@ class TestBoM(TestMrpCommon):
         mo_form.product_qty = 1.0
         mo_form.bom_id = bom_1
         mo = mo_form.save()
-        self.assertEqual(mo.workorder_ids.mapped('name'), ['op1', 'op2'])
+        # only the first operation gets its work order upfront
+        self.assertEqual(mo.workorder_ids.mapped('name'), ['op1'])
         # test simple on change
         with Form(mo) as mo_form:
             mo_form.bom_id = bom_2
-        self.assertEqual(mo.workorder_ids.mapped('name'), ['op3', 'op4'])
+        self.assertEqual(mo.workorder_ids.mapped('name'), ['op3'])
         # test double onchange
         with Form(mo) as mo_form:
             mo_form.bom_id = bom_1
             mo_form.bom_id = bom_3
-        self.assertEqual(mo.workorder_ids.mapped('name'), ['op5', 'op6'])
+        self.assertEqual(mo.workorder_ids.mapped('name'), ['op5'])
         # add a new operation and check that it is not removed on bom change
         with Form(mo) as mo_form:
             with mo_form.workorder_ids.new() as wo_form:
                 wo_form.name = 'new op'
                 wo_form.workcenter_id = self.workcenter_2
-        self.assertEqual(mo.workorder_ids.mapped('name'), ['op5', 'op6', 'new op'])
+        self.assertEqual(mo.workorder_ids.mapped('name'), ['op5', 'new op'])
         with Form(mo) as mo_form:
             mo_form.bom_id = bom_2
-        self.assertEqual(set(mo.workorder_ids.mapped('name')), {'op3', 'op4', 'new op'})
+        self.assertEqual(set(mo.workorder_ids.mapped('name')), {'op3', 'new op'})
 
     def test_archive_operation(self):
         """ Checks that archiving an operation having both a bom line and a byproduct line linked to it properly unlinks them.

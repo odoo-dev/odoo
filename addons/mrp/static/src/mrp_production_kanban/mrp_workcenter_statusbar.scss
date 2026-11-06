@@ -1,0 +1,12 @@
+// The active work centers stay clickable (to take the order out of them), while
+// the statusbar only highlights its current step when disabled.
+.o_field_statusbar > .o_statusbar_status.o_mrp_workcenter_statusbar {
+    .o_arrow_button.o_arrow_button_current:not(.d-none) {
+        --btn-bg: var(--o-component-active-bg);
+        --btn-color: var(--btn-active-color);
+        --btn-hover-bg: var(--o-component-active-bg);
+        --btn-disabled-bg: var(--o-component-active-bg);
+        background-color: var(--o-component-active-bg);
+        color: var(--btn-active-color);
+    }
+}

@@ -450,7 +450,9 @@ export class KanbanRenderer extends Component {
     }
 
     isMovableField(field) {
-        return MOVABLE_RECORD_TYPES.includes(field.type);
+        // records grouped by a x2many field are moved from the origin group's related
+        // record to the target group's one
+        return [...MOVABLE_RECORD_TYPES, "many2many", "one2many"].includes(field.type);
     }
 
     // ------------------------------------------------------------------------

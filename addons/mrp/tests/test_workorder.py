@@ -171,6 +171,7 @@ class TestWorkorder(TestMrpCommon):
         mo_form.product_qty = 10
         mo = mo_form.save()
         mo.action_confirm()
+        mo._create_missing_operation_workorders()  # work orders are otherwise created one at a time
         original_names = mo.workorder_ids.mapped('name')
         self.assertEqual(original_names, ['Cutting Machine', 'Weld Machine'])
 

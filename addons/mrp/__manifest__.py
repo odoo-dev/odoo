@@ -26,6 +26,7 @@
         'views/stock_move_views.xml',
         'views/mrp_workorder_views.xml',
         'views/mrp_workcenter_views.xml',
+        'views/mrp_manufacturing_line_views.xml',
         'views/mrp_bom_views.xml',
         'views/mrp_production_views.xml',
         'views/mrp_routing_views.xml',

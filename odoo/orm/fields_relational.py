@@ -1451,8 +1451,9 @@ class Many2many(_RelationalMulti):
             group[id1].append(id2)
             corecord_ids.add(id2)
 
-        # store result in cache
-        values = [tuple(group[id_]) for id_ in records._ids]
+        # store result in cache; the relation table may hold duplicate pairs when
+        # it is not a pure relation table (e.g. the table of a model)
+        values = [tuple(unique(group[id_])) for id_ in records._ids]
         self._insert_cache(records, values)
 
     def write_batch(self, records_commands_list, create=False):

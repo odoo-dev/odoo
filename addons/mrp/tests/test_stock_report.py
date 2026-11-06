@@ -670,6 +670,7 @@ class TestMrpStockReports(TestReportsCommon):
             'product_id': expedition_33.id,
         })
         mo.action_confirm()
+        mo._create_missing_operation_workorders()  # work orders are otherwise created one at a time
         mo.workorder_ids.duration = 10
 
         overview_values = self.env['report.mrp.report_mo_overview'].get_report_values(mo.id)

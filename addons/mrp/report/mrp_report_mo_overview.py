@@ -274,6 +274,34 @@ class ReportMrpReport_Mo_Overview(models.AbstractModel):
             total_current_time += wo_duration if is_workorder_started else workorder.duration_expected
             total_mo_cost += currency.round(mo_cost)
 
+        # the next operations don't have their work order yet (they are created one
+        # at a time): estimate them
+        if production.state != 'cancel':
+            existing_operations = production.workorder_ids.operation_id
+            upcoming = [op for op in production._get_operations_to_process() if op not in existing_operations]
+            for index, operation in enumerate(upcoming, start=len(operations)):
+                duration = production._get_operation_duration_expected(operation)
+                mo_cost = duration / 60.0 * operation.workcenter_id.costs_hour
+                operations.append({
+                    'level': level,
+                    'index': f"{current_index}W{index}",
+                    'model': 'mrp.workorder',  # no id: no work order to open yet
+                    'name': operation.name,
+                    'state': 'ready',
+                    'formatted_state': self.env._("Upcoming"),
+                    'quantity': duration,
+                    'quantity_decorator': False,
+                    'uom_name': "",
+                    'production_id': production.id,
+                    'unit_cost': mo_cost / (duration or 1),
+                    'mo_cost': mo_cost,
+                    'currency_id': currency.id,
+                    'currency': currency,
+                })
+                total_expected_time += duration
+                total_current_time += duration
+                total_mo_cost += currency.round(mo_cost)
+
         return {
             'summary': {
                 'index': f"{current_index}W",

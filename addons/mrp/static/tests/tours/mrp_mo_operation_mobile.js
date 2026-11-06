@@ -22,7 +22,7 @@ registry.category("web_tour.tours").add("test_basic_mo_process_on_mobile", {
         },
         {
             content: "Wait for the MO be done",
-            trigger: ".o_statusbar_status button.dropdown-toggle:contains('Done')",
+            trigger: ".oe_title .o_field_badge[name=state]:contains('Done')",
         },
     ],
 });

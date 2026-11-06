@@ -17,6 +17,9 @@ class MrpRoutingWorkcenter(models.Model):
     name = fields.Char('Operation', required=True, copy=True)
     active = fields.Boolean(default=True)
     workcenter_id = fields.Many2one('mrp.workcenter', 'Work Center', required=True, check_company=True, tracking=True, index=True)
+    is_outside_manufacturing_line = fields.Boolean(
+        compute='_compute_is_outside_manufacturing_line',
+        help="The work center is not one of the manufacturing line of the bill of materials")
     sequence = fields.Integer(
         'Sequence', default=100,
         help="Gives the sequence order when displaying a list of routing Work Centers.")
@@ -119,6 +122,13 @@ class MrpRoutingWorkcenter(models.Model):
             operation.cycle_number = float_round(quantity / capacity, precision_digits=0, rounding_method="UP")
             operation.time_total = setup + cleanup + operation.cycle_number * operation.time_cycle * 100.0 / (workcenter.time_efficiency or 100.0)
             operation.show_time_total = operation.cycle_number > 1 or not float_is_zero(setup + cleanup, precision_digits=0)
+
+    @api.depends('workcenter_id', 'bom_id.manufacturing_line_id.workcenter_ids')
+    def _compute_is_outside_manufacturing_line(self):
+        for operation in self:
+            line = operation.bom_id.manufacturing_line_id
+            operation.is_outside_manufacturing_line = bool(
+                line and operation.workcenter_id and operation.workcenter_id not in line.workcenter_ids)
 
     def _compute_workorder_count(self):
         data = self.env['mrp.workorder']._read_group([

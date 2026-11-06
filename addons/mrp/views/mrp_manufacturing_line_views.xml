@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="mrp_manufacturing_line_view_list" model="ir.ui.view">
+        <field name="name">mrp.manufacturing.line.list</field>
+        <field name="model">mrp.manufacturing.line</field>
+        <field name="arch" type="xml">
+            <list string="Manufacturing Lines" editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="workcenter_ids" widget="many2many_tags"/>
+                <field name="color" widget="color_picker"/>
+                <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="mrp_manufacturing_line_view_form" model="ir.ui.view">
+        <field name="name">mrp.manufacturing.line.form</field>
+        <field name="model">mrp.manufacturing.line</field>
+        <field name="arch" type="xml">
+            <form string="Manufacturing Line">
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="e.g. Assembly Line"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="workcenter_ids" widget="many2many_tags"/>
+                        </group>
+                        <group>
+                            <field name="sequence"/>
+                            <field name="color" widget="color_picker"/>
+                            <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}"/>
+                            <field name="active" invisible="1"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="mrp_manufacturing_line_view_search" model="ir.ui.view">
+        <field name="name">mrp.manufacturing.line.search</field>
+        <field name="model">mrp.manufacturing.line</field>
+        <field name="arch" type="xml">
+            <search string="Manufacturing Lines">
+                <field name="name"/>
+                <field name="workcenter_ids"/>
+                <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="mrp_manufacturing_line_view_kanban" model="ir.ui.view">
+        <field name="name">mrp.manufacturing.line.kanban</field>
+        <field name="model">mrp.manufacturing.line</field>
+        <field name="arch" type="xml">
+            <kanban highlight_color="color" action="action_open_productions" type="object" create="0" sample="1">
+                <templates>
+                    <t t-name="menu">
+                        <div class="o_kanban_card_manage_settings row">
+                            <div role="menuitem" aria-haspopup="true" class="col-6">
+                                <field name="color" widget="kanban_color_picker"/>
+                            </div>
+                            <div role="menuitem" class="col-6">
+                                <a class="dropdown-item" role="menuitem" type="open">Settings</a>
+                            </div>
+                        </div>
+                    </t>
+                    <t t-name="card">
+                        <main>
+                            <span class="text-truncate d-block fs-4 fw-bold pe-4" t-att-title="record.name.value"><field name="name"/></span>
+                            <div class="d-flex gap-2 align-items-baseline text-muted min-w-0" t-if="record.workcenter_ids.raw_value.length">
+                                <i class="oi" data-icon="precision_manufacturing" title="Work Centers"/>
+                                <field name="workcenter_ids" widget="many2many_tags" class="text-truncate"/>
+                            </div>
+                        </main>
+                        <footer>
+                            <div class="d-flex align-items-center gap-2 text-muted">
+                                <span class="d-flex gap-1 align-items-baseline" title="Manufacturing Orders to process">
+                                    <i class="oi oi-filled" data-icon="factory"/>
+                                    <span><field name="production_count" class="o_value"/> Manufacturing Orders</span>
+                                </span>
+                            </div>
+                            <div class="d-flex ms-auto align-items-center gap-2">
+                                <span t-if="record.workorder_progress_count.raw_value" class="badge rounded-pill text-bg-info" title="Work orders in progress">
+                                    <field name="workorder_progress_count"/>
+                                </span>
+                                <span t-if="record.workorder_late_count.raw_value" class="badge rounded-pill text-bg-danger" title="Late work orders">
+                                    <field name="workorder_late_count"/>
+                                </span>
+                            </div>
+                        </footer>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="mrp_manufacturing_line_action" model="ir.actions.act_window">
+        <field name="name">Manufacturing Lines</field>
+        <field name="res_model">mrp.manufacturing.line</field>
+        <field name="view_mode">list,form</field>
+        <field name="view_id" ref="mrp_manufacturing_line_view_list"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new manufacturing line
+            </p><p>
+                A manufacturing line groups work centers to follow its manufacturing orders together.
+            </p>
+        </field>
+    </record>
+
+    <record id="mrp_manufacturing_line_kanban_action" model="ir.actions.act_window">
+        <field name="name">Manufacturing Lines</field>
+        <field name="path">manufacturing-lines</field>
+        <field name="res_model">mrp.manufacturing.line</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="view_id" ref="mrp_manufacturing_line_view_kanban"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No manufacturing line yet
+            </p><p>
+                Define manufacturing lines in the configuration to group their work centers.
+            </p>
+        </field>
+    </record>
+
+    <record id="mrp_production_overview_server_action" model="ir.actions.server">
+        <field name="name">Manufacturing Orders</field>
+        <field name="model_id" ref="model_mrp_manufacturing_line"/>
+        <field name="state">code</field>
+        <field name="code">action = model.action_open_overview()</field>
+    </record>
+
+    <menuitem id="menu_mrp_manufacturing_line"
+        action="mrp_manufacturing_line_action"
+        groups="-group_mrp_routings"
+        parent="menu_mrp_configuration"
+        sequence="91"/>
+
+    <menuitem id="menu_mrp_manufacturing_line_overview"
+        action="mrp_manufacturing_line_kanban_action"
+        groups="-group_mrp_routings"
+        parent="menu_mrp_manufacturing"
+        sequence="30"/>
+</odoo>

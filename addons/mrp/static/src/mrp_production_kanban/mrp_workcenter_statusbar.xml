@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="mrp.MrpWorkcenterStatusbar">
+        <div class="o_statusbar_status o_mrp_workcenter_statusbar" role="group" aria-label="Work Centers">
+            <t t-foreach="this.items" t-as="item" t-key="item.id">
+                <div class="o_arrow_button_wrap d-flex">
+                    <button type="button"
+                            class="btn btn-secondary o_arrow_button"
+                            t-att-class="{
+                                o_first: item_first,
+                                o_last: item_last,
+                                o_arrow_button_current: item.isActive,
+                            }"
+                            t-att-disabled="this.isDisabled"
+                            t-att-aria-pressed="item.isActive.toString()"
+                            t-att-data-value="item.id"
+                            t-att-title="item.isActive ? 'Done at this work center' : 'Send to this work center'"
+                            t-out="item.label"
+                            t-on-click="() => this.toggle(item)"/>
+                </div>
+            </t>
+        </div>
+    </t>
+</templates>

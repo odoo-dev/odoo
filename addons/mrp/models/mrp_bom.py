@@ -24,6 +24,10 @@ class MrpBom(models.Model):
         return self.env['uom.uom'].search([], limit=1, order='id').id
 
     code = fields.Char('Reference')
+    manufacturing_line_id = fields.Many2one(
+        'mrp.manufacturing.line', 'Manufacturing Line', check_company=True, index='btree_not_null',
+        help="Manufacturing line of the orders of this bill of materials")
+    has_manufacturing_lines = fields.Boolean(compute='_compute_has_manufacturing_lines')
     active = fields.Boolean('Active', default=True)
     type = fields.Selection([
         ('normal', 'Manufacture this product'),
@@ -101,6 +105,10 @@ class MrpBom(models.Model):
         'product_tmpl_id.attribute_line_ids.attribute_id.create_variant',
         'product_tmpl_id.attribute_line_ids.product_template_value_ids.ptav_active',
     )
+    def _compute_has_manufacturing_lines(self):
+        # manufacturing lines are used as soon as one is defined
+        self.has_manufacturing_lines = bool(self.env['mrp.manufacturing.line'].search_count([], limit=1))
+
     def _compute_possible_product_template_attribute_value_ids(self):
         for bom in self:
             bom.possible_product_template_attribute_value_ids = bom.product_tmpl_id.valid_product_template_attribute_line_ids.product_template_value_ids._only_active()

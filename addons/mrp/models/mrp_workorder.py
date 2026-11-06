@@ -7,7 +7,7 @@ from collections import defaultdict
 from odoo import Command, _, api, fields, models
 from odoo.fields import Domain
 from odoo.exceptions import UserError, ValidationError
-from odoo.tools import float_is_zero, float_round
+from odoo.tools import SQL, float_is_zero, float_round
 from odoo.tools.date_utils import sum_intervals
 from odoo.tools.intervals import Intervals
 
@@ -31,7 +31,7 @@ class MrpWorkorder(models.Model):
     sequence = fields.Integer("Sequence", compute='_compute_sequence', store=True, readonly=False, precompute=True)
     barcode = fields.Char(compute='_compute_barcode', store=True)
     workcenter_id = fields.Many2one(
-        'mrp.workcenter', 'Work Center', required=True, index=True, tracking=True,
+        'mrp.workcenter', 'Work Center', index=True, tracking=True, ondelete='restrict',
         group_expand='_read_group_workcenter_id', check_company=True)
     working_state = fields.Selection(
         string='Workcenter Status', related='workcenter_id.working_state') # technical: used in views only
@@ -39,7 +39,7 @@ class MrpWorkorder(models.Model):
     product_tracking = fields.Selection(related="product_id.tracking")
     uom_id = fields.Many2one(related='production_id.uom_id')
     product_variant_attributes = fields.Many2many('product.template.attribute.value', related='product_id.product_template_attribute_value_ids')
-    production_id = fields.Many2one('mrp.production', 'Manufacturing Order', required=True, check_company=True, readonly=True, index='btree')
+    production_id = fields.Many2one('mrp.production', 'Manufacturing Order', required=True, check_company=True, readonly=True, index='btree', ondelete='cascade')
     production_lot_producing_id = fields.Many2many('stock.lot', related="production_id.lot_producing_ids")
     production_availability = fields.Selection(
         string='Stock Availability', readonly=True,
@@ -260,6 +260,8 @@ class MrpWorkorder(models.Model):
             elif wo.date_start:
                 if not wo.date_finished:
                     wo.date_finished = wo._calculate_date_finished()
+                if not wo.workcenter_id:
+                    continue
                 wo.leave_id = wo.env['resource.calendar.leaves'].create({
                     'name': wo.display_name,
                     'calendar_id': wo.workcenter_id.resource_calendar_id.id,
@@ -310,6 +312,7 @@ class MrpWorkorder(models.Model):
 
         self.end_all()
         res = super().unlink()
+        self.env['mrp.production'].invalidate_model(['workcenter_ids'])
         # We need to go through `_action_confirm` for all workorders of the current productions to
         # make sure the links between them are correct (`next_work_order_id` could be obsolete now).
         mo_dirty.workorder_ids._action_confirm()
@@ -456,7 +459,7 @@ class MrpWorkorder(models.Model):
 
     def _calculate_date_finished(self, date_start=False, new_workcenter=False, compute_leaves=False):
         workcenter = new_workcenter or self.workcenter_id
-        if workcenter.resource_calendar_id._is_flexible():
+        if not workcenter.resource_calendar_id or workcenter.resource_calendar_id._is_flexible():
             duration_in_seconds = self.duration_expected * 60
             return (date_start or self.date_start) + timedelta(seconds=duration_in_seconds)
         return workcenter.resource_calendar_id.plan_hours(
@@ -479,7 +482,7 @@ class MrpWorkorder(models.Model):
                               "You should unplan the Manufacturing Order instead in order to unplan all the linked operations."))
 
     def _calculate_duration_expected(self, date_start=False, date_finished=False):
-        if self.workcenter_id.resource_calendar_id._is_flexible():
+        if not self.workcenter_id.resource_calendar_id or self.workcenter_id.resource_calendar_id._is_flexible():
             return ((date_finished or self.date_finished) - (date_start or self.date_start)).total_seconds() / 60
         interval = self.workcenter_id.resource_calendar_id.get_work_duration_data(
             date_start or self.date_start, date_finished or self.date_finished,
@@ -550,12 +553,66 @@ class MrpWorkorder(models.Model):
             workorder.duration_expected = workorder._get_duration_expected()
             if workorder.date_start:
                 workorder.with_context(bypass_duration_calculation=True).date_finished = workorder._calculate_date_finished(new_workcenter=new_workcenter)
-
+        if values.get('state') == 'done':
+            self._create_next_operation_workorders()
+        if 'workcenter_id' in values or 'state' in values:
+            self._invalidate_production_workcenters()
         return res
+
+    def _create_next_operation_workorders(self):
+        """ Create the work order of the operation following the one of each
+        work order (in the bill of materials), if it doesn't exist yet: work
+        orders are created one at a time, as the previous ones are done. """
+        vals_list = []
+        for production, workorders in self.filtered('operation_id').grouped('production_id').items():
+            if production.state in ('done', 'cancel'):
+                continue
+            operations = list(production._get_operations_to_process())
+            existing = production.workorder_ids.operation_id
+            for workorder in workorders:
+                if workorder.operation_id not in operations:
+                    continue
+                index = operations.index(workorder.operation_id)
+                next_operation = operations[index + 1] if index + 1 < len(operations) else False
+                if not next_operation or next_operation in existing:
+                    continue
+                existing |= next_operation
+                vals_list.append({
+                    'name': next_operation.name,
+                    'production_id': production.id,
+                    'workcenter_id': next_operation.workcenter_id.id,
+                    'uom_id': production.uom_id.id,
+                    'operation_id': next_operation.id,
+                    'state': 'ready',
+                })
+        if vals_list:
+            # created after the confirmation of their production
+            self.create(vals_list)._set_cost_mode()
+
+    def init(self):
+        super().init()
+        # relation of `mrp.production.workcenter_ids`: the work centers of the
+        # work orders still to process
+        self.env.cr.execute(SQL("""
+            CREATE OR REPLACE VIEW mrp_production_workcenter_rel AS (
+                SELECT production_id, workcenter_id
+                  FROM mrp_workorder
+                 WHERE workcenter_id IS NOT NULL
+                   AND state NOT IN ('done', 'cancel')
+            )
+        """))
+
+    def _invalidate_production_workcenters(self):
+        """ `mrp.production.workcenter_ids` is a many2many whose relation is a
+        view on the table of work orders: the ORM can't know that changing work
+        orders changes it, so flush them and drop the cached values. """
+        self.flush_model(['production_id', 'workcenter_id', 'state'])
+        self.env['mrp.production'].invalidate_model(['workcenter_ids'])
 
     @api.model_create_multi
     def create(self, vals_list):
         res = super().create(vals_list)
+        res._invalidate_production_workcenters()
 
         # resequence the workorders if necessary
         for mo in res.mapped('production_id'):
@@ -631,6 +688,10 @@ class MrpWorkorder(models.Model):
                 alternative = False
                 wo.workcenter_id = self.env['mrp.workcenter'].browse(self.env.context.get('workcenter_to_plan_on'))
             workcenters = wo.workcenter_id
+            if not workcenters:
+                # nothing to plan on: no capacity nor calendar without a work center
+                done_wo.add(wo.id)
+                continue
             if alternative:
                 workcenters |= wo.workcenter_id.alternative_workcenter_ids
             best_date_finished = datetime.max
@@ -718,7 +779,11 @@ class MrpWorkorder(models.Model):
                 'state': 'progress',
                 'date_start': date_start,
             }
-            if not wo.leave_id:
+            if not wo.workcenter_id:
+                # no calendar to book: a leave without calendar nor resource would be global
+                vals['date_finished'] = wo._calculate_date_finished(date_start)
+                wo.with_context(bypass_duration_calculation=True).write(vals)
+            elif not wo.leave_id:
                 leave = self.env['resource.calendar.leaves'].create({
                     'name': wo.display_name,
                     'calendar_id': wo.workcenter_id.resource_calendar_id.id,
@@ -1128,7 +1193,8 @@ class MrpWorkorder(models.Model):
         }
 
     def _set_cost_mode(self):
-        """ This should only be called once when the MO is confirmed. """
+        """ This should only be called once when the MO is confirmed, or when the
+        work order is created after it (work orders are created one at a time). """
         for workorder in self:
             workorder.cost_mode = workorder.operation_id.cost_mode or 'actual'
 
