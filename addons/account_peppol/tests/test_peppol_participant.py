@@ -388,3 +388,12 @@ class TestPeppolParticipant(PeppolConnectorCommon):
             p_rec = partner_form.save()
             self.assertEqual(p_rec.commercial_partner_id, p_rec)
             self.assertEqual(p_rec.commercial_partner_id.name, "test")
+
+    def test_not_recompute_registered_peppol_eas_endpoint(self):
+
+        company = self.env.company
+        company.account_peppol_proxy_state = "receiver"
+        self.env.company.vat = "BE0579767515"
+
+        self.assertEqual(company.peppol_endpoint, '0239843188')
+        self.assertEqual(company.peppol_eas, '0208')

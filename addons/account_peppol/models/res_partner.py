@@ -228,6 +228,13 @@ class ResPartner(models.Model):
             for company in all_companies:
                 partner.button_account_peppol_check_partner_endpoint(company=company)
 
+    def _get_registered_partners(self):
+        # Helper - Returns all partners associated to companies registered for peppol
+        can_send = self.env['account_edi_proxy_client.user']._get_can_send_domain()
+        return self.env["res.company"].search([
+            ('account_peppol_proxy_state', 'in', can_send)
+        ]).partner_id
+
     # -------------------------------------------------------------------------
     # LOW-LEVEL METHODS
     # -------------------------------------------------------------------------
@@ -240,11 +247,15 @@ class ResPartner(models.Model):
         return res
 
     def _compute_peppol_endpoint(self):
-        partners_to_recompute = self.browse([partner.id for partner in self if partner._origin not in self])
+        # Excludes all partners that are already registered on peppol
+        registered_partners = self._get_registered_partners()
+        partners_to_recompute = self.browse([partner.id for partner in self if partner._origin not in registered_partners])
         super(ResPartner, partners_to_recompute)._compute_peppol_endpoint()
 
     def _compute_peppol_eas(self):
-        partners_to_recompute = self.browse([partner.id for partner in self if partner._origin not in self])
+        # Excludes all partners that are already registered on peppol
+        registered_partners = self._get_registered_partners()
+        partners_to_recompute = self.browse([partner.id for partner in self if partner._origin not in registered_partners])
         super(ResPartner, partners_to_recompute)._compute_peppol_eas()
 
     # -------------------------------------------------------------------------
