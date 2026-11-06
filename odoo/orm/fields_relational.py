@@ -1111,9 +1111,10 @@ class One2many(_RelationalMulti):
                         prefetch_ids = recs[self.name]._prefetch_ids
                         browse((command[1],)).with_prefetch(prefetch_ids).write(command[2])
                     elif command[0] == Command.DELETE:
-                        to_delete.append(command[1])
+                        lines = browse((command[1],)).filtered(comodel_domain)
+                        to_delete.extend(lines.ids)
                     elif command[0] == Command.UNLINK:
-                        unlink(browse((command[1],)))
+                        unlink(browse((command[1],)).filtered(comodel_domain))
                     elif command[0] == Command.LINK:
                         to_link[recs[-1]].add(command[1])
                         allow_full_delete = False

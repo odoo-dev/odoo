@@ -338,6 +338,20 @@ class One2manyCase(TransactionExpressionCase):
                 'line_ids': [Command.link(line0.id), Command.link(line1.id)],
             })
 
+    def test_unlink_archived_o2m(self):
+        # TODO needs a model with a domain on comodel
+        discussion = self.env['test_orm.discussion'].create({'name': 'parentB', 'participants': self.env.user})
+        messages = self.env['test_orm.message'].create([{'discussion': discussion.id, 'body': f'msg{i}'} for i in range(3)])
+        self.assertEqual(discussion.messages, messages)
+
+        messages[0].active = False
+        discussion.invalidate_model()
+        self.assertEqual(discussion.messages, messages[1:])
+
+        discussion.write({'messages': [Command.unlink(m.id) for m in messages[:2]]})
+        self.assertEqual(discussion.messages, messages[2:])
+        self.assertEqual(messages[0].discussion.id, discussion.id, "not unlinked because was not linked through the o2m")
+
     def test_new_real_interactions(self):
         """ Test and specify the interactions between new and real records.
         Through m2o and o2m, with real/unreal records on both sides, the behavior
