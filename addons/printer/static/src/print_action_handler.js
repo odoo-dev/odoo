@@ -5,23 +5,20 @@ import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 
 const base64Decode = (base64) => {
-  const binary = atob(base64);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) {
-    bytes[i] = binary.charCodeAt(i);
-  }
-  return new TextDecoder("utf-8").decode(bytes);
-}
-
-
-const baseRequestParams = (report) => {
-    return {
-        method: "POST",
-        body: report,
-        signal: AbortSignal.timeout(15000),
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
     }
-}
+    return new TextDecoder("utf-8").decode(bytes);
+};
 
+const baseRequestParams = (report) => ({
+    method: "POST",
+    body: report,
+    targetAddressSpace: "loopback",
+    signal: AbortSignal.timeout(15000),
+});
 
 /**
  * Zebra printers host a web server that accepts print jobs
@@ -50,7 +47,7 @@ async function ePosPrint(ip, report) {
     try {
         const res = await fetch(
             `http://${ip}/cgi-bin/epos/service.cgi?devid=local_printer`,
-            baseRequestParams(report),
+            baseRequestParams(report)
         );
         const body = await res.text();
         const parser = new DOMParser();
@@ -68,6 +65,32 @@ async function ePosPrint(ip, report) {
     }
 }
 
+async function sendToPdfProxy(ip, binary) {
+    try {
+        const response = await fetch(`http://${ip}/print/pdf`, {
+            ...baseRequestParams(binary),
+            headers: { "Content-Type": "application/octet-stream" },
+        });
+        return { result: response.ok };
+    } catch (error) {
+        console.error(error);
+        return {
+            result: false,
+        };
+    }
+}
+
+function getPrintMethod(type) {
+    switch (type) {
+        case "epos":
+            return ePosPrint;
+        case "pdf":
+            return sendToPdfProxy;
+        default:
+            return zplPrint;
+    }
+}
+
 export async function printJobs(printer, jobs) {
     const notification = usePlugin(NotificationPlugin);
 
@@ -79,7 +102,7 @@ export async function printJobs(printer, jobs) {
             jobs.pop();
             continue;
         }
-        const print = job.type === "epos" ? ePosPrint : zplPrint;
+        const print = getPrintMethod(job.type);
         const res = await print(printer.ip_address, base64Decode(job.report));
 
         if (res.result) {
@@ -88,16 +111,18 @@ export async function printJobs(printer, jobs) {
         }
 
         if (res.errorCode === "ERROR_WAIT_EJECT") {
-            await new Promise(r => setTimeout(r, 1000));
+            await new Promise((r) => setTimeout(r, 1000));
             continue;
         }
 
-        notification.add(_t(
+        notification.add(
+            _t(
                 "Error occurred while printing the document. Please check the printer and try again: %s",
                 res.errorCode
-            ), {
+            ),
+            {
                 type: "danger",
-            },
+            }
         );
         jobs.pop();
     }
@@ -133,6 +158,4 @@ async function printActionHandler(action, options) {
     return true;
 }
 
-registry
-    .category("ir.actions.report handlers")
-    .add("print_action_handler", printActionHandler);
+registry.category("ir.actions.report handlers").add("print_action_handler", printActionHandler);

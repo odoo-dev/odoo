@@ -70,6 +70,8 @@ class IrActionsReport(models.Model):
             image = self._run_image_engine("wkhtmltopdf", [html], 576, 0)[0]
             if image:
                 jobs.append({"type": "epos", "report": base64.b64encode(thermal_printer_format(image))})
+        elif report.report_type == "qweb-pdf" and has_printer("pdf"):
+            jobs.append({"type": "pdf", "report": base64.b64encode(self._render(report_name, docids, data=data)[0])})
 
         return jobs
 

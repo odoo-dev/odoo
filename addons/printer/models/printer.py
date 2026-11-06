@@ -11,8 +11,9 @@ class Printer(models.Model):
     type = fields.Selection([
             ("zpl", "ZPL"),
             ('epos', 'ePOS'),
+            ("pdf", "PDF"),
         ],
-        default="zpl", required=True, string="Type"
+        default="zpl", required=True, string="Type",
     )
 
     @api.depends('name', 'type')
