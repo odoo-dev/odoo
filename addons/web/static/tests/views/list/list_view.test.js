@@ -12572,6 +12572,42 @@ test(`cell-level keyboard navigation in non-editable list`, async () => {
     expect.verifySteps(["resId: 3"]);
 });
 
+test(`keyboard navigation: can leave the last column of a list with optional fields`, async () => {
+    await mountView({
+        resModel: "foo",
+        type: "list",
+        arch: `
+            <list>
+                <field name="foo"/>
+                <field name="int_field" optional="show"/>
+            </list>
+        `,
+    });
+
+    await press("ArrowDown");
+    await press("ArrowDown");
+    await press("ArrowRight");
+    await press("ArrowRight");
+    await animationFrame();
+    expect(`tbody tr:eq(0) .o_field_cell[name=int_field]`).toBeFocused();
+
+    await press("ArrowRight");
+    await animationFrame();
+    expect(`tbody tr:eq(0) .o_field_cell[name=int_field]`).toBeFocused();
+
+    await press("ArrowDown");
+    await animationFrame();
+    expect(`tbody tr:eq(1) .o_field_cell[name=int_field]`).toBeFocused();
+
+    await press("ArrowUp");
+    await animationFrame();
+    expect(`tbody tr:eq(0) .o_field_cell[name=int_field]`).toBeFocused();
+
+    await press("ArrowLeft");
+    await animationFrame();
+    expect(`tbody tr:eq(0) .o_field_cell[name=foo]`).toBeFocused();
+});
+
 test(`keyboard navigation from last cell in editable list`, async () => {
     await mountView({
         resModel: "foo",

@@ -317,7 +317,7 @@
                         />
                     </td>
                 </t>
-                <td t-else="" tabindex="-1" class="w-print-0 p-print-0"/>
+                <td t-else="" class="w-print-0 p-print-0"/>
             </t>
         </tr>
     </t>
