@@ -3,6 +3,7 @@
 from urllib.parse import quote
 
 from odoo import api, models, fields
+from odoo.fields import Command
 from odoo.tools.image import binary_to_image
 from odoo.exceptions import UserError
 
@@ -36,6 +37,22 @@ class IrAttachment(models.Model):
         column1='attachment_id',
         column2='tag_id',
         string="Media Tags",
+    )
+    favorite_user_ids = fields.Many2many(
+        'res.users',
+        relation='html_editor_ir_attachment_favorite_user_rel',
+        column1='attachment_id',
+        column2='user_id',
+        string="Favorite of",
+        copy=False,
+        export_string_translation=False,
+    )
+    is_favorite = fields.Boolean(
+        compute='_compute_is_favorite',
+        search='_search_is_favorite',
+        readonly=False,
+        compute_sudo=True,
+        export_string_translation=False,
     )
 
     def _compute_local_url(self):
@@ -85,6 +102,33 @@ class IrAttachment(models.Model):
             except UserError:
                 attachment.image_width = 0
                 attachment.image_height = 0
+
+    @api.depends('favorite_user_ids')
+    @api.depends_context('uid')
+    def _compute_is_favorite(self):
+        for attachment in self:
+            attachment.is_favorite = self.env.user in attachment.favorite_user_ids
+
+    @api.model
+    def _search_is_favorite(self, operator, value):
+        if operator != 'in':
+            return NotImplemented
+        return [('favorite_user_ids', 'in', [self.env.uid])]
+
+    def write(self, vals):
+        # Favorites are personal: setting one only requires read access on the
+        # attachment, so it is handled apart from the regular write.
+        if 'is_favorite' in vals:
+            vals = dict(vals)
+            self._set_favorite(vals.pop('is_favorite'))
+            if not vals:
+                return True
+        return super().write(vals)
+
+    def _set_favorite(self, is_favorite):
+        self.check_access('read')
+        command = Command.link if is_favorite else Command.unlink
+        self.sudo().favorite_user_ids = [command(self.env.uid)]
 
     def _get_media_info(self):
         """Return a dict with the values that we need on the media dialog."""

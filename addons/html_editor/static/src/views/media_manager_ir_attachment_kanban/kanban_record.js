@@ -1,18 +1,9 @@
 import { KanbanRecord, kanbanRecordProps } from "@web/views/kanban/kanban_record";
 import { useService } from "@web/core/utils/hooks";
-import { user } from "@web/core/user";
 
 import { proxy, t, useProps } from "@odoo/owl";
 import { IMAGE_MIMETYPES } from "@html_editor/main/media/media_manager/helpers";
 
-const LS_IS_STARRED_KEY_PREFIX = "ir-attachment-record-is-starred";
-/**
- * Starred attachments are stored per company, so that favorites of one
- * organisation do not leak into (or collide with) another one.
- */
-export function getStarredStorageKey() {
-    return `${LS_IS_STARRED_KEY_PREFIX}-${user.activeCompany.id}`;
-}
 export const MediaManagerkanbanRecordProps = {
     ...kanbanRecordProps,
     canMultiSelect: t.any().optional(true),
@@ -34,7 +25,6 @@ export class MediaManagerKanbanRecord extends KanbanRecord {
         console.log("props : ", this.props);
         console.groupEnd();
         this.state = proxy({
-            starred: this.getLocalStorageStarredState(),
             selected: false,
         });
 
@@ -48,28 +38,10 @@ export class MediaManagerKanbanRecord extends KanbanRecord {
         classes = classes.filter((c) => !["flex-grow-1", "flex-md-shrink-1"].includes(c));
         classes.push("flex-grow-0");
         classes.push("flex-md-shrink-0");
-        if (this.state.starred) {
+        if (this.props.record.data.is_favorite) {
             classes.push("o_record_starred");
         }
         return classes.join(" ");
-    }
-
-    getLocalStorageStarredState() {
-        const allStarredItems = JSON.parse(localStorage.getItem(getStarredStorageKey())) || [];
-        return allStarredItems.includes(this.props.record.data.id);
-    }
-
-    updateLocalStorageStarredState() {
-        const allStarredItems = JSON.parse(localStorage.getItem(getStarredStorageKey())) || [];
-        if (this.state.starred) {
-            allStarredItems.push(this.props.record.data.id);
-        } else {
-            const index = allStarredItems.indexOf(this.props.record.data.id);
-            if (index !== -1) {
-                allStarredItems.splice(index, 1);
-            }
-        }
-        localStorage.setItem(getStarredStorageKey(), JSON.stringify(allStarredItems));
     }
 
     onGlobalClick(ev, _newWindow) {
@@ -111,8 +83,9 @@ export class MediaManagerKanbanRecord extends KanbanRecord {
 
     toggleStarred() {
         this.rootRef().focus();
-        this.state.starred = !this.state.starred;
-        this.updateLocalStorageStarredState();
+        const { record } = this.props;
+        // Card records save on update, so the favorite is stored right away.
+        return record.update({ is_favorite: !record.data.is_favorite });
     }
 
     deleteItem() {

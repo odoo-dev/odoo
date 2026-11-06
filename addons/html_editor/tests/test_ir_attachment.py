@@ -1,7 +1,8 @@
 from psycopg2 import IntegrityError
 
+from odoo.exceptions import AccessError
 from odoo.fields import Command
-from odoo.tests.common import TransactionCase, tagged
+from odoo.tests.common import TransactionCase, new_test_user, tagged
 from odoo.tools import mute_logger
 
 
@@ -43,3 +44,30 @@ class TestIrAttachmentWebEditor(TransactionCase):
         self.env['html_editor.media.tag'].create({'name': 'Banner'})
         with self.assertRaises(IntegrityError), mute_logger('odoo.sql_db'):
             self.env['html_editor.media.tag'].create({'name': 'Banner'})
+
+    def test_media_favorites(self):
+        user_a = new_test_user(self.env, login='media_user_a', groups='base.group_user')
+        user_b = new_test_user(self.env, login='media_user_b', groups='base.group_user')
+        # A public attachment created by someone else: readable but not writable.
+        attachment = self.env['ir.attachment'].create({
+            'name': 'logo.png',
+            'type': 'binary',
+            'mimetype': 'image/png',
+            'raw': b'',
+            'public': True,
+        })
+        attachment_a = attachment.with_user(user_a)
+        with self.assertRaises(AccessError):
+            attachment_a.name = 'renamed.png'
+
+        attachment_a.is_favorite = True
+        self.assertTrue(attachment_a.is_favorite)
+        self.assertFalse(attachment.with_user(user_b).is_favorite, "Favorites should be per user")
+        self.assertEqual(
+            self.env['ir.attachment'].with_user(user_a).search([('is_favorite', '=', True)]),
+            attachment,
+        )
+        self.assertFalse(self.env['ir.attachment'].with_user(user_b).search([('is_favorite', '=', True)]))
+
+        attachment_a.is_favorite = False
+        self.assertFalse(attachment_a.is_favorite)
