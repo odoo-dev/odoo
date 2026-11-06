@@ -325,6 +325,23 @@ class TestPeppolParticipant(PeppolConnectorCommon):
             'contact_email': self.env.company.account_peppol_contact_email,
         }])
 
+    def test_peppol_no_recompute_when_registered(self):
+        #Test to ensure Peppol EAS and Endpoint are not recomputed on VAT update when the company is registered on Peppol
+        can_send = self.env['account_edi_proxy_client.user']._get_can_send_domain()
+        initial_eas = self.env.company.peppol_eas
+        initial_endpoint = self.env.company.peppol_endpoint
+        self.env.company.account_peppol_proxy_state = can_send[0]
+        self.env.company.vat = 'BE0899999949'
+        self.assertEqual(self.env.company.peppol_eas, initial_eas)
+        self.assertEqual(self.env.company.peppol_endpoint, initial_endpoint)
+
+    def test_peppol_recompute_when_not_registered(self):
+        #Test to ensure Peppol EAS and Endpoint are recomputed on VAT update when the company is not registered on Peppol
+        self.env.company.account_peppol_proxy_state = 'not_registered'
+        self.env.company.vat = 'BE0477472701'
+        self.assertEqual(self.env.company.peppol_eas, '0208')
+        self.assertEqual(self.env.company.peppol_endpoint, '0477472701')
+
     def test_deregister_with_client_gone_error(self):
         """Test deregistration succeeds even when proxy returns client_gone error"""
         with self._mock_requests([
