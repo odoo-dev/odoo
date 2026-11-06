@@ -88,7 +88,7 @@ export function getMediaManagertDialogProps(recordInfo) {
             // todo link this to the search bar filters somehow
             { label: "uploaded last week", domain: [["create_date", ">", lastWeekDate]] },
             { label: "uploaded by me", domain: MY_MEDIA_DOMAIN },
-            { label: "favorites", customKey: "starred" },
+            { label: "favorites", domain: [["is_favorite", "=", true]] },
         ],
         noCreate: true,
         // todo : BINARY_DOMAIN prevents webp url to be shown, should we change that ?

@@ -1,5 +1,5 @@
 import { KanbanRenderer, kanbanRendererProps } from "@web/views/kanban/kanban_renderer";
-import { MediaManagerKanbanRecord, getStarredStorageKey } from "./kanban_record";
+import { MediaManagerKanbanRecord } from "./kanban_record";
 import { useService } from "@web/core/utils/hooks";
 import { IMAGE_MIMETYPES } from "@html_editor/main/media/media_manager/helpers";
 import { signal, t, useProps } from "@odoo/owl";
@@ -58,12 +58,8 @@ export class MediaManagerKanbanRenderer extends KanbanRenderer {
     // Filter records :
     // ----------------
 
-    filterRecords(domain, customKey) {
-        console.log("filterRecords", domain, customKey);
-        // construct domain on the fly based on the customKey
-        if (customKey === "starred") {
-            domain = [["id", "in", JSON.parse(localStorage.getItem(getStarredStorageKey())) || []]];
-        }
+    filterRecords(domain) {
+        console.log("filterRecords", domain);
         if (domain) {
             this.env.model.env.searchModel.splitAndAddDomain(domain);
         } else {

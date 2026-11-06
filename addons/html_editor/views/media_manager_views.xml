@@ -43,6 +43,7 @@
                     <field name="image_width"/>
                     <field name="image_height"/>
                     <field name="url"/>
+                    <field name="is_favorite"/>
                     <templates>
                         <t t-name="menu">
                             <!-- o-navigable keeps the input as the active dropdown item, so the focus stays on it while the suggestions update -->

@@ -12,7 +12,7 @@
                 <span class="oi" data-icon="star_filled"></span>
             </div>
             <div class="o_record_box_star o_record_interactive position-absolute" t-on-click="this.toggleStarred">
-                <span t-if="this.state.starred" class="oi" data-icon="star_filled"></span>
+                <span t-if="this.props.record.data.is_favorite" class="oi" data-icon="star_filled"></span>
                 <span t-else="" class="oi" data-icon="star"></span>
             </div>
 
