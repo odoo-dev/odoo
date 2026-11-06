@@ -24,6 +24,7 @@ touching instead of loading whole files.
 | [Organize files by feature](guidelines/javascript.md#organize-files-by-feature-not-by-type) | creating a file, or deciding where new code lives |
 | [Avoid getters](guidelines/javascript.md#avoid-getters) | adding a computed value to a class or a component |
 | [Avoid patching JavaScript code](guidelines/javascript.md#avoid-patching-javascript-code) | extending or overriding behaviour that already exists |
+| [Translate one whole sentence per case](guidelines/javascript.md#translate-one-whole-sentence-per-case) | a `_t()` string or Owl template text whose wording changes with a status, a type or a count |
 | [SCSS and CSS](guidelines/scss.md#scss-and-css) | touching `*.scss` |
 | [Assets](guidelines/assets.md#assets) | adding an image, font, or library |
 

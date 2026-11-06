@@ -25,6 +25,7 @@ touching instead of loading whole files.
 | [Imports](guidelines/python.md#imports) | writing Python anywhere in an addon |
 | [Naming and model layout](guidelines/python.md#naming-and-model-layout) | naming a model, field, method or variable; laying out a model class |
 | [Translate only static literals](guidelines/python.md#translate-only-static-literals) | user-facing strings in Python |
+| [Translate one whole sentence per case](guidelines/python.md#translate-one-whole-sentence-per-case) | a user-facing string, in Python or a QWeb template, whose wording changes with a state, a type or a count |
 | [Recordsets, domains and context](guidelines/orm.md#recordsets-domains-and-context) | reading records, building domains, passing context |
 | [Computes, onchange and constraints](guidelines/orm.md#computes-onchange-and-constraints) | computes, onchange, constraints, indexes, `create` overrides |
 | [Methods and extension points](guidelines/orm.md#methods-and-extension-points) | adding a model method, or one another module will override |
