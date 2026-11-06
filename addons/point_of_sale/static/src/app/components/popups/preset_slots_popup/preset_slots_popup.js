@@ -2,7 +2,7 @@ import { Component, onWillStart, proxy, useProps, t } from "@odoo/owl";
 import { usePos } from "@point_of_sale/app/hooks/pos_hook";
 import { Dialog } from "@web/core/dialog/dialog";
 import { _t } from "@web/core/l10n/translation";
-import { getDisplayDateInfo } from "@point_of_sale/utils";
+import { getDisplayDateInfo, getPosColorAttrs } from "@point_of_sale/utils";
 
 const { DateTime } = luxon;
 
@@ -13,6 +13,7 @@ export class PresetSlotsPopup extends Component {
         close: t.function(),
         getPayload: t.function(),
     });
+    getPosColorAttrs = getPosColorAttrs;
 
     setup() {
         this.pos = usePos();
@@ -32,14 +33,14 @@ export class PresetSlotsPopup extends Component {
         return getDisplayDateInfo(date);
     }
 
-    getSlotColor(slot, preset) {
+    getSlotColorAttrs(slot, preset) {
         const isSelected = this.isSelected(slot, preset);
         const isFull = slot.isFull;
 
         if (!isSelected && isFull) {
-            return "o_colorlist_item_numpad_color_1"; // Red
+            return getPosColorAttrs(1, "numpad"); // Red
         }
-        return isSelected ? "btn-primary" : "o_colorlist_item_numpad_color_10"; // Green
+        return isSelected ? { class: "btn-primary" } : getPosColorAttrs(10, "numpad"); // Green
     }
 
     isSelected(slot, preset) {

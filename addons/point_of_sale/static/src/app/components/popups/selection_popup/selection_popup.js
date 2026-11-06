@@ -1,6 +1,7 @@
 import { _t } from "@web/core/l10n/translation";
 import { Component, useProps, proxy, t } from "@odoo/owl";
 import { Dialog } from "@web/core/dialog/dialog";
+import { getColorListAttrs } from "@web/core/colorlist/colorlist";
 
 export class SelectionPopup extends Component {
     static template = "point_of_sale.SelectionPopup";
@@ -13,6 +14,7 @@ export class SelectionPopup extends Component {
         size: t.string().optional("lg"),
         bodyClass: t.string().optional(""),
     });
+    getColorListAttrs = getColorListAttrs;
 
     /**
      * Value of the `item` key of the selected element in the Selection

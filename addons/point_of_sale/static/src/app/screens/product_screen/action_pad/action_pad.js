@@ -4,6 +4,7 @@ import { SelectPartnerButton } from "@point_of_sale/app/screens/product_screen/c
 import { useService } from "@web/core/utils/hooks";
 import { BackButton } from "@point_of_sale/app/screens/product_screen/action_pad/back_button/back_button";
 import { PosOrder } from "@point_of_sale/app/models/pos_order";
+import { getColorListAttrs } from "@web/core/colorlist/colorlist";
 
 export const actionpadWidgetProps = {
     order: t.instanceOf(PosOrder),
@@ -19,6 +20,8 @@ export class ActionpadWidget extends Component {
     static template = "point_of_sale.ActionpadWidget";
     static components = { SelectPartnerButton, BackButton };
     props = useProps(actionpadWidgetProps);
+
+    getColorListAttrs = getColorListAttrs;
 
     setup() {
         this.pos = usePos();

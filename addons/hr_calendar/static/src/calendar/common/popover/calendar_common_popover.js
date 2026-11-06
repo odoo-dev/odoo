@@ -4,6 +4,7 @@ import { AttendeeCalendarCommonPopover } from "@calendar/views/attendee_calendar
 import { Field } from "@web/views/fields/field";
 import { formatDate } from "@web/views/fields/formatters";
 import { Record } from "@web/model/record";
+import { getPaletteColor } from "@web/views/calendar/utils";
 
 export const patchAttendeeCalendarCommonPopoverClass = {
     template: "hr_calendar.AttendeeCalendarCommonPopover",
@@ -40,6 +41,11 @@ export const patchAttendeeCalendarCommonPopover = {
         };
         this.formatDate = formatDate;
     },
+    get colorStyle() {
+        const color = getPaletteColor(this.props.record.colorIndex);
+        return color && `--o-calendar-color: ${color};`;
+    },
+
     isWorkLocationEvent() {
         return this.props.record.resModel === "hr.employee.location";
     },

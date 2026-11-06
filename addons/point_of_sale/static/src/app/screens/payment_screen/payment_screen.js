@@ -76,18 +76,18 @@ export class PaymentScreen extends Component {
     }
 
     getNumpadButtons() {
-        const colorClassMap = {
-            [this.env.services.localization.decimalPoint]: "o_colorlist_item_numpad_color_6",
-            Backspace: "o_colorlist_item_numpad_color_1",
-            "+10": "o_colorlist_item_numpad_color_10",
-            "+20": "o_colorlist_item_numpad_color_10",
-            "+50": "o_colorlist_item_numpad_color_10",
-            "-": "o_colorlist_item_numpad_color_3",
+        const colorMap = {
+            [this.env.services.localization.decimalPoint]: 6,
+            Backspace: 1,
+            "+10": 10,
+            "+20": 10,
+            "+50": 10,
+            "-": 3,
         };
 
         return enhancedButtons().map((button) => ({
             ...button,
-            class: `${colorClassMap[button.value] || ""}`,
+            color: colorMap[button.value],
         }));
     }
 

@@ -7,7 +7,8 @@
                 <button t-on-click="() => this.buttonClick(button)"
                     type="button"
                     class="btn me-2 mb-2 toggle-button "
-                    t-attf-class="{{button.class || 'btn-secondary'}}">
+                    t-att-class="{ 'btn-secondary': !button.color }"
+                    t-att="button.color ? this.getColorListAttrs(button.color) : {}">
                     <t t-out="button.label"/>
                 </button>
             </t>

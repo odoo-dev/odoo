@@ -4527,8 +4527,14 @@ test("kanban with color attribute", async () => {
             </kanban>`,
     });
 
-    expect(getKanbanRecord({ index: 0 })).toHaveClass("o_kanban_color_5");
-    expect(getKanbanRecord({ index: 1 })).toHaveClass("o_kanban_color_6");
+    expect(getKanbanRecord({ index: 0 })).toHaveStyle(
+        { "--o-colorlist-color": "var(--o-colors-5)" },
+        { inline: true }
+    );
+    expect(getKanbanRecord({ index: 1 })).toHaveStyle(
+        { "--o-colorlist-color": "var(--o-colors-6)" },
+        { inline: true }
+    );
 });
 
 test("edit the kanban color with the colorpicker", async () => {
@@ -4556,7 +4562,7 @@ test("edit the kanban color with the colorpicker", async () => {
 
     await toggleKanbanRecordDropdown(0);
 
-    expect(".o_kanban_record.o_kanban_color_12").toHaveCount(0, {
+    expect(".o_kanban_record[style*='var(--o-colors-12)']").toHaveCount(0, {
         message: "no record should have the color 12",
     });
     expect(
@@ -4568,11 +4574,14 @@ test("edit the kanban color with the colorpicker", async () => {
         })
     ).toHaveCount(12, { message: "the color picker should have 12 children (the colors)" });
 
-    await contains(".o_kanban_colorpicker .o_colorlist_item_color_9").click();
+    await contains(".o_kanban_colorpicker button[title='Raspberry']").click();
 
     // should write on the color field
     expect.verifySteps(["write-color-9"]);
-    expect(getKanbanRecord({ index: 0 })).toHaveClass("o_kanban_color_9");
+    expect(getKanbanRecord({ index: 0 })).toHaveStyle(
+        { "--o-colorlist-color": "var(--o-colors-9)" },
+        { inline: true }
+    );
 });
 
 test("kanban with colorpicker and node with color attribute", async () => {
@@ -4598,12 +4607,18 @@ test("kanban with colorpicker and node with color attribute", async () => {
                 </templates>
             </kanban>`,
     });
-    expect(getKanbanRecord({ index: 0 })).toHaveClass("o_kanban_color_3");
+    expect(getKanbanRecord({ index: 0 })).toHaveStyle(
+        { "--o-colorlist-color": "var(--o-colors-3)" },
+        { inline: true }
+    );
     await toggleKanbanRecordDropdown(0);
-    await contains(`.o_kanban_colorpicker .o_colorlist_item_color_9[title="Raspberry"]`).click();
+    await contains(`.o_kanban_colorpicker button[title="Raspberry"]`).click();
     // should write on the color field
     expect.verifySteps(["write-color-9"]);
-    expect(getKanbanRecord({ index: 0 })).toHaveClass("o_kanban_color_9");
+    expect(getKanbanRecord({ index: 0 })).toHaveStyle(
+        { "--o-colorlist-color": "var(--o-colors-9)" },
+        { inline: true }
+    );
 });
 
 test("edit the kanban color with translated colors resulting in the same terms", async () => {
@@ -4632,8 +4647,11 @@ test("edit the kanban color with translated colors resulting in the same terms",
     });
 
     await toggleKanbanRecordDropdown(0);
-    await contains(".o_kanban_colorpicker .o_colorlist_item_color_9").click();
-    expect(getKanbanRecord({ index: 0 })).toHaveClass("o_kanban_color_9");
+    await contains(".o_kanban_colorpicker button[title='Raspberry']").click();
+    expect(getKanbanRecord({ index: 0 })).toHaveStyle(
+        { "--o-colorlist-color": "var(--o-colors-9)" },
+        { inline: true }
+    );
 });
 
 test("load more records in column", async () => {

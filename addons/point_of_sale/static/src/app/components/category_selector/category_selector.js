@@ -2,9 +2,12 @@ import { Component } from "@odoo/owl";
 import { usePos } from "@point_of_sale/app/hooks/pos_hook";
 import { useService } from "@web/core/utils/hooks";
 import { pick } from "@web/core/utils/objects";
+import { getColorListAttrs } from "@web/core/colorlist/colorlist";
 
 export class CategorySelector extends Component {
     static template = "point_of_sale.CategorySelector";
+
+    getColorListAttrs = getColorListAttrs;
 
     setup() {
         this.ui = useService("ui");

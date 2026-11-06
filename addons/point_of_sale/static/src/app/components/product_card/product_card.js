@@ -2,6 +2,7 @@ import { Component, useProps, t } from "@odoo/owl";
 import { ProductProduct } from "@point_of_sale/app/models/product_product";
 import { ProductTemplate } from "@point_of_sale/app/models/product_template";
 import { formatFloat } from "@web/core/utils/numbers";
+import { getPosColorAttrs } from "@point_of_sale/utils";
 
 export class ProductCard extends Component {
     static template = "point_of_sale.ProductCard";
@@ -19,6 +20,8 @@ export class ProductCard extends Component {
         productCartQty: t.or([t.number(), t.literal(undefined)]).optional(),
         isComboPopup: t.boolean().optional(false),
     });
+
+    getPosColorAttrs = getPosColorAttrs;
 
     get productQty() {
         const productUnit = this.props.product.models["decimal.precision"].find(

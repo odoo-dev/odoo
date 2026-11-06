@@ -2,6 +2,7 @@
 
 import { session } from "@web/session";
 import { cookie } from "@web/core/browser/cookie";
+import { getColorListStyle } from "@web/core/colorlist/colorlist";
 import { deserializeDateTime, deserializeDate } from "@web/core/l10n/dates";
 import { Time } from "@web/core/l10n/time";
 import { _t } from "@web/core/l10n/translation";
@@ -171,6 +172,20 @@ export function getTimeUtil(date) {
 
 export function getColorScheme() {
     return cookie.get("pos_color_scheme") || "light";
+}
+
+/**
+ * Returns the attributes, to give with t-att, coloring a button like the entry
+ * `colorIndex` of the color list, in the lighter variant of the point of sale:
+ * "transparent" for the order tabs and product cards, "numpad" for the keys.
+ *
+ * @param {number} colorIndex
+ * @param {"transparent"|"numpad"} variant
+ * @returns {{ class?: string, style?: string }}
+ */
+export function getPosColorAttrs(colorIndex, variant) {
+    const style = getColorListStyle(colorIndex);
+    return style ? { class: `o_colorlist_${variant}`, style } : {};
 }
 
 /**

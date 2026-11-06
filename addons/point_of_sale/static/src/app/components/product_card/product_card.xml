@@ -4,7 +4,8 @@
     <t t-name="point_of_sale.ProductCard">
         <article tabindex="0"
             role="button"
-            t-attf-class="{{this.props.class}} {{this.props.color ? `o_colorlist_item_color_transparent_${this.props.color}` : ''}} product-sortable product position-relative btn btn-light d-flex align-items-stretch p-0 rounded-3 text-start cursor-pointer {{ this.props.imgUrl ? 'd-flex align-items-stretch' : ''}} {{ this.props.available ? '' : 'opacity-50' }}"
+            t-attf-class="{{this.props.class}} product-sortable product position-relative btn btn-light d-flex align-items-stretch p-0 rounded-3 text-start cursor-pointer {{ this.props.imgUrl ? 'd-flex align-items-stretch' : ''}} {{ this.props.available ? '' : 'opacity-50' }}"
+            t-att="this.getPosColorAttrs(this.props.color, 'transparent')"
             t-on-keypress="(event) => event.code === 'Space' ? this.props.onClick(event) : ()=>{}"
             t-on-click.stop="this.props.onClick"
             t-att-data-product-id="this.props.productId"

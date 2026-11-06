@@ -1,6 +1,7 @@
 import { Component, useProps, t, usePlugin } from "@odoo/owl";
 import { PosNumberBufferPlugin } from "@point_of_sale/app/plugins/pos_number_buffer_plugin";
 import { localization } from "@web/core/l10n/localization";
+import { getPosColorAttrs } from "@point_of_sale/utils";
 
 export const buttonsType = t.array(
     t.or([
@@ -8,6 +9,7 @@ export const buttonsType = t.array(
             value: t.string(),
             text: t.string().optional(),
             class: t.string().optional(),
+            color: t.number().optional(),
             disabled: t.boolean().optional(),
         }),
         t.number(),
@@ -19,12 +21,12 @@ export const DECIMAL = {
     get value() {
         return localization.decimalPoint;
     },
-    class: "o_colorlist_item_numpad_color_6",
+    color: 6,
 };
 export const BACKSPACE = {
     value: "Backspace",
     text: "⌫",
-    class: "o_colorlist_item_numpad_color_1",
+    color: 1,
 };
 export const ZERO = { value: "0" };
 export const SWITCHSIGN = { value: "-", text: "+/-" };
@@ -66,6 +68,8 @@ export class Numpad extends Component {
         onClick: t.function().optional(),
         buttons: buttonsType.optional(),
     });
+    getPosColorAttrs = getPosColorAttrs;
+
     get buttons() {
         return this.props.buttons || getButtons([DECIMAL, ZERO, BACKSPACE]);
     }

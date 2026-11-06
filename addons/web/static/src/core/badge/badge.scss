@@ -1,8 +1,61 @@
 .badge {
-    @for $size from 1 through length($o-colors) {
-        &.o_badge_color_#{$size - 1} {
-            background-color: nth($o-colors-bg-subtle, $size) !important;
-            color: nth($o-colors-text-emphasis, $size) !important;
-        }
+    &.o_badge_color_0 {
+        background-color: var(--o-colors-bg-subtle-0) !important;
+        color: var(--o-colors-text-emphasis-0) !important;
+    }
+
+    &.o_badge_color_1 {
+        background-color: var(--o-colors-bg-subtle-1) !important;
+        color: var(--o-colors-text-emphasis-1) !important;
+    }
+
+    &.o_badge_color_2 {
+        background-color: var(--o-colors-bg-subtle-2) !important;
+        color: var(--o-colors-text-emphasis-2) !important;
+    }
+
+    &.o_badge_color_3 {
+        background-color: var(--o-colors-bg-subtle-3) !important;
+        color: var(--o-colors-text-emphasis-3) !important;
+    }
+
+    &.o_badge_color_4 {
+        background-color: var(--o-colors-bg-subtle-4) !important;
+        color: var(--o-colors-text-emphasis-4) !important;
+    }
+
+    &.o_badge_color_5 {
+        background-color: var(--o-colors-bg-subtle-5) !important;
+        color: var(--o-colors-text-emphasis-5) !important;
+    }
+
+    &.o_badge_color_6 {
+        background-color: var(--o-colors-bg-subtle-6) !important;
+        color: var(--o-colors-text-emphasis-6) !important;
+    }
+
+    &.o_badge_color_7 {
+        background-color: var(--o-colors-bg-subtle-7) !important;
+        color: var(--o-colors-text-emphasis-7) !important;
+    }
+
+    &.o_badge_color_8 {
+        background-color: var(--o-colors-bg-subtle-8) !important;
+        color: var(--o-colors-text-emphasis-8) !important;
+    }
+
+    &.o_badge_color_9 {
+        background-color: var(--o-colors-bg-subtle-9) !important;
+        color: var(--o-colors-text-emphasis-9) !important;
+    }
+
+    &.o_badge_color_10 {
+        background-color: var(--o-colors-bg-subtle-10) !important;
+        color: var(--o-colors-text-emphasis-10) !important;
+    }
+
+    &.o_badge_color_11 {
+        background-color: var(--o-colors-bg-subtle-11) !important;
+        color: var(--o-colors-text-emphasis-11) !important;
     }
 }

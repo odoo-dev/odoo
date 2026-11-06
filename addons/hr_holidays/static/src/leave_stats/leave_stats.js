@@ -6,11 +6,13 @@ import { formatFloatTime } from "@web/views/fields/formatters";
 import { Component, onWillStart, proxy, useProps } from "@odoo/owl";
 import { standardWidgetProps } from "@web/views/widgets/standard_widget_props";
 import { _t } from "@web/core/l10n/translation";
+import { getColorListAttrs } from "@web/core/colorlist/colorlist";
 const { DateTime } = luxon;
 
 export class LeaveStatsComponent extends Component {
     static template = "hr_holidays.LeaveStatsComponent";
     props = useProps(standardWidgetProps);
+    getColorListAttrs = getColorListAttrs;
 
     setup() {
         this.orm = useService("orm");

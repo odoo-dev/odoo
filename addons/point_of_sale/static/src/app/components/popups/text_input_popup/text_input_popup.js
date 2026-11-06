@@ -1,5 +1,6 @@
 import { Component, onMounted, useProps, proxy, signal, t } from "@odoo/owl";
 import { Dialog } from "@web/core/dialog/dialog";
+import { getColorListAttrs } from "@web/core/colorlist/colorlist";
 
 export class TextInputPopup extends Component {
     static template = "point_of_sale.TextInputPopup";
@@ -17,6 +18,8 @@ export class TextInputPopup extends Component {
     });
 
     inputRef = signal.ref();
+    getColorListAttrs = getColorListAttrs;
+
     setup() {
         this.state = proxy({ inputValue: this.props.startingValue });
         onMounted(this.onMounted);

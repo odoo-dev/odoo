@@ -25,7 +25,9 @@ export class NumberPopup extends Component {
     }
 
     get buttons() {
-        return [1, 2, 3, 4, 5, 6, 7, 8, 9, DECIMAL, 0, BACKSPACE];
+        const decimal = { ...DECIMAL, class: "o_tip_numpad_decimal" };
+        const backspace = { ...BACKSPACE, class: "o_tip_numpad_backspace" };
+        return [1, 2, 3, 4, 5, 6, 7, 8, 9, decimal, 0, backspace];
     }
 
     input(value) {

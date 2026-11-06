@@ -15,6 +15,7 @@ import { AvatarTag } from "@web/core/tags_list/avatar_tag";
 import { useService } from "@web/core/utils/hooks";
 import { Many2ManyTagsAvatarFieldPopover } from "@web/views/fields/many2many_tags_avatar/many2many_tags_avatar_field";
 import { Many2XAutocomplete } from "@web/views/fields/relational_utils";
+import { getColorListAttrs } from "@web/core/colorlist/colorlist";
 
 class ResourceTag extends Component {
     static template = "resource_mail.ResourceTag";
@@ -28,9 +29,12 @@ class ResourceTag extends Component {
         tooltip: t.string().optional(),
         type: t.or([t.string(), t.literal(false)]), // in sample data, the type is false
     });
+    getColorListAttrs = getColorListAttrs;
 }
 
 const WithResourceFieldMixin = (T) => class ResourceFieldMixin extends T {
+    getColorListAttrs = getColorListAttrs;
+
     setup() {
         super.setup(...arguments);
         this.uiService = useService("ui");

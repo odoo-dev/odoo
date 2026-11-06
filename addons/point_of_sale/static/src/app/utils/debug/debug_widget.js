@@ -7,12 +7,15 @@ import { usePos } from "@point_of_sale/app/hooks/pos_hook";
 import { serializeDateTime } from "@web/core/l10n/dates";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { downloadPosLogs, downloadIdbErrors } from "../pretty_console_log";
+import { getColorListAttrs } from "@web/core/colorlist/colorlist";
 const { DateTime } = luxon;
 
 export class DebugWidget extends Component {
     static template = "point_of_sale.DebugWidget";
 
     importOrderInput = signal.ref();
+
+    getColorListAttrs = getColorListAttrs;
 
     setup() {
         this.pos = usePos();

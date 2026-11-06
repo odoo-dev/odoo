@@ -3,6 +3,7 @@ import { AttendeeCalendarCommonRenderer } from "@calendar/views/attendee_calenda
 import { patch } from "@web/core/utils/patch";
 import { renderToFragment } from "@web/core/utils/render";
 import { useCalendarPopover } from "@web/views/calendar/hooks/calendar_popover_hook";
+import { getPaletteColor } from "@web/views/calendar/utils";
 import { useService } from "@web/core/utils/hooks";
 
 /**
@@ -49,8 +50,20 @@ patch(AttendeeCalendarCommonRenderer.prototype, {
             "o_event",
             "o_activity_event",
             "o_event_allday",
-            ...(record ? [`o_calendar_color_${record.colorIndex}`] : []),
+            ...(record ? ["o_calendar_color"] : []),
         ];
+    },
+
+    /**
+     * @override
+     */
+    onEventDidMount(info) {
+        super.onEventDidMount(...arguments);
+        const record =
+            info.event.extendedProps?.isActivity && this.props.model.activities[info.event.id];
+        if (record) {
+            info.el.style.setProperty("--o-calendar-color", getPaletteColor(record.colorIndex));
+        }
     },
 
     /**
@@ -104,7 +117,7 @@ patch(AttendeeCalendarCommonRenderer.prototype, {
                     }
                 },
             },
-            `o_calendar_popover o_calendar_activity_popover card o_calendar_color_${activityEvent.colorIndex}`
+            "o_calendar_popover o_calendar_activity_popover card o_calendar_color"
         );
     },
 

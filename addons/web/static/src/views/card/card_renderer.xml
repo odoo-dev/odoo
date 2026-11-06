@@ -5,6 +5,7 @@
         <article
             role="link"
             t-att-class="this.getCardClasses()"
+            t-att-style="this.getCardStyle()"
             t-att-data-id="this.props.record.id"
             t-att-tabindex="this.props.record.model.useSampleModel ? -1 : 0">
                 <t t-call="{{ this.templates[this.constructor.CARD_ATTRIBUTE] }}" t-call-context="this.renderingContext"/>

@@ -1,4 +1,4 @@
-import { ColorList } from "@web/core/colorlist/colorlist";
+import { ColorList, getColorListAttrs } from "@web/core/colorlist/colorlist";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";
 import { registry } from "@web/core/registry";
@@ -15,6 +15,8 @@ export class ColorPickerField extends Component {
     props = useProps({
         ...standardFieldProps,
     });
+
+    getColorListAttrs = getColorListAttrs;
 
     setup() {
         this.dropdownState = useDropdownState();

@@ -138,6 +138,10 @@ export class CardRenderer extends Component {
         return classes.join(" ");
     }
 
+    getCardStyle() {
+        return this.props.archInfo.cardStyle;
+    }
+
     /**
      * Returns the card template's rendering context.
      *

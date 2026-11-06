@@ -53,6 +53,7 @@ export class CardArchParser {
         return {
             activeActions: getActiveActions(xmlDoc),
             cardClassName: cardDoc.getAttribute("class") || "",
+            cardStyle: cardDoc.getAttribute("style") || "",
             fieldNodes: fieldNodes,
             widgetNodes: widgetNodes,
             templateDocs: templateDocs,

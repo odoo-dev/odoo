@@ -46,6 +46,7 @@ import { logPosMessage } from "@point_of_sale/app/utils/pretty_console_log";
 import { SendReceiptPopup } from "@point_of_sale/app/components/popups/send_receipt_popup/send_receipt_popup";
 import { PrintPopup } from "@point_of_sale/app/components/popups/print_popup/print_popup";
 import { OrderDetailsDialog } from "./order_details_dialog/order_details_dialog";
+import { getColorListAttrs } from "@web/core/colorlist/colorlist";
 
 const { DateTime } = luxon;
 const NBR_BY_PAGE = 30;
@@ -79,6 +80,7 @@ export class TicketScreen extends Component {
         DropdownItem,
     };
     props = useProps(ticketScreenProps);
+    getColorListAttrs = getColorListAttrs;
 
     setup() {
         this.pos = usePos();

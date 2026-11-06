@@ -24,11 +24,54 @@
         :is(.o_calendar_fc_view_dayGridMonth, .o_calendar_fc_view_multiMonthYear) .o_calendar_day[aria-current=date][class*="hr_mandatory_day_"] {
             --o-calendar-day-number-bg: var(--mandatory-day-color);
         }
-
-        @for $size from 1 through length($o-colors) {
-            .hr_mandatory_day_#{$size - 1} {
-                --mandatory-day-color: #{nth($o-colors, $size)};
-            }
-        }   
     }
+}
+
+/* FullCalendar takes classes only for the day cells; the side panel reads the same ones */
+.hr_mandatory_day_0 {
+    --mandatory-day-color: var(--o-colors-0);
+}
+
+.hr_mandatory_day_1 {
+    --mandatory-day-color: var(--o-colors-1);
+}
+
+.hr_mandatory_day_2 {
+    --mandatory-day-color: var(--o-colors-2);
+}
+
+.hr_mandatory_day_3 {
+    --mandatory-day-color: var(--o-colors-3);
+}
+
+.hr_mandatory_day_4 {
+    --mandatory-day-color: var(--o-colors-4);
+}
+
+.hr_mandatory_day_5 {
+    --mandatory-day-color: var(--o-colors-5);
+}
+
+.hr_mandatory_day_6 {
+    --mandatory-day-color: var(--o-colors-6);
+}
+
+.hr_mandatory_day_7 {
+    --mandatory-day-color: var(--o-colors-7);
+}
+
+.hr_mandatory_day_8 {
+    --mandatory-day-color: var(--o-colors-8);
+}
+
+.hr_mandatory_day_9 {
+    --mandatory-day-color: var(--o-colors-9);
+}
+
+.hr_mandatory_day_10 {
+    --mandatory-day-color: var(--o-colors-10);
+}
+
+.hr_mandatory_day_11 {
+    --mandatory-day-color: var(--o-colors-11);
 }

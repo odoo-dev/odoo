@@ -3,6 +3,7 @@ import { useService } from "@web/core/utils/hooks";
 import { Component, useProps, t } from "@odoo/owl";
 import { ListContainer } from "@point_of_sale/app/components/list_container/list_container";
 import { PosOrder } from "@point_of_sale/app/models/pos_order";
+import { getPosColorAttrs } from "@point_of_sale/utils";
 
 export class OrderTabs extends Component {
     static template = "point_of_sale.OrderTabs";
@@ -13,6 +14,8 @@ export class OrderTabs extends Component {
         orders: t.array(t.instanceOf(PosOrder)),
         class: t.string().optional(""),
     });
+    getPosColorAttrs = getPosColorAttrs;
+
     setup() {
         this.pos = usePos();
         this.ui = useService("ui");

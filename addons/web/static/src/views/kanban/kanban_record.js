@@ -1,6 +1,6 @@
 import { browser } from "@web/core/browser/browser";
 import { signal, t, useProps } from "@odoo/owl";
-import { ColorList } from "@web/core/colorlist/colorlist";
+import { ColorList, getColorListStyle } from "@web/core/colorlist/colorlist";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
@@ -77,7 +77,6 @@ export class KanbanRecord extends CardRenderer {
     static MENU_ATTRIBUTE = MENU_ATTRIBUTE;
     static CANCEL_GLOBAL_CLICK = CANCEL_GLOBAL_CLICK;
     static PROGRESS_COLOR_PREFIX = "oe_kanban_card_";
-    static HIGHLIGHT_COLOR_PREFIX = "o_kanban_color_";
     static CoverImageDialog = KanbanCoverImageDialog;
 
     setup() {
@@ -144,8 +143,10 @@ export class KanbanRecord extends CardRenderer {
             }
         }
         if (cardColorField) {
-            const value = record.data[cardColorField];
-            classes.push(`o_kanban_record_colored ${this.constructor.HIGHLIGHT_COLOR_PREFIX}${getColorIndex(value)}`);
+            classes.push("o_kanban_record_colored");
+            if (getColorIndex(record.data[cardColorField])) {
+                classes.push("o_kanban_record_has_color");
+            }
         }
         if (!this.props.groupByField) {
             classes.push("flex-grow-1 flex-md-shrink-1 flex-shrink-0");
@@ -164,6 +165,16 @@ export class KanbanRecord extends CardRenderer {
             classes.push("o_disabled_offline");
         }
         return classes.join(" ");
+    }
+
+    getCardStyle() {
+        const { cardColorField, record } = this.props;
+        const style = super.getCardStyle();
+        if (!cardColorField) {
+            return style;
+        }
+        const colorStyle = getColorListStyle(getColorIndex(record.data[cardColorField]));
+        return [style, colorStyle].filter(Boolean).join("; ");
     }
 
     /**

@@ -1,5 +1,6 @@
 import { Component, useProps, t } from "@odoo/owl";
 import { RestaurantOrderCourse } from "@pos_restaurant/app/models/restaurant_order_course";
+import { getColorListAttrs } from "@web/core/colorlist/colorlist";
 
 export class OrderCourse extends Component {
     static template = "pos_restaurant.OrderCourse";
@@ -8,6 +9,7 @@ export class OrderCourse extends Component {
         course_index: t.number(),
         slots: t.object().optional(),
     });
+    getColorListAttrs = getColorListAttrs;
 
     get course() {
         return this.props.course;

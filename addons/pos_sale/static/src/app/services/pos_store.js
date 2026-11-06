@@ -248,13 +248,13 @@ patch(PosStore.prototype, {
     },
 
     async downPaymentSO(saleOrder, isPercentage) {
-        const colorClassMap = {
-            [DECIMAL.value]: "o_colorlist_item_numpad_color_6",
-            Backspace: "o_colorlist_item_numpad_color_1",
-            "+10": "o_colorlist_item_numpad_color_10",
-            "+20": "o_colorlist_item_numpad_color_10",
-            "+50": "o_colorlist_item_numpad_color_10",
-            "-": "o_colorlist_item_numpad_color_3",
+        const colorMap = {
+            [DECIMAL.value]: 6,
+            Backspace: 1,
+            "+10": 10,
+            "+20": 10,
+            "+50": 10,
+            "-": 3,
         };
 
         const payload = await makeAwaitable(this.dialog, NumberPopup, {
@@ -262,7 +262,7 @@ patch(PosStore.prototype, {
             subtitle: _t("Due balance: %s", this.formatCurrency(saleOrder.amount_unpaid)),
             buttons: enhancedButtons().map((button) => ({
                 ...button,
-                class: `${colorClassMap[button.value] || ""}`,
+                color: colorMap[button.value],
             })),
             confirmButtonLabel: _t("Apply"),
             formatDisplayedValue: (x) => (isPercentage ? `${x} %` : x),

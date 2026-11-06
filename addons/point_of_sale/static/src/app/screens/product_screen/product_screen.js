@@ -216,10 +216,10 @@ export class ProductScreen extends Component {
     }
 
     getNumpadButtons() {
-        const colorClassMap = {
-            [this.env.services.localization.decimalPoint]: "o_colorlist_item_numpad_color_6",
-            Backspace: "o_colorlist_item_numpad_color_1",
-            "-": "o_colorlist_item_numpad_color_3",
+        const colorMap = {
+            [this.env.services.localization.decimalPoint]: 6,
+            Backspace: 1,
+            "-": 3,
         };
 
         const order = this.currentOrder;
@@ -261,9 +261,9 @@ export class ProductScreen extends Component {
                 (button.value === SWITCHSIGN.value && !this.pos.accessRight.canSwitchSign) ||
                 (order?.getSelectedOrderline()?.isServiceFeeLine() &&
                     order?.preset_id?.service_fee_type === "percent"),
+            color: colorMap[button.value],
             class: `
                 ${defaultLastRowValues.includes(button.value) ? "" : ""}
-                ${colorClassMap[button.value] || ""}
                 ${this.pos.numpadMode === button.value ? "active" : ""}
                 ${button.value === "quantity" ? "numpad-qty rounded-0" : ""}
                 ${button.value === "price" ? "numpad-price rounded-0" : ""}

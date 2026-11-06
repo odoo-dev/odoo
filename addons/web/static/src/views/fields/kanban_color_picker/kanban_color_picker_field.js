@@ -1,5 +1,5 @@
 import { _t } from "@web/core/l10n/translation";
-import { ColorList } from "@web/core/colorlist/colorlist";
+import { ColorList, getColorListAttrs } from "@web/core/colorlist/colorlist";
 import { registry } from "@web/core/registry";
 import { standardFieldProps } from "../standard_field_props";
 
@@ -8,6 +8,7 @@ import { Component, useProps } from "@odoo/owl";
 class KanbanColorPickerField extends Component {
     static template = "web.KanbanColorPickerField";
     props = useProps(standardFieldProps);
+    getColorListAttrs = getColorListAttrs;
 
     get colors() {
         return ColorList.COLORS;
