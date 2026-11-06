@@ -57,7 +57,7 @@ class AccountBankStatement(models.Model):
 
     company_id = fields.Many2one(
         comodel_name='res.company',
-        related='journal_id.company_id', store=True,
+        compute='_compute_company_id', store=True,
     )
 
     currency_id = fields.Many2one(
@@ -176,6 +176,13 @@ class AccountBankStatement(models.Model):
     def _compute_balance_end_real(self):
         for stmt in self:
             stmt.balance_end_real = stmt.balance_end
+
+    @api.depends('journal_id.company_id', 'line_ids.company_id')
+    def _compute_company_id(self):
+        for statement in self:
+            # The lines of a journal shared with branches belong to the branch they were created from
+            line_companies = statement.line_ids.company_id
+            statement.company_id = line_companies if len(line_companies) == 1 else statement.journal_id.company_id
 
     @api.depends('journal_id.currency_id', 'company_id.currency_id')
     def _compute_currency_id(self):
