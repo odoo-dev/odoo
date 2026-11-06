@@ -12572,6 +12572,88 @@ test(`cell-level keyboard navigation in non-editable list`, async () => {
     expect.verifySteps(["resId: 3"]);
 });
 
+test(`keyboard navigation: reach and leave the optional fields column in rows`, async () => {
+    await mountView({
+        resModel: "foo",
+        type: "list",
+        arch: `
+            <list>
+                <field name="foo"/>
+                <field name="int_field" optional="show"/>
+            </list>
+        `,
+    });
+
+    await press("ArrowDown");
+    await press("ArrowDown");
+    await press("ArrowRight");
+    await press("ArrowRight");
+    await animationFrame();
+    expect(`tbody tr:eq(0) .o_field_cell[name=int_field]`).toBeFocused();
+
+    // the cell below the optional fields toggler is reachable...
+    await press("ArrowRight");
+    await animationFrame();
+    expect(`tbody tr:eq(0) td:last-child`).toBeFocused();
+
+    // ...it is the last cell, so ArrowRight keeps the focus there...
+    await press("ArrowRight");
+    await animationFrame();
+    expect(`tbody tr:eq(0) td:last-child`).toBeFocused();
+
+    // ...and the other arrows still move away from it
+    await press("ArrowDown");
+    await animationFrame();
+    expect(`tbody tr:eq(1) td:last-child`).toBeFocused();
+
+    await press("ArrowUp");
+    await animationFrame();
+    expect(`tbody tr:eq(0) td:last-child`).toBeFocused();
+
+    await press("ArrowLeft");
+    await animationFrame();
+    expect(`tbody tr:eq(0) .o_field_cell[name=int_field]`).toBeFocused();
+});
+
+test(`keyboard navigation: reach and leave the optional fields toggler in header`, async () => {
+    await mountView({
+        resModel: "foo",
+        type: "list",
+        arch: `
+            <list>
+                <field name="foo"/>
+                <field name="int_field" optional="show"/>
+            </list>
+        `,
+    });
+
+    await press("ArrowDown");
+    await animationFrame();
+    expect(`thead th.o_list_record_selector input`).toBeFocused();
+
+    await press("ArrowRight");
+    await press("ArrowRight");
+    await animationFrame();
+    expect(`thead th[data-name=int_field]`).toBeFocused();
+
+    await press("ArrowRight");
+    await animationFrame();
+    expect(`thead th.o_list_actions_header`).toBeFocused();
+
+    await press("ArrowLeft");
+    await animationFrame();
+    expect(`thead th[data-name=int_field]`).toBeFocused();
+
+    await press("ArrowRight");
+    await press("ArrowDown");
+    await animationFrame();
+    expect(`tbody tr:eq(0) td:last-child`).toBeFocused();
+
+    await press("ArrowUp");
+    await animationFrame();
+    expect(`thead th.o_list_actions_header`).toBeFocused();
+});
+
 test(`keyboard navigation from last cell in editable list`, async () => {
     await mountView({
         resModel: "foo",
