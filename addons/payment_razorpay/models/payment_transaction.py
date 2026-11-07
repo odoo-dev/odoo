@@ -188,13 +188,7 @@ class PaymentTransaction(models.Model):
         :return: The converted amount in the given currency.
         :rtype: float
         """
-        inr_currency = (
-            self
-            .env["res.currency"]
-            .with_context(active_test=False)
-            .search([("name", "=", "INR")], limit=1)
-        )
-        return inr_currency._convert(amount, currency_id)
+        return self.env['res.currency'].ref('base.INR')._convert(amount, currency_id)
 
     def _send_payment_request(self):
         """Override of `payment` to send a payment request to Razorpay."""

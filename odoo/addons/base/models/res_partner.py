@@ -1454,9 +1454,8 @@ class ResPartner(models.Model):
 
         do_eu_check = False
         prefixed_country = ''
-        eu_prefix_country_group = self.env['res.country.group'].search([('code', '=', 'EU_PREFIX')], limit=1)
         country_code = EU_EXTRA_VAT_CODES_INV.get(vat_prefix, vat_prefix)
-        if country_code in eu_prefix_country_group.country_ids.mapped('code'):
+        if country_code in self.env['res.country.group'].ref('base.europe_prefix').country_ids.mapped('code'):
             if 'EU_PREFIX' in country.country_group_codes and vat_prefix:
                 vat = vat_number
                 prefixed_country = vat_prefix
@@ -1502,7 +1501,7 @@ class ResPartner(models.Model):
             else:
                 return '', code_to_check
 
-        if not vat_prefix and country in eu_prefix_country_group.country_ids and country.code not in EU_VAT_UNPREFIXED:
+        if not vat_prefix and country in self.env['res.country.group'].ref('base.europe_prefix').country_ids and country.code not in EU_VAT_UNPREFIXED:
             return self._run_vat_checks(country, country.code + vat, partner_name, validation)
 
         return vat_to_return, code_to_check

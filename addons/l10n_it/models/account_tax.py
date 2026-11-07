@@ -64,12 +64,5 @@ class AccountTax(models.Model):
         if not tax_tags:
             return False
 
-        it_tax_report_ve38_lines = self.env['account.report.line'].search([
-            ('report_id.country_id.code', '=', 'IT'),
-            ('code', '=', 'VE38'),
-        ])
-        if not it_tax_report_ve38_lines:
-            return False
-
-        ve38_lines_tags = it_tax_report_ve38_lines.expression_ids._get_matching_tags()
+        ve38_lines_tags = self.env['account.report.line'].ref('l10n_it.tax_annual_report_line_ve38').expression_ids._get_matching_tags()
         return bool(tax_tags & ve38_lines_tags)

@@ -1024,11 +1024,7 @@ class AccountMove(models.Model):
         """
         self.ensure_one()
         invoice_lines_tags = self.line_ids.tax_tag_ids
-        it_tax_report_vj3_lines = self.env['account.report.line'].search([
-            ('report_id.country_id.code', '=', 'IT'),
-            ('code', '=', 'VJ3'),
-        ])
-        vj3_lines_tags = it_tax_report_vj3_lines.expression_ids._get_matching_tags()
+        vj3_lines_tags = self.env['account.report.line'].ref('l10n_it.tax_annual_report_line_vj3').expression_ids._get_matching_tags()
         return bool(invoice_lines_tags & vj3_lines_tags)
 
     def _l10n_it_edi_is_simplified(self):

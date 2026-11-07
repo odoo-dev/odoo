@@ -29,7 +29,7 @@ class AccountChartTemplate(models.AbstractModel):
         if coa_responsibility:
             company.write({
                 'l10n_ar_afip_responsibility_type_id': coa_responsibility.id,
-                'country_id': self.env['res.country'].search([('code', '=', 'AR')]).id,
+                'country_id': self.env['res.country'].ref('base.ar').id,
                 'tax_calculation_rounding_method': 'round_globally',
             })
 

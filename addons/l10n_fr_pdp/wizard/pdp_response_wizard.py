@@ -100,10 +100,7 @@ class PdpResponseWizard(models.TransientModel):
 
     @api.depends('move_ids')
     def _compute_currency_id(self):
-        eur = self.env['res.currency'].search([('name', '=', 'EUR')], limit=1)
-        if not eur:
-            raise UserError(self.env._("The EUR currency is missing."))
-        self.currency_id = eur
+        self.currency_id = self.env['res.currency'].ref('base.EUR')
 
     @api.depends('move_ids')
     def _compute_paid_amount(self):

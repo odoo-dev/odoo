@@ -425,9 +425,8 @@ class AccountMove(models.Model):
             operation_date = self.delivery_date.isoformat()
 
         # Multi-currencies.
-        eur_curr = self.env['res.currency'].search([('name', '=', 'EUR')])
         inv_curr = self.currency_id
-        conversion_needed = inv_curr != eur_curr
+        conversion_needed = inv_curr != self.env['res.currency'].ref('base.EUR')
 
         # Invoice xml values.
         invoice_ref = self.ref and self.ref[:20]
@@ -530,7 +529,7 @@ class AccountMove(models.Model):
             'is_outstanding': self.move_type.startswith('out_'),
             'float_repr': float_repr,
             'file_currency': inv_curr,
-            'eur': eur_curr,
+            'eur': self.env['res.currency'].ref('base.EUR'),
             'conversion_needed': conversion_needed,
             'refund_multiplier': refund_multiplier,
 
