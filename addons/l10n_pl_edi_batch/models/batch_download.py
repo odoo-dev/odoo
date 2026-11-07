@@ -386,7 +386,8 @@ class BatchDownload(models.Model):
                         # create the move and the attachment
                         move = AccountMove.create([{'move_type': 'in_invoice', 'l10n_pl_edi_number': ksef_number}])
                         attachment = self.env['ir.attachment'].create({
-                            'name': ksef_number,
+                            'name': f"KSeF-{ksef_number.replace('/', '_')}.xml",
+                            'description': self.env._('KSeF Fetched Invoice XML'),
                             'mimetype': 'application/xml',
                             'company_id': batch.company_id.id,
                             'res_model': move._name,
@@ -402,15 +403,7 @@ class BatchDownload(models.Model):
 
                         # if successful
                         if move.invoice_line_ids:
-                            attachment.write({
-                                'description': self.env._('KSeF Received Bill XML'),
-                                'res_field': 'l10n_pl_edi_attachment_file',
-                            })
-                            move.write({
-                                'l10n_pl_edi_status': 'fetched',
-                                'l10n_pl_edi_attachment_id': attachment.id,
-                            })
-                            move.invalidate_recordset(fnames=['l10n_pl_edi_attachment_id', 'l10n_pl_edi_attachment_file'])
+                            move.l10n_pl_edi_status = 'fetched'
                             self._commit()
 
                 batch.part_ids.unlink()
