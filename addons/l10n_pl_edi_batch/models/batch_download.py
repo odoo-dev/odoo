@@ -315,6 +315,8 @@ class BatchDownload(models.Model):
                         batch._delayed_trigger('l10n_pl_edi_batch.ir_cron_check_status')
                     else:
                         batch.retry_count = 0  # stop the quick retries, the next run asks again
+                elif batch.state == 'failed':
+                    self._create_batch_download(company, batch.date_from, batch.date_to)  # request the same window again
 
         self._run_for_all_companies(check_status, 'l10n_pl_edi_batch.ir_cron_check_status')
 
