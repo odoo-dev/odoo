@@ -74,11 +74,11 @@ class BatchDownloadPart(models.Model):
         for record in self:
             with tempfile.NamedTemporaryFile(mode='w+b') as tmpf:
                 try:
-                    response = requests.request(record.download_method, record.download_url, stream=True, timeout=TIMEOUT)
-                    _logger.debug("KSeF part download %s %s %s", record.download_method, record.download_url, response.status_code)
-                    response.raise_for_status()
-                    for decrypted_chunk in record._decrypt_stream(response):
-                        tmpf.write(decrypted_chunk)
+                    with requests.request(record.download_method, record.download_url, stream=True, timeout=TIMEOUT) as response:
+                        _logger.debug("KSeF part download %s %s %s", record.download_method, record.download_url, response.status_code)
+                        response.raise_for_status()
+                        for decrypted_chunk in record._decrypt_stream(response):
+                            tmpf.write(decrypted_chunk)
                 except (
                     requests.RequestException, ValueError, TypeError,
                     InvalidKey, InvalidSignature, UnsupportedAlgorithm,
