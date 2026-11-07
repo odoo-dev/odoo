@@ -8,6 +8,9 @@ from datetime import timedelta
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
 from odoo.fields import Command, Domain
+from odoo.tools.translate import LazyTranslate
+
+_lt = LazyTranslate(__name__)
 
 
 class StockLocation(models.Model):
@@ -18,6 +21,11 @@ class StockLocation(models.Model):
     _order = 'complete_name, id'
     _rec_names_search = ('complete_name', 'barcode')
     _check_company_auto = True
+
+    _inter_company_location = models.Ref(
+        'stock.stock_location_inter_company', 'stock.location',
+        message=_lt('The %(name)s location is required by the Inventory app and cannot be deleted, but you can archive it.'),
+    )
     _check_company_domain = models.check_company_domain_parent_of
 
     @api.model
@@ -202,12 +210,6 @@ class StockLocation(models.Model):
         for record in self:
             if record.usage == 'inventory' and self.env['stock.picking.type'].search_count([('code', '=', 'mrp_operation'), ('default_location_dest_id', '=', record.id)], limit=1):
                 raise ValidationError(_("You cannot set a location as a scrap location when it is assigned as a destination location for a manufacturing type operation."))
-
-    @api.ondelete(at_uninstall=False)
-    def _unlink_except_master_data(self):
-        inter_company_location = self.env.ref('stock.stock_location_inter_company')
-        if inter_company_location in self:
-            raise ValidationError(_('The %s location is required by the Inventory app and cannot be deleted, but you can archive it.', inter_company_location.name))
 
     def _search_is_empty(self, operator, value):
         if operator != 'in':

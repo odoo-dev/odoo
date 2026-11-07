@@ -2,13 +2,25 @@
 from collections import OrderedDict
 from zlib import error as zlib_error
 
-from odoo import api, fields, models, _
+from odoo import fields, models, _
 from odoo.exceptions import UserError
 from odoo.tools import pdf
+from odoo.tools.translate import LazyTranslate
+
+_lt = LazyTranslate(__name__)
+
+_MASTER_REPORT_MESSAGE = _lt("You cannot delete this report (%(name)s), it is used by the accounting PDF generation engine.")
 
 
 class IrActionsReport(models.Model):
     _inherit = 'ir.actions.report'
+
+    _report_invoices = models.Ref('account.account_invoices', 'ir.actions.report', message=_MASTER_REPORT_MESSAGE)
+    _report_original_vendor_bill = models.Ref('account.action_account_original_vendor_bill', 'ir.actions.report', message=_MASTER_REPORT_MESSAGE)
+    _report_invoices_without_payment = models.Ref('account.account_invoices_without_payment', 'ir.actions.report', message=_MASTER_REPORT_MESSAGE)
+    _report_payment_receipt = models.Ref('account.action_report_payment_receipt', 'ir.actions.report', message=_MASTER_REPORT_MESSAGE)
+    _report_account_statement = models.Ref('account.action_report_account_statement', 'ir.actions.report', message=_MASTER_REPORT_MESSAGE)
+    _report_account_hash_integrity = models.Ref('account.action_report_account_hash_integrity', 'ir.actions.report', message=_MASTER_REPORT_MESSAGE)
 
     is_invoice_report = fields.Boolean(
         string="Invoice report",
@@ -75,22 +87,6 @@ class IrActionsReport(models.Model):
                 raise UserError(_("Only invoices could be printed."))
 
         return super()._pre_render_qweb_pdf(report_ref, res_ids=res_ids, data=data)
-
-    @api.ondelete(at_uninstall=False)
-    def _unlink_except_master_tags(self):
-        master_xmlids = [
-            "account_invoices",
-            "action_account_original_vendor_bill",
-            "account_invoices_without_payment",
-            "action_report_journal",
-            "action_report_payment_receipt",
-            "action_report_account_statement",
-            "action_report_account_hash_integrity",
-        ]
-        for master_xmlid in master_xmlids:
-            master_report = self.env.ref(f"account.{master_xmlid}", raise_if_not_found=False)
-            if master_report and master_report in self:
-                raise UserError(_("You cannot delete this report (%s), it is used by the accounting PDF generation engine.", master_report.name))
 
     def _get_rendering_context(self, report, docids, data):
         data = super()._get_rendering_context(report, docids, data)

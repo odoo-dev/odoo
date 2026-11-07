@@ -1,11 +1,19 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, models
-from odoo.exceptions import UserError, ValidationError
+from odoo import models
+from odoo.exceptions import ValidationError
+from odoo.tools.translate import LazyTranslate
+
+_lt = LazyTranslate(__name__)
+
+_LOYALTY_PRODUCT_MESSAGE = _lt("You cannot delete %(name)s as it is used in 'Coupons & Loyalty'. Please archive it instead.")
 
 
 class ProductProduct(models.Model):
     _inherit = "product.product"
+
+    _gift_card_product = models.Ref('loyalty.gift_card_product_50', 'product.product', message=_LOYALTY_PRODUCT_MESSAGE)
+    _ewallet_product = models.Ref('loyalty.ewallet_product_50', 'product.product', message=_LOYALTY_PRODUCT_MESSAGE)
 
     def write(self, vals):
         if not vals.get("active", True) and any(product.active for product in self):
@@ -32,18 +40,3 @@ class ProductProduct(models.Model):
                     )
                 )
         return super().write(vals)
-
-    @api.ondelete(at_uninstall=False)
-    def _unlink_except_loyalty_products(self):
-        product_data = [
-            self.env.ref("loyalty.gift_card_product_50", False),
-            self.env.ref("loyalty.ewallet_product_50", False),
-        ]
-        for product in self.filtered(lambda p: p in product_data):
-            raise UserError(
-                product.env._(
-                    "You cannot delete %(name)s as it is used in 'Coupons & Loyalty'."
-                    " Please archive it instead.",
-                    name=product.with_context(display_default_code=False).display_name,
-                )
-            )

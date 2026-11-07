@@ -1,12 +1,20 @@
 from odoo import api, fields, models, _
 from odoo.fields import Domain
 from odoo.tools import SQL
-from odoo.exceptions import UserError
+from odoo.tools.translate import LazyTranslate
+
+_lt = LazyTranslate(__name__)
+
+_MASTER_TAG_MESSAGE = _lt("You cannot delete this account tag (%(name)s), it is used on the chart of account definition.")
 
 
 class AccountAccountTag(models.Model):
     _name = 'account.account.tag'
     _description = 'Account Tag'
+
+    _tag_operating = models.Ref('account.account_tag_operating', 'account.account.tag', message=_MASTER_TAG_MESSAGE)
+    _tag_financing = models.Ref('account.account_tag_financing', 'account.account.tag', message=_MASTER_TAG_MESSAGE)
+    _tag_investing = models.Ref('account.account_tag_investing', 'account.account.tag', message=_MASTER_TAG_MESSAGE)
 
     name = fields.Char('Tag Name', required=True, translate=True)
     applicability = fields.Selection([('accounts', 'Accounts'), ('taxes', 'Taxes'), ('products', 'Products')], required=True, default='accounts')
@@ -105,18 +113,6 @@ class AccountAccountTag(models.Model):
             )
             for record in self
         ))
-
-    @api.ondelete(at_uninstall=False)
-    def _unlink_except_master_tags(self):
-        master_xmlids = [
-            "account_tag_operating",
-            "account_tag_financing",
-            "account_tag_investing",
-        ]
-        for master_xmlid in master_xmlids:
-            master_tag = self.env.ref(f"account.{master_xmlid}", raise_if_not_found=False)
-            if master_tag and master_tag in self:
-                raise UserError(_("You cannot delete this account tag (%s), it is used on the chart of account definition.", master_tag.name))
 
     def _translate_tax_tags(self, langs=None, tag_ids=None):
         """Translate tax tags having the same name as report lines."""

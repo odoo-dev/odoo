@@ -10,6 +10,9 @@ from odoo.exceptions import UserError
 from odoo.fields import Domain
 from odoo.http import request
 from odoo.tools.translate import html_translate
+from odoo.tools.translate import LazyTranslate
+
+_lt = LazyTranslate(__name__)
 
 
 class WebsiteMenu(models.Model):
@@ -19,6 +22,11 @@ class WebsiteMenu(models.Model):
 
     _parent_store = True
     _order = "sequence, id"
+
+    _main_menu = models.Ref(
+        'website.main_menu', 'website.menu',
+        message=_lt("You cannot delete this website menu as this serves as the default parent menu for new websites (e.g., /shop, /event, ...)."),
+    )
 
     def _default_sequence(self):
         menu = self.search([], limit=1, order="sequence DESC")
@@ -251,12 +259,6 @@ class WebsiteMenu(models.Model):
                 if copy := self.env.ref(website._website_xmlid(id), raise_if_not_found=False):
                     copies_to_remove += copy
         return super(WebsiteMenu, self + copies_to_remove).unlink()
-
-    @api.ondelete(at_uninstall=False)
-    def _unlink_except_master_tags(self):
-        main_menu = self.env.ref('website.main_menu', raise_if_not_found=False)
-        if main_menu and main_menu in self:
-            raise UserError(_("You cannot delete this website menu as this serves as the default parent menu for new websites (e.g., /shop, /event, ...)."))
 
     def _compute_visible(self):
         for menu in self:

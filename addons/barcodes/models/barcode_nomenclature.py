@@ -1,8 +1,10 @@
 import re
 
-from odoo import models, fields, api, _
-from odoo.exceptions import UserError
+from odoo import models, fields, api
 from odoo.tools.barcode import check_barcode_encoding, get_barcode_check_digit
+from odoo.tools.translate import LazyTranslate
+
+_lt = LazyTranslate(__name__)
 
 
 UPC_EAN_CONVERSIONS = [
@@ -22,6 +24,11 @@ class BarcodeNomenclature(models.Model):
     upc_ean_conv = fields.Selection(
         UPC_EAN_CONVERSIONS, string='UPC/EAN Conversion', required=True, default='always',
         help="UPC Codes can be converted to EAN by prefixing them with a zero. This setting determines if a UPC/EAN barcode should be automatically converted in one way or another when trying to match a rule with the other encoding.")
+
+    _default_nomenclature = models.Ref(
+        'barcodes.default_barcode_nomenclature', 'barcode.nomenclature',
+        message=_lt("You cannot delete '%(name)s' because it's the default barcode nomenclature."),
+    )
 
     @api.model
     def sanitize_ean(self, ean):
@@ -204,12 +211,3 @@ class BarcodeNomenclature(models.Model):
             'type': 'package',
             'value': sscc,
         }]
-
-    @api.ondelete(at_uninstall=False)
-    def _unlink_except_default(self):
-        default_record = self.env.ref("barcodes.default_barcode_nomenclature", raise_if_not_found=False)
-        if default_record and default_record in self:
-            raise UserError(_(
-                "You cannot delete '%(name)s' because it's the default barcode nomenclature.",
-                name=default_record.display_name
-            ))

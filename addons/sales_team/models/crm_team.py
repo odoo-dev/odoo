@@ -3,6 +3,11 @@ import random
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 from odoo.fields import Domain
+from odoo.tools.translate import LazyTranslate
+
+_lt = LazyTranslate(__name__)
+
+_DEFAULT_TEAM_MESSAGE = _lt('Cannot delete default team "%(name)s"')
 
 
 class CrmTeam(models.Model):
@@ -12,6 +17,9 @@ class CrmTeam(models.Model):
     _order = "sequence ASC, create_date DESC, id DESC"
     _check_company_auto = True
     _mail_post_access = 'read'
+
+    _website_sales_team = models.Ref('sales_team.salesteam_website_sales', 'crm.team', message=_DEFAULT_TEAM_MESSAGE)
+    _pos_sales_team = models.Ref('sales_team.pos_sales_team', 'crm.team', message=_DEFAULT_TEAM_MESSAGE)
 
     def _get_default_color(self):
         return random.randint(1, 11)
@@ -234,16 +242,6 @@ class CrmTeam(models.Model):
         if vals.get('member_ids'):
             self._add_members_to_favorites()
         return res
-
-    @api.ondelete(at_uninstall=False)
-    def _unlink_except_default(self):
-        default_teams = [
-            self.env.ref('sales_team.salesteam_website_sales'),
-            self.env.ref('sales_team.pos_sales_team'),
-        ]
-        for team in self:
-            if team in default_teams:
-                raise UserError(_('Cannot delete default team "%s"', team.name))
 
     # ------------------------------------------------------------
     # ACTIONS

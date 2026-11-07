@@ -1,21 +1,15 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, models
-from odoo.exceptions import UserError
+from odoo import models
+from odoo.tools.translate import LazyTranslate
+
+_lt = LazyTranslate(__name__)
 
 
 class ProductCategory(models.Model):
     _inherit = "product.category"
 
-    @api.ondelete(at_uninstall=False)
-    def _unlink_except_delivery_category(self):
-        delivery_category = self.env.ref(
-            "delivery.product_category_deliveries", raise_if_not_found=False
-        )
-        if delivery_category and delivery_category in self:
-            raise UserError(
-                self.env._(
-                    "You cannot delete this product category as it is used on the products linked"
-                    " to delivery methods."
-                )
-            )
+    _delivery_category = models.Ref(
+        'delivery.product_category_deliveries', 'product.category',
+        message=_lt("You cannot delete this product category as it is used on the products linked to delivery methods."),
+    )
