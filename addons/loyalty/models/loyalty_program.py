@@ -312,10 +312,6 @@ class LoyaltyProgram(models.Model):
         first_sale_product = self.env["product.product"].search(
             [("company_id", "in", [False, self.env.company.id]), ("sale_ok", "=", True)], limit=1
         )
-        loyalty_card_mail_template = (
-            self.env.ref("loyalty.mail_template_loyalty_card", raise_if_not_found=False)
-            or self.env["mail.template"]
-        )
         return {
             "coupons": {
                 "applies_on": "current",
@@ -331,7 +327,7 @@ class LoyaltyProgram(models.Model):
                     Command.clear(),
                     Command.create({
                         "trigger": "create",
-                        "mail_template_id": loyalty_card_mail_template.id,
+                        "mail_template_id": self.env['mail.template'].ref('loyalty.mail_template_loyalty_card').id,
                     }),
                 ],
             },
@@ -366,9 +362,7 @@ class LoyaltyProgram(models.Model):
                         "reward_point_amount": 1,
                         "reward_point_mode": "money",
                         "reward_point_split": True,
-                        "product_ids": self.env.ref(
-                            "loyalty.gift_card_product_50", raise_if_not_found=False
-                        ),
+                        "product_ids": self.env['product.product']._loyalty__gift_card_product_50,
                         "minimum_qty": 0,
                     }),
                 ],
@@ -387,12 +381,7 @@ class LoyaltyProgram(models.Model):
                     Command.clear(),
                     Command.create({
                         "trigger": "create",
-                        "mail_template_id": (
-                            self.env.ref(
-                                "loyalty.mail_template_gift_card", raise_if_not_found=False
-                            )
-                            or self.env["mail.template"]
-                        ).id,
+                        "mail_template_id": self.env['mail.template'].ref('loyalty.mail_template_gift_card').id,
                     }),
                 ],
             },
@@ -419,9 +408,7 @@ class LoyaltyProgram(models.Model):
                         "reward_point_amount": "1",
                         "reward_point_mode": "money",
                         "reward_point_split": False,
-                        "product_ids": self.env.ref(
-                            "loyalty.ewallet_product_50", raise_if_not_found=False
-                        ),
+                        "product_ids": self.env['product.product']._loyalty__ewallet_product_50,
                     }),
                 ],
                 "reward_ids": [
@@ -506,7 +493,7 @@ class LoyaltyProgram(models.Model):
                     Command.clear(),
                     Command.create({
                         "trigger": "create",
-                        "mail_template_id": loyalty_card_mail_template.id,
+                        "mail_template_id": self.env['mail.template'].ref('loyalty.mail_template_loyalty_card').id,
                     }),
                 ],
             },

@@ -34,7 +34,7 @@ class AccountChartTemplate(models.AbstractModel):
     def _get_demo_data_product_product(self, template_code):
         # Only needed for the first company
         company = self.env.company
-        if company != self.env.ref('base.main_company', raise_if_not_found=False):
+        if company != self.env['res.company']._base__main_company_optional:
             return {}
 
         taxes = {}
@@ -55,7 +55,7 @@ class AccountChartTemplate(models.AbstractModel):
     def _get_demo_data_products_template(self, template_code):
         company = self.env.company
         # Only needed for the first company
-        if company != self.env.ref('base.main_company', raise_if_not_found=False):
+        if company != self.env['res.company']._base__main_company_optional:
             return {}
 
         taxes = {}

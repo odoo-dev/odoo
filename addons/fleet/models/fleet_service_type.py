@@ -9,6 +9,8 @@ class FleetServiceType(models.Model):
     _description = 'Fleet Service Type'
     _order = 'name'
 
+    _fleet__type_service_service_7 = models.Ref('fleet.type_service_service_7', required=False)
+
     name = fields.Char(required=True, translate=True)
     category = fields.Selection([
         ('contract', 'Contract'),

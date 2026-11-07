@@ -9,11 +9,10 @@ class WebsiteSaleDonation(http.Controller):
         :return: A dict with the values required by the donation snippet.
         :rtype: dict
         """
-        donation_product = self.env.ref("website_sale.product_donation", raise_if_not_found=False)
-        if not donation_product:
+        if not self.env['product.template']._website_sale__product_donation:
             return {}
         # Unpublished, sudo to allow public users to read it
-        donation_product_sudo = donation_product.sudo()
+        donation_product_sudo = self.env['product.template']._website_sale__product_donation.sudo()
         if not donation_product_sudo.active:
             return {}
         return {

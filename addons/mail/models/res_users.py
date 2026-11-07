@@ -99,7 +99,7 @@ class ResUsers(models.Model):
         # e.g. if you add HR > Manager to a user, this method will be called.
         # It should therefore be written to be as performant as possible, and make the less change/write as possible
         # when it's not `mail.group_mail_notification_type_inbox` or `share` that are being changed.
-        inbox_group_id = self.env['ir.model.data']._xmlid_to_res_id('mail.group_mail_notification_type_inbox')
+        inbox_group_id = self.env['res.groups'].ref('mail.group_mail_notification_type_inbox').id
 
         self.filtered_domain([
             ('group_ids', 'in', inbox_group_id), ('notification_type', '!=', 'inbox')

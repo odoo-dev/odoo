@@ -31,7 +31,7 @@ class ResourceCalendarLeaves(models.Model):
             if leave.resource_id:
                 continue
             country = leave.calendar_id.company_id.country_id or leave.company_id.country_id or self.env.company.country_id
-            leave.work_entry_type_id = public_holiday_types.get(country, self.env.ref('hr_work_entry.generic_work_entry_type_public_holiday', raise_if_not_found=False))
+            leave.work_entry_type_id = public_holiday_types.get(country, self.env['hr.work.entry.type']._hr_work_entry__generic_work_entry_type_public_holiday)
 
     @api.depends('calendar_id.company_id', 'company_id')
     def _compute_allowed_work_entry_type_ids(self):

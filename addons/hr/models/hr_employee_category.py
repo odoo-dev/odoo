@@ -11,6 +11,8 @@ class HrEmployeeCategory(models.Model):
 
     _description = "Employee Category"
 
+    _hr__employee_category_demo = models.Ref('hr.employee_category_demo', required=False)
+
     def _get_default_color(self):
         return randint(1, 11)
 

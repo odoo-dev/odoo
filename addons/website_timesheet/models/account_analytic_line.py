@@ -9,5 +9,4 @@ class AccountAnalyticLine(models.Model):
         """
         Determine if we show timesheet information in the portal.
         """
-        entry = self.env.ref("hr_timesheet.portal_timesheets", raise_if_not_found=False)
-        return bool(entry and entry.show_in_portal)
+        return bool(self.env['portal.entry']._hr_timesheet__portal_timesheets and self.env['portal.entry']._hr_timesheet__portal_timesheets.show_in_portal)

@@ -54,3 +54,5 @@ from . import product_uom
 from . import ir_sequence
 from . import pos_prep_order
 from . import pos_prep_line
+from . import account_payment_method
+from . import ir_ui_menu

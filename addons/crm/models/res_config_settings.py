@@ -55,9 +55,9 @@ class ResConfigSettings(models.TransientModel):
 
     @api.depends('crm_use_auto_assignment')
     def _compute_crm_auto_assignment_data(self):
-        assign_cron = self.sudo().env.ref('crm.ir_cron_crm_lead_assign', raise_if_not_found=False)
+        assign_cron = self.env['ir.cron'].sudo().ref('crm.ir_cron_crm_lead_assign')
         for setting in self:
-            if setting.crm_use_auto_assignment and assign_cron:
+            if setting.crm_use_auto_assignment:
                 setting.crm_auto_assignment_action = 'auto' if assign_cron.active else 'manual'
                 setting.crm_auto_assignment_interval_type = assign_cron.interval_type or 'days'
                 setting.crm_auto_assignment_interval_number = assign_cron.interval_number or 1
@@ -135,7 +135,7 @@ class ResConfigSettings(models.TransientModel):
                 setting.predictive_lead_scoring_field_labels = _('Stage')
 
     def set_values(self):
-        group_use_lead_id = self.env['ir.model.data']._xmlid_to_res_id('crm.group_use_lead')
+        group_use_lead_id = self.env['res.groups'].ref('crm.group_use_lead').id
         has_group_lead_before = group_use_lead_id in self.env.user.all_group_ids.ids
         super(ResConfigSettings, self).set_values()
         # update use leads / opportunities setting on all teams according to settings update
@@ -146,21 +146,20 @@ class ResConfigSettings(models.TransientModel):
             for team in teams:
                 team.alias_id.write(team._alias_get_creation_values())
         # synchronize cron with settings
-        assign_cron = self.sudo().env.ref('crm.ir_cron_crm_lead_assign', raise_if_not_found=False)
-        if assign_cron:
-            # Writing on a cron tries to grab a write-lock on the table. This
-            # could be avoided when saving a res.config without modifying this specific
-            # configuration
-            cron_vals = {
-                'active': self.crm_use_auto_assignment and self.crm_auto_assignment_action == 'auto',
-                'interval_type': self.crm_auto_assignment_interval_type,
-                'interval_number': self.crm_auto_assignment_interval_number,
-                # keep nextcall on cron as it is required whatever the setting
-                'nextcall': self.crm_auto_assignment_run_datetime if self.crm_auto_assignment_run_datetime else assign_cron.nextcall,
-            }
-            cron_vals = {field_name: value for field_name, value in cron_vals.items() if assign_cron[field_name] != value}
-            if cron_vals:
-                assign_cron.write(cron_vals)
+        assign_cron = self.env['ir.cron'].sudo().ref('crm.ir_cron_crm_lead_assign')
+        # Writing on a cron tries to grab a write-lock on the table. This
+        # could be avoided when saving a res.config without modifying this specific
+        # configuration
+        cron_vals = {
+            'active': self.crm_use_auto_assignment and self.crm_auto_assignment_action == 'auto',
+            'interval_type': self.crm_auto_assignment_interval_type,
+            'interval_number': self.crm_auto_assignment_interval_number,
+            # keep nextcall on cron as it is required whatever the setting
+            'nextcall': self.crm_auto_assignment_run_datetime if self.crm_auto_assignment_run_datetime else assign_cron.nextcall,
+        }
+        cron_vals = {field_name: value for field_name, value in cron_vals.items() if assign_cron[field_name] != value}
+        if cron_vals:
+            assign_cron.write(cron_vals)
         # TDE FIXME: re create cron if not found ?
 
     def _get_crm_auto_assignmment_run_datetime(self, run_datetime, run_interval, run_interval_number):

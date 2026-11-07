@@ -5,6 +5,8 @@ from odoo.fields import Domain
 class ProductTemplate(models.Model):
     _inherit = 'product.template'
 
+    _pos_self_order__product_delivery_template = models.Ref('pos_self_order.product_delivery_template', required=False)
+
     self_order_available = fields.Boolean(
         string="Available in Self Order",
         help="If this product is available in the Self Order screens",

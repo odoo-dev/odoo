@@ -5,6 +5,10 @@ from odoo import fields, models, api
 class ResCompany(models.Model):
     _inherit = "res.company"
 
+    _base__company_exento = models.Ref('base.company_exento', required=False)
+    _base__company_mono = models.Ref('base.company_mono', required=False)
+    _base__company_ri = models.Ref('base.company_ri', required=False)
+
     l10n_ar_gross_income_number = fields.Char(
         related='partner_id.l10n_ar_gross_income_number', string='Gross Income Number', readonly=False,
         help="This field is required in order to print the invoice report properly")

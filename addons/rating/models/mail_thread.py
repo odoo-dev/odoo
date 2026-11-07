@@ -27,7 +27,7 @@ class MailThread(models.AbstractModel):
     # --------------------------------------------------
 
     def _rating_apply_get_default_subtype_id(self):
-        return self.env['ir.model.data']._xmlid_to_res_id("mail.mt_comment")
+        return self.env['mail.message.subtype'].ref('mail.mt_comment').id
 
     def _rating_get_operator(self):
         """ Return the operator (partner) that is the person who is rated.

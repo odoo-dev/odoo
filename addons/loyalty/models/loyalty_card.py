@@ -178,7 +178,6 @@ class LoyaltyCard(models.Model):
         """
         self.ensure_one()
         default_template = self._get_default_template()
-        compose_form = self.env.ref("mail.email_compose_message_wizard_form", False)
         ctx = dict(
             default_model="loyalty.card",
             default_res_ids=self.ids,
@@ -191,8 +190,8 @@ class LoyaltyCard(models.Model):
             "type": "ir.actions.act_window",
             "view_mode": "form",
             "res_model": "mail.compose.message",
-            "views": [(compose_form.id, "form")],
-            "view_id": compose_form.id,
+            "views": [(self.env['ir.ui.view'].ref('mail.email_compose_message_wizard_form').id, "form")],
+            "view_id": self.env['ir.ui.view'].ref('mail.email_compose_message_wizard_form').id,
             "target": "new",
             "context": ctx,
         }

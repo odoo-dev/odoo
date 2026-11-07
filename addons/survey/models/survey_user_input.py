@@ -725,12 +725,11 @@ class SurveyUser_Input(models.Model):
     # ------------------------------------------------------------
 
     def _notify_new_participation_subscribers(self):
-        subtype_id = self.env.ref('survey.mt_survey_survey_user_input_completed', raise_if_not_found=False)
-        if not self.ids or not subtype_id:
+        if not self.ids:
             return
         author_id = self.env.ref('base.partner_root').id if self.env.user.is_public else self.env.user.partner_id.id
         # Only post if there are any followers
-        recipients_data = self.env['mail.followers']._get_recipient_data(self.survey_id, 'notification', subtype_id.id)
+        recipients_data = self.env['mail.followers']._get_recipient_data(self.survey_id, 'notification', self.env['mail.message.subtype'].ref('survey.mt_survey_survey_user_input_completed').id)
         followed_survey_ids = [survey_id for survey_id, followers in recipients_data.items() if followers]
         for user_input in self.filtered(lambda user_input_: user_input_.survey_id.id in followed_survey_ids):
             survey_title = user_input.survey_id.title

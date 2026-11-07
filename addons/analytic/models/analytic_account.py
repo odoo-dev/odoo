@@ -201,7 +201,6 @@ class AccountAnalyticAccount(models.Model):
                 (current_fname, 'in', accounts.ids),
             ]
             if self.env['account.analytic.line'].sudo().search_count(domain, limit=1):
-                list_view = self.env.ref('analytic.view_account_analytic_line_tree', raise_if_not_found=False)
                 raise RedirectWarning(
                     message=_("Whoa there! Making this change would wipe out your current data. Let's avoid that, shall we?"),
                     action={
@@ -209,7 +208,7 @@ class AccountAnalyticAccount(models.Model):
                         'type': 'ir.actions.act_window',
                         'domain': domain,
                         'target': 'new',
-                        'views': [(list_view and list_view.id, 'list')]
+                        'views': [(self.env['ir.ui.view'].ref('analytic.view_account_analytic_line_tree').id, 'list')]
                     },
                     button_text=_("See them"),
                 )

@@ -20,6 +20,6 @@ class ProductTemplate(models.Model):
         # 000000 is default for both general goods/service
         for record in self:
             if record.type == 'service':
-                record.l10n_id_product_code = self.env.ref('l10n_id_efaktur_coretax.product_code_000000_service', raise_if_not_found=False)
+                record.l10n_id_product_code = self.env['l10n_id_efaktur_coretax.product.code']._l10n_id_efaktur_coretax__product_code_000000_service
             else:
-                record.l10n_id_product_code = self.env.ref('l10n_id_efaktur_coretax.product_code_000000_goods', raise_if_not_found=False)
+                record.l10n_id_product_code = self.env['l10n_id_efaktur_coretax.product.code']._l10n_id_efaktur_coretax__product_code_000000_goods_optional

@@ -9,6 +9,6 @@ class AccountChartTemplate(models.AbstractModel):
     def _post_load_data(self, template_code, company, template_data):
         super()._post_load_data(template_code, company, template_data)
         if template_code == 'nl':
-            if cash_tag := self.env.ref('l10n_nl.account_tag_25', raise_if_not_found=False):
-                company.account_journal_suspense_account_id.tag_ids += cash_tag
-                company.transfer_account_id.tag_ids += cash_tag
+            cash_tag = self.env['account.account.tag'].ref('l10n_nl.account_tag_25')
+            company.account_journal_suspense_account_id.tag_ids += cash_tag
+            company.transfer_account_id.tag_ids += cash_tag

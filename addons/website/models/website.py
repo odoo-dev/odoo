@@ -115,6 +115,8 @@ class Website(models.CachedModel):
     _description = "Website"
     _order = "sequence, id"
 
+    _base__default_website = models.Ref('base.default_website', required=False)
+
     def website_domain(self):
         return Domain('website_id', 'in', [False, *self.ids])
 
@@ -347,19 +349,18 @@ class Website(models.CachedModel):
                 default_policy_page_to_unlink = default_policy_page
                 values['cookie_policy_id'] = False
             elif not values.get('cookie_policy_id', self.cookie_policy_id):
-                cookies_view = self.env.ref('website.cookie_policy', raise_if_not_found=False)
-                if cookies_view:
-                    cookies_view.with_context(website_id=self.id).write({'website_id': self.id})
-                    specific_cook_view = self.with_context(website_id=self.id).viewref('website.cookie_policy')
-                    if not default_policy_page:
-                        default_policy_page = self.env['website.page'].create({
-                            'is_published': True,
-                            'website_indexed': False,
-                            'url': '/cookie-policy',
-                            'website_id': self.id,
-                            'view_id': specific_cook_view.id,
-                        })
-                    values["cookie_policy_id"] = default_policy_page
+                cookies_view = self.env['ir.ui.view'].ref('website.cookie_policy')
+                cookies_view.with_context(website_id=self.id).write({'website_id': self.id})
+                specific_cook_view = self.with_context(website_id=self.id).viewref('website.cookie_policy')
+                if not default_policy_page:
+                    default_policy_page = self.env['website.page'].create({
+                        'is_published': True,
+                        'website_indexed': False,
+                        'url': '/cookie-policy',
+                        'website_id': self.id,
+                        'view_id': specific_cook_view.id,
+                    })
+                values["cookie_policy_id"] = default_policy_page
 
         result = super(Website, self - public_user_to_change_websites).write(values)
         default_policy_page_to_unlink.unlink()
@@ -479,7 +480,7 @@ class Website(models.CachedModel):
         points to the first website by sequence
         """
         first_website = self.sudo().search([], limit=1, order='sequence, id')
-        default_website = self.env.ref("base.default_website", raise_if_not_found=False)
+        default_website = self._base__default_website
         if not first_website:
             return
         if not default_website:
@@ -530,9 +531,8 @@ class Website(models.CachedModel):
 
     @api.ondelete(at_uninstall=False)
     def _unlink_except_default_website(self):
-        default_website = self.env.ref('base.default_website', raise_if_not_found=False)
-        if default_website and default_website in self:
-            raise UserError(_("You cannot delete default website %s. Try to change its settings instead", default_website.name))
+        if self._base__default_website in self:
+            raise UserError(_("You cannot delete default website %s. Try to change its settings instead", self._base__default_website.name))
 
     def _delete_extra(self):
         yield from super()._delete_extra()
@@ -1332,9 +1332,7 @@ class Website(models.CachedModel):
     # ----------------------------------------------------------
     def _bootstrap_homepage(self):
         Page = self.env['website.page']
-        standard_homepage = self.env.ref('website.homepage', raise_if_not_found=False)
-        if not standard_homepage:
-            return
+        standard_homepage = self.env['ir.ui.view'].ref('website.homepage')
 
         # keep strange indentation in python file, to get it correctly in database
         new_homepage_view = '''<t name="Homepage" t-name="website.homepage">
@@ -1358,7 +1356,7 @@ class Website(models.CachedModel):
         homepage_page.url = '/'
 
         # Bootstrap default menu hierarchy, create a new minimalist one if no default
-        if not self.menu_id and (default_menu := self.env.ref('website.main_menu', raise_if_not_found=False)):
+        if not self.menu_id and (default_menu := self.env['website.menu']._website__main_menu):
             default_menu._copy_menu_hierarchy(self)
         home_menu = self.env['website.menu'].search([('website_id', '=', self.id), ('url', '=', '/')])
         home_menu.page_id = homepage_page
@@ -1695,7 +1693,7 @@ class Website(models.CachedModel):
             # form editable object, add the backend configuration link
             if 'main_object' in values and has_group_restricted_editor:
                 func = getattr(values['main_object'], 'get_backend_menu_id', False)
-                values['backend_menu_id'] = lazy(lambda: func and func() or self.env['ir.model.data']._xmlid_to_res_id('website.menu_website_configuration'))
+                values['backend_menu_id'] = lazy(lambda: func and func() or self.env['ir.ui.menu'].ref('website.menu_website_configuration').id)
 
         # update context
 

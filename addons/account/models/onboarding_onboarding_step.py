@@ -36,8 +36,7 @@ class OnboardingOnboardingStep(models.Model):
     @api.model
     def action_validate_step_base_document_layout(self):
         """Set the onboarding(s) step as done only if layout is set."""
-        step = self.env.ref('account.onboarding_onboarding_step_base_document_layout', raise_if_not_found=False)
-        if not step or not self.env.company.external_report_layout_id:
+        if not self.env.company.external_report_layout_id:
             return False
         return self.action_validate_step('account.onboarding_onboarding_step_base_document_layout')
 

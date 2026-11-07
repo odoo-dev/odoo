@@ -2526,8 +2526,7 @@ class HrEmployee(models.Model):
         return None
 
     def _load_scenario(self):
-        demo_tag = self.env.ref('hr.employee_category_demo', raise_if_not_found=False)
-        if demo_tag:
+        if self.env['hr.employee.category']._hr__employee_category_demo:
             return
         convert.convert_file(self.env, 'hr', 'data/scenarios/hr_scenario.xml', None, mode='init')
 

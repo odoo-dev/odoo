@@ -7,6 +7,8 @@ from odoo.addons.mail.tools.discuss import Store
 class MailMessage(models.Model):
     _inherit = "mail.message"
 
+    _mail__module_install_notification = models.Ref('mail.module_install_notification', required=False)
+
     call_history_ids = fields.One2many("discuss.call.history", "start_call_message_id")
     channel_id = fields.Many2one("discuss.channel", compute="_compute_channel_id")
 

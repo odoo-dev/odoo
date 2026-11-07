@@ -11,9 +11,9 @@ class AccountChartTemplate(models.AbstractModel):
     def _l10n_ar_has_static_demo(self):
         # Do not load generic demo data on these companies
         return self.env.company in (
-            self.env.ref('base.company_mono', raise_if_not_found=False),
-            self.env.ref('base.company_exento', raise_if_not_found=False),
-            self.env.ref('base.company_ri', raise_if_not_found=False),
+            self.env['res.company']._base__company_mono,
+            self.env['res.company']._base__company_exento,
+            self.env['res.company']._base__company_ri,
         )
 
     @template(model='account.move', demo=True)

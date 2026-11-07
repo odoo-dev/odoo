@@ -38,9 +38,7 @@ class CrmLeadForwardToPartner(models.TransientModel):
         res = super(CrmLeadForwardToPartner, self).default_get(fields)
         active_ids = self.env.context.get('active_ids')
         if 'body' in fields:
-            template = self.env.ref('website_crm_partner_assign.email_template_lead_forward_mail', False)
-            if template:
-                res['body'] = template.body_html
+            res['body'] = self.env['mail.template'].ref('website_crm_partner_assign.email_template_lead_forward_mail').body_html
         if active_ids:
             default_composition_mode = self.env.context.get('default_composition_mode')
             res['assignation_lines'] = []
@@ -58,9 +56,7 @@ class CrmLeadForwardToPartner(models.TransientModel):
 
     def action_forward(self):
         self.ensure_one()
-        template = self.env.ref('website_crm_partner_assign.email_template_lead_forward_mail', False)
-        if not template:
-            raise UserError(_('The Forward Email Template is not in the database'))
+        template = self.env['mail.template'].ref('website_crm_partner_assign.email_template_lead_forward_mail')
         portal_group = self.env.ref('base.group_portal')
 
         local_context = self.env.context.copy()

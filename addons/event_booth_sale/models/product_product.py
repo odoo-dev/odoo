@@ -5,6 +5,8 @@ from odoo.exceptions import ValidationError
 class ProductProduct(models.Model):
     _inherit = 'product.product'
 
+    _event_booth_sale__product_product_event_booth = models.Ref('event_booth_sale.product_product_event_booth', required=False)
+
     @api.onchange('service_tracking')
     def _onchange_type_event_booth(self):
         if self.service_tracking == 'event_booth':

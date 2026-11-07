@@ -27,6 +27,7 @@ class WebsiteMenu(models.Model):
         'website.main_menu',
         message=_lt("You cannot delete this website menu as this serves as the default parent menu for new websites (e.g., /shop, /event, ...)."),
     )
+    _website__main_menu = models.Ref('website.main_menu', required=False)
 
     def _default_sequence(self):
         menu = self.search([], limit=1, order="sequence DESC")

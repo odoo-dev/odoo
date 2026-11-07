@@ -190,9 +190,7 @@ class AccountMove(models.Model):
         res = super()._action_invoice_ready_to_be_sent()
 
         # Make sure the send invoice CRON is called when an invoice becomes ready to be sent.
-        send_invoice_cron = self.env.ref("sale.send_invoice_cron", raise_if_not_found=False)
-        if send_invoice_cron:
-            send_invoice_cron._trigger()
+        self.env['ir.cron'].ref('sale.send_invoice_cron')._trigger()
 
         return res
 

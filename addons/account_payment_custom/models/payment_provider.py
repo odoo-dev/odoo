@@ -27,14 +27,10 @@ class PaymentProvider(models.Model):
 
         :return: None
         """
-        wire_transfer_cron = self.env.ref(
-            "account_payment_custom.cron_auto_confirm_paid_wire_transfer_txs", False
+        any_wire_transfer_provider = bool(
+            self.sudo().search_count([("custom_mode", "=", "wire_transfer")], limit=1)
         )
-        if wire_transfer_cron:
-            any_wire_transfer_provider = bool(
-                self.sudo().search_count([("custom_mode", "=", "wire_transfer")], limit=1)
-            )
-            wire_transfer_cron.active = any_wire_transfer_provider
+        self.env['ir.cron'].ref('account_payment_custom.cron_auto_confirm_paid_wire_transfer_txs').active = any_wire_transfer_provider
 
     # === SETUP METHODS === #
 

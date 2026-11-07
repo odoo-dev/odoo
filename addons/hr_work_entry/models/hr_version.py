@@ -33,7 +33,7 @@ class HrVersion(models.Model):
             ('code', '=', '002.00'),
             ('country_code', '=', country_code),
         ], limit=1)
-        attendance = country_attendance or self.env.ref('hr_work_entry.generic_work_entry_type_attendance', raise_if_not_found=False)
+        attendance = country_attendance or self.env['hr.work.entry.type']._hr_work_entry__generic_work_entry_type_attendance
         return attendance.id if attendance else False
 
     def _get_leave_work_entry_type_dates(self, leave, date_from, date_to, employee):

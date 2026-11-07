@@ -964,7 +964,7 @@ class ProjectProject(models.Model):
         if self.env.user.has_group('project.group_project_stages') and 'stage_id' in tracked_fields and project.stage_id.mail_template_id:
             res['stage_id'] = (project.stage_id.mail_template_id, {
                 'auto_delete_keep_log': False,
-                'subtype_id': self.env['ir.model.data']._xmlid_to_res_id('mail.mt_note'),
+                'subtype_id': self.env['mail.message.subtype'].ref('mail.mt_note').id,
             })
         return res
 

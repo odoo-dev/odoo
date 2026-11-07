@@ -5,5 +5,4 @@ from . import wizard
 
 
 def uninstall_hook(env):
-    if rule := env.ref('gamification.gamification_badge_user_access', raise_if_not_found=False):
-        rule.active = True
+    env['ir.access'].ref('gamification.gamification_badge_user_access').active = True

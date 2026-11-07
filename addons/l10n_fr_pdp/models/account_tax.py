@@ -9,6 +9,5 @@ class AccountTax(models.Model):
         self.ensure_one()
         # l10n_eu_oss is optional: avoid introducing a stable dependency while
         # still recognizing the taxes it generates when it is installed.
-        oss_tag = self.env.ref('l10n_eu_oss.tag_oss', raise_if_not_found=False)
         repartition_tags = (self.invoice_repartition_line_ids | self.refund_repartition_line_ids).tag_ids
-        return bool(oss_tag and oss_tag in repartition_tags)
+        return self.env['account.account.tag']._l10n_eu_oss__tag_oss_optional in repartition_tags

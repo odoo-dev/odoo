@@ -90,8 +90,7 @@ class ResPartner(models.Model):
             partner.l10n_my_identification_number_placeholder = placeholder
 
     def _compute_l10n_my_edi_industrial_classification(self):
-        default_classification = self.env.ref('l10n_my_edi.class_00000', raise_if_not_found=False)
-        self.filtered(lambda p: not p.l10n_my_edi_industrial_classification).l10n_my_edi_industrial_classification = default_classification
+        self.filtered(lambda p: not p.l10n_my_edi_industrial_classification).l10n_my_edi_industrial_classification = self.env['l10n_my_edi.industry_classification']._l10n_my_edi__class_00000
 
     # --------------
     # Action methods

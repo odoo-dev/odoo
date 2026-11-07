@@ -1160,7 +1160,7 @@ class HrExpense(models.Model):
     @api.model
     def _get_empty_list_mail_alias(self):
         use_mailgateway = self.env['ir.config_parameter'].sudo().get_bool('hr_expense.use_mailgateway')
-        expense_alias = self.env.ref('hr_expense.mail_alias_expense', raise_if_not_found=False) if use_mailgateway else False
+        expense_alias = self.env['mail.alias']._hr_expense__mail_alias_expense if use_mailgateway else False
         if expense_alias and expense_alias.alias_domain and expense_alias.alias_name:
             # encode, but force %20 encoding for space instead of a + (URL / mailto difference)
             params = werkzeug.urls.url_encode({'subject': _("Lunch with customer $12.32")}).replace('+', '%20')
@@ -1330,11 +1330,10 @@ class HrExpense(models.Model):
         if (
             (form_toolbar := res['views'].get('form', {}).get('toolbar'))
             and form_toolbar.get('print')
-            and (report := self.env.ref('hr_expense.action_report_hr_expense', raise_if_not_found=False))
         ):
             form_toolbar['print'] = [
                 dict(action, name=self.env._("Print"))
-                if action['id'] == report.id else action
+                if action['id'] == self.env['ir.actions.report'].ref('hr_expense.action_report_hr_expense').id else action
                 for action in form_toolbar['print']
             ]
         return res
@@ -1576,7 +1575,7 @@ class HrExpense(models.Model):
         return expense_state
 
     def action_approve_duplicates(self):
-        root = self.env['ir.model.data']._xmlid_to_res_id("base.partner_root")
+        root = self.env['res.partner']._base__partner_root_optional.id
         for expense in self.duplicate_expense_ids:
             expense.message_post(
                 body=_('%(user)s confirms this expense is not a duplicate with similar expense.', user=self.env.user.name),
@@ -1803,7 +1802,7 @@ class HrExpense(models.Model):
             draft_moves_sudo.unlink()  # Else we have lingering moves
 
         self.approval_state = 'refused'
-        subtype_id = self.env['ir.model.data']._xmlid_to_res_id('mail.mt_comment')
+        subtype_id = self.env['mail.message.subtype'].ref('mail.mt_comment').id
         for expense in self:
             expense.message_post_with_source(
                 'hr_expense.hr_expense_template_refuse_reason',

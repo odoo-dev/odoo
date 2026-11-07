@@ -265,11 +265,10 @@ WHERE sub.user_id IN %s""",
             # avoid sending emails in install mode (prevents spamming users when creating data ranks)
             return
 
-        template = self.env.ref('gamification.mail_template_data_new_rank_reached', raise_if_not_found=False)
-        if template:
-            for u in self:
-                if u.rank_id.karma_min > 0:
-                    template.send_mail(u.id, force_send=False, email_layout_xmlid='mail.mail_notification_light')
+        template = self.env['mail.template'].ref('gamification.mail_template_data_new_rank_reached')
+        for u in self:
+            if u.rank_id.karma_min > 0:
+                template.send_mail(u.id, force_send=False, email_layout_xmlid='mail.mail_notification_light')
 
     def _recompute_rank(self):
         """

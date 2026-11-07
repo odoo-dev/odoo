@@ -560,7 +560,7 @@ class Base(models.AbstractModel):
         Dedicated method to ease override and csutom behavior for filtering
         and sorting messages in '_message_get_suggested_recipients' """
         subtype_ids = self._creation_subtype().ids if hasattr(self, '_creation_subtype') else []
-        subtype_ids.append(self.env['ir.model.data']._xmlid_to_res_id('mail.mt_comment'))
+        subtype_ids.append(self.env['mail.message.subtype'].ref('mail.mt_comment').id)
         return messages.filtered(
             lambda msg: (
                 msg.message_type in ('email', 'comment') and

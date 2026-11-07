@@ -14,10 +14,10 @@ class HrEmployee(models.Model):
         # reads the related field `expense_manager_id` of `res.users` and retrieve its domain.
         # This is a problem because the `group_hr_expense_team_approver` record has already been created but
         # not its associated `ir.model.data` which makes `self.env.ref(...)` fail.
-        group = self.env.ref('hr_expense.group_hr_expense_team_approver', raise_if_not_found=False)
+        group = self.env['res.groups'].ref('hr_expense.group_hr_expense_team_approver')
         return [
             '|', ('id', 'parent_of', self.ids), ('all_group_ids', 'in', group.ids)
-        ] if group else [('id', 'parent_of', self.ids)]
+        ]
 
     expense_manager_id = fields.Many2one(
         comodel_name='res.users',

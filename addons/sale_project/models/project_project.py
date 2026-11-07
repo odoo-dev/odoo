@@ -547,12 +547,12 @@ class ProjectProject(models.Model):
         self.ensure_one()
         embedded_action_context = self.env.context.get('from_embedded_action', False)
         view_ids_per_type = {}
-        if pivot_view := self.env.ref('sale_project.view_account_analytic_line_inherit_sale_project_pivot_single', raise_if_not_found=False):
-            view_ids_per_type['pivot'] = pivot_view.id
-        if list_view := self.env.ref('sale_project.account_analytic_line_view_list_margins_no_group', raise_if_not_found=False):
-            view_ids_per_type['list'] = list_view.id
-        if graph_view := self.env.ref('sale_project.account_analytic_line_view_graph_for_single_project', raise_if_not_found=False):
-            view_ids_per_type['graph'] = graph_view.id
+        pivot_view = self.env['ir.ui.view'].ref('sale_project.view_account_analytic_line_inherit_sale_project_pivot_single')
+        view_ids_per_type['pivot'] = pivot_view.id
+        list_view = self.env['ir.ui.view'].ref('sale_project.account_analytic_line_view_list_margins_no_group')
+        view_ids_per_type['list'] = list_view.id
+        graph_view = self.env['ir.ui.view'].ref('sale_project.account_analytic_line_view_graph_for_single_project')
+        view_ids_per_type['graph'] = graph_view.id
         action = self.env['ir.actions.act_window']._for_xml_id('sale_project.action_analytic_reporting_inherit_sale_project')
         if view_ids_per_type:
             action['views'] = [

@@ -49,6 +49,8 @@ class AccountReport(models.Model):
     _description = "Accounting Report"
     _order = 'sequence, id'
 
+    _account_reports__profit_and_loss_optional = models.Ref('account_reports.profit_and_loss', required=False)
+
     #  CORE ==========================================================================================================================================
 
     name = fields.Char(string="Name", required=True, translate=True)

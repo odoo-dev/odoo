@@ -77,7 +77,7 @@ class ResPartner(models.Model):
         if not self or len(self) > 1:
             return {}
 
-        europe = self.env.ref('base.europe', raise_if_not_found=False)
+        europe = self.env['res.country.group'].ref('base.europe')
         in_eu = not europe or not self.country_id or self.country_id in europe.country_ids
         is_sm = self.country_id and self.country_id.code == "SM"
 
@@ -167,8 +167,7 @@ class ResPartner(models.Model):
     def _l10n_it_edi_export_check(self, checks=None):
         checks = checks or ['partner_vat_codice_fiscale_missing', 'partner_address_missing']
         single_views = [(False, 'form')]
-        list_view = self.env.ref('l10n_it_edi.res_partner_tree_l10n_it', raise_if_not_found=False)
-        multi_views = [(list_view.id if list_view else False, 'list'), (False, 'form')]
+        multi_views = [(self.env['ir.ui.view'].ref('l10n_it_edi.res_partner_tree_l10n_it').id, 'list'), (False, 'form')]
 
         def build_error(errors, key, message, invalid_records):
             views = single_views if len(invalid_records) == 1 else multi_views

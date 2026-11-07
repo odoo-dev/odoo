@@ -301,8 +301,8 @@ class StockMove(models.Model):
 
     def _get_partner_id(self):
         if self.raw_material_production_id.subcontractor_id:
-            route = self.env.ref('mrp_subcontracting.route_resupply_subcontractor_mto', raise_if_not_found=False)
-            if route and self.rule_id.route_id == route:
+            route_resupply_subcontractor_mto = self.env['stock.route']._mrp_subcontracting__route_resupply_subcontractor_mto
+            if route_resupply_subcontractor_mto and self.rule_id.route_id == route_resupply_subcontractor_mto:
                 return self.raw_material_production_id.subcontractor_id.id
         return super()._get_partner_id()
 

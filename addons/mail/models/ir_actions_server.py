@@ -425,7 +425,7 @@ class IrActionsServer(models.Model):
         cleaned_ctx['mail_post_autofollow'] = self.mail_post_autofollow
         if isinstance(self.env[self.model_name], self.env.registry.get("mail.thread")):
             records = self.env[self.model_name].with_context(cleaned_ctx).browse(res_ids)
-            subtype_id = self.env['ir.model.data']._xmlid_to_res_id('mail.mt_comment')
+            subtype_id = self.env['mail.message.subtype'].ref('mail.mt_comment').id
             records.message_post_with_source(
                 self.template_id,
                 message_type='auto_comment',

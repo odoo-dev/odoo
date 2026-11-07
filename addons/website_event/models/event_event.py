@@ -479,12 +479,12 @@ class EventEvent(models.Model):
         self.ensure_one()
         if track_init_values.keys() & {'publish_on'}:
             if self.publish_on:
-                return self.env.ref('website_event.mt_event_scheduled', raise_if_not_found=False) or super()._track_log_get_default_subtype(track_init_values)
-            return self.env.ref('website_event.mt_event_unscheduled', raise_if_not_found=False) or super()._track_log_get_default_subtype(track_init_values)
+                return self.env['mail.message.subtype'].ref('website_event.mt_event_scheduled')
+            return self.env['mail.message.subtype'].ref('website_event.mt_event_unscheduled')
         if track_init_values.keys() & {'is_published', 'website_published'}:
             if self.is_published:
-                return self.env.ref('website_event.mt_event_published', raise_if_not_found=False) or super()._track_log_get_default_subtype(track_init_values)
-            return self.env.ref('website_event.mt_event_unpublished', raise_if_not_found=False) or super()._track_log_get_default_subtype(track_init_values)
+                return self.env['mail.message.subtype'].ref('website_event.mt_event_published')
+            return self.env['mail.message.subtype'].ref('website_event.mt_event_unpublished')
         return super()._track_log_get_default_subtype(track_init_values)
 
     def _get_event_resource_urls(self, slot=False):

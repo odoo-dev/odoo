@@ -91,11 +91,11 @@ class PrivacyLookupWizard(models.TransientModel):
             # Indirect references CTE
             email_normalized, name,
             # Search on res.partner
-            self.env['ir.model.data']._xmlid_to_res_id('base.model_res_partner'),
+            self.env['ir.model'].ref('base.model_res_partner').id,
             # Search on res.users
-            self.env['ir.model.data']._xmlid_to_res_id('base.model_res_users'), email, email, name,
+            self.env['ir.model'].ref('base.model_res_users').id, email, email, name,
             # Direct messages
-            self.env['ir.model.data']._xmlid_to_res_id('mail.model_mail_message'),
+            self.env['ir.model'].ref('mail.model_mail_message').id,
         )
 
         # Step 3: Retrieve info on other models

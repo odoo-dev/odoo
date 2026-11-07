@@ -6,10 +6,11 @@ from odoo import models
 class PortalEntryPayment(models.Model):
     _inherit = "portal.entry"
 
+    _payment__payment_methods_portal_entry = models.Ref('payment.payment_methods_portal_entry', required=False)
+
     def _filter_visible_portal_cards(self):
         visible_entries = super()._filter_visible_portal_cards()
-        payment_methods_entry = self.env.ref("payment.payment_methods_portal_entry", raise_if_not_found=False)
-        if payment_methods_entry and payment_methods_entry in self:
+        if self._payment__payment_methods_portal_entry in self:
             partner_sudo = self.env.user.partner_id.sudo()
             providers_sudo = (
                 self
@@ -31,5 +32,5 @@ class PortalEntryPayment(models.Model):
                 is_validation=True
             )
             if not (methods_allowing_tokenization or existing_tokens):
-                visible_entries -= payment_methods_entry
+                visible_entries -= self._payment__payment_methods_portal_entry
         return visible_entries

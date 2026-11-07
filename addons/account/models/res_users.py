@@ -8,9 +8,7 @@ class ResGroups(models.Model):
 
     @api.model
     def _activate_group_account_secured(self):
-        group_account_secured = self.env.ref('account.group_account_secured', raise_if_not_found=False)
-        if not group_account_secured:
-            return
+        group_account_secured = self.ref('account.group_account_secured')
         groups_with_access = [
             'account.group_account_readonly',
             'account.group_account_invoice',

@@ -376,12 +376,11 @@ class EventRegistration(models.Model):
             message loaded by default
         """
         self.ensure_one()
-        template = self.env.ref('event.event_registration_mail_template_badge', raise_if_not_found=False)
         compose_form = self.env.ref('mail.email_compose_message_wizard_form')
         ctx = dict(
             default_model='event.registration',
             default_res_ids=self.ids,
-            default_template_id=template.id if template else False,
+            default_template_id=self.env['mail.template'].ref('event.event_registration_mail_template_badge').id,
             default_composition_mode='comment',
         )
         return {

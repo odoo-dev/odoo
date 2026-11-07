@@ -13,6 +13,9 @@ class HrWorkEntryType(models.Model):
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _rec_names_search = ('name', 'code', 'display_code')
 
+    _hr_work_entry__generic_work_entry_type_attendance = models.Ref('hr_work_entry.generic_work_entry_type_attendance', required=False)
+    _hr_work_entry__generic_work_entry_type_public_holiday = models.Ref('hr_work_entry.generic_work_entry_type_public_holiday', required=False)
+
     name = fields.Char(required=True, translate=True, tracking=True)
     display_code = fields.Char(string="Display Code", size=3, translate=True, tracking=True, help="This code can be changed, it is only for a display purpose (3 letters max)")
     code = fields.Char(

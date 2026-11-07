@@ -9,6 +9,8 @@ from odoo.exceptions import ValidationError
 class ProductProduct(models.Model):
     _inherit = 'product.product'
 
+    _sale_timesheet__time_product_optional = models.Ref('sale_timesheet.time_product', required=False)
+
     def _is_delivered_timesheet(self):
         """ Check if the product is a delivered timesheet """
         self.ensure_one()

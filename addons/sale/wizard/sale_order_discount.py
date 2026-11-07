@@ -47,11 +47,8 @@ class SaleOrderDiscount(models.TransientModel):
             "company_id": self.company_id.id,
             "taxes_id": None,
         }
-        services_category = self.env.ref(
-            "product.product_category_services", raise_if_not_found=False
-        )
-        if services_category:
-            values["categ_id"] = services_category.id
+        if self.env['product.category']._product__product_category_services:
+            values["categ_id"] = self.env['product.category']._product__product_category_services.id
         return values
 
     def _prepare_global_discount_so_lines(self, base_lines):

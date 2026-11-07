@@ -34,18 +34,12 @@ def _post_init_hook(env):  # noqa: RUF067
         )
     )
 
-    recovery_template = env.ref(
-        "website_sale.mail_template_sale_cart_recovery", raise_if_not_found=False
-    )
-    if recovery_template:
-        existing_websites.cart_recovery_mail_template_id = recovery_template
+    existing_websites.cart_recovery_mail_template_id = env['mail.template'].ref('website_sale.mail_template_sale_cart_recovery')
 
 
 def uninstall_hook(env):
     ''' Need to reenable the `product` pricelist multi-company rule that were
         disabled to be 'overridden' for multi-website purpose
     '''
-    if access := env.ref('product.product_pricelist_comp_rule', raise_if_not_found=False):
-        access.active = True
-    if access := env.ref('product.product_pricelist_item_comp_rule', raise_if_not_found=False):
-        access.active = True
+    env['ir.access'].ref('product.product_pricelist_comp_rule').active = True
+    env['ir.access'].ref('product.product_pricelist_item_comp_rule').active = True

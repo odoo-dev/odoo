@@ -24,7 +24,7 @@ class AccountMove(models.Model):
     def _compute_l10n_sa_edi_transaction_type_ids(self):
         for move in self:
             if move.commercial_partner_id.country_id.code != 'SA' and move.l10n_sa_invoice_type == 'tax':
-                move.l10n_sa_edi_transaction_type_ids = self.env.ref('l10n_sa_edi.transaction_type_export', raise_if_not_found=False)
+                move.l10n_sa_edi_transaction_type_ids = self.env['l10n_sa_edi.transaction.type']._l10n_sa_edi__transaction_type_export
             else:
                 move.l10n_sa_edi_transaction_type_ids = None
 

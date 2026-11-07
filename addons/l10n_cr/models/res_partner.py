@@ -6,6 +6,8 @@ from odoo.addons.l10n_cr.tools.partner_identifiers import CR_ADDITIONAL_IDENTIFI
 class ResPartner(models.Model):
     _inherit = 'res.partner'
 
+    _l10n_cr__demo_partner_zona_franca = models.Ref('l10n_cr.demo_partner_zona_franca', required=False)
+
     l10n_cr_district_id = fields.Many2one(
         comodel_name='l10n_cr.res.city.district',
         string='District (CR)',

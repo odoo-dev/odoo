@@ -24,13 +24,13 @@ class ResConfigSettings(models.TransientModel):
 
     @api.depends('company_id')
     def _compute_timesheet_encode_method(self):
-        uom_day = self.env.ref('uom.product_uom_day', raise_if_not_found=False)
+        uom_day = self.env['uom.uom'].ref('uom.product_uom_day')
         for settings in self:
             settings.timesheet_encode_method = 'days' if settings.company_id.timesheet_encode_uom_id == uom_day else 'hours'
 
     def _inverse_timesheet_encode_method(self):
-        uom_day = self.env.ref('uom.product_uom_day', raise_if_not_found=False)
-        uom_hour = self.env.ref('uom.product_uom_hour', raise_if_not_found=False)
+        uom_day = self.env['uom.uom'].ref('uom.product_uom_day')
+        uom_hour = self.env['uom.uom'].ref('uom.product_uom_hour')
         for settings in self:
             settings.company_id.timesheet_encode_uom_id = uom_day if settings.timesheet_encode_method == 'days' else uom_hour
 

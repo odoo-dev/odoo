@@ -1084,9 +1084,7 @@ class AccountMove(models.Model):
             If one line has the tag for professional fee then we return True
         """
         self.ensure_one()
-        professional_fee_tag = self.env.ref('l10n_it_edi.l10n_it_edi_professional_fees_tag', raise_if_not_found=False)
-        if not professional_fee_tag:
-            return False
+        professional_fee_tag = self.env['account.account.tag'].ref('l10n_it_edi.l10n_it_edi_professional_fees_tag')
 
         return any(
             professional_fee_tag.id in line.account_id.tag_ids.ids

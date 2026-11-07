@@ -7,6 +7,8 @@ from odoo.tools.business_data import split_vat
 class ResPartner(models.Model):
     _inherit = 'res.partner'
 
+    _l10n_es__partner_simplified_optional = models.Ref('l10n_es.partner_simplified', required=False)
+
     l10n_es_passport = fields.Char(
         string='Passport',
         compute='_compute_l10n_es_passport',

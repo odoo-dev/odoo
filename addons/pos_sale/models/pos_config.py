@@ -8,10 +8,10 @@ class PosConfig(models.Model):
     _inherit = 'pos.config'
 
     def _get_default_down_payment_product(self):
-        return self.env.ref('pos_sale.default_downpayment_product', raise_if_not_found=False)
+        return self.env['product.product']._pos_sale__default_downpayment_product
 
     def _get_default_sol_product(self):
-        return self.env.ref('pos_sale.default_sol_product', raise_if_not_found=False)
+        return self.env['product.product']._pos_sale__default_sol_product
 
     crm_team_id = fields.Many2one(
         'crm.team', string="Sales Team", ondelete="set null", index='btree_not_null',
@@ -38,8 +38,8 @@ class PosConfig(models.Model):
         )
 
     def _init_column_default_products(self):
-        category_id = (self.env.ref('product.product_category_services', raise_if_not_found=False) or self.env['product.category']).id
-        uom_unit_id = (self.env.ref('uom.product_uom_unit', raise_if_not_found=False) or self.env['uom.uom']).id
+        category_id = self.env['product.category']._product__product_category_services.id
+        uom_unit_id = self.env['uom.uom'].ref('uom.product_uom_unit').id
 
         to_create = []
         xmlids_needed = []
@@ -57,7 +57,7 @@ class PosConfig(models.Model):
             })
             xmlids_needed.append('default_downpayment_product')
 
-        if not self.env.ref('pos_sale.default_sol_product', raise_if_not_found=False):
+        if not self.env['product.product']._pos_sale__default_sol_product:
             to_create.append({
                 'name': 'Default Product (POS)',
                 'available_in_pos': False,

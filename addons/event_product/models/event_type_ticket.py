@@ -14,7 +14,7 @@ class EventTypeTicket(models.Model):
     _order = "sequence, price, name, id"
 
     def _default_product_id(self):
-        return self.env.ref('event_product.product_product_event', raise_if_not_found=False)
+        return self.env['product.product']._event_product__product_product_event
 
     description = fields.Text(compute='_compute_description', readonly=False, store=True)
     # product

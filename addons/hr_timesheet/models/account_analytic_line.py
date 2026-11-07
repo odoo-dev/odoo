@@ -397,7 +397,7 @@ class AccountAnalyticLine(models.Model):
             wip_report_id = None
 
             def get_wip_report_id():
-                return self.env['ir.model.data']._xmlid_to_res_id("mrp_account.wip_report", raise_if_not_found=False)
+                return self.env['ir.actions.report']._mrp_account__wip_report_optional.id
 
             for view_data in res['views'].values():
                 print_data_list = view_data.get('toolbar', {}).get('print')
@@ -517,7 +517,7 @@ class AccountAnalyticLine(models.Model):
 
     @api.model
     def _ensure_uom_hours(self):
-        uom_hours = self.env.ref('uom.product_uom_hour', raise_if_not_found=False)
+        uom_hours = self.env['uom.uom'].ref('uom.product_uom_hour')
         if not uom_hours:
             uom_hours = self.env['uom.uom'].create({
                 'name': "Hours",

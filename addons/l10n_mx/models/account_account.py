@@ -9,10 +9,8 @@ class AccountAccount(models.Model):
         # EXTENDS account - ensure there is a tag on created MX accounts
         # The computation is a bit naive and might not be correct in all cases.
         accounts = super().create(vals_list)
-        debit_tag = self.env.ref('l10n_mx.tag_debit_balance_account', raise_if_not_found=False)
-        credit_tag = self.env.ref('l10n_mx.tag_credit_balance_account', raise_if_not_found=False)
-        if not debit_tag or not credit_tag:
-            return accounts
+        debit_tag = self.env['account.account.tag'].ref('l10n_mx.tag_debit_balance_account')
+        credit_tag = self.env['account.account.tag'].ref('l10n_mx.tag_credit_balance_account')
         mx_account_no_tags = accounts.filtered(
             lambda a: 'MX' in a.company_ids.mapped('country_code') and a.internal_group != 'off'
             and not a.tag_ids & (credit_tag + debit_tag)

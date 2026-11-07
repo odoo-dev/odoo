@@ -7,6 +7,8 @@ from odoo import models, api
 class PosSession(models.Model):
     _inherit = 'pos.session'
 
+    _pos_restaurant__pos_closed_session_3 = models.Ref('pos_restaurant.pos_closed_session_3', required=False)
+
     @api.model
     def _load_pos_data_models(self, config):
         data = super()._load_pos_data_models(config)

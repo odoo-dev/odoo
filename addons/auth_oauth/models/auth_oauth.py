@@ -10,6 +10,9 @@ class AuthOauthProvider(models.Model):
     _description = 'OAuth2 provider'
     _order = 'sequence, name'
 
+    _auth_oauth__provider_google = models.Ref('auth_oauth.provider_google', required=False)
+    _auth_oauth__provider_openerp = models.Ref('auth_oauth.provider_openerp', required=False)
+
     name = fields.Char(string='Provider name', required=True)  # Name of the OAuth2 entity, Google, etc
     client_id = fields.Char(string='Client ID')  # Our identifier
     auth_endpoint = fields.Char(string='Authorization URL', required=True)  # OAuth provider URL to authenticate users

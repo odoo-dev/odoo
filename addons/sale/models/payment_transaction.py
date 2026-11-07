@@ -107,12 +107,8 @@ class PaymentTransaction(models.Model):
                 done_tx._invoice_sale_orders()
             super(PaymentTransaction, done_tx)._post_process()  # Post the invoices.
             if auto_invoice and not self.env.context.get("skip_sale_auto_invoice_send"):
-                if self.env["ir.config_parameter"].sudo().get_bool("sale.async_emails") and (
-                    send_invoice_cron := self.env.ref(
-                        "sale.send_invoice_cron", raise_if_not_found=False
-                    )
-                ):
-                    send_invoice_cron._trigger()
+                if self.env["ir.config_parameter"].sudo().get_bool("sale.async_emails"):
+                    self.env['ir.cron'].ref('sale.send_invoice_cron')._trigger()
                 else:
                     self._send_invoice()
 

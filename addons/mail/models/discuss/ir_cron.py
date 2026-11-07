@@ -8,6 +8,6 @@ class IrCron(models.Model):
 
     def _notify_admin(self, message):
         """Send a notification to the admin users."""
-        if channel_admin := self.env.ref("mail.channel_admin", raise_if_not_found=False):
+        if channel_admin := self.env['discuss.channel']._mail__channel_admin:
             channel_admin.with_user(SUPERUSER_ID).message_post(body=message)
         super()._notify_admin(message)

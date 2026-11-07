@@ -152,6 +152,8 @@ class IrUiView(models.Model):
     _allow_sudo_commands = False
     _clear_cache_name = 'templates'
 
+    _web__minimal_layout_optional = models.Ref('web.minimal_layout', required=False)
+
     name = fields.Char(string='View Name', required=True, copy=True)
     model = fields.Char(index=True)
     key = fields.Char(index='btree_not_null')

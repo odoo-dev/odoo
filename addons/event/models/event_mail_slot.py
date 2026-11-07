@@ -27,5 +27,5 @@ class EventMailRegistration(models.Model):
             mail_slot.scheduled_date = date.replace(microsecond=0) + _INTERVALS[scheduler.interval_unit](sign * scheduler.interval_nbr) if date else False
 
         next_schedule = self.filtered('scheduled_date').mapped('scheduled_date')
-        if next_schedule and (cron := self.env.ref('event.event_mail_scheduler', raise_if_not_found=False)):
-            cron._trigger(next_schedule)
+        if next_schedule:
+            self.env['ir.cron'].ref('event.event_mail_scheduler')._trigger(next_schedule)

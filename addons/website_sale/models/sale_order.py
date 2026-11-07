@@ -129,9 +129,7 @@ class SaleOrder(models.Model):
             return
 
         # Try to find a payment term even if there wasn't any set on the partner
-        default_pt = self.env.ref(
-            "account.account_payment_term_immediate", raise_if_not_found=False
-        )
+        default_pt = self.env['account.payment.term']._account__account_payment_term_immediate
         for order in website_orders:
             if default_pt and (
                 order.company_id == default_pt.company_id or not default_pt.company_id
@@ -272,9 +270,7 @@ class SaleOrder(models.Model):
         """
         websites = self.mapped("website_id")
         template = websites.cart_recovery_mail_template_id if len(websites) == 1 else False
-        template = template or self.env.ref(
-            "website_sale.mail_template_sale_cart_recovery", raise_if_not_found=False
-        )
+        template = template or self.env['mail.template'].ref('website_sale.mail_template_sale_cart_recovery')
         return template or self.env["mail.template"]
 
     # === BUSINESS METHODS ===#

@@ -9,3 +9,4 @@ from . import purchase
 from . import stock_replenish_mixin
 from . import stock_rule
 from . import stock_orderpoint
+from . import stock_route

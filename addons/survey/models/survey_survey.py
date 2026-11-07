@@ -1058,12 +1058,10 @@ class SurveySurvey(models.Model):
         """ Open a window to compose an email, pre-filled with the survey message """
         self.check_validity()
 
-        template = self.env.ref('survey.mail_template_user_input_invite', raise_if_not_found=False)
-
         local_context = dict(
             self.env.context,
             default_survey_id=self.id,
-            default_template_id=template and template.id or False,
+            default_template_id=self.env['mail.template'].ref('survey.mail_template_user_input_invite').id,
             default_send_email=(self.access_mode != 'public'),
             hide_mail_template_management_options=True,
         )

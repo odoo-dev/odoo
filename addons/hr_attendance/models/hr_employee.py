@@ -127,13 +127,12 @@ class HrEmployee(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         """Create employees and add their ``attendance_manager_id`` to the attendance officers."""
-        officer_group = self.env.ref('hr_attendance.group_hr_attendance_officer', raise_if_not_found=False)
         group_updates = []
         for vals in vals_list:
-            if officer_group and vals.get('attendance_manager_id'):
+            if vals.get('attendance_manager_id'):
                 group_updates.append((4, vals['attendance_manager_id']))
         if group_updates:
-            officer_group.sudo().write({'user_ids': group_updates})
+            self.env['res.groups'].ref('hr_attendance.group_hr_attendance_officer').sudo().write({'user_ids': group_updates})
         return super().create(vals_list)
 
     def write(self, vals):
@@ -145,9 +144,8 @@ class HrEmployee(models.Model):
             # Officer was added
             if vals['attendance_manager_id']:
                 officer = self.env['res.users'].browse(vals['attendance_manager_id'])
-                officers_group = self.env.ref('hr_attendance.group_hr_attendance_officer', raise_if_not_found=False)
-                if officers_group and not officer.has_group('hr_attendance.group_hr_attendance_officer'):
-                    officer.sudo().write({'group_ids': [(4, officers_group.id)]})
+                if not officer.has_group('hr_attendance.group_hr_attendance_officer'):
+                    officer.sudo().write({'group_ids': [(4, self.env['res.groups'].ref('hr_attendance.group_hr_attendance_officer').id)]})
 
         res = super().write(vals)
         old_officers.sudo()._clean_attendance_officers()

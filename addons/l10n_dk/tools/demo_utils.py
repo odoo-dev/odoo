@@ -33,12 +33,7 @@ def _mock_call_nemhandel_proxy(func, self, endpoint, params=None):
 
     def _mock_send_document(user):
         # Trigger the reception of vendor bills
-        get_messages_cron = user.env['ir.cron'].sudo().env.ref(
-            'l10n_dk.ir_cron_nemhandel_get_new_documents',
-            raise_if_not_found=False,
-        )
-        if get_messages_cron:
-            get_messages_cron._trigger()
+        user.env['ir.cron'].sudo().ref('l10n_dk.ir_cron_nemhandel_get_new_documents')._trigger()
         return {
             'messages': [{
                 'message_uuid': 'demo_%s' % uuid.uuid4(),

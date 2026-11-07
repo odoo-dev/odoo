@@ -195,11 +195,10 @@ class SaleOrder(models.Model):
             sol for sol in sorted_line
             if sol._is_product_line() and sol.product_id.type == 'service'
         ), self.env['sale.order.line'])
-        view_id = self.env.ref('sale_project.sale_project_view_form_simplified_template', raise_if_not_found=False)
         return {
             **self.env['project.template.create.wizard'].action_open_template_view(),
             'name': self.env._('Create a Project'),
-            'views': [(view_id.id, 'form')],
+            'views': [(self.env['ir.ui.view'].ref('sale_project.sale_project_view_form_simplified_template').id, 'form')],
             'context': {
                 'default_sale_order_id': self.id,
                 'default_reinvoiced_sale_order_id': self.id,

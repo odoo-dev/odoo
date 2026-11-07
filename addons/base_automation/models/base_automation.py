@@ -519,16 +519,12 @@ class BaseAutomation(models.Model):
         return record_copy
 
     def action_open_scheduled_action(self):
-        cron = self.env.ref('base_automation.ir_cron_data_base_automation_check', raise_if_not_found=False)
-        if not cron:
-            message = _("The scheduled action for Automation Rules seems to have vanished.")
-            raise exceptions.MissingError(message)
         return {
             'type': 'ir.actions.act_window',
             'name': _('Scheduled Action'),
             'view_mode': 'form',
             'res_model': 'ir.cron',
-            'res_id': cron.id,
+            'res_id': self.env['ir.cron'].ref('base_automation.ir_cron_data_base_automation_check').id,
         }
 
     def action_rotate_webhook_uuid(self):
@@ -640,25 +636,24 @@ class BaseAutomation(models.Model):
         the smallest automation delay, or restore the default 4 hours if there
         is no time based automation.
         """
-        cron = self.env.ref('base_automation.ir_cron_data_base_automation_check', raise_if_not_found=False)
-        if cron:
-            try:
-                cron.lock_for_update(allow_referencing=True)
-            except LockError:
-                return
-            automations = self.with_context(active_test=True).search([('trigger', 'in', TIME_TRIGGERS)])
-            interval_number, interval_type = self._get_cron_interval(automations)
-            vals = {'active': bool(automations)}
+        cron = self.env['ir.cron'].ref('base_automation.ir_cron_data_base_automation_check')
+        try:
+            cron.lock_for_update(allow_referencing=True)
+        except LockError:
+            return
+        automations = self.with_context(active_test=True).search([('trigger', 'in', TIME_TRIGGERS)])
+        interval_number, interval_type = self._get_cron_interval(automations)
+        vals = {'active': bool(automations)}
 
-            actual_cron_timedelta = TIMEDELTA_TYPES[cron.interval_type](cron.interval_number)
-            new_cron_timedelta = TIMEDELTA_TYPES[interval_type](interval_number)
-            if new_cron_timedelta < actual_cron_timedelta:
-                # we only update the cron interval if the new delay is shorter than the current one
-                vals.update({
-                    'interval_type': interval_type,
-                    'interval_number': interval_number,
-                })
-            cron.write(vals)
+        actual_cron_timedelta = TIMEDELTA_TYPES[cron.interval_type](cron.interval_number)
+        new_cron_timedelta = TIMEDELTA_TYPES[interval_type](interval_number)
+        if new_cron_timedelta < actual_cron_timedelta:
+            # we only update the cron interval if the new delay is shorter than the current one
+            vals.update({
+                'interval_type': interval_type,
+                'interval_number': interval_number,
+            })
+        cron.write(vals)
 
     def _update_registry(self):
         """ Update the registry after a modification on automation rules. """

@@ -529,8 +529,7 @@ class IrModuleModule(models.Model):
                 )
                 # like `Translaitonimporter.save()` we bypass the ORM(`View.write()`)
                 field._update_cache(View.with_context(prefetch_langs=True).browse(specific_id), new_specific_arch_db, dirty=True)
-        default_menu = self.env.ref('website.main_menu', raise_if_not_found=False)
-        if not default_menu:
+        if not self.env['website.menu']._website__main_menu:
             return res
 
         lang_value_list = [SQL("%(lang)s, o_menu.name->>%(lang)s", lang=lang) for lang in langs if lang != 'en_US']
@@ -551,7 +550,7 @@ class IrModuleModule(models.Model):
                AND menu.id = s_menu.id
             """,
             o_menu_name=o_menu_name,
-            default_menu_id=default_menu.id
+            default_menu_id=self.env['website.menu']._website__main_menu.id
         ))
 
         return res

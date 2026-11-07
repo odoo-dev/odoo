@@ -10,6 +10,4 @@ class ResConfigSettings(models.TransientModel):
 
     @api.onchange('partnership_label')
     def _onchange_partnership_label(self):
-        crm_menu = self.env.ref('partnership.crm_menu_partners', raise_if_not_found=False)
-        if crm_menu:
-            crm_menu.name = self.partnership_label
+        self.env['ir.ui.menu'].ref('partnership.crm_menu_partners').name = self.partnership_label

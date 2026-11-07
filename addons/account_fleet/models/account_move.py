@@ -15,8 +15,7 @@ class AccountMove(models.Model):
             record.service_count = len(record.line_ids.vehicle_log_service_ids)
 
     def _post(self, soft=True):
-        vendor_bill_service = self.env.ref('account_fleet.data_fleet_service_type_vendor_bill', raise_if_not_found=False)
-        if not vendor_bill_service:
+        if not self.env['fleet.service.type']._account_fleet__data_fleet_service_type_vendor_bill:
             return super()._post(soft)
 
         val_list = []
@@ -79,9 +78,8 @@ class AccountMoveLine(models.Model):
         return (*super()._get_query_tax_details_aml_fields(), 'vehicle_id')
 
     def _prepare_fleet_log_service(self):
-        vendor_bill_service = self.env.ref('account_fleet.data_fleet_service_type_vendor_bill', raise_if_not_found=False)
         return {
-            'service_type_id': vendor_bill_service.id,
+            'service_type_id': self.env['fleet.service.type']._account_fleet__data_fleet_service_type_vendor_bill.id,
             'vehicle_id': self.vehicle_id.id,
             'vendor_id': self.partner_id.id,
             'description': self.name,

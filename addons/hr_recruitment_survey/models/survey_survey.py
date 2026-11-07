@@ -35,8 +35,8 @@ class SurveySurvey(models.Model):
         if self.survey_type == 'recruitment':
             access_user = self.env['res.users'].browse(access_uid) if access_uid else self.env.user
             if not access_user.has_group('survey.group_survey_user'):
-                if view := self.env.ref('hr_recruitment_survey.survey_survey_view_form', raise_if_not_found=False):
-                    return view.id
+                view = self.env['ir.ui.view'].ref('hr_recruitment_survey.survey_survey_view_form')
+                return view.id
         return super().get_formview_id(access_uid=access_uid)
 
     def action_survey_user_input_completed(self):

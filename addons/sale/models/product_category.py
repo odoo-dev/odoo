@@ -6,6 +6,8 @@ from odoo import fields, models
 class ProductCategory(models.Model):
     _inherit = 'product.category'
 
+    _product__product_category_services = models.Ref('product.product_category_services', required=False)
+
     property_account_invoices_to_issue_id = fields.Many2one(
         'account.account', 'Invoices to be Issued Account', company_dependent=True, ondelete='restrict',
         check_company=True,

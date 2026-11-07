@@ -128,8 +128,8 @@ class AccountMoveSend(models.AbstractModel):
         - action the action to run when the link is clicked
         """
         alerts = {}
-        send_cron = self.env.ref('account.ir_cron_account_move_send', raise_if_not_found=False)
-        if len(moves) > 1 and send_cron and not send_cron.sudo().active:
+        send_cron = self.env['ir.cron'].ref('account.ir_cron_account_move_send')
+        if len(moves) > 1 and not send_cron.sudo().active:
             has_cron_access = send_cron.has_access('write')
             has_access_message = _("The scheduled action 'Send Invoices automatically' is archived. You won't be able to send invoices in batch.")
             no_access_addendum = _("\nPlease contact your administrator.")

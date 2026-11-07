@@ -224,8 +224,8 @@ class ResCompany(models.Model):
         # If the user removed his Import journal in his Peppol settings, we need to tell IAP the user can't support
         # responses anymore. If a journal is added when it was empty before, we also need to tell IAP the user can support
         # responses again.
-        if cron := self.env.ref('account_peppol.ir_cron_peppol_auto_register_services', raise_if_not_found=False):
-            cron._trigger()
+        cron = self.env['ir.cron'].ref('account_peppol.ir_cron_peppol_auto_register_services')
+        cron._trigger()
 
     @api.depends('email')
     def _compute_account_peppol_contact_email(self):
@@ -340,11 +340,7 @@ class ResCompany(models.Model):
         if self.account_peppol_proxy_state not in ('sender', 'receiver'):
             return
 
-        mail_template = self.env.ref('account_peppol.mail_template_peppol_registration', raise_if_not_found=False)
-        if not mail_template:
-            return
-
-        mail_template.send_mail(self.id, force_send=True)
+        self.env['mail.template'].ref('account_peppol.mail_template_peppol_registration').send_mail(self.id, force_send=True)
 
     def _get_peppol_proxy_type(self):
         self.ensure_one()

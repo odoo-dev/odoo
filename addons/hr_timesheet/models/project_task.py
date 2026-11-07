@@ -194,17 +194,17 @@ class ProjectTask(models.Model):
                 continue
             if not is_internal_user:
                 if view[1] == 'list':
-                    tree_view_id = self.env['ir.model.data']._xmlid_to_res_id('hr_timesheet.hr_timesheet_line_portal_tree')
+                    tree_view_id = self.env['ir.ui.view'].ref('hr_timesheet.hr_timesheet_line_portal_tree').id
                     if tree_view_id:
                         new_views.insert(0, (tree_view_id, 'list'))
                         continue
                 elif view[1] == 'form':
-                    form_view_id = self.env['ir.model.data']._xmlid_to_res_id('hr_timesheet.timesheet_view_form_portal_user')
+                    form_view_id = self.env['ir.ui.view'].ref('hr_timesheet.timesheet_view_form_portal_user').id
                     if form_view_id:
                         new_views.append((form_view_id, 'form'))
                         continue
                 elif view[1] == 'kanban':
-                    kanban_view_id = self.env['ir.model.data']._xmlid_to_res_id('hr_timesheet.view_kanban_account_analytic_line_portal_user')
+                    kanban_view_id = self.env['ir.ui.view'].ref('hr_timesheet.view_kanban_account_analytic_line_portal_user').id
                     if kanban_view_id:
                         new_views.append((kanban_view_id, 'kanban'))
                         continue

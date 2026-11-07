@@ -64,9 +64,7 @@ class ResPartner(models.Model):
         """
         # No existing cron = no way for db to pull updates, thus no need to bother IAP
         if (
-            not self.env.ref('l10n_eu_account_vies.vies_iap_check_update', raise_if_not_found=False)
-            or tools.config['test_enable']
-            or modules.module.current_test
+            tools.config['test_enable'] or modules.module.current_test
         ):
             return "dummy_identifier", "dummy_token"  # ignored by IAP, same as neutralized
 

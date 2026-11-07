@@ -739,7 +739,6 @@ class StockMoveLine(models.Model):
     def action_send_recall_email(self):
         move_lines = self.filtered('picking_partner_id')
         if move_lines:
-            template = self.env.ref('stock.mail_template_data_stock_picking_recall', raise_if_not_found=False)
             recalled_lots_dict = {}
             recalled_products_dict = {}
             for picking, ml in move_lines.grouped('picking_id').items():
@@ -756,8 +755,8 @@ class StockMoveLine(models.Model):
                     'default_partner_ids': move_lines.picking_partner_id.ids,
                     'default_model': 'stock.picking',
                     'default_res_ids': move_lines.picking_id.ids,
-                    'default_template_id': template.id if template else False,
-                    'default_use_template': bool(template),
+                    'default_template_id': self.env['mail.template'].ref('stock.mail_template_data_stock_picking_recall').id,
+                    'default_use_template': bool(self.env['mail.template'].ref('stock.mail_template_data_stock_picking_recall')),
                     'recalled_lots_dict': recalled_lots_dict,
                     'recalled_products_dict': recalled_products_dict,
                 }

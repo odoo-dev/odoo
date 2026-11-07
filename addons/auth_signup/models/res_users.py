@@ -189,16 +189,10 @@ class ResUsers(models.Model):
         portal_account_created_template = None
         if create_mode:
             if any(user._is_internal() for user in self):
-                internal_account_created_template = self.env.ref('auth_signup.set_password_email', raise_if_not_found=False)
-                if internal_account_created_template and internal_account_created_template._name != 'mail.template':
-                    _logger.error("Wrong set password template %r", internal_account_created_template)
-                    return
+                internal_account_created_template = self.env['mail.template'].ref('auth_signup.set_password_email')
 
             if any(not user._is_internal() for user in self):
-                portal_account_created_template = self.env.ref('auth_signup.portal_set_password_email', raise_if_not_found=False)
-                if portal_account_created_template and portal_account_created_template._name != 'mail.template':
-                    _logger.error("Wrong set password template %r", portal_account_created_template)
-                    return
+                portal_account_created_template = self.env['mail.template'].ref('auth_signup.portal_set_password_email')
 
         email_values = {
             'email_cc': False,
@@ -264,11 +258,7 @@ class ResUsers(models.Model):
         }
 
     def send_unregistered_user_reminder(self, *, after_days=5, batch_size=100):
-        email_template = self.env.ref('auth_signup.mail_template_data_unregistered_users', raise_if_not_found=False)
-        if not email_template:
-            _logger.warning("Template 'auth_signup.mail_template_data_unregistered_users' was not found. Cannot send reminder notifications.")
-            self.env['ir.cron']._commit_progress(deactivate=True)
-            return
+        email_template = self.env['mail.template'].ref('auth_signup.mail_template_data_unregistered_users')
         datetime_min = fields.Datetime.today() - relativedelta(days=after_days)
         datetime_max = datetime_min + relativedelta(days=1)
 

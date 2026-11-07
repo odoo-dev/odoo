@@ -177,6 +177,11 @@ class ResUsers(models.Model):
     _order = 'name, login'
     _allow_sudo_commands = False
 
+    _base__public_user_optional = models.Ref('base.public_user', required=False)
+    _base__template_portal_user_id = models.Ref('base.template_portal_user_id', required=False)
+    _base__user_admin_optional = models.Ref('base.user_admin', required=False)
+    _base__user_root_optional = models.Ref('base.user_root', required=False)
+
     def _check_company_domain(self, companies):
         if not companies:
             return Domain.TRUE
@@ -193,9 +198,7 @@ class ResUsers(models.Model):
         All the groups of the Default User Group
         """
         groups = self.env.ref('base.group_user')
-        default_group = self.env.ref('base.default_user_group', raise_if_not_found=False)
-        if default_group:
-            groups += default_group.implied_ids
+        groups += self.env['res.groups'].ref('base.default_user_group').implied_ids
         return groups
 
     partner_id = fields.Many2one('res.partner', required=True, ondelete='restrict', bypass_search_access=True, index=True,
@@ -428,8 +431,8 @@ class ResUsers(models.Model):
 
     @api.depends('all_group_ids')
     def _compute_role(self):
-        group_system = self.env.ref('base.group_system', raise_if_not_found=False)
-        group_user = self.env.ref('base.group_user', raise_if_not_found=False)
+        group_system = self.env['res.groups'].ref('base.group_system')
+        group_user = self.env['res.groups'].ref('base.group_user')
 
         for user in self:
             # A group is almost never held directly: ``base.group_user`` and the
@@ -437,9 +440,9 @@ class ResUsers(models.Model):
             # is given, so the role is determined on the implied groups.
             all_groups = user.group_ids._origin.all_implied_ids
             user.role = (
-                'group_system' if group_system and group_system in all_groups else
-                'light_user' if group_user and group_user in all_groups and all_groups._is_light_groups() else
-                'regular_user' if group_user and group_user in all_groups else
+                'group_system' if group_system in all_groups else
+                'light_user' if group_user in all_groups and all_groups._is_light_groups() else
+                'regular_user' if group_user in all_groups else
                 False
             )
 
@@ -503,7 +506,7 @@ class ResUsers(models.Model):
     # This update is made manually during group implying updates.
     @api.depends('group_ids')
     def _compute_share(self):
-        user_group_id = self.env['ir.model.data']._xmlid_to_res_id('base.group_user')
+        user_group_id = self.env['res.groups'].ref('base.group_user').id
         internal_users = self.filtered_domain([('all_group_ids', 'in', [user_group_id])])
         internal_users.share = False
         (self - internal_users).share = True
@@ -604,8 +607,8 @@ class ResUsers(models.Model):
 
     @api.constrains('action_id')
     def _check_action_id(self):
-        action_open_website = self.env.ref('base.action_open_website', raise_if_not_found=False)
-        if action_open_website and any(user.action_id.id == action_open_website.id for user in self):
+        action_open_website = self.env['ir.actions.act_url'].ref('base.action_open_website')
+        if any(user.action_id.id == action_open_website.id for user in self):
             raise ValidationError(_('The "App Switcher" action cannot be selected as home action.'))
         # We use sudo() because  "Access rights" admins can't read action models
         for user in self.sudo():
@@ -744,17 +747,14 @@ class ResUsers(models.Model):
 
     @api.ondelete(at_uninstall=True)
     def _unlink_except_master_data(self):
-        portal_user_template = self.env.ref('base.template_portal_user_id', False)
-        public_user = self.env.ref('base.public_user', False)
         if SUPERUSER_ID in self.ids:
             raise UserError(_('You can not remove the admin user as it is used internally for resources created by Odoo (updates, module installation, ...)'))
-        user_admin = self.env.ref('base.user_admin', raise_if_not_found=False)
-        if user_admin and user_admin in self:
+        if self._base__user_admin_optional in self:
             raise UserError(_('You cannot delete the admin user because it is utilized in various places (such as security configurations,...). Instead, archive it.'))
         self.env.transaction.invalidate_ormcache()
-        if portal_user_template and portal_user_template in self:
+        if self._base__template_portal_user_id in self:
             raise UserError(_('Deleting the template users is not allowed. Deleting this profile will compromise critical functionalities.'))
-        if public_user and public_user in self:
+        if self._base__public_user_optional in self:
             raise UserError(_("Deleting the public user is not allowed. Deleting this profile will compromise critical functionalities."))
 
     @api.model
@@ -1440,8 +1440,7 @@ class UsersMultiCompany(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         users = super().create(vals_list)
-        group_multi_company_id = self.env['ir.model.data']._xmlid_to_res_id(
-            'base.group_multi_company', raise_if_not_found=False)
+        group_multi_company_id = self.env['res.groups'].ref('base.group_multi_company').id
         if group_multi_company_id:
             for user in users:
                 company_count = len(user.sudo().company_ids)
@@ -1455,8 +1454,7 @@ class UsersMultiCompany(models.Model):
         res = super().write(vals)
         if 'company_ids' not in vals:
             return res
-        group_multi_company_id = self.env['ir.model.data']._xmlid_to_res_id(
-            'base.group_multi_company', raise_if_not_found=False)
+        group_multi_company_id = self.env['res.groups'].ref('base.group_multi_company').id
         if group_multi_company_id:
             for user in self:
                 company_count = len(user.sudo().company_ids)
@@ -1474,8 +1472,7 @@ class UsersMultiCompany(models.Model):
 
         if origin:
             return user
-        group_multi_company_id = self.env['ir.model.data']._xmlid_to_res_id(
-            'base.group_multi_company', raise_if_not_found=False)
+        group_multi_company_id = self.env['res.groups'].ref('base.group_multi_company').id
         if group_multi_company_id:
             company_count = len(user.sudo().company_ids)
             if company_count <= 1 and group_multi_company_id in user.group_ids.ids:

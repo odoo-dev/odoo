@@ -243,9 +243,6 @@ class ResPartner(models.Model):
         """
          Post a chatter note containing company enrichment data received from IAP
         """
-        template = self.env.ref('iap_mail.enrich_company_by_dnb', raise_if_not_found=False)
-        if not template:
-            return
         company = {
             'phone': self.phone,
             'name': self.name,

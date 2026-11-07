@@ -235,8 +235,8 @@ class Account_Edi_Proxy_ClientUser(models.Model):
                 )
                 failed = True
         if failed:
-            if registering_cron := self.env.ref('account_peppol.ir_cron_peppol_auto_register_services', raise_if_not_found=False):
-                registering_cron._trigger(at=datetime.now() + timedelta(hours=4))
+            registering_cron = self.env['ir.cron'].ref('account_peppol.ir_cron_peppol_auto_register_services')
+            registering_cron._trigger(at=datetime.now() + timedelta(hours=4))
 
     # -------------------------------------------------------------------------
     # BUSINESS ACTIONS

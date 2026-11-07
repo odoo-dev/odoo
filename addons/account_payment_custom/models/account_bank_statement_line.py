@@ -12,11 +12,7 @@ class AccountBankStatementLine(models.Model):
     def create(self, vals_list):
         statement_lines = super().create(vals_list)
 
-        wire_transfer_cron = self.env.ref(
-            "account_payment_custom.cron_auto_confirm_paid_wire_transfer_txs", False
-        )
-        if wire_transfer_cron:
-            wire_transfer_cron._trigger()
+        self.env['ir.cron'].ref('account_payment_custom.cron_auto_confirm_paid_wire_transfer_txs')._trigger()
 
         return statement_lines
 

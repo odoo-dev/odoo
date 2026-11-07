@@ -409,7 +409,7 @@ class MailingList(models.Model):
                 )
             contact.with_context(mail_post_autofollow_author_skip=True).message_post(
                 body=body,
-                subtype_id=self.env['ir.model.data']._xmlid_to_res_id('mail.mt_note'),
+                subtype_id=self.env['mail.message.subtype'].ref('mail.mt_note').id,
             )
         self._post_subscribe_hook(contacts_to_subscribe, contacts_to_unsubscribe)
         return contacts

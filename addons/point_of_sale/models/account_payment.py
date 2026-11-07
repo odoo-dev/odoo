@@ -29,7 +29,7 @@ class AccountPayment(models.Model):
         # having an account.payment.method.line with a smaller sequence than sepa_ct.
         account_sepa = self.env['ir.module.module'].search([('name', '=', 'account_iso20022')])
         if account_sepa.state == 'installed':
-            sepa_ct = self.env.ref('account_iso20022.account_payment_method_sepa_ct', raise_if_not_found=False)
+            sepa_ct = self.env['account.payment.method']._account_iso20022__account_payment_method_sepa_ct_optional
             if sepa_ct and 'pos_payment' in self.env.context and sepa_ct.code not in res:
                 res.append(sepa_ct.code)
         return res

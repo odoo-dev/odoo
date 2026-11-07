@@ -1278,8 +1278,7 @@ class MrpProduction(models.Model):
             action['domain'] = [('id', 'in', self.picking_ids.ids)]
         elif self.picking_ids:
             action['res_id'] = self.picking_ids.id
-            picking_form = self.env.ref('stock.view_picking_form', False)
-            picking_form_view = [(picking_form and picking_form.id or False, 'form')]
+            picking_form_view = [(self.env['ir.ui.view'].ref('stock.view_picking_form').id, 'form')]
             action['views'] = picking_form_view + [(state, view) for state, view in action.get('views', []) if view != 'form']
         action['context'] = dict(self.env.context, default_origin=self.name)
         return action
@@ -3335,7 +3334,7 @@ class MrpProduction(models.Model):
         return vals
 
     def _post_run_manufacture(self, post_production_values):
-        note_subtype_id = self.env['ir.model.data']._xmlid_to_res_id('mail.mt_note')
+        note_subtype_id = self.env['mail.message.subtype'].ref('mail.mt_note').id
         for production, procurement in zip(self, post_production_values):
             if group_id := procurement.values.get('production_group_id'):
                 production.production_group_id.parent_ids = [Command.link(group_id)]

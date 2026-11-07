@@ -312,8 +312,7 @@ class MailingContact(models.Model):
     @api.model
     def _is_name_split_activated(self):
         """ Return whether the contact names are populated as first and last name or as a single field (name). """
-        view = self.env.ref("mass_mailing.mailing_contact_view_tree_split_name", raise_if_not_found=False)
-        return view and view.sudo().active
+        return self.env['ir.ui.view'].ref('mass_mailing.mailing_contact_view_tree_split_name').sudo().active
 
     def _creation_message(self):
         self.ensure_one()

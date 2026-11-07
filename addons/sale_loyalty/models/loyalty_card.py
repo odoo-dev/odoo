@@ -20,9 +20,7 @@ class LoyaltyCard(models.Model):
     def _get_default_template(self):
         default_template = super()._get_default_template()
         if not default_template:
-            default_template = self.env.ref(
-                "loyalty.mail_template_loyalty_card", raise_if_not_found=False
-            )
+            default_template = self.env['mail.template'].ref('loyalty.mail_template_loyalty_card')
         return default_template
 
     def _mail_get_partner_fields(self, introspect_fields=False):

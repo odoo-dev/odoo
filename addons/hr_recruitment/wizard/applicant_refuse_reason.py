@@ -166,7 +166,7 @@ class ApplicantGetRefuseReason(models.TransientModel):
         return related_original_applicants
 
     def _prepare_send_refusal_mails(self):
-        subtype_id = self.env['ir.model.data']._xmlid_to_res_id('mail.mt_note')
+        subtype_id = self.env['mail.message.subtype'].ref('mail.mt_note').id
         # The refusal is sent to the contact of the applicant, the email doesn't create it
         self.applicant_ids._find_or_create_partner()
         for applicant in self.applicant_ids:

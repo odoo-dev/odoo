@@ -50,14 +50,11 @@ class ResConfigSettings(models.TransientModel):
     picking_policy = fields.Selection(related="company_id.picking_policy", readonly=False, required=True)
 
     def _compute_replenish_on_order(self):
-        route = self.env.ref('stock.route_warehouse0_mto', raise_if_not_found=False)
-        if route:
-            self.replenish_on_order = route.active
+        if self.env['stock.route']._stock__route_warehouse0_mto:
+            self.replenish_on_order = self.env['stock.route']._stock__route_warehouse0_mto.active
 
     def _inverse_replenish_on_order(self):
-        route = self.env.ref('stock.route_warehouse0_mto', raise_if_not_found=False)
-        if route:
-            route.active = self.replenish_on_order
+        self.env['stock.route']._stock__route_warehouse0_mto.active = self.replenish_on_order
 
     @api.onchange('group_stock_multi_locations')
     def _onchange_group_stock_multi_locations(self):
@@ -132,8 +129,8 @@ class ResConfigSettings(models.TransientModel):
             # Disable the views removing the create button from the location list and form.
             # Be resilient if the views have been deleted manually.
             for view in (
-                self.env.ref('stock.stock_location_view_tree2_editable', raise_if_not_found=False),
-                self.env.ref('stock.stock_location_view_form_editable', raise_if_not_found=False),
+                self.env['ir.ui.view'].ref('stock.stock_location_view_tree2_editable'),
+                self.env['ir.ui.view'].ref('stock.stock_location_view_form_editable'),
             ):
                 if view:
                     view.active = False
@@ -145,8 +142,8 @@ class ResConfigSettings(models.TransientModel):
             # Enable the views removing the create button from the location list and form.
             # Be resilient if the views have been deleted manually.
             for view in (
-                self.env.ref('stock.stock_location_view_tree2_editable', raise_if_not_found=False),
-                self.env.ref('stock.stock_location_view_form_editable', raise_if_not_found=False),
+                self.env['ir.ui.view'].ref('stock.stock_location_view_tree2_editable'),
+                self.env['ir.ui.view'].ref('stock.stock_location_view_form_editable'),
             ):
                 if view:
                     view.active = True
@@ -158,6 +155,6 @@ class ResConfigSettings(models.TransientModel):
         return
 
     def action_view_delivery_methods(self):
-        if action := self.env.ref('delivery.action_delivery_carrier_form', raise_if_not_found=False):
+        if action := self.env['ir.actions.act_window']._delivery__action_delivery_carrier_form_optional:
             return action._get_action_dict()
         return

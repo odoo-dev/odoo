@@ -20,6 +20,7 @@ class ResGroups(models.Model):
     _order = 'privilege_id, sequence, name, id'
     _clear_cache_name = 'groups'
     _clear_cache_on_fields = {'implied_ids', 'implied_by_ids'}
+
     name = fields.Char(required=True, translate=True)
     user_ids = fields.Many2many('res.users', 'res_groups_users_rel', 'gid', 'uid', help='Users explicitly in this group')
     all_user_ids = fields.Many2many('res.users', string='Users and implied users',

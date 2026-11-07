@@ -112,7 +112,7 @@ class AccountMove(models.Model):
 
     @api.depends('partner_id', 'partner_shipping_id', 'company_id')
     def _compute_l10n_in_state_id(self):
-        foreign_state = self.env.ref('l10n_in.state_in_oc', raise_if_not_found=False)
+        foreign_state = self.env['res.country.state'].ref('l10n_in.state_in_oc')
         for move in self:
             if move.country_code == 'IN' and move.is_sale_document(include_receipts=True):
                 partner = (

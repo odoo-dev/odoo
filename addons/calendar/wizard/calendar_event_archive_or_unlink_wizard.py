@@ -50,7 +50,7 @@ class CalendarEventArchiveOrUnlinkWizard(models.TransientModel):
             )[wizard.calendar_event_id.id]
 
     def _compute_template_id(self):
-        self.template_id = self.env.ref('calendar.calendar_template_delete_event', raise_if_not_found=False)
+        self.template_id = self.env['mail.template'].ref('calendar.calendar_template_delete_event')
 
     @api.depends('calendar_event_id', 'template_id')
     def _compute_body(self):

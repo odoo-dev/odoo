@@ -185,9 +185,7 @@ class GamificationChallenge(models.Model):
                 challenge.next_report_date = False
 
     def _get_report_template(self):
-        template = self.env.ref('gamification.simple_report_template', raise_if_not_found=False)
-
-        return template.id if template else False
+        return self.env['mail.template'].ref('gamification.simple_report_template').id
 
     @api.model_create_multi
     def create(self, vals_list):

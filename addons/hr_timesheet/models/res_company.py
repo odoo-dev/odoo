@@ -10,11 +10,11 @@ class ResCompany(models.Model):
 
     @api.model
     def _default_project_time_mode_id(self):
-        return self.env.ref('uom.product_uom_hour', raise_if_not_found=False)
+        return self.env['uom.uom'].ref('uom.product_uom_hour')
 
     @api.model
     def _default_timesheet_encode_uom_id(self):
-        return self.env.ref('uom.product_uom_hour', raise_if_not_found=False)
+        return self.env['uom.uom'].ref('uom.product_uom_hour')
 
     project_time_mode_id = fields.Many2one('uom.uom', string='Project Time Unit',
         default=_default_project_time_mode_id,
@@ -45,8 +45,8 @@ class ResCompany(models.Model):
 
     def _create_internal_project_task(self):
         results = []
-        type_ids_ref = self.env.ref('hr_timesheet.internal_project_default_stage', raise_if_not_found=False)
-        type_ids = [(4, type_ids_ref.id)] if type_ids_ref else []
+        internal_project_default_stage = self.env['project.task.type']._hr_timesheet__internal_project_default_stage
+        type_ids = [(4, internal_project_default_stage.id)] if internal_project_default_stage else []
         for company in self:
             company = company.with_company(company)
             results += [{

@@ -843,7 +843,7 @@ class ProductTemplate(models.Model):
         compute='_compute_store_by', inverse='_set_store_by', search='_search_store_by',
         help="Ensure the traceability of a storable product in your warehouse.")
     lot_sequence_id = fields.Many2one(
-        'ir.sequence', 'Serial/Lot Numbers Sequence', default=lambda self: self.env.ref('stock.sequence_production_lots', raise_if_not_found=False),
+        'ir.sequence', 'Serial/Lot Numbers Sequence', default=lambda self: self.env['ir.sequence']._stock__sequence_production_lots,
         help='Technical Field: The Ir.Sequence record that is used to generate serial/lot numbers for this product', index='btree_not_null')
     serial_prefix_format = fields.Char(
         'Custom Lot/Serial', compute='_compute_serial_prefix_format', inverse='_inverse_serial_prefix_format',
@@ -903,7 +903,7 @@ class ProductTemplate(models.Model):
                     template.lot_sequence_id = new_sequence
                     sequences_by_prefix[template.serial_prefix_format] = new_sequence
             else:
-                template.lot_sequence_id = self.env.ref('stock.sequence_production_lots', raise_if_not_found=False)
+                template.lot_sequence_id = self.env['ir.sequence']._stock__sequence_production_lots
 
     @api.depends('lot_sequence_id.number_next_actual')
     def _compute_next_serial(self):

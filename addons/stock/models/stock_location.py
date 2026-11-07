@@ -28,7 +28,10 @@ class StockLocation(models.Model):
     )
     _check_company_domain = models.check_company_domain_parent_of
 
+    _stock__stock_location_inter_company_optional = models.Ref('stock.stock_location_inter_company', required=False)
     _location_customers = models.Ref('stock.stock_location_customers', required=False)
+    _stock__stock_location_customers_optional = models.Ref('stock.stock_location_customers', required=False)
+    _stock__stock_location_suppliers_optional = models.Ref('stock.stock_location_suppliers', required=False)
 
     @api.model
     def default_get(self, fields):
@@ -484,8 +487,7 @@ class StockLocation(models.Model):
         if self.usage == 'customer':
             return True
         # Can also be True if location is inter-company transit
-        inter_comp_location = self.env.ref('stock.stock_location_inter_company', raise_if_not_found=False)
-        return self._child_of(inter_comp_location)
+        return self._child_of(self._stock__stock_location_inter_company_optional)
 
     def _get_weight(self, excluded_sml_ids=False):
         """Returns a dictionary with the net and forecasted weight of the location.
@@ -533,6 +535,8 @@ class StockRoute(models.Model):
     _description = "Inventory Route"
     _order = 'sequence'
     _check_company_auto = True
+
+    _stock__route_warehouse0_mto = models.Ref('stock.route_warehouse0_mto', required=False)
 
     name = fields.Char('Route', required=True, translate=True)
     active = fields.Boolean('Active', default=True, help="If the active field is set to False, it will allow you to hide the route without removing it.")

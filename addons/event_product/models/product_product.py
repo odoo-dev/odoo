@@ -5,6 +5,8 @@ from odoo.exceptions import ValidationError
 class ProductProduct(models.Model):
     _inherit = 'product.product'
 
+    _event_product__product_product_event = models.Ref('event_product.product_product_event', required=False)
+
     event_ticket_ids = fields.One2many('event.event.ticket', 'product_id', string='Event Tickets')
 
     @api.constrains('event_ticket_ids', 'service_tracking')

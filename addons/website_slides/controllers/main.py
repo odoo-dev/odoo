@@ -762,7 +762,7 @@ class WebsiteSlides(WebsiteProfile):
         }
 
         if not request.env.user._is_public():
-            subtype_comment_id = request.env['ir.model.data']._xmlid_to_res_id('mail.mt_comment')
+            subtype_comment_id = request.env['mail.message.subtype'].ref('mail.mt_comment').id
             last_message = request.env['mail.message'].search([
                 ('model', '=', channel._name),
                 ('res_id', '=', channel.id),
@@ -963,10 +963,8 @@ class WebsiteSlides(WebsiteProfile):
     @http.route(['/slides/channel/subscribe'], type='jsonrpc', auth='user', website=True)
     def slide_channel_subscribe(self, channel_id):
         # Presentation Published subtype
-        subtype = request.env.ref("website_slides.mt_channel_slide_published", raise_if_not_found=False)
-        if subtype:
-            return request.env['slide.channel'].browse(channel_id).message_subscribe(
-                partner_ids=[request.env.user.partner_id.id], subtype_ids=subtype.ids)
+        return request.env['slide.channel'].browse(channel_id).message_subscribe(
+            partner_ids=[request.env.user.partner_id.id], subtype_ids=request.env['mail.message.subtype'].ref('website_slides.mt_channel_slide_published').ids)
         return True
 
     @http.route(['/slides/channel/unsubscribe'], type='jsonrpc', auth='user', website=True)

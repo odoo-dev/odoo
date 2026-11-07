@@ -12,3 +12,4 @@ from . import pos_session
 from . import sale_order
 from . import res_config_settings
 from . import res_partner
+from . import product_product

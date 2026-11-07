@@ -3,8 +3,8 @@ from . import models
 
 
 def post_init_hook(env):
-    if registering_cron := env.ref('account_peppol.ir_cron_peppol_auto_register_services', raise_if_not_found=False):
-        registering_cron._trigger()
+    registering_cron = env['ir.cron'].ref('account_peppol.ir_cron_peppol_auto_register_services')
+    registering_cron._trigger()
 
 
 def uninstall_hook(env):

@@ -291,7 +291,6 @@ class AccountFiscalPosition(models.Model):
         return all_auto_apply_fpos._get_first_matching_fpos(delivery)
 
     def action_open_related_taxes(self):
-        list_view = self.env.ref('account.account_tax_fiscal_position_view_tree', raise_if_not_found=False)
         domain = [
             *self.env['account.tax']._check_company_domain(self.company_id),
             '|',
@@ -302,7 +301,7 @@ class AccountFiscalPosition(models.Model):
             'type': 'ir.actions.act_window',
             'name': self.env._("%s taxes", self.display_name),
             'res_model': 'account.tax',
-            'views': [(list_view.id if list_view else False, 'list'), (False, 'form')],
+            'views': [(self.env['ir.ui.view'].ref('account.account_tax_fiscal_position_view_tree').id, 'list'), (False, 'form')],
             'domain': domain,
             'context': {'active_test': False},
         }
@@ -345,6 +344,8 @@ class AccountFiscalPositionAccount(models.Model):
 
 class ResPartner(models.Model):
     _inherit = 'res.partner'
+
+    _base__res_partner_2 = models.Ref('base.res_partner_2', required=False)
 
     fiscal_country_codes = fields.Char(compute='_compute_fiscal_country_codes')
     fiscal_country_group_codes = fields.Json(compute='_compute_fiscal_country_group_codes')

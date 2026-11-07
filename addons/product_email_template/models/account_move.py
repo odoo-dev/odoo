@@ -12,7 +12,7 @@ class AccountMove(models.Model):
             self = self.with_user(SUPERUSER_ID)
         for invoice in self.filtered(lambda x: x.move_type == 'out_invoice'):
             # send template only on customer invoice
-            comment_subtype_id = self.env['ir.model.data']._xmlid_to_res_id('mail.mt_comment')
+            comment_subtype_id = self.env['mail.message.subtype'].ref('mail.mt_comment').id
             for line in invoice.invoice_line_ids:
                 if line.product_id.email_template_id:
                     invoice.message_post_with_source(

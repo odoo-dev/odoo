@@ -49,24 +49,21 @@ class DeliveryNoteWizard(models.TransientModel):
     def _send_shipping_confirmation_email(self):
         """Send an email to the customer confirming the shipment."""
         self.ensure_one()
-        delivery_note_template = self.env.ref(
-            "delivery.mail_template_data_delivery_note", raise_if_not_found=False
+        delivery_note_template = self.env['mail.template'].ref('delivery.mail_template_data_delivery_note')
+        rendered_template = delivery_note_template._generate_template(
+            [self.id], ["body_html", "subject", "partner_to"]
+        )[self.id]
+        rendered_attachments = delivery_note_template._generate_template_attachments(
+            [self.id], ["report_template_ids"]
+        )[self.id]
+        self.so_id.message_post(
+            body=rendered_template["body_html"],
+            subject=rendered_template["subject"],
+            partner_ids=rendered_template.get("partner_ids", []),
+            attachments=rendered_attachments.get("attachments", []),
+            message_type="comment",
+            subtype_xmlid="mail.mt_comment",
         )
-        if delivery_note_template:
-            rendered_template = delivery_note_template._generate_template(
-                [self.id], ["body_html", "subject", "partner_to"]
-            )[self.id]
-            rendered_attachments = delivery_note_template._generate_template_attachments(
-                [self.id], ["report_template_ids"]
-            )[self.id]
-            self.so_id.message_post(
-                body=rendered_template["body_html"],
-                subject=rendered_template["subject"],
-                partner_ids=rendered_template.get("partner_ids", []),
-                attachments=rendered_attachments.get("attachments", []),
-                message_type="comment",
-                subtype_xmlid="mail.mt_comment",
-            )
 
     def _get_report_lang(self):
         return self.partner_id.lang or self.env.lang

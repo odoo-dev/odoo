@@ -113,12 +113,8 @@ class ResPartner(models.Model):
 
     def write(self, vals):
         res = super().write(vals)
-        if (
-            (vals.keys() & self._display_address_depends())
-            and self.filtered('should_be_geolocalized')
-            and (geo_localize_cron := self.env.ref('base_geolocalize.ir_cron_geolocalize_required_partners', raise_if_not_found=False))
-        ):
-            geo_localize_cron._trigger()
+        if vals.keys() & self._display_address_depends() and self.filtered('should_be_geolocalized'):
+            self.env['ir.cron'].ref('base_geolocalize.ir_cron_geolocalize_required_partners')._trigger()
         return res
 
     def _cron_geolocalize(self, batch_size=20):

@@ -116,7 +116,7 @@ class CalendarAttendee(models.Model):
          Notably inside appointment to use a different mail template from the appointment type. """
         now = fields.Datetime.now()
         self.filtered(lambda attendee: attendee.event_id.start > now)._notify_attendees(
-            self.env.ref('calendar.calendar_template_meeting_invitation', raise_if_not_found=False),
+            self.env['mail.template'].ref('calendar.calendar_template_meeting_invitation'),
             force_send=True,
         )
 

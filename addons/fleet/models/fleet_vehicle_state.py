@@ -9,6 +9,9 @@ class FleetVehicleState(models.Model):
     _order = 'sequence asc'
     _description = 'Vehicle Status'
 
+    _fleet__fleet_vehicle_state_new_request = models.Ref('fleet.fleet_vehicle_state_new_request', required=False)
+    _fleet__fleet_vehicle_state_waiting_list = models.Ref('fleet.fleet_vehicle_state_waiting_list', required=False)
+
     name = fields.Char(required=True, translate=True)
     sequence = fields.Integer()
     fold = fields.Boolean(string='Folded in Kanban')

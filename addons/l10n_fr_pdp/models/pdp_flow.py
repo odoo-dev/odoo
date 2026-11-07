@@ -568,20 +568,18 @@ class PdpFlow(models.Model):
         self.ensure_one()
         if not self.error_moves_count:
             return self.action_send_from_ui()
-        view = self.env.ref('l10n_fr_pdp.l10n_fr_pdp_view_send_wizard_form', raise_if_not_found=False)
         return {
             'type': 'ir.actions.act_window',
             'res_model': 'l10n.fr.pdp.reports.send.wizard',
             'view_mode': 'form',
-            'view_id': view.id if view else False,
+            'view_id': self.env['ir.ui.view'].ref('l10n_fr_pdp.l10n_fr_pdp_view_send_wizard_form').id,
             'target': 'new',
             'context': {'default_flow_id': self.id},
         }
 
     def action_view_moves(self):
         """Open list view of related invoices."""
-        ereporting_view = self.env.ref("l10n_fr_pdp.l10n_fr_pdp_list_view_move_ereporting", raise_if_not_found=False)
-        view = ereporting_view.id if ereporting_view else False
+        view = self.env['ir.ui.view'].ref('l10n_fr_pdp.l10n_fr_pdp_list_view_move_ereporting').id
         return self._get_moves()._get_records_action(
             name=self.env._("Related Invoices"),
             views=[(view, 'list'), (False, 'form')],

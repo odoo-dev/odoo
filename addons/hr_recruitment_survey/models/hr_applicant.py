@@ -54,7 +54,7 @@ class HrApplicant(models.Model):
         return action
 
     def action_send_survey(self):
-        template = self.env.ref('hr_recruitment_survey.mail_template_applicant_interview_invite', raise_if_not_found=False)
+        template = self.env['mail.template'].ref('hr_recruitment_survey.mail_template_applicant_interview_invite')
 
         applicant_partner_ids = self.env['res.partner']
         applicant_survey_ids = self.env['survey.survey']
@@ -72,7 +72,7 @@ class HrApplicant(models.Model):
             default_survey_ids=applicant_survey_ids.ids,
             default_partner_ids=applicant_partner_ids.ids,
             default_use_template=bool(template),
-            default_template_id=template and template.id or False,
+            default_template_id=template.id,
             default_deadline=fields.Datetime.now() + timedelta(days=15),
             hide_mail_template_management_options=True,
             dialog_size='large',

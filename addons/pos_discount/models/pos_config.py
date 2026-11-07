@@ -16,9 +16,9 @@ class PosConfig(models.Model):
     @api.model
     def _default_discount_value_on_module_install(self):
         configs = self.env['pos.config'].search([])
-        product = self.env.ref("pos_discount.product_product_consumable", raise_if_not_found=False)
+        product = self.env['product.product']._pos_discount__product_product_consumable_optional
         for conf in configs:
-            conf.discount_product_id = product if conf.module_pos_discount and product and (not product.company_id or product.company_id == conf.company_id) else False
+            conf.discount_product_id = product if conf.module_pos_discount and (not product.company_id or product.company_id == conf.company_id) else False
 
     def open_ui(self):
         for config in self:
@@ -28,5 +28,4 @@ class PosConfig(models.Model):
 
     def _get_special_products(self):
         res = super()._get_special_products()
-        default_discount_product = self.env.ref('pos_discount.product_product_consumable', raise_if_not_found=False) or self.env['product.product']
-        return res | self.env['pos.config'].search([]).mapped('discount_product_id') | default_discount_product
+        return res | self.env['pos.config'].search([]).mapped('discount_product_id') | self.env['product.product']._pos_discount__product_product_consumable_optional

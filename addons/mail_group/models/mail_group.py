@@ -381,9 +381,7 @@ class MailGroup(models.Model):
         if self.is_closed:
             raise UserError(_("You can not send guidelines for a closed group."))
 
-        template = self.env.ref('mail_group.mail_template_guidelines', raise_if_not_found=False)
-        if not template:
-            raise UserError(_('Template "mail_group.mail_template_guidelines" was not found. No email has been sent. Please contact an administrator to fix this issue.'))
+        template = self.env['mail.template'].ref('mail_group.mail_template_guidelines')
 
         banned_emails = self.env['mail.group.moderation'].sudo().search([
             ('status', '=', 'ban'),
@@ -492,10 +490,6 @@ class MailGroup(models.Model):
 
     def _notify_moderators(self):
         """Push a notification (Inbox / Email) to the moderators whose an action is waiting."""
-        template = self.env.ref('mail_group.mail_group_notify_moderation', raise_if_not_found=False)
-        if not template:
-            _logger.warning('Template "mail_group.mail_group_notify_moderation" was not found. Cannot send reminder notifications.')
-            return
 
         results = self.env['mail.group.message']._read_group(
             [('mail_group_id', 'in', self.ids), ('moderation_status', '=', 'pending_moderation')],

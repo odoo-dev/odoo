@@ -14,6 +14,8 @@ class ProductProduct(models.Model):
 
     _gift_card_product = models.Ref('loyalty.gift_card_product_50', message=_LOYALTY_PRODUCT_MESSAGE)
     _ewallet_product = models.Ref('loyalty.ewallet_product_50', message=_LOYALTY_PRODUCT_MESSAGE)
+    _loyalty__ewallet_product_50 = models.Ref('loyalty.ewallet_product_50', required=False)
+    _loyalty__gift_card_product_50 = models.Ref('loyalty.gift_card_product_50', required=False)
 
     def write(self, vals):
         if not vals.get("active", True) and any(product.active for product in self):

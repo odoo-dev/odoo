@@ -70,12 +70,12 @@ class PosConfig(models.Model):
             'record': config,
             'noupdate': True,
         }])
-        if not self.env.ref('pos_restaurant.floor_main', raise_if_not_found=False):
+        if not self.env['restaurant.floor']._pos_restaurant__floor_main:
             convert.convert_file(self._env_with_clean_context(), 'pos_restaurant', 'data/scenarios/restaurant_floor.xml', idref=None, mode='init', noupdate=True)
         config_floors = [(5, 0)]
-        if (floor_main := self.env.ref('pos_restaurant.floor_main', raise_if_not_found=False)):
+        if (floor_main := self.env['restaurant.floor']._pos_restaurant__floor_main):
             config_floors += [(4, floor_main.id)]
-        if (floor_patio := self.env.ref('pos_restaurant.floor_patio', raise_if_not_found=False)):
+        if (floor_patio := self.env['restaurant.floor']._pos_restaurant__floor_patio):
             config_floors += [(4, floor_patio.id)]
         config.update({'floor_ids': config_floors})
         config._load_bar_demo_data(with_demo_data)
@@ -120,16 +120,16 @@ class PosConfig(models.Model):
         if bool(presets):
             # Ensure the "Presets" menu is visible when installing the restaurant scenario
             self.env.ref("point_of_sale.group_pos_preset").implied_by_ids |= self.env.ref("base.group_user")
-        if not self.env.ref('pos_restaurant.floor_main', raise_if_not_found=False):
+        if not self.env['restaurant.floor']._pos_restaurant__floor_main:
             convert.convert_file(self._env_with_clean_context(), 'pos_restaurant', 'data/scenarios/restaurant_floor.xml', idref=None, mode='init', noupdate=True)
         config_floors = [(5, 0)]
-        if (floor_main := self.env.ref('pos_restaurant.floor_main', raise_if_not_found=False)):
+        if (floor_main := self.env['restaurant.floor']._pos_restaurant__floor_main):
             config_floors += [(4, floor_main.id)]
-        if (floor_patio := self.env.ref('pos_restaurant.floor_patio', raise_if_not_found=False)):
+        if (floor_patio := self.env['restaurant.floor']._pos_restaurant__floor_patio):
             config_floors += [(4, floor_patio.id)]
         config.update({'floor_ids': config_floors})
         config._load_restaurant_demo_data(with_demo_data)
-        existing_session = self.env.ref('pos_restaurant.pos_closed_session_3', raise_if_not_found=False)
+        existing_session = self.env['pos.session']._pos_restaurant__pos_closed_session_3
         if with_demo_data and self.env.company.id == self.env.ref('base.main_company').id and not existing_session:
             convert.convert_file(self._env_with_clean_context(), 'pos_restaurant', 'data/scenarios/restaurant_demo_session.xml', idref=None, mode='init', noupdate=True)
         return {'config_id': config.id}

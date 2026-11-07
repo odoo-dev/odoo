@@ -22,8 +22,8 @@ class ResPartner(models.Model):
         self.ensure_one()
         if 'is_published' in track_init_values:
             if self.is_published:
-                return self.env.ref('website_partner.mt_partner_published', raise_if_not_found=False) or super()._track_log_get_default_subtype(track_init_values)
-            return self.env.ref('website_partner.mt_partner_unpublished', raise_if_not_found=False) or super()._track_log_get_default_subtype(track_init_values)
+                return self.env['mail.message.subtype'].ref('website_partner.mt_partner_published')
+            return self.env['mail.message.subtype'].ref('website_partner.mt_partner_unpublished')
         return super()._track_log_get_default_subtype(track_init_values)
 
     def _prepare_jsonld_vals(self):

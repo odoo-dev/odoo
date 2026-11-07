@@ -18,6 +18,8 @@ class PosSession(models.Model):
     _description = 'Point of Sale Session'
     _inherit = ['mail.thread', 'mail.activity.mixin', "pos.bus.mixin", 'pos.load.mixin']
 
+    _point_of_sale__pos_closed_session_2 = models.Ref('point_of_sale.pos_closed_session_2', required=False)
+
     company_id = fields.Many2one(
         'res.company',
         related='config_id.company_id',

@@ -13,9 +13,4 @@ class AccountEdiProxyUser(models.Model):
         super()._peppol_get_participant_status()
         new_sg_receivers = self.filtered_domain(sg_receiver_domain) - prev_sg_receivers
         if new_sg_receivers:
-            cron = self.env.ref(
-                'account_peppol.ir_cron_peppol_auto_register_services',
-                raise_if_not_found=False,
-            )
-            if cron:
-                cron._trigger()
+            self.env['ir.cron'].ref('account_peppol.ir_cron_peppol_auto_register_services')._trigger()

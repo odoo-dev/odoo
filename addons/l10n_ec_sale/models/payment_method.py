@@ -23,10 +23,10 @@ class PaymentMethod(models.Model):
     def _compute_l10n_ec_sri_payment_id(self):
         for method in self:
             if method.code == 'card':
-                method.l10n_ec_sri_payment_id = self.env.ref('l10n_ec.P19', raise_if_not_found=False)
+                method.l10n_ec_sri_payment_id = self.env['l10n_ec.sri.payment'].ref('l10n_ec.P19')
             elif method.code == 'bank_transfer':
-                method.l10n_ec_sri_payment_id = self.env.ref('l10n_ec.P20', raise_if_not_found=False)
+                method.l10n_ec_sri_payment_id = self.env['l10n_ec.sri.payment'].ref('l10n_ec.P20')
             elif method.code == 'bank_account':
-                method.l10n_ec_sri_payment_id = self.env.ref('l10n_ec.P21', raise_if_not_found=False)
+                method.l10n_ec_sri_payment_id = self.env['l10n_ec.sri.payment'].ref('l10n_ec.P21')
             else:
                 method.l10n_ec_sri_payment_id = False

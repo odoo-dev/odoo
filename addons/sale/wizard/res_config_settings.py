@@ -122,14 +122,10 @@ class ResConfigSettings(models.TransientModel):
 
     def set_values(self):
         super().set_values()
-        if mandatory_product_view := self.env.ref(
-            "sale.view_order_form_mandatory_product", raise_if_not_found=False
-        ):
-            mandatory_product_view.active = self.sale_order_mandatory_product
+        self.env['ir.ui.view'].ref('sale.view_order_form_mandatory_product').active = self.sale_order_mandatory_product
 
     # === ACTION METHODS === #
 
     # Unique name to avoid colliding with `website_payment`.
     def action_sale_start_payment_onboarding(self):
-        menu = self.env.ref("sale.menu_sale_general_settings", raise_if_not_found=False)
-        return self.company_id._start_payment_onboarding(menu and menu.id)
+        return self.company_id._start_payment_onboarding(self.env['ir.ui.menu'].ref('sale.menu_sale_general_settings').id)

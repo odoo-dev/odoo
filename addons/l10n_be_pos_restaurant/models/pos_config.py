@@ -34,8 +34,8 @@ class PosConfig(models.Model):
                     'noupdate': True,
                 }])
             presets = self.env['pos.preset']
-            presets |= self.env.ref('pos_restaurant.pos_takeout_preset', raise_if_not_found=False) or presets
-            presets |= self.env.ref('pos_restaurant.pos_delivery_preset', raise_if_not_found=False) or presets
+            presets |= self.env['pos.preset']._takeout_preset
+            presets |= self.env['pos.preset']._delivery_preset
             if presets:
                 presets.write({'fiscal_position_id': fp.id})
 
@@ -44,10 +44,9 @@ class PosConfig(models.Model):
         if (self.env.company.chart_template or '').startswith('be'):
             ChartTemplate = self.env['account.chart.template'].with_company(self.env.company)
             tax_alcohol = ChartTemplate.ref('tax_alcohol_luxury')
-            cocktails_category = self.env.ref('pos_restaurant.pos_category_cocktails', raise_if_not_found=False)
-            if cocktails_category:
+            if self.env['pos.category']._pos_restaurant__pos_category_cocktails:
                 self.env['product.template'].search([
-                    ('pos_categ_ids', 'in', [cocktails_category.id])
+                    ('pos_categ_ids', 'in', [self.env['pos.category']._pos_restaurant__pos_category_cocktails.id])
                 ]).write({'taxes_id': [(6, 0, [tax_alcohol.id])]})
 
     @api.model

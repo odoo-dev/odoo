@@ -866,6 +866,8 @@ class PreferredClassification(models.Model):
     _description = 'Preferred myDATA classification combinations for a particular product'
     _order = 'priority DESC, id DESC'
 
+    _l10n_gr_edi__default_preferred_classification = models.Ref('l10n_gr_edi.default_preferred_classification', required=False)
+
     # Inverse fields
     product_template_id = fields.Many2one(comodel_name='product.template')
     fiscal_position_id = fields.Many2one(comodel_name='account.fiscal.position')

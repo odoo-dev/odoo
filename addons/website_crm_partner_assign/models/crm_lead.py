@@ -100,9 +100,8 @@ class CrmLead(models.Model):
             if not partner_id:
                 partner_id = partner_dict.get(lead.id, False)
             if not partner_id:
-                tag_to_add = self.env.ref('website_crm_partner_assign.tag_portal_lead_partner_unavailable', False)
-                if tag_to_add:
-                    lead.write({'tag_ids': [(4, tag_to_add.id, False)]})
+                if self.env['crm.tag']._website_crm_partner_assign__tag_portal_lead_partner_unavailable:
+                    lead.write({'tag_ids': [(4, self.env['crm.tag']._website_crm_partner_assign__tag_portal_lead_partner_unavailable.id, False)]})
                 continue
             lead.assign_geo_localize(lead.partner_latitude, lead.partner_longitude)
             partner = self.env['res.partner'].browse(partner_id)
@@ -241,7 +240,7 @@ class CrmLead(models.Model):
         }
 
         if spam:
-            tag_spam = self.env.ref('website_crm_partner_assign.tag_portal_lead_is_spam', False)
+            tag_spam = self.env['crm.tag']._website_crm_partner_assign__tag_portal_lead_is_spam
             if tag_spam and tag_spam not in self.sudo().tag_ids:
                 values['tag_ids'] = [(4, tag_spam.id, False)]
         if partner_ids:
@@ -306,7 +305,7 @@ class CrmLead(models.Model):
             return {
                 'errors': _('All fields are required!')
             }
-        tag_own = self.env.ref('website_crm_partner_assign.tag_portal_lead_own_opp', False)
+        tag_own = self.env['crm.tag']._website_crm_partner_assign__tag_portal_lead_own_opp
         values = {
             'contact_name': values['contact_name'],
             'name': values['title'],

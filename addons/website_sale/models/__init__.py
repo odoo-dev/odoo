@@ -46,3 +46,4 @@ from . import (
 )
 
 from . import res_groups
+from . import account_payment_term

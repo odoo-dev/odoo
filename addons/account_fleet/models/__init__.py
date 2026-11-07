@@ -5,3 +5,4 @@ from . import account_move
 from . import account_tax
 from . import fleet_vehicle
 from . import fleet_vehicle_log_services
+from . import fleet_service_type

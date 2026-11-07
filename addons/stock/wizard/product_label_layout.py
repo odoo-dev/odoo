@@ -57,7 +57,7 @@ class ProductLabelLayout(models.TransientModel):
                     continue
                 quantities[move.product_id] += quantity
         else:
-            uom_unit = self.env.ref('uom.product_uom_unit', raise_if_not_found=False)
+            uom_unit = self.env['uom.uom'].ref('uom.product_uom_unit')
             for line in move_lines:
                 if line.uom_id._has_common_reference(uom_unit):
                     if (line.lot_id or line.lot_name) and int(line.quantity):

@@ -10,8 +10,7 @@ class IrConfig_Parameter(models.Model):
     def init(self, force=False):
         super().init(force=force)
         if force:
-            oauth_oe = self.env.ref('auth_oauth.provider_openerp', raise_if_not_found=False)
-            if not oauth_oe:
+            if not self.env['auth.oauth.provider']._auth_oauth__provider_openerp:
                 return
             dbuuid = self.sudo().get_str('database.uuid')
-            oauth_oe.write({'client_id': dbuuid})
+            self.env['auth.oauth.provider']._auth_oauth__provider_openerp.write({'client_id': dbuuid})

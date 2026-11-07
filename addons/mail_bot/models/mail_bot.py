@@ -21,7 +21,7 @@ class MailBot(models.AbstractModel):
          :param command: the name of the called command if the logic is not triggered by a message_post
         """
         channel.ensure_one()
-        odoobot_id = self.env['ir.model.data']._xmlid_to_res_id("base.partner_root")
+        odoobot_id = self.env['res.partner']._base__partner_root_optional.id
         message = message or self.env['mail.message']
         if message.author_id.id == odoobot_id or message.message_type != "comment" and not command:
             return

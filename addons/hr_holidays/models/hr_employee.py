@@ -322,16 +322,15 @@ class HrEmployee(models.Model):
         """Default the time off approver to the manager's user and give it the approver group."""
         if self.env.context.get('salary_simulation'):
             return super().create(vals_list)
-        approver_group = self.env.ref('hr_holidays.group_hr_holidays_responsible', raise_if_not_found=False)
         group_updates = []
         for vals in vals_list:
             if 'parent_id' in vals:
                 manager = self.env['hr.employee'].browse(vals['parent_id']).user_id
                 vals['leave_manager_id'] = vals.get('leave_manager_id', manager.id)
-            if approver_group and vals.get('leave_manager_id'):
+            if vals.get('leave_manager_id'):
                 group_updates.append((4, vals['leave_manager_id']))
         if group_updates:
-            approver_group.sudo().write({'user_ids': group_updates})
+            self.env['res.groups'].ref('hr_holidays.group_hr_holidays_responsible').sudo().write({'user_ids': group_updates})
         return super().create(vals_list)
 
     def write(self, vals):
@@ -358,8 +357,8 @@ class HrEmployee(models.Model):
             if values['leave_manager_id']:
                 leave_manager = self.env['res.users'].browse(values['leave_manager_id'])
                 old_managers -= leave_manager
-                approver_group = self.env.ref('hr_holidays.group_hr_holidays_responsible', raise_if_not_found=False)
-                if approver_group and not leave_manager.has_group('hr_holidays.group_hr_holidays_responsible'):
+                approver_group = self.env['res.groups'].ref('hr_holidays.group_hr_holidays_responsible')
+                if not leave_manager.has_group('hr_holidays.group_hr_holidays_responsible'):
                     leave_manager.sudo().write({'group_ids': [(4, approver_group.id)]})
 
         res = super().write(values)

@@ -142,8 +142,8 @@ class ResConfigSettings(models.TransientModel):
                 website._populate_product_feeds()
         # if Request ratings option is enabled activate Customer Reviews view
         if self.send_order_rating_emails:
-            view = self.env.ref("website_sale.product_comment", raise_if_not_found=False)
-            if view and not view.active:
+            view = self.env['ir.ui.view'].ref('website_sale.product_comment')
+            if not view.active:
                 view.active = True
 
         # Activate / deactivate the automation of suggested products

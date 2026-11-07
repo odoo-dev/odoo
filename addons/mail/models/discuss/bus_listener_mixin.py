@@ -22,7 +22,7 @@ class BusListenerMixin(models.AbstractModel):
                 res.attr("body", Markup("<span class='o_mail_notification'>%s</span>") % content),
                 res.attr("id", message_id),
                 res.attr("is_transient", True),
-                res.attr("subtype_id", self.env["ir.model.data"]._xmlid_to_res_id("mail.mt_note")),
+                res.attr("subtype_id", self.env['mail.message.subtype'].ref('mail.mt_note').id),
                 res.one("thread", [], as_thread=True, value=channel),
             ),
         )

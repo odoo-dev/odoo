@@ -59,14 +59,14 @@ class BaseDocumentLayout(models.TransientModel):
     def document_layout_save(self):
         """Save layout and onboarding step progress, return super() result"""
         res = super(BaseDocumentLayout, self).document_layout_save()
-        if step := self.env.ref('account.onboarding_onboarding_step_base_document_layout', raise_if_not_found=False):
-            for company_id in self.company_id:
-                # Account users cannot write the technical onboarding progress records so we must use sudo.
-                step.sudo().with_company(company_id).action_set_just_done()
-            # When we finish the configuration of the layout, we want the dialog size to be reset to large
-            # which is the default behaviour.
-            if res.get('context'):
-                res['context']['dialog_size'] = 'large'
+        step = self.env['onboarding.onboarding.step'].ref('account.onboarding_onboarding_step_base_document_layout')
+        for company_id in self.company_id:
+            # Account users cannot write the technical onboarding progress records so we must use sudo.
+            step.sudo().with_company(company_id).action_set_just_done()
+        # When we finish the configuration of the layout, we want the dialog size to be reset to large
+        # which is the default behaviour.
+        if res.get('context'):
+            res['context']['dialog_size'] = 'large'
         return res
 
     def _get_preview_template(self):

@@ -69,8 +69,7 @@ class CrmTeam(models.Model):
         assign_enabled = self.env['crm.lead']._is_rule_based_assignment_activated()
         auto_assign_enabled = False
         if assign_enabled:
-            assign_cron = self.sudo().env.ref('crm.ir_cron_crm_lead_assign', raise_if_not_found=False)
-            auto_assign_enabled = assign_cron.active if assign_cron else False
+            auto_assign_enabled = self.env['ir.cron'].sudo().ref('crm.ir_cron_crm_lead_assign').active
         self.assignment_enabled = assign_enabled
         self.assignment_auto_enabled = auto_assign_enabled
 

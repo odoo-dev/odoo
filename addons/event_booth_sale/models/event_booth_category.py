@@ -14,7 +14,7 @@ class EventBoothCategory(models.Model):
     _inherit = 'event.booth.category'
 
     def _default_product_id(self):
-        return self.env.ref('event_booth_sale.product_product_event_booth', raise_if_not_found=False)
+        return self.env['product.product']._event_booth_sale__product_product_event_booth
 
     product_id = fields.Many2one(
         'product.product', string='Product', required=True,

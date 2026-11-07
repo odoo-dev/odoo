@@ -29,7 +29,7 @@ class RatingRating(models.Model):
         (done here by fetching the group record then using has_group, as it may
         not be defined and we do not want to make a complete bridge module just
         for that). Either write access on document is granted. """
-        editor_group = self.env['ir.model.data']._xmlid_to_res_id('website.group_website_restricted_editor')
+        editor_group = self.env['res.groups']._website__group_website_restricted_editor_optional.id
         if editor_group and self.env.user.has_group('website.group_website_restricted_editor'):
             return
         for model, model_data in self._classify_by_model().items():

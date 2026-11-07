@@ -23,7 +23,7 @@ class ResCompany(models.Model):
             ('code', '=', '002.00'),
             ('country_code', '=', country_code),
         ], limit=1)
-        return country_type or self.env.ref('hr_work_entry.generic_work_entry_type_attendance', raise_if_not_found=False)
+        return country_type or self.env['hr.work.entry.type']._hr_work_entry__generic_work_entry_type_attendance
 
     @api.depends('partner_id.country_id')
     def _compute_allowed_work_entry_type_ids(self):

@@ -6,6 +6,7 @@ class ProductProduct(models.Model):
     _name = 'product.product'
     _inherit = ['product.product', 'pos.load.mixin']
 
+    _point_of_sale__product_product_service_fee_optional = models.Ref('point_of_sale.product_product_service_fee', required=False)
     _service_fee_product = models.Ref('point_of_sale.product_product_service_fee', required=False)
     _tip_product = models.Ref('point_of_sale.product_product_tip', required=False)
 

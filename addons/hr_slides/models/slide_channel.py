@@ -25,8 +25,7 @@ class SlideChannelPartner(models.Model):
 
         if employees:
             HrResumeLine = self.env['hr.resume.line'].sudo()
-            line_type = self.env.ref('hr.resume_type_training', raise_if_not_found=False)
-            line_type_id = line_type and line_type.id
+            line_type_id = self.env['hr.resume.line.type']._hr__resume_type_training.id
 
             lines_for_channel_by_employee = dict(HrResumeLine._read_group([
                 ('employee_id', 'in', employees.ids),

@@ -5,7 +5,7 @@ import urllib.parse
 from datetime import UTC, date, datetime
 
 from odoo import _, api, fields, models
-from odoo.exceptions import AccessError, UserError
+from odoo.exceptions import AccessError
 from odoo.fields import Domain
 from odoo.http import request
 from odoo.models import Query
@@ -533,17 +533,7 @@ class WebsitePublishedMixin(models.AbstractModel):
                     return
 
     def _manage_next_scheduled_action(self):
-        scheduled_action = self.env.ref(
-            'website.ir_cron_publish_scheduled_pages',
-            raise_if_not_found=False,
-        )
-        if not scheduled_action:
-            raise UserError(
-                _(
-                    'The scheduled action "Website Publish Mixin: Publish scheduled website page" '
-                    "has been deleted. Please contact your administrator to restore it or reinstall the website module."
-                )
-            )
+        scheduled_action = self.env['ir.cron'].ref('website.ir_cron_publish_scheduled_pages')
 
         cron_trigger_env = self.env['ir.cron.trigger'].sudo()
         next_trigger = cron_trigger_env.search(

@@ -1591,9 +1591,9 @@ class SaleOrder(models.Model):
         """
         self.ensure_one()
         if self.env.context.get("proforma"):
-            return self.env.ref("sale.email_template_proforma", raise_if_not_found=False)
+            return self.env['mail.template'].ref('sale.email_template_proforma')
         if self.state != "sale":
-            return self.env.ref("sale.email_template_edi_sale", raise_if_not_found=False)
+            return self.env['mail.template'].ref('sale.email_template_edi_sale')
         return self._get_confirmation_template()
 
     def _get_confirmation_template(self):
@@ -1610,7 +1610,7 @@ class SaleOrder(models.Model):
         )
         if default_confirmation_template:
             return default_confirmation_template
-        return self.env.ref("sale.mail_template_sale_confirmation", raise_if_not_found=False)
+        return self.env['mail.template'].ref('sale.mail_template_sale_confirmation')
 
     def action_quotation_sent(self):
         """Mark the given draft quotation(s) as sent.
@@ -1694,9 +1694,7 @@ class SaleOrder(models.Model):
 
         :return: None
         """
-        mail_template = self.env.ref(
-            "sale.mail_template_sale_payment_executed", raise_if_not_found=False
-        )
+        mail_template = self.env['mail.template'].ref('sale.mail_template_sale_payment_executed')
         for order in self:
             order._send_order_notification_mail(mail_template)
 
@@ -1722,8 +1720,8 @@ class SaleOrder(models.Model):
             self = self.with_user(SUPERUSER_ID)
 
         async_send = self.env["ir.config_parameter"].sudo().get_bool("sale.async_emails")
-        cron = self.env.ref("sale.send_pending_emails_cron", raise_if_not_found=False)
-        cron_enabled = cron and cron.sudo().active
+        cron = self.env['ir.cron'].ref('sale.send_pending_emails_cron')
+        cron_enabled = cron.sudo().active
         if async_send and cron_enabled and allow_deferred_sending:
             # Schedule the email to be sent asynchronously.
             self.pending_email_template_id = mail_template

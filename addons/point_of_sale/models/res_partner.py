@@ -7,6 +7,8 @@ class ResPartner(models.Model):
     _name = 'res.partner'
     _inherit = ['res.partner', 'pos.load.mixin']
 
+    _point_of_sale__default_session_closing_partner = models.Ref('point_of_sale.default_session_closing_partner', required=False)
+
     pos_order_count = fields.Integer(
         compute='_compute_pos_order',
         help="The number of point of sales orders related to this customer",

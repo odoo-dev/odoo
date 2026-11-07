@@ -28,6 +28,9 @@ class RestaurantFloor(models.Model):
     _order = "sequence, name"
     _inherit = ['pos.load.mixin']
 
+    _pos_restaurant__floor_main = models.Ref('pos_restaurant.floor_main', required=False)
+    _pos_restaurant__floor_patio = models.Ref('pos_restaurant.floor_patio', required=False)
+
     name = fields.Char('Floor Name', required=True)
     pos_config_ids = fields.Many2many('pos.config', string='Point of Sales', domain="[('module_pos_restaurant', '=', True)]", copy=False)
     table_ids = fields.One2many('restaurant.table', 'floor_id', string='Tables')

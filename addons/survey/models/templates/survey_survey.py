@@ -203,11 +203,9 @@ class SurveySurvey(models.Model):
                 }),
             ]
         }
-        mail_template = self.env.ref('survey.mail_template_certification', raise_if_not_found=False)
-        if mail_template:
-            survey_values.update({
-                'certification_mail_template_id': mail_template.id
-            })
+        survey_values.update({
+            'certification_mail_template_id': self.env['mail.template'].ref('survey.mail_template_certification').id
+        })
         return survey_values
 
     @api.model

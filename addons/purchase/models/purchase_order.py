@@ -649,7 +649,7 @@ class PurchaseOrder(models.Model):
         lang = self.env.context.get('lang')
         if {'default_template_id', 'default_model', 'default_res_id'} <= ctx.keys():
             template = self.env['mail.template'].browse(ctx['default_template_id'])
-            if template and template.lang:
+            if template.lang:
                 lang = template._render_lang([ctx['default_res_id']])[ctx['default_res_id']]
 
         self = self.with_context(lang=lang)
@@ -1016,8 +1016,7 @@ class PurchaseOrder(models.Model):
         if len(invoices) > 1:
             result['domain'] = [('id', 'in', invoices.ids)]
         elif len(invoices) == 1:
-            res = self.env.ref('account.view_move_form', False)
-            form_view = [(res and res.id or False, 'form')]
+            form_view = [(self.env['ir.ui.view'].ref('account.view_move_form').id, 'form')]
             if 'views' in result:
                 result['views'] = form_view + [(state, view) for state, view in result['views'] if view != 'form']
             else:
@@ -1123,29 +1122,27 @@ class PurchaseOrder(models.Model):
         if not self.env.user.has_group('purchase.group_send_reminder'):
             return
 
-        template = self.env.ref('purchase.email_template_edi_purchase_reminder', raise_if_not_found=False)
-        if template:
-            orders = self if send_single else self._get_orders_to_remind()
-            for order in orders:
-                date = order.date_planned
-                if date and (send_single or (date - relativedelta(days=order.reminder_date_before_receipt)).date() == datetime.today().date()):
-                    if send_single:
-                        return order._send_reminder_open_composer(template.id)
-                    else:
-                        order.with_context(is_reminder=True).message_post_with_source(
-                            template,
-                            email_layout_xmlid="mail.mail_notification_layout_with_responsible_signature",
-                            subtype_xmlid='mail.mt_comment',
-                        )
+        template = self.env['mail.template'].ref('purchase.email_template_edi_purchase_reminder')
+        orders = self if send_single else self._get_orders_to_remind()
+        for order in orders:
+            date = order.date_planned
+            if date and (send_single or (date - relativedelta(days=order.reminder_date_before_receipt)).date() == datetime.today().date()):
+                if send_single:
+                    return order._send_reminder_open_composer(template.id)
+                else:
+                    order.with_context(is_reminder=True).message_post_with_source(
+                        template,
+                        email_layout_xmlid="mail.mail_notification_layout_with_responsible_signature",
+                        subtype_xmlid='mail.mt_comment',
+                    )
 
     def send_reminder_preview(self):
         self.ensure_one()
         if not self.env.user.has_group('purchase.group_send_reminder'):
             return
 
-        template = self.env.ref('purchase.email_template_edi_purchase_reminder', raise_if_not_found=False)
-        if template and self.env.user.email and self.id:
-            template.with_context(is_reminder=True).send_mail(
+        if self.env.user.email and self.id:
+            self.env['mail.template'].ref('purchase.email_template_edi_purchase_reminder').with_context(is_reminder=True).send_mail(
                 self.id,
                 force_send=True,
                 raise_exception=False,
@@ -1172,7 +1169,7 @@ class PurchaseOrder(models.Model):
         lang = self.env.context.get('lang')
         if {'default_template_id', 'default_model', 'default_res_id'} <= ctx.keys():
             template = self.env['mail.template'].browse(ctx['default_template_id'])
-            if template and template.lang:
+            if template.lang:
                 lang = template._render_lang([ctx['default_res_id']])[ctx['default_res_id']]
         self = self.with_context(lang=lang)
         ctx['model_description'] = _('Purchase Order')

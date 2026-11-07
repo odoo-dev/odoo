@@ -224,12 +224,12 @@ class CardCampaign(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        utm_source = self.env.ref('marketing_card.utm_source_marketing_card', raise_if_not_found=False)
+        utm_source = self.env['utm.source']._marketing_card__utm_source_marketing_card
         link_trackers = self.env['link.tracker'].sudo().create([
             {
                 'url': vals.get('target_url') or self.env['card.campaign'].get_base_url(),
                 'title': vals['name'],  # not having this will trigger a request in the create
-                'source_id': utm_source.id if utm_source else None,
+                'source_id': utm_source.id,
                 'label': f"marketing_card_campaign_{vals.get('name', '')}_{fields.Datetime.now()}",
             }
             for vals in vals_list

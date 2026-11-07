@@ -28,8 +28,7 @@ class FleetVehicle(models.Model):
     _rec_names_search = ('name', 'driver_id.name')
 
     def _get_default_state(self):
-        state = self.env.ref('fleet.fleet_vehicle_state_new_request', raise_if_not_found=False)
-        return state if state and state.id else False
+        return self.env['fleet.vehicle.state']._fleet__fleet_vehicle_state_new_request
 
     def _get_year_selection(self):
         current_year = datetime.now().year
@@ -384,12 +383,12 @@ class FleetVehicle(models.Model):
     def create(self, vals_list):
         to_update_drivers_cars = set()
         to_update_drivers_bikes = set()
-        state_waiting_list = self.env.ref('fleet.fleet_vehicle_state_waiting_list', raise_if_not_found=False)
+        state_waiting_list = self.env['fleet.vehicle.state']._fleet__fleet_vehicle_state_waiting_list
         for vals in vals_list:
             if vals.get('future_driver_id'):
                 state_id = vals.get('state_id')
                 model_id = self.env['fleet.vehicle.model'].browse(vals['model_id'])
-                if not state_waiting_list or state_waiting_list.id != state_id:
+                if state_waiting_list.id != state_id:
                     if model_id.vehicle_type == 'bike':
                         to_update_drivers_bikes.add(vals['future_driver_id'])
                     elif model_id.vehicle_type == 'car':
@@ -430,8 +429,8 @@ class FleetVehicle(models.Model):
 
         if 'future_driver_id' in vals and vals['future_driver_id']:
             future_driver = vals['future_driver_id']
-            state_waiting_list = self.env.ref('fleet.fleet_vehicle_state_waiting_list', raise_if_not_found=False)
-            state_new_request = self.env.ref('fleet.fleet_vehicle_state_new_request', raise_if_not_found=False)
+            state_waiting_list = self.env['fleet.vehicle.state']._fleet__fleet_vehicle_state_waiting_list
+            state_new_request = self.env['fleet.vehicle.state']._fleet__fleet_vehicle_state_new_request
             vehicle_types = set(self.filtered(lambda vehicle:
                                 vals.get('state_id', vehicle.state_id.id) not in [state_waiting_list.id, state_new_request.id]).mapped('vehicle_type'))
             if vehicle_types:

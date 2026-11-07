@@ -202,9 +202,7 @@ class DiscussChannelMember(models.Model):
                     SQL("mail_message"),
                     SQL("discuss_channel_member.channel_id"),
                 ),
-                subtype_id=self.env["ir.model.data"]._xmlid_to_res_id(
-                    "mail.mt_important_notification",
-                ),
+                subtype_id=self.env['mail.message.subtype'].ref('mail.mt_important_notification').id,
             ))
             unread_counter_by_member = {res['id']: res['count'] for res in self.env.cr.dictfetchall()}
             for member in self:
@@ -236,7 +234,7 @@ class DiscussChannelMember(models.Model):
                 table.channel_id,
             ),
             separator=table.new_message_separator,
-            subtype_id=self.env["ir.model.data"]._xmlid_to_res_id("mail.mt_important_notification"),
+            subtype_id=self.env['mail.message.subtype'].ref('mail.mt_important_notification').id,
         )
 
     @api.depends("partner_id.name", "guest_id.name", "channel_id.display_name")

@@ -12,6 +12,6 @@ class IrUiMenu(models.Model):
             is_department_manager = bool(self.env["hr.department"].search_count([
                 ('manager_id', 'in', self.env.user.employee_ids.ids)
             ], limit=1))
-            if not is_department_manager and (dep_menu := self.env.ref('hr.menu_hr_department_kanban', raise_if_not_found=False)):
-                res.append(dep_menu.id)
+            if not is_department_manager:
+                res.append(self.ref('hr.menu_hr_department_kanban').id)
         return res

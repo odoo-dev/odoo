@@ -510,11 +510,7 @@ class ProductProduct(models.Model):
         - website salesperson email
         - company email_formatted, which includes the mail alias domain catchall
         """
-        email_template = self.env.ref(
-            "website_sale.email_template_back_in_stock", raise_if_not_found=False
-        )
-        if not email_template:
-            return
+        email_template = self.env['mail.template'].ref('website_sale.email_template_back_in_stock')
         grouped_notifications = self.env["product.stock.notification"]._read_group(
             [], groupby=["product_id", "website_id"], aggregates=["id:recordset"]
         )

@@ -1297,17 +1297,14 @@ class AccountJournal(models.Model):
     def _notify_einvoices_received(self, moves):
         self.ensure_one()
         # legacy if module was not upgraded
-        new_mail_template = self.env.ref('account.mail_template_invoice_subscriber', raise_if_not_found=False)
-        if new_mail_template:
-            # if module was upgraded, this is handled in _notify_invoice_subscribers
-            return
+        # if module was upgraded, this is handled in _notify_invoice_subscribers
+        return
 
         emails = set(email_normalize_all(self.incoming_einvoice_notification_email or ''))
         if not moves or not emails:
             return
 
-        if not (mail_template := self.env.ref('account.mail_template_einvoice_notification', raise_if_not_found=False)):
-            return
+        mail_template = self.env['mail.template'].ref('account.mail_template_einvoice_notification')
 
         mail_template.with_context(einvoices=moves).send_mail(self.id, force_send=True)
 
@@ -1331,10 +1328,7 @@ class AccountJournal(models.Model):
         if not recipients:
             return
 
-        if not (template := self.env.ref('account.mail_template_invoice_subscriber', raise_if_not_found=False)):
-            # we add the template in stable, thus this might happen if the module was not upgraded
-            self._notify_einvoices_received(invoice)
-            return
+        template = self.env['mail.template'].ref('account.mail_template_invoice_subscriber')
 
         base_url = self.get_base_url()
         for recipient in recipients:

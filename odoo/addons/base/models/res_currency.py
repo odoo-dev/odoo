@@ -120,17 +120,11 @@ class ResCurrency(models.CachedModel):
 
     @api.model
     def _activate_group_multi_currency(self):
-        group_user = self.env.ref('base.group_user', raise_if_not_found=False)
-        group_mc = self.env.ref('base.group_multi_currency', raise_if_not_found=False)
-        if group_user and group_mc:
-            group_user.sudo()._apply_group(group_mc)
+        self.env['res.groups'].ref('base.group_user').sudo()._apply_group(self.env['res.groups'].ref('base.group_multi_currency'))
 
     @api.model
     def _deactivate_group_multi_currency(self):
-        group_user = self.env.ref('base.group_user', raise_if_not_found=False)
-        group_mc = self.env.ref('base.group_multi_currency', raise_if_not_found=False)
-        if group_user and group_mc:
-            group_user.sudo()._remove_group(group_mc.sudo())
+        self.env['res.groups'].ref('base.group_user').sudo()._remove_group(self.env['res.groups'].ref('base.group_multi_currency').sudo())
 
     @api.constrains('active')
     def _check_company_currency_stays_active(self):

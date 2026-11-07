@@ -1284,21 +1284,17 @@ class PaymentProvider(models.Model):
 
         :return: None
         """
-        post_processing_cron = self.env.ref(
-            "payment.post_processing_cron", raise_if_not_found=False
-        )
-        if post_processing_cron:
-            any_installed_provider = bool(
-                self.sudo().search_count(
-                    [
-                        "|",
-                        ("module_state", "in", ("installed", "to install")),
-                        ("module_id", "=", False),
-                    ],
-                    limit=1,
-                )
+        any_installed_provider = bool(
+            self.sudo().search_count(
+                [
+                    "|",
+                    ("module_state", "in", ("installed", "to install")),
+                    ("module_id", "=", False),
+                ],
+                limit=1,
             )
-            post_processing_cron.active = any_installed_provider
+        )
+        self.env['ir.cron'].ref('payment.post_processing_cron').active = any_installed_provider
 
     def _get_code(self):
         """Return the code of the provider.

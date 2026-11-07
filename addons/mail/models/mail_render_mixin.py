@@ -220,7 +220,7 @@ class MailRenderMixin(models.AbstractModel):
             template_ctx['subtype_internal'] = False
         else:
             if 'is_discussion' not in template_ctx:
-                template_ctx['is_discussion'] = subtype.id == self.env['ir.model.data']._xmlid_to_res_id('mail.mt_comment')
+                template_ctx['is_discussion'] = subtype.id == self.env['mail.message.subtype'].ref('mail.mt_comment').id
             if 'subtype_internal' not in template_ctx:
                 template_ctx['subtype_internal'] = subtype.is_internal
         template_ctx.setdefault('subtype', subtype)

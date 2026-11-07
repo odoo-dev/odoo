@@ -40,11 +40,11 @@ class ProjectTask(models.Model):
         :rtype: list(tuple())
         """
         return [
-            (self.env['ir.model.data']._xmlid_to_res_id("project_todo.project_task_view_todo_kanban"), "kanban"),
-            (self.env['ir.model.data']._xmlid_to_res_id("project_todo.project_task_view_todo_tree"), "list"),
-            (self.env['ir.model.data']._xmlid_to_res_id("project_todo.project_task_view_todo_form"), "form"),
-            (self.env['ir.model.data']._xmlid_to_res_id("project_todo.project_task_view_todo_calendar"), "calendar"),
-            (self.env['ir.model.data']._xmlid_to_res_id("project_todo.project_task_view_todo_activity"), "activity"),
+            (self.env['ir.ui.view'].ref('project_todo.project_task_view_todo_kanban').id, "kanban"),
+            (self.env['ir.ui.view'].ref('project_todo.project_task_view_todo_tree').id, "list"),
+            (self.env['ir.ui.view'].ref('project_todo.project_task_view_todo_form').id, "form"),
+            (self.env['ir.ui.view'].ref('project_todo.project_task_view_todo_calendar').id, "calendar"),
+            (self.env['ir.ui.view'].ref('project_todo.project_task_view_todo_activity').id, "activity"),
         ]
 
     def _notify_get_recipients_groups(self, message, model_description):
