@@ -289,9 +289,9 @@ class BatchDownload(models.Model):
 
     @api.model
     def _cron_check_status(self):
-        """ Ask KSeF for the status of each due requested batch, and commit after each one.
-            Still 100, or a KSeF error: count a retry, and check again once the batch is due;
-            after the last retry, the batch fails.
+        """ Ask KSeF for the status of the latest requested batch of each company.
+            Still 100: count a retry, and check again after 10 * 2**retry_count seconds;
+            after the last retry, reset the count, and the next run asks again.
         """
 
         def check_status(company):
@@ -309,8 +309,11 @@ class BatchDownload(models.Model):
                     if is_truncated:
                         self._create_batch_download(company, batch.date_to, old_date_to)
                 elif batch.state == 'requested':
-                    batch.retry_count += 1
-                    batch._delayed_trigger('l10n_pl_edi_batch.ir_cron_check_status')
+                    if batch.retry_count < MAX_RETRIES:
+                        batch.retry_count += 1
+                        batch._delayed_trigger('l10n_pl_edi_batch.ir_cron_check_status')
+                    else:
+                        batch.retry_count = 0  # stop the quick retries, the next run asks again
 
         self._run_for_all_companies(check_status, 'l10n_pl_edi_batch.ir_cron_check_status')
 
