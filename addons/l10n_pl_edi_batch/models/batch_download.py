@@ -304,6 +304,7 @@ class BatchDownload(models.Model):
 
                 batch.update(data)
                 if batch.state == 'downloading':
+                    batch.retry_count = 0  # the download counts its own retries
                     self.env.ref('l10n_pl_edi_batch.ir_cron_download')._trigger()
                     # A truncated historic export: this batch now ends where KSeF stopped, request the rest
                     if is_truncated:
