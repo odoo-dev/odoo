@@ -345,8 +345,6 @@ class BatchDownload(models.Model):
             batch = batches[:1]
             if not batch.part_ids:
                 return
-            if not all(batch.part_ids.with_context(bin_size=True).mapped('decrypted_file')):
-                raise UserError(self.env._("The KSeF batch %s must be fully downloaded before importing it.", batch.name))
 
             AccountMove = self.env['account.move'].with_company(batch.company_id)
             with tempfile.TemporaryFile(mode='w+b') as zip_stream:
