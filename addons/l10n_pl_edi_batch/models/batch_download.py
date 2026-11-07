@@ -105,13 +105,15 @@ class BatchDownload(models.Model):
 
     def _get_state_by_code(self, code):
         self.ensure_one()
-        if self.is_expired or code not in (KSEF_IN_PROGRESS, KSEF_READY):
+        if code not in (KSEF_IN_PROGRESS, KSEF_READY) or self.retry_count > MAX_RETRIES:
             return 'failed'
         elif code == KSEF_IN_PROGRESS:
             return 'requested'
         elif code == KSEF_READY and self.part_ids:
             parts_missing = self.part_ids.filtered(lambda part: not part.with_context(bin_size=True).decrypted_file)
-            return 'downloading' if parts_missing else 'downloaded'
+            if parts_missing:
+                return 'failed' if self.is_expired else 'downloading'
+            return 'downloaded'
         return 'done'
 
     @api.depends('content', 'retry_count', 'part_ids.decrypted_file')
