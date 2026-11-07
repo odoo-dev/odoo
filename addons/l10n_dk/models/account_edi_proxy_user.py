@@ -16,6 +16,9 @@ BATCH_SIZE = 50
 class AccountEdiProxyClientUser(models.Model):
     _inherit = 'account_edi_proxy_client.user'
 
+    _l10n_dk__ir_cron_nemhandel_get_message_status = models.Ref('l10n_dk.ir_cron_nemhandel_get_message_status', 'ir.cron')
+    _l10n_dk__ir_cron_nemhandel_get_new_documents = models.Ref('l10n_dk.ir_cron_nemhandel_get_new_documents', 'ir.cron')
+
     nemhandel_verification_code = fields.Char(string='Nemhandel SMS verification code')
     proxy_type = fields.Selection(selection_add=[('nemhandel', 'Nemhandel')], ondelete={'nemhandel': 'cascade'})
 
@@ -284,7 +287,7 @@ class AccountEdiProxyClientUser(models.Model):
                 )
                 edi_user._nemhandel_post_process_new_messages(moves)
         if need_retrigger:
-            self.env.ref('l10n_dk.ir_cron_nemhandel_get_new_documents')._trigger()
+            self._l10n_dk__ir_cron_nemhandel_get_new_documents._trigger()
 
     def _nemhandel_process_new_messages(self, messages):
         self.ensure_one()
@@ -349,7 +352,7 @@ class AccountEdiProxyClientUser(models.Model):
                 params={'message_uuids': list(processed_message_uuids)},
             )
         if need_retrigger:
-            self.env.ref('l10n_dk.ir_cron_nemhandel_get_message_status')._trigger()
+            self._l10n_dk__ir_cron_nemhandel_get_message_status._trigger()
 
     def _nemhandel_get_documents_for_status(self, batch_size):
         self.ensure_one()

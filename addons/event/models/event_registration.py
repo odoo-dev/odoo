@@ -19,6 +19,9 @@ class EventRegistration(models.Model):
     _mail_defaults_to_email = True
 
     _event__event_registration_mail_template_badge = models.Ref('event.event_registration_mail_template_badge', 'mail.template', required=False)
+    _event__event_mail_scheduler = models.Ref('event.event_mail_scheduler', 'ir.cron')
+    _mail__email_compose_message_wizard_form = models.Ref('mail.email_compose_message_wizard_form', 'ir.ui.view')
+    _mail__ir_cron_mail_scheduler_action = models.Ref('mail.ir_cron_mail_scheduler_action', 'ir.cron')
 
     @api.model
     def _get_random_barcode(self):
@@ -378,7 +381,6 @@ class EventRegistration(models.Model):
             message loaded by default
         """
         self.ensure_one()
-        compose_form = self.env.ref('mail.email_compose_message_wizard_form')
         ctx = dict(
             default_model='event.registration',
             default_res_ids=self.ids,
@@ -390,8 +392,8 @@ class EventRegistration(models.Model):
             'type': 'ir.actions.act_window',
             'view_mode': 'form',
             'res_model': 'mail.compose.message',
-            'views': [(compose_form.id, 'form')],
-            'view_id': compose_form.id,
+            'views': [(self._mail__email_compose_message_wizard_form.id, 'form')],
+            'view_id': self._mail__email_compose_message_wizard_form.id,
             'target': 'new',
             'context': ctx,
         }
@@ -420,8 +422,8 @@ class EventRegistration(models.Model):
         # either trigger the cron, either run schedulers immediately (scaling choice)
         async_scheduler = self.env['ir.config_parameter'].sudo().get_bool('event.event_mail_async')
         if async_scheduler or self.env.context.get('import_file'):
-            self.env.ref('event.event_mail_scheduler')._trigger()
-            self.env.ref('mail.ir_cron_mail_scheduler_action')._trigger()
+            self._event__event_mail_scheduler._trigger()
+            self._mail__ir_cron_mail_scheduler_action._trigger()
         else:
             # we could simply call _create_missing_mail_registrations and let cron do their job
             # but it currently leads to several delays. We therefore call execute until

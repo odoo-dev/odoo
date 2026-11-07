@@ -6,6 +6,10 @@ from odoo.addons.account.models.chart_template import template
 class AccountChartTemplate(models.AbstractModel):
     _inherit = 'account.chart.template'
 
+    _l10n_at__account_tag_external_code_2300 = models.Ref('l10n_at.account_tag_external_code_2300', 'account.account.tag')
+    _l10n_at__account_tag_external_code_2885 = models.Ref('l10n_at.account_tag_external_code_2885', 'account.account.tag')
+    _l10n_at__account_tag_l10n_at_ABIV = models.Ref('l10n_at.account_tag_l10n_at_ABIV', 'account.account.tag')
+
     @template('at')
     def _get_at_template_data(self):
         return {
@@ -41,9 +45,9 @@ class AccountChartTemplate(models.AbstractModel):
     def _setup_utility_bank_accounts(self, template_code, company, template_data):
         super()._setup_utility_bank_accounts(template_code, company, template_data)
         if template_code == "at":
-            bank_tags = self.env.ref('l10n_at.account_tag_external_code_2300') | self.env.ref('l10n_at.account_tag_l10n_at_ABIV')
+            bank_tags = self._l10n_at__account_tag_external_code_2300 | self._l10n_at__account_tag_l10n_at_ABIV
             company.account_journal_suspense_account_id.tag_ids = bank_tags
-            company.transfer_account_id.tag_ids = self.env.ref('l10n_at.account_tag_external_code_2885') | self.env.ref('l10n_at.account_tag_l10n_at_ABIV')
+            company.transfer_account_id.tag_ids = self._l10n_at__account_tag_external_code_2885 | self._l10n_at__account_tag_l10n_at_ABIV
 
     @template('at', 'account.account')
     def _get_at_account_account(self):

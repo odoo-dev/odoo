@@ -15,6 +15,8 @@ class GamificationBadgeUser(models.Model):
     _order = "create_date desc"
     _rec_name = "badge_name"
 
+    _gamification__email_template_badge_received = models.Ref('gamification.email_template_badge_received', 'mail.template')
+
     user_id = fields.Many2one('res.users', string="User", required=True, ondelete="cascade", index=True)
     user_partner_id = fields.Many2one('res.partner', related='user_id.partner_id')
     sender_id = fields.Many2one('res.users', string="Sender")
@@ -33,7 +35,7 @@ class GamificationBadgeUser(models.Model):
         The stats counters are incremented
         :param ids: list(int) of badge users that will receive the badge
         """
-        body_html = self.env.ref('gamification.email_template_badge_received')._render_field('body_html', self.ids)[self.id]
+        body_html = self._gamification__email_template_badge_received._render_field('body_html', self.ids)[self.id]
         for badge_user in self:
             badge_user.with_context(
                 email_notification_force_header=True,

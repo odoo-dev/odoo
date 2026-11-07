@@ -30,6 +30,9 @@ class Account_Edi_Proxy_ClientUser(models.Model):
     _inherit = 'account_edi_proxy_client.user'
 
     _account_peppol__ir_cron_peppol_auto_register_services = models.Ref('account_peppol.ir_cron_peppol_auto_register_services', 'ir.cron', required=False)
+    _account_peppol__ir_cron_peppol_get_message_status = models.Ref('account_peppol.ir_cron_peppol_get_message_status', 'ir.cron')
+    _account_peppol__ir_cron_peppol_get_new_documents = models.Ref('account_peppol.ir_cron_peppol_get_new_documents', 'ir.cron')
+    _account_peppol__ir_cron_peppol_get_participant_status = models.Ref('account_peppol.ir_cron_peppol_get_participant_status', 'ir.cron')
 
     proxy_type = fields.Selection(selection_add=[('peppol', 'Peppol')], ondelete={'peppol': 'cascade'})
 
@@ -156,7 +159,7 @@ class Account_Edi_Proxy_ClientUser(models.Model):
         # trigger participant status update after resync to confirm token & keep state in sync
         # but run async, since sync may confirm token server-side (thus increment token_sync_version)
         # yet fail before commit, leaving unrecoverable state
-        self.env.ref('account_peppol.ir_cron_peppol_get_participant_status')._trigger()
+        self._account_peppol__ir_cron_peppol_get_participant_status._trigger()
 
     def _peppol_out_of_sync_disconnect_this_database(self):
         self.ensure_one()
@@ -187,7 +190,7 @@ class Account_Edi_Proxy_ClientUser(models.Model):
 
         # throughout the registration process, we need to check the status more frequently
         if self.search_count([('company_id.account_peppol_proxy_state', '=', 'smp_registration')], limit=1):
-            self.env.ref('account_peppol.ir_cron_peppol_get_participant_status')._trigger(at=fields.Datetime.now() + timedelta(hours=1))
+            self._account_peppol__ir_cron_peppol_get_participant_status._trigger(at=fields.Datetime.now() + timedelta(hours=1))
 
     def _cron_peppol_webhook_keepalive(self):
         edi_users = self.search([('company_id.account_peppol_proxy_state', 'in', ['sender', 'receiver'])])
@@ -494,7 +497,7 @@ class Account_Edi_Proxy_ClientUser(models.Model):
                 edi_user._peppol_post_process_new_messages(moves)
 
         if need_retrigger:
-            self.env.ref('account_peppol.ir_cron_peppol_get_new_documents')._trigger()
+            self._account_peppol__ir_cron_peppol_get_new_documents._trigger()
 
     def _peppol_get_filetype(self, content):
         return "xml", "application/xml"
@@ -571,7 +574,7 @@ class Account_Edi_Proxy_ClientUser(models.Model):
                     params={'message_uuids': processed_message_uuids},
                 )
         if need_retrigger:
-            self.env.ref('account_peppol.ir_cron_peppol_get_message_status')._trigger(
+            self._account_peppol__ir_cron_peppol_get_message_status._trigger(
                 fields.Datetime.add(fields.Datetime.now(), minutes=5),
             )
 
@@ -800,7 +803,7 @@ class Account_Edi_Proxy_ClientUser(models.Model):
         company.account_peppol_proxy_state = 'smp_registration'
         company.peppol_external_provider = None
 
-        self.env.ref('account_peppol.ir_cron_peppol_get_participant_status')._trigger(at=fields.Datetime.now() + timedelta(hours=1))
+        self._account_peppol__ir_cron_peppol_get_participant_status._trigger(at=fields.Datetime.now() + timedelta(hours=1))
 
     @handle_demo
     def _peppol_deregister_participant(self):

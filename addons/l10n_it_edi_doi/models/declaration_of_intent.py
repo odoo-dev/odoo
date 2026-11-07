@@ -11,6 +11,12 @@ class L10n_It_Edi_DoiDeclaration_Of_Intent(models.Model):
     _description = "Declaration of Intent"
     _order = 'protocol_number_part1, protocol_number_part2'
 
+    _account__view_account_invoice_filter = models.Ref('account.view_account_invoice_filter', 'ir.ui.view')
+    _base__EUR = models.Ref('base.EUR', 'res.currency')
+    _l10n_it_edi_doi__view_move_tree = models.Ref('l10n_it_edi_doi.view_move_tree', 'ir.ui.view')
+    _l10n_it_edi_doi__view_quotation_tree = models.Ref('l10n_it_edi_doi.view_quotation_tree', 'ir.ui.view')
+    _sale__sale_order_view_search_inherit_quotation = models.Ref('sale.sale_order_view_search_inherit_quotation', 'ir.ui.view')
+
     state = fields.Selection([
          ('draft', 'Draft'),
          ('active', 'Active'),
@@ -47,7 +53,7 @@ class L10n_It_Edi_DoiDeclaration_Of_Intent(models.Model):
     currency_id = fields.Many2one(
         comodel_name='res.currency',
         string='Currency',
-        default=lambda self: self.env.ref('base.EUR').id,
+        default=lambda self: self._base__EUR.id,
         required=True,
         readonly=True,
     )
@@ -291,8 +297,8 @@ class L10n_It_Edi_DoiDeclaration_Of_Intent(models.Model):
             'type': 'ir.actions.act_window',
             'res_model': 'sale.order',
             'domain': [('id', 'in', self.sale_order_ids.ids)],
-            'views': [(self.env.ref('l10n_it_edi_doi.view_quotation_tree').id, 'list'), (False, 'form')],
-            'search_view_id': [self.env.ref('sale.sale_order_view_search_inherit_quotation').id],
+            'views': [(self._l10n_it_edi_doi__view_quotation_tree.id, 'list'), (False, 'form')],
+            'search_view_id': [self._sale__sale_order_view_search_inherit_quotation.id],
             'context': {
                 'search_default_sales': 1,
             },
@@ -305,8 +311,8 @@ class L10n_It_Edi_DoiDeclaration_Of_Intent(models.Model):
             'type': 'ir.actions.act_window',
             'res_model': 'account.move',
             'domain': [('id', 'in', self.invoice_ids.ids)],
-            'views': [(self.env.ref('l10n_it_edi_doi.view_move_tree').id, 'list'), (False, 'form')],
-            'search_view_id': [self.env.ref('account.view_account_invoice_filter').id],
+            'views': [(self._l10n_it_edi_doi__view_move_tree.id, 'list'), (False, 'form')],
+            'search_view_id': [self._account__view_account_invoice_filter.id],
             'context': {
                 'search_default_posted': 1,
             },

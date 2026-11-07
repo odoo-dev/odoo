@@ -11,3 +11,4 @@ from . import res_country
 from . import res_partner
 from . import res_users_apikeys_description
 from . import portal_entry
+from . import res_users

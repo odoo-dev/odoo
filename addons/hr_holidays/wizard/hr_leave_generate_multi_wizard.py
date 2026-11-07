@@ -13,6 +13,9 @@ class HrLeaveGenerateMultiWizard(models.TransientModel):
     _inherit = ['hr.mixin']
     _description = 'Generate time off for multiple employees'
 
+    _hr_holidays__hr_leave_view_form_manager = models.Ref('hr_holidays.hr_leave_view_form_manager', 'ir.ui.view')
+    _hr_holidays__hr_leave_view_tree = models.Ref('hr_holidays.hr_leave_view_tree', 'ir.ui.view')
+
     def _get_employee_domain(self):
         domain = (
             Domain([("company_id", "=", self.company_id.id)])
@@ -126,7 +129,7 @@ class HrLeaveGenerateMultiWizard(models.TransientModel):
         return {
             'type': 'ir.actions.act_window',
             'name': self.env._('Generated Time Off'),
-            "views": [[self.env.ref('hr_holidays.hr_leave_view_tree').id, "list"], [self.env.ref('hr_holidays.hr_leave_view_form_manager').id, "form"]],
+            "views": [[self._hr_holidays__hr_leave_view_tree.id, "list"], [self._hr_holidays__hr_leave_view_form_manager.id, "form"]],
             'view_mode': 'list',
             'res_model': 'hr.leave',
             'domain': [('id', 'in', leaves.ids)],

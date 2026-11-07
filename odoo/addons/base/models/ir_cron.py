@@ -98,6 +98,8 @@ class IrCron(models.Model):
 
     _inherits = {'ir.actions.server': 'ir_actions_server_id'}
 
+    _base__autovacuum_job = models.Ref('base.autovacuum_job', 'ir.cron', required=False)
+
     ir_actions_server_id = fields.Many2one(
         'ir.actions.server', 'Server action', index=True,
         delegate=True, ondelete='restrict', required=True)

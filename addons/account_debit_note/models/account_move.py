@@ -7,6 +7,8 @@ from odoo.tools import SQL
 class AccountMove(models.Model):
     _inherit = "account.move"
 
+    _account_debit_note__action_view_account_move_debit = models.Ref('account_debit_note.action_view_account_move_debit', 'ir.actions.act_window')
+
     debit_origin_id = fields.Many2one('account.move', 'Original Invoice Debited', readonly=True, copy=False, index='btree_not_null')
     debit_origin_move_type = fields.Selection(related='debit_origin_id.move_type', string="Debit Origin Move Type")  # String defined to avoid runbot error about same string on different fields.
     debit_note_ids = fields.One2many('account.move', 'debit_origin_id', 'Debit Notes',
@@ -32,7 +34,7 @@ class AccountMove(models.Model):
         )
 
     def action_debit_note(self):
-        action = self.env.ref('account_debit_note.action_view_account_move_debit')._get_action_dict()
+        action = self._account_debit_note__action_view_account_move_debit._get_action_dict()
         return action
 
     def _get_last_sequence_domain(self, relaxed=False):

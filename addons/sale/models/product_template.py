@@ -12,6 +12,8 @@ class ProductTemplate(models.Model):
     _inherit = "product.template"
     _check_company_auto = True
 
+    _sale__sale_menu_root = models.Ref('sale.sale_menu_root', 'ir.ui.menu')
+
     service_type = fields.Selection(
         selection=[("manual", "Manually set quantities on order")],
         string="Track Service",
@@ -215,7 +217,7 @@ class ProductTemplate(models.Model):
                 template.invoice_policy = "order"
 
     def _get_backend_root_menu_ids(self):
-        return super()._get_backend_root_menu_ids() + [self.env.ref("sale.sale_menu_root").id]
+        return super()._get_backend_root_menu_ids() + [self._sale__sale_menu_root.id]
 
     def _get_product_accounts(self):
         accounts = super()._get_product_accounts()

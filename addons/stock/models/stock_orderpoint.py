@@ -26,6 +26,10 @@ class StockWarehouseOrderpoint(models.Model):
     _check_company_auto = True
     _order = "location_id,company_id,id"
 
+    _product__model_product_template = models.Ref('product.model_product_template', 'ir.model')
+    _product__product_normal_form_view = models.Ref('product.product_normal_form_view', 'ir.ui.view')
+    _stock__stock_picking_action_picking_type = models.Ref('stock.stock_picking_action_picking_type', 'ir.actions.act_window')
+
     name = fields.Char(
         'Name', copy=False, required=True, readonly=True,
         default=lambda self: self.env['ir.sequence'].next_by_code('stock.orderpoint'))
@@ -391,7 +395,7 @@ class StockWarehouseOrderpoint(models.Model):
                 'type': 'ir.actions.act_window',
                 'res_model': 'product.product',
                 'res_id': self.product_id.id,
-                'views': [(self.env.ref('product.product_normal_form_view').id, 'form')],
+                'views': [(self._product__product_normal_form_view.id, 'form')],
             }, _('Edit Product'))
         notification = False
         if len(self) == 1:
@@ -670,7 +674,7 @@ class StockWarehouseOrderpoint(models.Model):
         move = self.env['stock.move'].search(domain, limit=1)
         if ((move.location_id.warehouse_id and move.location_id.warehouse_id != self.warehouse_id)
             or move.location_id.usage == 'transit') and move.picking_id:
-            action = self.env.ref('stock.stock_picking_action_picking_type')
+            action = self._stock__stock_picking_action_picking_type
             return {
                 'type': 'ir.actions.client',
                 'tag': 'display_notification',
@@ -790,7 +794,7 @@ class StockWarehouseOrderpoint(models.Model):
                 for orderpoint, error_msg in all_orderpoints_exceptions:
                     existing_activity = self.env['mail.activity'].search_count([
                         ('res_id', '=', orderpoint.product_id.product_tmpl_id.id),
-                        ('res_model_id', '=', self.env.ref('product.model_product_template').id),
+                        ('res_model_id', '=', self._product__model_product_template.id),
                         ('note', 'like', error_msg)], limit=1)
                     if not existing_activity:
                         orderpoint.product_id.product_tmpl_id.with_user(SUPERUSER_ID).activity_schedule(

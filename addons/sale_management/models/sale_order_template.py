@@ -12,6 +12,16 @@ class SaleOrderTemplate(models.Model):
     _order = "sequence, id"
 
     _sale_management__sale_order_template_1 = models.Ref('sale_management.sale_order_template_1', 'sale.order.template', required=False)
+    _product__consu_delivery_02 = models.Ref('product.consu_delivery_02', 'product.product', required=False)
+    _product__monitor_stand = models.Ref('product.monitor_stand', 'product.product', required=False)
+    _product__product_delivery_01 = models.Ref('product.product_delivery_01', 'product.product', required=False)
+    _product__product_product_11_product_template = models.Ref('product.product_product_11_product_template', 'product.template', required=False)
+    _product__product_product_16 = models.Ref('product.product_product_16', 'product.product', required=False)
+    _product__product_product_4c = models.Ref('product.product_product_4c', 'product.product', required=False)
+    _product__product_template_acoustic_bloc_screens = models.Ref('product.product_template_acoustic_bloc_screens', 'product.template', required=False)
+    _sale__product_product_1_product_template = models.Ref('sale.product_product_1_product_template', 'product.template', required=False)
+    _uom__product_uom_pack_6 = models.Ref('uom.product_uom_pack_6', 'uom.uom')
+    _uom__product_uom_square_meter = models.Ref('uom.product_uom_square_meter', 'uom.uom')
 
     active = fields.Boolean(
         default=True,
@@ -195,30 +205,26 @@ class SaleOrderTemplate(models.Model):
             # Skip if template not found, or already configured
             return
 
-        acoustic_bloc_screen_product = self.env.ref(
-            "product.product_template_acoustic_bloc_screens"
-        ).product_variant_id
-        chair_protection_product = self.env.ref(
-            "sale.product_product_1_product_template"
-        ).product_variant_id
+        acoustic_bloc_screen_product = self._product__product_template_acoustic_bloc_screens.product_variant_id
+        chair_protection_product = self._sale__product_product_1_product_template.product_variant_id
         demo_template.sale_order_template_line_ids = [
             Command.create({
                 "name": self.env._("Open Space Renovation"),
                 "display_type": "line_section",
                 "product_uom_qty": 0,
                 "section_qty": 250,
-                "section_uom_id": self.env.ref("uom.product_uom_square_meter").id,
+                "section_uom_id": self._uom__product_uom_square_meter.id,
             }),
             Command.create({
                 "name": self.env._("Acoustic wall insulation"),
                 "product_uom_qty": 187.5,
-                "product_uom_id": self.env.ref("uom.product_uom_square_meter").id,
+                "product_uom_id": self._uom__product_uom_square_meter.id,
                 "price_unit": 45.0,
             }),
             Command.create({
                 "name": self.env._("Acoustic ceiling"),
                 "product_uom_qty": 250,
-                "product_uom_id": self.env.ref("uom.product_uom_square_meter").id,
+                "product_uom_id": self._uom__product_uom_square_meter.id,
                 "price_unit": 60.0,
                 "discount": 20,
             }),
@@ -249,11 +255,9 @@ class SaleOrderTemplate(models.Model):
                 "display_type": "line_section",
                 "product_uom_qty": 0,
             }),
-            Command.create({"product_id": self.env.ref("product.consu_delivery_02").id}),
+            Command.create({"product_id": self._product__consu_delivery_02.id}),
             Command.create({
-                "product_id": self.env.ref(
-                    "product.product_product_11_product_template"
-                ).product_variant_id.id,
+                "product_id": self._product__product_product_11_product_template.product_variant_id.id,
                 "product_uom_qty": 10,
             }),
             Command.create({
@@ -282,14 +286,14 @@ class SaleOrderTemplate(models.Model):
                 "product_uom_qty": 0,
             }),
             Command.create({
-                "product_id": self.env.ref("product.product_product_4c").id,
+                "product_id": self._product__product_product_4c.id,
                 "product_uom_qty": 24,
             }),
             Command.create({"product_id": acoustic_bloc_screen_product.id, "product_uom_qty": 24}),
             Command.create({
-                "product_id": self.env.ref("product.product_delivery_01").id,
+                "product_id": self._product__product_delivery_01.id,
                 "product_uom_qty": 4,
-                "product_uom_id": self.env.ref("uom.product_uom_pack_6").id,
+                "product_uom_id": self._uom__product_uom_pack_6.id,
             }),
             Command.create({
                 "name": self.env._("Options"),
@@ -298,11 +302,11 @@ class SaleOrderTemplate(models.Model):
                 "product_uom_qty": 0,
             }),
             Command.create({
-                "product_id": self.env.ref("product.product_product_16").id,
+                "product_id": self._product__product_product_16.id,
                 "product_uom_qty": 0,
             }),
             Command.create({
-                "product_id": self.env.ref("product.monitor_stand").id,
+                "product_id": self._product__monitor_stand.id,
                 "product_uom_qty": 0,
             }),
             Command.create({"product_id": chair_protection_product.id, "product_uom_qty": 0}),

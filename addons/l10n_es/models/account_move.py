@@ -12,6 +12,7 @@ class AccountMove(models.Model):
     _inherit = 'account.move'
 
     _l10n_es__partner_simplified_optional = models.Ref('l10n_es.partner_simplified', 'res.partner', required=False)
+    _base__europe = models.Ref('base.europe', 'res.country.group')
 
     l10n_es_original_invoice_credited = fields.Char(string='Original Invoice Credited', store=False)
     l10n_es_invoice_type_available = fields.Char(
@@ -67,7 +68,7 @@ class AccountMove(models.Model):
                  'invoice_line_ids.tax_ids.l10n_es_type', 'amount_total_signed')
     def _compute_l10n_es_invoice_type(self):
         simplified_partner = self._l10n_es__partner_simplified_optional
-        europe = self.env.ref('base.europe')
+        europe = self._base__europe
         for move in self:
             if move.state == 'posted' and move.l10n_es_invoice_type:
                 continue

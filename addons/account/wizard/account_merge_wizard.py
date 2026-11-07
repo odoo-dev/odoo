@@ -9,6 +9,8 @@ class AccountMergeWizard(models.TransientModel):
     _name = 'account.merge.wizard'
     _description = "Account merge wizard"
 
+    _account__account_merge_wizard_form = models.Ref('account.account_merge_wizard_form', 'ir.ui.view')
+
     account_ids = fields.Many2many('account.account')
     is_group_by_name = fields.Boolean(
         string="Group by name?",
@@ -91,7 +93,7 @@ class AccountMergeWizard(models.TransientModel):
         return {
             'type': 'ir.actions.act_window',
             'name': _("Merge Accounts"),
-            'view_id': self.env.ref('account.account_merge_wizard_form').id,
+            'view_id': self._account__account_merge_wizard_form.id,
             'context': self.env.context,
             'res_model': 'account.merge.wizard',
             'res_id': self.id,

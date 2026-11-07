@@ -12,6 +12,7 @@ class IrActionsServer(models.Model):
     _inherit = ['ir.actions.server', 'mail.thread', 'mail.activity.mixin']
 
     _mail__mt_comment_optional = models.Ref('mail.mt_comment', 'mail.message.subtype', required=False)
+    _mail__mt_comment = models.Ref('mail.mt_comment', 'mail.message.subtype')
 
     name = fields.Char(tracking=True)
     model_id = fields.Many2one(tracking=True)
@@ -62,7 +63,7 @@ class IrActionsServer(models.Model):
     subtype_ids = fields.Many2many(
         'mail.message.subtype',
         string="Subscriptions",
-        default=lambda self: self.env.ref('mail.mt_comment').ids,
+        default=lambda self: self._mail__mt_comment.ids,
         readonly=False, store=True)
 
     # Message Post

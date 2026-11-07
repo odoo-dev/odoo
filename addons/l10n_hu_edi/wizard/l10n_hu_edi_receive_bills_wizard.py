@@ -10,6 +10,8 @@ class L10nHuEdiReceiveBillsWizard(models.TransientModel):
     _name = 'l10n_hu_edi.receive.bills.wizard'
     _description = "Receive Bills Wizard"
 
+    _account__view_in_invoice_bill_tree = models.Ref('account.view_in_invoice_bill_tree', 'ir.ui.view')
+
     datetime_from = fields.Datetime(default=lambda self: fields.Datetime.now() - timedelta(weeks=1))
     datetime_to = fields.Datetime(default=lambda self: fields.Datetime.now())
 
@@ -27,7 +29,7 @@ class L10nHuEdiReceiveBillsWizard(models.TransientModel):
             message = self.env._("Bills were successfully received from NAV.")
             action = moves._get_records_action(
                 name=self.env._("Bills received from NAV"),
-                views=[(self.env.ref('account.view_in_invoice_bill_tree').id, 'list'), (False, 'form')] if len(moves) > 1 else [(False, 'form')],
+                views=[(self._account__view_in_invoice_bill_tree.id, 'list'), (False, 'form')] if len(moves) > 1 else [(False, 'form')],
             )
         else:
             message = self.env._("No bills received from NAV.")

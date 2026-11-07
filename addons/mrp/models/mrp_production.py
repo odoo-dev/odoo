@@ -46,6 +46,16 @@ class MrpProduction(models.Model):
 
     _mail__mt_note_optional = models.Ref('mail.mt_note', 'mail.message.subtype', required=False)
     _stock__view_picking_form_optional = models.Ref('stock.view_picking_form', 'ir.ui.view', required=False)
+    _mrp__action_report_mrp_packages = models.Ref('mrp.action_report_mrp_packages', 'ir.actions.report')
+    _mrp__action_report_production_order = models.Ref('mrp.action_report_production_order', 'ir.actions.report')
+    _mrp__group_mrp_user = models.Ref('mrp.group_mrp_user', 'res.groups')
+    _mrp__mrp_production_form_view = models.Ref('mrp.mrp_production_form_view', 'ir.ui.view')
+    _mrp__mt_mo_state = models.Ref('mrp.mt_mo_state', 'mail.message.subtype')
+    _stock__picking_label_type_form = models.Ref('stock.picking_label_type_form', 'ir.ui.view')
+    _stock__stock_package_view_list_editable = models.Ref('stock.stock_package_view_list_editable', 'ir.ui.view')
+    _stock__view_scrap_move_form = models.Ref('stock.view_scrap_move_form', 'ir.ui.view')
+    _stock__view_scrap_move_list = models.Ref('stock.view_scrap_move_list', 'ir.ui.view')
+    _uom__product_uom_unit = models.Ref('uom.product_uom_unit', 'uom.uom')
 
     @api.model
     def default_get(self, fields):
@@ -239,7 +249,7 @@ class MrpProduction(models.Model):
         help='Technical field to check when we can reserve quantities')
     user_id = fields.Many2one(
         'res.users', 'Responsible', default=lambda self: self.env.user,
-        domain=lambda self: [('all_group_ids', 'in', self.env.ref('mrp.group_mrp_user').id)])
+        domain=lambda self: [('all_group_ids', 'in', self._mrp__group_mrp_user.id)])
     company_id = fields.Many2one(
         'res.company', 'Company', default=lambda self: self.env.company,
         index=True, required=True)
@@ -1335,7 +1345,7 @@ class MrpProduction(models.Model):
             'name': self.env._('Packages'),
             'res_model': 'stock.package',
             'view_mode': 'list',
-            'views': [(self.env.ref('stock.stock_package_view_list_editable').id, 'list'), (False, 'kanban'), (False, 'form')],
+            'views': [(self._stock__stock_package_view_list_editable.id, 'list'), (False, 'kanban'), (False, 'form')],
             'type': 'ir.actions.act_window',
             'domain': [('id', 'in', packages.ids)],
         }
@@ -1854,7 +1864,7 @@ class MrpProduction(models.Model):
             if as_soon_as_possible:
                 order.date_start = fields.Datetime.now()
             order._plan_workorders(ignore_schedule)
-            order.message_post(body=self.env._("The manufacturing order has been planned."), subtype_id=self.env.ref('mrp.mt_mo_state').id)
+            order.message_post(body=self.env._("The manufacturing order has been planned."), subtype_id=self._mrp__mt_mo_state.id)
         if skip_orders_count == len(self):
             return {
                 'type': 'ir.actions.client',
@@ -2489,7 +2499,7 @@ class MrpProduction(models.Model):
                 another_action = {
                     'type': 'ir.actions.act_window',
                     'res_model': 'mrp.production',
-                    'views': [[self.env.ref('mrp.mrp_production_form_view').id, 'form']],
+                    'views': [[self._mrp__mrp_production_form_view.id, 'form']],
                     'res_id': self.id,
                     'target': 'main',
                 }
@@ -2597,7 +2607,7 @@ class MrpProduction(models.Model):
             'name': _('Scrap Products'),
             'view_mode': 'form',
             'res_model': 'stock.move',
-            'views': [[self.env.ref('stock.view_scrap_move_form').id, 'form']],
+            'views': [[self._stock__view_scrap_move_form.id, 'form']],
             'type': 'ir.actions.act_window',
             'context': {
                 'from_order': True,
@@ -2617,7 +2627,7 @@ class MrpProduction(models.Model):
             'name': _('Scraps'),
             'type': 'ir.actions.act_window',
             'res_model': 'stock.move',
-            'views': [(self.env.ref('stock.view_scrap_move_list').id, 'list'), (self.env.ref('stock.view_scrap_move_form').id, 'form')],
+            'views': [(self._stock__view_scrap_move_list.id, 'list'), (self._stock__view_scrap_move_form.id, 'form')],
             'domain': ['&', '|', ('raw_material_production_id', '=', self.id), ('production_id', '=', self.id), ('is_scrap', '=', True)],
             'context': dict(self.env.context, default_origin=self.name, create=False),
         }
@@ -3154,7 +3164,7 @@ class MrpProduction(models.Model):
         report_actions = []
         productions_to_print = self.filtered(lambda p: p.picking_type_id.auto_print_done_production_order)
         if productions_to_print:
-            action = self.env.ref("mrp.action_report_production_order").report_action(productions_to_print.ids, config=False)
+            action = self._mrp__action_report_production_order.report_action(productions_to_print.ids, config=False)
             clean_action(action, self.env)
             report_actions.append(action)
         productions_to_print = self.filtered(lambda p: p.picking_type_id.auto_print_done_mrp_product_labels)
@@ -3187,7 +3197,7 @@ class MrpProduction(models.Model):
             if order.picking_type_id.auto_print_mrp_reception_report_labels:
                 print_label_move_ids.update(order.move_finished_ids.move_dest_ids.ids)
         if orders_for_reception_report:
-            action = self.env.ref('mrp.action_report_production_order').report_action(orders_for_reception_report, config=False)
+            action = self._mrp__action_report_production_order.report_action(orders_for_reception_report, config=False)
             clean_action(action, self.env)
             report_actions.append(action)
         if print_label_move_ids:
@@ -3209,7 +3219,7 @@ class MrpProduction(models.Model):
         if self.env.user.has_group('stock.group_tracking_lot'):
             mo_print_packages = self.filtered(lambda p: p.picking_type_id.auto_print_packages and p.finished_move_line_ids.result_package_id)
             if mo_print_packages:
-                action = self.env.ref("mrp.action_report_mrp_packages").report_action(mo_print_packages.ids, config=False)
+                action = self._mrp__action_report_mrp_packages.report_action(mo_print_packages.ids, config=False)
                 report_actions.append(clean_action(action, self.env))
         return report_actions
 
@@ -3226,9 +3236,8 @@ class MrpProduction(models.Model):
     def _autoprint_generated_lots(self, lot_ids):
         self.ensure_one()
         print_format = self.picking_type_id.generated_mrp_lot_label_to_print
-        uom_unit = self.env.ref('uom.product_uom_unit')
         quantity = self.qty_producing or self.product_qty
-        can_print_per_unit = self.product_tracking != 'serial' and self.uom_id._has_common_reference(uom_unit)
+        can_print_per_unit = self.product_tracking != 'serial' and self.uom_id._has_common_reference(self._uom__product_uom_unit)
         copies = int(quantity) if print_format.endswith('_units') and can_print_per_unit else 1
         action = self.env['lot.label.layout']._process_lot_labels(
             lot_ids,
@@ -3247,12 +3256,11 @@ class MrpProduction(models.Model):
     def action_open_label_type(self):
         move_line_ids = self.move_finished_ids.mapped('move_line_ids')
         if self.env.user.has_group('stock.group_production_lot') and move_line_ids.lot_id:
-            view = self.env.ref('stock.picking_label_type_form')
             return {
                 'name': _('Choose Type of Labels To Print'),
                 'type': 'ir.actions.act_window',
                 'res_model': 'picking.label.type',
-                'views': [(view.id, 'form')],
+                'views': [(self._stock__picking_label_type_form.id, 'form')],
                 'target': 'new',
                 'context': {'default_production_ids': self.ids},
             }
@@ -3296,7 +3304,7 @@ class MrpProduction(models.Model):
     def _track_log_get_default_subtype(self, track_init_values):
         self.ensure_one()
         if 'state' in track_init_values:
-            return self.env.ref('mrp.mt_mo_state')
+            return self._mrp__mt_mo_state
         return super()._track_log_get_default_subtype(track_init_values)
 
     # -------------------------------------------------------------------------

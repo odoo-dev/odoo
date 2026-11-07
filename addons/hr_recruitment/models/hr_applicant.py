@@ -40,11 +40,21 @@ class HrApplicant(models.Model):
 
     _hr_recruitment__mt_talent_new = models.Ref('hr_recruitment.mt_talent_new', 'mail.message.subtype', required=False)
     _mail__mt_note_optional = models.Ref('mail.mt_note', 'mail.message.subtype', required=False)
+    _hr_recruitment__group_hr_recruitment_manager = models.Ref('hr_recruitment.group_hr_recruitment_manager', 'res.groups')
+    _hr_recruitment__group_hr_recruitment_user = models.Ref('hr_recruitment.group_hr_recruitment_user', 'res.groups')
+    _hr_recruitment__hr_applicant_view_form_interviewer = models.Ref('hr_recruitment.hr_applicant_view_form_interviewer', 'ir.ui.view')
+    _hr_recruitment__ir_attachment_hr_recruitment_list_view = models.Ref('hr_recruitment.ir_attachment_hr_recruitment_list_view', 'ir.ui.view')
+    _hr_recruitment__ir_attachment_view_search_inherit_hr_recruitment = models.Ref(
+        'hr_recruitment.ir_attachment_view_search_inherit_hr_recruitment', 'ir.ui.view')
+    _hr_recruitment__job_add_applicants_view_form = models.Ref('hr_recruitment.job_add_applicants_view_form', 'ir.ui.view')
+    _hr_recruitment__mt_applicant_new = models.Ref('hr_recruitment.mt_applicant_new', 'mail.message.subtype')
+    _hr_recruitment__mt_applicant_stage_changed = models.Ref('hr_recruitment.mt_applicant_stage_changed', 'mail.message.subtype')
+    _hr_recruitment__stage_job0 = models.Ref('hr_recruitment.stage_job0', 'hr.recruitment.stage')
 
     def _recruiter_domain(self):
         recruiter_groups = [
-            self.env.ref("hr_recruitment.group_hr_recruitment_manager").id,
-            self.env.ref("hr_recruitment.group_hr_recruitment_user").id,
+            self._hr_recruitment__group_hr_recruitment_manager.id,
+            self._hr_recruitment__group_hr_recruitment_user.id,
         ]
         return (
             Domain("user_id", "!=", False)
@@ -935,7 +945,7 @@ class HrApplicant(models.Model):
     def get_view(self, view_id=None, view_type='form', **options):
         if view_type == 'form' and self.env.user.has_group('hr_recruitment.group_hr_recruitment_interviewer')\
             and not self.env.user.has_group('hr_recruitment.group_hr_recruitment_user'):
-            view_id = self.env.ref('hr_recruitment.hr_applicant_view_form_interviewer').id
+            view_id = self._hr_recruitment__hr_applicant_view_form_interviewer.id
         return super().get_view(view_id, view_type, **options)
 
     def action_create_meeting(self):
@@ -976,10 +986,10 @@ class HrApplicant(models.Model):
             },
             'view_mode': 'list,form',
             'views': [
-                (self.env.ref('hr_recruitment.ir_attachment_hr_recruitment_list_view').id, 'list'),
+                (self._hr_recruitment__ir_attachment_hr_recruitment_list_view.id, 'list'),
                 (False, 'form'),
             ],
-            'search_view_id': self.env.ref('hr_recruitment.ir_attachment_view_search_inherit_hr_recruitment').ids,
+            'search_view_id': self._hr_recruitment__ir_attachment_view_search_inherit_hr_recruitment.ids,
             'domain': [('res_model', '=', 'hr.applicant'), ('res_id', 'in', self.ids), ],
         }
 
@@ -1058,7 +1068,7 @@ class HrApplicant(models.Model):
             "type": "ir.actions.act_window",
             "res_model": "job.add.applicants",
             "target": "new",
-            "views": [[self.env.ref('hr_recruitment.job_add_applicants_view_form').id, "form"]],
+            "views": [[self._hr_recruitment__job_add_applicants_view_form.id, "form"]],
             "context": {
                 "is_modal": True,
                 "default_applicant_ids": self.ids or self.env.context.get("default_applicant_ids"),
@@ -1079,7 +1089,7 @@ class HrApplicant(models.Model):
     def action_add_to_job(self):
         self.with_context(just_moved=True).write({
             "job_id": self.env["hr.job"].browse(self.env.context.get("matching_job_id")).id,
-            "stage_id": self.env.ref("hr_recruitment.stage_job0").id,
+            "stage_id": self._hr_recruitment__stage_job0.id,
         })
         action = self.env["ir.actions.actions"]._for_xml_id("hr_recruitment.action_hr_job_applications")
         action["context"] = literal_eval(action["context"].replace("active_id", str(self.job_id.id)))
@@ -1104,12 +1114,12 @@ class HrApplicant(models.Model):
         self.ensure_one()
         if self.is_pool_applicant:
             return self._hr_recruitment__mt_talent_new
-        return self.env.ref('hr_recruitment.mt_applicant_new')
+        return self._hr_recruitment__mt_applicant_new
 
     def _track_log_get_default_subtype(self, track_init_values):
         record = self[0]
         if 'stage_id' in track_init_values and record.stage_id:
-            return self.env.ref('hr_recruitment.mt_applicant_stage_changed')
+            return self._hr_recruitment__mt_applicant_stage_changed
         return super()._track_log_get_default_subtype(track_init_values)
 
     def _notify_get_reply_to(self, default=None, author_id=False):

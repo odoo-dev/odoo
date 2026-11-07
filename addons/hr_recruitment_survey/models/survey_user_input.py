@@ -6,10 +6,12 @@ from odoo import fields, models, _
 class SurveyUser_Input(models.Model):
     _inherit = "survey.user_input"
 
+    _base__partner_root = models.Ref('base.partner_root', 'res.partner')
+
     applicant_id = fields.Many2one('hr.applicant', string='Applicant', index='btree_not_null')
 
     def _mark_done(self):
-        odoobot = self.env.ref('base.partner_root')
+        odoobot = self._base__partner_root
         for user_input in self:
             if user_input.applicant_id:
                 body = _('The applicant "%s" has finished the survey.', user_input.applicant_id.partner_name)

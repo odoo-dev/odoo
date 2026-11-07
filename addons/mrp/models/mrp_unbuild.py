@@ -14,6 +14,8 @@ class MrpUnbuild(models.Model):
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _order = 'id desc'
 
+    _mrp__stock_warn_insufficient_qty_unbuild_form_view = models.Ref('mrp.stock_warn_insufficient_qty_unbuild_form_view', 'ir.ui.view')
+
     name = fields.Char('Reference', copy=False, readonly=True, default=lambda s: s.env._('New'))
     product_id = fields.Many2one(
         'product.product', 'Product', check_company=True,
@@ -342,7 +344,7 @@ class MrpUnbuild(models.Model):
                 'name': _('%(product)s: Insufficient Quantity To Unbuild', product=self.product_id.display_name),
                 'view_mode': 'form',
                 'res_model': 'stock.warn.insufficient.qty.unbuild',
-                'view_id': self.env.ref('mrp.stock_warn_insufficient_qty_unbuild_form_view').id,
+                'view_id': self._mrp__stock_warn_insufficient_qty_unbuild_form_view.id,
                 'type': 'ir.actions.act_window',
                 'context': {
                     'default_product_id': self.product_id.id,

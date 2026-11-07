@@ -4,6 +4,9 @@ from odoo import Command, api, fields, models
 class AccountJournal(models.Model):
     _inherit = 'account.journal'
 
+    _l10n_dk__account_tag_6470 = models.Ref('l10n_dk.account_tag_6470', 'account.account.tag')
+    _l10n_dk__account_tag_6480 = models.Ref('l10n_dk.account_tag_6480', 'account.account.tag')
+
     l10n_dk_nemhandel_proxy_state = fields.Selection(related='company_id.l10n_dk_nemhandel_proxy_state')
     is_nemhandel_journal = fields.Boolean(string='Journal used for Nemhandel')
 
@@ -30,9 +33,9 @@ class AccountJournal(models.Model):
             # of the Danish financial reports.
             account_vals.setdefault('tag_ids', [])
             if vals.get('type') == 'bank':
-                account_vals['tag_ids'].append(Command.link(self.env.ref('l10n_dk.account_tag_6480').id))
+                account_vals['tag_ids'].append(Command.link(self._l10n_dk__account_tag_6480.id))
             elif vals.get('type') == 'cash':
-                account_vals['tag_ids'].append(Command.link(self.env.ref('l10n_dk.account_tag_6470').id))
+                account_vals['tag_ids'].append(Command.link(self._l10n_dk__account_tag_6470.id))
 
         return account_vals
 

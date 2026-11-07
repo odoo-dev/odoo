@@ -39,6 +39,9 @@ class MailGroup(models.Model):
 
     _mail_group__mail_group_notify_moderation = models.Ref('mail_group.mail_group_notify_moderation', 'ir.ui.view', required=False)
     _mail_group__mail_template_guidelines = models.Ref('mail_group.mail_template_guidelines', 'mail.template', required=False)
+    _base__group_user = models.Ref('base.group_user', 'res.groups')
+    _mail_group__mail_template_list_subscribe = models.Ref('mail_group.mail_template_list_subscribe', 'mail.template')
+    _mail_group__mail_template_list_unsubscribe = models.Ref('mail_group.mail_template_list_unsubscribe', 'mail.template')
 
     @api.model
     def default_get(self, fields):
@@ -68,7 +71,7 @@ class MailGroup(models.Model):
     moderation_rule_count = fields.Integer(string='Moderated emails count', compute='_compute_moderation_rule_count')
     moderation_rule_ids = fields.One2many('mail.group.moderation', 'mail_group_id', string='Moderated Emails')
     moderator_ids = fields.Many2many('res.users', 'mail_group_moderator_rel', string='Moderators',
-                                     domain=lambda self: [('all_group_ids', 'in', self.env.ref('base.group_user').id)])
+                                     domain=lambda self: [('all_group_ids', 'in', self._base__group_user.id)])
     moderation_notify = fields.Boolean(
         string='Automatic notification',
         help='People receive an automatic notification about their message being waiting for moderation.')
@@ -84,7 +87,7 @@ class MailGroup(models.Model):
         ('groups', 'Selected group of users'),
         ], string='Privacy', required=True, default='public')
     access_group_id = fields.Many2one('res.groups', string='Authorized Group',
-                                      default=lambda self: self.env.ref('base.group_user'))
+                                      default=lambda self: self._base__group_user)
     # UI
     can_manage_group = fields.Boolean('Can Manage', help='Can manage the members', compute='_compute_can_manage_group')
 
@@ -625,8 +628,7 @@ class MailGroup(models.Model):
         self.ensure_one()
         confirm_action_url = self._generate_action_url(email, 'subscribe')
 
-        template = self.env.ref('mail_group.mail_template_list_subscribe')
-        template.with_context(token_url=confirm_action_url).send_mail(
+        self._mail_group__mail_template_list_subscribe.with_context(token_url=confirm_action_url).send_mail(
             self.id,
             email_layout_xmlid='mail.mail_notification_light',
             email_values={
@@ -645,8 +647,7 @@ class MailGroup(models.Model):
         self.ensure_one()
         confirm_action_url = self._generate_action_url(email, 'unsubscribe')
 
-        template = self.env.ref('mail_group.mail_template_list_unsubscribe')
-        template.with_context(token_url=confirm_action_url).send_mail(
+        self._mail_group__mail_template_list_unsubscribe.with_context(token_url=confirm_action_url).send_mail(
             self.id,
             email_layout_xmlid='mail.mail_notification_light',
             email_values={

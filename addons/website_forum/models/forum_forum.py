@@ -26,6 +26,8 @@ class ForumForum(models.Model):
     ]
     _order = "sequence, id"
 
+    _base__default_website = models.Ref('base.default_website', 'website', required=False)
+
     @api.model
     def _get_default_welcome_message(self):
         return Markup("""
@@ -343,7 +345,7 @@ class ForumForum(models.Model):
         return res
 
     def _set_default_faq(self):
-        website = self.env.website or self.env.website.browse(self.env.context.get('host_id')) or self.env.ref('base.default_website')
+        website = self.env.website or self.env.website.browse(self.env.context.get('host_id')) or self._base__default_website
         for forum in self:
             forum.faq = website._render_template('website_forum.faq_accordion', {"forum": forum})
 

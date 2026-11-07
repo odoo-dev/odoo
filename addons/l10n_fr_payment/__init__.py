@@ -6,7 +6,7 @@ from . import models
 def post_init_hook(env):
     providers = (
         env['payment.provider'].sudo().search([('code', '=', 'worldline')])
-        or env.ref('payment.payment_provider_worldline')
+        or env['payment.provider']._payment__payment_provider_worldline
     )
     if providers:
         providers._apply_worldline_branding()
@@ -15,7 +15,7 @@ def post_init_hook(env):
 def uninstall_hook(env):
     providers = (
         env['payment.provider'].sudo().search([('code', '=', 'worldline')])
-        or env.ref('payment.payment_provider_worldline')
+        or env['payment.provider']._payment__payment_provider_worldline
     )
     if providers:
         providers._apply_default_worldline_branding()

@@ -6,6 +6,8 @@ from odoo import Command, api, fields, models
 class HrExpense(models.Model):
     _inherit = "hr.expense"
 
+    _sale__view_order_form = models.Ref('sale.view_order_form', 'ir.ui.view')
+
     sale_order_id = fields.Many2one(
         'sale.order',
         string='Reinvoice to',
@@ -88,7 +90,7 @@ class HrExpense(models.Model):
         return {
             'type': 'ir.actions.act_window',
             'res_model': 'sale.order',
-            'views': [(self.env.ref("sale.view_order_form").id, 'form')],
+            'views': [(self._sale__view_order_form.id, 'form')],
             'view_mode': 'form',
             'target': 'current',
             'name': self.sale_order_id.display_name,

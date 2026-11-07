@@ -94,6 +94,9 @@ class DiscussChannel(models.Model):
     _mail__channel_all_employees = models.Ref('mail.channel_all_employees', 'discuss.channel', required=False)
     _mail__module_install_notification = models.Ref('mail.module_install_notification', 'mail.message', required=False)
     _mail__mt_important_notification = models.Ref('mail.mt_important_notification', 'mail.message.subtype', required=False)
+    _base__group_user = models.Ref('base.group_user', 'res.groups')
+    _base__partner_admin = models.Ref('base.partner_admin', 'res.partner')
+    _mail__ir_cron_discuss_channel_sync_last_interest_dt = models.Ref('mail.ir_cron_discuss_channel_sync_last_interest_dt', 'ir.cron')
 
     MAX_BOUNCE_LIMIT = 10
 
@@ -500,7 +503,7 @@ class DiscussChannel(models.Model):
             if channel.parent_channel_id:
                 channel.group_public_id = channel.parent_channel_id.group_public_id
             elif not channel.group_public_id:
-                channel.group_public_id = self.env.ref("base.group_user")
+                channel.group_public_id = self._base__group_user
         (self - channels).group_public_id = None
 
     @api.depends('uuid')
@@ -610,7 +613,7 @@ class DiscussChannel(models.Model):
 
     @api.model
     def _setup_builtin_channels(self):
-        admin_lang = self.env.ref("base.partner_admin").lang
+        admin_lang = self._base__partner_admin.lang
         translate_env = self.env(context=dict(self.env.context, lang=admin_lang))
         channel_general = self._mail__channel_all_employees
         if not channel_general.name:
@@ -801,7 +804,7 @@ class DiscussChannel(models.Model):
             channel_ids = cr.postcommit.data["mail.sync_last_interest_dt"] = OrderedSet()
             dbname = cr.dbname
             # sudo: ir.cron - the poster may be a public/guest visitor with no access to the cron.
-            trigger = self.env.ref("mail.ir_cron_discuss_channel_sync_last_interest_dt").sudo()._trigger(
+            trigger = self._mail__ir_cron_discuss_channel_sync_last_interest_dt.sudo()._trigger(
                 at=fields.Datetime.now() + timedelta(minutes=1)
             )
 
@@ -868,7 +871,7 @@ class DiscussChannel(models.Model):
         to let the lock holders release.
         """
         LastInterestUpdate = self.env["discuss.channel.last.interest.update"]
-        cron = self.env.ref("mail.ir_cron_discuss_channel_sync_last_interest_dt")
+        cron = self._mail__ir_cron_discuss_channel_sync_last_interest_dt
         with tools.mute_logger('odoo.models.unlink'):
             self.env["ir.cron.trigger"].search([("cron_id", "=", cron.id)]).unlink()
         channel_ids = LastInterestUpdate.search_fetch([], limit=batch_size).channel_id.ids

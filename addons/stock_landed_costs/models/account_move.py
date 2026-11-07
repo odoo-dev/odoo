@@ -7,6 +7,8 @@ from odoo import api, fields, models
 class AccountMove(models.Model):
     _inherit = 'account.move'
 
+    _stock_landed_costs__view_stock_landed_cost_tree2 = models.Ref('stock_landed_costs.view_stock_landed_cost_tree2', 'ir.ui.view')
+
     landed_costs_ids = fields.One2many('stock.landed.cost', 'vendor_bill_id', string='Landed Costs')
     landed_costs_visible = fields.Boolean(compute='_compute_landed_costs_visible')
 
@@ -47,7 +49,7 @@ class AccountMove(models.Model):
         self.ensure_one()
 
         views = [(False, 'form')] if len(self.landed_costs_ids) == 1 else [
-            (self.env.ref('stock_landed_costs.view_stock_landed_cost_tree2').id, 'list'), (False, 'form'), (False, 'kanban')
+            (self._stock_landed_costs__view_stock_landed_cost_tree2.id, 'list'), (False, 'form'), (False, 'kanban')
         ]
         return self.landed_costs_ids.with_context(
             default_vendor_bill_id=self.id

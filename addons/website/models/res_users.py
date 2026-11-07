@@ -11,6 +11,9 @@ _logger = logging.getLogger(__name__)
 class ResUsers(models.Model):
     _inherit = 'res.users'
 
+    _base__default_website = models.Ref('base.default_website', 'website', required=False)
+    _base__group_user = models.Ref('base.group_user', 'res.groups')
+
     website_id = fields.Many2one('website', related='partner_id.website_id', store=True, related_sudo=False, readonly=False)
 
     _login_key = models.Constraint(
@@ -67,7 +70,7 @@ class ResUsers(models.Model):
 
     @api.model
     def _get_signup_invitation_scope(self):
-        current_website = self.env.website or self.env.website.browse(self.env.context.get('host_id')) or self.env.ref('base.default_website')
+        current_website = self.env.website or self.env.website.browse(self.env.context.get('host_id')) or self._base__default_website
         return current_website.auth_signup_uninvited or super(ResUsers, self)._get_signup_invitation_scope()
 
     def authenticate(self, credential, user_agent_env):
@@ -100,7 +103,7 @@ class ResUsers(models.Model):
     @api.constrains('group_ids')
     def _check_disjoint_groups(self):
         super()._check_disjoint_groups()
-        internal_users = self.env.ref('base.group_user').all_user_ids & self
+        internal_users = self._base__group_user.all_user_ids & self
         if any(user.website_id for user in internal_users):
             raise ValidationError(_("Remove website on related partner before they become internal user."))
 

@@ -12,6 +12,8 @@ class PurchaseBillLineMatch(models.Model):
     _auto = False
     _order = 'matching_id desc, aml_id desc, product_id'
 
+    _purchase__bill_to_po_wizard_form = models.Ref('purchase.bill_to_po_wizard_form', 'ir.ui.view')
+
     pol_id = fields.Many2one(comodel_name='purchase.order.line', readonly=True)
     matching_id = fields.Integer(string="Matching", readonly=True)
     aml_id = fields.Many2one(comodel_name='account.move.line', readonly=True)
@@ -250,6 +252,6 @@ class PurchaseBillLineMatch(models.Model):
             'name': _("Add to Purchase Order"),
             'res_model': 'bill.to.po.wizard',
             'target': 'new',
-            'views': [(self.env.ref('purchase.bill_to_po_wizard_form').id, 'form')],
+            'views': [(self._purchase__bill_to_po_wizard_form.id, 'form')],
             'context': context,
         }

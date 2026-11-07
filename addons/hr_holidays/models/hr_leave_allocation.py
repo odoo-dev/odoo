@@ -33,6 +33,11 @@ class HrLeaveAllocation(models.Model):
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _mail_post_access = 'read'
 
+    _hr_holidays__mail_act_leave_allocation_approval = models.Ref('hr_holidays.mail_act_leave_allocation_approval', 'mail.activity.type')
+    _hr_holidays__mail_act_leave_allocation_second_approval = models.Ref('hr_holidays.mail_act_leave_allocation_second_approval', 'mail.activity.type')
+    _hr_holidays__mail_template_allocation_confirmed = models.Ref('hr_holidays.mail_template_allocation_confirmed', 'mail.template')
+    _hr_holidays__mt_leave_allocation = models.Ref('hr_holidays.mt_leave_allocation', 'mail.message.subtype')
+
     def _default_work_entry_type_id(self):
         if self.env.user.has_group('hr_holidays.group_hr_holidays_user'):
             domain = [('id', 'in', self.allowed_work_entry_type_ids.ids), ('has_valid_allocation', '=', True), ('requires_allocation', '=', True)]
@@ -1353,8 +1358,8 @@ class HrLeaveAllocation(models.Model):
         to_clean, to_do, to_second_do = self.env['hr.leave.allocation'], self.env['hr.leave.allocation'], self.env['hr.leave.allocation']
         activity_vals = []
         model_id = self.env['ir.model']._get_id('hr.leave.allocation')
-        confirm_activity = self.env.ref('hr_holidays.mail_act_leave_allocation_approval')
-        approval_activity = self.env.ref('hr_holidays.mail_act_leave_allocation_second_approval')
+        confirm_activity = self._hr_holidays__mail_act_leave_allocation_approval
+        approval_activity = self._hr_holidays__mail_act_leave_allocation_second_approval
         for allocation in self:
             if allocation.state in ['confirm', 'validate1']:
                 if allocation.work_entry_type_id.allocation_validation_type != 'no_validation':
@@ -1407,10 +1412,10 @@ class HrLeaveAllocation(models.Model):
         self.ensure_one()
         res = super()._track_template_parameters(tracked_fields)
         if 'state' in tracked_fields and self.state == 'validate':
-            subtype = self.work_entry_type_id.allocation_notif_subtype_id or self.env.ref('hr_holidays.mt_leave_allocation')
+            subtype = self.work_entry_type_id.allocation_notif_subtype_id or self._hr_holidays__mt_leave_allocation
             if self.employee_id:
                 partner = self.employee_id.work_contact_id or self.employee_id.user_id.partner_id
-            res['state'] = (self.env.ref('hr_holidays.mail_template_allocation_confirmed'), {
+            res['state'] = (self._hr_holidays__mail_template_allocation_confirmed, {
                 'auto_delete_keep_log': False,
                 'subtype_id': subtype.id,
                 'email_layout_xmlid': 'mail.mail_notification_layout',

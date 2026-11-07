@@ -8,6 +8,8 @@ from odoo.exceptions import UserError
 class EventEvent(models.Model):
     _inherit = "event.event"
 
+    _event_crm__ir_cron_generate_leads = models.Ref('event_crm.ir_cron_generate_leads', 'ir.cron')
+
     lead_ids = fields.One2many(
         'crm.lead', 'event_id', string="Leads", groups='sales_team.group_sale_salesman',
         help="Leads generated from this event")
@@ -67,7 +69,7 @@ class EventEvent(models.Model):
                 'event_id': event.id,
                 'event_lead_rule_ids': event_lead_rules,
             } for event in self])
-            self.env.ref('event_crm.ir_cron_generate_leads')._trigger()
+            self._event_crm__ir_cron_generate_leads._trigger()
             notification = _("Got it! We've noted your request. Your leads will be created soon!")
 
         return {

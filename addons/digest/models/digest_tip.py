@@ -9,6 +9,8 @@ class DigestTip(models.Model):
     _description = 'Digest Tip'
     _order = 'sequence'
 
+    _base__group_user = models.Ref('base.group_user', 'res.groups')
+
     sequence = fields.Integer(
         'Sequence', default=1,
         help='Used to display digest tip in email template base on order')
@@ -19,4 +21,4 @@ class DigestTip(models.Model):
     tip_description = fields.Html('Tip description', translate=html_translate, sanitize=False)
     group_id = fields.Many2one(
         'res.groups', string='Authorized Group',
-        default=lambda self: self.env.ref('base.group_user'))
+        default=lambda self: self._base__group_user)

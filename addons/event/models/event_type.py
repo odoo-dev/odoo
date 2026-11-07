@@ -7,24 +7,27 @@ class EventType(models.Model):
     _description = 'Event Template'
     _order = 'sequence, id'
 
+    _event__event_reminder = models.Ref('event.event_reminder', 'mail.template')
+    _event__event_subscription = models.Ref('event.event_subscription', 'mail.template')
+
     def _default_event_mail_type_ids(self):
         return [(0, 0,
                  {'interval_nbr': 0,
                   'interval_unit': 'now',
                   'interval_type': 'after_sub',
-                  'template_ref': 'mail.template, %i' % self.env.ref('event.event_subscription').id,
+                  'template_ref': 'mail.template, %i' % self._event__event_subscription.id,
                  }),
                 (0, 0,
                  {'interval_nbr': 1,
                   'interval_unit': 'hours',
                   'interval_type': 'before_event',
-                  'template_ref': 'mail.template, %i' % self.env.ref('event.event_reminder').id,
+                  'template_ref': 'mail.template, %i' % self._event__event_reminder.id,
                  }),
                 (0, 0,
                  {'interval_nbr': 3,
                   'interval_unit': 'days',
                   'interval_type': 'before_event',
-                  'template_ref': 'mail.template, %i' % self.env.ref('event.event_reminder').id,
+                  'template_ref': 'mail.template, %i' % self._event__event_reminder.id,
                  })]
 
     def _default_question_ids(self):

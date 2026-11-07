@@ -7,10 +7,13 @@ class ReportCmrBatch(models.AbstractModel):
     _name = 'report.stock_fleet.report_cmr_batch'
     _description = 'CMR Batch Report'
 
+    _uom__product_uom_cubic_meter = models.Ref('uom.product_uom_cubic_meter', 'uom.uom')
+    _uom__product_uom_kgm = models.Ref('uom.product_uom_kgm', 'uom.uom')
+
     def _get_report_values(self, docids, data=None):
         outgoing_batches = self.env['stock.picking.batch'].browse(docids).filtered(lambda b: b.picking_type_id.code == 'outgoing')
-        kg_uom = self.env.ref('uom.product_uom_kgm')
-        m3_uom = self.env.ref('uom.product_uom_cubic_meter')
+        kg_uom = self._uom__product_uom_kgm
+        m3_uom = self._uom__product_uom_cubic_meter
 
         pickings_data = []
         has_carrier_id = 'carrier_id' in self.env['stock.picking']._fields
@@ -31,10 +34,13 @@ class ReportCmr(models.AbstractModel):
     _name = 'report.stock_fleet.report_cmr'
     _description = 'CMR Report'
 
+    _uom__product_uom_cubic_meter = models.Ref('uom.product_uom_cubic_meter', 'uom.uom')
+    _uom__product_uom_kgm = models.Ref('uom.product_uom_kgm', 'uom.uom')
+
     def _get_report_values(self, docids, data=None):
         pickings = self.env['stock.picking'].browse(docids).filtered(lambda p: p.picking_type_id.code == 'outgoing')
-        kg_uom = self.env.ref('uom.product_uom_kgm')
-        m3_uom = self.env.ref('uom.product_uom_cubic_meter')
+        kg_uom = self._uom__product_uom_kgm
+        m3_uom = self._uom__product_uom_cubic_meter
 
         pickings_data = [self._get_pickings_data(picking, kg_uom, m3_uom) for picking in pickings]
 

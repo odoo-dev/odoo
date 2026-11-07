@@ -13,6 +13,10 @@ class AccountSecureEntriesWizard(models.TransientModel):
     _name = 'account.secure.entries.wizard'
     _description = 'Secure Journal Entries'
 
+    _account__view_account_move_filter = models.Ref('account.view_account_move_filter', 'ir.ui.view')
+    _account__view_move_form = models.Ref('account.view_move_form', 'ir.ui.view')
+    _account__view_move_tree_multi_edit = models.Ref('account.view_move_tree_multi_edit', 'ir.ui.view')
+
     company_id = fields.Many2one(
         comodel_name='res.company',
         required=True,
@@ -200,7 +204,7 @@ class AccountSecureEntriesWizard(models.TransientModel):
                     'action_text': _("Review Entries"),
                     'action': {
                         **self.env['account.journal']._show_sequence_holes(list(domain)),
-                        'views': [[self.env.ref('account.view_move_tree_multi_edit').id, 'list'], [self.env.ref('account.view_move_form').id, 'form']],
+                        'views': [[self._account__view_move_tree_multi_edit.id, 'list'], [self._account__view_move_form.id, 'form']],
                     }
                 }
 
@@ -244,8 +248,8 @@ class AccountSecureEntriesWizard(models.TransientModel):
             'res_model': 'account.move',
             'type': 'ir.actions.act_window',
             'domain': [('id', 'in', moves.ids)],
-            'search_view_id': [self.env.ref('account.view_account_move_filter').id, 'search'],
-            'views': [[self.env.ref('account.view_move_tree_multi_edit').id, 'list'], [self.env.ref('account.view_move_form').id, 'form']],
+            'search_view_id': [self._account__view_account_move_filter.id, 'search'],
+            'views': [[self._account__view_move_tree_multi_edit.id, 'list'], [self._account__view_move_form.id, 'form']],
         }
 
     def action_show_draft_moves_in_hashed_period(self):
@@ -256,8 +260,8 @@ class AccountSecureEntriesWizard(models.TransientModel):
             'res_model': 'account.move',
             'type': 'ir.actions.act_window',
             'domain': list(self._get_draft_moves_in_hashed_period_domain()),
-            'search_view_id': [self.env.ref('account.view_account_move_filter').id, 'search'],
-            'views': [[self.env.ref('account.view_move_tree_multi_edit').id, 'list'], [self.env.ref('account.view_move_form').id, 'form']],
+            'search_view_id': [self._account__view_account_move_filter.id, 'search'],
+            'views': [[self._account__view_move_tree_multi_edit.id, 'list'], [self._account__view_move_form.id, 'form']],
         }
 
     def action_secure_entries(self):

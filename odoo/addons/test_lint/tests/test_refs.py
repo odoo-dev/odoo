@@ -1,19 +1,13 @@
 import ast
 import functools
-import json
-import logging
 import os
-from collections import Counter
 
 from odoo.modules import Manifest
-from odoo.tools import config
 from odoo.tools.misc import file_open
 
 from .common import LintCase, RegistryLintCase
 
-_logger = logging.getLogger(__name__)
 
-BASELINE_FILE = 'test_lint/tests/refs_baseline.json'
 EXCLUDED_DIRS = {'tests', 'migrations', 'upgrades'}
 
 
@@ -91,42 +85,27 @@ def iter_literal_refs(tree: ast.AST):
 
 
 class TestLiteralRefs(LintCase):
-    """ Ratchet on the literal XML ID lookups in business code: their number
-    per module may only go down.  Declare a ``models.Ref`` instead.
+    """ Business code must not look up a literal XML ID: declare a
+    ``models.Ref`` on the model instead. """
 
-    When removing lookups, lower the module's count in the baseline file.
-    """
-
-    def count_literal_refs(self) -> Counter:
-        roots = (
-            os.path.join(config.root_path, 'addons'),
-            os.path.join(os.path.dirname(config.root_path), 'addons'),
-        )
-        counts = Counter()
+    def test_literal_refs(self):
+        errors = []
         for manifest in Manifest.all_addon_manifests():
-            module = manifest.name
-            if module.startswith('test_') or not manifest.path.startswith(roots):
+            if manifest.name.startswith('test_'):
                 continue
             for root, dirs, files in os.walk(manifest.path):
                 dirs[:] = [d for d in dirs if d not in EXCLUDED_DIRS]
                 for fname in files:
-                    if not fname.endswith('.py'):
+                    if not fname.endswith('.py') or fname.startswith('test_'):
                         continue
-                    with file_open(os.path.join(root, fname), 'rb') as f:
+                    path = os.path.join(root, fname)
+                    with file_open(path, 'rb') as f:
                         tree = ast.parse(f.read())
-                    if count := sum(1 for _node in iter_literal_refs(tree)):
-                        counts[module] += count
-        return counts
-
-    def test_literal_refs(self):
-        with file_open(BASELINE_FILE) as f:
-            baseline = json.load(f)
-        counts = self.count_literal_refs()
-        for module, count in sorted(counts.items()):
-            with self.subTest(module=module):
-                self.assertLessEqual(
-                    count, baseline.get(module, 0),
-                    "New literal env.ref() or _xmlid_to_res_id() calls: declare a models.Ref instead",
-                )
-        if lowered := {module: counts[module] for module, count in baseline.items() if counts[module] < count}:
-            _logger.info("Lower the counts of %s in %s", lowered, BASELINE_FILE)
+                    errors.extend(
+                        f"{path}:{node.lineno}: {ast.unparse(node)}"
+                        for node in iter_literal_refs(tree)
+                    )
+        if errors:
+            self.fail(
+                "Literal XML ID lookups found, declare a models.Ref instead:\n" + "\n".join(errors)
+            )

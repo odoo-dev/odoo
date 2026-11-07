@@ -18,9 +18,10 @@ class HrEmployee(models.Model):
     _inherit = 'hr.employee'
 
     _hr_holidays__group_hr_holidays_responsible = models.Ref('hr_holidays.group_hr_holidays_responsible', 'res.groups', required=False)
+    _hr_holidays__group_hr_holidays_employee = models.Ref('hr_holidays.group_hr_holidays_employee', 'res.groups')
 
     def _get_leave_manager_domain(self):
-        return "[('share', '=', False), ('company_ids', 'in', company_id), ('role', 'in', ['regular_user', 'group_system']), ('all_group_ids', 'in', %s)]" % self.env.ref('hr_holidays.group_hr_holidays_employee').id
+        return "[('share', '=', False), ('company_ids', 'in', company_id), ('role', 'in', ['regular_user', 'group_system']), ('all_group_ids', 'in', %s)]" % self._hr_holidays__group_hr_holidays_employee.id
     leave_manager_id = fields.Many2one(
         'res.users', string='Time Off Approver',
         compute='_compute_leave_manager', store=True, readonly=False,

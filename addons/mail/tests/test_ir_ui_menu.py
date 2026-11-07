@@ -5,6 +5,7 @@ from unittest.mock import Mock, patch
 from odoo.addons.mail.tests.common import MailCommon, mail_new_test_user
 from odoo.tests import tagged, users
 from odoo.tests.common import warmup
+from odoo.tools import mute_logger
 
 
 @tagged('mail_thread')
@@ -57,8 +58,10 @@ class TestMenuRootLookupByModel(MailCommon):
                 'type': 'ir.actions.act_window',
             })
 
-        # Remove all menus and setup test menu with known results
-        Menu.search([]).unlink()
+        # Remove all menus and setup test menu with known results, including
+        # the menus protected by a models.Ref
+        with mute_logger('odoo.models'):
+            Menu.search([]).with_context(force_delete=True).unlink()
 
         menu_root_contact = new_menu('Contacts')
         new_menu('Contacts', parent_id=menu_root_contact.id,

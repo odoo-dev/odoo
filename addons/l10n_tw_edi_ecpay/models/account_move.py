@@ -15,6 +15,8 @@ from odoo.tools import float_round
 class AccountMove(models.Model):
     _inherit = "account.move"
 
+    _base__TWD = models.Ref('base.TWD', 'res.currency')
+
     # ------------------
     # Fields declaration
     # ------------------
@@ -375,7 +377,7 @@ class AccountMove(models.Model):
         self.ensure_one()
         if self.currency_id.name == "TWD":
             return amount
-        return self.currency_id._convert(amount, self.env.ref("base.TWD"), self.company_id, self.invoice_date or self.date, round=False)
+        return self.currency_id._convert(amount, self._base__TWD, self.company_id, self.invoice_date or self.date, round=False)
 
     @api.model
     def _reformat_phone_number(self, phone):

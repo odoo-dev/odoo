@@ -22,6 +22,8 @@ class StockLandedCost(models.Model):
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _order = 'date desc, id desc'
 
+    _stock_landed_costs__mt_stock_landed_cost_open = models.Ref('stock_landed_costs.mt_stock_landed_cost_open', 'mail.message.subtype')
+
     def _default_account_journal_id(self):
         """Take the journal configured in the company, else fallback on the stock journal."""
         ProductCategory = self.env['product.category']
@@ -102,7 +104,7 @@ class StockLandedCost(models.Model):
 
     def _track_log_get_default_subtype(self, track_init_values):
         if 'state' in track_init_values and self.state == 'done':
-            return self.env.ref('stock_landed_costs.mt_stock_landed_cost_open')
+            return self._stock_landed_costs__mt_stock_landed_cost_open
         return super()._track_log_get_default_subtype(track_init_values)
 
     def button_cancel(self):

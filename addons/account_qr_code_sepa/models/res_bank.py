@@ -8,6 +8,8 @@ from odoo.tools import float_repr
 class ResPartnerBank(models.Model):
     _inherit = 'res.partner.bank'
 
+    _base__sepa_zone = models.Ref('base.sepa_zone', 'res.country.group')
+
     def _get_qr_vals(self, qr_method, amount, currency, debtor_partner, free_communication, structured_communication):
         if qr_method == 'sct_qr':
             if structured_communication and is_valid_structured_reference(structured_communication):
@@ -51,7 +53,7 @@ class ResPartnerBank(models.Model):
         if qr_method == 'sct_qr':
             # Some countries share the same IBAN country code
             # (e.g. Åland Islands and Finland IBANs are 'FI', but Åland Islands' code is 'AX').
-            sepa_country_codes = self.env.ref('base.sepa_zone').country_ids.mapped('code')
+            sepa_country_codes = self._base__sepa_zone.country_ids.mapped('code')
             non_iban_codes = {'AX', 'NC', 'YT', 'TF', 'BL', 'RE', 'MF', 'GP', 'PM', 'PF', 'GF', 'MQ', 'JE', 'GG', 'IM'}
             sepa_iban_codes = {code for code in sepa_country_codes if code not in non_iban_codes}
             error_messages = []

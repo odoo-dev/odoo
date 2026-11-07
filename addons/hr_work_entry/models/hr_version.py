@@ -18,6 +18,7 @@ class HrVersion(models.Model):
     _inherit = 'hr.version'
 
     _hr_work_entry__generic_work_entry_type_attendance = models.Ref('hr_work_entry.generic_work_entry_type_attendance', 'hr.work.entry.type', required=False)
+    _hr_work_entry__generic_work_entry_type_leave = models.Ref('hr_work_entry.generic_work_entry_type_leave', 'hr.work.entry.type')
 
     def _get_default_work_entry_type_id(self):
         """Return the id of the work entry type used for worked time without explicit type.
@@ -130,7 +131,7 @@ class HrVersion(models.Model):
                 interval_start = interval[0].astimezone(UTC).replace(tzinfo=None)
                 interval_stop = interval[1].astimezone(UTC).replace(tzinfo=None)
                 return self._get_leave_work_entry_type_dates(leave[2], interval_start, interval_stop, self.employee_id)
-        return self.env.ref('hr_work_entry.generic_work_entry_type_leave')
+        return self._hr_work_entry__generic_work_entry_type_leave
 
     def _get_sub_leave_domain(self):
         """Return the calendar part of the domain of :meth:`_get_leave_domain`.

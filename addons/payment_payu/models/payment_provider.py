@@ -14,6 +14,8 @@ from odoo.addons.payment_payu import const
 class PaymentProvider(models.Model):
     _inherit = "payment.provider"
 
+    _payment__action_payment_provider = models.Ref('payment.action_payment_provider', 'ir.actions.act_window')
+
     code = fields.Selection(selection_add=[("payu", "PayU")], ondelete={"payu": "set default"})
     payu_key_id = fields.Char(string="PayU Key Id", copy=False)
     payu_merchant_salt = fields.Char(
@@ -78,7 +80,7 @@ class PaymentProvider(models.Model):
                 self.env._(
                     "PayU is not available in your country; please use another payment provider."
                 ),
-                self.env.ref("payment.action_payment_provider").id,
+                self._payment__action_payment_provider.id,
                 self.env._("Other Payment Providers"),
             )
 

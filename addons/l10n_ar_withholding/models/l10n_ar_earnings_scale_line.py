@@ -6,6 +6,8 @@ class L10n_ArEarningsScaleLine(models.Model):
     _description = 'l10n_ar.earnings.scale.line'
     _order = 'to_amount'
 
+    _base__ARS = models.Ref('base.ARS', 'res.currency')
+
     scale_id = fields.Many2one(
         comodel_name='l10n_ar.earnings.scale',
         required=True,
@@ -14,7 +16,7 @@ class L10n_ArEarningsScaleLine(models.Model):
     )
     currency_id = fields.Many2one(
         comodel_name='res.currency',
-        default=lambda self: self.env.ref('base.ARS'),
+        default=lambda self: self._base__ARS,
         store=False,
     )
     from_amount = fields.Monetary(

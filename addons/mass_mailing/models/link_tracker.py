@@ -15,6 +15,8 @@ class LinkTracker(models.Model):
 class LinkTrackerClick(models.Model):
     _inherit = "link.tracker.click"
 
+    _mass_mailing__link_tracker_click_view_list_simplified = models.Ref('mass_mailing.link_tracker_click_view_list_simplified', 'ir.ui.view')
+
     mailing_trace_id = fields.Many2one('mailing.trace', string='Mail Statistics', index='btree_not_null')
     mass_mailing_id = fields.Many2one('mailing.mailing', string='Mass Mailing', index='btree_not_null')
     email = fields.Char(string="Email", related="mailing_trace_id.email", help="The email address of the entity that clicked the link")
@@ -53,7 +55,7 @@ class LinkTrackerClick(models.Model):
         By default, no grouping is applied.
         :param graph_mode: when `True`, the graph mode will be set to `pie`."""
         context = {**self.env.context, 'create': False}
-        views = [(self.env.ref('mass_mailing.link_tracker_click_view_list_simplified').id, 'list')]
+        views = [(self._mass_mailing__link_tracker_click_view_list_simplified.id, 'list')]
         view_mode = 'list'
         if graph_mode:
             context = {**self.env.context, 'graph_mode': 'pie', 'stacked': False}

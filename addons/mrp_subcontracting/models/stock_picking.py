@@ -14,6 +14,11 @@ from dateutil.relativedelta import relativedelta
 class StockPicking(models.Model):
     _inherit = 'stock.picking'
 
+    _mrp_subcontracting__mrp_production_subcontracting_form_view = models.Ref('mrp_subcontracting.mrp_production_subcontracting_form_view', 'ir.ui.view')
+    _mrp_subcontracting__mrp_production_subcontracting_portal_form_view = models.Ref(
+        'mrp_subcontracting.mrp_production_subcontracting_portal_form_view', 'ir.ui.view')
+    _mrp_subcontracting__mrp_production_subcontracting_tree_view = models.Ref('mrp_subcontracting.mrp_production_subcontracting_tree_view', 'ir.ui.view')
+
     show_subcontracting_details_visible = fields.Boolean(compute='_compute_show_subcontracting_details_visible')
 
     @api.depends('move_ids.show_subcontracting_details_visible')
@@ -75,10 +80,10 @@ class StockPicking(models.Model):
         productions = self._get_subcontract_production().filtered(lambda m: m.state != 'cancel')
         ctx = {"mrp_subcontracting": True}
         if self.env.user._is_portal():
-            form_view_id = self.env.ref('mrp_subcontracting.mrp_production_subcontracting_portal_form_view')
+            form_view_id = self._mrp_subcontracting__mrp_production_subcontracting_portal_form_view
             ctx.update(no_breadcrumbs=False)
         else:
-            form_view_id = self.env.ref('mrp_subcontracting.mrp_production_subcontracting_form_view')
+            form_view_id = self._mrp_subcontracting__mrp_production_subcontracting_form_view
         action = {
             'type': 'ir.actions.act_window',
             'res_model': 'mrp.production',
@@ -89,7 +94,7 @@ class StockPicking(models.Model):
             action.update({
                 'name': _('Subcontracting MOs'),
                 'views': [
-                    (self.env.ref('mrp_subcontracting.mrp_production_subcontracting_tree_view').id, 'list'),
+                    (self._mrp_subcontracting__mrp_production_subcontracting_tree_view.id, 'list'),
                     (form_view_id.id, 'form'),
                 ],
                 'domain': [('id', 'in', productions.ids)],

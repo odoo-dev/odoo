@@ -12,6 +12,7 @@ class BusListenerMixin(models.AbstractModel):
     _inherit = "bus.listener.mixin"
 
     _mail__mt_note_optional = models.Ref('mail.mt_note', 'mail.message.subtype', required=False)
+    _base__partner_root = models.Ref('base.partner_root', 'res.partner')
 
     def _bus_send_transient_message(self, channel, content):
         """Posts a fake message in the given ``channel``, only visible for ``self`` listeners."""
@@ -20,7 +21,7 @@ class BusListenerMixin(models.AbstractModel):
         store.add_model_values(
             "mail.message",
             lambda res: (
-                res.one("author_id", [], value=self.env.ref("base.partner_root")),
+                res.one("author_id", [], value=self._base__partner_root),
                 res.attr("body", Markup("<span class='o_mail_notification'>%s</span>") % content),
                 res.attr("id", message_id),
                 res.attr("is_transient", True),

@@ -14,6 +14,8 @@ SII_VAT = '60805000-0'
 class AccountMove(models.Model):
     _inherit = "account.move"
 
+    _base__cl = models.Ref('base.cl', 'res.country')
+
     partner_id_vat = fields.Char(related='partner_id.vat', string='VAT No')
 
     @api.constrains("l10n_latam_document_number")
@@ -31,7 +33,7 @@ class AccountMove(models.Model):
 
     def _get_l10n_latam_documents_domain(self):
         self.ensure_one()
-        if self.journal_id.company_id.account_fiscal_country_id != self.env.ref('base.cl') or not \
+        if self.journal_id.company_id.account_fiscal_country_id != self._base__cl or not \
                 self.l10n_latam_use_documents:
             return super()._get_l10n_latam_documents_domain()
         if self.journal_id.type == 'sale':

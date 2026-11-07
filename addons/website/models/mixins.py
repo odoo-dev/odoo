@@ -848,6 +848,8 @@ class WebsiteSearchableMixin(models.AbstractModel):
     _name = 'website.searchable.mixin'
     _description = 'Website Searchable Mixin'
 
+    _base__default_website = models.Ref('base.default_website', 'website', required=False)
+
     def _split_for_highlight(self, text, term):
         """
         Splits a string into parts around search term matches.
@@ -1088,7 +1090,7 @@ class WebsiteSearchableMixin(models.AbstractModel):
                 highlighted_tags.append(tag)
 
         if highlighted_tags:
-            website = self.env.website or self.env.ref('base.default_website')
+            website = self.env.website or self._base__default_website
             value = website.sudo()._render_template(
                 "website.search_tags_highlight",
                 {'tags': highlighted_tags}

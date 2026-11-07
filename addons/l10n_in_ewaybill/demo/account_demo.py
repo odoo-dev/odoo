@@ -8,6 +8,8 @@ _logger = logging.getLogger(__name__)
 class AccountChartTemplate(models.AbstractModel):
     _inherit = 'account.chart.template'
 
+    _l10n_in_ewaybill__type_tax_invoice_sub_type_supply = models.Ref('l10n_in_ewaybill.type_tax_invoice_sub_type_supply', 'l10n.in.ewaybill.type')
+
     @template('in', model='res.company', demo=True)
     def _l10n_in_ewaybill_res_company_demo(self):
         return {
@@ -31,7 +33,7 @@ class AccountChartTemplate(models.AbstractModel):
         ]
         default_ewaybill_vals = {
             'distance': 20,
-            'type_id': self.env.ref("l10n_in_ewaybill.type_tax_invoice_sub_type_supply").id,
+            'type_id': self._l10n_in_ewaybill__type_tax_invoice_sub_type_supply.id,
             'mode': "1",
             'vehicle_no': "GJ11AA1234",
             'vehicle_type': "R",

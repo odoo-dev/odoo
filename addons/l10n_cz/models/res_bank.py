@@ -6,6 +6,8 @@ from odoo import api, models
 class ResPartnerBank(models.Model):
     _inherit = 'res.partner.bank'
 
+    _base__CZK = models.Ref('base.CZK', 'res.currency')
+
     def _get_qr_vals(self, qr_method, amount, currency, debtor_partner, free_communication, structured_communication):
         if qr_method == 'czk_qr':
             invoice = self.env['account.move'].search([
@@ -49,7 +51,7 @@ class ResPartnerBank(models.Model):
     def _get_error_messages_for_qr(self, qr_method, debtor_partner, currency):
         if qr_method == 'czk_qr':
             error_messages = []
-            if currency.id != self.env.ref('base.CZK').id:
+            if currency.id != self._base__CZK.id:
                 error_messages.append(self.env._("The bank account currency must be CZK to generate the QR code."))
             if self.account_type != 'iban':
                 error_messages.append(self.env._("The bank account type must be IBAN to generate the QR code."))

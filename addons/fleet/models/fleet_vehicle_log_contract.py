@@ -12,6 +12,8 @@ class FleetVehicleLogContract(models.Model):
     _description = 'Vehicle Contract'
     _order = 'state desc,expiration_date'
 
+    _fleet__mail_act_fleet_contract_to_renew = models.Ref('fleet.mail_act_fleet_contract_to_renew', 'mail.activity.type')
+
     def compute_next_year_date(self, strdate):
         oneyear = relativedelta(years=1)
         start_date = fields.Date.from_string(strdate)
@@ -159,7 +161,7 @@ class FleetVehicleLogContract(models.Model):
         delay_alert_contract = params.get_int('hr_fleet.delay_alert_contract', 30)
         date_today = fields.Date.from_string(fields.Date.today())
         outdated_days = fields.Date.to_string(date_today + relativedelta(days=+delay_alert_contract))
-        reminder_activity_type = self.env.ref('fleet.mail_act_fleet_contract_to_renew')
+        reminder_activity_type = self._fleet__mail_act_fleet_contract_to_renew
         nearly_expired_contracts = self.search([
             ('state', '=', 'open'),
             ('expiration_date', '<', outdated_days),

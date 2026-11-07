@@ -9,6 +9,8 @@ class ResPartner(models.Model):
     _inherit = 'res.partner'
     _explanation = "In the HR context, partners also represent employees."
 
+    _base__view_partner_form = models.Ref('base.view_partner_form', 'ir.ui.view')
+
     employee_ids = fields.One2many(
         'hr.employee', 'work_contact_id', string='Employees', groups="hr.group_hr_user",
         help="Related employees based on their private address")
@@ -91,7 +93,7 @@ class ResPartner(models.Model):
 
     def _action_show(self):
         """If self is a singleton, directly access the form view. If it is a recordset, open a list view"""
-        view_id = self.env.ref('base.view_partner_form').id
+        view_id = self._base__view_partner_form.id
         action = {
             'type': 'ir.actions.act_window',
             'res_model': 'res.partner',

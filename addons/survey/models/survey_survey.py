@@ -26,6 +26,8 @@ class SurveySurvey(models.Model):
     _inherit = ['mail.thread', 'mail.activity.mixin']
 
     _survey__mail_template_user_input_invite = models.Ref('survey.mail_template_user_input_invite', 'mail.template', required=False)
+    _survey__field_survey_user_input__partner_id = models.Ref('survey.field_survey_user_input__partner_id', 'ir.model.fields')
+    _survey__model_survey_user_input = models.Ref('survey.model_survey_user_input', 'ir.model')
 
     @api.model
     def _get_default_access_token(self):
@@ -1252,10 +1254,10 @@ class SurveySurvey(models.Model):
             'domain': "['&', ('survey_id', '=', %s), ('scoring_success', '=', True)]" % self.id,
             'computation_mode': 'count',
             'display_mode': 'boolean',
-            'model_id': self.env.ref('survey.model_survey_user_input').id,
+            'model_id': self._survey__model_survey_user_input.id,
             'condition': 'higher',
             'batch_mode': True,
-            'batch_distinctive_field': self.env.ref('survey.field_survey_user_input__partner_id').id,
+            'batch_distinctive_field': self._survey__field_survey_user_input__partner_id.id,
             'batch_user_expression': 'user.partner_id.id'
         })
         challenge = self.env['gamification.challenge'].create({

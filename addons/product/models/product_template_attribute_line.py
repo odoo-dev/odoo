@@ -15,6 +15,8 @@ class ProductTemplateAttributeLine(models.Model):
     _description = "Product Template Attribute Line"
     _order = 'sequence, attribute_id, id'
 
+    _product__product_template_attribute_value_view_tree = models.Ref('product.product_template_attribute_value_view_tree', 'ir.ui.view')
+
     active = fields.Boolean(default=True)
     product_tmpl_id = fields.Many2one(
         comodel_name='product.template',
@@ -269,7 +271,7 @@ class ProductTemplateAttributeLine(models.Model):
             'view_mode': 'list,form',
             'domain': [('id', 'in', self.product_template_value_ids.ids)],
             'views': [
-                (self.env.ref('product.product_template_attribute_value_view_tree').id, 'list'),
+                (self._product__product_template_attribute_value_view_tree.id, 'list'),
             ],
             'context': {
                 'search_default_active': 1,

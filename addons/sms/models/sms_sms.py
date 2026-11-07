@@ -20,6 +20,8 @@ class SmsSms(models.Model):
     _rec_name = 'number'
     _order = 'id DESC'
 
+    _sms__ir_cron_sms_scheduler_action = models.Ref('sms.ir_cron_sms_scheduler_action', 'ir.cron')
+
     @property
     def IAP_TO_SMS_STATE_SUCCESS(self):
         return {
@@ -84,7 +86,7 @@ class SmsSms(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        self.env.ref('sms.ir_cron_sms_scheduler_action')._trigger()
+        self._sms__ir_cron_sms_scheduler_action._trigger()
         return super().create(vals_list)
 
     @api.depends('uuid')

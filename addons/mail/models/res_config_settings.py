@@ -18,6 +18,7 @@ class ResConfigSettings(models.TransientModel):
     _inherit = 'res.config.settings'
 
     _mail__mail_notification_layout = models.Ref('mail.mail_notification_layout', 'ir.ui.view', required=False)
+    _mail__res_config_settings_view_form_sfu_client_source = models.Ref('mail.res_config_settings_view_form_sfu_client_source', 'ir.ui.view')
 
     external_email_server_default = fields.Boolean(
         "Use Custom Email Servers",
@@ -168,7 +169,7 @@ class ResConfigSettings(models.TransientModel):
             "type": "ir.actions.act_window",
             "res_model": self._name,
             "res_id": self.id,
-            "views": [(self.env.ref("mail.res_config_settings_view_form_sfu_client_source").id, "form")],
+            "views": [(self._mail__res_config_settings_view_form_sfu_client_source.id, "form")],
             "target": "new",
             "context": {"dialog_size": "extra-large"},
         }

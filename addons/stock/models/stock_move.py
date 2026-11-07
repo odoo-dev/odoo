@@ -23,6 +23,11 @@ class StockMove(models.Model):
     _rec_name = 'reference'
 
     _base__partner_root_optional = models.Ref('base.partner_root', 'res.partner', required=False)
+    _stock__label_picking = models.Ref('stock.label_picking', 'ir.actions.report')
+    _stock__product_label_layout_form_picking = models.Ref('stock.product_label_layout_form_picking', 'ir.ui.view')
+    _stock__stock_package_view_add_list = models.Ref('stock.stock_package_view_add_list', 'ir.ui.view')
+    _stock__stock_warn_insufficient_qty_scrap_form_view = models.Ref('stock.stock_warn_insufficient_qty_scrap_form_view', 'ir.ui.view')
+    _stock__view_stock_move_operations = models.Ref('stock.view_stock_move_operations', 'ir.ui.view')
 
     sequence = fields.Integer('Sequence', default=10)
     priority = fields.Selection(
@@ -999,7 +1004,7 @@ Please change the quantity done or the rounding precision in your settings.""",
             'type': 'ir.actions.act_window',
             'res_model': 'stock.package',
             'view_mode': 'list',
-            'views': [(self.env.ref('stock.stock_package_view_add_list').id, 'list')],
+            'views': [(self._stock__stock_package_view_add_list.id, 'list')],
             'target': 'new',
             'domain': [('location_id', 'child_of', picking.location_id.id)],
             'context': {
@@ -1014,15 +1019,14 @@ Please change the quantity done or the rounding precision in your settings.""",
             'docids': self.ids,
             'quantity': quantities,
         }
-        return self.env.ref('stock.label_picking').report_action(self, data=data, config=False)
+        return self._stock__label_picking.report_action(self, data=data, config=False)
 
     def action_open_label_layout(self):
-        view = self.env.ref('stock.product_label_layout_form_picking')
         return {
             'name': _('Choose Labels Layout'),
             'type': 'ir.actions.act_window',
             'res_model': 'product.label.layout',
-            'views': [(view.id, 'form')],
+            'views': [(self._stock__product_label_layout_form_picking.id, 'form')],
             'target': 'new',
             'context': {
                 'default_product_ids': self.product_id.ids,
@@ -1037,14 +1041,13 @@ Please change the quantity done or the rounding precision in your settings.""",
         checked on the picking type.
         """
         self.ensure_one()
-        view = self.env.ref('stock.view_stock_move_operations')
         action = {
             'name': _('Detailed Operations'),
             'type': 'ir.actions.act_window',
             'view_mode': 'form',
             'res_model': 'stock.move',
-            'views': [(view.id, 'form')],
-            'view_id': view.id,
+            'views': [(self._stock__view_stock_move_operations.id, 'form')],
+            'view_id': self._stock__view_stock_move_operations.id,
             'target': 'new',
             'res_id': self.id,
             'context': dict(
@@ -2991,7 +2994,7 @@ Please change the quantity done or the rounding precision in your settings.""",
                 'name': self.env._('%(product)s: Insufficient Quantity To Scrap', product=self.product_id.display_name),
                 'view_mode': 'form',
                 'res_model': 'stock.warn.insufficient.qty.scrap',
-                'view_id': self.env.ref('stock.stock_warn_insufficient_qty_scrap_form_view').id,
+                'view_id': self._stock__stock_warn_insufficient_qty_scrap_form_view.id,
                 'type': 'ir.actions.act_window',
                 'context': ctx,
                 'target': 'new'

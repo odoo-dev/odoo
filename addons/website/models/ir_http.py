@@ -39,6 +39,8 @@ def sitemap_qs2dom(qs, route, field='name'):
 class IrHttp(models.AbstractModel):
     _inherit = 'ir.http'
 
+    _base__default_website = models.Ref('base.default_website', 'website', required=False)
+
     def routing_map(self, key=None):
         key = self.env.website.id or self.env.context.get('host_id') or None
         return super().routing_map(key=key)
@@ -317,7 +319,7 @@ class IrHttp(models.AbstractModel):
         if page_info:
             if not WebsitePage.env.context.get('website_id'):
                 context = request.env.context
-                website_id = page_info['website_id'] or context.get('website_id') or context.get('host_id') or request.env.ref('base.default_website')
+                website_id = page_info['website_id'] or context.get('website_id') or context.get('host_id') or request.env['ir.http']._base__default_website
                 WebsitePage = WebsitePage.with_context(website_id=website_id)
                 request.update_context(website_id=website_id)
             return WebsitePage.browse(page_info['id'])._get_response(request)
@@ -409,7 +411,7 @@ class IrHttp(models.AbstractModel):
     def _get_error_html(self, code, values):
         irHttp = self
         if code in ('page_404', 'protected_403'):
-            website = self.env.website or self.env.website.browse(self.env.context.get('host_id')) or self.env.ref('base.default_website')
+            website = self.env.website or self.env.website.browse(self.env.context.get('host_id')) or self._base__default_website
             return code.split('_')[1], website._render_template('website.%s' % code, values)
         return super(IrHttp, irHttp)._get_error_html(code, values)
 

@@ -18,6 +18,8 @@ _logger = logging.getLogger(__name__)
 class ResPartner(models.Model):
     _inherit = 'res.partner'
 
+    _base__dk = models.Ref('base.dk', 'res.country')
+
     invoice_sending_method = fields.Selection(
         selection_add=[('nemhandel', 'By Nemhandel')],
     )
@@ -61,7 +63,7 @@ class ResPartner(models.Model):
         columns = table_columns(self.env.cr, 'res_partner')
         if 'nemhandel_identifier_type' not in columns or 'nemhandel_identifier_value' not in columns:
             return
-        country_dk = self.env.ref('base.dk').id
+        country_dk = self._base__dk.id
         self.env.execute_query(SQL("""
             UPDATE res_partner p
             SET nemhandel_identifier_type = '0184',

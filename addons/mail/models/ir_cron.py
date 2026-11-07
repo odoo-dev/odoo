@@ -7,6 +7,8 @@ class IrCron(models.AbstractModel):
     _name = 'ir.cron'
     _inherit = ['ir.cron', 'mail.thread', 'mail.activity.mixin']
 
+    _mail__ir_cron_mail_end_polls = models.Ref('mail.ir_cron_mail_end_polls', 'ir.cron')
+
     user_id = fields.Many2one(tracking=True)
     interval_number = fields.Integer(tracking=True)
     interval_type = fields.Selection(tracking=True)

@@ -6,6 +6,9 @@ from odoo.addons.account.models.chart_template import template
 class AccountChartTemplate(models.AbstractModel):
     _inherit = 'account.chart.template'
 
+    _l10n_lt__account_account_tag_6_other_operating_results = models.Ref('l10n_lt.account_account_tag_6_other_operating_results', 'account.account.tag')
+    _l10n_lt__account_account_tag_b_4 = models.Ref('l10n_lt.account_account_tag_b_4', 'account.account.tag')
+
     @template('lt')
     def _get_lt_template_data(self):
         return {
@@ -38,13 +41,11 @@ class AccountChartTemplate(models.AbstractModel):
     def _setup_utility_bank_accounts(self, template_code, company, template_data):
         super()._setup_utility_bank_accounts(template_code, company, template_data)
         if template_code == "lt":
-            bank_tags = self.env.ref('l10n_lt.account_account_tag_b_4')
-            company.account_journal_suspense_account_id.tag_ids |= bank_tags
-            company.transfer_account_id.tag_ids |= bank_tags
+            company.account_journal_suspense_account_id.tag_ids |= self._l10n_lt__account_account_tag_b_4
+            company.transfer_account_id.tag_ids |= self._l10n_lt__account_account_tag_b_4
 
-            other_operating_results_tags = self.env.ref('l10n_lt.account_account_tag_6_other_operating_results')
-            company.default_cash_difference_income_account_id.tag_ids |= other_operating_results_tags
-            company.default_cash_difference_expense_account_id.tag_ids |= other_operating_results_tags
+            company.default_cash_difference_income_account_id.tag_ids |= self._l10n_lt__account_account_tag_6_other_operating_results
+            company.default_cash_difference_expense_account_id.tag_ids |= self._l10n_lt__account_account_tag_6_other_operating_results
 
     @template('lt', 'account.account')
     def _get_lt_account_account(self):

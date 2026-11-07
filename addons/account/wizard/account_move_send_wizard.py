@@ -12,6 +12,8 @@ class AccountMoveSendWizard(models.TransientModel):
     _inherit = ['account.move.send', 'mail.composer.mixin']
     _description = "Send Invoice Wizard"
 
+    _mail__mail_compose_message_view_form_template_save = models.Ref('mail.mail_compose_message_view_form_template_save', 'ir.ui.view')
+
     move_id = fields.Many2one(comodel_name='account.move', required=True)
     company_id = fields.Many2one(comodel_name='res.company', related='move_id.company_id')
     alerts = fields.Json(compute='_compute_alerts')
@@ -285,7 +287,7 @@ class AccountMoveSendWizard(models.TransientModel):
         return {
             'type': 'ir.actions.act_window',
             'view_mode': 'form',
-            'view_id': self.env.ref('mail.mail_compose_message_view_form_template_save').id,
+            'view_id': self._mail__mail_compose_message_view_form_template_save.id,
             'name': _('Create a Mail Template'),
             'res_model': 'account.move.send.wizard',
             'context': {'dialog_size': 'medium'},

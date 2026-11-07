@@ -9,6 +9,8 @@ class GamificationBadgeUser(models.Model):
     """User having received a badge"""
     _inherit = 'gamification.badge.user'
 
+    _hr_gamification__view_current_badge_form = models.Ref('hr_gamification.view_current_badge_form', 'ir.ui.view')
+
     employee_id = fields.Many2one('hr.employee', string='Employee', index=True)
     has_edit_delete_access = fields.Boolean(compute="_compute_has_edit_delete_access")
 
@@ -33,7 +35,7 @@ class GamificationBadgeUser(models.Model):
             'res_id': self.id,
             'target': 'new',
             'view_mode': 'form',
-            'view_id': self.env.ref("hr_gamification.view_current_badge_form").id,
+            'view_id': self._hr_gamification__view_current_badge_form.id,
             'context': {"dialog_size": "medium"},
         }
 

@@ -6,6 +6,8 @@ from odoo import fields, models
 class Digest(models.Model):
     _inherit = 'digest.digest'
 
+    _stock__menu_stock_root = models.Ref('stock.menu_stock_root', 'ir.ui.menu')
+
     kpi_stock_delivery_count = fields.Boolean('Deliveries')
     kpi_stock_delivery_count_value = fields.Integer(compute='_compute_kpi_stock_delivery_count_value')
     kpi_stock_receipt_count = fields.Boolean('Receipts')
@@ -37,7 +39,7 @@ class Digest(models.Model):
 
     def _get_kpi_custom_settings(self, company, user):
         res = super()._get_kpi_custom_settings(company, user)
-        menu_id = self.env.ref('stock.menu_stock_root').id
+        menu_id = self._stock__menu_stock_root.id
         res['kpi_action']['kpi_stock_delivery_count'] = f'stock.stock_move_action_outgoing?menu_id={menu_id}'
         res['kpi_action']['kpi_stock_receipt_count'] = f'stock.stock_move_action_incoming?menu_id={menu_id}'
         res['kpi_sequence']['kpi_stock_delivery_count'] = 6500

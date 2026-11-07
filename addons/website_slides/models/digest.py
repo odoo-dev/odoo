@@ -6,6 +6,8 @@ from odoo import fields, models
 class Digest(models.Model):
     _inherit = 'digest.digest'
 
+    _website_slides__website_slides_menu_root = models.Ref('website_slides.website_slides_menu_root', 'ir.ui.menu')
+
     kpi_nbr_of_certified_attendees = fields.Boolean('Certified Attendees')
     kpi_nbr_of_certified_attendees_value = fields.Integer(
         compute='_compute_kpi_nbr_of_certified_attendees_value'
@@ -28,7 +30,7 @@ class Digest(models.Model):
 
     def _get_kpi_custom_settings(self, company, user):
         res = super()._get_kpi_custom_settings(company, user)
-        menu_id = self.env.ref('website_slides.website_slides_menu_root').id
+        menu_id = self._website_slides__website_slides_menu_root.id
         res['kpi_action']['kpi_nbr_of_new_attendees'] = (
             f'website_slides.slide_channel_partner_action_report?menu_id={menu_id}')
         res['kpi_action']['kpi_nbr_of_certified_attendees'] = (

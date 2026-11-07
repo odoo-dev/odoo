@@ -11,6 +11,8 @@ _logger = logging.getLogger(__name__)
 class AccountMoveSend(models.AbstractModel):
     _inherit = 'account.move.send'
 
+    _l10n_pl_edi__cron_auto_checks_the_polish_invoice_status = models.Ref('l10n_pl_edi.cron_auto_checks_the_polish_invoice_status', 'ir.cron')
+
     def _get_all_extra_edis(self):
         res = super()._get_all_extra_edis()
         res.update({
@@ -134,4 +136,4 @@ class AccountMoveSend(models.AbstractModel):
                     )],
                 }
 
-            self.env.ref('l10n_pl_edi.cron_auto_checks_the_polish_invoice_status')._trigger()
+            self._l10n_pl_edi__cron_auto_checks_the_polish_invoice_status._trigger()

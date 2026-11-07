@@ -6,6 +6,8 @@ from odoo import fields, models
 class CrmTeam(models.Model):
     _inherit = "crm.team"
 
+    _sale__sale_order_view_search_inherit_sale = models.Ref('sale.sale_order_view_search_inherit_sale', 'ir.ui.view')
+
     website_ids = fields.One2many(
         string="Websites", comodel_name="website", inverse_name="salesteam_id"
     )
@@ -43,7 +45,7 @@ class CrmTeam(models.Model):
             "type": "ir.actions.act_window",
             "view_mode": "list,form",
             "domain": [("is_abandoned_cart", "=", True)],
-            "search_view_id": [self.env.ref("sale.sale_order_view_search_inherit_sale").id],
+            "search_view_id": [self._sale__sale_order_view_search_inherit_sale.id],
             "context": {
                 "search_default_team_id": self.id,
                 "default_team_id": self.id,

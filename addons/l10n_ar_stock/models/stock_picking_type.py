@@ -7,6 +7,9 @@ from odoo.exceptions import ValidationError
 class StockPickingType(models.Model):
     _inherit = 'stock.picking.type'
 
+    _l10n_ar__dc_r_r = models.Ref('l10n_ar.dc_r_r', 'l10n_latam.document.type')
+    _l10n_ar__dc_remito_x = models.Ref('l10n_ar.dc_remito_x', 'l10n_latam.document.type')
+
     l10n_ar_document_type_id = fields.Many2one(
         comodel_name='l10n_latam.document.type',
         string="Document Type",
@@ -58,8 +61,8 @@ class StockPickingType(models.Model):
     def _get_allowed_document_type_ids(self):
         """Limit document types to only those used for Remitos in Argentina"""
         return [
-            self.env.ref('l10n_ar.dc_r_r').id,
-            self.env.ref('l10n_ar.dc_remito_x').id
+            self._l10n_ar__dc_r_r.id,
+            self._l10n_ar__dc_remito_x.id
         ]
 
     # === CONSTRAINT METHODS === #

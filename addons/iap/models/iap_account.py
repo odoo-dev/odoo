@@ -24,6 +24,8 @@ class IapAccount(models.Model):
     _name = 'iap.account'
     _description = 'IAP Account'
 
+    _iap__iap_account_menu = models.Ref('iap.iap_account_menu', 'ir.ui.menu')
+
     name = fields.Char()
     service_id = fields.Many2one('iap.service', required=True)
     service_name = fields.Char(related='service_id.technical_name')
@@ -301,13 +303,12 @@ class IapAccount(models.Model):
     def get_config_account_url(self):
         """ Called notably by ajax partner_autocomplete. """
         account = self.env['iap.account'].get('partner_autocomplete')
-        menu = self.env.ref('iap.iap_account_menu')
         if not self.env.user.has_group('base.group_no_one'):
             return False
         if account:
-            url = f"/odoo/action-iap.iap_account_action/{account.id}?menu_id={menu.id}"
+            url = f"/odoo/action-iap.iap_account_action/{account.id}?menu_id={self._iap__iap_account_menu.id}"
         else:
-            url = f"/odoo/action-iap.iap_account_action?menu_id={menu.id}"
+            url = f"/odoo/action-iap.iap_account_action?menu_id={self._iap__iap_account_menu.id}"
         return url
 
     @api.model

@@ -21,6 +21,9 @@ class MailTemplate(models.Model):
 
     _unrestricted_rendering = True
 
+    _mail__email_compose_message_wizard_form = models.Ref('mail.email_compose_message_wizard_form', 'ir.ui.view')
+    _mail__mail_template_preview_action = models.Ref('mail.mail_template_preview_action', 'ir.actions.act_window')
+
     @api.model
     def default_get(self, fields):
         res = super(MailTemplate, self).default_get(fields)
@@ -298,7 +301,7 @@ class MailTemplate(models.Model):
 
     def create_action(self):
         ActWindow = self.env['ir.actions.act_window']
-        view = self.env.ref('mail.email_compose_message_wizard_form')
+        view = self._mail__email_compose_message_wizard_form
         for template in self:
             context = {
                 'default_composition_mode': 'mass_mail',
@@ -321,7 +324,7 @@ class MailTemplate(models.Model):
         return True
 
     def action_open_mail_preview(self):
-        action = self.env.ref('mail.mail_template_preview_action')._get_action_dict()
+        action = self._mail__mail_template_preview_action._get_action_dict()
         action.update({'name': _('Template Preview: "%(template_name)s"', template_name=self.name)})
         return action
 

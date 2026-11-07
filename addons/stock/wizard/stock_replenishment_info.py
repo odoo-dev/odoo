@@ -190,6 +190,8 @@ class StockReplenishmentOption(models.TransientModel):
     _name = 'stock.replenishment.option'
     _description = 'Stock warehouse replenishment option'
 
+    _stock__replenishment_option_warning_view = models.Ref('stock.replenishment_option_warning_view', 'ir.ui.view')
+
     route_id = fields.Many2one('stock.route')
     product_id = fields.Many2one('product.product')
     replenishment_info_id = fields.Many2one('stock.replenishment.info')
@@ -238,7 +240,7 @@ class StockReplenishmentOption(models.TransientModel):
                 "type": "ir.actions.act_window",
                 "res_model": "stock.replenishment.option",
                 "res_id": self.id,
-                "views": [[self.env.ref('stock.replenishment_option_warning_view').id, "form"]],
+                "views": [[self._stock__replenishment_option_warning_view.id, "form"]],
                 "target": "new",
                 "name": _("Quantity available too low")
             }

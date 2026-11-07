@@ -117,7 +117,7 @@ class LunchController(http.Controller):
             'wallet': request.env['lunch.cashmove'].get_wallet_balance(user, False),
             'wallet_with_config': request.env['lunch.cashmove'].get_wallet_balance(user),
             'is_manager': is_manager,
-            'group_portal_id': request.env.ref('base.group_portal').id,
+            'group_portal_id': request.env['res.groups']._base__group_portal.id,
             'locations': request.env['lunch.location'].search_read([], ['name']),
             'currency': {'symbol': currency.symbol, 'position': currency.position},
         })

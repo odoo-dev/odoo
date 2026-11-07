@@ -10,6 +10,9 @@ class PosConfig(models.Model):
     _pos_restaurant__floor_main = models.Ref('pos_restaurant.floor_main', 'restaurant.floor', required=False)
     _pos_restaurant__floor_patio = models.Ref('pos_restaurant.floor_patio', 'restaurant.floor', required=False)
     _pos_restaurant__pos_closed_session_3 = models.Ref('pos_restaurant.pos_closed_session_3', 'pos.session', required=False)
+    _base__group_user = models.Ref('base.group_user', 'res.groups')
+    _base__main_company = models.Ref('base.main_company', 'res.company')
+    _point_of_sale__group_pos_preset = models.Ref('point_of_sale.group_pos_preset', 'res.groups')
 
     floor_ids = fields.Many2many('restaurant.floor', string='Restaurant Floors', help='The restaurant floors served by this point of sale.', copy=False)
     default_screen = fields.Selection([('tables', 'Tables'), ('register', 'Register')], string='Default Screen', default='tables')
@@ -123,7 +126,7 @@ class PosConfig(models.Model):
         }])
         if bool(presets):
             # Ensure the "Presets" menu is visible when installing the restaurant scenario
-            self.env.ref("point_of_sale.group_pos_preset").implied_by_ids |= self.env.ref("base.group_user")
+            self._point_of_sale__group_pos_preset.implied_by_ids |= self._base__group_user
         if not self._pos_restaurant__floor_main:
             convert.convert_file(self._env_with_clean_context(), 'pos_restaurant', 'data/scenarios/restaurant_floor.xml', idref=None, mode='init', noupdate=True)
         config_floors = [(5, 0)]
@@ -134,7 +137,7 @@ class PosConfig(models.Model):
         config.update({'floor_ids': config_floors})
         config._load_restaurant_demo_data(with_demo_data)
         existing_session = self._pos_restaurant__pos_closed_session_3
-        if with_demo_data and self.env.company.id == self.env.ref('base.main_company').id and not existing_session:
+        if with_demo_data and self.env.company.id == self._base__main_company.id and not existing_session:
             convert.convert_file(self._env_with_clean_context(), 'pos_restaurant', 'data/scenarios/restaurant_demo_session.xml', idref=None, mode='init', noupdate=True)
         return {'config_id': config.id}
 

@@ -24,6 +24,8 @@ def ctx_tz(record, field):
 class ResCompany(models.Model):
     _inherit = 'res.company'
 
+    _l10n_fr_pos_cert__action_report_pos_hash_integrity = models.Ref('l10n_fr_pos_cert.action_report_pos_hash_integrity', 'ir.actions.report')
+
     l10n_fr_pos_cert_sequence_id = fields.Many2one('ir.sequence')
 
     @api.model_create_multi
@@ -46,7 +48,7 @@ class ResCompany(models.Model):
         return res
 
     def _action_check_pos_hash_integrity(self):
-        return self.env.ref('l10n_fr_pos_cert.action_report_pos_hash_integrity').report_action(self.id)
+        return self._l10n_fr_pos_cert__action_report_pos_hash_integrity.report_action(self.id)
 
     def _check_pos_hash_integrity(self):
         """Checks that all posted or invoiced pos orders have still the same data as when they were posted

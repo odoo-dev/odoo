@@ -12,6 +12,12 @@ class StockMove(models.Model):
     _inherit = 'stock.move'
 
     _mrp_subcontracting__route_resupply_subcontractor_mto = models.Ref('mrp_subcontracting.route_resupply_subcontractor_mto', 'stock.route', required=False)
+    _mrp_subcontracting__mrp_production_subcontracting_form_view = models.Ref('mrp_subcontracting.mrp_production_subcontracting_form_view', 'ir.ui.view')
+    _mrp_subcontracting__mrp_production_subcontracting_portal_form_view = models.Ref(
+        'mrp_subcontracting.mrp_production_subcontracting_portal_form_view', 'ir.ui.view')
+    _mrp_subcontracting__mrp_production_subcontracting_tree_view = models.Ref('mrp_subcontracting.mrp_production_subcontracting_tree_view', 'ir.ui.view')
+    _mrp_subcontracting__mrp_subcontracting_view_stock_move_operations = models.Ref(
+        'mrp_subcontracting.mrp_subcontracting_view_stock_move_operations', 'ir.ui.view')
 
     is_subcontract = fields.Boolean('The move is a subcontract receipt')
     show_subcontracting_details_visible = fields.Boolean(
@@ -86,7 +92,7 @@ class StockMove(models.Model):
         if self.is_subcontract:
             action = super(StockMove, self.with_context(force_lot_m2o=True)).action_show_details()
             if self.env.user._is_portal():
-                action['views'] = [(self.env.ref('mrp_subcontracting.mrp_subcontracting_view_stock_move_operations').id, 'form')]
+                action['views'] = [(self._mrp_subcontracting__mrp_subcontracting_view_stock_move_operations.id, 'form')]
             return action
         return super().action_show_details()
 
@@ -100,10 +106,10 @@ class StockMove(models.Model):
                 productions = productions.filtered(lambda p: not p.lot_producing_ids)
         ctx = {"mrp_subcontracting": True}
         if self.env.user._is_portal():
-            form_view_id = self.env.ref('mrp_subcontracting.mrp_production_subcontracting_portal_form_view')
+            form_view_id = self._mrp_subcontracting__mrp_production_subcontracting_portal_form_view
             ctx.update(no_breadcrumbs=False)
         else:
-            form_view_id = self.env.ref('mrp_subcontracting.mrp_production_subcontracting_form_view')
+            form_view_id = self._mrp_subcontracting__mrp_production_subcontracting_form_view
         action = {
             'type': 'ir.actions.act_window',
             'res_model': 'mrp.production',
@@ -114,7 +120,7 @@ class StockMove(models.Model):
             action.update({
                 'name': _('Subcontracting MOs'),
                 'views': [
-                    (self.env.ref('mrp_subcontracting.mrp_production_subcontracting_tree_view').id, 'list'),
+                    (self._mrp_subcontracting__mrp_production_subcontracting_tree_view.id, 'list'),
                     (form_view_id.id, 'form'),
                 ],
                 'domain': [('id', 'in', productions.ids)],

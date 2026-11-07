@@ -6,6 +6,8 @@ from odoo import fields, models
 class DigestDigest(models.Model):
     _inherit = "digest.digest"
 
+    _website__menu_website_configuration = models.Ref('website.menu_website_configuration', 'ir.ui.menu')
+
     kpi_website_sale_total = fields.Boolean(string="eCommerce Sales")
     kpi_website_sale_total_value = fields.Monetary(compute="_compute_kpi_website_sale_total_value")
 
@@ -24,7 +26,7 @@ class DigestDigest(models.Model):
 
     def _get_kpi_custom_settings(self, company, user):
         res = super()._get_kpi_custom_settings(company, user)
-        menu_id = self.env.ref("website.menu_website_configuration").id
+        menu_id = self._website__menu_website_configuration.id
         res["kpi_action"]["kpi_website_sale_total"] = f"website.backend_dashboard?menu_id={menu_id}"
         res["kpi_sequence"]["kpi_website_sale_total"] = 2505
         return res

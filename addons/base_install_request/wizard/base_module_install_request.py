@@ -11,6 +11,9 @@ class BaseModuleInstallRequest(models.TransientModel):
     _description = "Module Activation Request"
     _rec_name = "module_id"
 
+    _base__group_system = models.Ref('base.group_system', 'res.groups')
+    _base__menu_apps = models.Ref('base.menu_apps', 'ir.ui.menu')
+
     module_id = fields.Many2one(
         'ir.module.module', string="Module", required=True,
         domain=[('state', '=', "uninstalled")],
@@ -23,11 +26,11 @@ class BaseModuleInstallRequest(models.TransientModel):
 
     @api.depends('module_id')
     def _compute_user_ids(self):
-        users = self.env.ref('base.group_system').all_user_ids
+        users = self._base__group_system.all_user_ids
         self.user_ids = [(6, 0, users.ids)]
 
     def action_send_request(self):
-        menu_id = self.env.ref('base.menu_apps').id
+        menu_id = self._base__menu_apps.id
         for user in self.user_ids:
             mail_content_html = self.env['ir.qweb']._render(self.qweb_template_xmlid,
                 {

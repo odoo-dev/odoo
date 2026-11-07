@@ -20,6 +20,7 @@ class StockMoveLine(models.Model):
     _order = "result_package_id desc, id"
 
     _stock__mail_template_data_stock_picking_recall = models.Ref('stock.mail_template_data_stock_picking_recall', 'mail.template', required=False)
+    _stock__stock_package_destination_form_view = models.Ref('stock.stock_package_destination_form_view', 'ir.ui.view')
 
     picking_id = fields.Many2one(
         'stock.picking', 'Transfer', bypass_search_access=True,
@@ -1109,7 +1110,7 @@ class StockMoveLine(models.Model):
 
     def _check_destinations(self):
         if len(self.location_dest_id) > 1:
-            view_id = self.env.ref('stock.stock_package_destination_form_view').id
+            view_id = self._stock__stock_package_destination_form_view.id
             wiz = self.env['stock.package.destination'].create({
                 'move_line_ids': self.ids,
                 'location_dest_id': self[0].location_dest_id.id,

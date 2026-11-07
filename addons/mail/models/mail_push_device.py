@@ -25,6 +25,8 @@ class MailPushDevice(models.Model):
     _name = 'mail.push.device'
     _description = "Push Notification Device"
 
+    _mail__ir_cron_web_push_notification = models.Ref('mail.ir_cron_web_push_notification', 'ir.cron')
+
     partner_id = fields.Many2one(
         'res.partner', string='Partner', index=True, required=True,
         default=lambda self: self.env.user.partner_id)
@@ -161,7 +163,7 @@ class MailPushDevice(models.Model):
                 'mail_push_device_id': device.id,
                 'payload': json.dumps(payload_by_lang and payload_by_lang[device.partner_id.lang] or payload),
             } for device in self])
-            self.env.ref('mail.ir_cron_web_push_notification')._trigger()
+            self._mail__ir_cron_web_push_notification._trigger()
 
     def _web_push_truncate_payload(self, payload):
         r"""Check the payload limit of ~3990 bytes to avoid 413 error return code.

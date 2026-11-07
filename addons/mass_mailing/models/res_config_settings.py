@@ -7,6 +7,10 @@ from odoo import api, fields, models
 class ResConfigSettings(models.TransientModel):
     _inherit = 'res.config.settings'
 
+    _mass_mailing__ir_cron_mass_mailing_ab_testing = models.Ref('mass_mailing.ir_cron_mass_mailing_ab_testing', 'ir.cron')
+    _mass_mailing__mailing_contact_view_form_split_name = models.Ref('mass_mailing.mailing_contact_view_form_split_name', 'ir.ui.view')
+    _mass_mailing__mailing_contact_view_tree_split_name = models.Ref('mass_mailing.mailing_contact_view_tree_split_name', 'ir.ui.view')
+
     group_mass_mailing_campaign = fields.Boolean(
         string="Mailing Campaigns",
         implied_group='mass_mailing.group_mass_mailing_campaign',
@@ -46,11 +50,9 @@ class ResConfigSettings(models.TransientModel):
 
     def set_values(self):
         super().set_values()
-        ab_test_cron = self.env.ref('mass_mailing.ir_cron_mass_mailing_ab_testing').sudo()
-        if ab_test_cron and ab_test_cron.active != self.group_mass_mailing_campaign:
+        ab_test_cron = self._mass_mailing__ir_cron_mass_mailing_ab_testing.sudo()
+        if ab_test_cron.active != self.group_mass_mailing_campaign:
             ab_test_cron.active = self.group_mass_mailing_campaign
         if self.env['mailing.contact']._is_name_split_activated() != self.mass_mailing_split_contact_name:
-            self.env.ref(
-                "mass_mailing.mailing_contact_view_tree_split_name").active = self.mass_mailing_split_contact_name
-            self.env.ref(
-                "mass_mailing.mailing_contact_view_form_split_name").active = self.mass_mailing_split_contact_name
+            self._mass_mailing__mailing_contact_view_tree_split_name.active = self.mass_mailing_split_contact_name
+            self._mass_mailing__mailing_contact_view_form_split_name.active = self.mass_mailing_split_contact_name

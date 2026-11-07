@@ -12,6 +12,9 @@ class AccountMove(models.Model):
     _inherit = 'account.move'
 
     _l10n_ar__fa_exterior = models.Ref('l10n_ar.fa_exterior', 'l10n_latam.document.type', required=False)
+    _account__action_account_config = models.Ref('account.action_account_config', 'ir.actions.act_window')
+    _account__action_account_journal_form = models.Ref('account.action_account_journal_form', 'ir.actions.act_window')
+    _l10n_ar__res_IVA_LIB = models.Ref('l10n_ar.res_IVA_LIB', 'l10n_ar.afip.responsibility.type')
 
     @api.model
     def _l10n_ar_get_document_number_parts(self, document_number, document_type_code):
@@ -101,7 +104,7 @@ class AccountMove(models.Model):
 
         # WSFEX 1668 - If Expo invoice and we have a "IVA Liberado – Ley Nº 19.640" (Zona Franca) partner
         # then ARCA concept to use should be type "Others (4)"
-        is_zona_franca = self.partner_id.l10n_ar_afip_responsibility_type_id == self.env.ref("l10n_ar.res_IVA_LIB")
+        is_zona_franca = self.partner_id.l10n_ar_afip_responsibility_type_id == self._l10n_ar__res_IVA_LIB
         # Default value "product"
         afip_concept = '1'
         if expo_invoice and is_zona_franca:
@@ -202,8 +205,7 @@ class AccountMove(models.Model):
                 rec.journal_id = journal.id
             elif msg:
                 # Throw an error to user in order to proper configure the journal for the type of operation
-                action = self.env.ref('account.action_account_journal_form')
-                raise RedirectWarning(msg, action.id, _('Go to Journals'))
+                raise RedirectWarning(msg, self._account__action_account_journal_form.id, _('Go to Journals'))
 
     def _compute_l10n_latam_document_type(self):
         """We correct the default document type in vendor bills in case the partner is foreign (code 8)
@@ -316,7 +318,7 @@ class AccountMove(models.Model):
                     "Note: You might have to relink your existing taxes to this new tax group.",
                     'tax_group_percepcion_ganancias',
                 ),
-                action=self.env.ref('account.action_account_config').id,
+                action=self._account__action_account_config.id,
                 button_text=_("Accounting Settings"),
             )
 

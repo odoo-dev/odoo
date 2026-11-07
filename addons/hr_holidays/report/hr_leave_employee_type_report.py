@@ -10,6 +10,9 @@ class HrLeaveEmployeeTypeReport(models.Model):
     _auto = False
     _order = "date_from DESC, employee_id"
 
+    _hr_holidays__hr_leave_allocation_action_form = models.Ref('hr_holidays.hr_leave_allocation_action_form', 'ir.actions.act_window')
+    _hr_holidays__view_search_hr_holidays_employee_type_report = models.Ref('hr_holidays.view_search_hr_holidays_employee_type_report', 'ir.ui.view')
+
     employee_id = fields.Many2one('hr.employee', string="Employee", readonly=True)
     active_employee = fields.Boolean(readonly=True)
     number_of_days = fields.Float('Number of Days', readonly=True, aggregator="sum")
@@ -254,7 +257,7 @@ class HrLeaveEmployeeTypeReport(models.Model):
             'type': 'ir.actions.act_window',
             'res_model': 'hr.leave.employee.type.report',
             'view_mode': 'pivot',
-            'search_view_id': [self.env.ref('hr_holidays.view_search_hr_holidays_employee_type_report').id],
+            'search_view_id': [self._hr_holidays__view_search_hr_holidays_employee_type_report.id],
             'domain': domain,
             'help': _("""
                 <p class="o_view_nocontent_empty_folder">
@@ -263,7 +266,7 @@ class HrLeaveEmployeeTypeReport(models.Model):
                 <p>
                     Why don't you start by <a type="action" class="text-link" name="%d">Allocating Time off</a> ?
                 </p>
-            """, self.env.ref("hr_holidays.hr_leave_allocation_action_form").id),
+            """, self._hr_holidays__hr_leave_allocation_action_form.id),
             'context': {
                 'search_default_year': True,
                 'search_default_company': True,

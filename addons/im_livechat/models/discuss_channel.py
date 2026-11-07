@@ -38,6 +38,9 @@ class DiscussChannel(models.Model):
     _name = 'discuss.channel'
     _inherit = ['discuss.channel']
 
+    _base__partner_root = models.Ref('base.partner_root', 'res.partner')
+    _im_livechat__im_livechat_group_user = models.Ref('im_livechat.im_livechat_group_user', 'res.groups')
+
     channel_type = fields.Selection(selection_add=[("livechat", "Live Chat")], ondelete={"livechat": "cascade"})
     duration = fields.Float('Duration', compute='_compute_duration', help='Duration of the session in hours')
     livechat_lang_id = fields.Many2one("res.lang", string="Language", help="Lang of the visitor of the channel.")
@@ -256,8 +259,7 @@ class DiscussChannel(models.Model):
         need_help_before = self.filtered(lambda c: c.livechat_status == "need_help")
         result = super().write(vals)
         need_help_after = self.filtered(lambda c: c.livechat_status == "need_help")
-        group_livechat_user = self.env.ref("im_livechat.im_livechat_group_user")
-        store = Store(bus_channel=group_livechat_user, bus_subchannel="LOOKING_FOR_HELP")
+        store = Store(bus_channel=self._im_livechat__im_livechat_group_user, bus_subchannel="LOOKING_FOR_HELP")
         store.add(need_help_after - need_help_before, "_store_channel_fields")
         store.add(need_help_before - need_help_after, ["livechat_status"])
         if "livechat_expertise_ids" in vals:
@@ -624,7 +626,7 @@ class DiscussChannel(models.Model):
             # Notify that the visitor has left the conversation
             # sudo: mail.message - posting visitor leave message is allowed
             self.sudo().message_post(
-                author_id=self.env.ref("base.partner_root").id,
+                author_id=self._base__partner_root.id,
                 body=Markup('<div class="o_mail_notification o_hide_author">%s</div>') % message,
                 message_type="notification",
                 subtype_xmlid="mail.mt_comment",

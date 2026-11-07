@@ -183,7 +183,14 @@ class ResUsers(models.Model):
     _base__group_user_optional = models.Ref('base.group_user', 'res.groups', required=False)
     _base__public_user_optional = models.Ref('base.public_user', 'res.users', required=False)
     _base__template_portal_user_id = models.Ref('base.template_portal_user_id', 'res.users', required=False)
+    _base__public_user = models.Ref('base.public_user', 'res.users')
+    _base__user_admin = models.Ref('base.user_admin', 'res.users')
     _base__user_admin_optional = models.Ref('base.user_admin', 'res.users', required=False)
+    _base__action_res_users_my = models.Ref('base.action_res_users_my', 'ir.actions.act_window')
+    _base__group_system = models.Ref('base.group_system', 'res.groups')
+    _base__group_user = models.Ref('base.group_user', 'res.groups')
+    _base__group_user_regular = models.Ref('base.group_user_regular', 'res.groups')
+    _base__view_users_form = models.Ref('base.view_users_form', 'ir.ui.view')
 
     def _check_company_domain(self, companies):
         if not companies:
@@ -200,7 +207,7 @@ class ResUsers(models.Model):
 
         All the groups of the Default User Group
         """
-        groups = self.env.ref('base.group_user')
+        groups = self._base__group_user
         if self._base__default_user_group:
             groups += self._base__default_user_group.implied_ids
         return groups
@@ -452,9 +459,9 @@ class ResUsers(models.Model):
 
     @api.onchange('role')
     def _onchange_role(self):
-        group_admin = self.env['res.groups'].new(origin=self.env.ref('base.group_system'))
-        group_regular = self.env['res.groups'].new(origin=self.env.ref('base.group_user_regular'))
-        group_user = self.env['res.groups'].new(origin=self.env.ref('base.group_user'))
+        group_admin = self.env['res.groups'].new(origin=self._base__group_system)
+        group_regular = self.env['res.groups'].new(origin=self._base__group_user_regular)
+        group_user = self.env['res.groups'].new(origin=self._base__group_user)
 
         if self.role == 'regular_user':
             if group_regular not in self.all_group_ids:
@@ -477,9 +484,9 @@ class ResUsers(models.Model):
         light_group_ids = {group_definitions.get_id(xid) for xid in self.env['res.groups']._get_light_group_xmlids()}
         regular_group_ids = set(group_definitions.get_all_ids()) - light_group_ids
 
-        is_system = Domain('all_group_ids', 'in', [self.env.ref('base.group_system').id])
+        is_system = Domain('all_group_ids', 'in', [self._base__group_system.id])
         is_user_regular = Domain('all_group_ids', 'in', regular_group_ids)
-        is_user = Domain('all_group_ids', 'in', [self.env.ref('base.group_user').id])
+        is_user = Domain('all_group_ids', 'in', [self._base__group_user.id])
         domains_by_role = {
             'light_user': is_user & ~is_user_regular,
             'regular_user': is_user & is_user_regular & ~is_system,
@@ -651,7 +658,7 @@ class ResUsers(models.Model):
     def _check_at_least_one_administrator(self):
         if not self.env.registry._init_modules:
             return  # ignore the constraint when updating the module 'base'
-        if not self.env.ref('base.group_system').user_ids:
+        if not self._base__group_system.user_ids:
             raise ValidationError(_("You must have at least an administrator user."))
 
     @api.model
@@ -832,7 +839,7 @@ class ResUsers(models.Model):
 
     @api.model
     def action_get(self):
-        return self.sudo().env.ref('base.action_res_users_my').read()[0]
+        return self.sudo()._base__action_res_users_my.read()[0]
 
     @api.model
     def _get_invalidation_fields(self):
@@ -1245,7 +1252,7 @@ class ResUsers(models.Model):
             'context': {'create': False},
             'name': _('Users'),
             'view_mode': 'form',
-            'views': [[self.env.ref('base.view_users_form').id, 'form']],
+            'views': [[self._base__view_users_form.id, 'form']],
             'domain': [('id', 'in', self.ids)],
         }
 

@@ -28,6 +28,9 @@ class BlogBlog(models.Model):
 
     _CUSTOMER_HEADERS_LIMIT_COUNT = 0  # never use X-Msg-To headers
 
+    _mail__mt_note = models.Ref('mail.mt_note', 'mail.message.subtype')
+    _website_blog__mt_blog_blog_published = models.Ref('website_blog.mt_blog_blog_published', 'mail.message.subtype')
+
     def _default_sequence(self):
         return (self.search([], order="sequence desc", limit=1).sequence or 0) + 1
 
@@ -68,8 +71,8 @@ class BlogBlog(models.Model):
         self.ensure_one()
         if parent_id:
             parent_message = self.env['mail.message'].sudo().browse(parent_id)
-            if parent_message.subtype_id and parent_message.subtype_id == self.env.ref('website_blog.mt_blog_blog_published'):
-                subtype_id = self.env.ref('mail.mt_note').id
+            if parent_message.subtype_id and parent_message.subtype_id == self._website_blog__mt_blog_blog_published:
+                subtype_id = self._mail__mt_note.id
         return super().message_post(parent_id=parent_id, subtype_id=subtype_id, **kwargs)
 
     def all_tags(self, join=False, min_limit=1):

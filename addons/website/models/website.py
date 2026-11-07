@@ -120,6 +120,10 @@ class Website(models.CachedModel):
     _website__homepage = models.Ref('website.homepage', 'ir.ui.view', required=False)
     _website__main_menu = models.Ref('website.main_menu', 'website.menu', required=False)
     _website__menu_website_configuration_optional = models.Ref('website.menu_website_configuration', 'ir.ui.menu', required=False)
+    _base__public_user = models.Ref('base.public_user', 'res.users')
+    _website__configurator_tour = models.Ref('website.configurator_tour', 'ir.asset')
+    _website__group_multi_website = models.Ref('website.group_multi_website', 'res.groups')
+    _website__website_configurator_todo = models.Ref('website.website_configurator_todo', 'ir.actions.todo')
 
     def website_domain(self):
         return Domain('website_id', 'in', [False, *self.ids])
@@ -314,7 +318,7 @@ class Website(models.CachedModel):
                 vals['default_lang_id'] = self._default_language()
             if 'user_id' not in vals:
                 company = self.env['res.company'].browse(vals.get('company_id'))
-                vals['user_id'] = company._get_public_user().id if company else self.env.ref('base.public_user').id
+                vals['user_id'] = company._get_public_user().id if company else self._base__public_user.id
 
         websites = super().create(vals_list)
         websites._ensure_logo_media_attachment()
@@ -325,7 +329,7 @@ class Website(models.CachedModel):
         if not self.env.user.has_group('website.group_multi_website') and self.search_count([]) > 1:
             all_user_groups = 'base.group_portal,base.group_user,base.group_public'
             groups = self.env['res.groups'].concat(self.env.ref(it) for it in all_user_groups.split(','))
-            groups.write({'implied_ids': [(4, self.env.ref('website.group_multi_website').id)]})
+            groups.write({'implied_ids': [(4, self._website__group_multi_website.id)]})
 
         self._ensure_default_website_consistency()
 
@@ -556,8 +560,7 @@ class Website(models.CachedModel):
 
     def create_and_redirect_configurator(self):
         self._force()
-        configurator_action_todo = self.env.ref('website.website_configurator_todo')
-        return configurator_action_todo.action_launch()
+        return self._website__website_configurator_todo.action_launch()
 
     def _idna_url(self, url):
         return get_base_domain(url.lower(), True).encode('idna').decode('ascii')
@@ -766,7 +769,7 @@ class Website(models.CachedModel):
     def configurator_init(self):
         self._check_configurator_access()
         r = dict()
-        current_website = self.env.website or self.env.website.browse(self.env.context.get('host_id')) or self.env.ref('base.default_website')
+        current_website = self.env.website or self.env.website.browse(self.env.context.get('host_id')) or self._base__default_website
         company = current_website.company_id
         r['logo'] = False
         if not company.uses_default_logo:
@@ -930,7 +933,7 @@ class Website(models.CachedModel):
     @api.model
     def configurator_apply(self, **kwargs):
         self._check_configurator_access()
-        website = self.env.website or self.env.website.browse(self.env.context.get('host_id')) or self.env.ref('base.default_website')
+        website = self.env.website or self.env.website.browse(self.env.context.get('host_id')) or self._base__default_website
         self = self.with_context(website_id=website.id)  # noqa: PLW0642
         skip_ai = kwargs.get('skip_ai')  # Used by design-themes tooling
         theme_name = kwargs['theme_name']
@@ -968,7 +971,7 @@ class Website(models.CachedModel):
         website.brief = '\n'.join(brief_description)
 
         # Enable tour
-        tour_asset_id = self.env.ref('website.configurator_tour')
+        tour_asset_id = self._website__configurator_tour
         tour_asset_id.copy({'key': tour_asset_id.key, 'website_id': website.id, 'active': True})
 
         # Set logo from generated attachment or from company's logo

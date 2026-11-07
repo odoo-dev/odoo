@@ -9,6 +9,8 @@ class ProjectSaleLineEmployeeMap(models.Model):
     _name = 'project.sale.line.employee.map'
     _description = 'Project Sales line, employee mapping'
 
+    _uom__product_uom_day = models.Ref('uom.product_uom_day', 'uom.uom')
+
     def _domain_sale_line_id(self):
         domain = Domain.AND([
             self.env['sale.order.line']._sellable_lines_domain(),
@@ -103,7 +105,7 @@ class ProjectSaleLineEmployeeMap(models.Model):
     @api.depends_context('company')
     @api.depends('cost', 'employee_id.resource_calendar_id')
     def _compute_display_cost(self):
-        is_uom_day = self.env.ref('uom.product_uom_day') == self.env.company.timesheet_encode_uom_id
+        is_uom_day = self._uom__product_uom_day == self.env.company.timesheet_encode_uom_id
         resource_calendar_per_hours = self._get_working_hours_per_calendar(is_uom_day)
 
         for map_line in self:
@@ -113,7 +115,7 @@ class ProjectSaleLineEmployeeMap(models.Model):
                 map_line.display_cost = map_line.cost
 
     def _inverse_display_cost(self):
-        is_uom_day = self.env.ref('uom.product_uom_day') == self.env.company.timesheet_encode_uom_id
+        is_uom_day = self._uom__product_uom_day == self.env.company.timesheet_encode_uom_id
         resource_calendar_per_hours = self._get_working_hours_per_calendar(is_uom_day)
 
         for map_line in self:

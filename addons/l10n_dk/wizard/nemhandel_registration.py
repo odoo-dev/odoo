@@ -15,6 +15,8 @@ class NemhandelRegistration(models.TransientModel):
     _name = 'nemhandel.registration'
     _description = "Nemhandel Registration"
 
+    _base__action_res_company_form = models.Ref('base.action_res_company_form', 'ir.actions.act_window')
+
     company_id = fields.Many2one(
         comodel_name='res.company',
         required=True,
@@ -148,7 +150,7 @@ class NemhandelRegistration(models.TransientModel):
         if not self.env.company.vat:
             raise RedirectWarning(
                 _("Please fill in your company's VAT"),
-                self.env.ref('base.action_res_company_form').id,
+                self._base__action_res_company_form.id,
                 _('Company settings')
             )
 

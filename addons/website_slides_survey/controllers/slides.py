@@ -60,7 +60,7 @@ class WebsiteSlidesSurvey(WebsiteSlides):
                 'scoring_type': 'scoring_without_answers',
                 'certification': True,
                 'scoring_success_min': 70.0,
-                'certification_mail_template_id': request.env.ref('survey.mail_template_certification').id,
+                'certification_mail_template_id': request.env['mail.template']._survey__mail_template_certification.id,
             }).id
         elif linked_survey_id:
             try:

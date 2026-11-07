@@ -50,6 +50,8 @@ class ProductTemplate(models.Model):
     _add_seo_rels = True
 
     _website_sale__product_donation = models.Ref('website_sale.product_donation', 'product.template', required=False)
+    _website_sale__dynamic_filter_cross_selling_alternative_products = models.Ref(
+        'website_sale.dynamic_filter_cross_selling_alternative_products', 'website.snippet.filter')
 
     # === DEFAULT METHODS ===#
 
@@ -1392,7 +1394,7 @@ class ProductTemplate(models.Model):
 
     @api.model
     def _get_alternative_product_filter(self):
-        return self.env.ref("website_sale.dynamic_filter_cross_selling_alternative_products").id
+        return self._website_sale__dynamic_filter_cross_selling_alternative_products.id
 
     @api.model
     def _get_product_types_allow_zero_price(self):  # noqa: PLR6301

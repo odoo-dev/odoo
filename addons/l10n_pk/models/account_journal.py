@@ -5,6 +5,7 @@ class AccountJournal(models.Model):
     _inherit = 'account.journal'
 
     _l10n_pk__action_l10n_pk_edi_activate = models.Ref('l10n_pk.action_l10n_pk_edi_activate', 'ir.actions.server', required=False)
+    _account__action_account_config = models.Ref('account.action_account_config', 'ir.actions.act_window')
 
     def _get_onboarding_action_data(self):
         # EXTENDS 'account'
@@ -23,5 +24,5 @@ class AccountJournal(models.Model):
             }
         return {
             'title': self.env._("E-Invoicing Settings"),
-            'action': self.env.ref('account.action_account_config')._get_action_dict(),
+            'action': self._account__action_account_config._get_action_dict(),
         }

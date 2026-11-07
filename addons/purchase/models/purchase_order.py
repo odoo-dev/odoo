@@ -30,6 +30,12 @@ class PurchaseOrder(models.Model):
 
     _account__view_move_form_optional = models.Ref('account.view_move_form', 'ir.ui.view', required=False)
     _purchase__email_template_edi_purchase_reminder = models.Ref('purchase.email_template_edi_purchase_reminder', 'mail.template', required=False)
+    _purchase__mt_rfq_approved = models.Ref('purchase.mt_rfq_approved', 'mail.message.subtype')
+    _purchase__mt_rfq_confirmed = models.Ref('purchase.mt_rfq_confirmed', 'mail.message.subtype')
+    _purchase__mt_rfq_sent = models.Ref('purchase.mt_rfq_sent', 'mail.message.subtype')
+    _purchase__product_view_kanban_catalog_purchase_only = models.Ref('purchase.product_view_kanban_catalog_purchase_only', 'ir.ui.view')
+    _purchase__product_view_search_catalog = models.Ref('purchase.product_view_search_catalog', 'ir.ui.view')
+    _purchase__purchase_bill_line_match_tree = models.Ref('purchase.purchase_bill_line_match_tree', 'ir.ui.view')
 
     @api.depends('order_line.price_subtotal', 'company_id', 'currency_id')
     def _amount_all(self):
@@ -605,12 +611,12 @@ class PurchaseOrder(models.Model):
         self.ensure_one()
         if 'state' in track_init_values and self.state == 'purchase':
             if track_init_values['state'] == 'to approve':
-                return self.env.ref('purchase.mt_rfq_approved')
-            return self.env.ref('purchase.mt_rfq_confirmed')
+                return self._purchase__mt_rfq_approved
+            return self._purchase__mt_rfq_confirmed
         elif 'state' in track_init_values and self.state == 'to approve':
-            return self.env.ref('purchase.mt_rfq_confirmed')
+            return self._purchase__mt_rfq_confirmed
         elif 'state' in track_init_values and self.state == 'sent':
-            return self.env.ref('purchase.mt_rfq_sent')
+            return self._purchase__mt_rfq_sent
         return super()._track_log_get_default_subtype(track_init_values)
 
     # ------------------------------------------------------------
@@ -781,7 +787,7 @@ class PurchaseOrder(models.Model):
                 ('matching_id', '=', 0),
                 ('aml_id.purchase_order_id', '=', self.id),
             ],
-            'views': [(self.env.ref('purchase.purchase_bill_line_match_tree').id, 'list')],
+            'views': [(self._purchase__purchase_bill_line_match_tree.id, 'list')],
         }
 
     def _prepare_down_payment_section_values(self):
@@ -1205,9 +1211,9 @@ class PurchaseOrder(models.Model):
 
     def action_add_from_catalog(self):
         res = super().action_add_from_catalog()
-        kanban_view_id = self.env.ref('purchase.product_view_kanban_catalog_purchase_only').id
+        kanban_view_id = self._purchase__product_view_kanban_catalog_purchase_only.id
         res['views'][0] = (kanban_view_id, 'kanban')
-        res['search_view_id'] = [self.env.ref('purchase.product_view_search_catalog').id, 'search']
+        res['search_view_id'] = [self._purchase__product_view_search_catalog.id, 'search']
         return res
 
     def _get_action_add_from_catalog_extra_context(self):

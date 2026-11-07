@@ -9,6 +9,8 @@ class L10n_ArAfipResponsibilityType(models.Model):
     _description = 'ARCA Responsibility Type'
     _order = 'sequence'
 
+    _l10n_ar__res_CF = models.Ref('l10n_ar.res_CF', 'l10n_ar.afip.responsibility.type')
+
     name = fields.Char(required=True, index='trigram')
     sequence = fields.Integer()
     code = fields.Char(required=True, index=True)

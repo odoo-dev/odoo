@@ -8,6 +8,8 @@ class ProjectTaskTypeDeleteWizard(models.TransientModel):
     _name = 'project.task.type.delete.wizard'
     _description = 'Project Task Stage Delete Wizard'
 
+    _project__view_project_task_type_delete_confirmation_wizard = models.Ref('project.view_project_task_type_delete_confirmation_wizard', 'ir.ui.view')
+
     project_ids = fields.Many2many('project.project', domain="['|', ('active', '=', False), ('active', '=', True)]", string='Projects', ondelete='cascade', export_string_translation=False)
     stage_ids = fields.Many2many('project.task.type', string='Stages To Delete', ondelete='cascade', export_string_translation=False)
     tasks_count = fields.Integer('Number of Tasks', compute='_compute_tasks_count', export_string_translation=False)
@@ -31,7 +33,7 @@ class ProjectTaskTypeDeleteWizard(models.TransientModel):
             'name': _('Confirmation'),
             'view_mode': 'form',
             'res_model': 'project.task.type.delete.wizard',
-            'views': [(self.env.ref('project.view_project_task_type_delete_confirmation_wizard').id, 'form')],
+            'views': [(self._project__view_project_task_type_delete_confirmation_wizard.id, 'form')],
             'type': 'ir.actions.act_window',
             'res_id': self.id,
             'target': 'new',

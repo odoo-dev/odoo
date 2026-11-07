@@ -46,6 +46,10 @@ class SlideChannel(models.Model):
     _website_slides__mail_template_slide_channel_invite = models.Ref('website_slides.mail_template_slide_channel_invite', 'mail.template', required=False)
     _website_slides__slide_template_published = models.Ref('website_slides.slide_template_published', 'mail.template', required=False)
     _website_slides__slide_template_shared = models.Ref('website_slides.slide_template_shared', 'mail.template', required=False)
+    _mail__mt_comment = models.Ref('mail.mt_comment', 'mail.message.subtype')
+    _mail__mt_note = models.Ref('mail.mt_note', 'mail.message.subtype')
+    _website_slides__mt_channel_slide_published = models.Ref('website_slides.mt_channel_slide_published', 'mail.message.subtype')
+    _website_slides__website_slides_menu_root = models.Ref('website_slides.website_slides_menu_root', 'ir.ui.menu')
 
     def _default_cover_properties(self):
         """ Cover properties defaults are overridden to keep a consistent look for the slides
@@ -612,17 +616,17 @@ class SlideChannel(models.Model):
             raise AccessError(_('Not enough karma to review'))
         if parent_id:
             parent_message = self.env['mail.message'].sudo().browse(parent_id)
-            if parent_message.subtype_id and parent_message.subtype_id == self.env.ref('website_slides.mt_channel_slide_published'):
-                subtype_id = self.env.ref('mail.mt_note').id
+            if parent_message.subtype_id and parent_message.subtype_id == self._website_slides__mt_channel_slide_published:
+                subtype_id = self._mail__mt_note.id
         message = super().message_post(parent_id=parent_id, subtype_id=subtype_id, **kwargs)
         if self.env.user._is_internal() and not message.rating_value:
             return message
-        if message.subtype_id == self.env.ref("mail.mt_comment"):
+        if message.subtype_id == self._mail__mt_comment:
             domain = [
                 ("res_id", "=", self.id),
                 ("author_id", "=", message.author_id.id),
                 ("model", "=", "slide.channel"),
-                ("subtype_id", "=", self.env.ref("mail.mt_comment").id),
+                ("subtype_id", "=", self._mail__mt_comment.id),
                 ("rating_ids", "!=", False),
             ]
             if self.env["mail.message"].search_count(domain, limit=2) > 1:
@@ -786,7 +790,7 @@ class SlideChannel(models.Model):
             for channel, partner_ids in result_channel_partners_map.items():
                 channel.message_subscribe(
                     partner_ids=partner_ids,
-                    subtype_ids=[self.env.ref('website_slides.mt_channel_slide_published').id]
+                    subtype_ids=[self._website_slides__mt_channel_slide_published.id]
                 )
         return result_channel_partners
 
@@ -1059,7 +1063,7 @@ class SlideChannel(models.Model):
             })
 
     def get_backend_menu_id(self):
-        return self.env.ref('website_slides.website_slides_menu_root').id
+        return self._website_slides__website_slides_menu_root.id
 
     @api.model
     def _search_get_detail(self, website, order, options):

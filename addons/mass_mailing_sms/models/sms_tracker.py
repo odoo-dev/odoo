@@ -6,6 +6,8 @@ from odoo import fields, models
 class SmsTracker(models.Model):
     _inherit = "sms.tracker"
 
+    _base__partner_root = models.Ref('base.partner_root', 'res.partner')
+
     @property
     def SMS_STATE_TO_TRACE_STATUS(self):
         return {
@@ -77,7 +79,7 @@ class SmsTracker(models.Model):
 
         if mailings_to_mark_done:
             if self.env.user.is_public:  # From webhook event
-                mailings_to_mark_done._track_set_log_author(self.env.ref('base.partner_root'))
+                mailings_to_mark_done._track_set_log_author(self._base__partner_root)
             for mailing in mailings_to_mark_done:
                 mailing.write({
                     'state': 'done',

@@ -510,7 +510,7 @@ class Website(Home):
             return request.redirect('/')
         if request.env.lang != self.env.website.default_lang_id.code:
             return request.redirect('/%s%s' % (self.env.website.default_lang_id.url_code, request.httprequest.path))
-        action_url = f"/odoo/action-website.website_configurator?menu_id={request.env.ref('website.menu_website_configuration').id}"
+        action_url = f"/odoo/action-website.website_configurator?menu_id={request.env['ir.ui.menu']._website__menu_website_configuration.id}"
         if step > 1:
             action_url += '&step=' + str(step)
         return request.redirect(action_url)

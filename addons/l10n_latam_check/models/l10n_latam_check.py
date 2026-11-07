@@ -17,6 +17,9 @@ class L10n_LatamCheck(models.Model):
     _check_company_auto = True
     _inherit = ['mail.thread', 'mail.activity.mixin']
 
+    _l10n_latam_check__view_account_third_party_check_operations_tree = models.Ref(
+        'l10n_latam_check.view_account_third_party_check_operations_tree', 'ir.ui.view')
+
     payment_id = fields.Many2one(
         'account.payment',
         required=True,
@@ -222,7 +225,7 @@ class L10n_LatamCheck(models.Model):
             'type': 'ir.actions.act_window',
             'res_model': 'account.payment',
             'views': [
-                (self.env.ref('l10n_latam_check.view_account_third_party_check_operations_tree').id, 'list'),
+                (self._l10n_latam_check__view_account_third_party_check_operations_tree.id, 'list'),
                 (False, 'form')
             ],
             'context': {'create': False},

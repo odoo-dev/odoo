@@ -50,6 +50,9 @@ class AccountEdiXmlUBLMyInvoisMY(models.AbstractModel):
     _description = "Malaysian implementation of ubl for the MyInvois portal"
 
     _l10n_my_edi__class_00000 = models.Ref('l10n_my_edi.class_00000', 'l10n_my_edi.industry_classification', required=False)
+    _base__MYR = models.Ref('base.MYR', 'res.currency')
+    _base__my = models.Ref('base.my', 'res.country')
+    _base__state_my_jhr = models.Ref('base.state_my_jhr', 'res.country.state')
 
     # -----------------------
     # EXPORT
@@ -106,8 +109,8 @@ class AccountEdiXmlUBLMyInvoisMY(models.AbstractModel):
                 customer = self.env['res.partner'].new({
                     'name': 'General Public',
                     'vat': 'EI00000000010',
-                    'country_id': self.env.ref('base.my'),
-                    'state_id': self.env.ref('base.state_my_jhr'),
+                    'country_id': self._base__my,
+                    'state_id': self._base__state_my_jhr,
                     'phone': 'NA',
                     'street': 'NA',
                     'city': 'NA',
@@ -439,7 +442,7 @@ class AccountEdiXmlUBLMyInvoisMY(models.AbstractModel):
                 total_amount_in_company_currency += base_line['tax_details']['raw_total_included']
                 total_amount_in_currency += base_line['tax_details']['raw_total_included_currency']
             # We recalculate the rate so that it works in any cases, even when using consolidated invoices.
-            rate = self.env.ref('base.MYR').round(abs(total_amount_in_company_currency) / (total_amount_in_currency or 1))
+            rate = self._base__MYR.round(abs(total_amount_in_company_currency) / (total_amount_in_currency or 1))
             # Exchange rate information must be provided if applicable
             document_node['cac:TaxExchangeRate'] = {
                 'cbc:SourceCurrencyCode': {'_text': vals['currency_id'].name},

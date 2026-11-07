@@ -16,6 +16,8 @@ _logger = logging.getLogger(__name__)
 class SaleOrder(models.Model):
     _inherit = "sale.order"
 
+    _base__partner_root = models.Ref('base.partner_root', 'res.partner')
+
     # === COMPUTE METHODS === #
 
     @api.depends("order_line.product_id")
@@ -146,7 +148,7 @@ class SaleOrder(models.Model):
         _logger.info("Notification received from Gelato with data:\n%s", pprint.pformat(data))
         self.message_post(
             body=self.env._("The order has been successfully passed on Gelato."),
-            author_id=self.env.ref("base.partner_root").id,
+            author_id=self._base__partner_root.id,
         )
 
     def _gelato_prepare_items_payload(self):
@@ -204,7 +206,7 @@ class SaleOrder(models.Model):
                     order_reference=gelato_order_id,
                     error_message=Markup("<br/>%s") % e,
                 ),
-                author_id=self.env.ref("base.partner_root").id,
+                author_id=self._base__partner_root.id,
             )
         finally:
             _logger.info(
@@ -238,7 +240,7 @@ class SaleOrder(models.Model):
                     order_reference=gelato_order_id,
                     error_message=Markup("<br/>%s") % e,
                 ),
-                author_id=self.env.ref("base.partner_root").id,
+                author_id=self._base__partner_root.id,
             )
         finally:
             _logger.info(

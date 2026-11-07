@@ -8,6 +8,8 @@ class MrpConsumptionWarning(models.TransientModel):
     _name = 'mrp.consumption.warning'
     _description = "Wizard for warning about mismatching expected vs actual component consumption quantities for MOs"
 
+    _mrp__mrp_production_form_view = models.Ref('mrp.mrp_production_form_view', 'ir.ui.view')
+
     mrp_production_ids = fields.Many2many('mrp.production')
     mrp_production_count = fields.Integer(compute="_compute_mrp_production_count")
 
@@ -47,7 +49,7 @@ class MrpConsumptionWarning(models.TransientModel):
             return {
                 'type': 'ir.actions.act_window',
                 'res_model': 'mrp.production',
-                'views': [[self.env.ref('mrp.mrp_production_form_view').id, 'form']],
+                'views': [[self._mrp__mrp_production_form_view.id, 'form']],
                 'res_id': self.mrp_production_ids.id,
                 'target': 'main',
             }

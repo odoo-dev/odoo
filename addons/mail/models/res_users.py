@@ -24,6 +24,15 @@ class ResUsers(models.Model):
     _mail_post_access = 'read'
 
     _mail__group_mail_notification_type_inbox_optional = models.Ref('mail.group_mail_notification_type_inbox', 'res.groups', required=False)
+    _base__group_user = models.Ref('base.group_user', 'res.groups')
+    _base__partner_root = models.Ref('base.partner_root', 'res.partner')
+    _base__user_root = models.Ref('base.user_root', 'res.users')
+    _mail__group_mail_notification_type_inbox = models.Ref('mail.group_mail_notification_type_inbox', 'res.groups')
+    _mail__action_discuss_optional = models.Ref('mail.action_discuss', 'ir.actions.client', required=False)
+    _mail__mail_activity_data_email = models.Ref('mail.mail_activity_data_email', 'mail.activity.type', required=False)
+    _mail__mt_comment_optional = models.Ref('mail.mt_comment', 'mail.message.subtype', required=False)
+    _mail__mt_important_notification = models.Ref('mail.mt_important_notification', 'mail.message.subtype', required=False)
+    _mail__mt_note_optional = models.Ref('mail.mt_note', 'mail.message.subtype', required=False)
 
     name = fields.Char(tracking=1)
     email = fields.Char(tracking=2)
@@ -145,7 +154,7 @@ class ResUsers(models.Model):
             user.offline_since = user.presence_ids.last_poll if user.im_status == "offline" else None
 
     def _inverse_notification_type(self):
-        inbox_group = self.env.ref('mail.group_mail_notification_type_inbox')
+        inbox_group = self._mail__group_mail_notification_type_inbox
         inbox_users = self.filtered(lambda user: user.notification_type == 'inbox')
 
         # only write on users whose groups change, to avoid useless cache invalidations
@@ -350,7 +359,7 @@ class ResUsers(models.Model):
                 'email_from': (
                     user.company_id.partner_id.email_formatted or
                     self.env.user.email_formatted or
-                    self.env.ref('base.user_root').email_formatted
+                    self._base__user_root.email_formatted
                 ),
                 'email_to': kwargs.get('force_email') or user.email_formatted,
                 'subject': subject,
@@ -450,18 +459,17 @@ class ResUsers(models.Model):
         return limited_field_access_token(self, "im_status", scope="mail.presence")
 
     def _store_init_global_fields(self, res: Store.FieldList):
-        xmlid_to_res_id = self.env["ir.model.data"]._xmlid_to_res_id
         # sudo: res.partner - exposing OdooBot data is considered acceptable
-        odoobot = self.env.ref("base.partner_root").sudo()
+        odoobot = self._base__partner_root.sudo()
         if not self._is_public():
             odoobot = odoobot.with_prefetch((odoobot + self.partner_id).ids)
-        res.attr("action_discuss_id", xmlid_to_res_id("mail.action_discuss"))
-        res.attr("emailActivityTypeId", xmlid_to_res_id("mail.mail_activity_data_email"))
+        res.attr("action_discuss_id", self._mail__action_discuss_optional.id)
+        res.attr("emailActivityTypeId", self._mail__mail_activity_data_email.id)
         res.attr("hasLinkPreviewFeature", self.env["mail.link.preview"]._is_link_preview_enabled())
-        res.attr("internalUserGroupId", self.env.ref("base.group_user").id)
-        res.attr("mt_comment", xmlid_to_res_id("mail.mt_comment"))
-        res.attr("mt_important_notification", xmlid_to_res_id("mail.mt_important_notification"))
-        res.attr("mt_note", xmlid_to_res_id("mail.mt_note"))
+        res.attr("internalUserGroupId", self._base__group_user.id)
+        res.attr("mt_comment", self._mail__mt_comment_optional.id)
+        res.attr("mt_important_notification", self._mail__mt_important_notification.id)
+        res.attr("mt_note", self._mail__mt_note_optional.id)
         res.one("odoobot", "_store_partner_fields", value=odoobot)
         if not self._is_public():
             res.one("self_user", "_store_init_fields", value=self)

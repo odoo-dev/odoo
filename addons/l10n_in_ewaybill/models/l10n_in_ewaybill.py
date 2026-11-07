@@ -22,6 +22,8 @@ class L10nInEwaybill(models.Model):
     _inherit = ['portal.mixin', 'mail.thread', 'mail.activity.mixin']
     _check_company_auto = True
 
+    _base__partner_root = models.Ref('base.partner_root', 'res.partner')
+
     # Ewaybill details generated from the API
     name = fields.Char("e-Waybill Number", copy=False, readonly=True, tracking=True)
     ewaybill_date = fields.Date("e-Waybill Date", copy=False, readonly=True, tracking=True)
@@ -494,7 +496,7 @@ class L10nInEwaybill(models.Model):
             for warning in warnings:
                 if warning.get('message_post'):
                     self.message_post(
-                        author_id=self.env.ref('base.partner_root').id,
+                        author_id=self._base__partner_root.id,
                         body=warning.get('message')
                     )
                 else:
@@ -533,7 +535,7 @@ class L10nInEwaybill(models.Model):
         attachment_vals_list.append(_create_attachment_vals(name, response, res_field='attachment_file'))
         attachments = self.env['ir.attachment'].create(attachment_vals_list)
         self.message_post(
-            author_id=self.env.ref('base.partner_root').id,
+            author_id=self._base__partner_root.id,
             attachment_ids=attachments.ids,
             body=self.env._("E-waybill has been successfully %s.", 'cancelled' if is_cancel else 'sent')
         )

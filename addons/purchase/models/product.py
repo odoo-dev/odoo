@@ -10,6 +10,8 @@ from dateutil.relativedelta import relativedelta
 class ProductTemplate(models.Model):
     _inherit = 'product.template'
 
+    _purchase__menu_purchase_root = models.Ref('purchase.menu_purchase_root', 'ir.ui.menu')
+
     purchased_product_qty = fields.Float(compute='_compute_purchased_product_qty', string='Purchased', digits='Product Unit')
     purchase_method = fields.Selection([
         ('purchase', 'On ordered quantities'),
@@ -33,7 +35,7 @@ class ProductTemplate(models.Model):
             template.purchased_product_qty = template.uom_id.round(sum(p.purchased_product_qty for p in template.product_variant_ids))
 
     def _get_backend_root_menu_ids(self):
-        return super()._get_backend_root_menu_ids() + [self.env.ref('purchase.menu_purchase_root').id]
+        return super()._get_backend_root_menu_ids() + [self._purchase__menu_purchase_root.id]
 
     @api.model
     def get_import_templates(self):
@@ -72,6 +74,8 @@ class ProductTemplate(models.Model):
 
 class ProductProduct(models.Model):
     _inherit = 'product.product'
+
+    _purchase__menu_purchase_root = models.Ref('purchase.menu_purchase_root', 'ir.ui.menu')
 
     purchased_product_qty = fields.Float(compute='_compute_purchased_product_qty', string='Purchased',
         digits='Product Unit')
@@ -164,7 +168,7 @@ class ProductProduct(models.Model):
         return action
 
     def _get_backend_root_menu_ids(self):
-        return super()._get_backend_root_menu_ids() + [self.env.ref('purchase.menu_purchase_root').id]
+        return super()._get_backend_root_menu_ids() + [self._purchase__menu_purchase_root.id]
 
     def _update_uom(self, to_uom_id):
         for uom, product, po_lines in self.env['purchase.order.line']._read_group(

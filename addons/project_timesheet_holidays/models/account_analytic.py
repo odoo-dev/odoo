@@ -8,6 +8,9 @@ from odoo.fields import Domain
 class AccountAnalyticLine(models.Model):
     _inherit = 'account.analytic.line'
 
+    _hr_holidays__hr_leave_view_form = models.Ref('hr_holidays.hr_leave_view_form', 'ir.ui.view')
+    _hr_holidays__hr_leave_view_tree_my = models.Ref('hr_holidays.hr_leave_view_tree_my', 'ir.ui.view')
+
     holiday_id = fields.Many2one("hr.leave", string='Time Off Request', copy=False, index='btree_not_null', export_string_translation=False)
     global_leave_id = fields.Many2one("resource.calendar.leaves", string="Global Time Off", index='btree_not_null', ondelete='cascade', export_string_translation=False)
     task_id = fields.Many2one(domain="[('allow_timesheets', '=', True), ('project_id', '=?', project_id), ('has_template_ancestor', '=', False), ('is_timeoff_task', '=', False)]")
@@ -19,12 +22,12 @@ class AccountAnalyticLine(models.Model):
         return super()._is_readonly() or self.holiday_id or self.global_leave_id
 
     def _get_redirect_action(self):
-        leave_form_view_id = self.env.ref('hr_holidays.hr_leave_view_form').id
+        leave_form_view_id = self._hr_holidays__hr_leave_view_form.id
         action_data = {
            'name': _('Time Off'),
            'type': 'ir.actions.act_window',
            'res_model': 'hr.leave',
-           'views': [(self.env.ref('hr_holidays.hr_leave_view_tree_my').id, 'list'), (leave_form_view_id, 'form')],
+           'views': [(self._hr_holidays__hr_leave_view_tree_my.id, 'list'), (leave_form_view_id, 'form')],
            'domain': [('id', 'in', self.holiday_id.ids)],
         }
         if len(self.holiday_id) == 1:

@@ -66,13 +66,13 @@ class GamificationChallenge(models.Model):
     _CUSTOMER_HEADERS_LIMIT_COUNT = 0  # never use X-Msg-To headers
 
     _gamification__simple_report_template = models.Ref('gamification.simple_report_template', 'mail.template', required=False)
+    _base__group_user = models.Ref('base.group_user', 'res.groups')
 
     @api.model
     def default_get(self, fields):
         res = super().default_get(fields)
         if 'user_domain' in fields and 'user_domain' not in res:
-            user_group_id = self.env.ref('base.group_user')
-            res['user_domain'] = f'["&", ("all_group_ids", "in", [{user_group_id.id}]), ("active", "=", True)]'
+            res['user_domain'] = f'["&", ("all_group_ids", "in", [{self._base__group_user.id}]), ("active", "=", True)]'
         return res
 
     # description

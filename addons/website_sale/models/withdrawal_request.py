@@ -13,6 +13,10 @@ class WithdrawalRequest(models.Model):
     _description = "Withdrawal Request"
     _rec_name = "order_reference"
 
+    _website_sale__mail_template_sale_withdrawal_request_confirmation = models.Ref(
+        'website_sale.mail_template_sale_withdrawal_request_confirmation', 'mail.template')
+    _website_sale__mail_template_withdrawal_request_notification = models.Ref('website_sale.mail_template_withdrawal_request_notification', 'mail.template')
+
     email = fields.Char(string="Your Email", required=True)
     order_reference = fields.Char(related="order_id.name", store=True, readonly=False)
     order_id = fields.Many2one(comodel_name="sale.order", string="Order", required=True, index=True)
@@ -96,9 +100,8 @@ class WithdrawalRequest(models.Model):
         """
         self.ensure_one()
         order = self.order_id
-        template = self.env.ref("website_sale.mail_template_sale_withdrawal_request_confirmation")
         # detach the email from the record, so that it is not logged in the chatter
-        template.send_mail(
+        self._website_sale__mail_template_sale_withdrawal_request_confirmation.send_mail(
             order.id,
             force_send=True,
             email_values={
@@ -107,18 +110,17 @@ class WithdrawalRequest(models.Model):
                 "email_to": order.partner_id.email_formatted,
             },
         )
-        rendered = template._generate_template(order.ids, ["subject", "body_html"])[order.id]
+        rendered = self._website_sale__mail_template_sale_withdrawal_request_confirmation._generate_template(order.ids, ["subject", "body_html"])[order.id]
         return {"subject": rendered["subject"], "body": rendered["body_html"]}
 
     def _notify_withdrawal_request(self):
         """Notify the internal team that a withdrawal request was submitted."""
         self.ensure_one()
         if recipient_emails := self.recipient_emails:
-            template = self.env.ref("website_sale.mail_template_withdrawal_request_notification")
             order_access_link = self.order_id._notify_get_action_link(
                 "view", model="sale.order", res_id=self.order_id.id
             )
-            template.with_context(order_access_link=order_access_link).send_mail(
+            self._website_sale__mail_template_withdrawal_request_notification.with_context(order_access_link=order_access_link).send_mail(
                 self.id,
                 force_send=True,
                 email_values={

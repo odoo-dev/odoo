@@ -17,6 +17,8 @@ class HrJob(models.Model):
         'website.structured_data.mixin',
     ]
 
+    _hr_recruitment__menu_hr_recruitment_root = models.Ref('hr_recruitment.menu_hr_recruitment_root', 'ir.ui.menu')
+
     @mute_logger('odoo.addons.base.models.ir_qweb')
     def _get_default_website_description(self):
         return self.env['ir.qweb']._render("website_hr_recruitment.default_website_description", raise_if_not_found=False)
@@ -91,7 +93,7 @@ spirit. To be successful, you will have solid solving problem skills.''')
             job.website_url = f'/jobs/{self.env["ir.http"]._slug(job)}'
 
     def get_backend_menu_id(self):
-        return self.env.ref('hr_recruitment.menu_hr_recruitment_root').id
+        return self._hr_recruitment__menu_hr_recruitment_root.id
 
     def action_archive(self):
         self.filtered('active').write({'website_published': False, 'publish_on': False})

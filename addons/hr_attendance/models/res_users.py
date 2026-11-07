@@ -7,6 +7,8 @@ from odoo import models
 class ResUsers(models.Model):
     _inherit = 'res.users'
 
+    _hr_attendance__group_hr_attendance_officer = models.Ref('hr_attendance.group_hr_attendance_officer', 'res.groups')
+
     def _clean_attendance_officers(self):
         """Remove the users of ``self`` that approve no employee's attendances from the
         attendance officer group."""
@@ -14,5 +16,5 @@ class ResUsers(models.Model):
             [('attendance_manager_id', 'in', self.ids)]).attendance_manager_id
         officers_to_remove_ids = self - attendance_officers
         if officers_to_remove_ids:
-            self.env.ref('hr_attendance.group_hr_attendance_officer').user_ids = [(3, user.id) for user in
+            self._hr_attendance__group_hr_attendance_officer.user_ids = [(3, user.id) for user in
                                                                                officers_to_remove_ids]

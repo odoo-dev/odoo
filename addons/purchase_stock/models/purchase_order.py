@@ -14,6 +14,7 @@ class PurchaseOrder(models.Model):
     _inherit = 'purchase.order'
 
     _stock__view_picking_form_optional = models.Ref('stock.view_picking_form', 'ir.ui.view', required=False)
+    _purchase_stock__product_view_kanban_catalog_purchase_only = models.Ref('purchase_stock.product_view_kanban_catalog_purchase_only', 'ir.ui.view')
 
     @api.model
     def _default_picking_type(self):
@@ -139,7 +140,7 @@ class PurchaseOrder(models.Model):
     def action_add_from_catalog(self):
         # Replaces the product's kanban view by the purchase specific one.
         action = super().action_add_from_catalog()
-        kanban_view_id = self.env.ref('purchase_stock.product_view_kanban_catalog_purchase_only').id
+        kanban_view_id = self._purchase_stock__product_view_kanban_catalog_purchase_only.id
         action['views'] = [(kanban_view_id, view_type) if view_type == 'kanban' else (view_id, view_type) for (view_id, view_type) in action['views']]
         return action
 

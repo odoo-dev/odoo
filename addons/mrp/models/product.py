@@ -22,6 +22,8 @@ PY_OPERATORS = {
 class ProductTemplate(models.Model):
     _inherit = "product.template"
 
+    _mrp__menu_mrp_root = models.Ref('mrp.menu_mrp_root', 'ir.ui.menu')
+
     bom_line_ids = fields.One2many('mrp.bom.line', 'product_tmpl_id', 'BoM Components')
     bom_ids = fields.One2many('mrp.bom', 'product_tmpl_id', 'Bill of Materials')
     bom_count = fields.Integer('# Bill of Material',
@@ -115,11 +117,13 @@ class ProductTemplate(models.Model):
         return res
 
     def _get_backend_root_menu_ids(self):
-        return super()._get_backend_root_menu_ids() + [self.env.ref('mrp.menu_mrp_root').id]
+        return super()._get_backend_root_menu_ids() + [self._mrp__menu_mrp_root.id]
 
 
 class ProductProduct(models.Model):
     _inherit = "product.product"
+
+    _mrp__menu_mrp_root = models.Ref('mrp.menu_mrp_root', 'ir.ui.menu')
 
     variant_bom_ids = fields.One2many('mrp.bom', 'product_id', 'BOM Product Variants')
     bom_line_ids = fields.One2many('mrp.bom.line', 'product_id', 'BoM Components')
@@ -414,7 +418,7 @@ class ProductProduct(models.Model):
         return res
 
     def _get_backend_root_menu_ids(self):
-        return super()._get_backend_root_menu_ids() + [self.env.ref('mrp.menu_mrp_root').id]
+        return super()._get_backend_root_menu_ids() + [self._mrp__menu_mrp_root.id]
 
     def _update_uom(self, to_uom_id):
         for uom, product_template, boms in self.env['mrp.bom']._read_group(

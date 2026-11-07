@@ -89,6 +89,16 @@ class AccountMove(models.Model):
     _rec_names_search = ('name', 'partner_id.name', 'ref')
     _mailing_enabled = True
 
+    _account__account_invoices = models.Ref('account.account_invoices', 'ir.actions.report')
+    _account__action_account_config = models.Ref('account.action_account_config', 'ir.actions.act_window')
+    _account__group_partial_purchase_deductibility = models.Ref('account.group_partial_purchase_deductibility', 'res.groups')
+    _account__mt_invoice_created = models.Ref('account.mt_invoice_created', 'mail.message.subtype')
+    _account__mt_invoice_paid = models.Ref('account.mt_invoice_paid', 'mail.message.subtype')
+    _account__mt_invoice_validated = models.Ref('account.mt_invoice_validated', 'mail.message.subtype')
+    _account__validate_account_move_view = models.Ref('account.validate_account_move_view', 'ir.ui.view')
+    _account__view_move_form = models.Ref('account.view_move_form', 'ir.ui.view')
+    _account__view_move_tree = models.Ref('account.view_move_tree', 'ir.ui.view')
+
     @property
     def _sequence_monthly_regex(self):
         return self.journal_id.sequence_override_regex or super()._sequence_monthly_regex
@@ -2833,7 +2843,7 @@ class AccountMove(models.Model):
             rec_account = self.partner_id.property_account_receivable_id
             pay_account = self.partner_id.property_account_payable_id
             if not rec_account and not pay_account:
-                action = self.env.ref('account.action_account_config')
+                action = self._account__action_account_config
                 msg = _('Cannot find a chart of accounts for this company, You should configure it. \nPlease go to Account Configuration.')
                 raise RedirectWarning(msg, action.id, _('Go to the configuration panel'))
 
@@ -6379,7 +6389,7 @@ class AccountMove(models.Model):
 
         if not self.env.user.has_group('account.group_partial_purchase_deductibility') and \
                 self.filtered(lambda move: move.move_type == 'in_invoice' and move.invoice_line_ids.filtered(lambda l: l.deductible_percentage != 1)):
-            self.env.user.sudo().group_ids = [Command.link(self.env.ref('account.group_partial_purchase_deductibility').id)]
+            self.env.user.sudo().group_ids = [Command.link(self._account__group_partial_purchase_deductibility.id)]
 
         # Add the move number to the non_deductible lines for easier auditing
         if non_deductible_lines := self.line_ids.filtered(lambda line: (line.display_type in ('non_deductible_product_total', 'non_deductible_tax'))):
@@ -6738,7 +6748,7 @@ class AccountMove(models.Model):
             'res_model': 'account.move',
             'view_mode': 'form',
             'domain': [('id', 'in', self.tax_cash_basis_created_move_ids.ids)],
-            'views': [(self.env.ref('account.view_move_tree').id, 'list'), (False, 'form')],
+            'views': [(self._account__view_move_tree.id, 'list'), (False, 'form')],
         }
 
     def open_adjusting_entries(self):
@@ -6833,7 +6843,7 @@ class AccountMove(models.Model):
         action = self.env["ir.actions.actions"]._for_xml_id("account.action_move_journal_line")
         action['context'] = dict(self.env.context)
         action['context']['view_no_maturity'] = False
-        action['views'] = [(self.env.ref('account.view_move_form').id, 'form')]
+        action['views'] = [(self._account__view_move_form.id, 'form')]
         action['res_id'] = self.copy().id
         return action
 
@@ -6965,7 +6975,7 @@ class AccountMove(models.Model):
                 'res_model': 'validate.account.move',
                 'res_id': wizard.id,
                 'view_mode': 'form',
-                'view_id': self.env.ref('account.validate_account_move_view').id,
+                'view_id': self._account__validate_account_move_view.id,
                 'target': 'new',
             }
         return False
@@ -7780,7 +7790,7 @@ class AccountMove(models.Model):
         """ Get the filename of the generated invoice report with extension file. """
         self.ensure_one()
         if not report:
-            report = self.partner_id.invoice_template_pdf_report_id or self.env.ref('account.account_invoices')
+            report = self.partner_id.invoice_template_pdf_report_id or self._account__account_invoices
         if report.print_report_name and isinstance(report.print_report_name, str):
             file_name = safe_eval(report.print_report_name, {'object': self})
         else:
@@ -8168,7 +8178,7 @@ class AccountMove(models.Model):
     def _creation_subtype(self):
         # EXTENDS mail mail.thread
         if self.move_type in ('out_invoice', 'out_receipt'):
-            return self.env.ref('account.mt_invoice_created')
+            return self._account__mt_invoice_created
         else:
             return super()._creation_subtype()
 
@@ -8177,9 +8187,9 @@ class AccountMove(models.Model):
         self.ensure_one()
 
         if 'payment_state' in track_init_values and self.payment_state == 'paid' and self.is_invoice(include_receipts=True):
-            return self.env.ref('account.mt_invoice_paid')
+            return self._account__mt_invoice_paid
         elif 'state' in track_init_values and self.state == 'posted' and self.is_invoice(include_receipts=True) and self.is_sale_document(include_receipts=True):
-            return self.env.ref('account.mt_invoice_validated')
+            return self._account__mt_invoice_validated
         return super()._track_log_get_default_subtype(track_init_values)
 
     def _creation_message(self):

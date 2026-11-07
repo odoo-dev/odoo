@@ -10,6 +10,8 @@ class HrEmployeeSkill(models.Model):
     _description = "Skill level for employee"
     _rec_name = "skill_id"
 
+    _hr__employee_skill_view_inherit_certificate_form = models.Ref('hr.employee_skill_view_inherit_certificate_form', 'ir.ui.view')
+
     employee_id = fields.Many2one('hr.employee', required=True, index=True, ondelete='cascade')
     company_id = fields.Many2one(related='employee_id.company_id')
 
@@ -55,7 +57,7 @@ class HrEmployeeSkill(models.Model):
                 'show_employee': True,
                 'default_skill_type_id': self.env['hr.skill.type'].search([('is_certification', '=', True)], limit=1).id
             },
-            'views': [(self.env.ref('hr.employee_skill_view_inherit_certificate_form').id, 'form')],
+            'views': [(self._hr__employee_skill_view_inherit_certificate_form.id, 'form')],
         }
 
     def action_save(self):

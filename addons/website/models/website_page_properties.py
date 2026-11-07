@@ -7,6 +7,8 @@ class WebsitePagePropertiesBase(models.TransientModel):
     _name = 'website.page.properties.base'
     _description = "Page Properties Base"
 
+    _base__group_user = models.Ref('base.group_user', 'res.groups')
+
     target_model_id = fields.Reference(selection='_selection_target_model_id', required=True)
     website_id = fields.Many2one('website', required=True)
     menu_ids = fields.One2many('website.menu', compute='_compute_menu_ids')
@@ -174,7 +176,7 @@ class WebsitePagePropertiesBase(models.TransientModel):
             target.is_published = self.is_published
 
     def _get_ir_ui_view_unpublish_group(self):
-        return self.env.ref('base.group_user')
+        return self._base__group_user
 
     def _is_ir_ui_view_unpublished(self, view):
         view.ensure_one()

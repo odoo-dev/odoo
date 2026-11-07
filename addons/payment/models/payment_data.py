@@ -14,6 +14,8 @@ class PaymentData(models.Model):
     _name = "payment.data"
     _description = "Pending payment data payload to process"
 
+    _payment__post_processing_cron = models.Ref('payment.post_processing_cron', 'ir.cron')
+
     def _auto_init(self):
         """Create a partial index to speed up the search of non-errored records."""
         super()._auto_init()
@@ -115,7 +117,7 @@ class PaymentData(models.Model):
                 "Failed to post-process transaction %s; deferring to the post-processing cron.",
                 tx.reference,
             )
-            self.env.ref("payment.post_processing_cron")._trigger()
+            self._payment__post_processing_cron._trigger()
             tx._notify_status()
             remaining_time = IrCron._commit_progress(processed=1)
         return remaining_time

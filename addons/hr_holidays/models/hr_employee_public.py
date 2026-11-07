@@ -8,6 +8,8 @@ from odoo import fields, models
 class HrEmployeePublic(models.Model):
     _inherit = 'hr.employee.public'
 
+    _hr_holidays__action_my_days_off_dashboard_calendar = models.Ref('hr_holidays.action_my_days_off_dashboard_calendar', 'ir.actions.act_window')
+
     leave_manager_id = fields.Many2one(
         'res.users', string='Time Off Approver',
         compute='_compute_leave_manager', store=True, readonly=False,
@@ -55,7 +57,7 @@ class HrEmployeePublic(models.Model):
     def action_open_time_off_calendar(self):
         """Open the time off calendar filtered on this employee."""
         self.ensure_one()
-        action = self.env.ref('hr_holidays.action_my_days_off_dashboard_calendar').sudo().read()[0]
+        action = self._hr_holidays__action_my_days_off_dashboard_calendar.sudo().read()[0]
         action['domain'] = [('employee_id', '=', self.id)]
         ctx = ({
             'active_employee_id': self.id,

@@ -16,6 +16,7 @@ class CrmLead(models.Model):
     _website_crm_partner_assign__tag_portal_lead_own_opp = models.Ref('website_crm_partner_assign.tag_portal_lead_own_opp', 'crm.tag', required=False)
     _website_crm_partner_assign__tag_portal_lead_partner_unavailable = models.Ref(
         'website_crm_partner_assign.tag_portal_lead_partner_unavailable', 'crm.tag', required=False)
+    _crm__model_crm_lead = models.Ref('crm.model_crm_lead', 'ir.model')
 
     partner_latitude = fields.Float('Latitude', digits=(10, 7))
     partner_longitude = fields.Float('Longitude', digits=(10, 7))
@@ -275,7 +276,7 @@ class CrmLead(models.Model):
                     })
                 else:
                     self.env['mail.activity'].sudo().create({
-                        'res_model_id': self.env.ref('crm.model_crm_lead').id,
+                        'res_model_id': self._crm__model_crm_lead.id,
                         'res_id': lead.id,
                         'user_id': self.env.user.id,
                         'activity_type_id': values['activity_type_id'],

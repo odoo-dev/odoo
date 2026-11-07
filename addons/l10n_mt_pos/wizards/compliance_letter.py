@@ -6,6 +6,8 @@ class ComplianceLetter(models.TransientModel):
     _name = 'compliance.letter.wizard'
     _description = 'Compliance Letter for EXO Number'
 
+    _l10n_mt_pos__report_compliance_letter = models.Ref('l10n_mt_pos.report_compliance_letter', 'ir.actions.report')
+
     company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
 
     def generate_letter(self):
@@ -19,7 +21,7 @@ class ComplianceLetter(models.TransientModel):
             "vat": self.company_id.vat,
             "address": self.company_id.partner_id.address,
         }
-        return self.env.ref('l10n_mt_pos.report_compliance_letter').report_action([], data=data)
+        return self._l10n_mt_pos__report_compliance_letter.report_action([], data=data)
 
     def _get_formatted_date(self):
         """Returns the formatted date as 'Date (Month, xxth, 20XX)'."""

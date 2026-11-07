@@ -20,6 +20,8 @@ _logger = get_payment_logger(__name__)
 class PaymentProvider(models.Model):
     _inherit = "payment.provider"
 
+    _payment__action_payment_provider = models.Ref('payment.action_payment_provider', 'ir.actions.act_window')
+
     code = fields.Selection(
         selection_add=[("razorpay", "Razorpay")], ondelete={"razorpay": "set default"}
     )
@@ -140,7 +142,7 @@ class PaymentProvider(models.Model):
                     "Razorpay is not available in your country; please use another payment"
                     " provider."
                 ),
-                self.env.ref("payment.action_payment_provider").id,
+                self._payment__action_payment_provider.id,
                 self.env._("Other Payment Providers"),
             )
 

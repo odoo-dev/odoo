@@ -9,6 +9,8 @@ from odoo.addons.l10n_in.models.iap_account import IAP_SERVICE_NAME
 class ResConfigSettings(models.TransientModel):
     _inherit = 'res.config.settings'
 
+    _base__view_company_form = models.Ref('base.view_company_form', 'ir.ui.view')
+
     group_l10n_in_reseller = fields.Boolean(
         implied_group='l10n_in.group_l10n_in_reseller',
         string="Manage Reseller(E-Commerce)"
@@ -143,7 +145,7 @@ class ResConfigSettings(models.TransientModel):
                 'res_model': 'res.company',
                 'type': 'ir.actions.act_window',
                 'res_id': company.id,
-                'views': [[self.env.ref('base.view_company_form').id, 'form']],
+                'views': [[self._base__view_company_form.id, 'form']],
             }
             raise RedirectWarning(_("Please set a valid GST number on company."), action, _("Go to Company"))
 

@@ -6,6 +6,9 @@ from odoo import fields, models
 class ResourceCalendar(models.Model):
     _inherit = "resource.calendar"
 
+    _hr_holidays__resource_calendar_leaves_tree_inherit = models.Ref('hr_holidays.resource_calendar_leaves_tree_inherit', 'ir.ui.view')
+    _hr_holidays__resource_calendar_leaves_view_search_inherit = models.Ref('hr_holidays.resource_calendar_leaves_view_search_inherit', 'ir.ui.view')
+
     associated_leaves_count = fields.Integer("Time Off Count", compute='_compute_associated_leaves_count')
     leave_accrual_plan_id = fields.Many2one(
         string="Accrual Plan",
@@ -42,7 +45,7 @@ class ResourceCalendar(models.Model):
             'res_model': 'resource.calendar.leaves',
             'name': self.env._('Public Holidays'),
             'view_mode': 'list',
-            'view_id': self.env.ref('hr_holidays.resource_calendar_leaves_tree_inherit').id,
+            'view_id': self._hr_holidays__resource_calendar_leaves_tree_inherit.id,
             'domain': [
                 ('resource_id', '=', False),
                 '|',
@@ -55,5 +58,5 @@ class ResourceCalendar(models.Model):
                 'default_calendar_id': self.id,
                 'search_default_filter_date': True,
             },
-            'search_view_id': self.env.ref('hr_holidays.resource_calendar_leaves_view_search_inherit').id,
+            'search_view_id': self._hr_holidays__resource_calendar_leaves_view_search_inherit.id,
         }

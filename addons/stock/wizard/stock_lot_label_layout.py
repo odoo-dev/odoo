@@ -9,6 +9,8 @@ class LotLabelLayout(models.TransientModel):
     _name = 'lot.label.layout'
     _description = 'Choose the sheet layout to print lot labels'
 
+    _uom__product_uom_unit = models.Ref('uom.product_uom_unit', 'uom.uom')
+
     lot_ids = fields.Many2many('stock.lot')
     move_line_ids = fields.Many2many('stock.move.line')
     custom_quantity = fields.Integer(default=1)
@@ -52,7 +54,7 @@ class LotLabelLayout(models.TransientModel):
         if self.label_quantity == 'lots':
             return {lot: 1 for lot in self.move_line_ids.lot_id}
 
-        uom_unit = self.env.ref('uom.product_uom_unit')
+        uom_unit = self._uom__product_uom_unit
         quantity_by_lot = defaultdict(int)
         for move_line in self.move_line_ids:
             if not move_line.lot_id:

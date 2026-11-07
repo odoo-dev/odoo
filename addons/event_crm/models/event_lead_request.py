@@ -21,6 +21,8 @@ class EventLeadRequest(models.Model):
 
     _REGISTRATIONS_BATCH_SIZE = 200
 
+    _event_crm__ir_cron_generate_leads = models.Ref('event_crm.ir_cron_generate_leads', 'ir.cron')
+
     event_id = fields.Many2one('event.event', required=True, string="Event", ondelete="cascade")
     event_lead_rule_ids = fields.Many2many('event.lead.rule', string="Lead Rules")
     processed_registration_id = fields.Integer("Processed Registration",
@@ -73,7 +75,7 @@ class EventLeadRequest(models.Model):
 
         if generate_requests - fulfilled_requests:
             # we still have unfinished requests: run the CRON again
-            self.env.ref('event_crm.ir_cron_generate_leads')._trigger()
+            self._event_crm__ir_cron_generate_leads._trigger()
 
         if fulfilled_requests:
             fulfilled_requests.unlink()

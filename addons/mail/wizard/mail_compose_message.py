@@ -49,6 +49,7 @@ class MailComposeMessage(models.TransientModel):
 
     _mail__mt_comment_optional = models.Ref('mail.mt_comment', 'mail.message.subtype', required=False)
     _mail__mt_note_optional = models.Ref('mail.mt_note', 'mail.message.subtype', required=False)
+    _mail__mail_compose_message_view_form_template_save = models.Ref('mail.mail_compose_message_view_form_template_save', 'ir.ui.view')
 
     @api.model
     def default_get(self, fields):
@@ -1003,7 +1004,7 @@ class MailComposeMessage(models.TransientModel):
         return {
             'type': 'ir.actions.act_window',
             'view_mode': 'form',
-            'view_id': self.env.ref('mail.mail_compose_message_view_form_template_save').id,
+            'view_id': self._mail__mail_compose_message_view_form_template_save.id,
             'name': _('Create a Mail Template'),
             'res_model': 'mail.compose.message',
             'context': {'dialog_size': 'medium'},

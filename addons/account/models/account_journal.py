@@ -50,12 +50,15 @@ class AccountJournal(models.Model):
 
     _account__mail_template_einvoice_notification = models.Ref('account.mail_template_einvoice_notification', 'mail.template', required=False)
     _account__mail_template_invoice_subscriber = models.Ref('account.mail_template_invoice_subscriber', 'mail.template', required=False)
+    _account__account_payment_method_manual_in = models.Ref('account.account_payment_method_manual_in', 'account.payment.method')
+    _account__account_payment_method_manual_out = models.Ref('account.account_payment_method_manual_out', 'account.payment.method')
+    _base__main_company = models.Ref('base.main_company', 'res.company')
 
     def _default_inbound_payment_methods(self):
-        return self.env.ref('account.account_payment_method_manual_in')
+        return self._account__account_payment_method_manual_in
 
     def _default_outbound_payment_methods(self):
-        return self.env.ref('account.account_payment_method_manual_out')
+        return self._account__account_payment_method_manual_out
 
     def _get_bank_statements_available_sources(self):
         return [('undefined', _('Undefined Yet'))]
@@ -871,7 +874,7 @@ class AccountJournal(models.Model):
                     self.env['mail.alias']._sanitize_alias_name(string))
             ), False
         )
-        if company != self.env.ref('base.main_company'):
+        if company != self._base__main_company:
             company_identifier = self.env['mail.alias']._sanitize_alias_name(company.name) if self.env['mail.alias']._is_encodable(company.name) else company.id
             if f'-{company_identifier}' not in alias_name:
                 alias_name = f"{alias_name}-{company_identifier}"

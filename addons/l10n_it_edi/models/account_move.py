@@ -63,6 +63,8 @@ class AccountMove(models.Model):
     _inherit = 'account.move'
 
     _l10n_it_edi__l10n_it_edi_professional_fees_tag = models.Ref('l10n_it_edi.l10n_it_edi_professional_fees_tag', 'account.account.tag', required=False)
+    _base__EUR = models.Ref('base.EUR', 'res.currency')
+    _l10n_it_edi__ir_cron_l10n_it_edi_download_and_update = models.Ref('l10n_it_edi.ir_cron_l10n_it_edi_download_and_update', 'ir.cron')
 
     l10n_it_edi_state = fields.Selection(
         string="SDI State",
@@ -979,7 +981,7 @@ class AccountMove(models.Model):
             'cig': self.l10n_it_cig,
             'cup': self.l10n_it_cup,
             'convention_code': self.l10n_it_convention_code,
-            'currency': self.currency_id or self.company_currency_id if not convert_to_euros else self.env.ref('base.EUR'),
+            'currency': self.currency_id or self.company_currency_id if not convert_to_euros else self._base__EUR,
             'regime_fiscale': company.l10n_it_tax_system if not is_self_invoice else 'RF18',
             'is_self_invoice': is_self_invoice,
             'partner_bank': self.partner_bank_id,
@@ -1289,7 +1291,7 @@ class AccountMove(models.Model):
         # Retrigger download if there are still some on the server
         if retrigger:
             _logger.info('Retriggering "Receive invoices from the SdI"...')
-            self.env.ref('l10n_it_edi.ir_cron_l10n_it_edi_download_and_update')._trigger()
+            self._l10n_it_edi__ir_cron_l10n_it_edi_download_and_update._trigger()
 
     def _l10n_it_edi_download_invoices(self, proxy_user):
         """ Check the proxy for incoming invoices for a specified proxy user.

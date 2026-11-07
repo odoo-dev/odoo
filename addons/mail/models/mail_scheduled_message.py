@@ -35,6 +35,8 @@ class MailScheduledMessage(models.Model):
     _description = 'Scheduled Message'
     _access_domain_heavy = True
 
+    _mail__ir_cron_post_scheduled_message = models.Ref('mail.ir_cron_post_scheduled_message', 'ir.cron')
+
     # content
     subject = fields.Char('Subject')
     body = fields.Html('Contents', sanitize_style=True)
@@ -96,7 +98,7 @@ class MailScheduledMessage(models.Model):
                 })
         # schedule cron trigger
         if scheduled_messages:
-            self.env.ref('mail.ir_cron_post_scheduled_message')._trigger_list(
+            self._mail__ir_cron_post_scheduled_message._trigger_list(
                 set(scheduled_messages.mapped('scheduled_date'))
             )
         return scheduled_messages
@@ -145,7 +147,7 @@ class MailScheduledMessage(models.Model):
         # make sure user can write on the record the messages are scheduled on
         res = super().write(vals)
         if new_scheduled_date := vals.get('scheduled_date'):
-            self.env.ref('mail.ir_cron_post_scheduled_message')._trigger(fields.Datetime.to_datetime(new_scheduled_date))
+            self._mail__ir_cron_post_scheduled_message._trigger(fields.Datetime.to_datetime(new_scheduled_date))
         return res
 
     # ------------------------------------------------------
@@ -273,7 +275,7 @@ class MailScheduledMessage(models.Model):
 
         # restart cron if needed
         if self.search_count(domain, limit=1):
-            self.env.ref('mail.ir_cron_post_scheduled_message')._trigger()
+            self._mail__ir_cron_post_scheduled_message._trigger()
 
     def _store_scheduled_message_fields(self, res: Store.FieldList):
         res.many("attachment_ids", "_store_attachment_fields")

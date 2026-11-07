@@ -8,6 +8,8 @@ class StockRulesReport(models.TransientModel):
     _name = 'stock.rules.report'
     _description = 'Stock Rules report'
 
+    _stock__action_report_stock_rule = models.Ref('stock.action_report_stock_rule', 'ir.actions.report')
+
     product_id = fields.Many2one('product.product', string='Product', required=True)
     product_tmpl_id = fields.Many2one('product.template', string='Product Template', required=True)
     warehouse_ids = fields.Many2many('stock.warehouse', string='Warehouses', required=True,
@@ -48,4 +50,4 @@ class StockRulesReport(models.TransientModel):
     def print_report(self):
         self.ensure_one()
         data = self._prepare_report_data()
-        return self.env.ref('stock.action_report_stock_rule').report_action(None, data=data)
+        return self._stock__action_report_stock_rule.report_action(None, data=data)

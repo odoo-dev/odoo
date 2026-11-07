@@ -716,7 +716,7 @@ class Transaction:
         else:
             for env in self.envs:
                 _logger.warning("Missing default_env, flushing as public user")
-                public_user = env.ref('base.public_user')
+                public_user = env['res.users']._base__public_user
                 Environment(env.cr, public_user.id, {}).flush_all()
                 break
 

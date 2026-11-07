@@ -32,6 +32,7 @@ class Website(models.Model):
     _sales_team__salesteam_website_sales = models.Ref('sales_team.salesteam_website_sales', 'crm.team', required=False)
     _website_sale__ir_cron_send_abandoned_email = models.Ref('website_sale.ir_cron_send_abandoned_email', 'ir.cron', required=False)
     _website_sale__mail_template_sale_order_rating = models.Ref('website_sale.mail_template_sale_order_rating', 'mail.template', required=False)
+    _website_sale__mail_template_sale_cart_recovery = models.Ref('website_sale.mail_template_sale_cart_recovery', 'mail.template', required=False)
 
     # === DEFAULT METHODS ===#
 
@@ -42,10 +43,7 @@ class Website(models.Model):
         return None
 
     def _default_recovery_mail_template(self):
-        try:
-            return self.env.ref("website_sale.mail_template_sale_cart_recovery").id
-        except ValueError:
-            return False
+        return self._website_sale__mail_template_sale_cart_recovery.id
 
     def _default_confirmation_email_template(self):
         template_id = (

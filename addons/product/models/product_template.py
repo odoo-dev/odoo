@@ -26,6 +26,13 @@ class ProductTemplate(models.Model):
     _check_company_domain = models.check_company_domain_parent_of
 
     _product__product_template_acoustic_bloc_screens = models.Ref('product.product_template_acoustic_bloc_screens', 'product.template', required=False)
+    _uom__product_uom_cubic_foot = models.Ref('uom.product_uom_cubic_foot', 'uom.uom')
+    _uom__product_uom_cubic_meter = models.Ref('uom.product_uom_cubic_meter', 'uom.uom')
+    _uom__product_uom_foot = models.Ref('uom.product_uom_foot', 'uom.uom')
+    _uom__product_uom_kgm = models.Ref('uom.product_uom_kgm', 'uom.uom')
+    _uom__product_uom_lb = models.Ref('uom.product_uom_lb', 'uom.uom')
+    _uom__product_uom_millimeter = models.Ref('uom.product_uom_millimeter', 'uom.uom')
+    _uom__product_uom_unit = models.Ref('uom.product_uom_unit', 'uom.uom')
 
     @api.model
     def default_get(self, fields):
@@ -41,7 +48,7 @@ class ProductTemplate(models.Model):
     @api.ormcache()
     def _default_uom_id(self):
         # Deletion forbidden (at least through unlink)
-        return self.env.ref('uom.product_uom_unit')
+        return self._uom__product_uom_unit
 
     def _read_group_categ_id(self, categories, domain):
         category_ids = self.env.context.get('default_categ_id')
@@ -574,9 +581,9 @@ class ProductTemplate(models.Model):
         """
         product_weight_in_lbs_param = self.env['ir.config_parameter'].sudo().get_str('product.weight_in_lbs') or '0'
         if product_weight_in_lbs_param == '1':
-            return self.env.ref('uom.product_uom_lb')
+            return self._uom__product_uom_lb
         else:
-            return self.env.ref('uom.product_uom_kgm')
+            return self._uom__product_uom_kgm
 
     @api.model
     def _get_length_uom_id_from_ir_config_parameter(self):
@@ -587,9 +594,9 @@ class ProductTemplate(models.Model):
         """
         product_length_in_feet_param = self.env['ir.config_parameter'].sudo().get_str('product.volume_in_cubic_feet') or '0'
         if product_length_in_feet_param == '1':
-            return self.env.ref('uom.product_uom_foot')
+            return self._uom__product_uom_foot
         else:
-            return self.env.ref('uom.product_uom_millimeter')
+            return self._uom__product_uom_millimeter
 
     @api.model
     def _get_volume_uom_id_from_ir_config_parameter(self):
@@ -600,9 +607,9 @@ class ProductTemplate(models.Model):
         """
         product_length_in_feet_param = self.env['ir.config_parameter'].sudo().get_str('product.volume_in_cubic_feet') or '0'
         if product_length_in_feet_param == '1':
-            return self.env.ref('uom.product_uom_cubic_foot')
+            return self._uom__product_uom_cubic_foot
         else:
-            return self.env.ref('uom.product_uom_cubic_meter')
+            return self._uom__product_uom_cubic_meter
 
     @api.model
     def _get_weight_uom_name_from_ir_config_parameter(self):

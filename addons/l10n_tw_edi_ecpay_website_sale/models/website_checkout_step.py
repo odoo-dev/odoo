@@ -6,6 +6,8 @@ from odoo import models
 class WebsiteCheckoutStep(models.Model):
     _inherit = 'website.checkout.step'
 
+    _l10n_tw_edi_ecpay_website_sale__checkout_step_invoicing = models.Ref('l10n_tw_edi_ecpay_website_sale.checkout_step_invoicing', 'website.checkout.step')
+
     def _validate_completion(self, order_sudo, **kwargs):
         if self.step_href == '/shop/l10n_tw_invoicing_info':
             return self._check_l10n_tw_invoicing_info_completion(order_sudo, **kwargs)

@@ -43,6 +43,8 @@ class SlideSlide(models.Model):
     _partner_unfollow_enabled = True
     _add_seo_rels = True
 
+    _website_slides__website_slides_menu_root = models.Ref('website_slides.website_slides_menu_root', 'ir.ui.menu')
+
     YOUTUBE_VIDEO_ID_REGEX = r'^(?:(?:https?:)?//)?(?:www\.|m\.)?(?:youtu\.be/|youtube(-nocookie)?\.com/(?:embed/|v/|shorts/|live/|watch\?v=|watch\?.+&v=))((?:\w|-){11})\S*$'
     GOOGLE_DRIVE_DOCUMENT_ID_REGEX = r'(^https:\/\/docs.google.com|^https:\/\/drive.google.com).*\/d\/([^\/]*)'
     VIMEO_VIDEO_ID_REGEX = r'\/\/(player.)?vimeo.com\/(?:[a-z]*\/)*([0-9]{6,11})\/?([0-9a-z]{6,11})?[?]?.*'
@@ -1340,7 +1342,7 @@ class SlideSlide(models.Model):
         return self.env['slide.slide']
 
     def get_backend_menu_id(self):
-        return self.env.ref('website_slides.website_slides_menu_root').id
+        return self._website_slides__website_slides_menu_root.id
 
     @api.model
     def _search_get_detail(self, website, order, options):

@@ -12,6 +12,8 @@ _logger = get_payment_logger(__name__)
 class PaymentProvider(models.Model):
     _inherit = "payment.provider"
 
+    _base__module_payment_mollie = models.Ref('base.module_payment_mollie', 'ir.module.module')
+
     code = fields.Selection(
         selection_add=[("mollie", "Mollie")], ondelete={"mollie": "set default"}
     )
@@ -62,7 +64,7 @@ class PaymentProvider(models.Model):
         if self.code != "mollie":
             return super()._build_request_headers(*args, **kwargs)
 
-        module_version = self.env.ref("base.module_payment_mollie").installed_version
+        module_version = self._base__module_payment_mollie.installed_version
         return {
             "Accept": "application/json",
             "Authorization": f"Bearer {self.mollie_api_key}",

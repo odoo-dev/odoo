@@ -8,6 +8,8 @@ from odoo.exceptions import AccessError
 class DigestDigest(models.Model):
     _inherit = 'digest.digest'
 
+    _crm__crm_menu_root = models.Ref('crm.crm_menu_root', 'ir.ui.menu')
+
     kpi_crm_lead_created = fields.Boolean('New Leads')
     kpi_crm_lead_created_value = fields.Integer(compute='_compute_kpi_crm_lead_created_value')
     kpi_crm_opportunities_won = fields.Boolean('Opportunities Won')
@@ -28,7 +30,7 @@ class DigestDigest(models.Model):
 
     def _get_kpi_custom_settings(self, company, user):
         res = super()._get_kpi_custom_settings(company, user)
-        menu_id = self.env.ref('crm.crm_menu_root').id
+        menu_id = self._crm__crm_menu_root.id
         res['kpi_action']['kpi_crm_opportunities_won'] = f'crm.crm_lead_action_pipeline?menu_id={menu_id}'
         if user.has_group('crm.group_use_lead'):
             res['kpi_action']['kpi_crm_lead_created'] = f'crm.crm_lead_all_leads?menu_id={menu_id}'

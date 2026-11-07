@@ -4,6 +4,9 @@ from odoo import fields, models
 class AccountMove(models.Model):
     _inherit = 'account.move'
 
+    _l10n_do__ecf_31 = models.Ref('l10n_do.ecf_31', 'l10n_latam.document.type')
+    _l10n_do__ecf_32 = models.Ref('l10n_do.ecf_32', 'l10n_latam.document.type')
+
     l10n_do_purchase_type = fields.Selection(
         string="Purchase Type",
         help="Type of goods and services purchased, as expected on the DGII 606 report",
@@ -42,7 +45,7 @@ class AccountMove(models.Model):
         if self.country_code != 'DO' or not self.l10n_latam_use_documents:
             return domain
         if self.move_type == 'out_invoice' and not self.debit_origin_id:
-            allowed_docs = [self.env.ref('l10n_do.ecf_31').id, self.env.ref('l10n_do.ecf_32').id] if self.partner_id._l10n_do_has_rnc() else [self.env.ref('l10n_do.ecf_32').id]
+            allowed_docs = [self._l10n_do__ecf_31.id, self._l10n_do__ecf_32.id] if self.partner_id._l10n_do_has_rnc() else [self._l10n_do__ecf_32.id]
             domain.append(('id', 'in', allowed_docs))
         return domain
 

@@ -10,10 +10,12 @@ MAX_INT32 = 2147483647
 class AccountJournal(models.Model):
     _inherit = "account.journal"
 
+    _account_check_printing__account_payment_method_check = models.Ref('account_check_printing.account_payment_method_check', 'account.payment.method')
+
     def _default_outbound_payment_methods(self):
         res = super()._default_outbound_payment_methods()
         if self._is_payment_method_available('check_printing'):
-            res |= self.env.ref('account_check_printing.account_payment_method_check')
+            res |= self._account_check_printing__account_payment_method_check
         return res
 
     check_manual_sequencing = fields.Boolean(

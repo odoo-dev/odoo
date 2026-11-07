@@ -21,6 +21,7 @@ class ResPartner(models.Model):
     _inherit = 'res.partner'
 
     _base__partner_demo_company_fr = models.Ref('base.partner_demo_company_fr', 'res.partner', required=False)
+    _base__europe = models.Ref('base.europe', 'res.country.group')
 
     invoice_edi_format = fields.Selection(selection_add=[('ubl_21_fr', "France E-Invoicing (UBL 2.1)")])
     l10n_fr_is_pdp = fields.Boolean(compute='_compute_l10n_fr_is_pdp')
@@ -144,7 +145,7 @@ class ResPartner(models.Model):
         if (
             specific_scheme
             or drom_com_territories.is_france_territory(country_code)
-            or self.country_id in self.env.ref('base.europe').country_ids
+            or self.country_id in self._base__europe.country_ids
         ):
             return ('0223', partner_vat) if len(partner_vat) > 1 else (False, False)
         if country_code and self.name:

@@ -25,6 +25,8 @@ except ImportError:
 class AccountMove(models.Model):
     _inherit = "account.move"
 
+    _base__partner_root = models.Ref('base.partner_root', 'res.partner')
+
     # E-Invoice Fields
     l10n_in_edi_status = fields.Selection(
         string="India E-Invoice Status",
@@ -241,7 +243,7 @@ class AccountMove(models.Model):
             json_payload=generate_json
         )
         if error := response.get('error', {}):
-            odoobot_id = self.env.ref('base.partner_root').id
+            odoobot_id = self._base__partner_root.id
             error_codes = [e.get("code") for e in error]
             if '2150' in error_codes:
                 # Get IRN by details in case of IRN is already generated
@@ -373,7 +375,7 @@ class AccountMove(models.Model):
         response = self._l10n_in_edi_connect_to_server(url_end_point='cancel', json_payload=cancel_json)
         # Creating a lambda function so it fetches the odoobot id only when needed
         _get_odoobot_id = (
-            lambda self: self.env.ref('base.partner_root').id
+            lambda self: self._base__partner_root.id
         )
         if error := response.get('error'):
             error_codes = [e.get('code') for e in error]
@@ -612,7 +614,7 @@ class AccountMove(models.Model):
         if not discount_lines:
             return json_payload
         self.message_post(
-            author_id=self.env.ref('base.partner_root').id,
+            author_id=self._base__partner_root.id,
             body=_("Negative lines will be decreased from positive invoice lines having the same taxes and HSN code")
         )
 

@@ -24,6 +24,7 @@ class SurveyUser_Input(models.Model):
     _inherit = ['mail.thread', 'mail.activity.mixin']
 
     _survey__mt_survey_survey_user_input_completed = models.Ref('survey.mt_survey_survey_user_input_completed', 'mail.message.subtype', required=False)
+    _base__partner_root = models.Ref('base.partner_root', 'res.partner')
 
     # answer description
     survey_id = fields.Many2one('survey.survey', string='Survey', required=True, readonly=True, index=True, ondelete='cascade')
@@ -729,7 +730,7 @@ class SurveyUser_Input(models.Model):
     def _notify_new_participation_subscribers(self):
         if not self.ids or not self._survey__mt_survey_survey_user_input_completed:
             return
-        author_id = self.env.ref('base.partner_root').id if self.env.user.is_public else self.env.user.partner_id.id
+        author_id = self._base__partner_root.id if self.env.user.is_public else self.env.user.partner_id.id
         # Only post if there are any followers
         recipients_data = self.env['mail.followers']._get_recipient_data(self.survey_id, 'notification', self._survey__mt_survey_survey_user_input_completed.id)
         followed_survey_ids = [survey_id for survey_id, followers in recipients_data.items() if followers]

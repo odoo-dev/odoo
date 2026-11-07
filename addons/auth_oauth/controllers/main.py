@@ -161,10 +161,10 @@ class OAuthController(Controller):
 
         registry = Registry(dbname)
         with registry.cursor() as cr:
-            try:
-                env = api.Environment(cr, SUPERUSER_ID, {})
-                provider = env.ref('auth_oauth.provider_openerp')
-            except ValueError:
+            env = api.Environment(cr, SUPERUSER_ID, {})
+            # the database may not have auth_oauth installed
+            provider = 'auth.oauth.provider' in env and env['auth.oauth.provider']._auth_oauth__provider_openerp
+            if not provider:
                 redirect = request.redirect(f'/web?db={dbname}', 303)
                 redirect.autocorrect_location_header = False
                 return redirect

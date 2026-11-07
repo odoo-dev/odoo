@@ -35,6 +35,10 @@ class PosOrder(models.Model):
     _order = "date_order desc, name desc, id desc"
     _mailing_enabled = True
 
+    _account__view_move_form = models.Ref('account.view_move_form', 'ir.ui.view')
+    _point_of_sale__view_pos_make_invoice = models.Ref('point_of_sale.view_pos_make_invoice', 'ir.ui.view')
+    _point_of_sale__view_pos_pos_form = models.Ref('point_of_sale.view_pos_pos_form', 'ir.ui.view')
+
     # This function deals with orders that belong to a closed session. It attempts to find
     # any open session that can be used to capture the order. If no open session is found,
     # an error is raised, asking the user to open a session.
@@ -717,7 +721,7 @@ class PosOrder(models.Model):
             return {
                 'name': _('Customer Invoice'),
                 'view_mode': 'form',
-                'view_id': self.env.ref('account.view_move_form').id,
+                'view_id': self._account__view_move_form.id,
                 'res_model': 'account.move',
                 'context': "{'move_type':'out_invoice'}",
                 'type': 'ir.actions.act_window',
@@ -735,7 +739,7 @@ class PosOrder(models.Model):
         return {
             'name': _('Create Invoice(s)'),
             'view_mode': 'form',
-            'view_id': self.env.ref('point_of_sale.view_pos_make_invoice').id,
+            'view_id': self._point_of_sale__view_pos_make_invoice.id,
             'res_model': 'pos.make.invoice',
             'target': 'new',
             'type': 'ir.actions.act_window',
@@ -747,7 +751,7 @@ class PosOrder(models.Model):
         return {
             'name': _('Refunded Order'),
             'view_mode': 'form',
-            'view_id': self.env.ref('point_of_sale.view_pos_pos_form').id,
+            'view_id': self._point_of_sale__view_pos_pos_form.id,
             'res_model': 'pos.order',
             'type': 'ir.actions.act_window',
             'res_id': self.refunded_order_id.id,
@@ -1822,7 +1826,7 @@ class PosOrder(models.Model):
         return {
             'name': _('Customer Invoice'),
             'view_mode': 'form',
-            'view_id': self.env.ref('account.view_move_form').id,
+            'view_id': self._account__view_move_form.id,
             'res_model': 'account.move',
             'context': "{'move_type':'out_invoice'}",
             'type': 'ir.actions.act_window',

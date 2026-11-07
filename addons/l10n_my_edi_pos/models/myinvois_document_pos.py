@@ -24,6 +24,10 @@ class MyInvoisDocumentPoS(models.Model):
     """
     _inherit = 'myinvois.document'
 
+    _l10n_my_edi_pos__myinvois_document_pos_form_view = models.Ref('l10n_my_edi_pos.myinvois_document_pos_form_view', 'ir.ui.view')
+    _l10n_my_edi_pos__myinvois_document_pos_list_view = models.Ref('l10n_my_edi_pos.myinvois_document_pos_list_view', 'ir.ui.view')
+    _l10n_my_edi_pos__view_pos_order_tree_consolidated = models.Ref('l10n_my_edi_pos.view_pos_order_tree_consolidated', 'ir.ui.view')
+
     # ------------------
     # Fields declaration
     # ------------------
@@ -88,7 +92,7 @@ class MyInvoisDocumentPoS(models.Model):
                 'view_mode': 'list,form',
                 # A dedicated list view is used so that the orders are listed in the order in which they are
                 # reported on the consolidated invoice, rather than in the default reverse chronological one.
-                'views': [(self.env.ref('l10n_my_edi_pos.view_pos_order_tree_consolidated').id, 'list'), (False, 'form')],
+                'views': [(self._l10n_my_edi_pos__view_pos_order_tree_consolidated.id, 'list'), (False, 'form')],
                 'domain': [('id', 'in', self.pos_order_ids.ids)],
             }
 
@@ -110,7 +114,7 @@ class MyInvoisDocumentPoS(models.Model):
                 'res_model': 'myinvois.document',
                 'view_mode': 'form',
                 'res_id': self.id,
-                'views': [(self.env.ref('l10n_my_edi_pos.myinvois_document_pos_form_view').id, 'form')],
+                'views': [(self._l10n_my_edi_pos__myinvois_document_pos_form_view.id, 'form')],
             }
         else:
             action_vals = {
@@ -118,7 +122,7 @@ class MyInvoisDocumentPoS(models.Model):
                 'type': 'ir.actions.act_window',
                 'res_model': 'myinvois.document',
                 'view_mode': 'list,form',
-                'views': [(self.env.ref('l10n_my_edi_pos.myinvois_document_pos_list_view').id, 'list'), (self.env.ref('l10n_my_edi_pos.myinvois_document_pos_form_view').id, 'form')],
+                'views': [(self._l10n_my_edi_pos__myinvois_document_pos_list_view.id, 'list'), (self._l10n_my_edi_pos__myinvois_document_pos_form_view.id, 'form')],
                 'domain': [('id', 'in', self.ids)],
             }
         return action_vals

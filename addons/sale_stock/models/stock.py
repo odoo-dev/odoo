@@ -242,8 +242,10 @@ class StockMove(models.Model):
 class StockMoveLine(models.Model):
     _inherit = "stock.move.line"
 
+    _stock__stock_location_inter_company = models.Ref('stock.stock_location_inter_company', 'stock.location')
+
     def _should_show_lot_in_invoice(self):
-        return 'customer' in {self.location_id.usage, self.location_dest_id.usage} or self.env.ref('stock.stock_location_inter_company') in (self.location_id, self.location_dest_id)
+        return 'customer' in {self.location_id.usage, self.location_dest_id.usage} or self._stock__stock_location_inter_company in (self.location_id, self.location_dest_id)
 
 
 class StockRule(models.Model):

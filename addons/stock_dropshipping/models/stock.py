@@ -48,18 +48,21 @@ class StockPicking(models.Model):
 class StockPickingType(models.Model):
     _inherit = 'stock.picking.type'
 
+    _stock__stock_location_customers = models.Ref('stock.stock_location_customers', 'stock.location')
+    _stock__stock_location_suppliers = models.Ref('stock.stock_location_suppliers', 'stock.location')
+
     code = fields.Selection(
         selection_add=[('dropship', 'Dropship')], ondelete={'dropship': lambda recs: recs.write({'code': 'outgoing', 'active': False})})
 
     def _compute_default_location_src_id(self):
         dropship_types = self.filtered(lambda pt: pt.code == 'dropship')
-        dropship_types.default_location_src_id = self.env.ref('stock.stock_location_suppliers').id
+        dropship_types.default_location_src_id = self._stock__stock_location_suppliers.id
 
         super(StockPickingType, self - dropship_types)._compute_default_location_src_id()
 
     def _compute_default_location_dest_id(self):
         dropship_types = self.filtered(lambda pt: pt.code == 'dropship')
-        dropship_types.default_location_dest_id = self.env.ref('stock.stock_location_customers').id
+        dropship_types.default_location_dest_id = self._stock__stock_location_customers.id
 
         super(StockPickingType, self - dropship_types)._compute_default_location_dest_id()
 

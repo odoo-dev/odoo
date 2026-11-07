@@ -32,6 +32,12 @@ class PosConfig(models.Model):
     _point_of_sale__default_session_closing_partner = models.Ref('point_of_sale.default_session_closing_partner', 'res.partner', required=False)
     _point_of_sale__pos_closed_session_2 = models.Ref('point_of_sale.pos_closed_session_2', 'pos.session', required=False)
     _point_of_sale__menu_pos_preparation_printer = models.Ref('point_of_sale.menu_pos_preparation_printer', 'ir.ui.menu', required=False)
+    _base__europe = models.Ref('base.europe', 'res.country.group')
+    _base__main_company = models.Ref('base.main_company', 'res.company')
+    _point_of_sale__group_pos_manager = models.Ref('point_of_sale.group_pos_manager', 'res.groups')
+    _point_of_sale__group_pos_user = models.Ref('point_of_sale.group_pos_user', 'res.groups')
+    _point_of_sale__view_pos_price_inclusion_wizard_form = models.Ref('point_of_sale.view_pos_price_inclusion_wizard_form', 'ir.ui.view')
+    _uom__product_uom_unit = models.Ref('uom.product_uom_unit', 'uom.uom')
 
     def _default_sale_journal(self):
         return self.env['account.journal']._ensure_company_account_journal()
@@ -64,10 +70,10 @@ class PosConfig(models.Model):
         return non_cash_pm | available_cash_pm
 
     def _get_group_pos_manager(self):
-        return self.env.ref('point_of_sale.group_pos_manager')
+        return self._point_of_sale__group_pos_manager
 
     def _get_group_pos_user(self):
-        return self.env.ref('point_of_sale.group_pos_user')
+        return self._point_of_sale__group_pos_user
 
     def _get_default_tip_product(self):
         tip_product_id = self._tip_product
@@ -353,7 +359,7 @@ class PosConfig(models.Model):
         record['_data_server_date'] = self.env.context.get('pos_last_server_date') or self.env.cr.now()
         record['_has_cash_move_perm'] = self.env.user._has_cash_move_permission()
         record['_has_cash_delete_perm'] = self.env.user._has_cash_delete_permission()
-        record["_unit_uom_id"] = self.env.ref('uom.product_uom_unit').id
+        record["_unit_uom_id"] = self._uom__product_uom_unit.id
         record['_limited_partner_count'] = config._get_limited_partner_count()
 
         session = config.current_session_id
@@ -369,7 +375,7 @@ class PosConfig(models.Model):
 
         if not record['use_pricelist']:
             record['pricelist_id'] = False
-        record['_IS_VAT'] = self.env.company.country_id.id in self.env.ref("base.europe").country_ids.ids
+        record['_IS_VAT'] = self.env.company.country_id.id in self._base__europe.country_ids.ids
         return read_records
 
     @api.depends('custom_logo', 'custom_phone', 'custom_receipt_address', 'custom_email', 'custom_website', 'company_id', 'use_custom_receipt_info',
@@ -1014,7 +1020,7 @@ class PosConfig(models.Model):
             "type": "ir.actions.act_window",
             "name": _("How do you want to display prices?"),
             "res_model": "pos.price.inclusion.wizard",
-            "views": [(self.env.ref("point_of_sale.view_pos_price_inclusion_wizard_form").id, "form")],
+            "views": [(self._point_of_sale__view_pos_price_inclusion_wizard_form.id, "form")],
             "view_mode": "form",
             "target": "new",
             "context": {
@@ -1377,7 +1383,7 @@ class PosConfig(models.Model):
         }])
         config._load_onboarding_furniture_demo_data(with_demo_data)
         existing_session = self._point_of_sale__pos_closed_session_2
-        if with_demo_data and self.env.company.id == self.env.ref('base.main_company').id and not existing_session:
+        if with_demo_data and self.env.company.id == self._base__main_company.id and not existing_session:
             convert.convert_file(self._env_with_clean_context(), 'point_of_sale', 'data/orders_demo.xml', idref=None, mode='init', noupdate=True)
         return {'config_id': config.id}
 

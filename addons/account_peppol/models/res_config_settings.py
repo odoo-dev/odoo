@@ -4,6 +4,8 @@ from odoo import _, api, fields, models
 class ResConfigSettings(models.TransientModel):
     _inherit = 'res.config.settings'
 
+    _base__action_view_base_module_update = models.Ref('base.action_view_base_module_update', 'ir.actions.act_window')
+
     routing_scheme = fields.Selection(string="Routing Scheme", related='company_id.partner_id.routing_scheme', readonly=False)
     routing_endpoint = fields.Char(string="Routing Endpoint", related='company_id.partner_id.routing_endpoint', readonly=False)
     account_peppol_edi_user = fields.Many2one(related='company_id.account_peppol_edi_user')
@@ -169,7 +171,7 @@ class ResConfigSettings(models.TransientModel):
             action_name = self.env._("Go to module")
             warning = self.env._("To use the Approved Platform for French E-Invoicing install the module '%s'.", module_name)
         else:
-            action = self.env.ref('base.action_view_base_module_update').id
+            action = self._base__action_view_base_module_update.id
             action_name = self.env._("Update App List")
             warning = self.env._("To use the Approved Platform for French E-Invoicing install the module '%s'.\n"
                                  "The module was not found. Please update the app list first.",

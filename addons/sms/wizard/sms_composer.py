@@ -16,6 +16,7 @@ class SmsComposer(models.TransientModel):
     _description = 'Send SMS Wizard'
 
     _mail__mt_note_optional = models.Ref('mail.mt_note', 'mail.message.subtype', required=False)
+    _sms__sms_composer_view_form_template_save = models.Ref('sms.sms_composer_view_form_template_save', 'ir.ui.view')
 
     @api.model
     def default_get(self, fields):
@@ -224,7 +225,7 @@ class SmsComposer(models.TransientModel):
             'res_model': 'sms.composer',
             'target': 'new',
             'type': 'ir.actions.act_window',
-            'view_id': self.env.ref('sms.sms_composer_view_form_template_save').id,
+            'view_id': self._sms__sms_composer_view_form_template_save.id,
             'view_mode': 'form',
         }
 

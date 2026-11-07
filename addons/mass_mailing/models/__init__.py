@@ -27,3 +27,4 @@ from . import utm_medium
 from . import utm_source
 
 from . import res_groups
+from . import ir_ui_menu

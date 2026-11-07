@@ -5,6 +5,7 @@ from odoo.addons.mail.tools.discuss import Store
 from odoo.tests import tagged
 
 from odoo.addons.project.tests.test_project_sharing import TestProjectSharingCommon
+from odoo.tools import mute_logger
 
 @tagged('post_install', '-at_install')
 class TestPortalTimesheet(TestProjectSharingCommon):
@@ -47,7 +48,9 @@ class TestPortalTimesheet(TestProjectSharingCommon):
                 elif view_type == 'kanban':
                     self.assertEqual(view_id, portal_kanban_view_id)
 
-            self.env['ir.ui.view'].browse([portal_tree_view_id, portal_form_view_id, portal_kanban_view_id]).unlink()
+            # remove the views, even if some are protected by a models.Ref
+            with mute_logger('odoo.models'):
+                self.env['ir.ui.view'].browse([portal_tree_view_id, portal_form_view_id, portal_kanban_view_id]).with_context(force_delete=True).unlink()
 
         action = self.task_portal.with_user(self.user_portal).action_view_subtask_timesheet()
         for view_id, view_type in action['views']:

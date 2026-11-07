@@ -5,6 +5,8 @@ from odoo import models
 class AccountMove(models.Model):
     _inherit = 'account.move'
 
+    _l10n_au__account_tag_dgst = models.Ref('l10n_au.account_tag_dgst', 'account.account.tag')
+
     def _get_name_invoice_report(self):
         if self.company_id.account_fiscal_country_id.code == 'AU':
             return 'l10n_au.report_invoice_document'
@@ -24,7 +26,7 @@ class AccountMove(models.Model):
             # We identify that it is DGST based on a tag on the account.
             # This is the simplest solution to keep it configurable while avoiding a new setting for a niche feature.
             # At worse, they don't get the correct account assigned automatically and need manual adjustment.
-            with_dgst_account = self.invoice_line_ids.account_id.tag_ids == self.env.ref("l10n_au.account_tag_dgst")
+            with_dgst_account = self.invoice_line_ids.account_id.tag_ids == self._l10n_au__account_tag_dgst
             if with_dgst_account:
                 # In this case, we want the balancing line to balance IN THE SAME ACCOUNT.
                 return self.invoice_line_ids.account_id.id

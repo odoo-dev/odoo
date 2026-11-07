@@ -6,6 +6,8 @@ from odoo import fields, models
 class DigestDigest(models.Model):
     _inherit = "digest.digest"
 
+    _sale__sale_menu_root = models.Ref('sale.sale_menu_root', 'ir.ui.menu')
+
     kpi_all_sale_total = fields.Boolean("All Sales")
     kpi_all_sale_total_value = fields.Monetary(compute="_compute_kpi_sale_total_value")
 
@@ -21,7 +23,7 @@ class DigestDigest(models.Model):
 
     def _get_kpi_custom_settings(self, company, user):
         res = super()._get_kpi_custom_settings(company, user)
-        menu_id = self.env.ref("sale.sale_menu_root").id
+        menu_id = self._sale__sale_menu_root.id
         res["kpi_action"]["kpi_all_sale_total"] = (
             f"sale.report_all_channels_sales_action?menu_id={menu_id}"
         )

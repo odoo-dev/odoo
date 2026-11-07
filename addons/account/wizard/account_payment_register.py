@@ -14,6 +14,9 @@ class AccountPaymentRegister(models.TransientModel):
     _description = 'Pay'
     _check_company_auto = True
 
+    _account__partner_missing_account_list_view = models.Ref('account.partner_missing_account_list_view', 'ir.ui.view')
+    _account__view_partner_bank_form_inherit_account = models.Ref('account.view_partner_bank_form_inherit_account', 'ir.ui.view')
+
     # == Business fields ==
     payment_date = fields.Date(string="Payment Date", required=True,
         default=fields.Date.context_today)
@@ -1430,13 +1433,13 @@ class AccountPaymentRegister(models.TransientModel):
                 "res_model": "res.partner.bank",
                 "type": "ir.actions.act_window",
                 "res_id": self.untrusted_bank_ids.id,
-                "views": [[self.env.ref("account.view_partner_bank_form_inherit_account").id, "form"]],
+                "views": [[self._account__view_partner_bank_form_inherit_account.id, "form"]],
             }
         else:
             action = {
                 "type": "ir.actions.act_window",
                 "res_model": "res.partner.bank",
-                "views": [[False, "list"], [self.env.ref("account.view_partner_bank_form_inherit_account").id, "form"]],
+                "views": [[False, "list"], [self._account__view_partner_bank_form_inherit_account.id, "form"]],
                 "domain": [["id", "in", self.untrusted_bank_ids.ids]],
             }
 
@@ -1446,6 +1449,6 @@ class AccountPaymentRegister(models.TransientModel):
         self.ensure_one()
         vals = {}
         if len(self.missing_account_partners) > 1:
-            listview_id = self.env.ref('account.partner_missing_account_list_view').id
+            listview_id = self._account__partner_missing_account_list_view.id
             vals['views'] = [(listview_id, 'list'), (False, "form")]
         return self.missing_account_partners._get_records_action(**vals)

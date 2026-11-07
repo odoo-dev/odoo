@@ -4,6 +4,8 @@ from odoo import models
 class AccountJournal(models.Model):
     _inherit = 'account.journal'
 
+    _account__action_account_config = models.Ref('account.action_account_config', 'ir.actions.act_window')
+
     def button_fetch_in_einvoices(self):
         """
         Extend to also fetch regulatory messages (exchanged with the PPF).
@@ -31,5 +33,5 @@ class AccountJournal(models.Model):
             }
         return {
             'title': self.env._("Electronic Invoicing Settings"),
-            'action': self.env.ref('account.action_account_config')._get_action_dict(),
+            'action': self._account__action_account_config._get_action_dict(),
         }

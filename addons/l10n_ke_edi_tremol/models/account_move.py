@@ -14,6 +14,8 @@ _logger = logging.getLogger(__name__)
 class AccountMove(models.Model):
     _inherit = 'account.move'
 
+    _base__KES = models.Ref('base.KES', 'res.currency')
+
     l10n_ke_cu_datetime = fields.Datetime(string='CU Signing Date and Time', copy=False)
     l10n_ke_cu_serial_number = fields.Char(string='CU Serial Number', copy=False)
     l10n_ke_cu_invoice_number = fields.Char(string='CU Invoice Number', copy=False)
@@ -63,7 +65,7 @@ class AccountMove(models.Model):
             if move.country_code != 'KE':
                 move_errors.append(_("This invoice is not a Kenyan invoice and therefore can not be sent to the device."))
 
-            if move.company_id.currency_id != self.env.ref('base.KES'):
+            if move.company_id.currency_id != self._base__KES:
                 move_errors.append(_("This invoice's company currency is not in Kenyan Shillings, conversion to KES is not possible."))
 
             if move.state != 'posted':

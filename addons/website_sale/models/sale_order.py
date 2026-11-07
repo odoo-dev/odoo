@@ -28,6 +28,7 @@ class SaleOrder(models.Model):
 
     _account__account_payment_term_immediate = models.Ref('account.account_payment_term_immediate', 'account.payment.term', required=False)
     _website_sale__mail_template_sale_cart_recovery = models.Ref('website_sale.mail_template_sale_cart_recovery', 'mail.template', required=False)
+    _mail__email_compose_message_wizard_form = models.Ref('mail.email_compose_message_wizard_form', 'ir.ui.view')
 
     website_id = fields.Many2one(
         string="eCommerce Website",
@@ -243,7 +244,7 @@ class SaleOrder(models.Model):
     def action_recovery_email_send(self):
         for order in self:
             order._portal_ensure_token()
-        composer_form_view_id = self.env.ref("mail.email_compose_message_wizard_form").id
+        composer_form_view_id = self._mail__email_compose_message_wizard_form.id
 
         template_id = self._get_cart_recovery_template().id
 

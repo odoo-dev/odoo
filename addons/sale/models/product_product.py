@@ -10,6 +10,8 @@ from odoo.fields import Domain
 class ProductProduct(models.Model):
     _inherit = "product.product"
 
+    _sale__sale_menu_root = models.Ref('sale.sale_menu_root', 'ir.ui.menu')
+
     sales_count = fields.Float(compute="_compute_sales_count", string="Sold", digits="Product Unit")
 
     previously_bought_by_customer = fields.Boolean(
@@ -126,7 +128,7 @@ class ProductProduct(models.Model):
         return action
 
     def _get_backend_root_menu_ids(self):
-        return super()._get_backend_root_menu_ids() + [self.env.ref("sale.sale_menu_root").id]
+        return super()._get_backend_root_menu_ids() + [self._sale__sale_menu_root.id]
 
     def _get_invoice_policy(self):
         return self.invoice_policy

@@ -32,6 +32,9 @@ class DeliveryCarrier(models.Model):
        (they are documented hereunder)
     """
 
+    _delivery__delivery_provider_module_kanban = models.Ref('delivery.delivery_provider_module_kanban', 'ir.ui.view')
+    _delivery__delivery_provider_module_list = models.Ref('delivery.delivery_provider_module_list', 'ir.ui.view')
+
     name = fields.Char(string="Delivery Method", translate=True, required=True)
     active = fields.Boolean(default=True)
     sequence = fields.Integer(help="Determine the display order", default=10)
@@ -257,8 +260,8 @@ class DeliveryCarrier(models.Model):
             "res_model": "ir.module.module",
             "view_mode": "kanban,list",
             "views": [
-                (self.env.ref("delivery.delivery_provider_module_kanban").id, "kanban"),
-                (self.env.ref("delivery.delivery_provider_module_list").id, "list"),
+                (self._delivery__delivery_provider_module_kanban.id, "kanban"),
+                (self._delivery__delivery_provider_module_list.id, "list"),
             ],
             "domain": [["name", "=like", "delivery_%"], ["name", "not in", exclude_apps]],
             "type": "ir.actions.act_window",

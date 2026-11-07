@@ -13,6 +13,8 @@ class MailActivityPlanTemplate(models.Model):
     _order = 'sequence, id'
     _rec_name = 'summary'
 
+    _mail__mail_activity_data_todo = models.Ref('mail.mail_activity_data_todo', 'mail.activity.type')
+
     plan_id = fields.Many2one(
         'mail.activity.plan', string="Plan",
         ondelete='cascade', required=True, index=True)
@@ -21,7 +23,7 @@ class MailActivityPlanTemplate(models.Model):
     sequence = fields.Integer(default=10)
     activity_type_id = fields.Many2one(
         'mail.activity.type', 'Activity Type',
-        default=lambda self: self.env.ref('mail.mail_activity_data_todo'),
+        default=lambda self: self._mail__mail_activity_data_todo,
         domain="['|', ('res_model', '=', False), '&', ('res_model', '!=', False), ('res_model', '=', parent.res_model)]",
         ondelete='restrict', required=True, index=True,
     )

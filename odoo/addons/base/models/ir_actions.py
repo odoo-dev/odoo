@@ -59,6 +59,9 @@ class IrActionsActions(models.Model):
     _order = 'name, id'
     _allow_sudo_commands = False
 
+    _base__action_client_base_menu = models.Ref('base.action_client_base_menu', 'ir.actions.client', required=False)
+    _base__open_menu = models.Ref('base.open_menu', 'ir.actions.todo', required=False)
+
     _path_unique = models.Constraint(
         'unique(path)',
         "Path to show in the URL must be unique! Please choose another one.",
@@ -110,12 +113,10 @@ class IrActionsActions(models.Model):
 
     @api.ondelete(at_uninstall=True)
     def _unlink_reset_todo_open_menu(self):
-        try:
-            todo_open_menu = self.env.ref('base.open_menu')
-            todo_default_action = self.env.ref('base.action_client_base_menu')
-            todo_default_action_id = todo_default_action.id  # different model, same id
-        except ValueError:
+        todo_open_menu = self._base__open_menu
+        if not (todo_open_menu and self._base__action_client_base_menu):
             return
+        todo_default_action_id = self._base__action_client_base_menu.id  # different model, same id
         if todo_open_menu.action_id.id in self.ids:
             todo_open_menu.action_id = todo_default_action_id
 
@@ -1401,6 +1402,10 @@ class IrActionsTodo(models.Model):
     _order = "sequence, id"
     _allow_sudo_commands = False
 
+    _base__action_client_base_menu = models.Ref('base.action_client_base_menu', 'ir.actions.client', required=False)
+    _base__demo_failure_todo = models.Ref('base.demo_failure_todo', 'ir.actions.todo', required=False)
+    _base__open_menu = models.Ref('base.open_menu', 'ir.actions.todo', required=False)
+
     action_id = fields.Many2one('ir.actions.actions', string='Action', required=True, index=True, ondelete='cascade')
     sequence = fields.Integer(default=10)
     state = fields.Selection([('open', 'To Do'), ('done', 'Done')], string='Status', default='open', required=True)
@@ -1428,14 +1433,12 @@ class IrActionsTodo(models.Model):
 
     def unlink(self):
         if self:
-            try:
-                todo_open_menu = self.env.ref('base.open_menu')
-                # don't remove base.open_menu todo but set its original action
-                if todo_open_menu in self:
-                    todo_open_menu.action_id = self.env.ref('base.action_client_base_menu').id
-                    self -= todo_open_menu
-            except ValueError:
-                pass
+            todo_open_menu = self._base__open_menu
+            todo_default_action = self._base__action_client_base_menu
+            # don't remove base.open_menu todo but set its original action
+            if todo_open_menu in self and todo_default_action:
+                todo_open_menu.action_id = todo_default_action.id
+                self -= todo_open_menu
         return super().unlink()
 
     def action_launch(self):

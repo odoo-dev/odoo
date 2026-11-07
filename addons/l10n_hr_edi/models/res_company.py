@@ -21,6 +21,8 @@ _logger = logging.getLogger(__name__)
 class ResCompany(models.Model):
     _inherit = 'res.company'
 
+    _l10n_hr_edi__ir_cron_mer_get_new_documents = models.Ref('l10n_hr_edi.ir_cron_mer_get_new_documents', 'ir.cron')
+
     l10n_hr_mer_username = fields.Char("MojEracun username", groups="account.group_account_manager")
     l10n_hr_mer_password = fields.Char("MojEracun password", groups="account.group_account_manager")
     l10n_hr_mer_company_ident = fields.Char("MojEracun CompanyId", groups="account.group_account_manager")
@@ -301,7 +303,7 @@ class ResCompany(models.Model):
 
             imported_documents.update({company.id: proxy_acks})
         if need_retrigger:
-            self.env.ref('l10n_hr_edi.ir_cron_mer_get_new_documents')._trigger()
+            self._l10n_hr_edi__ir_cron_mer_get_new_documents._trigger()
         # Return the documents that were successfully imported
         return imported_documents
 

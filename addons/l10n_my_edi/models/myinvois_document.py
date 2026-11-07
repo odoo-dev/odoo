@@ -37,6 +37,9 @@ class MyInvoisDocument(models.Model):
     _check_company_auto = True
     _sequence_date_field = "myinvois_issuance_date"
 
+    _l10n_my_edi__myinvois_document_form_view = models.Ref('l10n_my_edi.myinvois_document_form_view', 'ir.ui.view')
+    _l10n_my_edi__myinvois_document_list_view = models.Ref('l10n_my_edi.myinvois_document_list_view', 'ir.ui.view')
+
     # ------------------
     # Fields declaration
     # ------------------
@@ -498,7 +501,7 @@ class MyInvoisDocument(models.Model):
                 'res_model': 'myinvois.document',
                 'view_mode': 'form',
                 'res_id': self.id,
-                'views': [(self.env.ref('l10n_my_edi.myinvois_document_form_view').id, 'form')],
+                'views': [(self._l10n_my_edi__myinvois_document_form_view.id, 'form')],
             }
         else:
             action_vals = {
@@ -506,7 +509,7 @@ class MyInvoisDocument(models.Model):
                 'type': 'ir.actions.act_window',
                 'res_model': 'myinvois.document',
                 'view_mode': 'list,form',
-                'views': [(self.env.ref('l10n_my_edi.myinvois_document_list_view').id, 'list'), (self.env.ref('l10n_my_edi.myinvois_document_form_view').id, 'form')],
+                'views': [(self._l10n_my_edi__myinvois_document_list_view.id, 'list'), (self._l10n_my_edi__myinvois_document_form_view.id, 'form')],
                 'domain': [('id', 'in', self.ids)],
             }
         return action_vals

@@ -4,6 +4,8 @@ from odoo import models
 class AccountMoveLine(models.Model):
     _inherit = 'account.move.line'
 
+    _l10n_in__view_move_line_tree_hsn_l10n_in = models.Ref('l10n_in.view_move_line_tree_hsn_l10n_in', 'ir.ui.view')
+
     # E-Invoice Methods
     def _l10n_in_is_global_discount(self):
         self.ensure_one()
@@ -51,7 +53,7 @@ class AccountMoveLine(models.Model):
                     name=_("Check Invoice Line(s)"),
                     domain=[('id', 'in', lines.ids)],
                     views=[(
-                        self.env.ref('l10n_in.view_move_line_tree_hsn_l10n_in').id,
+                        self._l10n_in__view_move_line_tree_hsn_l10n_in.id,
                         'list'
                     )],
                 ),

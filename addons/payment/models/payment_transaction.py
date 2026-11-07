@@ -27,6 +27,9 @@ class PaymentTransaction(models.Model):
     _order = "id desc"
     _rec_name = "reference"
 
+    _payment__post_processing_cron = models.Ref('payment.post_processing_cron', 'ir.cron')
+    _payment__processing_cron = models.Ref('payment.processing_cron', 'ir.cron')
+
     @api.model
     def _lang_get(self):
         return self.env["res.lang"].get_installed()
@@ -914,7 +917,7 @@ class PaymentTransaction(models.Model):
         self.ensure_one()
 
         self.env["payment.data"].create({"transaction_id": self.id, "payload": payment_data})
-        self.env.ref("payment.processing_cron")._trigger()
+        self._payment__processing_cron._trigger()
 
     # === LIFECYCLE METHODS - PROCESSING === #
 
@@ -928,12 +931,11 @@ class PaymentTransaction(models.Model):
 
         :rtype: None
         """
-        processing_cron = self.env.ref("payment.processing_cron")
         try:
-            processing_cron.lock_for_update(allow_referencing=True)  # Lock first to avoid UserError
+            self._payment__processing_cron.lock_for_update(allow_referencing=True)  # Lock first to avoid UserError
         except LockError:  # The cron is already running
             return  # Nothing to do; it will notify the client when the transaction is processed
-        processing_cron.sudo().method_direct_trigger()  # In sudo mode to run as superuser
+        self._payment__processing_cron.sudo().method_direct_trigger()  # In sudo mode to run as superuser
 
     def _process(self, payment_data):
         """Process the payment data to update the internal state.
@@ -1297,7 +1299,7 @@ class PaymentTransaction(models.Model):
                 "Failed to post-process transactions %s; deferring to the post-processing cron.",
                 ", ".join(self.mapped("reference")),
             )
-            self.env.ref("payment.post_processing_cron")._trigger()
+            self._payment__post_processing_cron._trigger()
         self._notify_status()
 
     def _post_process_with_lock(self):

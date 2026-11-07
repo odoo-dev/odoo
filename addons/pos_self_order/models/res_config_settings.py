@@ -11,6 +11,8 @@ from werkzeug.urls import url_unquote
 class ResConfigSettings(models.TransientModel):
     _inherit = "res.config.settings"
 
+    _pos_self_order__report_self_order_qr_codes_page = models.Ref('pos_self_order.report_self_order_qr_codes_page', 'ir.actions.report')
+
     pos_self_ordering_service_mode = fields.Selection(related="pos_config_id.self_ordering_service_mode", readonly=False, required=True)
     pos_self_ordering_mode = fields.Selection(related="pos_config_id.self_ordering_mode", readonly=False, required=True)
     pos_self_ordering_default_language_id = fields.Many2one(related="pos_config_id.self_ordering_default_language_id", readonly=False)
@@ -184,7 +186,7 @@ class ResConfigSettings(models.TransientModel):
                 url = url_unquote(self.pos_config_id._get_self_order_url(table_ids[0].id))
                 name = table_ids[0].table_number
 
-        return self.env.ref("pos_self_order.report_self_order_qr_codes_page").report_action(
+        return self._pos_self_order__report_self_order_qr_codes_page.report_action(
             [], data={
                 'pos_name': self.pos_config_id.name,
                 'floors': [

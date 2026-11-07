@@ -31,6 +31,9 @@ class HrVersion(models.Model):
     _order = 'date_version'
     _rec_name = 'name'
 
+    _hr__group_hr_user = models.Ref('hr.group_hr_user', 'res.groups')
+    _hr__hr_contract_template_form_view = models.Ref('hr.hr_contract_template_form_view', 'ir.ui.view')
+
     def _get_default_address_id(self):
         address = self.env.company.partner_id.address_get(['default'])
         return address['default'] if address else False
@@ -42,7 +45,7 @@ class HrVersion(models.Model):
         )
 
     def _get_hr_responsible_domain(self):
-        return [('share', '=', False), ('company_ids', 'in', self.env.company.ids), ('all_group_ids', 'in', self.env.ref('hr.group_hr_user').id)]
+        return [('share', '=', False), ('company_ids', 'in', self.env.company.ids), ('all_group_ids', 'in', self._hr__group_hr_user.id)]
 
     company_id = fields.Many2one('res.company', compute='_compute_company_id', readonly=False,
                                  store=True, index=True, default=lambda self: self.env.company, tracking=1)
@@ -949,7 +952,7 @@ class HrVersion(models.Model):
 
     def action_open_version_form_view(self):
         self.ensure_one()
-        view_id = self.env.ref('hr.hr_contract_template_form_view').id
+        view_id = self._hr__hr_contract_template_form_view.id
 
         return {
             'type': 'ir.actions.act_window',

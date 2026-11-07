@@ -6,6 +6,8 @@ from odoo import models
 class ResCompany(models.Model):
     _inherit = 'res.company'
 
+    _payment__payment_provider_worldline = models.Ref('payment.payment_provider_worldline', 'payment.provider')
+
     def write(self, vals):
         fr_before = self.filtered('is_france_country')
         result = super().write(vals)
@@ -16,7 +18,7 @@ class ResCompany(models.Model):
                     ('code', '=', 'worldline'),
                     ('company_id', 'in', updated_companies.ids),
                 ])
-                or self.env.ref('payment.payment_provider_worldline').sudo().filtered(
+                or self._payment__payment_provider_worldline.sudo().filtered(
                     lambda provider: provider.company_id in updated_companies
                 )
             )

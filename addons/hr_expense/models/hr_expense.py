@@ -53,6 +53,11 @@ class HrExpense(models.Model):
     _hr_expense__action_report_hr_expense = models.Ref('hr_expense.action_report_hr_expense', 'ir.actions.report', required=False)
     _hr_expense__mail_alias_expense = models.Ref('hr_expense.mail_alias_expense', 'mail.alias', required=False)
     _mail__mt_comment_optional = models.Ref('mail.mt_comment', 'mail.message.subtype', required=False)
+    _hr_expense__group_hr_expense_team_approver = models.Ref('hr_expense.group_hr_expense_team_approver', 'res.groups')
+    _hr_expense__mt_expense_approved = models.Ref('hr_expense.mt_expense_approved', 'mail.message.subtype')
+    _hr_expense__mt_expense_paid = models.Ref('hr_expense.mt_expense_paid', 'mail.message.subtype')
+    _hr_expense__mt_expense_refused = models.Ref('hr_expense.mt_expense_refused', 'mail.message.subtype')
+    _hr_expense__mt_expense_reset = models.Ref('hr_expense.mt_expense_reset', 'mail.message.subtype')
 
     @api.model
     def _default_employee_id(self):
@@ -91,7 +96,7 @@ class HrExpense(models.Model):
         comodel_name='res.users',
         string="Approver",
         compute='_compute_from_employee_id', store=True,
-        domain=lambda self: [('share', '=', False), '|', ('employee_id.expense_manager_id', 'in', self.env.user.id), ('all_group_ids', 'in', self.env.ref('hr_expense.group_hr_expense_team_approver').ids)],
+        domain=lambda self: [('share', '=', False), '|', ('employee_id.expense_manager_id', 'in', self.env.user.id), ('all_group_ids', 'in', self._hr_expense__group_hr_expense_team_approver.ids)],
         copy=False,
         tracking=True,
     )
@@ -1202,16 +1207,16 @@ class HrExpense(models.Model):
 
         match self.state:
             case 'draft':
-                return self.env.ref('hr_expense.mt_expense_reset')
+                return self._hr_expense__mt_expense_reset
             case 'refused':
-                return self.env.ref('hr_expense.mt_expense_refused')
+                return self._hr_expense__mt_expense_refused
             case 'paid':
-                return self.env.ref('hr_expense.mt_expense_paid')
+                return self._hr_expense__mt_expense_paid
             case 'approved':
                 if track_init_values['state'] in {'posted', 'in_payment', 'paid'}:  # Reverting state
                     subtype = 'hr_expense.mt_expense_entry_draft' if self.account_move_id else 'hr_expense.mt_expense_entry_delete'
                     return self.env.ref(subtype)
-                return self.env.ref('hr_expense.mt_expense_approved')
+                return self._hr_expense__mt_expense_approved
             case _:
                 return super()._track_log_get_default_subtype(track_init_values)
 

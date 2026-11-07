@@ -19,10 +19,9 @@ def _update_demo_data(env):
     module_mass_mailing = env['ir.module.module']._get('mass_mailing')
     if module_mass_mailing.demo:
         # mass_mail_sale_order_0
-        mass_mail_sale_order_0 = env.ref('mass_mailing.mass_mail_sale_order_0')
         context = {
-            'company_id': env.ref('base.main_company'),
-            'res_company': env.ref('base.main_company')
+            'company_id': env['res.company']._base__main_company,
+            'res_company': env['res.company']._base__main_company
         }
         mailing_header = env['ir.qweb']._render(
             'mass_mailing.s_mail_block_header_logo_and_stacked_menu',
@@ -32,14 +31,13 @@ def _update_demo_data(env):
             'mass_mailing.s_mail_block_footer_social',
             context
         )
-        root = lxml.html.fromstring(mass_mail_sale_order_0.body_arch)
+        root = lxml.html.fromstring(env['mailing.mailing']._mass_mailing__mass_mail_sale_order_0.body_arch)
         section = root.find('.//section')
         header = lxml.html.fromstring(mailing_header)
         footer = lxml.html.fromstring(mailing_footer)
         section.addprevious(header)
         section.addnext(footer)
-        mass_mail_sale_order_0.body_arch = lxml.html.tostring(root, encoding='unicode')
+        env['mailing.mailing']._mass_mailing__mass_mail_sale_order_0.body_arch = lxml.html.tostring(root, encoding='unicode')
 
         # mass_mail_1
-        mass_mail_1 = env.ref('mass_mailing.mass_mail_1')
-        mass_mail_1.body_html = ""
+        env['mailing.mailing']._mass_mailing__mass_mail_1.body_html = ""

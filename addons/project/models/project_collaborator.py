@@ -7,6 +7,8 @@ class ProjectCollaborator(models.Model):
     _name = 'project.collaborator'
     _description = 'Collaborators in project shared'
 
+    _project__project_task_rule_portal_project_sharing = models.Ref('project.project_task_rule_portal_project_sharing', 'ir.access')
+
     project_id = fields.Many2one('project.project', 'Project Shared', domain=[('privacy_visibility', 'in', ['portal', 'invited_users']), ('is_template', '=', False)], required=True, readonly=True, export_string_translation=False)
     partner_id = fields.Many2one('res.partner', 'Collaborator', required=True, readonly=True, index=True, export_string_translation=False)
     partner_email = fields.Char(related='partner_id.email', export_string_translation=False)
@@ -52,6 +54,6 @@ class ProjectCollaborator(models.Model):
 
             :param active: contains boolean value, True to enable the project sharing feature, otherwise we disable the feature.
         """
-        task_portal_ir_rule = self.env.ref('project.project_task_rule_portal_project_sharing').sudo()
+        task_portal_ir_rule = self._project__project_task_rule_portal_project_sharing.sudo()
         if task_portal_ir_rule.active != active:
             task_portal_ir_rule.write({'active': active})

@@ -24,6 +24,8 @@ ETA_INVOICE_DUMMY_RESPONSE = {
 class AccountMove(models.Model):
     _inherit = 'account.move'
 
+    _base__EGP = models.Ref('base.EGP', 'res.currency')
+
     l10n_eg_long_id = fields.Char(string="ETA Long ID", compute='_compute_eta_long_id')
     l10n_eg_qr_code = fields.Char(string="ETA QR Code", compute='_compute_eta_qr_code_str')
     l10n_eg_uuid = fields.Char(
@@ -568,7 +570,7 @@ class AccountMove(models.Model):
             })
             totals['discount_total'] += discount_amount
             totals['total_price_subtotal_before_discount'] += price_subtotal_before_discount
-            if self.currency_id != self.env.ref('base.EGP'):
+            if self.currency_id != self._base__EGP:
                 lines[-1]['unitValue']['currencyExchangeRate'] = self._l10n_eg_edi_round(self._l10n_eg_edi_exchange_currency_rate())
                 lines[-1]['unitValue']['amountSold'] = line.price_unit
         return lines, totals

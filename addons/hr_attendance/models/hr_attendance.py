@@ -31,6 +31,9 @@ class HrAttendance(models.Model):
     _time_rule_span_end_field = 'check_out'
 
     _hr_attendance__resource_calendar_std_38h = models.Ref('hr_attendance.resource_calendar_std_38h', 'resource.calendar', required=False)
+    _hr__employee_eg = models.Ref('hr.employee_eg', 'hr.employee', required=False)
+    _hr__employee_mw = models.Ref('hr.employee_mw', 'hr.employee', required=False)
+    _hr__employee_sj = models.Ref('hr.employee_sj', 'hr.employee', required=False)
 
     def _default_employee(self):
         return self.env.user.employee_id
@@ -371,9 +374,9 @@ class HrAttendance(models.Model):
         # Load employees, schedules, departments and partners
         convert.convert_file(env_sudo, 'hr_attendance', 'data/scenarios/hr_attendance_scenario.xml', None, mode='init')
 
-        employee_sj = self.env.ref('hr.employee_sj')
-        employee_mw = self.env.ref('hr.employee_mw')
-        employee_eg = self.env.ref('hr.employee_eg')
+        employee_sj = self._hr__employee_sj
+        employee_mw = self._hr__employee_mw
+        employee_eg = self._hr__employee_eg
 
         # Retrieve employee from xml file
         # Calculate attendances records for the previous month and the current until today

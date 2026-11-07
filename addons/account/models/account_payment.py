@@ -12,6 +12,8 @@ class AccountPayment(models.Model):
     _order = "date desc, name desc"
     _check_company_auto = True
 
+    _account__action_report_payment_receipt = models.Ref('account.action_report_payment_receipt', 'ir.actions.report')
+
     # == Business fields ==
     name = fields.Char(string="Number", compute='_compute_name', store=True)
     date = fields.Date(default=fields.Date.context_today, required=True, tracking=True)
@@ -1231,8 +1233,7 @@ class AccountPayment(models.Model):
         (self.move_id - draft_moves).button_cancel()
 
     def action_print_receipt(self):
-        report_action = self.env.ref("account.action_report_payment_receipt")
-        return report_action.report_action(self)
+        return self._account__action_report_payment_receipt.report_action(self)
 
     def button_request_cancel(self):
         return self.move_id.button_request_cancel()

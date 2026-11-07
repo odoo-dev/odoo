@@ -7,6 +7,8 @@ from odoo import fields, models, _
 class MrpWorkorder(models.Model):
     _inherit = 'mrp.workorder'
 
+    _uom__product_uom_hour = models.Ref('uom.product_uom_hour', 'uom.uom')
+
     mo_analytic_account_line_ids = fields.Many2many('account.analytic.line', 'mrp_workorder_mo_analytic_rel', copy=False)
     wc_analytic_account_line_ids = fields.Many2many('account.analytic.line', 'mrp_workorder_wc_analytic_rel', copy=False)
 
@@ -33,7 +35,7 @@ class MrpWorkorder(models.Model):
             **account_field_values,
             'unit_amount': unit_amount,
             'product_id': self.product_id.id,
-            'product_uom_id': self.env.ref('uom.product_uom_hour').id,
+            'product_uom_id': self._uom__product_uom_hour.id,
             'company_id': self.company_id.id,
             'ref': self.production_id.name,
             'category': 'manufacturing_order',

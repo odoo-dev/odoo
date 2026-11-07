@@ -10,6 +10,8 @@ class HrHolidaysSummaryEmployee(models.TransientModel):
 
     _description = 'HR Time Off Summary Report By Employee'
 
+    _hr_holidays__action_report_holidayssummary = models.Ref('hr_holidays.action_report_holidayssummary', 'ir.actions.report')
+
     date_from = fields.Date(string='From', required=True, default=lambda *a: time.strftime('%Y-%m-01'))
     emp = fields.Many2many('hr.employee', 'summary_emp_rel', 'sum_id', 'emp_id', string='Employee(s)')
     holiday_type = fields.Selection([
@@ -28,4 +30,4 @@ class HrHolidaysSummaryEmployee(models.TransientModel):
             'model': 'hr.employee',
             'form': data
         }
-        return self.env.ref('hr_holidays.action_report_holidayssummary').report_action(employees, data=datas)
+        return self._hr_holidays__action_report_holidayssummary.report_action(employees, data=datas)

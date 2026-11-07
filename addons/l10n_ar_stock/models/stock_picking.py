@@ -5,6 +5,10 @@ from odoo.exceptions import UserError
 class StockPicking(models.Model):
     _inherit = 'stock.picking'
 
+    _l10n_ar_stock__action_delivery_guide_report_pdf = models.Ref('l10n_ar_stock.action_delivery_guide_report_pdf', 'ir.actions.report')
+    _l10n_ar_stock__email_template_ar_remitos_delivery_guide = models.Ref('l10n_ar_stock.email_template_ar_remitos_delivery_guide', 'mail.template')
+    _l10n_ar_stock__ir_cron_l10n_ar_send_delivery_guide = models.Ref('l10n_ar_stock.ir_cron_l10n_ar_send_delivery_guide', 'ir.cron')
+
     l10n_ar_delivery_guide_number = fields.Char(
         string="Delivery Guide No.",
         copy=False,
@@ -89,7 +93,7 @@ class StockPicking(models.Model):
             self._l10n_ar_send_delivery_guide(force_send=True)
             return None
         self.l10n_ar_delivery_guide_cron_user_id = self.env.user
-        self.env.ref('l10n_ar_stock.ir_cron_l10n_ar_send_delivery_guide')._trigger()
+        self._l10n_ar_stock__ir_cron_l10n_ar_send_delivery_guide._trigger()
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
@@ -136,10 +140,9 @@ class StockPicking(models.Model):
         PDFs are rendered in a single wkhtmltopdf call and split per record,
         which is dramatically faster than per-record rendering for batches.
         """
-        template = self.env.ref('l10n_ar_stock.email_template_ar_remitos_delivery_guide')
-        pdf_action = self.env.ref('l10n_ar_stock.action_delivery_guide_report_pdf')
+        template = self._l10n_ar_stock__email_template_ar_remitos_delivery_guide
 
-        pdf_contents = self._l10n_ar_render_delivery_guide_pdfs(pdf_action)
+        pdf_contents = self._l10n_ar_render_delivery_guide_pdfs(self._l10n_ar_stock__action_delivery_guide_report_pdf)
 
         attachment_vals = [{
             'name': f'Remito - {picking.l10n_ar_delivery_guide_number}.pdf',

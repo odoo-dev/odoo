@@ -200,7 +200,7 @@ class WebJsonController(http.Controller):
 
     def _check_json_route_active(self):
         # experimental route, only enabled in demo mode or when explicitly set
-        if not (request.env.ref('base.module_base').demo
+        if not (request.env['ir.module.module']._base__module_base.demo
                 or request.env['ir.config_parameter'].sudo().get_bool('web.json.enabled')):
             raise NotFound()
 

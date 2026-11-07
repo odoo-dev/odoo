@@ -35,6 +35,8 @@ class MailMail(models.Model):
     _order = 'id desc'
     _rec_name = 'subject'
 
+    _mail__ir_cron_mail_scheduler_action = models.Ref('mail.ir_cron_mail_scheduler_action', 'ir.cron')
+
     def _access_domain(self, operation):
         if not self.env['mail.message'].has_access(operation):
             return Domain.FALSE
@@ -716,7 +718,7 @@ class MailMail(models.Model):
 
                 mail.scheduled_date = server_limit_minute
 
-            self.env.ref('mail.ir_cron_mail_scheduler_action')._trigger(
+            self._mail__ir_cron_mail_scheduler_action._trigger(
                 min(to_delay.mapped('scheduled_date')) + relativedelta(seconds=59))
 
         _logger.info(

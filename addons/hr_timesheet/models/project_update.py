@@ -6,6 +6,8 @@ from odoo import fields, models, api
 class ProjectUpdate(models.Model):
     _inherit = "project.update"
 
+    _uom__product_uom_hour = models.Ref('uom.product_uom_hour', 'uom.uom')
+
     display_timesheet_stats = fields.Boolean(compute="_compute_display_timesheet_stats", export_string_translation=False)
     allocated_time = fields.Integer("Allocated Time", readonly=True)
     timesheet_time = fields.Integer("Timesheet Time", readonly=True)
@@ -27,7 +29,7 @@ class ProjectUpdate(models.Model):
     def create(self, vals_list):
         updates = super().create(vals_list)
         encode_uom = self.env.company.timesheet_encode_uom_id
-        ratio = self.env.ref("uom.product_uom_hour").factor / encode_uom.factor
+        ratio = self._uom__product_uom_hour.factor / encode_uom.factor
         for update in updates:
             project = update.project_id
             project.sudo().last_update_id = update

@@ -7,6 +7,8 @@ from odoo import models, _
 class SlideChannel(models.Model):
     _inherit = "slide.channel"
 
+    _base__model_res_partner = models.Ref('base.model_res_partner', 'ir.model')
+
     def action_mass_mailing_attendees(self):
         domain = repr([('slide_channel_ids', 'in', self.ids)])
         mass_mailing_action = dict(
@@ -16,7 +18,7 @@ class SlideChannel(models.Model):
             view_mode='form',
             target='current',
             context=dict(
-                default_mailing_model_id=self.env.ref('base.model_res_partner').id,
+                default_mailing_model_id=self._base__model_res_partner.id,
                 default_mailing_domain=domain,
                 # even if excluded, consider attendee communication might be important
                 # (update on courses, etc)

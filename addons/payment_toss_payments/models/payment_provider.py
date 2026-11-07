@@ -15,6 +15,8 @@ _logger = get_payment_logger(__name__, const.SENSITIVE_KEYS)
 class PaymentProvider(models.Model):
     _inherit = "payment.provider"
 
+    _base__KRW = models.Ref('base.KRW', 'res.currency')
+
     code = fields.Selection(
         selection_add=[("toss_payments", "Toss Payments")],
         ondelete={"toss_payments": "set default"},
@@ -53,7 +55,7 @@ class PaymentProvider(models.Model):
     @api.constrains("available_currency_ids")
     def _check_available_currency_ids_only_contains_supported_currencies(self):
         for provider in self.filtered(lambda p: p.code == "toss_payments"):
-            if provider.available_currency_ids != self.env.ref("base.KRW"):
+            if provider.available_currency_ids != self._base__KRW:
                 raise ValidationError(self.env._("Currencies other than KRW are not supported."))
 
     # === CRUD METHODS === #

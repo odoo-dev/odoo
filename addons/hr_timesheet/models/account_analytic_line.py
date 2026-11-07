@@ -15,6 +15,9 @@ class AccountAnalyticLine(models.Model):
 
     _mrp_account__wip_report = models.Ref('mrp_account.wip_report', 'ir.actions.report', required=False)
     _uom__product_uom_hour_optional = models.Ref('uom.product_uom_hour', 'uom.uom', required=False)
+    _hr_timesheet__timesheet_view_form_portal_user = models.Ref('hr_timesheet.timesheet_view_form_portal_user', 'ir.ui.view')
+    _uom__product_uom_day = models.Ref('uom.product_uom_day', 'uom.uom')
+    _uom__product_uom_hour = models.Ref('uom.product_uom_hour', 'uom.uom')
 
     def _get_favorite_project_id_domain(self, employee_id=False):
         employee_id = employee_id or self.env.user.employee_id.id
@@ -173,7 +176,7 @@ class AccountAnalyticLine(models.Model):
 
     def _compute_calendar_display_name(self):
         companies = self.company_id
-        encoding_in_days_per_company = dict(zip(companies, [company.timesheet_encode_uom_id == self.env.ref('uom.product_uom_day') for company in companies]))
+        encoding_in_days_per_company = dict(zip(companies, [company.timesheet_encode_uom_id == self._uom__product_uom_day for company in companies]))
         for line in self:
             if not line.project_id:
                 line.calendar_display_name = ""
@@ -491,16 +494,14 @@ class AccountAnalyticLine(models.Model):
 
     def _is_timesheet_encode_uom_day(self):
         company_uom = self.env.company.timesheet_encode_uom_id
-        return company_uom == self.env.ref('uom.product_uom_day')
+        return company_uom == self._uom__product_uom_day
 
     def _is_updatable_timesheet(self):
         return True
 
     @api.model
     def _convert_hours_to_days(self, time):
-        uom_hour = self.env.ref('uom.product_uom_hour')
-        uom_day = self.env.ref('uom.product_uom_day')
-        return round(uom_hour._compute_quantity(time, uom_day, raise_if_failure=False), 2)
+        return round(self._uom__product_uom_hour._compute_quantity(time, self._uom__product_uom_day, raise_if_failure=False), 2)
 
     def _get_timesheet_time_day(self):
         return self._convert_hours_to_days(self.unit_amount)
@@ -547,7 +548,7 @@ class AccountAnalyticLine(models.Model):
             'type': 'ir.actions.act_window',
             'res_id': self.id,
             'res_model': 'account.analytic.line',
-            'views': [(self.env.ref('hr_timesheet.timesheet_view_form_portal_user').id, 'form')],
+            'views': [(self._hr_timesheet__timesheet_view_form_portal_user.id, 'form')],
             'context': self.env.context,
         }
 

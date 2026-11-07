@@ -249,6 +249,8 @@ _eu_country_vat = {
 class Picking(models.Model):
     _inherit = 'stock.picking'
 
+    _base__ro = models.Ref('base.ro', 'res.country')
+
     # Document fields
     l10n_ro_edi_stock_document_ids = fields.One2many(comodel_name='l10n_ro_edi.document', inverse_name='picking_id')
     l10n_ro_edi_stock_document_uit = fields.Char(compute='_compute_l10n_ro_edi_stock_current_document_uit', string="eTransport UIT")
@@ -516,7 +518,7 @@ class Picking(models.Model):
             return errors  # return prematurely because all the end location fields depend on this field
 
         # Location fields
-        country_ro = self.env.ref('base.ro')
+        country_ro = self._base__ro
         for location in ('start', 'end'):
             loc_value = data[f'l10n_ro_edi_stock_{location}_loc_type']
             loc_group = _("'Start Location'") if location == 'start' else _("'End Location'")

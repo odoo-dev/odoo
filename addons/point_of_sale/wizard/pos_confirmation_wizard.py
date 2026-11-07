@@ -4,6 +4,8 @@ class PosConfirmationWizard(models.TransientModel):
     _name = 'pos.confirmation.wizard'
     _description = 'Confirmation Wizard'
 
+    _point_of_sale__view_pos_make_invoice = models.Ref('point_of_sale.view_pos_make_invoice', 'ir.ui.view')
+
     def get_selected_orders(self):
         selected_orders = self.env.context.get('orders')
         return self.env['pos.order'].browse(selected_orders)
@@ -22,7 +24,7 @@ class PosConfirmationWizard(models.TransientModel):
         return {
             'name': _('Create Invoice(s)'),
             'view_mode': 'form',
-            'view_id': self.env.ref('point_of_sale.view_pos_make_invoice').id,
+            'view_id': self._point_of_sale__view_pos_make_invoice.id,
             'res_model': 'pos.make.invoice',
             'target': 'new',
             'type': 'ir.actions.act_window',

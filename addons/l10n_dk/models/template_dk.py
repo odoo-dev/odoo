@@ -7,6 +7,8 @@ from odoo.addons.account.models.chart_template import template
 class AccountChartTemplate(models.AbstractModel):
     _inherit = 'account.chart.template'
 
+    _l10n_dk__account_tag_6480 = models.Ref('l10n_dk.account_tag_6480', 'account.account.tag')
+
     @template('dk')
     def _get_dk_template_data(self):
         return {
@@ -42,5 +44,5 @@ class AccountChartTemplate(models.AbstractModel):
     def _setup_utility_bank_accounts(self, template_code, company, template_data):
         super()._setup_utility_bank_accounts(template_code, company, template_data)
         if template_code == 'dk':
-            company.account_journal_suspense_account_id.tag_ids = self.env.ref('l10n_dk.account_tag_6480')
-            company.transfer_account_id.tag_ids = self.env.ref('l10n_dk.account_tag_6480')
+            company.account_journal_suspense_account_id.tag_ids = self._l10n_dk__account_tag_6480
+            company.transfer_account_id.tag_ids = self._l10n_dk__account_tag_6480

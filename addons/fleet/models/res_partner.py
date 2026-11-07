@@ -6,6 +6,8 @@ from odoo import fields, models
 class ResPartner(models.Model):
     _inherit = 'res.partner'
 
+    _fleet__fleet_vehicle_assignation_log_view_list = models.Ref('fleet.fleet_vehicle_assignation_log_view_list', 'ir.ui.view')
+
     partner_cars_count = fields.Integer(
         compute="_compute_partner_cars_count",
         string="Cars Count"
@@ -24,7 +26,7 @@ class ResPartner(models.Model):
         return {
             "type": "ir.actions.act_window",
             "res_model": "fleet.vehicle.assignation.log",
-            "views": [[self.env.ref("fleet.fleet_vehicle_assignation_log_view_list").id, "list"],
+            "views": [[self._fleet__fleet_vehicle_assignation_log_view_list.id, "list"],
                       [False, "form"]],
             "domain": [("driver_id", "in", self.ids)],
             "context": dict(self.env.context, default_driver_id=self.id),

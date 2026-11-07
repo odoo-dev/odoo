@@ -8,6 +8,8 @@ class AccountEdiUBLCenEn16931(models.AbstractModel):
     _inherit = 'account.edi.ubl'
     _description = "UBL CEN-EN16931"
 
+    _base__europe = models.Ref('base.europe', 'res.country.group')
+
     # -------------------------------------------------------------------------
     # EXPORT: NODES
     # -------------------------------------------------------------------------
@@ -140,7 +142,7 @@ class AccountEdiUBLCenEn16931(models.AbstractModel):
         nsmap = document_node['_nsmap']
         invoice = vals['invoice']
 
-        eu_countries = self.env.ref('base.europe').country_ids
+        eu_countries = self._base__europe.country_ids
         intracom_delivery = (
             vals['customer'].country_id in eu_countries
             and vals['supplier'].country_id in eu_countries

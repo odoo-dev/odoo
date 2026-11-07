@@ -7,6 +7,8 @@ class ResPartner(models.Model):
     _name = 'res.partner'
     _inherit = ['res.partner', 'pos.load.mixin']
 
+    _point_of_sale__view_partner_form_pos_ui = models.Ref('point_of_sale.view_partner_form_pos_ui', 'ir.ui.view')
+
     pos_order_count = fields.Integer(
         compute='_compute_pos_order',
         help="The number of point of sales orders related to this customer",
@@ -126,7 +128,7 @@ class ResPartner(models.Model):
             'view_mode': 'form',
             'type': 'ir.actions.act_window',
             'res_model': 'res.partner',
-            'views': [(self.env.ref('point_of_sale.view_partner_form_pos_ui').id, 'form')],
+            'views': [(self._point_of_sale__view_partner_form_pos_ui.id, 'form')],
         }
 
     def _get_current_partner(self, *, pos_order=False, **kwargs):

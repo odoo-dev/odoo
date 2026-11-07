@@ -17,6 +17,8 @@ class MailActivityType(models.Model):
     _order = 'sequence, id'
     _rec_name = 'name'
 
+    _mail__mail_activity_data_todo = models.Ref('mail.mail_activity_data_todo', 'mail.activity.type')
+
     def _get_model_selection(self):
         return [
             (model.model, model.name)
@@ -138,7 +140,7 @@ class MailActivityType(models.Model):
             ))
 
     def action_archive(self):
-        if self.env.ref('mail.mail_activity_data_todo') in self:
+        if self._mail__mail_activity_data_todo in self:
             raise UserError(_("The 'To-Do' activity type is used to create reminders from the top bar menu and the command palette. Consequently, it cannot be archived or deleted."))
         return super().action_archive()
 
@@ -147,7 +149,7 @@ class MailActivityType(models.Model):
         """ When removing an activity type, put activities into a Todo. """
         activities = self.env['mail.activity'].sudo().with_context(active_test=False).search([('activity_type_id', 'in', self.ids)])
         if activities:
-            activities.activity_type_id = self.env.ref('mail.mail_activity_data_todo').id
+            activities.activity_type_id = self._mail__mail_activity_data_todo.id
 
     def _get_date_deadline(self):
         """ Return the activity deadline computed from today or from activity_previous_deadline context variable. """

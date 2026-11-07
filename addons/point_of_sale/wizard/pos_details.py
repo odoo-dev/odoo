@@ -10,6 +10,8 @@ class PosDetailsWizard(models.TransientModel):
     _name = 'pos.details.wizard'
     _description = 'Point of Sale Details Report'
 
+    _point_of_sale__sale_details_report = models.Ref('point_of_sale.sale_details_report', 'ir.actions.report')
+
     def _default_start_date(self):
         """ Find the earliest start_date of the latests sessions """
         values = self.env['pos.session']._read_group([
@@ -36,4 +38,4 @@ class PosDetailsWizard(models.TransientModel):
 
     def generate_report(self):
         data = {'date_start': self.start_date, 'date_stop': self.end_date, 'config_ids': self.pos_config_ids.ids}
-        return self.env.ref('point_of_sale.sale_details_report').report_action([], data=data)
+        return self._point_of_sale__sale_details_report.report_action([], data=data)

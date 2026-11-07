@@ -11,6 +11,8 @@ class SmsTemplate(models.Model):
 
     _unrestricted_rendering = True
 
+    _sms__sms_composer_view_form = models.Ref('sms.sms_composer_view_form', 'ir.ui.view')
+
     @api.model
     def default_get(self, fields):
         res = super().default_get(fields)
@@ -46,7 +48,7 @@ class SmsTemplate(models.Model):
 
     def action_create_sidebar_action(self):
         ActWindow = self.env['ir.actions.act_window']
-        view = self.env.ref('sms.sms_composer_view_form')
+        view = self._sms__sms_composer_view_form
 
         for template in self:
             button_name = _('Send SMS (%s)', template.name)

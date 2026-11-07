@@ -7,6 +7,8 @@ from odoo.tools import BinaryBytes, file_open
 class PaymentProvider(models.Model):
     _inherit = 'payment.provider'
 
+    _payment__payment_provider_worldline = models.Ref('payment.payment_provider_worldline', 'payment.provider')
+
     @api.model_create_multi
     def create(self, vals_list):
         providers = super().create(vals_list)

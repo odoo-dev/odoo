@@ -7,6 +7,8 @@ from odoo import api, fields, models
 class ResCompany(models.Model):
     _inherit = 'res.company'
 
+    _account__action_account_config = models.Ref('account.action_account_config', 'ir.actions.act_window')
+
     # Single value shared by the whole instance, kept in a system parameter rather than per company.
     l10n_pk_iap_server_ip = fields.Char(string="Odoo Static IP Address", compute='_compute_l10n_pk_iap_server_ip', inverse='_inverse_l10n_pk_iap_server_ip')
 
@@ -37,5 +39,5 @@ class ResCompany(models.Model):
         return {
             'type': 'ir.actions.client',
             'tag': 'reload',
-            'params': {'action_id': self.env.ref('account.action_account_config').id},
+            'params': {'action_id': self._account__action_account_config.id},
         }

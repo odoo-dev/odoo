@@ -5,6 +5,9 @@ from odoo import models
 class AccountJournal(models.Model):
     _inherit = 'account.journal'
 
+    _account__view_move_form = models.Ref('account.view_move_form', 'ir.ui.view')
+    _account__view_out_invoice_tree = models.Ref('account.view_out_invoice_tree', 'ir.ui.view')
+
     def _get_journal_dashboard_data_batched(self):
         dashboard_data = super()._get_journal_dashboard_data_batched()
         sale_journals = self.filtered(lambda journal: journal.company_id.l10n_in_edi_feature and journal.type == 'sale')
@@ -19,8 +22,8 @@ class AccountJournal(models.Model):
             'res_model': 'account.move',
             'view_mode': 'list,form',
             'views': [
-                (self.env.ref('account.view_out_invoice_tree').id, 'list'),
-                (self.env.ref('account.view_move_form').id, 'form')
+                (self._account__view_out_invoice_tree.id, 'list'),
+                (self._account__view_move_form.id, 'form')
             ],
             'domain': [
                 ('journal_id', '=', self.id),

@@ -6,6 +6,8 @@ from odoo.tools.sql import column_exists, create_column
 class AccountMove(models.Model):
     _inherit = 'account.move'
 
+    _account__view_move_form = models.Ref('account.view_move_form', 'ir.ui.view')
+
     l10n_es_edi_verifactu_required = fields.Boolean(
         string="Veri*Factu Required",
         related='company_id.l10n_es_edi_verifactu_required',
@@ -144,7 +146,7 @@ class AccountMove(models.Model):
             'view_mode': 'form',
             'res_model': 'account.move',
             'res_id': move.id,
-            'views': [(self.env.ref('account.view_move_form').id, 'form')],
+            'views': [(self._account__view_move_form.id, 'form')],
             'context': self.env.context,
         }
 

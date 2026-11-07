@@ -7,6 +7,8 @@ from odoo.fields import Domain
 class CrmLead(models.Model):
     _inherit = 'crm.lead'
 
+    _sale__view_order_form = models.Ref('sale.view_order_form', 'ir.ui.view')
+
     sale_amount_total = fields.Monetary(compute='_compute_sale_data', string="Sum of Orders", help="Total of Confirmed Orders", currency_field='company_currency')
     quotation_count = fields.Integer(compute='_compute_sale_data', string="Number of Quotations")
     sale_order_count = fields.Integer(compute='_compute_sale_data', string="Number of Sale Orders")
@@ -46,7 +48,7 @@ class CrmLead(models.Model):
         action['domain'] = Domain.AND([[('opportunity_id', '=', self.id)], self._get_action_view_sale_quotation_domain()])
         quotations = self.order_ids.filtered_domain(self._get_action_view_sale_quotation_domain())
         if len(quotations) == 1:
-            action['views'] = [(self.env.ref('sale.view_order_form').id, 'form')]
+            action['views'] = [(self._sale__view_order_form.id, 'form')]
             action['res_id'] = quotations.id
         return action
 
@@ -61,7 +63,7 @@ class CrmLead(models.Model):
         action['domain'] = Domain.AND([[('opportunity_id', '=', self.id)], self._get_lead_sale_order_domain()])
         orders = self.order_ids.filtered_domain(self._get_lead_sale_order_domain())
         if len(orders) == 1:
-            action['views'] = [(self.env.ref('sale.view_order_form').id, 'form')]
+            action['views'] = [(self._sale__view_order_form.id, 'form')]
             action['res_id'] = orders.id
         return action
 

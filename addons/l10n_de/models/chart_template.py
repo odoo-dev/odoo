@@ -6,6 +6,9 @@ from odoo import models
 class AccountChartTemplate(models.AbstractModel):
     _inherit = 'account.chart.template'
 
+    _l10n_de__tag_de_asset_bs_B_II_4 = models.Ref('l10n_de.tag_de_asset_bs_B_II_4', 'account.account.tag')
+    _l10n_de__tag_de_asset_bs_B_IV = models.Ref('l10n_de.tag_de_asset_bs_B_IV', 'account.account.tag')
+
     @template('de_skr03', 'res.company')
     @template('de_skr04', 'res.company')
     def _get_de_res_company(self):
@@ -20,5 +23,5 @@ class AccountChartTemplate(models.AbstractModel):
     def _setup_utility_bank_accounts(self, template_code, company, template_data):
         super()._setup_utility_bank_accounts(template_code, company, template_data)
         if template_code in ["de_skr03", "de_skr04"]:
-            company.account_journal_suspense_account_id.tag_ids = self.env.ref('l10n_de.tag_de_asset_bs_B_II_4')
-            company.transfer_account_id.tag_ids = self.env.ref('l10n_de.tag_de_asset_bs_B_IV')
+            company.account_journal_suspense_account_id.tag_ids = self._l10n_de__tag_de_asset_bs_B_II_4
+            company.transfer_account_id.tag_ids = self._l10n_de__tag_de_asset_bs_B_IV

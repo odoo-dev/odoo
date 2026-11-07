@@ -52,7 +52,7 @@ class GelatoController(Controller):
                     gelato_message=event_data["comment"],
                 )
                 order_sudo.message_post(
-                    body=log_message, author_id=self.env.ref("base.partner_root").id
+                    body=log_message, author_id=self.env['res.partner']._base__partner_root.id
                 )
             elif fulfillment_status == "canceled":
                 # Cancel the order.
@@ -71,22 +71,22 @@ class GelatoController(Controller):
                     "Gelato has canceled order %(reference)s.", reference=order_sudo.display_name
                 )
                 order_sudo.message_post(
-                    body=log_message, author_id=self.env.ref("base.partner_root").id
+                    body=log_message, author_id=self.env['res.partner']._base__partner_root.id
                 )
             elif fulfillment_status == "in_transit":
                 # Send the Gelato order status update email.
                 tracking_data = self._extract_tracking_data(item_data=event_data["items"])
                 order_sudo.with_context({"tracking_data": tracking_data}).message_post_with_source(
-                    source_ref=self.env.ref("sale_gelato.order_status_update"),
+                    source_ref=self.env['mail.template']._sale_gelato__order_status_update,
                     subtype_xmlid="mail.mt_comment",
-                    author_id=self.env.ref("base.partner_root").id,
+                    author_id=self.env['res.partner']._base__partner_root.id,
                 )
             elif fulfillment_status == "delivered":
                 # Send the Gelato order status update email.
                 order_sudo.with_context({"order_delivered": True}).message_post_with_source(
-                    source_ref=self.env.ref("sale_gelato.order_status_update"),
+                    source_ref=self.env['mail.template']._sale_gelato__order_status_update,
                     subtype_xmlid="mail.mt_comment",
-                    author_id=self.env.ref("base.partner_root").id,
+                    author_id=self.env['res.partner']._base__partner_root.id,
                 )
             elif fulfillment_status == "returned":
                 # Log a message on the order.
@@ -94,7 +94,7 @@ class GelatoController(Controller):
                     "Gelato has returned order %(reference)s.", reference=order_sudo.display_name
                 )
                 order_sudo.message_post(
-                    body=log_message, author_id=self.env.ref("base.partner_root").id
+                    body=log_message, author_id=self.env['res.partner']._base__partner_root.id
                 )
         return request.make_json_response("")
 

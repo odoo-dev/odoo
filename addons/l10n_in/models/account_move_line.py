@@ -7,6 +7,16 @@ from odoo import _, api, fields, models
 class AccountMoveLine(models.Model):
     _inherit = "account.move.line"
 
+    _l10n_in__tax_tag_base_sgst_optional = models.Ref('l10n_in.tax_tag_base_sgst', 'account.account.tag', required=False)
+    _l10n_in__tax_tag_sgst_optional = models.Ref('l10n_in.tax_tag_sgst', 'account.account.tag', required=False)
+    _l10n_in__tax_tag_base_cgst_optional = models.Ref('l10n_in.tax_tag_base_cgst', 'account.account.tag', required=False)
+    _l10n_in__tax_tag_cgst_optional = models.Ref('l10n_in.tax_tag_cgst', 'account.account.tag', required=False)
+    _l10n_in__tax_tag_base_igst_optional = models.Ref('l10n_in.tax_tag_base_igst', 'account.account.tag', required=False)
+    _l10n_in__tax_tag_igst_optional = models.Ref('l10n_in.tax_tag_igst', 'account.account.tag', required=False)
+    _l10n_in__tax_tag_base_cess = models.Ref('l10n_in.tax_tag_base_cess', 'account.account.tag', required=False)
+    _l10n_in__tax_tag_cess_optional = models.Ref('l10n_in.tax_tag_cess', 'account.account.tag', required=False)
+    _l10n_in__tax_tag_eco_9_5 = models.Ref('l10n_in.tax_tag_eco_9_5', 'account.account.tag', required=False)
+
     l10n_in_hsn_code = fields.Char(string="HSN/SAC Code", compute="_compute_l10n_in_hsn_code", store=True, readonly=False, copy=False)
     l10n_in_gstr_section = fields.Selection(
         selection=[
@@ -71,17 +81,12 @@ class AccountMoveLine(models.Model):
         return False
 
     def _get_l10n_in_tax_tag_ids(self):
-        xmlid_to_res_id = self.env['ir.model.data']._xmlid_to_res_id
-        tag_refs = {
-            'sgst': ['l10n_in.tax_tag_base_sgst', 'l10n_in.tax_tag_sgst'],
-            'cgst': ['l10n_in.tax_tag_base_cgst', 'l10n_in.tax_tag_cgst'],
-            'igst': ['l10n_in.tax_tag_base_igst', 'l10n_in.tax_tag_igst'],
-            'cess': ['l10n_in.tax_tag_base_cess', 'l10n_in.tax_tag_cess'],
-            'eco_9_5': ['l10n_in.tax_tag_eco_9_5'],
-        }
         return {
-            categ: [xmlid_to_res_id(xml_id) for xml_id in ref]
-            for categ, ref in tag_refs.items()
+            'sgst': [self._l10n_in__tax_tag_base_sgst_optional.id, self._l10n_in__tax_tag_sgst_optional.id],
+            'cgst': [self._l10n_in__tax_tag_base_cgst_optional.id, self._l10n_in__tax_tag_cgst_optional.id],
+            'igst': [self._l10n_in__tax_tag_base_igst_optional.id, self._l10n_in__tax_tag_igst_optional.id],
+            'cess': [self._l10n_in__tax_tag_base_cess.id, self._l10n_in__tax_tag_cess_optional.id],
+            'eco_9_5': [self._l10n_in__tax_tag_eco_9_5.id],
         }
 
     def _get_l10n_in_gstr_section(self, tax_tags_dict):

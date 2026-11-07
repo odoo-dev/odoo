@@ -10,6 +10,8 @@ from odoo.tools import BinaryBytes
 class PosOrder(models.Model):
     _inherit = 'pos.order'
 
+    _base__JOD = models.Ref('base.JOD', 'res.currency')
+
     l10n_jo_edi_pos_return_reason = fields.Char(string="Return Reason", help="Return Reason reported to JoFotara")
     l10n_jo_edi_pos_enabled = fields.Boolean(related='company_id.l10n_jo_edi_pos_enabled')
     l10n_jo_edi_pos_uuid = fields.Char(string="Order UUID", copy=False, compute='_compute_l10n_jo_edi_pos_uuid', store=True, init_storage=lambda model: None)
@@ -101,7 +103,7 @@ class PosOrder(models.Model):
         if not self._l10n_jo_edi_pos_get_payment_type():
             error_msgs.append(self.env._("Please select the payment methods that are consistent with the value set in 'JoFotara Cash'. If set, the payment method is Cash. If empty, then it is Receivable."))
         else:
-            jod = self.env.ref('base.JOD')
+            jod = self._base__JOD
             amount_total_jod = self.amount_total if self.currency_id == jod else self.currency_id._convert(self.amount_total, jod, self.company_id, self.date_order)
             amount_total_requires_customer = jod.compare_amounts(amount_total_jod, 10_000) == 1
             if not self.partner_id and (self._l10n_jo_edi_pos_get_payment_type() == 'receivable' or amount_total_requires_customer):

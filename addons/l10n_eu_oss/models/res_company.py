@@ -13,18 +13,22 @@ from .eu_tax_map import EU_TAX_MAP
 class ResCompany(models.Model):
     _inherit = 'res.company'
 
+    _account__europe_vat = models.Ref('account.europe_vat', 'res.country.group')
+    _base__europe = models.Ref('base.europe', 'res.country.group')
+    _l10n_eu_oss__tag_oss = models.Ref('l10n_eu_oss.tag_oss', 'account.account.tag')
+
     @api.model
     def _map_all_eu_companies_taxes(self):
         ''' Identifies EU companies and calls the _map_eu_taxes function
         '''
-        eu_countries = self.env.ref('base.europe').country_ids
+        eu_countries = self._base__europe.country_ids
         companies = self.search([('account_fiscal_country_id', 'in', eu_countries.ids)])
         companies._map_eu_taxes()
 
     def _map_eu_taxes(self):
         '''Creates or updates Fiscal Positions for each EU country excluding the company's account_fiscal_country_id
         '''
-        eu_countries = self.env.ref('base.europe').country_ids
+        eu_countries = self._base__europe.country_ids
         oss_tax_groups = self.env['ir.model.data'].search([
             ('name', 'ilike', 'oss_tax_group'),
             ('module', '=', 'account'),
@@ -45,7 +49,7 @@ class ResCompany(models.Model):
             ])
             oss_countries = eu_countries - company.account_fiscal_country_id - multi_tax_reports_countries_fpos.country_id
 
-            eu_vat_country_group_id = self.env.ref('account.europe_vat').id
+            eu_vat_country_group_id = self._account__europe_vat.id
             eu_b2c_fp = self.env['account.fiscal.position'].search([
                 ('company_id', '=', company.id),
                 ('country_group_id', '=', eu_vat_country_group_id),
@@ -199,7 +203,7 @@ class ResCompany(models.Model):
         return oss_account
 
     def _get_oss_tags(self):
-        oss_tag = self.env.ref('l10n_eu_oss.tag_oss')
+        oss_tag = self._l10n_eu_oss__tag_oss
         country = self._get_country_from_vat()
         chart_template = self.env['account.chart.template']._guess_chart_template(country)
 

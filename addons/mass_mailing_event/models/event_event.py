@@ -7,6 +7,9 @@ from odoo import models, _
 class EventEvent(models.Model):
     _inherit = "event.event"
 
+    _base__model_res_partner = models.Ref('base.model_res_partner', 'ir.model')
+    _event__model_event_registration = models.Ref('event.model_event_registration', 'ir.model')
+
     def action_mass_mailing_attendees(self):
         return {
             'name': 'Mass Mail Attendees',
@@ -15,7 +18,7 @@ class EventEvent(models.Model):
             'view_mode': 'form',
             'target': 'current',
             'context': {
-                'default_mailing_model_id': self.env.ref('event.model_event_registration').id,
+                'default_mailing_model_id': self._event__model_event_registration.id,
                 'default_mailing_domain': repr([('event_id', 'in', self.ids), ('state', 'not in', ['cancel', 'draft'])]),
                 'default_subject': _("Event: %s", self.name),
                 # even if excluded, consider event communication might be important
@@ -32,7 +35,7 @@ class EventEvent(models.Model):
             'view_mode': 'form',
             'target': 'current',
             'context': {
-                'default_mailing_model_id': self.env.ref('base.model_res_partner').id,
+                'default_mailing_model_id': self._base__model_res_partner.id,
                 'default_subject': _("Event: %s", self.name),
             },
         }

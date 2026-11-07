@@ -14,6 +14,7 @@ class SaleOrder(models.Model):
 
     _sale_project__sale_project_view_form_simplified_template = models.Ref(
         'sale_project.sale_project_view_form_simplified_template', 'ir.ui.view', required=False)
+    _sale_project__project_milestone_view_tree = models.Ref('sale_project.project_milestone_view_tree', 'ir.ui.view')
 
     @api.model
     def default_get(self, fields):
@@ -269,7 +270,7 @@ class SaleOrder(models.Model):
             'name': _('Milestones'),
             'domain': [('sale_line_id', 'in', self.order_line.ids)],
             'res_model': 'project.milestone',
-            'views': [(self.env.ref('sale_project.project_milestone_view_tree').id, 'list')],
+            'views': [(self._sale_project__project_milestone_view_tree.id, 'list')],
             'view_mode': 'list',
             'help': _("""
                 <p class="o_view_nocontent_smiling_face">

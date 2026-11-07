@@ -7,6 +7,7 @@ class ResConfigSettings(models.TransientModel):
     _inherit = "res.config.settings"
 
     _website_sale__product_comment = models.Ref('website_sale.product_comment', 'ir.ui.view', required=False)
+    _website_sale__update_suggested_products_cron = models.Ref('website_sale.update_suggested_products_cron', 'ir.cron')
 
     # Groups
     group_product_price_comparison = fields.Boolean(
@@ -149,9 +150,7 @@ class ResConfigSettings(models.TransientModel):
                 view.active = True
 
         # Activate / deactivate the automation of suggested products
-        suggested_products_cron_sudo = self.sudo().env.ref(
-            "website_sale.update_suggested_products_cron"
-        )
+        suggested_products_cron_sudo = self.sudo()._website_sale__update_suggested_products_cron
         if self.group_automate_suggested_products and not had_group_asp:  # Enable the feature
             suggested_products_cron_sudo.active = True
             suggested_products_cron_sudo._trigger()

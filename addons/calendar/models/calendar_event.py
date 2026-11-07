@@ -105,6 +105,9 @@ class CalendarEvent(models.Model):
     _calendar__calendar_template_meeting_changedate = models.Ref('calendar.calendar_template_meeting_changedate', 'mail.template', required=False)
     _calendar__calendar_template_meeting_invitation = models.Ref('calendar.calendar_template_meeting_invitation', 'mail.template', required=False)
     _calendar__calendar_template_meeting_update = models.Ref('calendar.calendar_template_meeting_update', 'mail.template', required=False)
+    _base__user_root = models.Ref('base.user_root', 'res.users')
+    _calendar__ir_cron_scheduler_alarm = models.Ref('calendar.ir_cron_scheduler_alarm', 'ir.cron')
+    _calendar__mt_calendar_event_updated = models.Ref('calendar.mt_calendar_event_updated', 'mail.message.subtype')
 
     DISCUSS_ROUTE = 'calendar/join_videocall'
 
@@ -1603,7 +1606,7 @@ class CalendarEvent(models.Model):
 
     def _track_log_get_default_subtype(self, track_init_values):
         if {'start', 'stop', 'location'} & track_init_values.keys():
-            return self.env.ref('calendar.mt_calendar_event_updated')
+            return self._calendar__mt_calendar_event_updated
         return super()._track_log_get_default_subtype(track_init_values)
 
     def _get_mail_tz(self):
@@ -1662,7 +1665,7 @@ class CalendarEvent(models.Model):
 
     def _setup_alarms(self):
         """ Schedule cron triggers for future events """
-        cron = self.env.ref('calendar.ir_cron_scheduler_alarm').sudo()
+        cron = self._calendar__ir_cron_scheduler_alarm.sudo()
         alarm_types = self._get_trigger_alarm_types()
         events_to_notify = self.env['calendar.event']
         for event in self:
@@ -2053,7 +2056,7 @@ class CalendarEvent(models.Model):
         """Build sanitized HTML with the organizer details and the details
         of the contact partner (only when there is a single non-organizer attendee).
         """
-        odoobot = self.env.ref('base.user_root')
+        odoobot = self._base__user_root
         contact_description = []
         # Organizer
         if organizer and organizer != odoobot:

@@ -7,6 +7,8 @@ from odoo import fields, models
 class DigestDigest(models.Model):
     _inherit = 'digest.digest'
 
+    _account__menu_finance = models.Ref('account.menu_finance', 'ir.ui.menu')
+
     kpi_account_total_revenue = fields.Boolean('Revenue')
     kpi_account_total_revenue_value = fields.Monetary(compute='_compute_kpi_account_total_revenue_value')
 
@@ -32,7 +34,7 @@ class DigestDigest(models.Model):
 
     def _get_kpi_custom_settings(self, company, user):
         res = super()._get_kpi_custom_settings(company, user)
-        menu_id = self.env.ref('account.menu_finance').id
+        menu_id = self._account__menu_finance.id
         res['kpi_action']['kpi_account_total_revenue'] = f'account.action_move_out_invoice_type?menu_id={menu_id}'
         res['kpi_sequence']['kpi_account_total_revenue'] = 5500
         return res

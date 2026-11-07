@@ -42,6 +42,7 @@ class WebsitePage(models.Model):
     _CACHE_DURATION = 3600
 
     _base__default_website = models.Ref('base.default_website', 'website', required=False)
+    _website__view_view_form_extend = models.Ref('website.view_view_form_extend', 'ir.ui.view')
 
     name = fields.Char(
         string="Page Name",
@@ -371,7 +372,7 @@ class WebsitePage(models.Model):
             'res_model': 'ir.ui.view',
             'res_id': self.view_id.id,
             'view_mode': 'form',
-            'view_id': self.env.ref('website.view_view_form_extend').id,
+            'view_id': self._website__view_view_form_extend.id,
         }
 
     def open_website_url(self):

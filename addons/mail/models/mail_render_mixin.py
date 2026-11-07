@@ -65,6 +65,7 @@ class MailRenderMixin(models.AbstractModel):
     _unrestricted_rendering = False
 
     _mail__mt_comment_optional = models.Ref('mail.mt_comment', 'mail.message.subtype', required=False)
+    _mail__group_mail_template_editor = models.Ref('mail.group_mail_template_editor', 'res.groups')
 
     # language for rendering
     lang = fields.Char(
@@ -331,10 +332,9 @@ class MailRenderMixin(models.AbstractModel):
 
     def _check_access_right_dynamic_template(self):
         if not self.env.su and not self.env.user.has_group('mail.group_mail_template_editor') and self._has_unsafe_expression():
-            group = self.env.ref('mail.group_mail_template_editor')
             raise AccessError(
                 _('Only members of %(group_name)s group are allowed to edit templates containing sensible placeholders',
-                  group_name=group.name)
+                  group_name=self._mail__group_mail_template_editor.name)
             )
 
     # ------------------------------------------------------------
@@ -416,10 +416,9 @@ class MailRenderMixin(models.AbstractModel):
                 render_result = render_result[5:-6]
             except Exception as e:
                 if isinstance(e, QWebError) and isinstance(e.__cause__, PermissionError):
-                    group = self.env.ref('mail.group_mail_template_editor')
                     raise AccessError(
                         _('Only members of %(group_name)s group are allowed to edit templates containing sensible placeholders',
-                           group_name=group.name)
+                           group_name=self._mail__group_mail_template_editor.name)
                     ) from e
                 elif isinstance(e, QWebError):
                     # We extract the message before the template dump to clean out the full template
@@ -606,10 +605,9 @@ class MailRenderMixin(models.AbstractModel):
             return self._render_template_inline_template_regex(str(template_txt), model, res_ids)
 
         if self._is_restricted():
-            group = self.env.ref('mail.group_mail_template_editor')
             raise AccessError(
                 _('Only members of %(group_name)s group are allowed to edit templates containing sensible placeholders',
-                  group_name=group.name)
+                  group_name=self._mail__group_mail_template_editor.name)
             )
 
         # prepare template variables

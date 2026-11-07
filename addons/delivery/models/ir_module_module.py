@@ -7,6 +7,8 @@ class IrModuleModule(models.Model):
     _name = "ir.module.module"
     _inherit = ["ir.module.module"]
 
+    _delivery__action_delivery_carrier_form = models.Ref('delivery.action_delivery_carrier_form', 'ir.actions.act_window')
+
     def action_view_delivery_methods(self):
         self.ensure_one()
 
@@ -15,6 +17,6 @@ class IrModuleModule(models.Model):
             return False
 
         delivery_type = module_name.removeprefix("delivery_")  # dhl, fedex, etc.
-        action = self.env.ref("delivery.action_delivery_carrier_form").read()[0]
+        action = self._delivery__action_delivery_carrier_form.read()[0]
         action["context"] = {"search_default_delivery_type": delivery_type}
         return action

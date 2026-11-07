@@ -22,6 +22,8 @@ _logger = logging.getLogger(__name__)
 class AccountMove(models.Model):
     _inherit = 'account.move'
 
+    _base__group_user = models.Ref('base.group_user', 'res.groups')
+
     # Fields required for correctly generating CIUS HR documents
     l10n_hr_process_type = fields.Selection(
         [
@@ -140,8 +142,7 @@ class AccountMove(models.Model):
             return False
 
     def _get_l10n_hr_fiscal_user_id_domain(self):
-        internal_users = self.env.ref('base.group_user')
-        domain = [('user_ids', 'in', internal_users.user_ids.ids)]
+        domain = [('user_ids', 'in', self._base__group_user.user_ids.ids)]
         return domain
 
     @api.model

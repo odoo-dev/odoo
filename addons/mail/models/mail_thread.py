@@ -146,6 +146,9 @@ class MailThread(models.AbstractModel):
     _mail__mt_comment_optional = models.Ref('mail.mt_comment', 'mail.message.subtype', required=False)
     _mail__mt_important_notification = models.Ref('mail.mt_important_notification', 'mail.message.subtype', required=False)
     _mail__mt_note_optional = models.Ref('mail.mt_note', 'mail.message.subtype', required=False)
+    _base__partner_root = models.Ref('base.partner_root', 'res.partner')
+    _base__user_root = models.Ref('base.user_root', 'res.users')
+    _mail__mt_comment = models.Ref('mail.mt_comment', 'mail.message.subtype')
 
     _Attachment = namedtuple('Attachment', ('fname', 'content', 'info'))
 
@@ -1431,7 +1434,7 @@ class MailThread(models.AbstractModel):
 
             # switch to odoobot for all incoming message creation
             # to have a high-privilege archived user so real_author_id is correctly computed
-            thread_root = thread.with_user(self.env.ref('base.user_root'))
+            thread_root = thread.with_user(self._base__user_root)
             # replies to internal message are considered as notes, otherwise they are comments
             parent_message = False
             if message_dict.get('parent_id'):
@@ -3174,7 +3177,7 @@ class MailThread(models.AbstractModel):
             real_author = self.env.user.partner_id
         elif author_id:
             author = self.env['res.partner'].browse(author_id)
-            if author.active and author != self.env.ref('base.partner_root'):  # that happened :(
+            if author.active and author != self._base__partner_root:  # that happened :(
                 real_author = author
         return real_author
 
@@ -4668,7 +4671,7 @@ class MailThread(models.AbstractModel):
                 outgoing_email_to=email_to,
                 partner_ids=recipient.ids,
                 subject=_('Auto: %(subject)s', subject=(original_subject or self.display_name)),
-                subtype_id=self.env.ref('mail.mt_comment').id,  # TDE check: note ? but what about portal / internal ?
+                subtype_id=self._mail__mt_comment.id,  # TDE check: note ? but what about portal / internal ?
             )
         return ooo_messages
 

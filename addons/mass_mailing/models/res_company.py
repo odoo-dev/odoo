@@ -8,6 +8,8 @@ from odoo.exceptions import UserError
 class ResCompany(models.Model):
     _inherit = "res.company"
 
+    _base__main_company = models.Ref('base.main_company', 'res.company')
+
     def _get_social_media_links(self):
         self.ensure_one()
         return {

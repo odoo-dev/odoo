@@ -20,6 +20,8 @@ class MrpBom(models.Model):
     _order = "sequence, id"
     _check_company_auto = True
 
+    _mrp__mrp_bom_line_view_list_exploded_components = models.Ref('mrp.mrp_bom_line_view_list_exploded_components', 'ir.ui.view')
+
     def _default_uom_id(self):
         return self.env['uom.uom'].search([], limit=1, order='id').id
 
@@ -332,7 +334,7 @@ class MrpBom(models.Model):
         self.ensure_one()
         exploded_bom_line_ids, _ = self._get_exploded_bom_data()
         action = self.env['ir.actions.act_window']._for_xml_id('mrp.mrp_bom_line_action_used_in_boms')
-        action['views'] = [(self.env.ref('mrp.mrp_bom_line_view_list_exploded_components').id, 'list')]
+        action['views'] = [(self._mrp__mrp_bom_line_view_list_exploded_components.id, 'list')]
         action['display_name'] = self.env._("Exploded BoM Lines")
         action['domain'] = [('id', 'in', exploded_bom_line_ids)]
         action['context'] = {'forced_order_ids': exploded_bom_line_ids}

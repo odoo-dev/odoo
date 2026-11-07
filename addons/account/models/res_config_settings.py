@@ -8,6 +8,8 @@ from odoo.addons.account.models.company import PEPPOL_LIST
 class ResConfigSettings(models.TransientModel):
     _inherit = 'res.config.settings'
 
+    _account__res_company_view_form_terms = models.Ref('account.res_company_view_form_terms', 'ir.ui.view')
+
     has_accounting_entries = fields.Boolean(compute='_compute_has_chart_of_accounts')
     currency_id = fields.Many2one('res.currency', related="company_id.currency_id", required=True, readonly=False,
         string='Currency', help="Main currency of the company.")
@@ -324,7 +326,7 @@ class ResConfigSettings(models.TransientModel):
             'type': 'ir.actions.act_window',
             'view_mode': 'form',
             'res_model': 'res.company',
-            'view_id': self.env.ref("account.res_company_view_form_terms").id,
+            'view_id': self._account__res_company_view_form_terms.id,
             'target': 'new',
             'res_id': self.company_id.id,
         }

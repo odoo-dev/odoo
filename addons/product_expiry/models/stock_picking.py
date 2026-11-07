@@ -8,6 +8,8 @@ from odoo import models, _
 class StockPicking(models.Model):
     _inherit = "stock.picking"
 
+    _product_expiry__confirm_expiry_view = models.Ref('product_expiry.confirm_expiry_view', 'ir.ui.view')
+
     def _pre_action_done_hook(self):
         res = super()._pre_action_done_hook()
         # We use the 'skip_expired' context key to avoid to make the check when
@@ -20,7 +22,7 @@ class StockPicking(models.Model):
 
     def _action_generate_expired_wizard(self):
         expired_move_lines = self._get_move_lines_with_removal_warning()
-        view_id = self.env.ref('product_expiry.confirm_expiry_view').id
+        view_id = self._product_expiry__confirm_expiry_view.id
         context = dict(self.env.context)
 
         expired_lot_ids = expired_move_lines.lot_id.ids

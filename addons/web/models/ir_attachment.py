@@ -6,6 +6,8 @@ from odoo import api, models
 class IrAttachment(models.Model):
     _inherit = 'ir.attachment'
 
+    _web__image_placeholder = models.Ref('web.image_placeholder', 'ir.attachment')
+
     @api.model
     def web_create_image_variants(self, variants):
         """Create linked image variants in batch using `create_unique`."""

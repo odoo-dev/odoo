@@ -16,6 +16,9 @@ _logger = logging.getLogger(__name__)
 class MailingMailing(models.Model):
     _inherit = 'mailing.mailing'
 
+    _mass_mailing_sms__mailing_trace_view_form_sms = models.Ref('mass_mailing_sms.mailing_trace_view_form_sms', 'ir.ui.view')
+    _mass_mailing_sms__mailing_trace_view_tree_sms = models.Ref('mass_mailing_sms.mailing_trace_view_tree_sms', 'ir.ui.view')
+
     @api.model
     def default_get(self, fields):
         res = super().default_get(fields)
@@ -143,8 +146,8 @@ class MailingMailing(models.Model):
     def _action_view_traces_filtered(self, view_filter):
         action = super()._action_view_traces_filtered(view_filter)
         if self.mailing_type == 'sms':
-            action['views'] = [(self.env.ref('mass_mailing_sms.mailing_trace_view_tree_sms').id, 'list'),
-                               (self.env.ref('mass_mailing_sms.mailing_trace_view_form_sms').id, 'form')]
+            action['views'] = [(self._mass_mailing_sms__mailing_trace_view_tree_sms.id, 'list'),
+                               (self._mass_mailing_sms__mailing_trace_view_form_sms.id, 'form')]
         return action
 
     def action_buy_sms_credits(self):

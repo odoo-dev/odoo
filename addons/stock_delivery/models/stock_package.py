@@ -6,6 +6,8 @@ from odoo import api, fields, models
 class StockPackage(models.Model):
     _inherit = "stock.package"
 
+    _uom__product_uom_kgm = models.Ref('uom.product_uom_kgm', 'uom.uom')
+
     @api.depends('contained_quant_ids', 'package_type_id')
     def _compute_weight(self):
         packages_weight = self.sudo()._get_weight(self.env.context.get('picking_id'))
@@ -22,7 +24,7 @@ class StockPackage(models.Model):
     def _compute_weight_is_kg(self):
         self.weight_is_kg = False
         uom_id = self.env['product.template']._get_weight_uom_id_from_ir_config_parameter()
-        if uom_id == self.env.ref('uom.product_uom_kgm'):
+        if uom_id == self._uom__product_uom_kgm:
             self.weight_is_kg = True
         digits = self.env['decimal.precision'].precision_get('Product Unit')
         self.weight_uom_rounding = 10 ** -digits

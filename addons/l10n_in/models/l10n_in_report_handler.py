@@ -4,10 +4,12 @@ from odoo import models
 class AccountReport(models.Model):
     _inherit = 'account.report'
 
+    _account__generic_tax_report = models.Ref('account.generic_tax_report', 'account.report')
+
     def _init_options_buttons(self, options, previous_options):
         super()._init_options_buttons(options, previous_options)
         company = self.env.company
-        generic_report_id = self.env.ref('account.generic_tax_report').id
+        generic_report_id = self._account__generic_tax_report.id
 
         # Remove 'Returns' button from generic report for indian company
         if company.country_id.code == 'IN' and self.id == generic_report_id and not self.root_report_id:

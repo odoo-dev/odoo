@@ -25,6 +25,9 @@ class RepairOrder(models.Model):
     _check_company_auto = True
     _priority_field = 'priority'
 
+    _repair__action_report_repair_order = models.Ref('repair.action_report_repair_order', 'ir.actions.report')
+    _repair__product_view_search_catalog = models.Ref('repair.product_view_search_catalog', 'ir.ui.view')
+
     @api.model
     def _default_picking_type_id(self):
         return self._get_picking_type().get((self.env.company, self.env.user))
@@ -659,7 +662,7 @@ class RepairOrder(models.Model):
         }
 
     def print_repair_order(self):
-        return self.env.ref('repair.action_report_repair_order').report_action(self)
+        return self._repair__action_report_repair_order.report_action(self)
 
     def _action_repair_confirm(self):
         """ Repair order state is set to 'Confirmed'.
@@ -769,7 +772,7 @@ class RepairOrder(models.Model):
 
     def action_add_from_catalog(self):
         res = super().action_add_from_catalog()
-        res['search_view_id'] = [self.env.ref('repair.product_view_search_catalog').id, 'search']
+        res['search_view_id'] = [self._repair__product_view_search_catalog.id, 'search']
         return res
 
     def _get_product_catalog_domain(self):

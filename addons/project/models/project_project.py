@@ -36,6 +36,11 @@ class ProjectProject(models.Model):
     _track_duration_field = 'stage_id'
 
     _mail__mt_note_optional = models.Ref('mail.mt_note', 'mail.message.subtype', required=False)
+    _base__group_user = models.Ref('base.group_user', 'res.groups')
+    _project__group_project_user = models.Ref('project.group_project_user', 'res.groups')
+    _project__mt_project_stage_change = models.Ref('project.mt_project_stage_change', 'mail.message.subtype')
+    _project__mt_project_task_waiting = models.Ref('project.mt_project_task_waiting', 'mail.message.subtype')
+    _project__mt_task_waiting = models.Ref('project.mt_task_waiting', 'mail.message.subtype')
 
     def __compute_task_count(self, count_field='task_count', additional_domain=None):
         count_fields = {fname for fname in self._fields if 'count' in fname}
@@ -162,7 +167,7 @@ class ProjectProject(models.Model):
         compute='_compute_allowed_internal_user_ids',
         store=True,
         readonly=False,
-        domain=lambda self: f"[('share', '=', False), ('group_ids', 'in', {self.env.ref('project.group_project_user').id}), ('company_ids', '=?', company_id)]"
+        domain=lambda self: f"[('share', '=', False), ('group_ids', 'in', {self._project__group_project_user.id}), ('company_ids', '=?', company_id)]"
     )
     access_instruction_message = fields.Char('Access Instruction Message', compute='_compute_access_instruction_message', export_string_translation=False)
     date_start = fields.Date(string='Start Date', copy=False)
@@ -518,8 +523,8 @@ class ProjectProject(models.Model):
         res = self._check_project_group_with_field('allow_task_dependencies', 'project.group_project_task_dependencies')
         # Hide/Show task waiting subtype when task dependencies feature is disabled/enabled
         if res or res is False:
-            self.env.ref('project.mt_task_waiting').sudo().hidden = not res
-            self.env.ref('project.mt_project_task_waiting').sudo().hidden = not res
+            self._project__mt_task_waiting.sudo().hidden = not res
+            self._project__mt_project_task_waiting.sudo().hidden = not res
 
     def _inverse_allow_milestones(self):
         self._check_project_group_with_field('allow_milestones', 'project.group_project_milestone')
@@ -915,19 +920,18 @@ class ProjectProject(models.Model):
         """
         has_user_group = bool(self.env.user.has_group(group_name))
         group = self.env.ref(group_name)
-        base_group_user = self.env.ref('base.group_user')
         has_project_field_set = bool(self.env['project.project'].sudo().search_count([(field_name, '=', True)], limit=1))
         res = None
 
         if not has_user_group and has_project_field_set:
             # add the group to the base user group if there is at least one project with field_name=True
-            base_group_user.sudo().write({
+            self._base__group_user.sudo().write({
                 'implied_ids': [Command.link(group.id)]
             })
             res = True
         elif has_user_group and not has_project_field_set:
             # remove the group from the base user group if there is no project with field_name=True
-            base_group_user.sudo().write({
+            self._base__group_user.sudo().write({
                 'implied_ids': [Command.unlink(group.id)]
             })
             group.sudo().write({'user_ids': [Command.clear()]})
@@ -973,15 +977,14 @@ class ProjectProject(models.Model):
     def _track_log_get_default_subtype(self, track_init_values):
         self.ensure_one()
         if 'stage_id' in track_init_values:
-            return self.env.ref('project.mt_project_stage_change')
+            return self._project__mt_project_stage_change
         return super()._track_log_get_default_subtype(track_init_values)
 
     def _mail_get_message_subtypes(self):
         res = super()._mail_get_message_subtypes()
         if len(self) == 1:
-            waiting_subtype = self.env.ref('project.mt_project_task_waiting')
-            if not self.allow_task_dependencies and waiting_subtype in res:
-                res -= waiting_subtype
+            if not self.allow_task_dependencies and self._project__mt_project_task_waiting in res:
+                res -= self._project__mt_project_task_waiting
         return res
 
     def _notify_get_recipients_groups(self, message, model_description):

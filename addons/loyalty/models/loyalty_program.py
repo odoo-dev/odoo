@@ -21,6 +21,7 @@ class LoyaltyProgram(models.Model):
     _loyalty__gift_card_product_50 = models.Ref('loyalty.gift_card_product_50', 'product.product', required=False)
     _loyalty__mail_template_gift_card = models.Ref('loyalty.mail_template_gift_card', 'mail.template', required=False)
     _loyalty__mail_template_loyalty_card = models.Ref('loyalty.mail_template_loyalty_card', 'mail.template', required=False)
+    _loyalty__loyalty_program_view_form = models.Ref('loyalty.loyalty_program_view_form', 'ir.ui.view')
 
     @api.model
     def default_get(self, fields):
@@ -670,7 +671,7 @@ class LoyaltyProgram(models.Model):
             action = self.env["ir.actions.act_window"]._for_xml_id(
                 "loyalty.loyalty_program_discount_loyalty_action"
             )
-            view_id = self.env.ref("loyalty.loyalty_program_view_form").id
+            view_id = self._loyalty__loyalty_program_view_form.id
             action["views"] = [[view_id, "form"]]
         action["view_mode"] = "form"
         action["res_id"] = program.id

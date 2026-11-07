@@ -13,6 +13,11 @@ class ProjectTaskType(models.Model):
     _description = 'Task Stage'
     _order = 'sequence, id'
 
+    _project__mt_project_task_rating = models.Ref('project.mt_project_task_rating', 'mail.message.subtype')
+    _project__mt_task_rating = models.Ref('project.mt_task_rating', 'mail.message.subtype')
+    _project__view_project_task_type_delete_wizard = models.Ref('project.view_project_task_type_delete_wizard', 'ir.ui.view')
+    _project__view_project_task_type_unarchive_wizard = models.Ref('project.view_project_task_type_unarchive_wizard', 'ir.ui.view')
+
     def _get_default_project_ids(self):
         default_project_id = self.env.context.get('default_project_id')
         return [default_project_id] if default_project_id else None
@@ -99,7 +104,7 @@ class ProjectTaskType(models.Model):
             'name': _('Delete Stage'),
             'view_mode': 'form',
             'res_model': 'project.task.type.delete.wizard',
-            'views': [(self.env.ref('project.view_project_task_type_delete_wizard').id, 'form')],
+            'views': [(self._project__view_project_task_type_delete_wizard.id, 'form')],
             'type': 'ir.actions.act_window',
             'res_id': wizard.id,
             'target': 'new',
@@ -114,10 +119,9 @@ class ProjectTaskType(models.Model):
             rating_active = vals['rating_active']
             task_types = self.env['project.task.type'].search([('rating_active', '=', True)])
             if (not task_types and rating_active) or (task_types and task_types <= self and not rating_active):
-                mt_project_task_rating = self.env.ref('project.mt_project_task_rating')
-                mt_project_task_rating.hidden = not rating_active
-                mt_project_task_rating.default = rating_active
-                self.env.ref('project.mt_task_rating').hidden = not rating_active
+                self._project__mt_project_task_rating.hidden = not rating_active
+                self._project__mt_project_task_rating.default = rating_active
+                self._project__mt_task_rating.hidden = not rating_active
         return super().write(vals)
 
     @api.ondelete(at_uninstall=False)
@@ -201,7 +205,7 @@ class ProjectTaskType(models.Model):
                 'name': _('Unarchive Tasks'),
                 'view_mode': 'form',
                 'res_model': 'project.task.type.delete.wizard',
-                'views': [(self.env.ref('project.view_project_task_type_unarchive_wizard').id, 'form')],
+                'views': [(self._project__view_project_task_type_unarchive_wizard.id, 'form')],
                 'type': 'ir.actions.act_window',
                 'res_id': wizard.id,
                 'target': 'new',

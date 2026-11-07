@@ -8,6 +8,8 @@ from odoo.fields import Domain
 class HrEmployee(models.Model):
     _inherit = 'hr.employee'
 
+    _hr_fleet__fleet_vehicle_assignation_log_employee_view_list = models.Ref('hr_fleet.fleet_vehicle_assignation_log_employee_view_list', 'ir.ui.view')
+
     employee_cars_count = fields.Integer(compute="_compute_employee_cars_count", string="Cars", groups="fleet.fleet_group_user")
     car_ids = fields.One2many(
         'fleet.vehicle', 'driver_employee_id', string='Vehicles (private)',
@@ -22,7 +24,7 @@ class HrEmployee(models.Model):
             "type": "ir.actions.act_window",
             "res_model": "fleet.vehicle.assignation.log",
             "views": [
-                [self.env.ref("hr_fleet.fleet_vehicle_assignation_log_employee_view_list").id, "list"],
+                [self._hr_fleet__fleet_vehicle_assignation_log_employee_view_list.id, "list"],
                 [False, "form"],
             ],
             "domain": [("driver_employee_id", "in", self.ids), ("driver_id", "in", self.work_contact_id.ids)],

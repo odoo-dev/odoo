@@ -7,6 +7,8 @@ from odoo.http import request
 class IrUiMenu(models.Model):
     _inherit = 'ir.ui.menu'
 
+    _website__menu_website_configuration = models.Ref('website.menu_website_configuration', 'ir.ui.menu')
+
     @api.model
     @api.ormcache('self.env.uid', 'self.env.lang', 'self.env.context.get("force_action")')
     def load_menus_root(self):

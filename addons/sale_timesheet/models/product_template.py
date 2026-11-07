@@ -9,6 +9,10 @@ from odoo.exceptions import ValidationError
 class ProductTemplate(models.Model):
     _inherit = 'product.template'
 
+    _sale_timesheet__time_product = models.Ref('sale_timesheet.time_product', 'product.product')
+    _uom__product_uom_hour = models.Ref('uom.product_uom_hour', 'uom.uom')
+    _uom__product_uom_unit = models.Ref('uom.product_uom_unit', 'uom.uom')
+
     def _selection_service_policy(self):
         service_policies = super()._selection_service_policy()
         service_policies.insert(1, ('delivered_timesheet', _('Based on Timesheets')))
@@ -25,8 +29,8 @@ class ProductTemplate(models.Model):
 
     @api.depends('uom_id', 'company_id')
     def _compute_service_upsell_threshold_ratio(self):
-        product_uom_hour = self.env.ref('uom.product_uom_hour')
-        uom_unit = self.env.ref('uom.product_uom_unit')
+        product_uom_hour = self._uom__product_uom_hour
+        uom_unit = self._uom__product_uom_unit
         company_uom = self.env.company.timesheet_encode_uom_id
         for record in self:
             if not record.uom_id or record.uom_id != uom_unit or\
@@ -51,7 +55,7 @@ class ProductTemplate(models.Model):
 
     @api.onchange('type', 'service_type', 'service_policy')
     def _onchange_service_fields(self):
-        hour_uom = self.env.ref('uom.product_uom_hour')
+        hour_uom = self._uom__product_uom_hour
         for record in self:
             default_uom_id = self.env['ir.default']._get_model_defaults('product.template').get('uom_id')
             default_uom = self.env['uom.uom'].browse(default_uom_id)
@@ -97,14 +101,12 @@ class ProductTemplate(models.Model):
 
     @api.ondelete(at_uninstall=False)
     def _unlink_except_master_data(self):
-        time_product = self.env.ref('sale_timesheet.time_product')
-        if time_product.product_tmpl_id in self:
-            raise ValidationError(_('The %s product is required by the Timesheets app and cannot be archived, deleted nor linked to a company.', time_product.name))
+        if self._sale_timesheet__time_product.product_tmpl_id in self:
+            raise ValidationError(_('The %s product is required by the Timesheets app and cannot be archived, deleted nor linked to a company.', self._sale_timesheet__time_product.name))
 
     def write(self, vals):
         # timesheet product can't be deleted, archived or linked to a company
         if ('active' in vals and not vals['active']) or ('company_id' in vals and vals['company_id']):
-            time_product = self.env.ref('sale_timesheet.time_product')
-            if time_product.product_tmpl_id in self:
-                raise ValidationError(_('The %s product is required by the Timesheets app and cannot be archived, deleted nor linked to a company.', time_product.name))
+            if self._sale_timesheet__time_product.product_tmpl_id in self:
+                raise ValidationError(_('The %s product is required by the Timesheets app and cannot be archived, deleted nor linked to a company.', self._sale_timesheet__time_product.name))
         return super().write(vals)

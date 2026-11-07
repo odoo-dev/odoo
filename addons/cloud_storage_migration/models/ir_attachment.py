@@ -21,6 +21,9 @@ _logger = logging.getLogger(__name__)
 class CloudStorageAttachmentMigration(models.Model):
     _inherit = 'ir.attachment'
 
+    _cloud_storage_migration__ir_cron_manual_migrate_local_to_cloud_storage = models.Ref(
+        'cloud_storage_migration.ir_cron_manual_migrate_local_to_cloud_storage', 'ir.cron')
+
     def _migrate_local_to_cloud_storage(self, session):
         """Migrate attachment from local binary storage to cloud storage"""
         if self.type != 'binary':
@@ -55,7 +58,6 @@ class CloudStorageAttachmentMigration(models.Model):
             raise UserError(_("Cloud storage provider is not configured"))
 
         # check ir.config_parameter values' formats are correct
-        cron = self.env.ref('cloud_storage_migration.ir_cron_manual_migrate_local_to_cloud_storage')
         min_file_size = ICP.get_int('cloud_storage_min_file_size', DEFAULT_CLOUD_STORAGE_MIN_FILE_SIZE)
         max_file_size = ICP.get_int('cloud_storage_migration_max_file_size', 10**9)  # default 1GB
         max_batch_file_size = ICP.get_int('cloud_storage_migration_max_batch_file_size', 10**9)  # default 1GB
@@ -183,4 +185,4 @@ class CloudStorageAttachmentMigration(models.Model):
                 _logger.info('Timeout reached for cloud storage migration')
                 break
 
-        cron._trigger()
+        self._cloud_storage_migration__ir_cron_manual_migrate_local_to_cloud_storage._trigger()

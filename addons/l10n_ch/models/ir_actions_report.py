@@ -14,6 +14,9 @@ CH_QR_CROSS_FILE = Path('../static/src/img/CH-Cross_7mm.png') # Image file conta
 class IrActionsReport(models.Model):
     _inherit = 'ir.actions.report'
 
+    _l10n_ch__paperformat_euro_no_margin = models.Ref('l10n_ch.paperformat_euro_no_margin', 'report.paperformat')
+    _l10n_din5008__paperformat_euro_din = models.Ref('l10n_din5008.paperformat_euro_din', 'report.paperformat')
+
     @api.model
     def get_available_barcode_masks(self):
         rslt = super(IrActionsReport, self).get_available_barcode_masks()
@@ -76,7 +79,7 @@ class IrActionsReport(models.Model):
     def get_paperformat(self):
         if self.env.context.get('snailmail_layout'):
             if self.report_name == 'l10n_ch.qr_report_main':
-                return self.env.ref('l10n_ch.paperformat_euro_no_margin')
+                return self._l10n_ch__paperformat_euro_no_margin
             if self.report_name == 'l10n_ch.qr_report_header':
-                return self.env.ref('l10n_din5008.paperformat_euro_din')
+                return self._l10n_din5008__paperformat_euro_din
         return super(IrActionsReport, self).get_paperformat()

@@ -7,6 +7,8 @@ from odoo import api, fields, models
 class ResPartner(models.Model):
     _inherit = 'res.partner'
 
+    _contacts__menu_contacts = models.Ref('contacts.menu_contacts', 'ir.ui.menu')
+
     website_tag_ids = fields.Many2many(
         'res.partner.tag',
         'res_partner_res_partner_tag_rel',
@@ -17,7 +19,7 @@ class ResPartner(models.Model):
     )
 
     def get_backend_menu_id(self):
-        return self.env.ref('contacts.menu_contacts').id
+        return self._contacts__menu_contacts.id
 
 
 class ResPartnerTag(models.Model):

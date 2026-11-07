@@ -28,8 +28,7 @@ class PaypalOnboardingController(Controller):
 
         # Prepare the onboarding page rendering values
         base_url = provider.get_base_url()
-        action = self.env.ref("payment.action_payment_provider")
-        redirect_url = f"/odoo/action-{action.id}/{provider_id}"
+        redirect_url = f"/odoo/action-{self.env['ir.actions.act_window']._payment__action_payment_provider.id}/{provider_id}"
         params = {
             "partnerId": provider._paypal_get_oauth_partner_id(),
             "partnerClientId": provider._paypal_get_oauth_client_id(),

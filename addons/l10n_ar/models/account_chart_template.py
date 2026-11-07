@@ -7,14 +7,18 @@ from odoo.addons.account.models.chart_template import template
 class AccountChartTemplate(models.AbstractModel):
     _inherit = 'account.chart.template'
 
+    _l10n_ar__res_IVAE = models.Ref('l10n_ar.res_IVAE', 'l10n_ar.afip.responsibility.type')
+    _l10n_ar__res_IVARI = models.Ref('l10n_ar.res_IVARI', 'l10n_ar.afip.responsibility.type')
+    _l10n_ar__res_RM = models.Ref('l10n_ar.res_RM', 'l10n_ar.afip.responsibility.type')
+
     @api.model
     def _get_ar_responsibility_match(self, chart_template):
         """ return responsibility type that match with the given chart_template code
         """
         match = {
-            'ar_base': self.env.ref('l10n_ar.res_RM'),
-            'ar_ex': self.env.ref('l10n_ar.res_IVAE'),
-            'ar_ri': self.env.ref('l10n_ar.res_IVARI'),
+            'ar_base': self._l10n_ar__res_RM,
+            'ar_ex': self._l10n_ar__res_IVAE,
+            'ar_ri': self._l10n_ar__res_IVARI,
         }
         return match.get(chart_template)
 
@@ -49,9 +53,9 @@ class AccountChartTemplate(models.AbstractModel):
             company = self.env['res.company'].browse([company])
         if company.country_code == 'AR' and not company.chart_template:
             match = {
-                self.env.ref('l10n_ar.res_RM'): 'ar_base',
-                self.env.ref('l10n_ar.res_IVAE'): 'ar_ex',
-                self.env.ref('l10n_ar.res_IVARI'): 'ar_ri',
+                self._l10n_ar__res_RM: 'ar_base',
+                self._l10n_ar__res_IVAE: 'ar_ex',
+                self._l10n_ar__res_IVARI: 'ar_ri',
             }
             template_code = match.get(company.l10n_ar_afip_responsibility_type_id, template_code)
         return super().try_loading(template_code, company, install_demo, force_create)

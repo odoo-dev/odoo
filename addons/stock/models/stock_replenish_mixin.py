@@ -8,6 +8,8 @@ class StockReplenishMixin(models.AbstractModel):
     _name = 'stock.replenish.mixin'
     _description = 'Product Replenish Mixin'
 
+    _stock__stock_location_inter_company = models.Ref('stock.stock_location_inter_company', 'stock.location')
+
     route_id = fields.Many2one(
         'stock.route', string="Preferred Route",
         help="Apply specific route for the replenishment instead of product's default routes.",
@@ -24,7 +26,7 @@ class StockReplenishMixin(models.AbstractModel):
     # TODO: remove dynamic domain
     # OVERWRITE in 'Drop Shipping', 'Dropship and Subcontracting Management' and 'Dropship and Subcontracting Management' to hide it
     def _get_allowed_route_domain(self):
-        stock_location_inter_company_id = self.env.ref('stock.stock_location_inter_company').id
+        stock_location_inter_company_id = self._stock__stock_location_inter_company.id
 
         base_domain = Domain('product_selectable', '=', True)
         if self.warehouse_id:

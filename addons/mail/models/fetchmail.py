@@ -93,6 +93,9 @@ class FetchmailServer(models.Model):
     _order = 'priority'
     _email_field = 'user'
 
+    _mail__ir_cron_mail_gateway_action = models.Ref('mail.ir_cron_mail_gateway_action', 'ir.cron')
+    _mail__ir_cron_mail_gateway_action_optional = models.Ref('mail.ir_cron_mail_gateway_action', 'ir.cron', required=False)
+
     name = fields.Char('Name', required=True)
     active = fields.Boolean('Active', default=True)
     state = fields.Selection([
@@ -244,7 +247,7 @@ odoo_mailgate: "|/path/to/odoo-mailgate.py --host=localhost -u %(uid)d -p PASSWO
     @api.model
     def _fetch_mails(self, **kw):
         """ Method called by cron to fetch mails from servers """
-        assert self.env.context.get('cron_id') == self.env.ref('mail.ir_cron_mail_gateway_action').id, "Meant for cron usage only"
+        assert self.env.context.get('cron_id') == self._mail__ir_cron_mail_gateway_action.id, "Meant for cron usage only"
         # We sort by priority first (lowest first).
         # Then by date ASC (oldest first), date is updated after server is processed by cron
         # This ensures that the fetchmail servers are rotated for each job run
@@ -357,9 +360,6 @@ odoo_mailgate: "|/path/to/odoo-mailgate.py --host=localhost -u %(uid)d -p PASSWO
     def _update_cron(self):
         if self.env.context.get('fetchmail_cron_running'):
             return
-        try:
-            # Enabled/Disable cron based on the number of 'done' server of type pop or imap
-            cron = self.env.ref('mail.ir_cron_mail_gateway_action')
+        # Enabled/Disable cron based on the number of 'done' server of type pop or imap
+        if cron := self._mail__ir_cron_mail_gateway_action_optional:
             cron.toggle(model=self._name, domain=MAIL_SERVER_DOMAIN)
-        except ValueError:
-            pass

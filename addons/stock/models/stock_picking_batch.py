@@ -15,6 +15,12 @@ class StockPickingBatch(models.Model):
     _description = "Batch Transfer"
     _order = "priority desc, name desc"
 
+    _stock__action_report_picking_batch = models.Ref('stock.action_report_picking_batch', 'ir.actions.report')
+    _stock__mt_batch_state = models.Ref('stock.mt_batch_state', 'mail.message.subtype')
+    _stock__picking_label_type_form = models.Ref('stock.picking_label_type_form', 'ir.ui.view')
+    _stock__stock_move_line_view_list_from_batch = models.Ref('stock.stock_move_line_view_list_from_batch', 'ir.ui.view')
+    _stock__stock_package_view_list_editable = models.Ref('stock.stock_package_view_list_editable', 'ir.ui.view')
+
     name = fields.Char(
         string='Batch Transfer', default=lambda self: _('New'),
         copy=False, required=True, readonly=True)
@@ -244,7 +250,7 @@ class StockPickingBatch(models.Model):
 
     def action_print(self):
         self.ensure_one()
-        return self.env.ref('stock.action_report_picking_batch').report_action(self)
+        return self._stock__action_report_picking_batch.report_action(self)
 
     def action_done(self):
         def has_no_quantity(picking):
@@ -307,12 +313,11 @@ class StockPickingBatch(models.Model):
 
     def action_open_label_layout(self):
         if self.env.user.has_group('stock.group_production_lot') and self.move_line_ids.lot_id:
-            view = self.env.ref('stock.picking_label_type_form')
             return {
                 'name': _('Choose Type of Labels To Print'),
                 'type': 'ir.actions.act_window',
                 'res_model': 'picking.label.type',
-                'views': [(view.id, 'form')],
+                'views': [(self._stock__picking_label_type_form.id, 'form')],
                 'target': 'new',
                 'context': {'default_picking_ids': self.picking_ids.ids},
             }
@@ -357,7 +362,7 @@ class StockPickingBatch(models.Model):
 
     def action_batch_detailed_operations(self):
         self.ensure_one()
-        view_id = self.env.ref('stock.stock_move_line_view_list_from_batch').id
+        view_id = self._stock__stock_move_line_view_list_from_batch.id
         return {
             'name': _('Detailed Operations'),
             'view_mode': 'list',
@@ -394,7 +399,7 @@ class StockPickingBatch(models.Model):
             'name': self.env._("Packages"),
             'res_model': 'stock.package',
             'view_mode': 'list,kanban,form',
-            'views': [(self.env.ref('stock.stock_package_view_list_editable').id, 'list'), (False, 'kanban'), (False, 'form')],
+            'views': [(self._stock__stock_package_view_list_editable.id, 'list'), (False, 'kanban'), (False, 'form')],
             'type': 'ir.actions.act_window',
             'domain': [('picking_ids', 'in', self.picking_ids.ids)],
             'context': {
@@ -444,7 +449,7 @@ class StockPickingBatch(models.Model):
 
     def _track_log_get_default_subtype(self, track_init_values):
         if 'state' in track_init_values:
-            return self.env.ref('stock.mt_batch_state')
+            return self._stock__mt_batch_state
         return super()._track_log_get_default_subtype(track_init_values)
 
     def _is_picking_auto_mergeable(self, picking):

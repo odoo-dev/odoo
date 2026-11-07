@@ -11,6 +11,8 @@ from werkzeug import urls
 class ResConfigSettings(models.TransientModel):
     _inherit = 'res.config.settings'
 
+    _website__view_website_form_view_themes_modal = models.Ref('website.view_website_form_view_themes_modal', 'ir.ui.view')
+
     def _default_website(self):
         return self.env['website'].search([('company_id', '=', self.env.company.id)], limit=1)
 
@@ -223,7 +225,7 @@ class ResConfigSettings(models.TransientModel):
         return {
             'name': _('Add Website'),
             'view_mode': 'form',
-            'view_id': self.env.ref('website.view_website_form_view_themes_modal').id,
+            'view_id': self._website__view_website_form_view_themes_modal.id,
             'res_model': 'website',
             'type': 'ir.actions.act_window',
             'target': 'new',

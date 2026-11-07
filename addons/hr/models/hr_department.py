@@ -15,6 +15,9 @@ class HrDepartment(models.Model):
     _rec_name = 'complete_name'
     _parent_store = True
 
+    _hr__hr_employee_public_view_search = models.Ref('hr.hr_employee_public_view_search', 'ir.ui.view')
+    _hr__view_employee_filter = models.Ref('hr.view_employee_filter', 'ir.ui.view')
+
     name = fields.Char('Department Name', required=True, translate=True)
     complete_name = fields.Char('Complete Name', compute='_compute_complete_name', recursive=True, search='_search_complete_name')
     active = fields.Boolean('Active', default=True)
@@ -186,10 +189,10 @@ class HrDepartment(models.Model):
     def action_employee_from_department(self):
         if self.env['hr.employee'].has_access('read'):
             res_model = "hr.employee"
-            search_view_id = self.env.ref('hr.view_employee_filter').id
+            search_view_id = self._hr__view_employee_filter.id
         else:
             res_model = "hr.employee.public"
-            search_view_id = self.env.ref('hr.hr_employee_public_view_search').id
+            search_view_id = self._hr__hr_employee_public_view_search.id
         return {
             'name': _("Employees"),
             'type': 'ir.actions.act_window',

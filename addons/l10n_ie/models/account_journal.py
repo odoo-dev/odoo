@@ -4,6 +4,8 @@ from odoo import api, models, Command
 class AccountJournal(models.Model):
     _inherit = 'account.journal'
 
+    _l10n_ie__l10n_ie_account_tag_cash_bank_hand = models.Ref('l10n_ie.l10n_ie_account_tag_cash_bank_hand', 'account.account.tag')
+
     @api.model
     def _prepare_liquidity_account_vals(self, company, code, vals):
         # OVERRIDE
@@ -14,7 +16,7 @@ class AccountJournal(models.Model):
             # of the Irish BS and PL tags reports.
             account_vals.setdefault('tag_ids', [])
             account_vals['tag_ids'] += [
-                Command.link(self.env.ref('l10n_ie.l10n_ie_account_tag_cash_bank_hand').id),
+                Command.link(self._l10n_ie__l10n_ie_account_tag_cash_bank_hand.id),
             ]
 
         return account_vals

@@ -12,6 +12,8 @@ class HrLeaveAccrualPlan(models.Model):
     _name = 'hr.leave.accrual.plan'
     _description = "Accrual Plan"
 
+    _hr_holidays__hr_accrual_level_view_form = models.Ref('hr_holidays.hr_accrual_level_view_form', 'ir.ui.view')
+
     active = fields.Boolean(default=True)
     name = fields.Char('Name', required=True)
     employees_count = fields.Integer("Employees", compute='_compute_employee_count')
@@ -137,7 +139,7 @@ class HrLeaveAccrualPlan(models.Model):
             'res_model': 'hr.leave.accrual.level',
             'view_mode': 'form',
             'views': [[False, 'form']],
-            'view_id': self.env.ref('hr_holidays.hr_accrual_level_view_form').id,
+            'view_id': self._hr_holidays__hr_accrual_level_view_form.id,
             'target': 'new',
             'context': dict(
                 self.env.context,

@@ -159,6 +159,8 @@ class StockPickingType(models.Model):
 class StockPicking(models.Model):
     _inherit = 'stock.picking'
 
+    _repair__view_repair_order_form = models.Ref('repair.view_repair_order_form', 'ir.ui.view')
+
     repair_ids = fields.One2many('repair.order', 'picking_id')
     nbr_repairs = fields.Integer('Number of repairs linked to this picking', compute='_compute_nbr_repairs')
 
@@ -181,7 +183,7 @@ class StockPicking(models.Model):
             'type': 'ir.actions.act_window',
             'view_mode': 'form',
             'res_model': 'repair.order',
-            'view_id': self.env.ref('repair.view_repair_order_form').id,
+            'view_id': self._repair__view_repair_order_form.id,
             'context': ctx,
         }
 

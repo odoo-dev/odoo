@@ -4,6 +4,8 @@ from odoo import models
 class ProductTemplate(models.Model):
     _inherit = 'product.template'
 
+    _pos_discount__product_product_consumable = models.Ref('pos_discount.product_product_consumable', 'product.product')
+
     def _load_pos_metadata(self, data, search_params={}):
         super()._load_pos_metadata(data, search_params)
         config_id = data['pos.config']['records'][0]
@@ -15,6 +17,4 @@ class ProductTemplate(models.Model):
         return data
 
     def _get_special_products_to_archive(self):
-        return super()._get_special_products_to_archive() | self.env.ref(
-            "pos_discount.product_product_consumable"
-        ).product_tmpl_id
+        return super()._get_special_products_to_archive() | self._pos_discount__product_product_consumable.product_tmpl_id

@@ -20,6 +20,8 @@ TEST_ENDPOINT = 'https://pdp.test.odoo.com'
 class ResCompany(models.Model):
     _inherit = 'res.company'
 
+    _base__EUR = models.Ref('base.EUR', 'res.currency')
+
     l10n_fr_pdp_send_to_ppf = fields.Boolean(
         string="Send to PPF",
         help="Activate Flux 1 regulatory data, Flux 6 mandatory statuses and Flux 10 e-reporting generation for this company.",
@@ -259,7 +261,7 @@ class ResCompany(models.Model):
                 company.l10n_fr_pdp_send_to_ppf
                 and company.account_peppol_edi_user
                 and company.account_fiscal_country_id.code == 'FR'
-                and company.currency_id == self.env.ref('base.EUR')
+                and company.currency_id == self._base__EUR
             )
             if not previous_state and company.l10n_fr_f10_enable_reporting:
                 changed_companies += company

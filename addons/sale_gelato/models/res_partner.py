@@ -10,6 +10,8 @@ from odoo.addons.sale_gelato import const
 class ResPartner(models.Model):
     _inherit = "res.partner"
 
+    _base__partner_root = models.Ref('base.partner_root', 'res.partner')
+
     def _gelato_validate_address(self):
         """Check that all required address fields are set and of correct length.
 

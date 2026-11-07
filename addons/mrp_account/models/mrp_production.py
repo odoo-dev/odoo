@@ -11,6 +11,8 @@ class MrpProduction(models.Model):
     _name = 'mrp.production'
     _inherit = ['mrp.production', 'res.currency.rate.consolidation.mixin']
 
+    _account__view_move_tree = models.Ref('account.view_move_tree', 'ir.ui.view')
+
     extra_cost = fields.Float(copy=False, string='Extra Unit Cost')
     show_valuation = fields.Boolean(compute='_compute_show_valuation')
     wip_move_ids = fields.Many2many('account.move', 'wip_move_production_rel', 'production_id', 'move_id', copy=False)
@@ -83,7 +85,7 @@ class MrpProduction(models.Model):
                 'name': _("WIP Entries of %s", self.name),
                 'domain': [('id', 'in', self.wip_move_ids.ids)],
                 'view_mode': 'list,form',
-                'views': [(self.env.ref('account.view_move_tree').id, 'list')],
+                'views': [(self._account__view_move_tree.id, 'list')],
             })
         return action
 

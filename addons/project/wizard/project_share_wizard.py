@@ -10,6 +10,8 @@ class ProjectShareWizard(models.TransientModel):
     _inherit = ['portal.share']
     _description = 'Project Sharing'
 
+    _project__project_share_wizard_confirm_form = models.Ref('project.project_share_wizard_confirm_form', 'ir.ui.view')
+
     @api.model
     def default_get(self, fields):
         # The project share action could be called in `project.collaborator`
@@ -112,7 +114,7 @@ class ProjectShareWizard(models.TransientModel):
             'name': _('Confirmation'),
             'type': 'ir.actions.act_window',
             'view_mode': 'form',
-            'views': [(self.env.ref('project.project_share_wizard_confirm_form').id, 'form')],
+            'views': [(self._project__project_share_wizard_confirm_form.id, 'form')],
             'res_model': 'project.share.wizard',
             'res_id': self.id,
             'target': 'new',

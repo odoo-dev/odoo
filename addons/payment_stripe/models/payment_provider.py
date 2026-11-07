@@ -22,6 +22,7 @@ class PaymentProvider(models.Model):
     _inherit = "payment.provider"
 
     _account_payment__payment_provider_menu = models.Ref('account_payment.payment_provider_menu', 'ir.ui.menu', required=False)
+    _payment__action_payment_provider = models.Ref('payment.action_payment_provider', 'ir.actions.act_window')
 
     code = fields.Selection(
         selection_add=[("stripe", "Stripe")], ondelete={"stripe": "set default"}
@@ -168,7 +169,7 @@ class PaymentProvider(models.Model):
                     "Stripe Connect is not available in your country, please use another payment"
                     " provider."
                 ),
-                self.env.ref("payment.action_payment_provider").id,
+                self._payment__action_payment_provider.id,
                 self.env._("Other Payment Providers"),
             )
 

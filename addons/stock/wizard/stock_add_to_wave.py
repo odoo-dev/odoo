@@ -8,6 +8,8 @@ class StockAddToWave(models.TransientModel):
     _name = 'stock.add.to.wave'
     _description = 'Batch Transfer Line'
 
+    _stock__view_move_line_tree_detailed = models.Ref('stock.view_move_line_tree_detailed', 'ir.ui.view')
+
     @api.model
     def default_get(self, fields):
         res = super().default_get(fields)
@@ -48,12 +50,11 @@ class StockAddToWave(models.TransientModel):
         else:
             raise UserError(_('Cannot create wave transfers'))
 
-        view = self.env.ref('stock.view_move_line_tree_detailed')
         return {
             'name': _('Add Operations'),
             'type': 'ir.actions.act_window',
             'view_mode': 'list',
-            'views': [(view.id, 'list')],
+            'views': [(self._stock__view_move_line_tree_detailed.id, 'list')],
             'res_model': 'stock.move.line',
             'target': 'new',
             'domain': [

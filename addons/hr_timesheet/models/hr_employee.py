@@ -10,6 +10,8 @@ from odoo.tools import SQL
 class HrEmployee(models.Model):
     _inherit = 'hr.employee'
 
+    _hr_timesheet__hr_employee_delete_wizard_form = models.Ref('hr_timesheet.hr_employee_delete_wizard_form', 'ir.ui.view')
+
     has_timesheet = fields.Boolean(compute='_compute_has_timesheet', export_string_translation=False)
 
     def _compute_has_timesheet(self):
@@ -60,7 +62,7 @@ class HrEmployee(models.Model):
             'name': self.env._('Confirmation'),
             'view_mode': 'form',
             'res_model': 'hr.employee.delete.wizard',
-            'views': [(self.env.ref('hr_timesheet.hr_employee_delete_wizard_form').id, 'form')],
+            'views': [(self._hr_timesheet__hr_employee_delete_wizard_form.id, 'form')],
             'type': 'ir.actions.act_window',
             'res_id': wizard.id,
             'target': 'new',

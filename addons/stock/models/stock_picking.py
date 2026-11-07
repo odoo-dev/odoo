@@ -23,6 +23,21 @@ class StockPicking(models.Model):
     _priority_field = 'priority'
 
     _mail__mt_comment_optional = models.Ref('mail.mt_comment', 'mail.message.subtype', required=False)
+    _stock__action_report_delivery = models.Ref('stock.action_report_delivery', 'ir.actions.report')
+    _stock__action_report_picking = models.Ref('stock.action_report_picking', 'ir.actions.report')
+    _stock__action_report_picking_packages = models.Ref('stock.action_report_picking_packages', 'ir.actions.report')
+    _stock__group_stock_user = models.Ref('stock.group_stock_user', 'res.groups')
+    _stock__mt_picking_state = models.Ref('stock.mt_picking_state', 'mail.message.subtype')
+    _stock__picking_label_type_form = models.Ref('stock.picking_label_type_form', 'ir.ui.view')
+    _stock__return_label_report = models.Ref('stock.return_label_report', 'ir.actions.report')
+    _stock__stock_package_view_list_editable = models.Ref('stock.stock_package_view_list_editable', 'ir.ui.view')
+    _stock__view_backorder_confirmation = models.Ref('stock.view_backorder_confirmation', 'ir.ui.view')
+    _stock__view_move_line_tree_detailed = models.Ref('stock.view_move_line_tree_detailed', 'ir.ui.view')
+    _stock__view_picking_move_tree = models.Ref('stock.view_picking_move_tree', 'ir.ui.view')
+    _stock__view_scrap_move_form = models.Ref('stock.view_scrap_move_form', 'ir.ui.view')
+    _stock__view_scrap_move_list = models.Ref('stock.view_scrap_move_list', 'ir.ui.view')
+    _stock__view_stock_move_line_detailed_operation_tree = models.Ref('stock.view_stock_move_line_detailed_operation_tree', 'ir.ui.view')
+    _stock__view_zero_demand_confirmation = models.Ref('stock.view_zero_demand_confirmation', 'ir.ui.view')
 
     def _default_picking_type_id(self):
         picking_type_code = self.env.context.get('restricted_picking_type_code')
@@ -117,7 +132,7 @@ class StockPicking(models.Model):
         readonly=True, store=True, index=True)
     user_id = fields.Many2one(
         'res.users', 'Responsible', tracking=True,
-        domain=lambda self: [('all_group_ids', 'in', self.env.ref('stock.group_stock_user').id)],
+        domain=lambda self: [('all_group_ids', 'in', self._stock__group_stock_user.id)],
         default=lambda self: self.env.user, copy=False
     )
     move_line_ids = fields.One2many('stock.move.line', 'picking_id', 'Operations')
@@ -759,12 +774,12 @@ class StockPicking(models.Model):
 
     def _track_log_get_default_subtype(self, init_values):
         if 'state' in init_values and self.state in ('done', 'cancel'):
-            return self.env.ref('stock.mt_picking_state')
+            return self._stock__mt_picking_state
         return super()._track_log_get_default_subtype(init_values)
 
     def do_print_picking(self):
         self.write({'printed': True})
-        return self.env.ref('stock.action_report_picking').report_action(self)
+        return self._stock__action_report_picking.report_action(self)
 
     def should_print_delivery_address(self):
         self.ensure_one()
@@ -775,14 +790,13 @@ class StockPicking(models.Model):
         return self.picking_type_code == 'outgoing'
 
     def action_add_operations(self):
-        view = self.env.ref('stock.view_move_line_tree_detailed')
         # TODO: would be better to have an actual record for the action.
         return {
             'name': _('Add Operations'),
             'type': 'ir.actions.act_window',
             'view_mode': 'list',
-            'view': view,
-            'views': [(view.id, 'list')],
+            'view': self._stock__view_move_line_tree_detailed,
+            'views': [(self._stock__view_move_line_tree_detailed.id, 'list')],
             'res_model': 'stock.move.line',
             'target': 'new',
             'domain': [
@@ -891,7 +905,7 @@ class StockPicking(models.Model):
             }
 
     def action_detailed_operations(self):
-        view_id = self.env.ref('stock.view_stock_move_line_detailed_operation_tree').id
+        view_id = self._stock__view_stock_move_line_detailed_operation_tree.id
         return {
             'name': _('Detailed Operations'),
             'view_mode': 'list',
@@ -1325,14 +1339,13 @@ class StockPicking(models.Model):
         return True
 
     def _action_generate_zero_demand_wizard(self):
-        view = self.env.ref('stock.view_zero_demand_confirmation')
         return {
             'name': _('Zero Demand Warning'),
             'type': 'ir.actions.act_window',
             'view_mode': 'form',
             'res_model': 'stock.zero.demand.confirmation',
-            'views': [(view.id, 'form')],
-            'view_id': view.id,
+            'views': [(self._stock__view_zero_demand_confirmation.id, 'form')],
+            'view_id': self._stock__view_zero_demand_confirmation.id,
             'target': 'new',
             'context': dict(
                 self.env.context,
@@ -1367,14 +1380,13 @@ class StockPicking(models.Model):
         )
 
     def _action_generate_backorder_wizard(self, show_transfers=False):
-        view = self.env.ref('stock.view_backorder_confirmation')
         return {
             'name': _('Create Backorder?'),
             'type': 'ir.actions.act_window',
             'view_mode': 'form',
             'res_model': 'stock.backorder.confirmation',
-            'views': [(view.id, 'form')],
-            'view_id': view.id,
+            'views': [(self._stock__view_backorder_confirmation.id, 'form')],
+            'view_id': self._stock__view_backorder_confirmation.id,
             'target': 'new',
             'context': dict(self.env.context, default_show_transfers=show_transfers, default_pick_ids=[(4, p.id) for p in self]),
         }
@@ -1748,7 +1760,6 @@ class StockPicking(models.Model):
 
     def action_scrap(self):
         self.ensure_one()
-        view = self.env.ref('stock.view_scrap_move_form')
         products = self.env['product.product']
         for move in self.move_ids:
             if move.state not in ('draft', 'cancel') and move.product_id.type == 'consu':
@@ -1758,8 +1769,8 @@ class StockPicking(models.Model):
             'name': _('Scrap Products'),
             'view_mode': 'form',
             'res_model': 'stock.move',
-            'view_id': view.id,
-            'views': [(view.id, 'form')],
+            'view_id': self._stock__view_scrap_move_form.id,
+            'views': [(self._stock__view_scrap_move_form.id, 'form')],
             'type': 'ir.actions.act_window',
             'context': {
                 'from_order': True,
@@ -1797,7 +1808,7 @@ class StockPicking(models.Model):
             'type': 'ir.actions.act_window',
             'name': 'Scraps',
             'res_model': 'stock.move',
-            'views': [(self.env.ref('stock.view_scrap_move_list').id, 'list'), (self.env.ref('stock.view_scrap_move_form').id, 'form')],
+            'views': [(self._stock__view_scrap_move_list.id, 'list'), (self._stock__view_scrap_move_form.id, 'form')],
             'domain': [('picking_id', '=', self.id), ('is_scrap', '=', True)],
             'context': dict(self.env.context, create=False),
         }
@@ -1809,7 +1820,7 @@ class StockPicking(models.Model):
             'name': self.env._("Packages"),
             'res_model': 'stock.package',
             'view_mode': 'list,kanban,form',
-            'views': [(self.env.ref('stock.stock_package_view_list_editable').id, 'list'), (False, 'kanban'), (False, 'form')],
+            'views': [(self._stock__stock_package_view_list_editable.id, 'list'), (False, 'kanban'), (False, 'form')],
             'type': 'ir.actions.act_window',
             'domain': [('picking_ids', 'in', self.ids)],
             'context': {
@@ -1837,7 +1848,7 @@ class StockPicking(models.Model):
     def action_picking_move_tree(self):
         action = self.env["ir.actions.actions"]._for_xml_id("stock.stock_move_action")
         action['views'] = [
-            (self.env.ref('stock.view_picking_move_tree').id, 'list'),
+            (self._stock__view_picking_move_tree.id, 'list'),
         ]
         action['context'] = self.env.context
         action['domain'] = [('picking_id', 'in', self.ids)]
@@ -1851,12 +1862,11 @@ class StockPicking(models.Model):
 
     def action_open_label_type(self):
         if self.env.user.has_group('stock.group_production_lot') and self.move_line_ids.lot_id:
-            view = self.env.ref('stock.picking_label_type_form')
             return {
                 'name': _('Choose Type of Labels To Print'),
                 'type': 'ir.actions.act_window',
                 'res_model': 'picking.label.type',
-                'views': [(view.id, 'form')],
+                'views': [(self._stock__picking_label_type_form.id, 'form')],
                 'target': 'new',
                 'context': {'default_picking_ids': self.ids},
             }
@@ -1905,12 +1915,12 @@ class StockPicking(models.Model):
         report_actions = []
         pickings_to_print = self.filtered(lambda p: p.picking_type_id.auto_print_delivery_slip)
         if pickings_to_print:
-            action = self.env.ref("stock.action_report_delivery").report_action(pickings_to_print.ids, config=False)
+            action = self._stock__action_report_delivery.report_action(pickings_to_print.ids, config=False)
             clean_action(action, self.env)
             report_actions.append(action)
         pickings_print_return_slip = self.filtered(lambda p: p.picking_type_id.auto_print_return_slip)
         if pickings_print_return_slip:
-            action = self.env.ref("stock.return_label_report").report_action(pickings_print_return_slip.ids, config=False)
+            action = self._stock__return_label_report.report_action(pickings_print_return_slip.ids, config=False)
             clean_action(action, self.env)
             report_actions.append(action)
 
@@ -1925,7 +1935,7 @@ class StockPicking(models.Model):
             if picking.picking_type_id.auto_print_reception_report_labels:
                 moves_to_print_label |= picking.move_ids.move_dest_ids
         if pickings_to_print_reception_report:
-            action = self.env.ref('stock.action_report_picking').report_action(pickings_to_print_reception_report, config=False)
+            action = self._stock__action_report_picking.report_action(pickings_to_print_reception_report, config=False)
             clean_action(action, self.env)
             report_actions.append(action)
         if moves_to_print_label:
@@ -1964,7 +1974,7 @@ class StockPicking(models.Model):
         if self.env.user.has_group('stock.group_tracking_lot'):
             pickings_print_packages = self.filtered(lambda p: p.picking_type_id.auto_print_packages and p.move_line_ids.result_package_id)
             if pickings_print_packages:
-                action = self.env.ref("stock.action_report_picking_packages").report_action(pickings_print_packages.ids, config=False)
+                action = self._stock__action_report_picking_packages.report_action(pickings_print_packages.ids, config=False)
                 clean_action(action, self.env)
                 report_actions.append(action)
         return report_actions

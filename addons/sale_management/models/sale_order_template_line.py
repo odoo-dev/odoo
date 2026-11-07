@@ -11,6 +11,8 @@ class SaleOrderTemplateLine(models.Model):
     _inherit = ["product.catalog.line.mixin"]
     _order = "sale_order_template_id, sequence, id"
 
+    _uom__product_uom_unit = models.Ref('uom.product_uom_unit', 'uom.uom')
+
     _accountable_product_id_required = models.Constraint(
         "CHECK(display_type IS NOT NULL OR product_uom_id IS NOT NULL)",
         "Missing required UoM on accountable sale quote line.",
@@ -295,7 +297,7 @@ class SaleOrderTemplateLine(models.Model):
 
     @api.depends("display_type")
     def _compute_section_uom_id(self):
-        default_uom_id = self.env.ref("uom.product_uom_unit").id
+        default_uom_id = self._uom__product_uom_unit.id
         for line in self:
             if line.display_type in {"line_section", "line_subsection"}:
                 line.section_uom_id = default_uom_id

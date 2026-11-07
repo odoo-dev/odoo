@@ -34,6 +34,11 @@ class ProjectTask(models.Model):
     _hr_timesheet__timesheet_view_form_portal_user_optional = models.Ref('hr_timesheet.timesheet_view_form_portal_user', 'ir.ui.view', required=False)
     _hr_timesheet__view_kanban_account_analytic_line_portal_user = models.Ref(
         'hr_timesheet.view_kanban_account_analytic_line_portal_user', 'ir.ui.view', required=False)
+    _hr_timesheet__timesheet_action_task = models.Ref('hr_timesheet.timesheet_action_task', 'ir.actions.act_window')
+    _hr_timesheet__timesheet_report_task = models.Ref('hr_timesheet.timesheet_report_task', 'ir.actions.report')
+    _hr_timesheet__view_hr_timesheet_line_graph_by_employee = models.Ref('hr_timesheet.view_hr_timesheet_line_graph_by_employee', 'ir.ui.view')
+    _uom__product_uom_day = models.Ref('uom.product_uom_day', 'uom.uom')
+    _uom__product_uom_hour = models.Ref('uom.product_uom_hour', 'uom.uom')
 
     @api.model
     def _get_portal_timesheet_domain(self):
@@ -77,7 +82,7 @@ class ProjectTask(models.Model):
             raise UserError(_("This task cannot be private because there are some timesheets linked to it."))
 
     def _uom_in_days(self):
-        return self.env.company.timesheet_encode_uom_id == self.env.ref('uom.product_uom_day')
+        return self.env.company.timesheet_encode_uom_id == self._uom__product_uom_day
 
     def _compute_encode_uom_in_days(self):
         self.encode_uom_in_days = self._uom_in_days()
@@ -192,7 +197,7 @@ class ProjectTask(models.Model):
         is_internal_user = self.env.user.has_group('base.group_user')
         task_ids = self.with_context(active_test=False)._get_subtask_ids_per_task_id().get(self.id, [])
         action = self.env["ir.actions.actions"]._for_xml_id("hr_timesheet.timesheet_action_all")
-        graph_view_id = self.env.ref("hr_timesheet.view_hr_timesheet_line_graph_by_employee").id
+        graph_view_id = self._hr_timesheet__view_hr_timesheet_line_graph_by_employee.id
         new_views = []
         for view in action['views']:
             if (not is_internal_user or self.env.context.get('is_project_sharing')) and view[1] not in ['tree', 'kanban', 'form']:
@@ -236,7 +241,7 @@ class ProjectTask(models.Model):
                     'sticky': False,
                 }
             }
-        return self.env.ref('hr_timesheet.timesheet_report_task').report_action(self)
+        return self._hr_timesheet__timesheet_report_task.report_action(self)
 
     def _get_timesheet(self):
         # Is override in sale_timesheet
@@ -304,14 +309,12 @@ class ProjectTask(models.Model):
         else:
             warning_msg = _("Some timesheet entries are weighing down these tasks! Remove them first, then you’ll be able to delete the tasks!")
         raise RedirectWarning(
-            warning_msg, self.env.ref('hr_timesheet.timesheet_action_task').id,
+            warning_msg, self._hr_timesheet__timesheet_action_task.id,
             _('See timesheet entries'), {'active_ids': task_with_timesheets_ids})
 
     @api.model
     def _convert_hours_to_days(self, time):
-        uom_hour = self.env.ref('uom.product_uom_hour')
-        uom_day = self.env.ref('uom.product_uom_day')
-        return round(uom_hour._compute_quantity(time, uom_day, raise_if_failure=False), 2)
+        return round(self._uom__product_uom_hour._compute_quantity(time, self._uom__product_uom_day, raise_if_failure=False), 2)
 
     def _get_portal_total_hours_dict(self):
         if not (timesheetable_tasks := self.filtered('allow_timesheets')):

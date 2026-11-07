@@ -39,6 +39,7 @@ class SnailmailLetter(models.Model):
     _description = 'Snailmail Letter'
 
     _l10n_de__external_layout_din5008 = models.Ref('l10n_de.external_layout_din5008', 'ir.ui.view', required=False)
+    _web__external_layout_standard = models.Ref('web.external_layout_standard', 'ir.ui.view')
 
     user_id = fields.Many2one('res.users', 'Sent by')
     model = fields.Char('Model', required=True)
@@ -177,7 +178,7 @@ class SnailmailLetter(models.Model):
                 self.env.ref(f'web.external_layout_{layout}')
                 for layout in ('bubble', 'wave', 'folder', 'center', 'dual', 'lines')
             }:
-                self.company_id.sudo().external_report_layout_id = self.env.ref('web.external_layout_standard')
+                self.company_id.sudo().external_report_layout_id = self._web__external_layout_standard
             filename, pdf_bin = self._generate_report_pdf(report)
             self.company_id.sudo().external_report_layout_id = prev
 

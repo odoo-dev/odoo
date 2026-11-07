@@ -148,6 +148,8 @@ class ResConfigSettings(models.TransientModel):
     _name = 'res.config.settings'
     _description = 'Config Settings'
 
+    _base__view_users_form = models.Ref('base.view_users_form', 'ir.ui.view')
+
     def _valid_field_parameter(self, field, name):
         return (
             name in ('default_model', 'config_parameter')
@@ -556,5 +558,5 @@ class ResConfigSettings(models.TransientModel):
         if not template_user.exists():
             raise UserError(_('Invalid template user. It seems it has been deleted.'))
         action['res_id'] = template_user_id
-        action['views'] = [[self.env.ref('base.view_users_form').id, 'form']]
+        action['views'] = [[self._base__view_users_form.id, 'form']]
         return action

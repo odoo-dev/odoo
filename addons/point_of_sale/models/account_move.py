@@ -6,6 +6,8 @@ class AccountMove(models.Model):
     _name = 'account.move'
     _inherit = ['account.move', 'pos.load.mixin']
 
+    _point_of_sale__view_pos_pos_form = models.Ref('point_of_sale.view_pos_pos_form', 'ir.ui.view')
+
     pos_order_ids = fields.One2many('pos.order', 'account_move')
     pos_payment_ids = fields.One2many('pos.payment', 'account_move_id')
     pos_refunded_invoice_ids = fields.Many2many('account.move', 'refunded_invoices', 'refund_account_move', 'original_account_move')
@@ -95,7 +97,7 @@ class AccountMove(models.Model):
         action = self.env['ir.actions.act_window']._for_xml_id('point_of_sale.action_pos_pos_form')
 
         if len(self.pos_order_ids) == 1:
-            action['views'] = [(self.env.ref('point_of_sale.view_pos_pos_form').id, 'form')]
+            action['views'] = [(self._point_of_sale__view_pos_pos_form.id, 'form')]
             action['res_id'] = self.pos_order_ids.id
         else:
             action['domain'] = [('id', 'in', self.pos_order_ids.ids)]

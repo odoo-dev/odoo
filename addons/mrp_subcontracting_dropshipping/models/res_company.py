@@ -7,6 +7,9 @@ from odoo import api, fields, models
 class ResCompany(models.Model):
     _inherit = 'res.company'
 
+    _stock__stock_location_suppliers = models.Ref('stock.stock_location_suppliers', 'stock.location')
+    _stock_dropshipping__route_drop_shipping = models.Ref('stock_dropshipping.route_drop_shipping', 'stock.route')
+
     dropship_subcontractor_pick_type_id = fields.Many2one('stock.picking.type')
 
     def _create_subcontracting_dropshipping_sequence(self):
@@ -34,7 +37,7 @@ class ResCompany(models.Model):
                 'warehouse_id': False,
                 'sequence_id': sequence.id,
                 'code': 'dropship',
-                'default_location_src_id': self.env.ref('stock.stock_location_suppliers').id,
+                'default_location_src_id': self._stock__stock_location_suppliers.id,
                 'default_location_dest_id': company.subcontracting_location_id.id,
                 'use_existing_lots': False,
             })
@@ -44,8 +47,8 @@ class ResCompany(models.Model):
                 pick_type.company_id.dropship_subcontractor_pick_type_id = pick_type.id
 
     def _create_subcontracting_dropshipping_rules(self):
-        dropship_route = self.env.ref('stock_dropshipping.route_drop_shipping')
-        supplier_location = self.env.ref('stock.stock_location_suppliers')
+        dropship_route = self._stock_dropshipping__route_drop_shipping
+        supplier_location = self._stock__stock_location_suppliers
         vals = []
         for company in self:
             subcontracting_location = company.subcontracting_location_id
@@ -70,8 +73,7 @@ class ResCompany(models.Model):
 
     @api.model
     def _create_missing_subcontracting_dropshipping_rules(self):
-        route = self.env.ref('stock_dropshipping.route_drop_shipping')
-        company_todo_rules = self.env['stock.rule'].search([('route_id', '=', route.id)]).mapped('company_id')
+        company_todo_rules = self.env['stock.rule'].search([('route_id', '=', self._stock_dropshipping__route_drop_shipping.id)]).mapped('company_id')
         company_todo_rules._create_subcontracting_dropshipping_rules()
 
     @api.model

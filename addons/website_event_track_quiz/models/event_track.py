@@ -7,6 +7,8 @@ from odoo.fields import Domain
 class EventTrack(models.Model):
     _inherit = 'event.track'
 
+    _website_event_track_quiz__event_quiz_view_form = models.Ref('website_event_track_quiz.event_quiz_view_form', 'ir.ui.view')
+
     quiz_id = fields.Many2one('event.quiz', string="Quiz", compute='_compute_quiz_id', store=True, groups="event.group_event_user")
     quiz_ids = fields.One2many('event.quiz', 'event_track_id', string="Quizzes")
     quiz_questions_count = fields.Integer(string="# Quiz Questions", compute='_compute_quiz_questions_count', groups="event.group_event_user")
@@ -72,12 +74,11 @@ class EventTrack(models.Model):
 
     def action_add_quiz(self):
         self.ensure_one()
-        event_quiz_form = self.env.ref('website_event_track_quiz.event_quiz_view_form')
         return {
             'type': 'ir.actions.act_window',
             'view_mode': 'form',
             'res_model': 'event.quiz',
-            'view_id': event_quiz_form.id,
+            'view_id': self._website_event_track_quiz__event_quiz_view_form.id,
             'context': {
                 'default_event_track_id': self.id,
                 'create': False,
@@ -86,13 +87,12 @@ class EventTrack(models.Model):
 
     def action_view_quiz(self):
         self.ensure_one()
-        event_quiz_form = self.env.ref('website_event_track_quiz.event_quiz_view_form')
         return {
             'type': 'ir.actions.act_window',
             'view_mode': 'form',
             'res_model': 'event.quiz',
             'res_id' : self.quiz_id.id,
-            'view_id': event_quiz_form.id,
+            'view_id': self._website_event_track_quiz__event_quiz_view_form.id,
             'context': {
                 'create': False,
             }

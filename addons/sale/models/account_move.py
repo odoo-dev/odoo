@@ -9,6 +9,7 @@ class AccountMove(models.Model):
     _inherit = ["account.move", "utm.mixin"]
 
     _sale__send_invoice_cron = models.Ref('sale.send_invoice_cron', 'ir.cron', required=False)
+    _sale__view_order_form = models.Ref('sale.view_order_form', 'ir.ui.view')
 
     team_id = fields.Many2one(
         "crm.team",
@@ -204,7 +205,7 @@ class AccountMove(models.Model):
         if len(source_orders) > 1:
             result["domain"] = [("id", "in", source_orders.ids)]
         elif len(source_orders) == 1:
-            result["views"] = [(self.env.ref("sale.view_order_form").id, "form")]
+            result["views"] = [(self._sale__view_order_form.id, "form")]
             result["res_id"] = source_orders.id
         else:
             result = {"type": "ir.actions.act_window_close"}

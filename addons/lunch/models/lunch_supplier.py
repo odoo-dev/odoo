@@ -23,6 +23,10 @@ class LunchSupplier(models.Model):
     _description = 'Lunch Supplier'
     _inherit = ['mail.thread', 'mail.activity.mixin']
 
+    _base__user_root = models.Ref('base.user_root', 'res.users')
+    _lunch__group_lunch_manager = models.Ref('lunch.group_lunch_manager', 'res.groups')
+    _lunch__lunch_order_mail_supplier = models.Ref('lunch.lunch_order_mail_supplier', 'mail.template')
+
     partner_id = fields.Many2one('res.partner', string='Vendor', required=True)
 
     name = fields.Char('Name', related='partner_id.name', readonly=False)
@@ -38,7 +42,7 @@ class LunchSupplier(models.Model):
     country_id = fields.Many2one('res.country', related='partner_id.country_id', readonly=False)
     company_id = fields.Many2one('res.company', related='partner_id.company_id', readonly=False, store=True)
 
-    responsible_id = fields.Many2one('res.users', string="Responsible", domain=lambda self: [('all_group_ids', 'in', self.env.ref('lunch.group_lunch_manager').id)],
+    responsible_id = fields.Many2one('res.users', string="Responsible", domain=lambda self: [('all_group_ids', 'in', self._lunch__group_lunch_manager.id)],
                                      default=lambda self: self.env.user,
                                      help="The responsible is the person that will order lunch for everyone. It will be used as the 'from' when sending the automatic email.")
 
@@ -140,7 +144,7 @@ class LunchSupplier(models.Model):
                 topping[2].update({'topping_category': 3})
         crons = self.env['ir.cron'].sudo().create([
             {
-                'user_id': self.env.ref('base.user_root').id,
+                'user_id': self._base__user_root.id,
                 'active': False,
                 'interval_type': 'days',
                 'interval_number': 1,
@@ -265,7 +269,7 @@ class LunchSupplier(models.Model):
             'address': site.address,
         } for site in sites]
 
-        self.env.ref('lunch.lunch_order_mail_supplier').with_context(
+        self._lunch__lunch_order_mail_supplier.with_context(
             email_notification_force_header=True,
             email_notification_force_footer=True,
             email_notification_subtitles=[_lt("Lunch Order")],

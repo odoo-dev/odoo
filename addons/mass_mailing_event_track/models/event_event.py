@@ -7,6 +7,8 @@ from odoo import models, _
 class EventEvent(models.Model):
     _inherit = "event.event"
 
+    _website_event_track__model_event_track = models.Ref('website_event_track.model_event_track', 'ir.model')
+
     def action_mass_mailing_track_speakers(self):
         mass_mailing_action = dict(
             name='Mass Mail Attendees',
@@ -15,7 +17,7 @@ class EventEvent(models.Model):
             view_mode='form',
             target='current',
             context=dict(
-                default_mailing_model_id=self.env.ref('website_event_track.model_event_track').id,
+                default_mailing_model_id=self._website_event_track__model_event_track.id,
                 default_mailing_domain=repr([('event_id', 'in', self.ids), ('stage_id.is_cancel', '!=', True)]),
                 default_subject=_("Event: %s", self.name),
                 # even if excluded, consider speaker communication might be important

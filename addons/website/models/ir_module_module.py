@@ -21,6 +21,7 @@ class IrModuleModule(models.Model):
     _inherit = ['ir.module.module']
 
     _website__main_menu = models.Ref('website.main_menu', 'website.menu', required=False)
+    _base__module_category_theme = models.Ref('base.module_category_theme', 'ir.module.category')
 
     # The order is important because of dependencies (page need view, menu need page)
     _theme_model_names = OrderedDict([
@@ -446,7 +447,7 @@ class IrModuleModule(models.Model):
         existing_urls = {url_wrapped['url'] for url_wrapped in existing_urls}
 
         themes = self.env['ir.module.module'].with_context(active_test=False).search([
-            ('category_id', 'child_of', self.env.ref('base.module_category_theme').id),
+            ('category_id', 'child_of', self._base__module_category_theme.id),
         ], order='name')
 
         for theme in themes:

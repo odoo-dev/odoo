@@ -18,6 +18,10 @@ _logger = logging.getLogger(__name__)
 class ResUsers(models.Model):
     _inherit = 'res.users'
 
+    _auth_totp_mail__mail_template_totp_invite = models.Ref('auth_totp_mail.mail_template_totp_invite', 'mail.template')
+    _auth_totp_mail__mail_template_totp_mail_code = models.Ref('auth_totp_mail.mail_template_totp_mail_code', 'mail.template')
+    _auth_totp_mail__res_users_view_form = models.Ref('auth_totp_mail.res_users_view_form', 'ir.ui.view')
+
     def write(self, vals):
         res = super().write(vals)
 
@@ -82,7 +86,7 @@ class ResUsers(models.Model):
             "name": _("Security"),
             "type": "ir.actions.act_window",
             "res_model": "res.users",
-            "views": [[self.env.ref('auth_totp_mail.res_users_view_form').id, "form"]],
+            "views": [[self._auth_totp_mail__res_users_view_form.id, "form"]],
             "res_id": self.id,
         }
         return action
@@ -91,7 +95,7 @@ class ResUsers(models.Model):
         return '/odoo/action-auth_totp_mail.action_activate_two_factor_authentication'
 
     def action_totp_invite(self):
-        invite_template = self.env.ref('auth_totp_mail.mail_template_totp_invite')
+        invite_template = self._auth_totp_mail__mail_template_totp_invite
         users_to_invite = self.sudo().filtered(lambda user: not user.totp_secret)
         for user in users_to_invite:
             email_values = {
@@ -185,7 +189,7 @@ class ResUsers(models.Model):
         if not self.email:
             raise UserError(_("Cannot send email: user %s has no email address.", self.name))
 
-        template = self.env.ref('auth_totp_mail.mail_template_totp_mail_code').sudo()
+        template = self._auth_totp_mail__mail_template_totp_mail_code.sudo()
         context = {}
         if request:
             device = request.httprequest.user_agent.platform

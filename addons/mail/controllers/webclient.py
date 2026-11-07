@@ -73,7 +73,7 @@ class WebclientController(ThreadController):
         )
         if request.env.user._is_internal():
             # sudo: res.partner - reading the odoobot partner id is acceptable
-            odoobot = request.env.ref("base.partner_root").sudo()
+            odoobot = request.env['res.partner']._base__partner_root.sudo()
             odoobot_chat = request.env["discuss.channel"].search_fetch([
                 ("channel_type", "=", "chat"),
                 ("is_member", "=", True),

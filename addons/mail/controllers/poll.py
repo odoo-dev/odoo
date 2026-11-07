@@ -37,7 +37,7 @@ class PollController(ThreadController):
         )
         # sudo - mail.poll: can access the poll we just created.
         poll = message.sudo().started_poll_ids
-        self.env.ref("mail.ir_cron_mail_end_polls")._trigger(end_dt)
+        self.env['ir.cron']._mail__ir_cron_mail_end_polls._trigger(end_dt)
         Store(*thread._store_target()).add(poll, "_store_poll_fields")
         return poll.id
 

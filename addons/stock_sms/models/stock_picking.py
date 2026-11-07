@@ -7,6 +7,8 @@ from odoo import models, modules, _
 class StockPicking(models.Model):
     _inherit = 'stock.picking'
 
+    _stock_sms__view_confirm_stock_sms = models.Ref('stock_sms.view_confirm_stock_sms', 'ir.ui.view')
+
     def _pre_action_done_hook(self):
         res = super()._pre_action_done_hook()
         if res is True and not self.env.context.get('skip_sms'):
@@ -29,15 +31,14 @@ class StockPicking(models.Model):
         return warn_sms_pickings
 
     def _action_generate_warn_sms_wizard(self):
-        view = self.env.ref('stock_sms.view_confirm_stock_sms')
         wiz = self.env['confirm.stock.sms'].create({'pick_ids': [(4, p.id) for p in self]})
         return {
             'name': _('SMS'),
             'type': 'ir.actions.act_window',
             'view_mode': 'form',
             'res_model': 'confirm.stock.sms',
-            'views': [(view.id, 'form')],
-            'view_id': view.id,
+            'views': [(self._stock_sms__view_confirm_stock_sms.id, 'form')],
+            'view_id': self._stock_sms__view_confirm_stock_sms.id,
             'target': 'new',
             'res_id': wiz.id,
             'context': self.env.context,

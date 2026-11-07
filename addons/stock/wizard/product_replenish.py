@@ -12,6 +12,8 @@ class ProductReplenish(models.TransientModel):
     _description = 'Product Replenish'
     _check_company_auto = True
 
+    _stock__stock_picking_action_picking_type = models.Ref('stock.stock_picking_action_picking_type', 'ir.actions.act_window')
+
     product_id = fields.Many2one('product.product', string='Product', required=True)
     product_tmpl_id = fields.Many2one('product.template', string='Product Template', required=True)
     product_has_variants = fields.Boolean('Has variants', default=False, required=True)
@@ -128,7 +130,7 @@ class ProductReplenish(models.TransientModel):
 
     def _get_replenishment_order_notification_link(self, move):
         if move.picking_id:
-            action = self.env.ref('stock.stock_picking_action_picking_type')
+            action = self._stock__stock_picking_action_picking_type
             return [{
                 'label': move.picking_id.name,
                 'url': f'/odoo/action-stock.stock_picking_action_picking_type/{move.picking_id.id}'

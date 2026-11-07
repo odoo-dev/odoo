@@ -16,6 +16,8 @@ class AccountAutomaticEntryWizard(models.TransientModel):
     _description = 'Create Automatic Entries'
     _check_company_auto = True
 
+    _account__view_move_tree = models.Ref('account.view_move_tree', 'ir.ui.view')
+
     # General
     action = fields.Selection([('change_period', 'Change Period'), ('change_account', 'Change Account')], required=True)
     move_data = fields.Text(compute="_compute_move_data") # JSON value of the moves to be created
@@ -456,7 +458,7 @@ class AccountAutomaticEntryWizard(models.TransientModel):
             'res_model': 'account.move',
             'view_mode': 'list,form',
             'type': 'ir.actions.act_window',
-            'views': [(self.env.ref('account.view_move_tree').id, 'list'), (False, 'form')],
+            'views': [(self._account__view_move_tree.id, 'list'), (False, 'form')],
         }
         if len(created_moves) == 1:
             action.update({'view_mode': 'form', 'res_id': created_moves.id})

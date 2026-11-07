@@ -6,3 +6,5 @@ from odoo import models
 class ResUsers(models.Model):
     _name = "res.users"
     _inherit = ["res.users", "bus.listener.mixin"]
+
+    _base__user_admin = models.Ref('base.user_admin', 'res.users')

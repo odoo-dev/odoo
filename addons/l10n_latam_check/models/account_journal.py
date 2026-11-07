@@ -4,14 +4,18 @@ from odoo import models, api
 class AccountJournal(models.Model):
     _inherit = "account.journal"
 
+    _l10n_latam_check__account_payment_method_own_checks = models.Ref('l10n_latam_check.account_payment_method_own_checks', 'account.payment.method')
+    _l10n_latam_check__account_payment_method_return_third_party_checks = models.Ref(
+        'l10n_latam_check.account_payment_method_return_third_party_checks', 'account.payment.method')
+
     def _default_outbound_payment_methods(self):
         res = super()._default_outbound_payment_methods()
         if self.company_id.country_id.code != "AR":
             return res
         if self._is_payment_method_available('own_checks'):
-            res |= self.env.ref('l10n_latam_check.account_payment_method_own_checks')
+            res |= self._l10n_latam_check__account_payment_method_own_checks
         if self._is_payment_method_available('return_third_party_checks'):
-            res |= self.env.ref('l10n_latam_check.account_payment_method_return_third_party_checks')
+            res |= self._l10n_latam_check__account_payment_method_return_third_party_checks
         return res
 
     @api.model

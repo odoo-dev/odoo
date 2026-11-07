@@ -8,6 +8,8 @@ from odoo.tools.sql import SQL
 class MailingList(models.Model):
     _inherit = 'mailing.list'
 
+    _mass_mailing_sms__mailing_mailing_view_form_sms = models.Ref('mass_mailing_sms.mailing_mailing_view_form_sms', 'ir.ui.view')
+
     contact_count_sms = fields.Integer(compute="_compute_mailing_list_statistics", string="SMS Contacts")
 
     def action_view_mailings(self):
@@ -29,7 +31,6 @@ class MailingList(models.Model):
         return action
 
     def action_send_mailing_sms(self):
-        view = self.env.ref('mass_mailing_sms.mailing_mailing_view_form_sms')
         action = self.env["ir.actions.actions"]._for_xml_id('mass_mailing_sms.mailing_mailing_action_sms')
         action.update({
             'context': {
@@ -39,7 +40,7 @@ class MailingList(models.Model):
             },
             'target': 'current',
             'view_type': 'form',
-            'views': [(view.id, 'form')],
+            'views': [(self._mass_mailing_sms__mailing_mailing_view_form_sms.id, 'form')],
         })
 
         return action

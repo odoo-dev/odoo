@@ -15,6 +15,8 @@ _lt = LazyTranslate(__name__)
 class ResUsers(models.Model):
     _inherit = 'res.users'
 
+    _website_profile__validation_email = models.Ref('website_profile.validation_email', 'mail.template')
+
     # overridden inherited fields to bypass access rights, in case you have
     # access to the user but not its corresponding partner
     country_id = fields.Many2one(related='partner_id.country_id', inherited=True, readonly=False, user_writeable=True)
@@ -43,26 +45,24 @@ class ResUsers(models.Model):
         if not self.email:
             return False
         token = self._generate_profile_token(self.id, self.email)
-        activation_template = self.env.ref('website_profile.validation_email')
-        if activation_template:
-            params = {
-                'token': token,
-                'user_id': self.id,
-                'email': self.email
-            }
-            params.update(kwargs)
-            token_url = self.get_base_url() + '/profile/validate_email?%s' % urls.url_encode(params)
-            # At this point, user access on template should not restrict template rendering
-            activation_template.sudo().with_context(
-                email_notification_force_header=True,
-                email_notification_force_footer=True,
-                email_notification_subtitles=[
-                    _lt("%(company_name)s Profile validation", company_name=self.sudo().company_id.name or '')],
-                token_url=token_url,
-            ).send_mail_batch(
-                self.ids, force_send=True, raise_exception=True,
-                email_layout_xmlid='mail.mail_notification_layout',
-            )
+        params = {
+            'token': token,
+            'user_id': self.id,
+            'email': self.email
+        }
+        params.update(kwargs)
+        token_url = self.get_base_url() + '/profile/validate_email?%s' % urls.url_encode(params)
+        # At this point, user access on template should not restrict template rendering
+        self._website_profile__validation_email.sudo().with_context(
+            email_notification_force_header=True,
+            email_notification_force_footer=True,
+            email_notification_subtitles=[
+                _lt("%(company_name)s Profile validation", company_name=self.sudo().company_id.name or '')],
+            token_url=token_url,
+        ).send_mail_batch(
+            self.ids, force_send=True, raise_exception=True,
+            email_layout_xmlid='mail.mail_notification_layout',
+        )
         return True
 
     def _process_profile_validation_token(self, token, email):

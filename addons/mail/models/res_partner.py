@@ -18,6 +18,8 @@ class ResPartner(models.Model):
     _mail_flat_thread = False
     _mail_post_access = 'read'
 
+    _base__partner_root = models.Ref('base.partner_root', 'res.partner')
+
     # override to add and order tracking
     name = fields.Char(tracking=1)
     email = fields.Char(tracking=1)

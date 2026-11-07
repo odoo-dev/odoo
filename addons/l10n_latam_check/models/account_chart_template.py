@@ -5,6 +5,13 @@ from odoo.addons.account.models.chart_template import template
 class AccountChartTemplate(models.AbstractModel):
     _inherit = 'account.chart.template'
 
+    _l10n_latam_check__account_payment_method_in_third_party_checks = models.Ref(
+        'l10n_latam_check.account_payment_method_in_third_party_checks', 'account.payment.method')
+    _l10n_latam_check__account_payment_method_new_third_party_checks = models.Ref(
+        'l10n_latam_check.account_payment_method_new_third_party_checks', 'account.payment.method')
+    _l10n_latam_check__account_payment_method_out_third_party_checks = models.Ref(
+        'l10n_latam_check.account_payment_method_out_third_party_checks', 'account.payment.method')
+
     @api.model
     def _get_third_party_checks_country_codes(self):
         """ Return the list of country codes for the countries where third party checks journals should be created
@@ -20,17 +27,17 @@ class AccountChartTemplate(models.AbstractModel):
                     'type': 'cash',
                     'outbound_payment_method_line_ids': [
                         Command.create({
-                            'payment_method_id': self.env.ref('l10n_latam_check.account_payment_method_out_third_party_checks').id,
+                            'payment_method_id': self._l10n_latam_check__account_payment_method_out_third_party_checks.id,
                             'payment_account_id': 'base_outstanding_payments',
                         }),
                     ],
                     'inbound_payment_method_line_ids': [
                         Command.create({
-                            'payment_method_id': self.env.ref('l10n_latam_check.account_payment_method_new_third_party_checks').id,
+                            'payment_method_id': self._l10n_latam_check__account_payment_method_new_third_party_checks.id,
                             'payment_account_id': 'base_outstanding_receipts',
                         }),
                         Command.create({
-                            'payment_method_id': self.env.ref('l10n_latam_check.account_payment_method_in_third_party_checks').id,
+                            'payment_method_id': self._l10n_latam_check__account_payment_method_in_third_party_checks.id,
                             'payment_account_id': 'base_outstanding_receipts',
                         }),
                     ],
@@ -40,17 +47,17 @@ class AccountChartTemplate(models.AbstractModel):
                     'type': 'cash',
                     'outbound_payment_method_line_ids': [
                         Command.create({
-                            'payment_method_id': self.env.ref('l10n_latam_check.account_payment_method_out_third_party_checks').id,
+                            'payment_method_id': self._l10n_latam_check__account_payment_method_out_third_party_checks.id,
                             'payment_account_id': 'base_outstanding_payments',
                         }),
                     ],
                     'inbound_payment_method_line_ids': [
                         Command.create({
-                            'payment_method_id': self.env.ref('l10n_latam_check.account_payment_method_new_third_party_checks').id,
+                            'payment_method_id': self._l10n_latam_check__account_payment_method_new_third_party_checks.id,
                             'payment_account_id': 'base_outstanding_receipts',
                         }),
                         Command.create({
-                            'payment_method_id': self.env.ref('l10n_latam_check.account_payment_method_in_third_party_checks').id,
+                            'payment_method_id': self._l10n_latam_check__account_payment_method_in_third_party_checks.id,
                             'payment_account_id': 'base_outstanding_receipts',
                         }),
                     ],

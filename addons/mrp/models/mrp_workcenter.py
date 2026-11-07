@@ -521,6 +521,9 @@ class MrpWorkcenterProductivity(models.Model):
     _rec_name = "loss_id"
     _check_company_auto = True
 
+    _mrp__block_reason4 = models.Ref('mrp.block_reason4', 'mrp.workcenter.productivity.loss')
+    _mrp__block_reason7 = models.Ref('mrp.block_reason7', 'mrp.workcenter.productivity.loss')
+
     def _get_default_company_id(self):
         company_id = False
         if self.env.context.get('default_company_id'):
@@ -603,9 +606,9 @@ class MrpWorkcenterProductivity(models.Model):
     def _loss_type_change(self):
         self.ensure_one()
         if self.workorder_id.duration > self.workorder_id.duration_expected:
-            self.loss_id = self.env.ref("mrp.block_reason4").id
+            self.loss_id = self._mrp__block_reason4.id
         else:
-            self.loss_id = self.env.ref("mrp.block_reason7").id
+            self.loss_id = self._mrp__block_reason7.id
 
     def _close(self):
         underperformance_timers = self.env['mrp.workcenter.productivity']
@@ -630,6 +633,8 @@ class MrpWorkcenterCapacity(models.Model):
     _name = 'mrp.workcenter.capacity'
     _description = 'Work Center Capacity'
     _check_company_auto = True
+
+    _uom__product_uom_unit = models.Ref('uom.product_uom_unit', 'uom.uom')
 
     def _default_time_start(self):
         workcenter_id = self.env.context.get('default_workcenter_id')
@@ -659,4 +664,4 @@ class MrpWorkcenterCapacity(models.Model):
     @api.depends('product_id')
     def _compute_uom_id(self):
         for capacity in self:
-            capacity.uom_id = capacity.product_id.uom_id or self.env.ref('uom.product_uom_unit')
+            capacity.uom_id = capacity.product_id.uom_id or self._uom__product_uom_unit

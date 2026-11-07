@@ -9,6 +9,9 @@ class ProjectProjectStage(models.Model):
     _description = 'Project Stage'
     _order = 'sequence, id'
 
+    _project__view_project_project_stage_delete_wizard = models.Ref('project.view_project_project_stage_delete_wizard', 'ir.ui.view')
+    _project__view_project_project_stage_unarchive_wizard = models.Ref('project.view_project_project_stage_unarchive_wizard', 'ir.ui.view')
+
     active = fields.Boolean(default=True, export_string_translation=False)
     sequence = fields.Integer(default=50, export_string_translation=False)
     name = fields.Char("Stage Name", required=True, translate=True)
@@ -30,7 +33,7 @@ class ProjectProjectStage(models.Model):
             'name': _('Delete Project Stage'),
             'view_mode': 'form',
             'res_model': 'project.project.stage.delete.wizard',
-            'views': [(self.env.ref('project.view_project_project_stage_delete_wizard').id, 'form')],
+            'views': [(self._project__view_project_project_stage_delete_wizard.id, 'form')],
             'type': 'ir.actions.act_window',
             'res_id': wizard.id,
             'target': 'new',
@@ -70,7 +73,7 @@ class ProjectProjectStage(models.Model):
                 'name': _('Unarchive Projects'),
                 'view_mode': 'form',
                 'res_model': 'project.project.stage.delete.wizard',
-                'views': [(self.env.ref('project.view_project_project_stage_unarchive_wizard').id, 'form')],
+                'views': [(self._project__view_project_project_stage_unarchive_wizard.id, 'form')],
                 'type': 'ir.actions.act_window',
                 'res_id': wizard.id,
                 'target': 'new',

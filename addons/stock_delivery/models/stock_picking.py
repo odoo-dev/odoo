@@ -13,6 +13,9 @@ from odoo.addons.web.controllers.utils import clean_action
 class StockPicking(models.Model):
     _inherit = 'stock.picking'
 
+    _stock_delivery__action_report_shipping_docs = models.Ref('stock_delivery.action_report_shipping_docs', 'ir.actions.report')
+    _stock_delivery__action_report_shipping_labels = models.Ref('stock_delivery.action_report_shipping_labels', 'ir.actions.report')
+
     def _get_default_weight_uom(self):
         return self.env['product.template']._get_weight_uom_name_from_ir_config_parameter()
 
@@ -312,12 +315,12 @@ class StockPicking(models.Model):
         report_actions = []
         shipping_labels_to_print = self.filtered(lambda p: p.picking_type_id.auto_print_carrier_labels)
         if shipping_labels_to_print:
-            action = self.env.ref("stock_delivery.action_report_shipping_labels").report_action(shipping_labels_to_print.ids, config=False)
+            action = self._stock_delivery__action_report_shipping_labels.report_action(shipping_labels_to_print.ids, config=False)
             clean_action(action, self.env)
             report_actions.append(action)
         shipping_documents_to_print = self.filtered(lambda p: p.picking_type_id.auto_print_export_documents)
         if shipping_documents_to_print:
-            action = self.env.ref("stock_delivery.action_report_shipping_docs").report_action(shipping_documents_to_print.ids, config=False)
+            action = self._stock_delivery__action_report_shipping_docs.report_action(shipping_documents_to_print.ids, config=False)
             clean_action(action, self.env)
             report_actions.append(action)
         return report_actions + super()._get_autoprint_report_actions()

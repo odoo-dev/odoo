@@ -7,6 +7,8 @@ from odoo.addons.l10n_my_edi.models.account_edi_xml_ubl_my import COUNTRY_CODE_M
 class AccountEdiXmlUBLMyInvoisMY(models.AbstractModel):
     _inherit = "account.edi.xml.ubl_myinvois_my"
 
+    _base__MYR = models.Ref('base.MYR', 'res.currency')
+
     # -----------------------
     # CRUD, inherited methods
     # -----------------------
@@ -250,7 +252,7 @@ class AccountEdiXmlUBLMyInvoisMY(models.AbstractModel):
             for base_line in vals['base_lines']:
                 total_amount_in_company_currency += base_line['tax_details']['raw_total_included']
                 total_amount_in_currency += base_line['tax_details']['raw_total_included_currency']
-            rate = self.env.ref('base.MYR').round(abs(total_amount_in_company_currency) / (total_amount_in_currency or 1))
+            rate = self._base__MYR.round(abs(total_amount_in_company_currency) / (total_amount_in_currency or 1))
             # Exchange rate information must be provided if applicable
             document_node['cac:TaxExchangeRate'] = {
                 'cbc:SourceCurrencyCode': {'_text': vals['currency_id'].name},

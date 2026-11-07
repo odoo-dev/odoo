@@ -33,6 +33,8 @@ class AccountMoveLine(models.Model):
     _check_company_auto = True
     _rec_names_search = ('name', 'move_id', 'product_id')
 
+    _account__view_move_line_tree = models.Ref('account.view_move_line_tree', 'ir.ui.view')
+
     # ==============================================================================================
     #                                          JOURNAL ENTRY
     # ==============================================================================================
@@ -3572,7 +3574,7 @@ class AccountMoveLine(models.Model):
                     'res_model': 'account.move.line',
                     'type': 'ir.actions.act_window',
                     'domain': [('id', 'in', lines_with_missing_analytic_distribution.ids)],
-                    'views': [(self.env.ref('account.view_move_line_tree').id, 'list')],
+                    'views': [(self._account__view_move_line_tree.id, 'list')],
                 },
                 button_text=_("See items"),
             )

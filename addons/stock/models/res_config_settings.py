@@ -12,6 +12,9 @@ class ResConfigSettings(models.TransientModel):
     _stock__route_warehouse0_mto = models.Ref('stock.route_warehouse0_mto', 'stock.route', required=False)
     _stock__stock_location_view_form_editable = models.Ref('stock.stock_location_view_form_editable', 'ir.ui.view', required=False)
     _stock__stock_location_view_tree2_editable = models.Ref('stock.stock_location_view_tree2_editable', 'ir.ui.view', required=False)
+    _base__group_user = models.Ref('base.group_user', 'res.groups')
+    _stock__group_stock_multi_locations = models.Ref('stock.group_stock_multi_locations', 'res.groups')
+    _stock__group_stock_multi_warehouses = models.Ref('stock.group_stock_multi_warehouses', 'res.groups')
 
     module_product_expiry = fields.Boolean("Expiration Dates",
         help="Track following dates on lots & serial numbers: best before, removal, end of life, alert. \n Such dates are set automatically at lot/serial number creation based on values set on the product (in days).")
@@ -103,11 +106,8 @@ class ResConfigSettings(models.TransientModel):
             self.group_stock_multi_locations = True
 
     def set_values(self):
-        warehouse_grp = self.env.ref('stock.group_stock_multi_warehouses')
-        location_grp = self.env.ref('stock.group_stock_multi_locations')
-        base_user = self.env.ref('base.group_user')
-        base_user_implied_ids = base_user.implied_ids
-        if not self.group_stock_multi_locations and location_grp in base_user_implied_ids and warehouse_grp in base_user_implied_ids:
+        base_user_implied_ids = self._base__group_user.implied_ids
+        if not self.group_stock_multi_locations and self._stock__group_stock_multi_locations in base_user_implied_ids and self._stock__group_stock_multi_warehouses in base_user_implied_ids:
             raise UserError(_("You can't deactivate the multi-location feature if you have more than one warehouse per company"))
 
         # Update all picking types of this company to keep their move_type aligned with the configured picking policy

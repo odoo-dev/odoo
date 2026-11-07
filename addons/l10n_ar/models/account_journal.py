@@ -7,6 +7,8 @@ from odoo.exceptions import UserError, ValidationError, RedirectWarning
 class AccountJournal(models.Model):
     _inherit = "account.journal"
 
+    _base__action_res_company_form = models.Ref('base.action_res_company_form', 'ir.actions.act_window')
+
     l10n_ar_afip_pos_system = fields.Selection(
         selection='_get_l10n_ar_afip_pos_types_selection', string='ARCA POS System',
         compute='_compute_l10n_ar_afip_pos_system', store=True, readonly=False,
@@ -83,9 +85,8 @@ class AccountJournal(models.Model):
             },
         }
         if not self.company_id.l10n_ar_afip_responsibility_type_id:
-            action = self.env.ref('base.action_res_company_form')
             msg = _('Can not create chart of account until you configure your company ARCA Responsibility and VAT.')
-            raise RedirectWarning(msg, action.id, _('Go to Companies'))
+            raise RedirectWarning(msg, self._base__action_res_company_form.id, _('Go to Companies'))
 
         letters = letters_data['issued' if self.l10n_ar_is_pos else 'received'][
             self.company_id.l10n_ar_afip_responsibility_type_id.code]

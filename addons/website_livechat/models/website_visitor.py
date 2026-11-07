@@ -11,6 +11,8 @@ from odoo.tools import get_lang
 class WebsiteVisitor(models.Model):
     _inherit = 'website.visitor'
 
+    _base__public_partner = models.Ref('base.public_partner', 'res.partner')
+
     current_livechat_agent_ids = fields.Many2many(
         "res.partner",
         compute="_compute_current_livechat_agent_ids",
@@ -118,7 +120,7 @@ class WebsiteVisitor(models.Model):
         """ Copy sessions of the secondary visitors to the main partner visitor. """
         target.discuss_channel_ids |= self.discuss_channel_ids
         self.discuss_channel_ids.channel_partner_ids = [
-            (3, self.env.ref('base.public_partner').id),
+            (3, self._base__public_partner.id),
             (4, target.partner_id.id),
         ]
         return super()._merge_visitor(target)

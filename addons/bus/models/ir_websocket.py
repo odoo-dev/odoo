@@ -18,6 +18,8 @@ class IrWebsocket(models.AbstractModel):
     _name = 'ir.websocket'
     _description = 'websocket message handling'
 
+    _base__public_user = models.Ref('base.public_user', 'res.users')
+
     def _build_bus_channel_list(self, channels):
         """
             Return the list of channels to subscribe to. Override this
@@ -104,5 +106,4 @@ class IrWebsocket(models.AbstractModel):
         if wsrequest.session.uid is not None:
             check(wsrequest.session, wsrequest)
         else:
-            public_user = wsrequest.env.ref('base.public_user')
-            wsrequest.update_env(user=public_user.id)
+            wsrequest.update_env(user=wsrequest.env['ir.websocket']._base__public_user.id)

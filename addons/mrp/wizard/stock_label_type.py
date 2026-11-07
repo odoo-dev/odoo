@@ -7,6 +7,8 @@ from odoo import _, fields, models
 class PickingLabelType(models.TransientModel):
     _inherit = 'picking.label.type'
 
+    _stock__lot_label_layout_form_picking = models.Ref('stock.lot_label_layout_form_picking', 'ir.ui.view')
+
     production_ids = fields.Many2many('mrp.production')
 
     def process(self):
@@ -14,12 +16,11 @@ class PickingLabelType(models.TransientModel):
             return super().process()
         if self.label_type == 'products':
             return self.production_ids.action_open_label_layout()
-        view = self.env.ref('stock.lot_label_layout_form_picking')
         return {
             'name': _('Choose Labels Layout'),
             'type': 'ir.actions.act_window',
             'res_model': 'lot.label.layout',
-            'views': [(view.id, 'form')],
+            'views': [(self._stock__lot_label_layout_form_picking.id, 'form')],
             'target': 'new',
             'context': {
                 'default_move_line_ids': self.production_ids.move_finished_ids.move_line_ids.ids

@@ -4,6 +4,8 @@ from odoo import api, fields, models
 class PosConfig(models.Model):
     _inherit = "pos.config"
 
+    _l10n_es__partner_simplified = models.Ref('l10n_es.partner_simplified', 'res.partner')
+
     is_spanish = fields.Boolean(string="Company located in Spain", compute="_compute_is_spanish")
     l10n_es_simplified_invoice_journal_id = fields.Many2one(
         comodel_name='account.journal',
@@ -23,7 +25,7 @@ class PosConfig(models.Model):
 
     def _compute_simplified_partner_id(self):
         for config in self:
-            config.simplified_partner_id = self.env.ref("l10n_es.partner_simplified").id
+            config.simplified_partner_id = self._l10n_es__partner_simplified.id
 
     def get_limited_partners_loading(self, offset=0):
         # this function normally returns 100 partners, but we have to make sure that

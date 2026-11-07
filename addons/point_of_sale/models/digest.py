@@ -7,6 +7,8 @@ from odoo import fields, models
 class DigestDigest(models.Model):
     _inherit = 'digest.digest'
 
+    _point_of_sale__menu_point_root = models.Ref('point_of_sale.menu_point_root', 'ir.ui.menu')
+
     kpi_pos_total = fields.Boolean('POS Sales')
     kpi_pos_total_value = fields.Monetary(compute='_compute_kpi_pos_total_value')
 
@@ -22,7 +24,7 @@ class DigestDigest(models.Model):
 
     def _get_kpi_custom_settings(self, company, user):
         res = super()._get_kpi_custom_settings(company, user)
-        menu_id = self.env.ref('point_of_sale.menu_point_root').id
+        menu_id = self._point_of_sale__menu_point_root.id
         res['kpi_action']['kpi_pos_total'] = f'point_of_sale.action_pos_sale_graph?menu_id={menu_id}'
         res['kpi_sequence']['kpi_pos_total'] = 1500
         return res

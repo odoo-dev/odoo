@@ -9,6 +9,8 @@ from odoo import api, fields, models, tools, _
 class EventRegistration(models.Model):
     _inherit = 'event.registration'
 
+    _base__public_partner = models.Ref('base.public_partner', 'res.partner')
+
     lead_ids = fields.Many2many(
         'crm.lead', string='Leads', copy=False, readonly=True,
         groups='sales_team.group_sale_salesman')
@@ -225,7 +227,7 @@ class EventRegistration(models.Model):
         """
         sorted_self = self.sorted("id")
         valid_partner = next(
-            (reg.partner_id for reg in sorted_self if reg.partner_id != self.env.ref('base.public_partner')),
+            (reg.partner_id for reg in sorted_self if reg.partner_id != self._base__public_partner),
             self.env['res.partner']
         )  # CHECKME: broader than just public partner
 

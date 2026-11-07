@@ -41,7 +41,7 @@ class DocController(http.Controller):
         if not self.env.user.has_group('api_doc.group_allow_doc'):
             raise AccessError(self.env._(
                 "This page is only accessible to %s users.",
-                self.env.ref('api_doc.group_allow_doc').sudo().name))
+                self.env['res.groups']._api_doc__group_allow_doc.sudo().name))
         res = request.render('api_doc.docclient')
         res.headers['X-Frame-Options'] = 'deny'
         return res
@@ -79,7 +79,7 @@ class DocController(http.Controller):
         if not self.env.user.has_group('api_doc.group_allow_doc'):
             raise AccessError(self.env._(
                 "This page is only accessible to %s users.",
-                self.env.ref('api_doc.group_allow_doc').sudo().name))
+                self.env['res.groups']._api_doc__group_allow_doc.sudo().name))
 
         # Client requested no cache, generate the document and send it.
         if parse_cache_control_header(request.httprequest.headers.get('Cache-Control')).no_cache:
@@ -192,7 +192,7 @@ class DocController(http.Controller):
         if not self.env.user.has_group('api_doc.group_allow_doc'):
             raise AccessError(self.env._(
                 "This page is only accessible to %s users.",
-                self.env.ref('api_doc.group_allow_doc').sudo().name))
+                self.env['res.groups']._api_doc__group_allow_doc.sudo().name))
         if model_name not in self.env:
             raise NotFound()
 

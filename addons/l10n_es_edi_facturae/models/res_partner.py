@@ -14,6 +14,8 @@ class L10n_Es_Edi_FacturaeAc_Role_Type(models.Model):
 class ResPartner(models.Model):
     _inherit = 'res.partner'
 
+    _base__europe = models.Ref('base.europe', 'res.country.group')
+
     invoice_edi_format = fields.Selection(selection_add=[('es_facturae', 'Spain (FacturaE)')])
     type = fields.Selection(selection_add=[('facturae_ac', 'FACe Center'), ('other',)])
     l10n_es_edi_facturae_ac_center_code = fields.Char(string='Code', size=10, help="Code of the issuing department.")
@@ -65,7 +67,7 @@ class ResPartner(models.Model):
 
     @api.depends('country_id')
     def _compute_l10n_es_edi_facturae_residence_type(self):
-        eu_country_ids = self.env.ref('base.europe').country_ids.ids
+        eu_country_ids = self._base__europe.country_ids.ids
         for partner in self:
             country = partner.country_id
             if country.code == 'ES':

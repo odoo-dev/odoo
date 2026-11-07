@@ -8,6 +8,8 @@ from odoo.fields import Domain
 class FleetVehicleAssignationLog(models.Model):
     _inherit = 'fleet.vehicle.assignation.log'
 
+    _hr_fleet__view_attachment_kanban_inherit_hr = models.Ref('hr_fleet.view_attachment_kanban_inherit_hr', 'ir.ui.view')
+
     driver_employee_id = fields.Many2one('hr.employee', string='Driver (Employee)', compute='_compute_driver_employee_id', store=True, readonly=False)
     attachment_number = fields.Integer('Number of Attachments', compute='_compute_attachment_number')
 
@@ -43,7 +45,7 @@ class FleetVehicleAssignationLog(models.Model):
     def action_get_attachment_view(self):
         self.ensure_one()
         res = self.env['ir.actions.act_window']._for_xml_id('base.action_attachment')
-        res['views'] = [[self.env.ref('hr_fleet.view_attachment_kanban_inherit_hr').id, 'kanban']]
+        res['views'] = [[self._hr_fleet__view_attachment_kanban_inherit_hr.id, 'kanban']]
         res['domain'] = [('res_model', '=', 'fleet.vehicle.assignation.log'), ('res_id', 'in', self.ids)]
         res['context'] = {'default_res_model': 'fleet.vehicle.assignation.log', 'default_res_id': self.id}
         return res

@@ -7,6 +7,8 @@ from odoo.exceptions import ValidationError
 class FleetVehicle(models.Model):
     _inherit = 'fleet.vehicle'
 
+    _hr_fleet__fleet_vehicle_assignation_log_view_list = models.Ref('hr_fleet.fleet_vehicle_assignation_log_view_list', 'ir.ui.view')
+
     driver_employee_id = fields.Many2one(
         'hr.employee', 'Driver (Employee)',
         compute='_compute_driver_employee_id', store=True,
@@ -143,5 +145,5 @@ class FleetVehicle(models.Model):
 
     def open_assignation_logs(self):
         action = super().open_assignation_logs()
-        action['views'] = [[self.env.ref('hr_fleet.fleet_vehicle_assignation_log_view_list').id, 'list']]
+        action['views'] = [[self._hr_fleet__fleet_vehicle_assignation_log_view_list.id, 'list']]
         return action

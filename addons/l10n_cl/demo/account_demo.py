@@ -7,12 +7,15 @@ from dateutil.relativedelta import relativedelta
 class AccountChartTemplate(models.AbstractModel):
     _inherit = "account.chart.template"
 
+    _base__USD = models.Ref('base.USD', 'res.currency')
+    _l10n_cl__UF = models.Ref('l10n_cl.UF', 'res.currency')
+    _l10n_cl__demo_partner_cl_fee_receipts = models.Ref('l10n_cl.demo_partner_cl_fee_receipts', 'res.partner', required=False)
+
     @api.model
     def _set_partner_account_payable(self):
-        fee_partner = self.env.ref('l10n_cl.demo_partner_cl_fee_receipts')
         account_payable = self.ref('account_210520')
-        fee_partner.property_account_payable_id = account_payable
-        return fee_partner
+        self._l10n_cl__demo_partner_cl_fee_receipts.property_account_payable_id = account_payable
+        return self._l10n_cl__demo_partner_cl_fee_receipts
 
     @template(model='account.move', demo=True)
     def _get_demo_data_move(self, template_code):
@@ -32,32 +35,30 @@ class AccountChartTemplate(models.AbstractModel):
         # Create currency rates
         usd_rate_value = 1 / 980.0
         uf_rate_value = 1 / 38400.0
-        currency_usd = self.env.ref('base.USD')
-        currency_uf = self.env.ref('l10n_cl.UF')
         first_day_of_rate = (today - timedelta(days=60)).replace(day=1)
         last_date_of_rate = (today + timedelta(days=60)).replace(day=1) - timedelta(days=1)
 
         self.env['res.currency.rate'].create([
             {
-                'currency_id': currency_usd.id,
+                'currency_id': self._base__USD.id,
                 'rate': usd_rate_value,
                 'name': first_day_of_rate,
                 'company_id': company.id,
             },
             {
-                'currency_id': currency_usd.id,
+                'currency_id': self._base__USD.id,
                 'rate': usd_rate_value,
                 'name': last_date_of_rate,
                 'company_id': company.id,
             },
             {
-                'currency_id': currency_uf.id,
+                'currency_id': self._l10n_cl__UF.id,
                 'rate': uf_rate_value,
                 'name': first_day_of_rate,
                 'company_id': company.id,
             },
             {
-                'currency_id': currency_uf.id,
+                'currency_id': self._l10n_cl__UF.id,
                 'rate': uf_rate_value,
                 'name': last_date_of_rate,
                 'company_id': company.id,

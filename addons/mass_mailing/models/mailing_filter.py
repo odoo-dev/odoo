@@ -15,6 +15,8 @@ class MailingFilter(models.Model):
     _description = 'Mailing Dynamic List'
     _order = 'create_date DESC'
 
+    _mass_mailing__mailing_contact_view_list_from_filter = models.Ref('mass_mailing.mailing_contact_view_list_from_filter', 'ir.ui.view')
+
     # override create_uid field to display default value while creating filter from 'Configuration' menus
     create_uid = fields.Many2one('res.users', 'Saved by', index=True, readonly=True, default=lambda self: self.env.user)
     name = fields.Char(string='List Name', required=True)
@@ -61,7 +63,7 @@ class MailingFilter(models.Model):
         buttons will be hidden."""
         self.ensure_one()
         if self.mailing_model_name == 'mailing.contact':
-            views = [(self.env.ref('mass_mailing.mailing_contact_view_list_from_filter').id, 'list'), (False, 'form')]
+            views = [(self._mass_mailing__mailing_contact_view_list_from_filter.id, 'list'), (False, 'form')]
         else:
             views = [(False, 'list'), (False, 'form')]
 

@@ -6,6 +6,8 @@ from odoo import api, fields, models
 class Digest(models.Model):
     _inherit = 'digest.digest'
 
+    _website__menu_website_configuration = models.Ref('website.menu_website_configuration', 'ir.ui.menu')
+
     kpi_website_visitor_count = fields.Boolean('Visitors')
     kpi_website_visitor_count_value = fields.Integer(compute='_compute_kpi_website_visitors_count_value')
     kpi_website_track_count = fields.Boolean('Tracked Page Views')  # Non unique
@@ -78,7 +80,7 @@ class Digest(models.Model):
 
     def _get_kpi_custom_settings(self, company, user):
         res = super()._get_kpi_custom_settings(company, user)
-        menu_id = self.env.ref('website.menu_website_configuration').id
+        menu_id = self._website__menu_website_configuration.id
         res['kpi_action']['kpi_website_visitor_count'] = f'website.website_visitors_action?menu_id={menu_id}'
         res['kpi_action']['kpi_website_track_count'] = f'website.website_visitor_view_action?menu_id={menu_id}'
         res['kpi_sequence']['kpi_website_visitor_count'] = 3500

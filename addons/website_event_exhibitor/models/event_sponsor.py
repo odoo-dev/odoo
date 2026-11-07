@@ -23,6 +23,8 @@ class EventSponsor(models.Model):
         'website.structured_data.mixin',
     ]
 
+    _event__event_main_menu = models.Ref('event.event_main_menu', 'ir.ui.menu')
+
     def _default_sponsor_type_id(self):
         return self.env['event.sponsor.type'].search([], order="sequence desc", limit=1).id
 
@@ -198,7 +200,7 @@ class EventSponsor(models.Model):
     # ---------------------------------------------------------
 
     def get_backend_menu_id(self):
-        return self.env.ref('event.event_main_menu').id
+        return self._event__event_main_menu.id
 
     # ------------------------------------------------------------
     # Misc

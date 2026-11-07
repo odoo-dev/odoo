@@ -5,8 +5,8 @@ from . import controllers
 
 def init_settings(env):
     # Activate cash rounding by default for all companies as soon as the module is installed.
-    group_user = env.ref('base.group_user').sudo()
-    group_user._apply_group(env.ref('account.group_cash_rounding'))
+    group_user = env['res.groups']._base__group_user.sudo()
+    group_user._apply_group(env['res.groups']._account__group_cash_rounding)
 
 
 def post_init(env):

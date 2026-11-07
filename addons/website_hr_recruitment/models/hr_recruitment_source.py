@@ -9,6 +9,8 @@ from odoo.tools import urls
 class HrRecruitmentSource(models.Model):
     _inherit = 'hr.recruitment.source'
 
+    _hr_recruitment__utm_campaign_job = models.Ref('hr_recruitment.utm_campaign_job', 'utm.campaign')
+
     url = fields.Char(compute='_compute_url', string='Tracker URL')
 
     @api.depends('source_id', 'source_id.name', 'job_id', 'job_id.company_id')
@@ -17,7 +19,7 @@ class HrRecruitmentSource(models.Model):
             source.url = urls.urljoin(source.job_id.get_base_url(), "%s?%s" % (
                 source.job_id.website_url,
                 url_encode({
-                    'utm_campaign': self.env.ref('hr_recruitment.utm_campaign_job').name,
+                    'utm_campaign': self._hr_recruitment__utm_campaign_job.name,
                     'utm_medium': source.medium_id.name or self.env['utm.mixin']._utm_ref('utm.utm_medium_website').name,
                     'utm_source': source.source_id.name or None
                 }),

@@ -8,6 +8,8 @@ import re
 class L10n_LatamDocumentType(models.Model):
     _inherit = "l10n_latam.document.type"
 
+    _base__ec = models.Ref('base.ec', 'res.country')
+
     internal_type = fields.Selection(
         selection_add=[
             ("purchase_liquidation", "Purchase Liquidation"),
@@ -21,7 +23,7 @@ class L10n_LatamDocumentType(models.Model):
 
     def _format_document_number(self, document_number):
         self.ensure_one()
-        if self.country_id != self.env.ref("base.ec"):
+        if self.country_id != self._base__ec:
             return super()._format_document_number(document_number)
         if not document_number:
             return False

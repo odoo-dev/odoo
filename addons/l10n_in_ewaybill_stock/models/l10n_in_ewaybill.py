@@ -10,6 +10,8 @@ class L10nInEwaybill(models.Model):
     _inherit = 'l10n.in.ewaybill'
     _check_company_auto = True
 
+    _l10n_in__tax_tag_cess = models.Ref('l10n_in.tax_tag_cess', 'account.account.tag')
+
     state = fields.Selection(
         selection_add=[('challan', "Challan")],
         ondelete={
@@ -222,7 +224,7 @@ class L10nInEwaybill(models.Model):
             for gst_tax_name in ['igst', 'sgst', 'cgst']:
                 if self.env.ref('l10n_in.tax_tag_%s' % (gst_tax_name)).id in tax['tag_ids']:
                     tax_name = gst_tax_name
-            if self.env.ref('l10n_in.tax_tag_cess').id in tax['tag_ids']:
+            if self._l10n_in__tax_tag_cess.id in tax['tag_ids']:
                 tax_name = tax_id.amount_type != 'percent' and 'cess_non_advol' or 'cess'
             rate_key = '%s_rate' % tax_name
             amount_key = '%s_amount' % tax_name

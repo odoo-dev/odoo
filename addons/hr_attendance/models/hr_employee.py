@@ -14,11 +14,12 @@ class HrEmployee(models.Model):
     _inherit = "hr.employee"
 
     _hr_attendance__group_hr_attendance_officer_optional = models.Ref('hr_attendance.group_hr_attendance_officer', 'res.groups', required=False)
+    _hr_attendance__group_hr_attendance_own = models.Ref('hr_attendance.group_hr_attendance_own', 'res.groups')
 
     attendance_based = fields.Boolean(readonly=False, related="version_id.attendance_based", inherited=True, groups="hr.group_hr_user")
 
     def _get_attendance_manager_domain(self):
-        return "[('share', '=', False), ('company_ids', 'in', company_id), ('role', 'in', ['regular_user', 'group_system']), ('all_group_ids', 'in', %s)]" % self.env.ref('hr_attendance.group_hr_attendance_own').id
+        return "[('share', '=', False), ('company_ids', 'in', company_id), ('role', 'in', ['regular_user', 'group_system']), ('all_group_ids', 'in', %s)]" % self._hr_attendance__group_hr_attendance_own.id
 
     attendance_manager_id = fields.Many2one(
         'res.users', store=True, readonly=False,

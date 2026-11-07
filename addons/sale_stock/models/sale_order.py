@@ -16,6 +16,8 @@ _logger = logging.getLogger(__name__)
 class SaleOrder(models.Model):
     _inherit = "sale.order"
 
+    _stock__view_picking_form = models.Ref('stock.view_picking_form', 'ir.ui.view')
+
     picking_policy = fields.Selection([
         ('direct', 'As soon as possible, with back orders'), ('one', 'When all products are ready')],
         string='Shipping Policy', required=True, default=lambda self: self.env.company.picking_policy,
@@ -285,7 +287,7 @@ class SaleOrder(models.Model):
         if len(pickings) > 1:
             action['domain'] = [('id', 'in', pickings.ids)]
         elif pickings:
-            form_view = [(self.env.ref('stock.view_picking_form').id, 'form')]
+            form_view = [(self._stock__view_picking_form.id, 'form')]
             if 'views' in action:
                 action['views'] = form_view + [(state,view) for state,view in action['views'] if view != 'form']
             else:

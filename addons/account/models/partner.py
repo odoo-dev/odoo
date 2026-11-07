@@ -38,6 +38,7 @@ class AccountFiscalPosition(models.Model):
     _check_company_domain = models.check_company_domain_parent_of
 
     _account__account_tax_fiscal_position_view_tree = models.Ref('account.account_tax_fiscal_position_view_tree', 'ir.ui.view', required=False)
+    _base__europe = models.Ref('base.europe', 'res.country.group')
 
     sequence = fields.Integer()
     name = fields.Char(string='Fiscal Position', required=True, translate=True)
@@ -269,7 +270,7 @@ class AccountFiscalPosition(models.Model):
         company = self.env.company
         intra_eu = vat_exclusion = False
         if company.has_vat and partner.has_vat:
-            eu_country_codes = set(self.env.ref('base.europe').country_ids.mapped('code'))
+            eu_country_codes = set(self._base__europe.country_ids.mapped('code'))
             intra_eu = company.vat[:2] in eu_country_codes and partner.vat[:2] in eu_country_codes
             vat_exclusion = company.vat[:2] == partner.vat[:2]
 

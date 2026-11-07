@@ -7,6 +7,8 @@ from odoo.exceptions import UserError
 class AccountPayment(models.Model):
     _inherit = 'account.payment'
 
+    _l10n_th__action_report_50_tawi = models.Ref('l10n_th.action_report_50_tawi', 'ir.actions.report')
+
     # ------------------
     # Fields declaration
     # ------------------
@@ -47,7 +49,7 @@ class AccountPayment(models.Model):
         """
         Triggered by the 'Print 50 Tawi' button.
         """
-        return self.env.ref('l10n_th.action_report_50_tawi').report_action(self, config=False)
+        return self._l10n_th__action_report_50_tawi.report_action(self, config=False)
 
     def action_download_50_tawi_bulk(self):
         """
@@ -61,7 +63,7 @@ class AccountPayment(models.Model):
         if not valid_payments:
             raise UserError(_("No eligible payments found for 50 Tawi report."))
 
-        report_action = self.env.ref('l10n_th.action_report_50_tawi')
+        report_action = self._l10n_th__action_report_50_tawi
         attachments = self.env['ir.attachment']
         for payment in valid_payments:
             pdf_content, _report_type = report_action.sudo()._render_qweb_pdf("l10n_th.report_50_tawi", res_ids=[payment.id])

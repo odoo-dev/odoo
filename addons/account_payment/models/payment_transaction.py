@@ -6,6 +6,8 @@ from odoo import SUPERUSER_ID, _, api, fields, models
 class PaymentTransaction(models.Model):
     _inherit = 'payment.transaction'
 
+    _account__view_move_form = models.Ref('account.view_move_form', 'ir.ui.view')
+
     payment_id = fields.Many2one(
         string="Payment", comodel_name='account.payment', readonly=True)
 
@@ -57,7 +59,7 @@ class PaymentTransaction(models.Model):
             invoice = invoice_ids[0]
             action['res_id'] = invoice
             action['view_mode'] = 'form'
-            action['views'] = [(self.env.ref('account.view_move_form').id, 'form')]
+            action['views'] = [(self._account__view_move_form.id, 'form')]
         else:
             action['view_mode'] = 'list,form'
             action['domain'] = [('id', 'in', invoice_ids)]

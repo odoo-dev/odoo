@@ -20,6 +20,8 @@ class ResPartnerBank(models.Model):
     _check_company_domain = models.check_company_domain_parent_of
     _allow_sudo_commands = False
 
+    _base__sepa_zone = models.Ref('base.sepa_zone', 'res.country.group')
+
     active = fields.Boolean(default=True)
     account_type = fields.Selection(
         selection=[('bank', 'Normal')],
@@ -127,7 +129,7 @@ class ResPartnerBank(models.Model):
 
     @api.depends('country_id')
     def _compute_show_clearing_number(self):
-        sepa_countries = self.env.ref('base.sepa_zone').country_ids
+        sepa_countries = self._base__sepa_zone.country_ids
         clearing_label_countries = self.env['clearing.label'].search([]).country_id
         excluded_countries = sepa_countries - clearing_label_countries
         for account in self:

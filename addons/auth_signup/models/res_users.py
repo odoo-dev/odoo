@@ -24,6 +24,8 @@ class ResUsers(models.Model):
     _auth_signup__mail_template_data_unregistered_users = models.Ref('auth_signup.mail_template_data_unregistered_users', 'mail.template', required=False)
     _auth_signup__portal_set_password_email_optional = models.Ref('auth_signup.portal_set_password_email', 'mail.template', required=False)
     _auth_signup__set_password_email = models.Ref('auth_signup.set_password_email', 'mail.template', required=False)
+    _auth_signup__reset_password_email = models.Ref('auth_signup.reset_password_email', 'ir.ui.view')
+    _base__public_user = models.Ref('base.public_user', 'res.users')
 
     state = fields.Selection(compute='_compute_state', search='_search_state', string='Status',
                  selection=[('new', 'Invited'), ('active', 'Confirmed'), ('inactive', 'Inactive')], tracking=4)
@@ -226,7 +228,7 @@ class ResUsers(models.Model):
                 else:
                     user_lang = user.lang or self.env.lang or 'en_US'
                     body = self.env['mail.render.mixin'].with_context(lang=user_lang)._render_template(
-                        self.env.ref('auth_signup.reset_password_email'),
+                        self._auth_signup__reset_password_email,
                         model='res.users', res_ids=user.ids,
                         engine='qweb_view', options={'post_process': True})[user.id]
                     body_html = self.env['mail.render.mixin'].with_context(lang=user_lang)._render_encapsulate(

@@ -20,7 +20,7 @@ class WebsiteSaleForm(WebsiteForm):
         "/website/form/shop.sale.order", type="http", auth="public", methods=["POST"], website=True
     )
     def website_form_saleorder(self, **kwargs):
-        model_record = self.env.ref("sale.model_sale_order").sudo()
+        model_record = self.env['ir.model']._sale__model_sale_order.sudo()
         try:
             data = self.extract_data(model_record, kwargs)
         except ValidationError as e:

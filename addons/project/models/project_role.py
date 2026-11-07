@@ -7,6 +7,8 @@ class ProjectRole(models.Model):
     _name = 'project.role'
     _description = 'Project Role'
 
+    _project__group_project_user = models.Ref('project.group_project_user', 'res.groups')
+
     def _get_default_color(self):
         return randint(1, 11)
 
@@ -20,5 +22,5 @@ class ProjectRole(models.Model):
         'project_role_id',
         'res_users_id',
         string='Team Members',
-        domain=lambda self: [('all_group_ids', '=', self.env.ref('project.group_project_user').id)],
+        domain=lambda self: [('all_group_ids', '=', self._project__group_project_user.id)],
     )

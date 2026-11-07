@@ -14,6 +14,8 @@ class BaseLanguageExport(models.TransientModel):
     _name = 'base.language.export'
     _description = 'Language Export'
 
+    _base__action_wizard_lang_export = models.Ref('base.action_wizard_lang_export', 'ir.actions.act_window')
+
     @api.model
     def _get_languages(self):
         langs = self.env['res.lang'].get_installed()
@@ -62,7 +64,7 @@ class BaseLanguageExport(models.TransientModel):
 
         self.write({'state': 'get', 'data': out, 'name': name})
         return {
-            'name': self.env.ref('base.action_wizard_lang_export').name,
+            'name': self._base__action_wizard_lang_export.name,
             'type': 'ir.actions.act_window',
             'res_model': 'base.language.export',
             'view_mode': 'form',

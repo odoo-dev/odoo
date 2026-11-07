@@ -20,6 +20,8 @@ class AccountMoveSend(models.AbstractModel):
     _description = "Shared Send Invoice Wizard Functions"
 
     _account__ir_cron_account_move_send_optional = models.Ref('account.ir_cron_account_move_send', 'ir.cron', required=False)
+    _account__account_invoices = models.Ref('account.account_invoices', 'ir.actions.report')
+    _mail__mt_comment = models.Ref('mail.mt_comment', 'mail.message.subtype')
 
     # -------------------------------------------------------------------------
     # DEFAULTS
@@ -56,10 +58,8 @@ class AccountMoveSend(models.AbstractModel):
         if journal_default_template := move.journal_id.with_company(move.company_id).invoice_template_pdf_report_id:
             return journal_default_template
 
-        action_report = self.env.ref('account.account_invoices')
-
-        if move._is_action_report_available(action_report):
-            return action_report
+        if move._is_action_report_available(self._account__account_invoices):
+            return self._account__account_invoices
 
         raise UserError(_("There is no template that applies to this move type."))
 
@@ -281,7 +281,7 @@ class AccountMoveSend(models.AbstractModel):
         # filter them out to avoid duplicated placeholders, since they are already added in the
         # _get_placeholder_mail_attachments_data method.
         pdf_report = pdf_report or self._get_default_pdf_report_id(move)
-        invoice_template = pdf_report | self.env.ref('account.account_invoices')
+        invoice_template = pdf_report | self._account__account_invoices
         extra_mail_templates = mail_template.report_template_ids - invoice_template
         attachments = []
         for extra_mail_template in extra_mail_templates:
@@ -669,7 +669,7 @@ class AccountMoveSend(models.AbstractModel):
 
     @api.model
     def _send_mails(self, moves_data):
-        subtype = self.env.ref('mail.mt_comment')
+        subtype = self._mail__mt_comment
 
         self._generate_dynamic_reports(moves_data)
 

@@ -12,6 +12,8 @@ class AccountLock_Exception(models.Model):
     _name = 'account.lock_exception'
     _description = "Account Lock Exception"
 
+    _account__view_message_tree_audit_log = models.Ref('account.view_message_tree_audit_log', 'ir.ui.view')
+
     active = fields.Boolean(
         string='Active',
         default=True,
@@ -274,7 +276,7 @@ class AccountLock_Exception(models.Model):
             'name':  self.env._("Audit Trail"),
             'type': 'ir.actions.act_window',
             'res_model': 'mail.message',
-            'view_id': self.env.ref('account.view_message_tree_audit_log').id,
+            'view_id': self._account__view_message_tree_audit_log.id,
             'view_mode': 'list',
             'domain': self._get_audit_trail_during_exception_domain(),
        }

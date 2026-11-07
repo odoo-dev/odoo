@@ -6,6 +6,8 @@ from odoo.addons.account.models.company import PEPPOL_DEFAULT_COUNTRIES
 class AccountJournal(models.Model):
     _inherit = 'account.journal'
 
+    _account__action_account_config = models.Ref('account.action_account_config', 'ir.actions.act_window')
+
     account_peppol_proxy_state = fields.Selection(related='company_id.account_peppol_proxy_state')
     is_peppol_journal = fields.Boolean(string="Account used for Peppol", default=False)
 
@@ -78,5 +80,5 @@ class AccountJournal(models.Model):
             }
         return {
             'title': self.env._("Peppol Settings"),
-            'action': self.env.ref('account.action_account_config')._get_action_dict(),
+            'action': self._account__action_account_config._get_action_dict(),
         }

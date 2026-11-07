@@ -14,6 +14,7 @@ class EventBoothCategory(models.Model):
     _inherit = 'event.booth.category'
 
     _event_booth_sale__product_product_event_booth = models.Ref('event_booth_sale.product_product_event_booth', 'product.product', required=False)
+    _event_product__product_category_events = models.Ref('event_product.product_category_events', 'product.category')
 
     def _default_product_id(self):
         return self._event_booth_sale__product_product_event_booth
@@ -95,7 +96,7 @@ class EventBoothCategory(models.Model):
             # need to create it during installation (data files not yet loaded)
             product = self.env['product.product'].create({
                 'name': 'Generic Event Booth Product',
-                'categ_id': self.env.ref('event_product.product_category_events').id,
+                'categ_id': self._event_product__product_category_events.id,
                 'list_price': 100,
                 'standard_price': 0,
                 'type': 'service',

@@ -12,6 +12,7 @@ class MailBot(models.AbstractModel):
     _description = 'Mail Bot'
 
     _base__partner_root_optional = models.Ref('base.partner_root', 'res.partner', required=False)
+    _base__partner_root = models.Ref('base.partner_root', 'res.partner')
 
     def _apply_logic(self, channel, message, command=None):
         """ Apply bot logic to generate an answer (or not) for the user
@@ -57,7 +58,7 @@ class MailBot(models.AbstractModel):
         }
 
     def _get_answer(self, channel, body, message, command=False):
-        odoobot = self.env.ref("base.partner_root")
+        odoobot = self._base__partner_root
         # onboarding
         odoobot_state = self.env.user.odoobot_state
 

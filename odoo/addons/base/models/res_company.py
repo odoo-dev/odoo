@@ -68,6 +68,10 @@ class ResCompany(models.CachedModel):
     _cached_data_fields = ('name', 'active', 'sequence', 'currency_id', 'parent_id', 'partner_id')
 
     _base__paperformat_euro_optional = models.Ref('base.paperformat_euro', 'report.paperformat', required=False)
+    _base__group_public = models.Ref('base.group_public', 'res.groups')
+    _base__public_user = models.Ref('base.public_user', 'res.users')
+    _base__main_company = models.Ref('base.main_company', 'res.company')
+    _base__main_company_optional = models.Ref('base.main_company', 'res.company', required=False)
 
     def copy(self, default=None):
         raise UserError(self.env._('Duplicating a company is not allowed. Please create a new company instead.'))
@@ -477,9 +481,8 @@ class ResCompany(models.CachedModel):
 
     @api.model
     def _get_main_company(self):
-        try:
-            main_company = self.sudo().env.ref('base.main_company')
-        except ValueError:
+        main_company = self.sudo()._base__main_company_optional
+        if not main_company:
             main_company = self.env['res.company'].sudo().search([], limit=1, order="id")
 
         return main_company
@@ -533,13 +536,13 @@ class ResCompany(models.CachedModel):
     def _get_public_user(self):
         self.ensure_one()
         # We need sudo to be able to see public users from others companies too
-        public_users = self.env.ref('base.group_public').sudo().with_context(active_test=False).all_user_ids
+        public_users = self._base__group_public.sudo().with_context(active_test=False).all_user_ids
         public_users_for_company = public_users.filtered(lambda user: user.company_id == self)
 
         if public_users_for_company:
             return public_users_for_company[0]
         else:
-            return self.env.ref('base.public_user').sudo().copy({
+            return self._base__public_user.sudo().copy({
                 'name': 'Public user for %s' % self.name,
                 'login': 'public-user@company-%s.com' % self.id,
                 'company_id': self.id,

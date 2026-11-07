@@ -703,7 +703,7 @@ class WebsiteSlides(WebsiteProfile):
         # for sys admins: prepare data to install directly modules from eLearning when
         # uploading slides. Currently supporting only survey, because why not.
         if request.env.user.has_group('base.group_system'):
-            module = request.env.ref('base.module_survey')
+            module = request.env['ir.module.module']._base__module_survey
             if module.state != 'installed':
                 render_values['modules_to_install'] = json.dumps([{
                     'id': module.id,

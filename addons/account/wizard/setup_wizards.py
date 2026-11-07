@@ -11,6 +11,8 @@ class AccountFinancialYearOp(models.TransientModel):
     _name = 'account.financial.year.op'
     _description = 'Opening Balance of Financial Year'
 
+    _account__onboarding_onboarding_account_dashboard = models.Ref('account.onboarding_onboarding_account_dashboard', 'onboarding.onboarding')
+
     company_id = fields.Many2one(comodel_name='res.company', required=True)
     opening_move_posted = fields.Boolean(string='Opening Move Posted', compute='_compute_opening_move_posted')
     opening_date = fields.Date(string='Opening Date', required=True, related='company_id.account_opening_date', help="Date from which the accounting is managed in Odoo. It is the date of the opening entry.", readonly=False)
@@ -92,7 +94,7 @@ class AccountFinancialYearOp(models.TransientModel):
         step_state = self.env['onboarding.onboarding.step'].sudo().with_company(self.company_id).action_validate_step('account.onboarding_onboarding_step_fiscal_year')
         # move the state to DONE to avoid an update in the web_read
         if step_state == 'JUST_DONE':
-            self.env.ref('account.onboarding_onboarding_account_dashboard').sudo()._prepare_rendering_values()
+            self._account__onboarding_onboarding_account_dashboard.sudo()._prepare_rendering_values()
         return {'type': 'ir.actions.client', 'tag': 'soft_reload'}
 
 

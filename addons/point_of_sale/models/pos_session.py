@@ -18,6 +18,11 @@ class PosSession(models.Model):
     _description = 'Point of Sale Session'
     _inherit = ['mail.thread', 'mail.activity.mixin', "pos.bus.mixin", 'pos.load.mixin']
 
+    _account__view_move_form = models.Ref('account.view_move_form', 'ir.ui.view')
+    _account__view_move_tree = models.Ref('account.view_move_tree', 'ir.ui.view')
+    _point_of_sale__view_pos_order_tree_no_session_id = models.Ref('point_of_sale.view_pos_order_tree_no_session_id', 'ir.ui.view')
+    _point_of_sale__view_pos_pos_form = models.Ref('point_of_sale.view_pos_pos_form', 'ir.ui.view')
+
     company_id = fields.Many2one(
         'res.company',
         related='config_id.company_id',
@@ -640,8 +645,8 @@ class PosSession(models.Model):
             'res_model': 'account.move',
             'domain': [('id', 'in', all_related_moves.ids)],
             'views': [
-                (self.env.ref('account.view_move_tree').id, 'list'),
-                (self.env.ref('account.view_move_form').id, 'form'),
+                (self._account__view_move_tree.id, 'list'),
+                (self._account__view_move_form.id, 'form'),
             ],
         }
 
@@ -744,8 +749,8 @@ class PosSession(models.Model):
             'res_model': 'pos.order',
             'view_mode': 'list,form',
             'views': [
-                (self.env.ref('point_of_sale.view_pos_order_tree_no_session_id').id, 'list'),
-                (self.env.ref('point_of_sale.view_pos_pos_form').id, 'form'),
+                (self._point_of_sale__view_pos_order_tree_no_session_id.id, 'list'),
+                (self._point_of_sale__view_pos_pos_form.id, 'form'),
                 ],
             'type': 'ir.actions.act_window',
             'domain': [('session_id', 'in', self.ids)],

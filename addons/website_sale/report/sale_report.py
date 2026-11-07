@@ -7,6 +7,8 @@ from odoo.tools import SQL
 class SaleReport(models.Model):
     _inherit = "sale.report"
 
+    _base__public_partner = models.Ref('base.public_partner', 'res.partner')
+
     website_id = fields.Many2one("website", readonly=True)
     is_abandoned_cart = fields.Boolean(string="Abandoned Cart", readonly=True)
     public_categ_ids = fields.Many2many(
@@ -25,7 +27,7 @@ class SaleReport(models.Model):
                 table.order_id.date_order, table.order_id.website_id.cart_abandoned_delay,
                 table.order_id.website_id.id,
                 table.order_id.state,
-                table.order_id.partner_id, self.env.ref("base.public_partner").id,
+                table.order_id.partner_id, self._base__public_partner.id,
             ),
         }
 

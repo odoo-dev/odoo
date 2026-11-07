@@ -24,6 +24,11 @@ _logger = logging.getLogger(__name__)
 class AccountMove(models.Model):
     _inherit = 'account.move'
 
+    _base__PLN = models.Ref('base.PLN', 'res.currency')
+    _base__pl = models.Ref('base.pl', 'res.country')
+    _l10n_pl_edi__cron_l10n_pl_edi_ksef_download_bills = models.Ref('l10n_pl_edi.cron_l10n_pl_edi_ksef_download_bills', 'ir.cron')
+    _l10n_pl_edi__fa3_xml_template = models.Ref('l10n_pl_edi.fa3_xml_template', 'ir.ui.view')
+
     l10n_pl_edi_status = fields.Selection([
         ('sent', 'Sent (In Progress)'),
         ('accepted', 'Accepted'),
@@ -152,7 +157,7 @@ class AccountMove(models.Model):
             return partner.with_context(without_country_name=True)._display_address(without_name=True, separator=' ')
 
         def get_tags(code):
-            return self.env['account.account.tag']._get_tax_tags(code, self.env.ref('base.pl').id)
+            return self.env['account.account.tag']._get_tax_tags(code, self._base__pl.id)
 
         def get_tag_names(line):
             return line.tax_tag_ids.with_context(lang='en_US').mapped(lambda x: re.sub(r'^[+-]', r'', x.name or ''))
@@ -165,7 +170,7 @@ class AccountMove(models.Model):
 
         def get_amounts_from_tag_in_PLN_currency(tax_group_id):
             conversion_line = self.invoice_line_ids.sorted(lambda line: abs(line.balance), reverse=True)[0] if self.invoice_line_ids else None
-            conversion_rate = abs(conversion_line.balance / conversion_line.amount_currency) if self.currency_id != self.env.ref('base.PLN') and conversion_line else 1
+            conversion_rate = abs(conversion_line.balance / conversion_line.amount_currency) if self.currency_id != self._base__PLN and conversion_line else 1
             return get_amounts_from_tag(tax_group_id) * conversion_rate
 
         def get_base_amounts_from_tag(tax_tag_string):
@@ -294,9 +299,8 @@ class AccountMove(models.Model):
         Renders the QWeb template, removes empty lines.
         """
         self.ensure_one()
-        qweb_template = self.env.ref('l10n_pl_edi.fa3_xml_template')
         ksef_values = self._l10n_pl_edi_get_xml_values()
-        xml_content = self.env['ir.qweb']._render(qweb_template.id, ksef_values)
+        xml_content = self.env['ir.qweb']._render(self._l10n_pl_edi__fa3_xml_template.id, ksef_values)
         return "\n".join([line for line in xml_content.splitlines() if line.strip()])
 
     def _l10n_pl_edi_generate_qr_link(self):
@@ -686,8 +690,7 @@ class AccountMove(models.Model):
         if not (delay := error.get('retry_after')):
             raise UserError(error.get('message'))
 
-        cron = self.env.ref('l10n_pl_edi.cron_l10n_pl_edi_ksef_download_bills')
-        cron._trigger(at=fields.Datetime.now() + relativedelta(seconds=delay))
+        self._l10n_pl_edi__cron_l10n_pl_edi_ksef_download_bills._trigger(at=fields.Datetime.now() + relativedelta(seconds=delay))
         return True
 
     def _fetch_bills_metadata(self, service):

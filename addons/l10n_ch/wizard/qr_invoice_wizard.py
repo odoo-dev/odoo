@@ -15,6 +15,8 @@ class L10n_ChQr_InvoiceWizard(models.TransientModel):
     _name = 'l10n_ch.qr_invoice.wizard'
     _description = 'Handles problems occurring while creating multiple QR-invoices at once'
 
+    _account__account_invoices = models.Ref('account.account_invoices', 'ir.actions.report')
+
     nb_qr_inv = fields.Integer(readonly=True)
     nb_classic_inv = fields.Integer(readonly=True)
     qr_inv_text = fields.Text(readonly=True)
@@ -57,7 +59,7 @@ class L10n_ChQr_InvoiceWizard(models.TransientModel):
         Triggered by the Print All button
         '''
         all_invoices_ids = self.env.context.get('inv_ids')
-        return self.env.ref('account.account_invoices').report_action(all_invoices_ids)
+        return self._account__account_invoices.report_action(all_invoices_ids)
 
     def action_view_faulty_invoices(self):
         '''

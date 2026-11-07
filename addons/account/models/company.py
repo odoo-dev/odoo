@@ -75,6 +75,13 @@ class ResCompany(models.Model):
     _inherit = ["res.company", "mail.thread"]
 
     _account__account_move_view_list_stock_closing = models.Ref('account.account_move_view_list_stock_closing', 'ir.ui.view', required=False)
+    _account__action_account_config = models.Ref('account.action_account_config', 'ir.actions.act_window')
+    _account__action_report_account_hash_integrity = models.Ref('account.action_report_account_hash_integrity', 'ir.actions.report')
+    _account__setup_bank_account_wizard = models.Ref('account.setup_bank_account_wizard', 'ir.ui.view')
+    _account__setup_credit_card_account_wizard = models.Ref('account.setup_credit_card_account_wizard', 'ir.ui.view')
+    _account__view_account_move_filter = models.Ref('account.view_account_move_filter', 'ir.ui.view')
+    _account__view_move_form = models.Ref('account.view_move_form', 'ir.ui.view')
+    _account__view_move_tree_multi_edit = models.Ref('account.view_move_tree_multi_edit', 'ir.ui.view')
 
     fiscalyear_last_day = fields.Integer(default=31, required=True)
     fiscalyear_last_month = fields.Selection(MONTH_SELECTION, default='12', required=True)
@@ -732,8 +739,8 @@ class ResCompany(models.Model):
                     'res_model': 'account.move',
                     'type': 'ir.actions.act_window',
                     'domain': [('id', 'in', draft_entries.ids)],
-                    'search_view_id': [self.env.ref('account.view_account_move_filter').id, 'search'],
-                    'views': [[self.env.ref('account.view_move_tree_multi_edit').id, 'list'], [self.env.ref('account.view_move_form').id, 'form']],
+                    'search_view_id': [self._account__view_account_move_filter.id, 'search'],
+                    'views': [[self._account__view_move_tree_multi_edit.id, 'list'], [self._account__view_move_form.id, 'form']],
                 }
                 raise RedirectWarning(error_msg, action_error, _('Show draft entries'))
 
@@ -923,7 +930,7 @@ class ResCompany(models.Model):
     @api.model
     def setting_init_bank_account_action(self):
         """ Called by the 'Bank Accounts' button of the setup bar or from the Financial configuration menu."""
-        view_id = self.env.ref('account.setup_bank_account_wizard').id
+        view_id = self._account__setup_bank_account_wizard.id
         context = {'dialog_size': 'medium', **self.env.context}
         return {
             'type': 'ir.actions.act_window',
@@ -938,7 +945,7 @@ class ResCompany(models.Model):
     @api.model
     def setting_init_credit_card_account_action(self):
         """ Called by the Financial configuration menu 'Add a credit card account' """
-        view_id = self.env.ref('account.setup_credit_card_account_wizard').id
+        view_id = self._account__setup_credit_card_account_wizard.id
         context = {'dialog_size': 'medium', **self.env.context}
         return {
             'type': 'ir.actions.act_window',
@@ -1112,11 +1119,10 @@ class ResCompany(models.Model):
     def get_chart_of_accounts_or_fail(self):
         account = self.env['account.account'].search(self.env['account.account']._check_company_domain(self), limit=1)
         if len(account) == 0:
-            action = self.env.ref('account.action_account_config')
             msg = _(
                 "We cannot find a chart of accounts for this company, you should configure it. \n"
                 "Please go to Account Configuration and select or install a fiscal localization.")
-            raise RedirectWarning(msg, action.id, _("Go to the configuration panel"))
+            raise RedirectWarning(msg, self._account__action_account_config.id, _("Go to the configuration panel"))
         return account
 
     def install_l10n_modules(self):
@@ -1147,7 +1153,7 @@ class ResCompany(models.Model):
 
     @api.model
     def _action_check_hash_integrity(self):
-        return self.env.ref('account.action_report_account_hash_integrity').report_action(self.id)
+        return self._account__action_report_account_hash_integrity.report_action(self.id)
 
     def _check_hash_integrity(self):
         """Checks that all hashed moves have still the same data as when they were hashed

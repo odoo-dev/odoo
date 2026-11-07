@@ -4,6 +4,8 @@ from odoo import models, fields, api
 class StockWarehouse(models.Model):
     _inherit = "stock.warehouse"
 
+    _stock__stock_location_customers = models.Ref('stock.stock_location_customers', 'stock.location')
+
     pos_type_id = fields.Many2one('stock.picking.type', string="Point of Sale Operation Type", copy=False)
 
     def _get_sequence_values(self, name=False, code=False):
@@ -32,7 +34,7 @@ class StockWarehouse(models.Model):
                 'name': self.env._('PoS Orders'),
                 'code': 'outgoing',
                 'default_location_src_id': self.lot_stock_id.id,
-                'default_location_dest_id': self.env.ref('stock.stock_location_customers').id,
+                'default_location_dest_id': self._stock__stock_location_customers.id,
                 'sequence': max_sequence + 1,
                 'company_id': self.company_id.id,
             }

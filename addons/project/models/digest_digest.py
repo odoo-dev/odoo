@@ -7,6 +7,8 @@ from odoo import fields, models
 class DigestDigest(models.Model):
     _inherit = 'digest.digest'
 
+    _project__menu_main_pm = models.Ref('project.menu_main_pm', 'ir.ui.menu')
+
     kpi_project_task_opened = fields.Boolean('Open Tasks')
     kpi_project_task_opened_value = fields.Integer(compute='_compute_project_task_opened_value', export_string_translation=False)
 
@@ -25,7 +27,7 @@ class DigestDigest(models.Model):
 
     def _get_kpi_custom_settings(self, company, user):
         res = super()._get_kpi_custom_settings(company, user)
-        menu_id = self.env.ref('project.menu_main_pm').id
+        menu_id = self._project__menu_main_pm.id
         res['kpi_action']['kpi_project_task_opened'] = f'project.open_view_project_all?menu_id={menu_id}'
         res['kpi_sequence']['kpi_project_task_opened'] = 7500
         return res

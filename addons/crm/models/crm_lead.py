@@ -100,6 +100,13 @@ class CrmLead(models.Model):
     _track_duration_field = 'stage_id'
     _priority_field = 'priority'
 
+    _crm__mt_lead_create = models.Ref('crm.mt_lead_create', 'mail.message.subtype')
+    _crm__mt_lead_lost = models.Ref('crm.mt_lead_lost', 'mail.message.subtype')
+    _crm__mt_lead_restored = models.Ref('crm.mt_lead_restored', 'mail.message.subtype')
+    _crm__mt_lead_stage = models.Ref('crm.mt_lead_stage', 'mail.message.subtype')
+    _crm__mt_lead_won = models.Ref('crm.mt_lead_won', 'mail.message.subtype')
+    _sales_team__crm_team_action_config = models.Ref('sales_team.crm_team_action_config', 'ir.actions.act_window')
+
     # Description
     name = fields.Char(
         'Opportunity', index='trigram', required=True,
@@ -1387,7 +1394,7 @@ class CrmLead(models.Model):
             if self.env.user.has_group('sales_team.group_sale_manager'):
                 suffix = _(
                     'To work with the CRM, you should <a name="%d" type="action" tabindex="-1">join a Team.</a>',
-                    self.env.ref('sales_team.crm_team_action_config').id
+                    self._sales_team__crm_team_action_config.id
                 )
             else:
                 suffix = _("To work with the CRM, you should be added to a Team.")
@@ -2046,7 +2053,7 @@ class CrmLead(models.Model):
     # ------------------------------------------------------------
 
     def _creation_subtype(self):
-        return self.env.ref('crm.mt_lead_create')
+        return self._crm__mt_lead_create
 
     def _creation_message(self):
         self.ensure_one()
@@ -2067,15 +2074,15 @@ class CrmLead(models.Model):
     def _track_log_get_default_subtype(self, track_init_values):
         self.ensure_one()
         if 'stage_id' in track_init_values and self.won_status == 'won':
-            return self.env.ref('crm.mt_lead_won')
+            return self._crm__mt_lead_won
         elif 'lost_reason_id' in track_init_values and self.lost_reason_id:
-            return self.env.ref('crm.mt_lead_lost')
+            return self._crm__mt_lead_lost
         elif 'stage_id' in track_init_values:
-            return self.env.ref('crm.mt_lead_stage')
+            return self._crm__mt_lead_stage
         elif 'won_status' in track_init_values and self.won_status != 'lost':
-            return self.env.ref('crm.mt_lead_restored')
+            return self._crm__mt_lead_restored
         elif 'won_status' in track_init_values and self.won_status == 'lost':
-            return self.env.ref('crm.mt_lead_lost')
+            return self._crm__mt_lead_lost
         return super()._track_log_get_default_subtype(track_init_values)
 
     def _notify_by_email_prepare_rendering_context(self, message, model_description=False,

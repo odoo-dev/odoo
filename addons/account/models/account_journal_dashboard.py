@@ -29,6 +29,11 @@ class AccountJournal(models.Model):
     _account_reports__action_account_report_pl = models.Ref('account_reports.action_account_report_pl', 'ir.actions.client', required=False)
     _account_reports__profit_and_loss_optional = models.Ref('account_reports.profit_and_loss', 'account.report', required=False)
     _base__res_partner_2 = models.Ref('base.res_partner_2', 'res.partner', required=False)
+    _account__action_account_config = models.Ref('account.action_account_config', 'ir.actions.act_window')
+    _account__action_account_invoice_report_all = models.Ref('account.action_account_invoice_report_all', 'ir.actions.act_window')
+    _account__action_base_document_layout_configurator = models.Ref('account.action_base_document_layout_configurator', 'ir.actions.act_window')
+    _account__view_account_move_with_gaps_in_sequence_filter = models.Ref('account.view_account_move_with_gaps_in_sequence_filter', 'ir.ui.view')
+    _account__view_move_form = models.Ref('account.view_move_form', 'ir.ui.view')
 
     kanban_dashboard = fields.Text(compute='_kanban_dashboard')
     kanban_dashboard_graph = fields.Text(compute='_kanban_dashboard_graph')
@@ -202,9 +207,6 @@ class AccountJournal(models.Model):
         income = profitability_amounts['income']
         expenses = profitability_amounts['expenses']
 
-        invoice_analysis_action = self.env.ref('account.action_account_invoice_report_all')
-        invoice_layout_action = self.env.ref('account.action_base_document_layout_configurator')
-
         unpaid_amounts = self._get_sale_purchase_kpi_amounts()
         customer_unpaid = unpaid_amounts['sale']
         supplier_unpaid = -unpaid_amounts['purchase']
@@ -215,7 +217,7 @@ class AccountJournal(models.Model):
                 'id': 'invoices',
                 'name': self.env._('Invoices'),
                 'value': format_amount(income),
-                'action_id': invoice_analysis_action.id,
+                'action_id': self._account__action_account_invoice_report_all.id,
             },
             {
                 'id': 'expenses',
@@ -251,7 +253,7 @@ class AccountJournal(models.Model):
                 'name': self.env._('Setup Your Invoice Layout'),
                 'is_invoice_layout_card': True,
                 'image': '/web/static/img/mimetypes/document.svg',
-                'action_id': invoice_layout_action.id,
+                'action_id': self._account__action_base_document_layout_configurator.id,
             })
 
         return cards
@@ -986,7 +988,7 @@ class AccountJournal(models.Model):
         self.ensure_one()
         return {
             'title': self.env._("Activate E-Invoicing"),
-            'action': self.env.ref('account.action_account_config')._get_action_dict(),
+            'action': self._account__action_account_config._get_action_dict(),
         }
 
     def _get_journal_dashboard_bank_running_balance(self):
@@ -1110,7 +1112,7 @@ class AccountJournal(models.Model):
             'type': 'ir.actions.act_window',
             'view_mode': 'form',
             'res_model': 'account.move',
-            'view_id': self.env.ref('account.view_move_form').id,
+            'view_id': self._account__view_move_form.id,
             'context': self._get_move_action_context(),
         }
 
@@ -1332,7 +1334,7 @@ class AccountJournal(models.Model):
             'type': 'ir.actions.act_window',
             'name': _("Journal Entries"),
             'res_model': 'account.move',
-            'search_view_id': (self.env.ref('account.view_account_move_with_gaps_in_sequence_filter').id, 'search'),
+            'search_view_id': (self._account__view_account_move_with_gaps_in_sequence_filter.id, 'search'),
             'view_mode': 'list,form',
             'domain': domain,
             'context': {

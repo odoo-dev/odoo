@@ -8,6 +8,8 @@ from odoo.fields import Command
 class SaleOrder(models.Model):
     _inherit = "sale.order"
 
+    _delivery__choose_delivery_carrier_view_form = models.Ref('delivery.choose_delivery_carrier_view_form', 'ir.ui.view')
+
     carrier_id = fields.Many2one(
         string="Delivery Method",
         help="Fill this field if you plan to invoice the shipping based on picking.",
@@ -107,7 +109,7 @@ class SaleOrder(models.Model):
         return True
 
     def action_open_delivery_wizard(self):
-        view_id = self.env.ref("delivery.choose_delivery_carrier_view_form").id
+        view_id = self._delivery__choose_delivery_carrier_view_form.id
         if self.env.context.get("carrier_recompute"):
             name = self.env._("Update shipping cost")
             carrier = self.carrier_id

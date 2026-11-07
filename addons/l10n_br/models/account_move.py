@@ -6,6 +6,9 @@ from odoo.tools import SQL
 class AccountMove(models.Model):
     _inherit = "account.move"
 
+    _l10n_br__dt_55 = models.Ref('l10n_br.dt_55', 'l10n_latam.document.type')
+    _l10n_br__dt_SE = models.Ref('l10n_br.dt_SE', 'l10n_latam.document.type')
+
     def _compute_l10n_latam_document_type(self):
         """ Override for debit notes. This sets the same document type as the one on the origin. Cannot
          override the defaults in the account.move.debit wizard because l10n_latam_invoice_document explicitly
@@ -26,9 +29,9 @@ class AccountMove(models.Model):
 
             first_type = self.invoice_line_ids.product_id.type
             if first_type == "service":
-                document_type = self.env.ref("l10n_br.dt_SE")
+                document_type = self._l10n_br__dt_SE
             elif first_type:
-                document_type = self.env.ref("l10n_br.dt_55")
+                document_type = self._l10n_br__dt_55
 
             self.l10n_latam_document_type_id = document_type
 

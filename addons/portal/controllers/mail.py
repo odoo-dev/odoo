@@ -37,7 +37,7 @@ class MailController(mail.MailController):
             return super(MailController, cls)._redirect_to_record(model, res_id, access_token=access_token, **kwargs)
 
         if isinstance(request.env[model], request.env.registry['portal.mixin']):
-            uid = request.session.uid or request.env.ref('base.public_user').id
+            uid = request.session.uid or request.env['res.users']._base__public_user.id
             record_sudo = request.env[model].sudo().browse(res_id).exists()
             try:
                 record_sudo.with_user(uid).check_access('read')

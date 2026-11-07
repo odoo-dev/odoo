@@ -6,6 +6,9 @@ from odoo import fields, models, api
 class SurveyUser_Input(models.Model):
     _inherit = 'survey.user_input'
 
+    _website_slides_survey__mail_template_user_input_certification_failed = models.Ref(
+        'website_slides_survey.mail_template_user_input_certification_failed', 'mail.template')
+
     slide_id = fields.Many2one('slide.slide', 'Related course slide',
         help="The related course slide when there is no membership information")
     slide_partner_id = fields.Many2one('slide.slide.partner', 'Subscriber information',
@@ -48,7 +51,7 @@ class SurveyUser_Input(models.Model):
                         # skip if user still has attempts left
                         continue
 
-                    self.env.ref('website_slides_survey.mail_template_user_input_certification_failed').send_mail(
+                    self._website_slides_survey__mail_template_user_input_certification_failed.send_mail(
                         user_input.id, email_layout_xmlid="mail.mail_notification_light"
                     )
 

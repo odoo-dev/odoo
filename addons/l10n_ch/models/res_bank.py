@@ -43,6 +43,9 @@ def check_qr_iban_range(iban):
 class ResPartnerBank(models.Model):
     _inherit = 'res.partner.bank'
 
+    _base__CHF = models.Ref('base.CHF', 'res.currency')
+    _base__EUR = models.Ref('base.EUR', 'res.currency')
+
     l10n_ch_qr_iban = fields.Char(string='QR-IBAN',
                                   compute='_compute_l10n_ch_qr_iban',
                                   store=True,
@@ -248,7 +251,7 @@ class ResPartnerBank(models.Model):
             debtor_check = self._l10n_ch_qr_debtor_check(debtor_partner)
             if debtor_partner and debtor_check:
                 error_messages.append(debtor_check)
-            if currency.id not in (self.env.ref('base.EUR').id, self.env.ref('base.CHF').id):
+            if currency.id not in (self._base__EUR.id, self._base__CHF.id):
                 error_messages.append(_("The currency isn't EUR nor CHF."))
             return '\r\n'.join(error_messages) if len(error_messages) > 1 else None
 

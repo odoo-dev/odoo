@@ -27,6 +27,7 @@ class WebsiteMenu(models.Model):
         'website.main_menu', 'website.menu',
         message=_lt("You cannot delete this website menu as this serves as the default parent menu for new websites (e.g., /shop, /event, ...)."),
     )
+    _website__group_website_designer = models.Ref('website.group_website_designer', 'res.groups')
 
     def _default_sequence(self):
         menu = self.search([], limit=1, order="sequence DESC")
@@ -247,7 +248,7 @@ class WebsiteMenu(models.Model):
         if 'group_ids' in vals and not self.env.context.get("adding_designer_group_to_menu"):
             self.filtered("group_ids").with_context(
                 adding_designer_group_to_menu=True
-            ).group_ids += self.env.ref("website.group_website_designer")
+            ).group_ids += self._website__group_website_designer
         return res
 
     def unlink(self):

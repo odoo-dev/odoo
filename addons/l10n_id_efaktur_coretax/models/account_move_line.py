@@ -7,6 +7,11 @@ from odoo.tools.float_utils import float_repr, float_compare
 class AccountMoveLine(models.Model):
     _inherit = "account.move.line"
 
+    _base__IDR = models.Ref('base.IDR', 'res.currency')
+    _l10n_id_efaktur_coretax__product_code_000000_goods = models.Ref(
+        'l10n_id_efaktur_coretax.product_code_000000_goods', 'l10n_id_efaktur_coretax.product.code')
+    _l10n_id_efaktur_coretax__uom_code_0018 = models.Ref('l10n_id_efaktur_coretax.uom_code_0018', 'l10n_id_efaktur_coretax.uom.code')
+
     def _l10n_id_coretax_is_negative_line(self):
         """ Whether this line must be absorbed as a discount by the other lines (e.g. a global discount).
 
@@ -18,7 +23,7 @@ class AccountMoveLine(models.Model):
     def _l10n_id_coretax_build_invoice_line_vals(self, vals, base_line):
         """ Fill in the vals['lines'] with some information regarding each invoice line"""
         self.ensure_one()
-        idr = self.env.ref('base.IDR')
+        idr = self._base__IDR
 
         # initialize
         if not vals.get('lines'):
@@ -50,9 +55,9 @@ class AccountMoveLine(models.Model):
 
         line_val = {
             "Opt": "B" if product.type == "service" else "A",  # A: goods, B: service
-            "Code": product.l10n_id_product_code.code or self.env.ref('l10n_id_efaktur_coretax.product_code_000000_goods').code,
+            "Code": product.l10n_id_product_code.code or self._l10n_id_efaktur_coretax__product_code_000000_goods.code,
             "Name": (self.label or '').replace('\n', ' '),
-            "Unit": self.product_uom_id.l10n_id_uom_code.code or self.env.ref('l10n_id_efaktur_coretax.uom_code_0018').code,
+            "Unit": self.product_uom_id.l10n_id_uom_code.code or self._l10n_id_efaktur_coretax__uom_code_0018.code,
             "Price": tax_details['raw_gross_price_unit'],  # excluding tax, before discount
             "Qty": self.quantity,
             "TotalDiscount": tax_details['discount_amount'],  # line discount + absorbed negative lines

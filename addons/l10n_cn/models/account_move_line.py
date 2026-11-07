@@ -7,6 +7,8 @@ from odoo.exceptions import ValidationError
 class AccountMoveLine(models.Model):
     _inherit = "account.move.line"
 
+    _l10n_cn__view_move_line_form_balance_deduction = models.Ref('l10n_cn.view_move_line_form_balance_deduction', 'ir.ui.view')
+
     l10n_cn_output_vat_offset_account_id = fields.Many2one(
         comodel_name='account.account',
         string="Output VAT Offset Account",
@@ -47,7 +49,7 @@ class AccountMoveLine(models.Model):
 
         return self._get_records_action(
             name=self.env._('Balance Deduction'),
-            views=[(self.env.ref('l10n_cn.view_move_line_form_balance_deduction').id, 'form')],
+            views=[(self._l10n_cn__view_move_line_form_balance_deduction.id, 'form')],
             target='new',
         )
 

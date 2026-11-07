@@ -13,6 +13,7 @@ class ProjectProject(models.Model):
     _inherit = 'project.project'
 
     _sale_timesheet__time_product_optional = models.Ref('sale_timesheet.time_product', 'product.product', required=False)
+    _uom__product_uom_day = models.Ref('uom.product_uom_day', 'uom.uom')
 
     @api.model
     def default_get(self, fields):
@@ -73,7 +74,7 @@ class ProjectProject(models.Model):
     @api.model
     def _get_view(self, view_id=None, view_type='form', **options):
         arch, view = super()._get_view(view_id, view_type, **options)
-        if view_type == 'form' and self.env.company.timesheet_encode_uom_id == self.env.ref('uom.product_uom_day'):
+        if view_type == 'form' and self.env.company.timesheet_encode_uom_id == self._uom__product_uom_day:
             for node in arch.xpath("//field[@name='display_cost'][not(@string)]"):
                 node.set('string', 'Daily Cost')
         return arch, view

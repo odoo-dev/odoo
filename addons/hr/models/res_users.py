@@ -89,6 +89,8 @@ def related_employee_field(name: str, *, field_name: str | None = None, string: 
 class ResUsers(models.Model):
     _inherit = 'res.users'
 
+    _base__view_users_form = models.Ref('base.view_users_form', 'ir.ui.view')
+
     def _employee_ids_domain(self):
         # employee_ids is considered a safe field and as such will be fetched as sudo.
         # So try to enforce the security rules on the field to make sure we do not load employees outside of active companies
@@ -454,7 +456,7 @@ class ResUsers(models.Model):
             user = self.env['res.users'].browse(access_uid).sudo()
 
         if self.env.context.get('default_create_employee_id') and user.has_group('base.group_erp_manager'):
-            res['views'] = [(self.env.ref('base.view_users_form').id, 'form')]
+            res['views'] = [(self._base__view_users_form.id, 'form')]
 
         return res
 

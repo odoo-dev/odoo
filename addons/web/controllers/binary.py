@@ -202,7 +202,7 @@ class Binary(Controller):
             # Use the ratio of the requested field_name instead of "raw"
             if (int(width), int(height)) == (0, 0):
                 width, height = image_guess_size_from_field_name(field)
-            record = request.env.ref('web.image_placeholder').sudo()
+            record = request.env['ir.attachment']._web__image_placeholder.sudo()
             stream = request.env['ir.binary']._get_image_stream_from(
                 record.with_context(download_attachments=download), 'raw', width=int(width), height=int(height), crop=crop,
             )

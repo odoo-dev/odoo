@@ -6,6 +6,8 @@ from odoo import fields, models, _
 class SurveyUser_Input(models.Model):
     _inherit = 'survey.user_input'
 
+    _crm__crm_lead_view_form = models.Ref('crm.crm_lead_view_form', 'ir.ui.view')
+
     lead_id = fields.Many2one('crm.lead', ondelete='set null')  # Linked to, at most, one lead
 
     def _mark_done(self):
@@ -218,6 +220,6 @@ class SurveyUser_Input(models.Model):
         ''' Shows the lead associated, created from inputs '''
         self.ensure_one()
         action = self.env['ir.actions.act_window']._for_xml_id('crm.crm_lead_opportunities')
-        action['views'] = [((self.env.ref('crm.crm_lead_view_form').id), 'form')]
+        action['views'] = [((self._crm__crm_lead_view_form.id), 'form')]
         action['res_id'] = self.lead_id.id
         return action

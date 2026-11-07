@@ -23,6 +23,8 @@ class LunchAlert(models.Model):
     _description = 'Lunch Alert'
     _order = 'write_date desc, id'
 
+    _base__user_root = models.Ref('base.user_root', 'res.users')
+
     name = fields.Char('Alert Name', required=True, translate=True)
     message = fields.Html('Message', required=True, translate=True)
 
@@ -112,7 +114,7 @@ class LunchAlert(models.Model):
     def create(self, vals_list):
         crons = self.env['ir.cron'].sudo().create([
             {
-                'user_id': self.env.ref('base.user_root').id,
+                'user_id': self._base__user_root.id,
                 'active': False,
                 'interval_type': 'days',
                 'interval_number': 1,

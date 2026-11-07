@@ -14,6 +14,8 @@ _logger = logging.getLogger(__name__)
 class AccountMoveSend(models.AbstractModel):
     _inherit = 'account.move.send'
 
+    _account_peppol__ir_cron_peppol_get_message_status = models.Ref('account_peppol.ir_cron_peppol_get_message_status', 'ir.cron')
+
     @api.model
     def _get_default_sending_methods(self, move) -> list:
         """ By default, we use the sending method set on the partner or peppol. """
@@ -356,7 +358,7 @@ class AccountMoveSend(models.AbstractModel):
                             'res_model': new_message._name,
                             'res_id': new_message.id,
                         })
-                self.env.ref('account_peppol.ir_cron_peppol_get_message_status')._trigger(at=fields.Datetime.now() + timedelta(minutes=5))
+                self._account_peppol__ir_cron_peppol_get_message_status._trigger(at=fields.Datetime.now() + timedelta(minutes=5))
 
     def _get_peppol_attachments_linked_message(self, edi_user):
         return _("The invoice has been sent to the Peppol Access Point. The following attachments were sent with the XML:")

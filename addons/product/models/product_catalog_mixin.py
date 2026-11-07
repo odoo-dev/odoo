@@ -13,11 +13,14 @@ class ProductCatalogMixin(models.AbstractModel):
     _name = "product.catalog.mixin"
     _description = "Product Catalog Mixin"
 
+    _product__product_view_kanban_catalog = models.Ref('product.product_view_kanban_catalog', 'ir.ui.view')
+    _product__product_view_search_catalog = models.Ref('product.product_view_search_catalog', 'ir.ui.view')
+
     @api.readonly
     def action_add_from_catalog(self) -> dict:
         self.ensure_one()
-        kanban_view_id = self.env.ref("product.product_view_kanban_catalog").id
-        search_view_id = self.env.ref("product.product_view_search_catalog").id
+        kanban_view_id = self._product__product_view_kanban_catalog.id
+        search_view_id = self._product__product_view_search_catalog.id
         additional_context = self._get_action_add_from_catalog_extra_context()
         context = {**self.env.context, **additional_context}
         context.pop('form_view_ref', None)

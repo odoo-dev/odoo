@@ -10,11 +10,11 @@ class ResCompany(models.Model):
     _inherit = "res.company"
     _check_company_auto = True
 
+    _stock__stock_location_inter_company = models.Ref('stock.stock_location_inter_company', 'stock.location')
+    _stock__mail_template_data_delivery_confirmation = models.Ref('stock.mail_template_data_delivery_confirmation', 'mail.template', required=False)
+
     def _default_confirmation_mail_template(self):
-        try:
-            return self.env.ref('stock.mail_template_data_delivery_confirmation').id
-        except ValueError:
-            return False
+        return self._stock__mail_template_data_delivery_confirmation.id
 
     # used for resupply routes between warehouses that belong to this company
     internal_transit_location_id = fields.Many2one(
@@ -199,7 +199,7 @@ class ResCompany(models.Model):
     def create(self, vals_list):
         companies = super().create(vals_list)
         # Unarchive inter-company location when multi-company is enabled.
-        inter_company_location = self.env.ref('stock.stock_location_inter_company')
+        inter_company_location = self._stock__stock_location_inter_company
         if not inter_company_location.active:
             inter_company_location.sudo().write({'active': True})
         for company in companies:

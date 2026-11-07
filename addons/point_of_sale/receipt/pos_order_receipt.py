@@ -62,6 +62,9 @@ class PosOrderReceipt(models.AbstractModel):
     _name = 'pos.order.receipt'
     _description = 'Point of Sale Order Receipt Generator'
 
+    _base__europe = models.Ref('base.europe', 'res.country.group')
+    _uom__product_uom_unit = models.Ref('uom.product_uom_unit', 'uom.uom')
+
     def _order_receipt_tz(self):
         """Receipts must use the shop timezone, since the rendering user (self ordering user, public user, OdooBot, ...) can be in a different tz"""
         self.ensure_one()
@@ -253,7 +256,7 @@ class PosOrderReceipt(models.AbstractModel):
             },
             'conditions': {
                 'basic_receipt': basic_receipt,
-                'display_vat': self.company_id.country_id.id in self.env.ref("base.europe").country_ids.ids,
+                'display_vat': self.company_id.country_id.id in self._base__europe.country_ids.ids,
                 'display_qr_code': use_qr_code,
                 'display_url': self.company_id.point_of_sale_ticket_portal_url_display_mode != 'qr_code',
                 'use_self_invoicing': self.company_id.point_of_sale_use_ticket_qr_code,
@@ -623,7 +626,7 @@ class PosOrderReceipt(models.AbstractModel):
             "group": group,
             "combo_line_ids": line.combo_line_ids.ids,
             "combo_parent_uuid": line.combo_parent_id.uuid,
-            "uom_is_base_unit": line.product_id.uom_id.id == self.env.ref('uom.product_uom_unit').id
+            "uom_is_base_unit": line.product_id.uom_id.id == self._uom__product_uom_unit.id
         }
 
     def _get_line_category_group(self, line):

@@ -7,6 +7,8 @@ class BaseLanguageInstall(models.TransientModel):
     _name = 'base.language.install'
     _description = "Install Language"
 
+    _base__language_install_view_form_lang_switch = models.Ref('base.language_install_view_form_lang_switch', 'ir.ui.view')
+
     @api.model
     def _default_lang_ids(self):
         """ Display the selected language when using the 'Update Terms' action
@@ -46,7 +48,7 @@ class BaseLanguageInstall(models.TransientModel):
                 'res_id': self.id,
                 'view_mode': 'form',
                 'target': 'new',
-                'views': [[self.env.ref('base.language_install_view_form_lang_switch').id, 'form']],
+                'views': [[self._base__language_install_view_form_lang_switch.id, 'form']],
             }
 
         return {

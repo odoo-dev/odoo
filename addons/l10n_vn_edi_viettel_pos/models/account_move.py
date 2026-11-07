@@ -6,6 +6,8 @@ from odoo import models
 class AccountMove(models.Model):
     _inherit = 'account.move'
 
+    _l10n_vn_edi_viettel_pos__partner_walk_in_customer = models.Ref('l10n_vn_edi_viettel_pos.partner_walk_in_customer', 'res.partner')
+
     def _get_invoice_legal_documents(self, filetype, allow_fallback=False):
         if filetype == 'pdf' and self.pos_order_ids and (sinvoice_attachment := self.l10n_vn_edi_sinvoice_pdf_file_id):
             return [{
@@ -19,7 +21,7 @@ class AccountMove(models.Model):
         super()._l10n_vn_edi_add_buyer_information(json_values)
 
         # For Walk-In Customer, there is no address and buyerNotGetInvoice should be set to 1
-        if self.partner_id == self.env.ref('l10n_vn_edi_viettel_pos.partner_walk_in_customer'):
+        if self.partner_id == self._l10n_vn_edi_viettel_pos__partner_walk_in_customer:
             del json_values['buyerInfo']['buyerAddressLine']
             json_values['buyerInfo']['buyerNotGetInvoice'] = 1
 

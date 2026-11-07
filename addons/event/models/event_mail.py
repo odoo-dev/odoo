@@ -32,6 +32,8 @@ class EventMail(models.Model):
     _description = 'Event Automated Mailing'
 
     _event__event_mail_scheduler_optional = models.Ref('event.event_mail_scheduler', 'ir.cron', required=False)
+    _base__user_root = models.Ref('base.user_root', 'res.users')
+    _event__event_mail_scheduler = models.Ref('event.event_mail_scheduler', 'ir.cron')
 
     event_id = fields.Many2one('event.event', string='Event', required=True, index=True, ondelete='cascade')
     sequence = fields.Integer('Display order')
@@ -186,7 +188,7 @@ class EventMail(models.Model):
         # there are more than planned for the cron -> reschedule
         if len(registrations) > cron_limit:
             registrations = registrations[:cron_limit]
-            self.env.ref('event.event_mail_scheduler')._trigger()
+            self._event__event_mail_scheduler._trigger()
 
         for registrations_chunk in tools.split_every(batch_size, registrations.ids, self.env["event.registration"].browse):
             self._execute_event_based_for_registrations(registrations_chunk)
@@ -288,7 +290,7 @@ class EventMail(models.Model):
         # there are more than planned for the cron -> reschedule
         if len(new_attendee_mails) > cron_limit:
             new_attendee_mails = new_attendee_mails[:cron_limit]
-            self.env.ref('event.event_mail_scheduler')._trigger()
+            self._event__event_mail_scheduler._trigger()
 
         for chunk in tools.split_every(batch_size, new_attendee_mails.ids, self.env["event.mail.registration"].browse):
             # filter out canceled / draft, and compare to seats_taken (same heuristic)
@@ -388,7 +390,7 @@ class EventMail(models.Model):
         elif self.env.user.email:
             author = self.env.user.partner_id
         else:
-            author = self.env.ref('base.user_root').partner_id
+            author = self._base__user_root.partner_id
 
         composer_values = {
             'composition_mode': 'mass_mail',

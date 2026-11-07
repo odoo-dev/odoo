@@ -17,6 +17,9 @@ TOLERANCE = 0.02  # tolerance applied to the total when searching for a matching
 class AccountMove(models.Model):
     _inherit = 'account.move'
 
+    _purchase__purchase_bill_line_match_tree = models.Ref('purchase.purchase_bill_line_match_tree', 'ir.ui.view')
+    _purchase__purchase_order_form = models.Ref('purchase.purchase_order_form', 'ir.ui.view')
+
     purchase_vendor_bill_id = fields.Many2one(
         'purchase.bill.union',
         store=False,
@@ -240,7 +243,7 @@ class AccountMove(models.Model):
                 ('qty_to_invoice_raw', '!=', 0),
                 ('qty_to_invoice', '!=', 0),
             ],
-            'views': [(self.env.ref('purchase.purchase_bill_line_match_tree').id, 'list')],
+            'views': [(self._purchase__purchase_bill_line_match_tree.id, 'list')],
         }
 
     def action_view_source_purchase_orders(self):
@@ -250,7 +253,7 @@ class AccountMove(models.Model):
         if len(source_orders) > 1:
             result['domain'] = [('id', 'in', source_orders.ids)]
         elif len(source_orders) == 1:
-            result['views'] = [(self.env.ref('purchase.purchase_order_form').id, 'form')]
+            result['views'] = [(self._purchase__purchase_order_form.id, 'form')]
             result['res_id'] = source_orders.id
         else:
             result = {'type': 'ir.actions.act_window_close'}

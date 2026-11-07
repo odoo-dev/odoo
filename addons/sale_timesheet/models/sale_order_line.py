@@ -7,6 +7,10 @@ from odoo.fields import Domain
 class SaleOrderLine(models.Model):
     _inherit = "sale.order.line"
 
+    _uom__product_uom_day = models.Ref('uom.product_uom_day', 'uom.uom')
+    _uom__product_uom_hour = models.Ref('uom.product_uom_hour', 'uom.uom')
+    _uom__product_uom_unit = models.Ref('uom.product_uom_unit', 'uom.uom')
+
     qty_delivered_method = fields.Selection(selection_add=[('timesheet', 'Timesheets')])
     analytic_line_ids = fields.One2many(domain=[('project_id', '=', False)])  # only analytic lines, not timesheets (since this field determine if SO line came from expense)
     remaining_hours_available = fields.Boolean(compute='_compute_remaining_hours_available', compute_sudo=True)
@@ -24,9 +28,9 @@ class SaleOrderLine(models.Model):
             encoding_uom = company.timesheet_encode_uom_id
             is_hour = is_day = False
             unit_label = ''
-            if encoding_uom == self.env.ref('uom.product_uom_hour'):
+            if encoding_uom == self._uom__product_uom_hour:
                 is_hour = True
-            elif encoding_uom == self.env.ref('uom.product_uom_day'):
+            elif encoding_uom == self._uom__product_uom_day:
                 is_day = True
                 unit_label = _('days remaining')
             for line in self:
@@ -47,12 +51,12 @@ class SaleOrderLine(models.Model):
     def _compute_remaining_hours_available(self):
         for line in self:
             is_ordered_prepaid = line.product_id.service_policy == 'ordered_prepaid'
-            is_time_product = line.product_uom_id and line.product_uom_id._has_common_reference(self.env.ref('uom.product_uom_hour'))
+            is_time_product = line.product_uom_id and line.product_uom_id._has_common_reference(self._uom__product_uom_hour)
             line.remaining_hours_available = is_ordered_prepaid and is_time_product
 
     @api.depends('remaining_hours_available', 'qty_delivered', 'product_uom_qty', 'product_uom_id')
     def _compute_remaining_hours(self):
-        uom_hour = self.env.ref('uom.product_uom_hour')
+        uom_hour = self._uom__product_uom_hour
         for line in self:
             remaining_hours = None
             if line.remaining_hours_available:
@@ -95,8 +99,8 @@ class SaleOrderLine(models.Model):
         company_time_uom_id = dest_company.project_time_mode_id
         allocated_hours = 0.0
         product_uom = self.product_uom_id
-        if product_uom == self.env.ref('uom.product_uom_unit'):
-            product_uom = self.env.ref('uom.product_uom_hour')
+        if product_uom == self._uom__product_uom_unit:
+            product_uom = self._uom__product_uom_hour
         if product_uom._has_common_reference(company_time_uom_id):
             if product_uom != company_time_uom_id:
                 allocated_hours = product_uom._compute_quantity(self.product_uom_qty, company_time_uom_id, rounding_method='HALF-UP')
@@ -114,8 +118,6 @@ class SaleOrderLine(models.Model):
             })
             return project
         project_uom = self.company_id.project_time_mode_id
-        uom_unit = self.env.ref('uom.product_uom_unit')
-        uom_hour = self.env.ref('uom.product_uom_hour')
 
         # dict of inverse factors for each relevant UoM found in SO
         factor_per_id = {
@@ -124,7 +126,7 @@ class SaleOrderLine(models.Model):
             if uom._has_common_reference(project_uom)
         }
         # if sold as units, assume hours for time allocation
-        factor_per_id[uom_unit.id] = uom_hour.factor
+        factor_per_id[self._uom__product_uom_unit.id] = self._uom__product_uom_hour.factor
 
         allocated_hours = 0.0
         # method only called once per project, so also allocate hours for

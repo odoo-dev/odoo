@@ -23,6 +23,8 @@ class AuthPasskeyKey(models.Model):
     _description = 'Passkey'
     _order = 'id desc'
 
+    _auth_passkey__auth_passkey_key_rename = models.Ref('auth_passkey.auth_passkey_key_rename', 'ir.ui.view')
+
     name = fields.Char(required=True)
     credential_identifier = fields.Char(required=True, groups='base.group_system')
     public_key = fields.Char(required=True, groups='base.group_system', compute='_compute_public_key', inverse='_inverse_public_key')
@@ -146,7 +148,7 @@ class AuthPasskeyKey(models.Model):
             'name': _('Rename Passkey'),
             'type': 'ir.actions.act_window',
             'res_model': 'auth.passkey.key',
-            'view_id': self.env.ref('auth_passkey.auth_passkey_key_rename').id,
+            'view_id': self._auth_passkey__auth_passkey_key_rename.id,
             'view_mode': 'form',
             'target': 'new',
             'res_id': self.id,

@@ -186,6 +186,8 @@ class IrHttp(models.AbstractModel):
     _name = 'ir.http'
     _description = "HTTP Routing"
 
+    _base__public_user = models.Ref('base.public_user', 'res.users')
+
     @classmethod
     def _is_valid_char(cls, ch: str) -> bool:
         """Returns True for any character allowed in a url"""
@@ -373,8 +375,7 @@ class IrHttp(models.AbstractModel):
     @classmethod
     def _auth_method_public(cls, routing: dict):
         if request.env.uid is None:
-            public_user = request.env.ref('base.public_user')
-            request.update_env(user=public_user.id)
+            request.update_env(user=request.env['ir.http']._base__public_user.id)
 
     @classmethod
     def _authenticate(cls, endpoint):

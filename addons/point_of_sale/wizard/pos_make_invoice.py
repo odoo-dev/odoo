@@ -6,6 +6,8 @@ class PosMakeInvoice(models.TransientModel):
     _name = 'pos.make.invoice'
     _description = 'Multiple order invoice creation'
 
+    _point_of_sale__view_confirm_action_wizard = models.Ref('point_of_sale.view_confirm_action_wizard', 'ir.ui.view')
+
     consolidated_billing = fields.Boolean(
         string="Consolidated Billing", default=True,
         help="Create one invoice for all orders related to same customer and same invoicing address"
@@ -51,7 +53,7 @@ class PosMakeInvoice(models.TransientModel):
                 return {
                     'name': _('Warning'),
                     'view_mode': 'form',
-                    'view_id': self.env.ref('point_of_sale.view_confirm_action_wizard').id,
+                    'view_id': self._point_of_sale__view_confirm_action_wizard.id,
                     'res_model': 'pos.confirmation.wizard',
                     'target': 'new',
                     'type': 'ir.actions.act_window',

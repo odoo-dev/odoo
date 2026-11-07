@@ -7,6 +7,8 @@ from odoo.exceptions import UserError
 class StockPicking(models.Model):
     _inherit = "stock.picking"
 
+    _l10n_in_ewaybill__l10n_in_ewaybill_form_action = models.Ref('l10n_in_ewaybill.l10n_in_ewaybill_form_action', 'ir.actions.act_window')
+
     l10n_in_ewaybill_ids = fields.One2many('l10n.in.ewaybill', 'picking_id', string="Ewaybill")
     l10n_in_ewaybill_name = fields.Char(
         "Indian Ewaybill Number",
@@ -15,7 +17,7 @@ class StockPicking(models.Model):
     l10n_in_ewaybill_feature_enabled = fields.Boolean(related='company_id.l10n_in_ewaybill_feature')
 
     def _get_l10n_in_ewaybill_form_action(self):
-        return self.env.ref('l10n_in_ewaybill.l10n_in_ewaybill_form_action')._get_action_dict()
+        return self._l10n_in_ewaybill__l10n_in_ewaybill_form_action._get_action_dict()
 
     def action_l10n_in_ewaybill_create(self):
         self.ensure_one()

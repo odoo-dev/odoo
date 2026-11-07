@@ -21,6 +21,8 @@ class GamificationGoal(models.Model):
     _rec_name = 'definition_id'
     _order = 'start_date desc, end_date desc, definition_id, id'
 
+    _gamification__email_template_goal_reminder = models.Ref('gamification.email_template_goal_reminder', 'mail.template')
+
     definition_id = fields.Many2one('gamification.goal.definition', string="Goal Definition", required=True, index=True, ondelete="cascade")
     user_id = fields.Many2one('res.users', string="User", required=True, bypass_search_access=True, index=True, ondelete="cascade")
     user_partner_id = fields.Many2one('res.partner', related='user_id.partner_id')
@@ -103,7 +105,7 @@ class GamificationGoal(models.Model):
             return {}
 
         # generate a reminder report
-        body_html = self.env.ref('gamification.email_template_goal_reminder')._render_field('body_html', self.ids, compute_lang=True)[self.id]
+        body_html = self._gamification__email_template_goal_reminder._render_field('body_html', self.ids, compute_lang=True)[self.id]
         self.message_notify(
             body=body_html,
             partner_ids=[self.user_id.partner_id.id],

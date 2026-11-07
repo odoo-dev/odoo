@@ -7,6 +7,8 @@ from odoo.tools.business_data import split_vat
 class ResPartner(models.Model):
     _inherit = 'res.partner'
 
+    _base__europe = models.Ref('base.europe', 'res.country.group')
+
     l10n_es_passport = fields.Char(
         string='Passport',
         compute='_compute_l10n_es_passport',
@@ -108,7 +110,7 @@ class ResPartner(models.Model):
     def _l10n_es_edi_get_partner_info(self):
         """ Used in SII and Veri*factu"""
         self.ensure_one()
-        eu_country_codes = set(self.env.ref('base.europe').country_ids.mapped('code'))
+        eu_country_codes = set(self._base__europe.country_ids.mapped('code'))
 
         partner_info = {}
         IDOtro_ID = self.has_vat and self.vat or 'NO_DISPONIBLE'

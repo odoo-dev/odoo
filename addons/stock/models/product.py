@@ -813,6 +813,7 @@ class ProductTemplate(models.Model):
     _check_company_auto = True
 
     _stock__sequence_production_lots = models.Ref('stock.sequence_production_lots', 'ir.sequence', required=False)
+    _stock__action_report_stock_rule = models.Ref('stock.action_report_stock_rule', 'ir.actions.report')
 
     def _default_responsible_id(self):
         # Return the current user unless it's OdooBot
@@ -1257,7 +1258,7 @@ class ProductTemplate(models.Model):
         if not self.env.user.has_group('stock.group_stock_multi_warehouses') and len(products) == 1:
             company = products.company_id or self.env.company
             warehouse = self.env['stock.warehouse'].search([('company_id', '=', company.id)], limit=1)
-            return self.env.ref('stock.action_report_stock_rule').report_action(None, data={
+            return self._stock__action_report_stock_rule.report_action(None, data={
                 'product_id': products.id,
                 'warehouse_ids': warehouse.ids,
             }, config=False)

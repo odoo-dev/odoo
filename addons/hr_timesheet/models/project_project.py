@@ -10,6 +10,11 @@ from odoo.tools.translate import _
 class ProjectProject(models.Model):
     _inherit = "project.project"
 
+    _hr_timesheet__timesheet_action_project = models.Ref('hr_timesheet.timesheet_action_project', 'ir.actions.act_window')
+    _hr_timesheet__timesheet_report_project = models.Ref('hr_timesheet.timesheet_report_project', 'ir.actions.report')
+    _uom__product_uom_day = models.Ref('uom.product_uom_day', 'uom.uom')
+    _uom__product_uom_hour = models.Ref('uom.product_uom_hour', 'uom.uom')
+
     allow_timesheets = fields.Boolean(
         "Timesheets", compute='_compute_allow_timesheets', store=True, readonly=False,
         default=True)
@@ -38,7 +43,7 @@ class ProjectProject(models.Model):
     stat_success_rate = fields.Float(compute='_compute_timesheet_stat_values', export_string_translation=False)
 
     def _compute_encode_uom_in_days(self):
-        self.encode_uom_in_days = self.env.company.timesheet_encode_uom_id == self.env.ref('uom.product_uom_day')
+        self.encode_uom_in_days = self.env.company.timesheet_encode_uom_id == self._uom__product_uom_day
 
     @api.depends('company_id', 'company_id.timesheet_encode_uom_id')
     @api.depends_context('company')
@@ -85,7 +90,7 @@ class ProjectProject(models.Model):
     def _compute_timesheet_stat_values(self):
         for project in self:
             encode_uom = project.timesheet_encode_uom_id
-            uom_ratio = self.env.ref('uom.product_uom_hour').factor / encode_uom.factor
+            uom_ratio = self._uom__product_uom_hour.factor / encode_uom.factor
 
             stat_timesheet_value = False
             stat_extra_time_value = False
@@ -180,7 +185,7 @@ class ProjectProject(models.Model):
                     'sticky': False,
                 }
             }
-        return self.env.ref('hr_timesheet.timesheet_report_project').report_action(self)
+        return self._hr_timesheet__timesheet_report_project.report_action(self)
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -231,7 +236,7 @@ class ProjectProject(models.Model):
             else:
                 warning_msg = _("This project has some timesheet entries referencing it. Before removing this project, you have to remove these timesheet entries.")
             raise RedirectWarning(
-                warning_msg, self.env.ref('hr_timesheet.timesheet_action_project').id,
+                warning_msg, self._hr_timesheet__timesheet_action_project.id,
                 _('See timesheet entries'), {'active_ids': projects_with_timesheets.ids})
 
     @api.model

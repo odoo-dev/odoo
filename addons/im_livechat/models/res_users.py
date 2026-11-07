@@ -15,6 +15,9 @@ class ResUsers(models.Model):
     """
     _inherit = 'res.users'
 
+    _base__public_user = models.Ref('base.public_user', 'res.users')
+    _im_livechat__im_livechat_group_user = models.Ref('im_livechat.im_livechat_group_user', 'res.groups')
+
     livechat_channel_ids = fields.Many2many(
         "im_livechat.channel", "im_livechat_channel_im_user", "user_id", "channel_id", copy=False
     )
@@ -142,10 +145,9 @@ class ResUsers(models.Model):
 
     def write(self, vals):
         if vals.get("group_ids"):
-            operator_group = self.env.ref("im_livechat.im_livechat_group_user")
-            if operator_group in self.all_group_ids:
+            if self._im_livechat__im_livechat_group_user in self.all_group_ids:
                 result = super().write(vals)
-                lost_operators = self.filtered_domain([("all_group_ids", "not in", operator_group.id)])
+                lost_operators = self.filtered_domain([("all_group_ids", "not in", self._im_livechat__im_livechat_group_user.id)])
                 # sudo - im_livechat.channel: user manager can remove user from livechat channels
                 self.env["im_livechat.channel"].sudo() \
                     .search([("user_ids", "in", lost_operators.ids)]) \
@@ -164,7 +166,7 @@ class ResUsers(models.Model):
     def _join_livechat_sessions_from_guest(self, guest):
         self.ensure_one()
         # using guest env to find livechat channels the guest has access to
-        guest_access_env = self.env(user=self.env.ref("base.public_user"))
+        guest_access_env = self.env(user=self._base__public_user)
         guest_members = guest_access_env["discuss.channel.member"].search_fetch(
             [
                 ("channel_id.channel_type", "=", "livechat"),

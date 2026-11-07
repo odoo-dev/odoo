@@ -11,6 +11,8 @@ class ResPartnerBank(models.Model):
     _name = 'res.partner.bank'
     _inherit = ['res.partner.bank', 'mail.thread', 'mail.activity.mixin']
 
+    _base__mx = models.Ref('base.mx', 'res.country')
+
     journal_id = fields.One2many(
         'account.journal', 'bank_account_id', domain=[('type', '=', 'bank')], string='Account Journal', readonly=True,
         check_company=True,
@@ -125,7 +127,7 @@ class ResPartnerBank(models.Model):
 
                 labels_and_countries = [
                     (self.env._("IBAN"), account.account_type == 'iban' and code_to_country_id.get(account.sanitized_account_number[:2])),
-                    (self.env._("CLABE"), account.account_type == 'clabe' and self.env.ref('base.mx')),
+                    (self.env._("CLABE"), account.account_type == 'clabe' and self._base__mx),
                     (self.env._("Account Holder"), account.partner_id.country_id),
                     (self.env._("Bank Account"), account.country_id),
                 ]

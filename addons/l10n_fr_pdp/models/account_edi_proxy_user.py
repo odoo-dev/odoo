@@ -92,6 +92,10 @@ DEMO_ENDPOINTS = {  # pdp reports specific endpoints not already mocked by l10n_
 class AccountEdiProxyClientUser(models.Model):
     _inherit = 'account_edi_proxy_client.user'
 
+    _account_peppol__ir_cron_peppol_get_participant_status = models.Ref('account_peppol.ir_cron_peppol_get_participant_status', 'ir.cron')
+    _l10n_fr_pdp__ir_cron_pdp_get_regulatory_documents = models.Ref('l10n_fr_pdp.ir_cron_pdp_get_regulatory_documents', 'ir.cron')
+    _l10n_fr_pdp__ir_cron_pdp_send_lifecycles = models.Ref('l10n_fr_pdp.ir_cron_pdp_send_lifecycles', 'ir.cron')
+
     proxy_type = fields.Selection(selection_add=[('pdp', 'Approved Platform')], ondelete={'pdp': 'cascade'})
 
     _peppol_proxy_types_conflict = models.Constraint(
@@ -206,7 +210,7 @@ class AccountEdiProxyClientUser(models.Model):
         self.company_id.account_peppol_proxy_state = 'smp_registration'
 
         datetime_in_1_hour = fields.Datetime.add(fields.Datetime.now(), hours=1)
-        self.env.ref('account_peppol.ir_cron_peppol_get_participant_status')._trigger(at=datetime_in_1_hour)
+        self._account_peppol__ir_cron_peppol_get_participant_status._trigger(at=datetime_in_1_hour)
 
     def _peppol_process_participant_status(self, proxy_user):
         self.ensure_one()
@@ -279,7 +283,7 @@ class AccountEdiProxyClientUser(models.Model):
                     params={'message_uuids': list(processed_uuid_to_record)},
                 )
         if need_retrigger:
-            self.env.ref('l10n_fr_pdp.ir_cron_pdp_get_regulatory_documents')._trigger()
+            self._l10n_fr_pdp__ir_cron_pdp_get_regulatory_documents._trigger()
 
     def _peppol_process_messages_status(self, messages, uuid_to_record):
         self.ensure_one()
@@ -949,7 +953,7 @@ class AccountEdiProxyClientUser(models.Model):
                 failed_moves._message_log_batch(bodies=message_bodies)
 
         if need_retrigger:
-            self.env.ref('l10n_fr_pdp.ir_cron_pdp_send_lifecycles')._trigger()
+            self._l10n_fr_pdp__ir_cron_pdp_send_lifecycles._trigger()
 
     # -------------------------------------------------------------------------
     # CRONS

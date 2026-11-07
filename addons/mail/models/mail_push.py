@@ -15,6 +15,8 @@ class MailPush(models.Model):
     _name = 'mail.push'
     _description = "Push Notification"
 
+    _mail__ir_cron_web_push_notification = models.Ref('mail.ir_cron_web_push_notification', 'ir.cron')
+
     mail_push_device_id = fields.Many2one('mail.push.device', string='devices', required=True, ondelete="cascade")
     payload = fields.Text()
 
@@ -68,4 +70,4 @@ class MailPush(models.Model):
 
         # restart the cron if needed
         if self.search_count([]) > 0:
-            self.env.ref('mail.ir_cron_web_push_notification')._trigger()
+            self._mail__ir_cron_web_push_notification._trigger()

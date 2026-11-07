@@ -436,7 +436,7 @@ class MassMailController(http.Controller):
         request.env['ir.config_parameter'].sudo().set_bool('mass_mailing.mass_mailing_reports', False)
         render_vals = {}
         if user.has_group('base.group_system'):
-            render_vals = {'menu_id': request.env.ref('mass_mailing.menu_mass_mailing_global_settings').id}
+            render_vals = {'menu_id': request.env['ir.ui.menu']._mass_mailing__menu_mass_mailing_global_settings.id}
         return request.render('mass_mailing.mailing_report_deactivated', render_vals)
 
     @http.route(['/mailing/<int:mailing_id>/view'], type='http', website=True, auth='public')

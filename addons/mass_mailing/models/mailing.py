@@ -49,6 +49,18 @@ class MailingMailing(models.Model):
 
     _unrestricted_rendering = True
 
+    _base__partner_root = models.Ref('base.partner_root', 'res.partner')
+    _mass_mailing__ir_cron_mass_mailing_ab_testing = models.Ref('mass_mailing.ir_cron_mass_mailing_ab_testing', 'ir.cron')
+    _mass_mailing__ir_cron_mass_mailing_queue = models.Ref('mass_mailing.ir_cron_mass_mailing_queue', 'ir.cron')
+    _mass_mailing__mailing_trace_view_form = models.Ref('mass_mailing.mailing_trace_view_form', 'ir.ui.view')
+    _mass_mailing__mailing_trace_view_tree_mail = models.Ref('mass_mailing.mailing_trace_view_tree_mail', 'ir.ui.view')
+    _mass_mailing__mass_mail_1 = models.Ref('mass_mailing.mass_mail_1', 'mailing.mailing', required=False)
+    _mass_mailing__mass_mail_sale_order_0 = models.Ref('mass_mailing.mass_mail_sale_order_0', 'mailing.mailing', required=False)
+    _mass_mailing__model_mailing_list = models.Ref('mass_mailing.model_mailing_list', 'ir.model')
+    _mass_mailing__res_groups_privilege_email_marketing = models.Ref('mass_mailing.res_groups_privilege_email_marketing', 'res.groups.privilege')
+    _mass_mailing__view_mail_mass_mailing_test_form = models.Ref('mass_mailing.view_mail_mass_mailing_test_form', 'ir.ui.view')
+    _mass_mailing__view_mail_mass_mailing_test_send_test_form = models.Ref('mass_mailing.view_mail_mass_mailing_test_send_test_form', 'ir.ui.view')
+
     @api.model
     def default_get(self, fields):
         vals = super().default_get(fields)
@@ -453,7 +465,7 @@ class MailingMailing(models.Model):
 
     def _compute_mailing_model_id(self):
         """Compute acts as default, this avoids issues when the field is made compute stored in overrides."""
-        self.filtered(lambda m: not m.mailing_model_id).mailing_model_id = self.env.ref('mass_mailing.model_mailing_list').id
+        self.filtered(lambda m: not m.mailing_model_id).mailing_model_id = self._mass_mailing__model_mailing_list.id
 
     @api.depends('mailing_model_id')
     def _compute_mailing_on_mailing_list(self):
@@ -560,7 +572,7 @@ class MailingMailing(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        ab_testing_cron = self.env.ref('mass_mailing.ir_cron_mass_mailing_ab_testing').sudo()
+        ab_testing_cron = self._mass_mailing__ir_cron_mass_mailing_ab_testing.sudo()
         for values in vals_list:
             if values.get('ab_testing_schedule_datetime'):
                 at = fields.Datetime.from_string(values['ab_testing_schedule_datetime'])
@@ -593,7 +605,7 @@ class MailingMailing(models.Model):
 
         if any(self.mapped('ab_testing_schedule_datetime')):
             schedule_date = min(m.ab_testing_schedule_datetime for m in self if m.ab_testing_schedule_datetime)
-            ab_testing_cron = self.env.ref('mass_mailing.ir_cron_mass_mailing_ab_testing').sudo()
+            ab_testing_cron = self._mass_mailing__ir_cron_mass_mailing_ab_testing.sudo()
             ab_testing_cron._trigger(at=schedule_date)
 
         return result
@@ -649,7 +661,7 @@ class MailingMailing(models.Model):
             'name': _('Preview Mailing'),
             'type': 'ir.actions.act_window',
             'view_mode': 'form',
-            'views': [(self.env.ref('mass_mailing.view_mail_mass_mailing_test_form').id, 'form')],
+            'views': [(self._mass_mailing__view_mail_mass_mailing_test_form.id, 'form')],
             'res_model': 'mailing.mailing.test',
             'target': 'new',
             'context': ctx,
@@ -667,7 +679,7 @@ class MailingMailing(models.Model):
             'type': 'ir.actions.act_window',
             'view_mode': 'form',
             'res_model': 'mailing.mailing.test',
-            'views': [(self.env.ref('mass_mailing.view_mail_mass_mailing_test_send_test_form').id, 'form')],
+            'views': [(self._mass_mailing__view_mail_mass_mailing_test_send_test_form.id, 'form')],
             'target': 'new',
             'context': ctx,
         }
@@ -689,8 +701,7 @@ class MailingMailing(models.Model):
 
     def action_put_in_queue(self):
         self.write({'state': 'in_queue'})
-        cron = self.env.ref('mass_mailing.ir_cron_mass_mailing_queue')
-        cron._trigger(
+        self._mass_mailing__ir_cron_mass_mailing_queue._trigger(
             schedule_date or fields.Datetime.now()
             for schedule_date in self.mapped('schedule_date')
         )
@@ -759,8 +770,8 @@ class MailingMailing(models.Model):
         action = self.env["ir.actions.actions"]._for_xml_id("mass_mailing.mailing_trace_action")
         action['context'] = {'search_default_mass_mailing_id': self.id,}
         action['views'] = [
-            (self.env.ref('mass_mailing.mailing_trace_view_tree_mail').id, 'list'),
-            (self.env.ref('mass_mailing.mailing_trace_view_form').id, 'form')
+            (self._mass_mailing__mailing_trace_view_tree_mail.id, 'list'),
+            (self._mass_mailing__mailing_trace_view_form.id, 'form')
         ]
         return action
 
@@ -1114,7 +1125,7 @@ class MailingMailing(models.Model):
         return self._action_send_mail(res_ids)
 
     def _action_send_mail(self, res_ids=None):
-        odoobot = self.env.ref('base.partner_root')
+        odoobot = self._base__partner_root
         user_partner = self.env.user.partner_id
 
         for mailing in self:
@@ -1322,7 +1333,7 @@ class MailingMailing(models.Model):
             }
 
         random_tip = self.env['digest.tip'].search(
-            [('group_id.privilege_id', '=', self.env.ref('mass_mailing.res_groups_privilege_email_marketing').id)]
+            [('group_id.privilege_id', '=', self._mass_mailing__res_groups_privilege_email_marketing.id)]
         )
         if random_tip:
             random_tip = random.choice(random_tip).tip_description

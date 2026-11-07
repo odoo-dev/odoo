@@ -26,6 +26,7 @@ class DiscussChannelMember(models.Model):
     _rec_names_search = ("channel_id", "partner_id", "guest_id")
 
     _mail__mt_important_notification = models.Ref('mail.mt_important_notification', 'mail.message.subtype', required=False)
+    _mail__ir_cron_discuss_channel_member_unmute = models.Ref('mail.ir_cron_discuss_channel_member_unmute', 'ir.cron')
 
     # identity
     partner_id = fields.Many2one("res.partner", "Partner", ondelete="cascade", index=True)
@@ -453,7 +454,7 @@ class DiscussChannelMember(models.Model):
     def _set_cron_for_unmute(self):
         for member in self:
             if member.mute_until_dt and member.mute_until_dt != -1:
-                self.env.ref("mail.ir_cron_discuss_channel_member_unmute")._trigger(member.mute_until_dt)
+                self._mail__ir_cron_discuss_channel_member_unmute._trigger(member.mute_until_dt)
 
     @api.model
     def _cleanup_expired_mutes(self):

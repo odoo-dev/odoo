@@ -7,6 +7,8 @@ from odoo.fields import Domain
 class ProjectTask(models.Model):
     _inherit = "project.task"
 
+    _uom__product_uom_hour = models.Ref('uom.product_uom_hour', 'uom.uom')
+
     def _get_default_partner_id(self, project=None, parent=None):
         res = super()._get_default_partner_id(project, parent)
         if not res and project:
@@ -49,7 +51,7 @@ class ProjectTask(models.Model):
 
         mapped_remaining_hours = {task._origin.id: task.sale_line_id and task.sale_order_state == 'sale' and
                                                    task.sale_line_id.remaining_hours or 0.0 for task in self}
-        uom_hour = self.env.ref('uom.product_uom_hour')
+        uom_hour = self._uom__product_uom_hour
         for timesheet in timesheets:
             delta = 0
             if timesheet._origin.so_line == timesheet.task_id.sale_line_id:

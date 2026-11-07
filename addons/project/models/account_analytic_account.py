@@ -9,6 +9,8 @@ class AccountAnalyticAccount(models.Model):
     _inherit = 'account.analytic.account'
     _description = 'Analytic Account'
 
+    _project__view_project_kanban = models.Ref('project.view_project_kanban', 'ir.ui.view')
+
     project_ids = fields.One2many('project.project', 'account_id', string='Projects', export_string_translation=False)
     project_count = fields.Integer("Project Count", compute='_compute_project_count', export_string_translation=False)
 
@@ -29,7 +31,7 @@ class AccountAnalyticAccount(models.Model):
             raise UserError(_("Before we can bid farewell to these accounts, you need to tidy up the projects linked to them by removing their existing tasks!"))
 
     def action_view_projects(self):
-        kanban_view_id = self.env.ref('project.view_project_kanban').id
+        kanban_view_id = self._project__view_project_kanban.id
         result = {
             "type": "ir.actions.act_window",
             "res_model": "project.project",

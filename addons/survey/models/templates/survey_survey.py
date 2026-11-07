@@ -16,6 +16,7 @@ class SurveySurvey(models.Model):
     _inherit = 'survey.survey'
 
     _survey__mail_template_certification_optional = models.Ref('survey.mail_template_certification', 'mail.template', required=False)
+    _survey__survey_survey_view_form = models.Ref('survey.survey_survey_view_form', 'ir.ui.view')
 
     @api.model
     def action_load_survey_template_sample(self, template_key):
@@ -295,7 +296,7 @@ class SurveySurvey(models.Model):
 
     def action_show_sample(self):
         action = self.env['ir.actions.act_window']._for_xml_id('survey.action_survey_form')
-        action['views'] = [[self.env.ref('survey.survey_survey_view_form').id, 'form']]
+        action['views'] = [[self._survey__survey_survey_view_form.id, 'form']]
         action['res_id'] = self.id
         action['context'] = dict(ast.literal_eval(action.get('context', {})),
             create=False

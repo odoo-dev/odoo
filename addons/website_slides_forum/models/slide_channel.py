@@ -7,6 +7,8 @@ from odoo import api, fields, models
 class SlideChannel(models.Model):
     _inherit = 'slide.channel'
 
+    _website_slides__group_website_slides_officer = models.Ref('website_slides.group_website_slides_officer', 'res.groups')
+
     forum_id = fields.Many2one('forum.forum', 'Course Forum', copy=False, index='btree_not_null')
     forum_total_posts = fields.Integer('Number of active forum posts', related="forum_id.total_posts")
 
@@ -41,6 +43,6 @@ class SlideChannel(models.Model):
             if old_forum != self.forum_id:
                 old_forum.write({
                     'privacy': 'private',
-                    'authorized_group_id': self.env.ref('website_slides.group_website_slides_officer').id,
+                    'authorized_group_id': self._website_slides__group_website_slides_officer.id,
                 })
         return res

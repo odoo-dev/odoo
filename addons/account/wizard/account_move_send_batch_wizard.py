@@ -9,6 +9,8 @@ class AccountMoveSendBatchWizard(models.TransientModel):
     _inherit = ['account.move.send']
     _description = "Send Invoice Batch Wizard"
 
+    _account__ir_cron_account_move_send = models.Ref('account.ir_cron_account_move_send', 'ir.cron')
+
     move_ids = fields.Many2many(comodel_name='account.move', required=True)
     summary_data = fields.Json(compute='_compute_summary_data')
     alerts = fields.Json(compute='_compute_alerts')
@@ -123,7 +125,7 @@ class AccountMoveSendBatchWizard(models.TransientModel):
             self.env['account.move.send']._generate_and_send_invoices(self.move_ids, allow_fallback_pdf=allow_fallback_pdf)
             return
 
-        account_move_send_cron = self.env.ref('account.ir_cron_account_move_send')
+        account_move_send_cron = self._account__ir_cron_account_move_send
         if not account_move_send_cron.sudo().active:
             if self.env.user.has_group('base.group_system'):
                 raise RedirectWarning(

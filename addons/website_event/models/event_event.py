@@ -36,6 +36,7 @@ class EventEvent(models.Model):
     _website_event__mt_event_scheduled = models.Ref('website_event.mt_event_scheduled', 'mail.message.subtype', required=False)
     _website_event__mt_event_unpublished = models.Ref('website_event.mt_event_unpublished', 'mail.message.subtype', required=False)
     _website_event__mt_event_unscheduled = models.Ref('website_event.mt_event_unscheduled', 'mail.message.subtype', required=False)
+    _event__event_main_menu = models.Ref('event.event_main_menu', 'ir.ui.menu')
 
     def _default_cover_properties(self):
         res = super()._default_cover_properties()
@@ -543,7 +544,7 @@ class EventEvent(models.Model):
         return res
 
     def get_backend_menu_id(self):
-        return self.env.ref('event.event_main_menu').id
+        return self._event__event_main_menu.id
 
     @api.model
     def _search_build_dates(self):

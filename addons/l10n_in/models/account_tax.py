@@ -7,6 +7,11 @@ from odoo.tools import frozendict
 class AccountTax(models.Model):
     _inherit = 'account.tax'
 
+    _l10n_in__tax_tag_cess = models.Ref('l10n_in.tax_tag_cess', 'account.account.tag')
+    _l10n_in__tax_tag_cgst = models.Ref('l10n_in.tax_tag_cgst', 'account.account.tag')
+    _l10n_in__tax_tag_igst = models.Ref('l10n_in.tax_tag_igst', 'account.account.tag')
+    _l10n_in__tax_tag_sgst = models.Ref('l10n_in.tax_tag_sgst', 'account.account.tag')
+
     l10n_in_reverse_charge = fields.Boolean("Reverse charge", help="Tick this if this tax is reverse charge. Only for Indian accounting")
     l10n_in_gst_tax_type = fields.Selection(
         selection=[('igst', 'igst'), ('cgst', 'cgst'), ('sgst', 'sgst'), ('cess', 'cess')],
@@ -38,10 +43,10 @@ class AccountTax(models.Model):
         in_taxes = self.filtered(lambda tax: tax.country_code == 'IN')
         if in_taxes:
             tags_mapping = {
-                'igst': self.env.ref('l10n_in.tax_tag_igst'),
-                'cgst': self.env.ref('l10n_in.tax_tag_cgst'),
-                'sgst': self.env.ref('l10n_in.tax_tag_sgst'),
-                'cess': self.env.ref('l10n_in.tax_tag_cess'),
+                'igst': self._l10n_in__tax_tag_igst,
+                'cgst': self._l10n_in__tax_tag_cgst,
+                'sgst': self._l10n_in__tax_tag_sgst,
+                'cess': self._l10n_in__tax_tag_cess,
             }
             for tax in in_taxes:
                 tags = tax.invoice_repartition_line_ids.tag_ids
