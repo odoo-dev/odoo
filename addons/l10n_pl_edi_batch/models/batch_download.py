@@ -183,6 +183,10 @@ class BatchDownload(models.Model):
             self.env.cr.rollback()
 
     @api.model
+    def _get_company_batches(self, company, state):
+        return self.search([('company_id', '=', company.id)], order='date_to desc').filtered(lambda batch: batch.state == state)
+
+    @api.model
     def _create_batch_download(self, company, date_from, date_to):
         """ Ask KSeF for an export of the company's bills between the two dates
             Save the batch as requested, and have the status cron check it.
@@ -295,7 +299,7 @@ class BatchDownload(models.Model):
         """
 
         def check_status(company):
-            if batch := self.search([('company_id', '=', company.id), ('state', '=', 'requested')], order='date_to desc', limit=1):
+            if batch := self._get_company_batches(company, 'requested')[:1]:
                 data = Service(company).download_batch_status(batch.name)
                 old_date_to = batch.date_to
                 package = data['content'].get('package') or {}
@@ -323,7 +327,7 @@ class BatchDownload(models.Model):
     @api.model
     def _cron_download(self):
         def do_download(company):
-            if batch := self.search([('company_id', '=', company.id), ('state', '=', 'downloading')], order='date_to desc', limit=1):
+            if batch := self._get_company_batches(company, 'downloading')[:1]:
                 missing_parts = batch.part_ids.with_context(bin_size=True).filtered(lambda part: not part.decrypted_file)
                 try:
                     missing_parts[:1].download()
@@ -339,7 +343,7 @@ class BatchDownload(models.Model):
     def _cron_import(self):
 
         def do_import(company):
-            batches = self.search([('company_id', '=', company.id), ('state', '=', 'downloaded')], order='date_to desc')
+            batches = self._get_company_batches(company, 'downloaded')
             if not batches:
                 return
             batch = batches[:1]
