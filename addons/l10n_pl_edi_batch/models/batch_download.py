@@ -302,6 +302,8 @@ class BatchDownload(models.Model):
                     # A truncated historic export: this batch now ends where KSeF stopped, request the rest
                     if is_truncated:
                         self._create_batch_download(company, batch.date_to, old_date_to)
+                elif batch.state == 'done' and batch.kind == 'historic':
+                    self.env.ref('l10n_pl_edi_batch.ir_cron_request_historic')._trigger()  # empty window: request the next one
                 elif batch.state == 'requested':
                     if batch.retry_count < MAX_RETRIES:
                         batch.retry_count += 1
