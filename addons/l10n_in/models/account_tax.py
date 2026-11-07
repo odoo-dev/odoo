@@ -38,10 +38,10 @@ class AccountTax(models.Model):
         in_taxes = self.filtered(lambda tax: tax.country_code == 'IN')
         if in_taxes:
             tags_mapping = {
-                'igst': self.env.ref('l10n_in.tax_tag_igst'),
-                'cgst': self.env.ref('l10n_in.tax_tag_cgst'),
-                'sgst': self.env.ref('l10n_in.tax_tag_sgst'),
-                'cess': self.env.ref('l10n_in.tax_tag_cess'),
+                'igst': self.env['account.account.tag'].ref('l10n_in.tax_tag_igst'),
+                'cgst': self.env['account.account.tag'].ref('l10n_in.tax_tag_cgst'),
+                'sgst': self.env['account.account.tag'].ref('l10n_in.tax_tag_sgst'),
+                'cess': self.env['account.account.tag'].ref('l10n_in.tax_tag_cess'),
             }
             for tax in in_taxes:
                 tags = tax.invoice_repartition_line_ids.tag_ids

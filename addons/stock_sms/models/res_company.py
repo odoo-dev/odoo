@@ -8,10 +8,7 @@ class ResCompany(models.Model):
     _inherit = "res.company"
 
     def _default_confirmation_sms_picking_template(self):
-        try:
-            return self.env.ref('stock_sms.sms_template_data_stock_delivery').id
-        except ValueError:
-            return False
+        return self.env['sms.template']._stock_sms__sms_template_data_stock_delivery.id
 
     stock_sms_confirmation_template_id = fields.Many2one(
         'sms.template', string="SMS Template",

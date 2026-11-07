@@ -92,7 +92,7 @@ class HrEmployee(models.Model):
     )
 
     def _get_hr_responsible_domain(self):
-        return "[('share', '=', False), ('company_ids', 'in', company_id), ('all_group_ids', 'in', %s)]" % self.env.ref('hr.group_hr_user').id
+        return "[('share', '=', False), ('company_ids', 'in', company_id), ('all_group_ids', 'in', %s)]" % self.env['res.groups'].ref('hr.group_hr_user').id
 
     hr_responsible_id = fields.Many2one(related='version_id.hr_responsible_id', readonly=False, inherited=True, domain=lambda self: self.env['hr.version']._get_hr_responsible_domain(), groups="hr.group_hr_user")
 
@@ -1763,7 +1763,7 @@ class HrEmployee(models.Model):
                 ('work_permit_expiration_date', '<=', today + relativedelta(days=company.work_permit_expiration_notice_period)),
             ])
 
-        todo_type = self.env.ref('mail.mail_activity_data_todo')
+        todo_type = self.env['mail.activity.type'].ref('mail.mail_activity_data_todo')
 
         # Existing activities
         existing_activities_contract = employees_contract_expiring.activity_ids.filtered(
@@ -1844,7 +1844,7 @@ class HrEmployee(models.Model):
             """You are not allowed to access "Employee" (hr.employee) records.
     We can redirect you to the public employee list."""
             ),
-            action=self.env.ref('hr.hr_employee_public_action').id,
+            action=self.env['ir.actions.act_window'].ref('hr.hr_employee_public_action').id,
             button_text=self.env._("Employees profile"),
         )
 
@@ -1906,7 +1906,7 @@ class HrEmployee(models.Model):
 
     @api.model
     def is_onboarding(self, company_ids):
-        main_company = self.env.ref("base.main_company").id
+        main_company = self.env['res.company']._base__main_company.id
         return (
             main_company in company_ids
             and not self.env['hr.employee'].search_count([('company_id', 'in', company_ids)], limit=1)
@@ -1933,7 +1933,7 @@ class HrEmployee(models.Model):
         if user.has_group('hr.group_hr_user'):
             return super().get_formview_id(access_uid=access_uid)
         # Hardcode the form view for public employee
-        return self.env.ref('hr.hr_employee_public_view_form').id
+        return self.env['ir.ui.view'].ref('hr.hr_employee_public_view_form').id
 
     def get_record_default_action(self, access_uid=None):
         """Return the default action of the record, on ``hr.employee.public`` when needed.
@@ -2341,7 +2341,7 @@ class HrEmployee(models.Model):
                 ('subscription_department_ids', 'in', employee_departments.ids)
             ])._subscribe_users_automatically()
         onboarding_notes_bodies = {}
-        hr_root_menu = self.env.ref('hr.menu_hr_root')
+        hr_root_menu = self.env['ir.ui.menu'].ref('hr.menu_hr_root')
         for employee in employees:
             # Launch onboarding plans
             link = Markup('<a href="/odoo/%(employee_id)s/action-hr.plan_wizard_action?active_model=hr.employee&menu_id=%(menu_id)s">%(text)s</a>') % {
@@ -3242,9 +3242,9 @@ class HrEmployee(models.Model):
             'path': 'versions',
             'res_model': 'hr.version',
             'view_mode': 'list,graph,pivot',
-            'views': [(self.env.ref('hr.hr_version_list_view').id, 'list'), (False, 'graph'), (False, 'pivot')],
+            'views': [(self.env['ir.ui.view'].ref('hr.hr_version_list_view').id, 'list'), (False, 'graph'), (False, 'pivot')],
             'domain': [('employee_id', '=', self.employee_id.id)],
-            'search_view_id': self.env.ref('hr.hr_version_search_view').id
+            'search_view_id': self.env['ir.ui.view'].ref('hr.hr_version_search_view').id
         }
 
     def _store_avatar_card_fields(self, res: Store.FieldList):
@@ -3376,7 +3376,7 @@ class HrEmployee(models.Model):
             'name': self.env._('End of collaboration'),
             'res_model': 'hr.employee.departure',
             'type': 'ir.actions.act_window',
-            'views': [(self.env.ref('hr.hr_employee_departure_view_form').id, 'form')],
+            'views': [(self.env['ir.ui.view'].ref('hr.hr_employee_departure_view_form').id, 'form')],
             'view_mode': 'form',
             'target': 'new',
             'context': {

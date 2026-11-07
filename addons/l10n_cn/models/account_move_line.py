@@ -47,7 +47,7 @@ class AccountMoveLine(models.Model):
 
         return self._get_records_action(
             name=self.env._('Balance Deduction'),
-            views=[(self.env.ref('l10n_cn.view_move_line_form_balance_deduction').id, 'form')],
+            views=[(self.env['ir.ui.view'].ref('l10n_cn.view_move_line_form_balance_deduction').id, 'form')],
             target='new',
         )
 

@@ -15,6 +15,8 @@ from odoo.addons.l10n_pe.tools.partner_identifiers import (
 class ResPartner(models.Model):
     _inherit = 'res.partner'
 
+    _base__res_partner_12 = models.Ref('base.res_partner_12', required=False)
+
     l10n_pe_district = fields.Many2one(
         'l10n_pe.res.city.district', string='District',
         help='Districts are part of a province or city.')

@@ -267,7 +267,7 @@ class AccountFiscalPosition(models.Model):
         company = self.env.company
         intra_eu = vat_exclusion = False
         if company.has_vat and partner.has_vat:
-            eu_country_codes = set(self.env.ref('base.europe').country_ids.mapped('code'))
+            eu_country_codes = set(self.env['res.country.group'].ref('base.europe').country_ids.mapped('code'))
             intra_eu = company.vat[:2] in eu_country_codes and partner.vat[:2] in eu_country_codes
             vat_exclusion = company.vat[:2] == partner.vat[:2]
 

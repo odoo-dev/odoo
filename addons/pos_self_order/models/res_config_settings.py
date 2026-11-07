@@ -184,7 +184,7 @@ class ResConfigSettings(models.TransientModel):
                 url = url_unquote(self.pos_config_id._get_self_order_url(table_ids[0].id))
                 name = table_ids[0].table_number
 
-        return self.env.ref("pos_self_order.report_self_order_qr_codes_page").report_action(
+        return self.env['ir.actions.report'].ref('pos_self_order.report_self_order_qr_codes_page').report_action(
             [], data={
                 'pos_name': self.pos_config_id.name,
                 'floors': [

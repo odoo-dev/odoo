@@ -659,7 +659,7 @@ class RepairOrder(models.Model):
         }
 
     def print_repair_order(self):
-        return self.env.ref('repair.action_report_repair_order').report_action(self)
+        return self.env['ir.actions.report'].ref('repair.action_report_repair_order').report_action(self)
 
     def _action_repair_confirm(self):
         """ Repair order state is set to 'Confirmed'.
@@ -769,7 +769,7 @@ class RepairOrder(models.Model):
 
     def action_add_from_catalog(self):
         res = super().action_add_from_catalog()
-        res['search_view_id'] = [self.env.ref('repair.product_view_search_catalog').id, 'search']
+        res['search_view_id'] = [self.env['ir.ui.view'].ref('repair.product_view_search_catalog').id, 'search']
         return res
 
     def _get_product_catalog_domain(self):

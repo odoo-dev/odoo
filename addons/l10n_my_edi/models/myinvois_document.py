@@ -498,7 +498,7 @@ class MyInvoisDocument(models.Model):
                 'res_model': 'myinvois.document',
                 'view_mode': 'form',
                 'res_id': self.id,
-                'views': [(self.env.ref('l10n_my_edi.myinvois_document_form_view').id, 'form')],
+                'views': [(self.env['ir.ui.view'].ref('l10n_my_edi.myinvois_document_form_view').id, 'form')],
             }
         else:
             action_vals = {
@@ -506,7 +506,7 @@ class MyInvoisDocument(models.Model):
                 'type': 'ir.actions.act_window',
                 'res_model': 'myinvois.document',
                 'view_mode': 'list,form',
-                'views': [(self.env.ref('l10n_my_edi.myinvois_document_list_view').id, 'list'), (self.env.ref('l10n_my_edi.myinvois_document_form_view').id, 'form')],
+                'views': [(self.env['ir.ui.view'].ref('l10n_my_edi.myinvois_document_list_view').id, 'list'), (self.env['ir.ui.view'].ref('l10n_my_edi.myinvois_document_form_view').id, 'form')],
                 'domain': [('id', 'in', self.ids)],
             }
         return action_vals

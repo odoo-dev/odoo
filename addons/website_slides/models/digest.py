@@ -28,7 +28,7 @@ class Digest(models.Model):
 
     def _get_kpi_custom_settings(self, company, user):
         res = super()._get_kpi_custom_settings(company, user)
-        menu_id = self.env.ref('website_slides.website_slides_menu_root').id
+        menu_id = self.env['ir.ui.menu'].ref('website_slides.website_slides_menu_root').id
         res['kpi_action']['kpi_nbr_of_new_attendees'] = (
             f'website_slides.slide_channel_partner_action_report?menu_id={menu_id}')
         res['kpi_action']['kpi_nbr_of_certified_attendees'] = (

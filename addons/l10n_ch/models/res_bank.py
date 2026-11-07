@@ -248,7 +248,7 @@ class ResPartnerBank(models.Model):
             debtor_check = self._l10n_ch_qr_debtor_check(debtor_partner)
             if debtor_partner and debtor_check:
                 error_messages.append(debtor_check)
-            if currency.id not in (self.env.ref('base.EUR').id, self.env.ref('base.CHF').id):
+            if currency.id not in (self.env['res.currency'].ref('base.EUR').id, self.env['res.currency'].ref('base.CHF').id):
                 error_messages.append(_("The currency isn't EUR nor CHF."))
             return '\r\n'.join(error_messages) if len(error_messages) > 1 else None
 

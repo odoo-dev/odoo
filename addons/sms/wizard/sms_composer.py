@@ -222,7 +222,7 @@ class SmsComposer(models.TransientModel):
             'res_model': 'sms.composer',
             'target': 'new',
             'type': 'ir.actions.act_window',
-            'view_id': self.env.ref('sms.sms_composer_view_form_template_save').id,
+            'view_id': self.env['ir.ui.view'].ref('sms.sms_composer_view_form_template_save').id,
             'view_mode': 'form',
         }
 

@@ -41,6 +41,6 @@ class SlideChannel(models.Model):
             if old_forum != self.forum_id:
                 old_forum.write({
                     'privacy': 'private',
-                    'authorized_group_id': self.env.ref('website_slides.group_website_slides_officer').id,
+                    'authorized_group_id': self.env['res.groups'].ref('website_slides.group_website_slides_officer').id,
                 })
         return res

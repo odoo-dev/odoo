@@ -12,19 +12,19 @@ class EventType(models.Model):
                  {'interval_nbr': 0,
                   'interval_unit': 'now',
                   'interval_type': 'after_sub',
-                  'template_ref': 'mail.template, %i' % self.env.ref('event.event_subscription').id,
+                  'template_ref': 'mail.template, %i' % self.env['mail.template'].ref('event.event_subscription').id,
                  }),
                 (0, 0,
                  {'interval_nbr': 1,
                   'interval_unit': 'hours',
                   'interval_type': 'before_event',
-                  'template_ref': 'mail.template, %i' % self.env.ref('event.event_reminder').id,
+                  'template_ref': 'mail.template, %i' % self.env['mail.template'].ref('event.event_reminder').id,
                  }),
                 (0, 0,
                  {'interval_nbr': 3,
                   'interval_unit': 'days',
                   'interval_type': 'before_event',
-                  'template_ref': 'mail.template, %i' % self.env.ref('event.event_reminder').id,
+                  'template_ref': 'mail.template, %i' % self.env['mail.template'].ref('event.event_reminder').id,
                  })]
 
     def _default_question_ids(self):

@@ -30,7 +30,10 @@ class StockLocation(models.Model):
 
     _stock__stock_location_inter_company_optional = models.Ref('stock.stock_location_inter_company', required=False)
     _location_customers = models.Ref('stock.stock_location_customers', required=False)
+    _stock__stock_location_customers = models.Ref('stock.stock_location_customers')
     _stock__stock_location_customers_optional = models.Ref('stock.stock_location_customers', required=False)
+    _stock__stock_location_inter_company = models.Ref('stock.stock_location_inter_company')
+    _stock__stock_location_suppliers = models.Ref('stock.stock_location_suppliers')
     _stock__stock_location_suppliers_optional = models.Ref('stock.stock_location_suppliers', required=False)
 
     @api.model

@@ -37,5 +37,5 @@ class ResCompany(models.Model):
         return {
             'type': 'ir.actions.client',
             'tag': 'reload',
-            'params': {'action_id': self.env.ref('account.action_account_config').id},
+            'params': {'action_id': self.env['ir.actions.act_window'].ref('account.action_account_config').id},
         }

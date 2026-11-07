@@ -28,7 +28,7 @@ class ResUsers(models.Model):
 
     def _init_odoobot(self):
         self.ensure_one()
-        odoobot_id = self.env['res.partner']._base__partner_root_optional.id
+        odoobot_id = self.env['res.partner']._base__partner_root.id
         channel = self.env['discuss.channel']._get_or_create_chat([odoobot_id, self.partner_id.id])
         message = Markup("%s<br/>%s<br/><b>%s</b>") % (
             self.env._("Hello 👋"),

@@ -60,7 +60,7 @@ class IrActionsServer(models.Model):
     subtype_ids = fields.Many2many(
         'mail.message.subtype',
         string="Subscriptions",
-        default=lambda self: self.env.ref('mail.mt_comment').ids,
+        default=lambda self: self.env['mail.message.subtype'].ref('mail.mt_comment').ids,
         readonly=False, store=True)
 
     # Message Post

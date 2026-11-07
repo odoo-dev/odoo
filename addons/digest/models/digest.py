@@ -93,7 +93,7 @@ class DigestDigest(models.Model):
         self._calculate_kpi(
             'mail.message',
             'kpi_mail_message_total_value',
-            additional_domain=[('subtype_id', '=', self.env.ref('mail.mt_comment').id),
+            additional_domain=[('subtype_id', '=', self.env['mail.message.subtype'].ref('mail.mt_comment').id),
                                ('message_type', 'in', ('comment', 'email', 'email_outgoing'))],
             is_cross_company=True)
 
@@ -230,7 +230,7 @@ class DigestDigest(models.Model):
             'email_from': (
                 self.company_id.partner_id.email_formatted
                 or self.env.user.email_formatted
-                or self.env.ref('base.user_root').email_formatted
+                or self.env['res.users']._base__user_root.email_formatted
             ),
             'email_to': user.email_formatted,
             # Add headers that allow the MUA to offer a one click button to unsubscribe (requires DKIM to work)
@@ -516,8 +516,8 @@ class DigestDigest(models.Model):
         """
         return {
             'kpi_action': {
-                'kpi_res_users_connected': f"base.action_res_users?menu_id={self.env.ref('base.menu_administration').id}",
-                'kpi_mail_message_total': f"mail.action_discuss?menu_id={self.env.ref('mail.menu_root_discuss').id}",
+                'kpi_res_users_connected': f"base.action_res_users?menu_id={self.env['ir.ui.menu'].ref('base.menu_administration').id}",
+                'kpi_mail_message_total': f"mail.action_discuss?menu_id={self.env['ir.ui.menu'].ref('mail.menu_root_discuss').id}",
             },
             'kpi_module': {
                 'kpi_mail_message_total': 'mail',

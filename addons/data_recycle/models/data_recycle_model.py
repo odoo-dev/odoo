@@ -59,7 +59,7 @@ class Data_RecycleModel(models.Model):
     # User Notifications for Manual clean
     notify_user_ids = fields.Many2many(
         'res.users', string='Notify Users',
-        domain=lambda self: [('all_group_ids', 'in', self.env.ref('base.group_system').id)],
+        domain=lambda self: [('all_group_ids', 'in', self.env['res.groups'].ref('base.group_system').id)],
         default=lambda self: self.env.user,
         help='List of users to notify when there are new records to recycle')
     notify_frequency = fields.Integer(string='Notify', default=1)
@@ -207,7 +207,7 @@ class Data_RecycleModel(models.Model):
         ])
         partner_ids = self.notify_user_ids.partner_id.ids if records_count else []
         if partner_ids:
-            menu_id = self.env.ref('data_recycle.menu_data_cleaning_root').id
+            menu_id = self.env['ir.ui.menu'].ref('data_recycle.menu_data_cleaning_root').id
             self.env['mail.thread'].message_notify(
                 body=self.env['ir.qweb']._render(
                     'data_recycle.notification',

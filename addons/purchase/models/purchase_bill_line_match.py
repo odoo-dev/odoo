@@ -250,6 +250,6 @@ class PurchaseBillLineMatch(models.Model):
             'name': _("Add to Purchase Order"),
             'res_model': 'bill.to.po.wizard',
             'target': 'new',
-            'views': [(self.env.ref('purchase.bill_to_po_wizard_form').id, 'form')],
+            'views': [(self.env['ir.ui.view'].ref('purchase.bill_to_po_wizard_form').id, 'form')],
             'context': context,
         }

@@ -19,5 +19,5 @@ class AccountJournal(models.Model):
             }
         return {
             'title': self.env._("E-Invoicing Settings"),
-            'action': self.env.ref('account.action_account_config')._get_action_dict(),
+            'action': self.env['ir.actions.act_window'].ref('account.action_account_config')._get_action_dict(),
         }

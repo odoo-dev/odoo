@@ -68,8 +68,8 @@ class BlogBlog(models.Model):
         self.ensure_one()
         if parent_id:
             parent_message = self.env['mail.message'].sudo().browse(parent_id)
-            if parent_message.subtype_id and parent_message.subtype_id == self.env.ref('website_blog.mt_blog_blog_published'):
-                subtype_id = self.env.ref('mail.mt_note').id
+            if parent_message.subtype_id and parent_message.subtype_id == self.env['mail.message.subtype'].ref('website_blog.mt_blog_blog_published'):
+                subtype_id = self.env['mail.message.subtype'].ref('mail.mt_note').id
         return super().message_post(parent_id=parent_id, subtype_id=subtype_id, **kwargs)
 
     def all_tags(self, join=False, min_limit=1):

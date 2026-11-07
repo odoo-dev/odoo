@@ -14,4 +14,4 @@ class PosDailySalesReportsWizard(models.TransientModel):
         return {'date_start': False, 'date_stop': False, 'config_ids': self.pos_session_id.config_id.ids, 'session_ids': self.pos_session_id.ids}
 
     def generate_report(self):
-        return self.env.ref('point_of_sale.sale_details_report').report_action([], data=self._get_report_data())
+        return self.env['ir.actions.report'].ref('point_of_sale.sale_details_report').report_action([], data=self._get_report_data())

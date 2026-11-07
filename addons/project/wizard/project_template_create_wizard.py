@@ -73,7 +73,7 @@ class ProjectTemplateRoleToUsersMap(models.TransientModel):
             ('share', '=', False),
             ('active', '=', True),
             ('project_role_ids', '=?', unquote('role_id if role_user_ids else False')),
-            ('all_group_ids', 'in', self.env.ref('project.group_project_user').ids),
+            ('all_group_ids', 'in', self.env['res.groups'].ref('project.group_project_user').ids),
         ]
 
     wizard_id = fields.Many2one('project.template.create.wizard', export_string_translation=False)

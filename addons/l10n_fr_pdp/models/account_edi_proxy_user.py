@@ -206,7 +206,7 @@ class AccountEdiProxyClientUser(models.Model):
         self.company_id.account_peppol_proxy_state = 'smp_registration'
 
         datetime_in_1_hour = fields.Datetime.add(fields.Datetime.now(), hours=1)
-        self.env.ref('account_peppol.ir_cron_peppol_get_participant_status')._trigger(at=datetime_in_1_hour)
+        self.env['ir.cron'].ref('account_peppol.ir_cron_peppol_get_participant_status')._trigger(at=datetime_in_1_hour)
 
     def _peppol_process_participant_status(self, proxy_user):
         self.ensure_one()
@@ -279,7 +279,7 @@ class AccountEdiProxyClientUser(models.Model):
                     params={'message_uuids': list(processed_uuid_to_record)},
                 )
         if need_retrigger:
-            self.env.ref('l10n_fr_pdp.ir_cron_pdp_get_regulatory_documents')._trigger()
+            self.env['ir.cron'].ref('l10n_fr_pdp.ir_cron_pdp_get_regulatory_documents')._trigger()
 
     def _peppol_process_messages_status(self, messages, uuid_to_record):
         self.ensure_one()
@@ -949,7 +949,7 @@ class AccountEdiProxyClientUser(models.Model):
                 failed_moves._message_log_batch(bodies=message_bodies)
 
         if need_retrigger:
-            self.env.ref('l10n_fr_pdp.ir_cron_pdp_send_lifecycles')._trigger()
+            self.env['ir.cron'].ref('l10n_fr_pdp.ir_cron_pdp_send_lifecycles')._trigger()
 
     # -------------------------------------------------------------------------
     # CRONS

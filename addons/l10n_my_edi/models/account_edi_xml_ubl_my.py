@@ -104,8 +104,8 @@ class AccountEdiXmlUBLMyInvoisMY(models.AbstractModel):
                 customer = self.env['res.partner'].new({
                     'name': 'General Public',
                     'vat': 'EI00000000010',
-                    'country_id': self.env.ref('base.my'),
-                    'state_id': self.env.ref('base.state_my_jhr'),
+                    'country_id': self.env['res.country'].ref('base.my'),
+                    'state_id': self.env['res.country.state'].ref('base.state_my_jhr'),
                     'phone': 'NA',
                     'street': 'NA',
                     'city': 'NA',
@@ -437,7 +437,7 @@ class AccountEdiXmlUBLMyInvoisMY(models.AbstractModel):
                 total_amount_in_company_currency += base_line['tax_details']['raw_total_included']
                 total_amount_in_currency += base_line['tax_details']['raw_total_included_currency']
             # We recalculate the rate so that it works in any cases, even when using consolidated invoices.
-            rate = self.env.ref('base.MYR').round(abs(total_amount_in_company_currency) / (total_amount_in_currency or 1))
+            rate = self.env['res.currency'].ref('base.MYR').round(abs(total_amount_in_company_currency) / (total_amount_in_currency or 1))
             # Exchange rate information must be provided if applicable
             document_node['cac:TaxExchangeRate'] = {
                 'cbc:SourceCurrencyCode': {'_text': vals['currency_id'].name},

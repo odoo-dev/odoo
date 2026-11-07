@@ -51,7 +51,7 @@ class AccountMoveLine(models.Model):
                     name=_("Check Invoice Line(s)"),
                     domain=[('id', 'in', lines.ids)],
                     views=[(
-                        self.env.ref('l10n_in.view_move_line_tree_hsn_l10n_in').id,
+                        self.env['ir.ui.view'].ref('l10n_in.view_move_line_tree_hsn_l10n_in').id,
                         'list'
                     )],
                 ),

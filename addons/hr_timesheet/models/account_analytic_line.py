@@ -170,7 +170,7 @@ class AccountAnalyticLine(models.Model):
 
     def _compute_calendar_display_name(self):
         companies = self.company_id
-        encoding_in_days_per_company = dict(zip(companies, [company.timesheet_encode_uom_id == self.env.ref('uom.product_uom_day') for company in companies]))
+        encoding_in_days_per_company = dict(zip(companies, [company.timesheet_encode_uom_id == self.env['uom.uom'].ref('uom.product_uom_day') for company in companies]))
         for line in self:
             if not line.project_id:
                 line.calendar_display_name = ""
@@ -488,16 +488,14 @@ class AccountAnalyticLine(models.Model):
 
     def _is_timesheet_encode_uom_day(self):
         company_uom = self.env.company.timesheet_encode_uom_id
-        return company_uom == self.env.ref('uom.product_uom_day')
+        return company_uom == self.env['uom.uom'].ref('uom.product_uom_day')
 
     def _is_updatable_timesheet(self):
         return True
 
     @api.model
     def _convert_hours_to_days(self, time):
-        uom_hour = self.env.ref('uom.product_uom_hour')
-        uom_day = self.env.ref('uom.product_uom_day')
-        return round(uom_hour._compute_quantity(time, uom_day, raise_if_failure=False), 2)
+        return round(self.env['uom.uom'].ref('uom.product_uom_hour')._compute_quantity(time, self.env['uom.uom'].ref('uom.product_uom_day'), raise_if_failure=False), 2)
 
     def _get_timesheet_time_day(self):
         return self._convert_hours_to_days(self.unit_amount)
@@ -544,7 +542,7 @@ class AccountAnalyticLine(models.Model):
             'type': 'ir.actions.act_window',
             'res_id': self.id,
             'res_model': 'account.analytic.line',
-            'views': [(self.env.ref('hr_timesheet.timesheet_view_form_portal_user').id, 'form')],
+            'views': [(self.env['ir.ui.view'].ref('hr_timesheet.timesheet_view_form_portal_user').id, 'form')],
             'context': self.env.context,
         }
 

@@ -1079,7 +1079,7 @@ class WebsiteSearchableMixin(models.AbstractModel):
                 highlighted_tags.append(tag)
 
         if highlighted_tags:
-            website = self.env.website or self.env.ref('base.default_website')
+            website = self.env.website or self.env['website']._base__default_website
             value = website.sudo()._render_template(
                 "website.search_tags_highlight",
                 {'tags': highlighted_tags}

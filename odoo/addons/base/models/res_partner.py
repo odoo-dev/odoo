@@ -1447,7 +1447,7 @@ class ResPartner(models.Model):
         vat_prefix, vat_number = split_vat(vat)
         original_vat = vat
 
-        if vat_prefix == 'EU' and country not in self.env.ref('base.europe').country_ids:
+        if vat_prefix == 'EU' and country not in self.env['res.country.group'].ref('base.europe').country_ids:
             # Foreign companies that trade with non-enterprises in the EU
             # may have a VATIN starting with "EU" instead of a country code.
             return vat, False
@@ -1560,7 +1560,7 @@ class ResPartner(models.Model):
         vat_variants = []
         if country_prefix.upper() == 'CH':
             normalized_vat = normalized_vat.replace('-', '')
-            if (vat_formatted := self._run_vat_checks(self.env.ref('base.ch'), normalized_vat, validation='setnull')[0]):
+            if (vat_formatted := self._run_vat_checks(self.env['res.country'].ref('base.ch'), normalized_vat, validation='setnull')[0]):
                 vat_base = re.sub(r"\s*(TVA|IVA|MWST)?$", "", vat_formatted.upper())
                 vat_variants.extend([f'{vat_base} {suffix}' for suffix in ('TVA', 'IVA', 'MWST')])
         return vat_variants

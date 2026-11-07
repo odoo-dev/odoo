@@ -48,12 +48,11 @@ class StockAddToWave(models.TransientModel):
         else:
             raise UserError(_('Cannot create wave transfers'))
 
-        view = self.env.ref('stock.view_move_line_tree_detailed')
         return {
             'name': _('Add Operations'),
             'type': 'ir.actions.act_window',
             'view_mode': 'list',
-            'views': [(view.id, 'list')],
+            'views': [(self.env['ir.ui.view'].ref('stock.view_move_line_tree_detailed').id, 'list')],
             'res_model': 'stock.move.line',
             'target': 'new',
             'domain': [

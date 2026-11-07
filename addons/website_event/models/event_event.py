@@ -538,7 +538,7 @@ class EventEvent(models.Model):
         return res
 
     def get_backend_menu_id(self):
-        return self.env.ref('event.event_main_menu').id
+        return self.env['ir.ui.menu'].ref('event.event_main_menu').id
 
     @api.model
     def _search_build_dates(self):

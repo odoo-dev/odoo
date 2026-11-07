@@ -1661,7 +1661,7 @@ class ProjectTask(models.Model):
         return res
 
     def _creation_subtype(self):
-        return self.env.ref('project.mt_task_new')
+        return self.env['mail.message.subtype'].ref('project.mt_task_new')
 
     def _creation_message(self):
         self.ensure_one()
@@ -1682,7 +1682,7 @@ class ProjectTask(models.Model):
         }
 
         if 'stage_id' in track_init_values:
-            return self.env.ref('project.mt_task_stage')
+            return self.env['mail.message.subtype'].ref('project.mt_task_stage')
         elif 'state' in track_init_values and self.state in mail_message_subtype_per_state:
             return self.env.ref(mail_message_subtype_per_state[self.state])
         return super()._track_log_get_default_subtype(track_init_values)
@@ -1690,13 +1690,12 @@ class ProjectTask(models.Model):
     def _mail_get_message_subtypes(self):
         res = super()._mail_get_message_subtypes()
         if not self.stage_id.rating_active:
-            res -= self.env.ref('project.mt_task_rating')
+            res -= self.env['mail.message.subtype'].ref('project.mt_task_rating')
         if len(self) == 1:
-            waiting_subtype = self.env.ref('project.mt_task_waiting')
             if ((self.project_id and not self.project_id.allow_task_dependencies)\
                 or (not self.project_id and not self.env.user.has_group('project.group_project_task_dependencies')))\
-                and waiting_subtype in res:
-                res -= waiting_subtype
+                and self.env['mail.message.subtype'].ref('project.mt_task_waiting') in res:
+                res -= self.env['mail.message.subtype'].ref('project.mt_task_waiting')
         return res
 
     def _get_customer_portal_message_types(self):
@@ -1722,7 +1721,7 @@ class ProjectTask(models.Model):
 
         self.ensure_one()
 
-        project_user_group_id = self.env.ref('project.group_project_user').id
+        project_user_group_id = self.env['res.groups'].ref('project.group_project_user').id
         new_group = ('group_project_user', lambda pdata: pdata['type'] == 'user' and project_user_group_id in pdata['groups'], {})
         groups = [new_group] + groups
 
@@ -1925,8 +1924,8 @@ class ProjectTask(models.Model):
             'search_view_ref': 'project.project_sharing_project_task_view_search',
             'default_project_id': self.project_id.id,
         }).action_open_parent_task()
-        action['views'] = [(self.env.ref('project.project_sharing_project_task_view_form').id, 'form')]
-        action['search_view_id'] = self.env.ref("project.project_sharing_project_task_view_search").id
+        action['views'] = [(self.env['ir.ui.view'].ref('project.project_sharing_project_task_view_form').id, 'form')]
+        action['search_view_id'] = self.env['ir.ui.view'].ref('project.project_sharing_project_task_view_search').id
         return action
 
     # ------------
@@ -1960,8 +1959,8 @@ class ProjectTask(models.Model):
             action['domain'].append(('is_template', '=', False))
         if not self.project_id:
             action['views'] = [
-                (self.env.ref('project.project_task_view_tree_base').id, 'list') if view_type == 'list' else
-                (self.env.ref('project.view_task_kanban_no_default_grouping').id, 'kanban') if view_type == 'kanban' else
+                (self.env['ir.ui.view'].ref('project.project_task_view_tree_base').id, 'list') if view_type == 'list' else
+                (self.env['ir.ui.view'].ref('project.view_task_kanban_no_default_grouping').id, 'kanban') if view_type == 'kanban' else
                 (view_id, view_type)
                 for view_id, view_type in action['views']
             ]
@@ -1969,7 +1968,7 @@ class ProjectTask(models.Model):
 
     def action_project_sharing_open_task(self):
         action = self.action_open_task()
-        action['views'] = [[self.env.ref('project.project_sharing_project_task_view_form').id, 'form']]
+        action['views'] = [[self.env['ir.ui.view'].ref('project.project_sharing_project_task_view_form').id, 'form']]
         return action
 
     def action_project_sharing_open_subtasks(self):
@@ -2046,7 +2045,7 @@ class ProjectTask(models.Model):
         if self.rating_count == 1:
             action['view_mode'] = 'form'
             action['res_id'] = self.rating_ids[0].id
-            action['views'] = [[self.env.ref('project.rating_rating_view_form_project').id, 'form']]
+            action['views'] = [[self.env['ir.ui.view'].ref('project.rating_rating_view_form_project').id, 'form']]
             return action
         else:
             return action
@@ -2063,7 +2062,7 @@ class ProjectTask(models.Model):
                 'type': 'ir.actions.act_window',
                 'res_model': 'project.task',
                 'res_id': self.id,
-                'views': [(self.env.ref('project.project_task_convert_to_subtask_view_form').id, 'form')],
+                'views': [(self.env['ir.ui.view'].ref('project.project_task_convert_to_subtask_view_form').id, 'form')],
                 'target': 'new',
             }
         return {
@@ -2255,7 +2254,7 @@ class ProjectTask(models.Model):
         )
 
     def action_redirect_to_project_task_form(self):
-        menu_id = self.env.ref('project.menu_project_management_all_tasks').id
+        menu_id = self.env['ir.ui.menu'].ref('project.menu_project_management_all_tasks').id
         return {
             'type': 'ir.actions.act_url',
             'url': f"/odoo/{self.project_id.id}/action-project.act_project_project_2_project_task_all/{self.id}?menu_id={menu_id}",

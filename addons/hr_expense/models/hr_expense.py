@@ -86,7 +86,7 @@ class HrExpense(models.Model):
         comodel_name='res.users',
         string="Approver",
         compute='_compute_from_employee_id', store=True,
-        domain=lambda self: [('share', '=', False), '|', ('employee_id.expense_manager_id', 'in', self.env.user.id), ('all_group_ids', 'in', self.env.ref('hr_expense.group_hr_expense_team_approver').ids)],
+        domain=lambda self: [('share', '=', False), '|', ('employee_id.expense_manager_id', 'in', self.env.user.id), ('all_group_ids', 'in', self.env['res.groups'].ref('hr_expense.group_hr_expense_team_approver').ids)],
         copy=False,
         tracking=True,
     )
@@ -1197,16 +1197,16 @@ class HrExpense(models.Model):
 
         match self.state:
             case 'draft':
-                return self.env.ref('hr_expense.mt_expense_reset')
+                return self.env['mail.message.subtype'].ref('hr_expense.mt_expense_reset')
             case 'refused':
-                return self.env.ref('hr_expense.mt_expense_refused')
+                return self.env['mail.message.subtype'].ref('hr_expense.mt_expense_refused')
             case 'paid':
-                return self.env.ref('hr_expense.mt_expense_paid')
+                return self.env['mail.message.subtype'].ref('hr_expense.mt_expense_paid')
             case 'approved':
                 if track_init_values['state'] in {'posted', 'in_payment', 'paid'}:  # Reverting state
                     subtype = 'hr_expense.mt_expense_entry_draft' if self.account_move_id else 'hr_expense.mt_expense_entry_delete'
                     return self.env.ref(subtype)
-                return self.env.ref('hr_expense.mt_expense_approved')
+                return self.env['mail.message.subtype'].ref('hr_expense.mt_expense_approved')
             case _:
                 return super()._track_log_get_default_subtype(track_init_values)
 
@@ -1575,7 +1575,7 @@ class HrExpense(models.Model):
         return expense_state
 
     def action_approve_duplicates(self):
-        root = self.env['res.partner']._base__partner_root_optional.id
+        root = self.env['res.partner']._base__partner_root.id
         for expense in self.duplicate_expense_ids:
             expense.message_post(
                 body=_('%(user)s confirms this expense is not a duplicate with similar expense.', user=self.env.user.name),

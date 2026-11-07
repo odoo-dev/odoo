@@ -76,7 +76,7 @@ class IrActionsReport(models.Model):
     def get_paperformat(self):
         if self.env.context.get('snailmail_layout'):
             if self.report_name == 'l10n_ch.qr_report_main':
-                return self.env.ref('l10n_ch.paperformat_euro_no_margin')
+                return self.env['report.paperformat'].ref('l10n_ch.paperformat_euro_no_margin')
             if self.report_name == 'l10n_ch.qr_report_header':
-                return self.env.ref('l10n_din5008.paperformat_euro_din')
+                return self.env['report.paperformat'].ref('l10n_din5008.paperformat_euro_din')
         return super(IrActionsReport, self).get_paperformat()

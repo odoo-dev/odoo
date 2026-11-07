@@ -14,3 +14,4 @@ class UtmCampaign(models.Model):
         'hr_recruitment.utm_campaign_job',
         message=_lt("The UTM campaign '%(name)s' cannot be deleted as it is used in the recruitment process."),
     )
+    _hr_recruitment__utm_campaign_job = models.Ref('hr_recruitment.utm_campaign_job')

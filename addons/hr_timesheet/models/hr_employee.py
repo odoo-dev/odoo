@@ -60,7 +60,7 @@ class HrEmployee(models.Model):
             'name': self.env._('Confirmation'),
             'view_mode': 'form',
             'res_model': 'hr.employee.delete.wizard',
-            'views': [(self.env.ref('hr_timesheet.hr_employee_delete_wizard_form').id, 'form')],
+            'views': [(self.env['ir.ui.view'].ref('hr_timesheet.hr_employee_delete_wizard_form').id, 'form')],
             'type': 'ir.actions.act_window',
             'res_id': wizard.id,
             'target': 'new',

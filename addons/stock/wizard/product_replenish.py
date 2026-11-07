@@ -128,7 +128,7 @@ class ProductReplenish(models.TransientModel):
 
     def _get_replenishment_order_notification_link(self, move):
         if move.picking_id:
-            action = self.env.ref('stock.stock_picking_action_picking_type')
+            action = self.env['ir.actions.act_window'].ref('stock.stock_picking_action_picking_type')
             return [{
                 'label': move.picking_id.name,
                 'url': f'/odoo/action-stock.stock_picking_action_picking_type/{move.picking_id.id}'

@@ -451,7 +451,7 @@ class DiscussChannelMember(models.Model):
     def _set_cron_for_unmute(self):
         for member in self:
             if member.mute_until_dt and member.mute_until_dt != -1:
-                self.env.ref("mail.ir_cron_discuss_channel_member_unmute")._trigger(member.mute_until_dt)
+                self.env['ir.cron'].ref('mail.ir_cron_discuss_channel_member_unmute')._trigger(member.mute_until_dt)
 
     @api.model
     def _cleanup_expired_mutes(self):

@@ -11,6 +11,6 @@ class AccountMoveSend(models.AbstractModel):
         )
         return [
             p for p in placeholders
-            if p.get('dynamic_report') != self.env.ref('sale_timesheet.timesheet_report_account_move').report_name
+            if p.get('dynamic_report') != self.env['ir.actions.report'].ref('sale_timesheet.timesheet_report_account_move').report_name
             or move.timesheet_ids
         ]

@@ -186,10 +186,10 @@ class HrDepartment(models.Model):
     def action_employee_from_department(self):
         if self.env['hr.employee'].has_access('read'):
             res_model = "hr.employee"
-            search_view_id = self.env.ref('hr.view_employee_filter').id
+            search_view_id = self.env['ir.ui.view'].ref('hr.view_employee_filter').id
         else:
             res_model = "hr.employee.public"
-            search_view_id = self.env.ref('hr.hr_employee_public_view_search').id
+            search_view_id = self.env['ir.ui.view'].ref('hr.hr_employee_public_view_search').id
         return {
             'name': _("Employees"),
             'type': 'ir.actions.act_window',

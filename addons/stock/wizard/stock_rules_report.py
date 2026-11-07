@@ -48,4 +48,4 @@ class StockRulesReport(models.TransientModel):
     def print_report(self):
         self.ensure_one()
         data = self._prepare_report_data()
-        return self.env.ref('stock.action_report_stock_rule').report_action(None, data=data)
+        return self.env['ir.actions.report'].ref('stock.action_report_stock_rule').report_action(None, data=data)

@@ -145,9 +145,6 @@ class PortalWizardUser(models.TransientModel):
         if self.is_portal or self.is_internal:
             raise UserError(_('The partner "%s" already has the portal access.', self.partner_id.name))
 
-        group_portal = self.env.ref('base.group_portal')
-        group_public = self.env.ref('base.group_public')
-
         self._update_partner_email()
         user_sudo = self.user_id.sudo()
 
@@ -157,7 +154,7 @@ class PortalWizardUser(models.TransientModel):
             user_sudo = self.sudo().with_company(company.id)._create_user()
 
         # users whose access was revoked used to be assigned to the public group
-        user_sudo.write({'active': True, 'group_ids': [(4, group_portal.id), (3, group_public.id)]})
+        user_sudo.write({'active': True, 'group_ids': [(4, self.env['res.groups'].ref('base.group_portal').id), (3, self.env['res.groups'].ref('base.group_public').id)]})
         # prepare for the signup process
         user_sudo.partner_id.signup_prepare()
 
@@ -221,15 +218,11 @@ class PortalWizardUser(models.TransientModel):
         """ send notification email to a new portal user """
         self.ensure_one()
 
-        template = self.env.ref('auth_signup.portal_set_password_email')
-        if not template:
-            raise UserError(_('The template "Portal: new user" not found for sending email to the portal user.'))
-
         lang = self.user_id.sudo().lang
         partner = self.user_id.sudo().partner_id
         partner.signup_prepare()
 
-        template.with_context(
+        self.env['mail.template'].ref('auth_signup.portal_set_password_email').with_context(
             dbname=self.env.cr.dbname,
             email_notification_force_header=True,
             email_notification_force_footer=True,

@@ -53,7 +53,7 @@ class PaymentProvider(models.Model):
     @api.constrains("available_currency_ids")
     def _check_available_currency_ids_only_contains_supported_currencies(self):
         for provider in self.filtered(lambda p: p.code == "toss_payments"):
-            if provider.available_currency_ids != self.env.ref("base.KRW"):
+            if provider.available_currency_ids != self.env['res.currency'].ref('base.KRW'):
                 raise ValidationError(self.env._("Currencies other than KRW are not supported."))
 
     # === CRUD METHODS === #

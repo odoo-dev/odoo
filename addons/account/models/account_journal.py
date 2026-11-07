@@ -49,10 +49,10 @@ class AccountJournal(models.Model):
     _rec_names_search = ('name', 'code')
 
     def _default_inbound_payment_methods(self):
-        return self.env.ref('account.account_payment_method_manual_in')
+        return self.env['account.payment.method'].ref('account.account_payment_method_manual_in')
 
     def _default_outbound_payment_methods(self):
-        return self.env.ref('account.account_payment_method_manual_out')
+        return self.env['account.payment.method'].ref('account.account_payment_method_manual_out')
 
     def _get_bank_statements_available_sources(self):
         return [('undefined', _('Undefined Yet'))]
@@ -868,7 +868,7 @@ class AccountJournal(models.Model):
                     self.env['mail.alias']._sanitize_alias_name(string))
             ), False
         )
-        if company != self.env.ref('base.main_company'):
+        if company != self.env['res.company']._base__main_company:
             company_identifier = self.env['mail.alias']._sanitize_alias_name(company.name) if self.env['mail.alias']._is_encodable(company.name) else company.id
             if f'-{company_identifier}' not in alias_name:
                 alias_name = f"{alias_name}-{company_identifier}"

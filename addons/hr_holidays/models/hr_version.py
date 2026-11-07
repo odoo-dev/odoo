@@ -20,7 +20,7 @@ class HrVersion(models.Model):
     _description = 'Employee Contract'
 
     def _get_hr_responsible_domain(self):
-        return [('share', '=', False), ('company_ids', 'in', self.env.company.ids), ('all_group_ids', 'in', self.env.ref('hr_holidays.group_hr_holidays_user').id)]
+        return [('share', '=', False), ('company_ids', 'in', self.env.company.ids), ('all_group_ids', 'in', self.env['res.groups'].ref('hr_holidays.group_hr_holidays_user').id)]
     hr_responsible_id = fields.Many2one(domain=lambda self: self._get_hr_responsible_domain())
     allocation_from_working_schedule_id = fields.Many2one('hr.leave.allocation', string="Allocation from working schedule", copy=False, groups="hr.group_hr_user")
 
@@ -373,7 +373,7 @@ class HrVersion(models.Model):
             rc_leave = including_holiday_rcleaves[0]
         if rc_leave:
             return self._get_leave_work_entry_type_dates(rc_leave, interval_start, interval_stop, self.employee_id)
-        return self.env.ref('hr_work_entry.generic_work_entry_type_leave')
+        return self.env['hr.work.entry.type']._hr_work_entry__generic_work_entry_type_leave
 
     def _get_sub_leave_domain(self):
         """Also accept the leaves of the time off of the employees, whatever their calendar.

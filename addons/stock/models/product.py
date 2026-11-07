@@ -1255,7 +1255,7 @@ class ProductTemplate(models.Model):
         if not self.env.user.has_group('stock.group_stock_multi_warehouses') and len(products) == 1:
             company = products.company_id or self.env.company
             warehouse = self.env['stock.warehouse'].search([('company_id', '=', company.id)], limit=1)
-            return self.env.ref('stock.action_report_stock_rule').report_action(None, data={
+            return self.env['ir.actions.report'].ref('stock.action_report_stock_rule').report_action(None, data={
                 'product_id': products.id,
                 'warehouse_ids': warehouse.ids,
             }, config=False)

@@ -269,7 +269,7 @@ class ProductTemplateAttributeLine(models.Model):
             'view_mode': 'list,form',
             'domain': [('id', 'in', self.product_template_value_ids.ids)],
             'views': [
-                (self.env.ref('product.product_template_attribute_value_view_tree').id, 'list'),
+                (self.env['ir.ui.view'].ref('product.product_template_attribute_value_view_tree').id, 'list'),
             ],
             'context': {
                 'search_default_active': 1,

@@ -16,14 +16,14 @@ class OnboardingOnboardingStep(models.Model):
             'name': _('Set your company data'),
             'res_model': 'res.company',
             'res_id': company.id,
-            'views': [(self.env.ref('account.res_company_form_view_onboarding').id, "form")],
+            'views': [(self.env['ir.ui.view'].ref('account.res_company_form_view_onboarding').id, "form")],
             'target': 'new',
         }
         return action
 
     @api.model
     def action_open_step_base_document_layout(self):
-        view_id = self.env.ref('web.view_base_document_layout').id
+        view_id = self.env['ir.ui.view'].ref('web.view_base_document_layout').id
         return {
             'name': _('Configure your document layout'),
             'type': 'ir.actions.act_window',
@@ -50,7 +50,7 @@ class OnboardingOnboardingStep(models.Model):
         return {
             'type': 'ir.actions.act_window',
             'name': _('Create first invoice'),
-            'views': [(self.env.ref("account.view_move_form").id, 'form')],
+            'views': [(self.env['ir.ui.view'].ref('account.view_move_form').id, 'form')],
             'res_model': 'account.move',
             'context': {'default_move_type': 'out_invoice'},
         }
@@ -59,7 +59,7 @@ class OnboardingOnboardingStep(models.Model):
     @api.model
     def action_open_step_fiscal_year(self):
         company = self.env['account.journal'].browse(self.env.context.get('journal_id', None)).company_id or self.env.company
-        view_id = self.env.ref('account.setup_financial_year_opening_form').id
+        view_id = self.env['ir.ui.view'].ref('account.setup_financial_year_opening_form').id
 
         return {
             'type': 'ir.actions.act_window',
@@ -85,7 +85,7 @@ class OnboardingOnboardingStep(models.Model):
             return 'account.action_account_form'
 
         # Then, we open will open a custom list view allowing to edit opening balances of the account
-        view_id = self.env.ref('account.init_accounts_tree').id
+        view_id = self.env['ir.ui.view'].ref('account.init_accounts_tree').id
         # Hide the current year earnings account as it is automatically computed
         domain = [
             *self.env['account.account']._check_company_domain(company),
@@ -97,7 +97,7 @@ class OnboardingOnboardingStep(models.Model):
             'res_model': 'account.account',
             'view_mode': 'list',
             'limit': 99999999,
-            'search_view_id': [self.env.ref('account.view_account_search').id],
+            'search_view_id': [self.env['ir.ui.view'].ref('account.view_account_search').id],
             'views': [[view_id, 'list'], [False, 'form']],
             'domain': domain,
         }
@@ -105,7 +105,7 @@ class OnboardingOnboardingStep(models.Model):
     # STEPS WITHOUT PANEL
     @api.model
     def action_open_step_sales_tax(self):
-        view_id = self.env.ref('account.res_company_form_view_onboarding_sale_tax').id
+        view_id = self.env['ir.ui.view'].ref('account.res_company_form_view_onboarding_sale_tax').id
 
         return {
             'type': 'ir.actions.act_window',

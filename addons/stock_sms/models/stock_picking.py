@@ -29,15 +29,14 @@ class StockPicking(models.Model):
         return warn_sms_pickings
 
     def _action_generate_warn_sms_wizard(self):
-        view = self.env.ref('stock_sms.view_confirm_stock_sms')
         wiz = self.env['confirm.stock.sms'].create({'pick_ids': [(4, p.id) for p in self]})
         return {
             'name': _('SMS'),
             'type': 'ir.actions.act_window',
             'view_mode': 'form',
             'res_model': 'confirm.stock.sms',
-            'views': [(view.id, 'form')],
-            'view_id': view.id,
+            'views': [(self.env['ir.ui.view'].ref('stock_sms.view_confirm_stock_sms').id, 'form')],
+            'view_id': self.env['ir.ui.view'].ref('stock_sms.view_confirm_stock_sms').id,
             'target': 'new',
             'res_id': wiz.id,
             'context': self.env.context,

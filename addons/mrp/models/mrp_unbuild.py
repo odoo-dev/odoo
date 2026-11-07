@@ -342,7 +342,7 @@ class MrpUnbuild(models.Model):
                 'name': _('%(product)s: Insufficient Quantity To Unbuild', product=self.product_id.display_name),
                 'view_mode': 'form',
                 'res_model': 'stock.warn.insufficient.qty.unbuild',
-                'view_id': self.env.ref('mrp.stock_warn_insufficient_qty_unbuild_form_view').id,
+                'view_id': self.env['ir.ui.view'].ref('mrp.stock_warn_insufficient_qty_unbuild_form_view').id,
                 'type': 'ir.actions.act_window',
                 'context': {
                     'default_product_id': self.product_id.id,

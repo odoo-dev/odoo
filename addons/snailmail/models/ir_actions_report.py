@@ -15,7 +15,6 @@ class IrActionsReport(models.Model):
         # force the right format (euro/A4) when sending letters, only if we are not using the l10n_DE layout
         res = super().get_paperformat()
         if self.env.context.get('snailmail_layout') and res != self.env['report.paperformat']._l10n_de__paperformat_euro_din_optional:
-            paperformat_id = self.env.ref('base.paperformat_euro')
-            return paperformat_id
+            return self.env['report.paperformat'].ref('base.paperformat_euro')
         else:
             return res

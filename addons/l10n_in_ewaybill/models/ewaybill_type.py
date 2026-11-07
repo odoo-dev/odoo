@@ -7,6 +7,8 @@ class L10nInEwaybillType(models.Model):
     _name = 'l10n.in.ewaybill.type'
     _description = "E-Waybill Document Type"
 
+    _l10n_in_ewaybill__type_tax_invoice_sub_type_supply = models.Ref('l10n_in_ewaybill.type_tax_invoice_sub_type_supply')
+
     name = fields.Char("Type")
     code = fields.Char("Type Code")
     sub_type = fields.Char("Sub-type")

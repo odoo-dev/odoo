@@ -14,8 +14,8 @@ class AccountJournal(models.Model):
             'type': 'ir.actions.act_window',
             'res_model': 'myinvois.document',
             'view_mode': 'list,form',
-            'search_view_id': [self.env.ref('l10n_my_edi.myinvois_document_search_view').id, 'search'],
-            'views': [(self.env.ref('l10n_my_edi.myinvois_document_list_view').id, 'list'), (self.env.ref('l10n_my_edi.myinvois_document_form_view').id, 'form')],
+            'search_view_id': [self.env['ir.ui.view'].ref('l10n_my_edi.myinvois_document_search_view').id, 'search'],
+            'views': [(self.env['ir.ui.view'].ref('l10n_my_edi.myinvois_document_list_view').id, 'list'), (self.env['ir.ui.view'].ref('l10n_my_edi.myinvois_document_form_view').id, 'form')],
             'context': {
                 'display_consolidate_invoice_button': True,
                 'journal_id': self.id,

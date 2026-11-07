@@ -284,7 +284,7 @@ class AccountEdiProxyClientUser(models.Model):
                 )
                 edi_user._nemhandel_post_process_new_messages(moves)
         if need_retrigger:
-            self.env.ref('l10n_dk.ir_cron_nemhandel_get_new_documents')._trigger()
+            self.env['ir.cron'].ref('l10n_dk.ir_cron_nemhandel_get_new_documents')._trigger()
 
     def _nemhandel_process_new_messages(self, messages):
         self.ensure_one()
@@ -349,7 +349,7 @@ class AccountEdiProxyClientUser(models.Model):
                 params={'message_uuids': list(processed_message_uuids)},
             )
         if need_retrigger:
-            self.env.ref('l10n_dk.ir_cron_nemhandel_get_message_status')._trigger()
+            self.env['ir.cron'].ref('l10n_dk.ir_cron_nemhandel_get_message_status')._trigger()
 
     def _nemhandel_get_documents_for_status(self, batch_size):
         self.ensure_one()

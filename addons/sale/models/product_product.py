@@ -126,7 +126,7 @@ class ProductProduct(models.Model):
         return action
 
     def _get_backend_root_menu_ids(self):
-        return super()._get_backend_root_menu_ids() + [self.env.ref("sale.sale_menu_root").id]
+        return super()._get_backend_root_menu_ids() + [self.env['ir.ui.menu'].ref('sale.sale_menu_root').id]
 
     def _get_invoice_policy(self):
         return self.invoice_policy

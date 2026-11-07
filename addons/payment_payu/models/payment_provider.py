@@ -78,7 +78,7 @@ class PaymentProvider(models.Model):
                 self.env._(
                     "PayU is not available in your country; please use another payment provider."
                 ),
-                self.env.ref("payment.action_payment_provider").id,
+                self.env['ir.actions.act_window'].ref('payment.action_payment_provider').id,
                 self.env._("Other Payment Providers"),
             )
 

@@ -125,7 +125,7 @@ class ResPartnerBank(models.Model):
 
                 labels_and_countries = [
                     (self.env._("IBAN"), account.account_type == 'iban' and code_to_country_id.get(account.sanitized_account_number[:2])),
-                    (self.env._("CLABE"), account.account_type == 'clabe' and self.env.ref('base.mx')),
+                    (self.env._("CLABE"), account.account_type == 'clabe' and self.env['res.country'].ref('base.mx')),
                     (self.env._("Account Holder"), account.partner_id.country_id),
                     (self.env._("Bank Account"), account.country_id),
                 ]

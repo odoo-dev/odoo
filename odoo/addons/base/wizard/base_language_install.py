@@ -46,7 +46,7 @@ class BaseLanguageInstall(models.TransientModel):
                 'res_id': self.id,
                 'view_mode': 'form',
                 'target': 'new',
-                'views': [[self.env.ref('base.language_install_view_form_lang_switch').id, 'form']],
+                'views': [[self.env['ir.ui.view'].ref('base.language_install_view_form_lang_switch').id, 'form']],
             }
 
         return {

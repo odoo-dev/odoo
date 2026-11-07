@@ -8,6 +8,9 @@ class ForumPostReason(models.Model):
     _description = "Post Closing Reason"
     _order = 'name'
 
+    _website_forum__reason_7 = models.Ref('website_forum.reason_7')
+    _website_forum__reason_8 = models.Ref('website_forum.reason_8')
+
     name = fields.Char(string='Closing Reason', required=True, translate=True)
     reason_type = fields.Selection(
         [('basic', 'Basic'), ('offensive', 'Offensive')],

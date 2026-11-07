@@ -77,8 +77,7 @@ class ResPartner(models.Model):
         if not self or len(self) > 1:
             return {}
 
-        europe = self.env['res.country.group'].ref('base.europe')
-        in_eu = not europe or not self.country_id or self.country_id in europe.country_ids
+        in_eu = not self.country_id or self.country_id in self.env['res.country.group'].ref('base.europe').country_ids
         is_sm = self.country_id and self.country_id.code == "SM"
 
         # VAT number and country code

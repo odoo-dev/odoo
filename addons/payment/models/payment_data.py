@@ -115,7 +115,7 @@ class PaymentData(models.Model):
                 "Failed to post-process transaction %s; deferring to the post-processing cron.",
                 tx.reference,
             )
-            self.env.ref("payment.post_processing_cron")._trigger()
+            self.env['ir.cron'].ref('payment.post_processing_cron')._trigger()
             tx._notify_status()
             remaining_time = IrCron._commit_progress(processed=1)
         return remaining_time

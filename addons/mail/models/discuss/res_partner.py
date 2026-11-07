@@ -10,6 +10,8 @@ from odoo.exceptions import AccessError
 class ResPartner(models.Model):
     _inherit = "res.partner"
 
+    _base__partner_admin = models.Ref('base.partner_admin')
+
     channel_ids = fields.Many2many(
         "discuss.channel",
         "discuss_channel_member",

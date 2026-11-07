@@ -7,6 +7,8 @@ from odoo.fields import Domain
 class ResPartner(models.Model):
     _inherit = "res.partner"
 
+    _base__public_partner = models.Ref('base.public_partner')
+
     wishlist_ids = fields.One2many(
         string="Wishlist",
         comodel_name="product.wishlist",

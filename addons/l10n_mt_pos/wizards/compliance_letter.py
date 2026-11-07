@@ -19,7 +19,7 @@ class ComplianceLetter(models.TransientModel):
             "vat": self.company_id.vat,
             "address": self.company_id.partner_id.address,
         }
-        return self.env.ref('l10n_mt_pos.report_compliance_letter').report_action([], data=data)
+        return self.env['ir.actions.report'].ref('l10n_mt_pos.report_compliance_letter').report_action([], data=data)
 
     def _get_formatted_date(self):
         """Returns the formatted date as 'Date (Month, xxth, 20XX)'."""

@@ -15,9 +15,7 @@ def create_internal_project(env):
     # installation, as there is no analytic account for them.
     env['project.project'].search([]).write({'allow_timesheets': True})
 
-    admin = env['res.users']._base__user_admin_optional
-    if not admin:
-        return
+    admin = env['res.users']._base__user_admin
     project_ids = env['res.company'].search([])._create_internal_project_task()
     env['account.analytic.line'].create([{
         'name': env._("Analysis"),

@@ -47,7 +47,7 @@ class AccountMove(models.Model):
         self.ensure_one()
 
         views = [(False, 'form')] if len(self.landed_costs_ids) == 1 else [
-            (self.env.ref('stock_landed_costs.view_stock_landed_cost_tree2').id, 'list'), (False, 'form'), (False, 'kanban')
+            (self.env['ir.ui.view'].ref('stock_landed_costs.view_stock_landed_cost_tree2').id, 'list'), (False, 'form'), (False, 'kanban')
         ]
         return self.landed_costs_ids.with_context(
             default_vendor_bill_id=self.id

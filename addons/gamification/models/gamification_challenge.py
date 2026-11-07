@@ -69,8 +69,7 @@ class GamificationChallenge(models.Model):
     def default_get(self, fields):
         res = super().default_get(fields)
         if 'user_domain' in fields and 'user_domain' not in res:
-            user_group_id = self.env.ref('base.group_user')
-            res['user_domain'] = f'["&", ("all_group_ids", "in", [{user_group_id.id}]), ("active", "=", True)]'
+            res['user_domain'] = f'["&", ("all_group_ids", "in", [{self.env['res.groups'].ref('base.group_user').id}]), ("active", "=", True)]'
         return res
 
     # description

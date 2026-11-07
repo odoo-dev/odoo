@@ -110,7 +110,7 @@ class ResPartner(models.Model):
     def _l10n_es_edi_get_partner_info(self):
         """ Used in SII and Veri*factu"""
         self.ensure_one()
-        eu_country_codes = set(self.env.ref('base.europe').country_ids.mapped('code'))
+        eu_country_codes = set(self.env['res.country.group'].ref('base.europe').country_ids.mapped('code'))
 
         partner_info = {}
         IDOtro_ID = self.has_vat and self.vat or 'NO_DISPONIBLE'

@@ -93,7 +93,7 @@ class EventBoothCategory(models.Model):
             # need to create it during installation (data files not yet loaded)
             product = self.env['product.product'].create({
                 'name': 'Generic Event Booth Product',
-                'categ_id': self.env.ref('event_product.product_category_events').id,
+                'categ_id': self.env['product.category']._event_product__product_category_events.id,
                 'list_price': 100,
                 'standard_price': 0,
                 'type': 'service',

@@ -57,10 +57,10 @@ class PosConfig(models.Model):
         return non_cash_pm | available_cash_pm
 
     def _get_group_pos_manager(self):
-        return self.env.ref('point_of_sale.group_pos_manager')
+        return self.env['res.groups'].ref('point_of_sale.group_pos_manager')
 
     def _get_group_pos_user(self):
-        return self.env.ref('point_of_sale.group_pos_user')
+        return self.env['res.groups'].ref('point_of_sale.group_pos_user')
 
     def _get_default_tip_product(self):
         tip_product_id = self.env['product.product']._tip_product
@@ -346,7 +346,7 @@ class PosConfig(models.Model):
         record['_data_server_date'] = self.env.context.get('pos_last_server_date') or self.env.cr.now()
         record['_has_cash_move_perm'] = self.env.user._has_cash_move_permission()
         record['_has_cash_delete_perm'] = self.env.user._has_cash_delete_permission()
-        record["_unit_uom_id"] = self.env.ref('uom.product_uom_unit').id
+        record["_unit_uom_id"] = self.env['uom.uom'].ref('uom.product_uom_unit').id
         record['_limited_partner_count'] = config._get_limited_partner_count()
 
         session = config.current_session_id
@@ -362,7 +362,7 @@ class PosConfig(models.Model):
 
         if not record['use_pricelist']:
             record['pricelist_id'] = False
-        record['_IS_VAT'] = self.env.company.country_id.id in self.env.ref("base.europe").country_ids.ids
+        record['_IS_VAT'] = self.env.company.country_id.id in self.env['res.country.group'].ref('base.europe').country_ids.ids
         return read_records
 
     @api.depends('custom_logo', 'custom_phone', 'custom_receipt_address', 'custom_email', 'custom_website', 'company_id', 'use_custom_receipt_info',
@@ -1007,7 +1007,7 @@ class PosConfig(models.Model):
             "type": "ir.actions.act_window",
             "name": _("How do you want to display prices?"),
             "res_model": "pos.price.inclusion.wizard",
-            "views": [(self.env.ref("point_of_sale.view_pos_price_inclusion_wizard_form").id, "form")],
+            "views": [(self.env['ir.ui.view'].ref('point_of_sale.view_pos_price_inclusion_wizard_form').id, "form")],
             "view_mode": "form",
             "target": "new",
             "context": {
@@ -1370,7 +1370,7 @@ class PosConfig(models.Model):
         }])
         config._load_onboarding_furniture_demo_data(with_demo_data)
         existing_session = self.env['pos.session']._point_of_sale__pos_closed_session_2
-        if with_demo_data and self.env.company.id == self.env.ref('base.main_company').id and not existing_session:
+        if with_demo_data and self.env.company.id == self.env['res.company']._base__main_company.id and not existing_session:
             convert.convert_file(self._env_with_clean_context(), 'point_of_sale', 'data/orders_demo.xml', idref=None, mode='init', noupdate=True)
         return {'config_id': config.id}
 
@@ -1415,7 +1415,7 @@ class PosConfig(models.Model):
 
     def _get_suffixed_ref_name(self, ref_name):
         """Suffix the given ref_name with the id of the current company if it's not the main company."""
-        if self.env.company.id == self.env['res.company']._base__main_company_optional.id:
+        if self.env.company.id == self.env['res.company']._base__main_company.id:
             return ref_name
         return f"{ref_name}_{self.env.company.id}"
 
@@ -1429,7 +1429,7 @@ class PosConfig(models.Model):
             "has_pos_config": has_pos_config,
             "has_chart_template": has_chart_template,
             "is_restaurant_installed": bool(self.env['ir.module.module'].search_count([('name', '=', 'pos_restaurant'), ('state', '=', 'installed')])),
-            "is_main_company": self.env.company.id == self.env['res.company']._base__main_company_optional.id,
+            "is_main_company": self.env.company.id == self.env['res.company']._base__main_company.id,
         }
 
     @api.model

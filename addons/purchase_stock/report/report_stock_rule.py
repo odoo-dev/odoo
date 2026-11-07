@@ -13,5 +13,5 @@ class ReportStockReport_Stock_Rule(models.AbstractModel):
         """
         res = super()._get_rule_loc(rule, product_id)
         if rule.action == 'buy':
-            res['source'] = self.env.ref('stock.stock_location_suppliers')
+            res['source'] = self.env['stock.location']._stock__stock_location_suppliers
         return res

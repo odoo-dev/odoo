@@ -152,7 +152,7 @@ class AccountMove(models.Model):
                 return False
             elif move.l10n_in_gst_treatment == 'special_economic_zone':
                 # Special Economic Zone
-                return self.env.ref('l10n_in.state_in_oc')
+                return self.env['res.country.state'].ref('l10n_in.state_in_oc')
             elif move.is_sale_document(include_receipts=True):
                 # In Sales Documents: Compare place of supply with company state
                 return move.l10n_in_state_id if move.l10n_in_state_id.l10n_in_tin != '96' else foreign_state
@@ -218,7 +218,6 @@ class AccountMove(models.Model):
     def _compute_l10n_in_warning(self):
         indian_invoice = self.filtered(lambda m: m.country_code == 'IN' and m.move_type != 'entry')
         line_filter_func = lambda line: line.display_type == 'product' and line.tax_ids and line._origin
-        _xmlid_to_res_id = self.env['ir.model.data']._xmlid_to_res_id
         for move in indian_invoice:
             warnings = {}
             company = move.company_id
@@ -233,7 +232,7 @@ class AccountMove(models.Model):
                     'message': _("As the Partner's PAN missing/invalid apply TCS at the higher rate."),
                     'action': invalid_tax_lines.with_context(tax_validation=True)._get_records_action(
                         name=action_name,
-                        views=[(_xmlid_to_res_id("l10n_in.view_move_line_tree_hsn_l10n_in"), "list")],
+                        views=[(self.env['ir.ui.view'].ref('l10n_in.view_move_line_tree_hsn_l10n_in').id, "list")],
                         domain=[('id', 'in', invalid_tax_lines.ids)],
                     ),
                     'action_text': action_text,
@@ -284,7 +283,7 @@ class AccountMove(models.Model):
                         'message': msg,
                         'action': lines._get_records_action(
                             name=action_name,
-                            views=[(_xmlid_to_res_id("l10n_in.view_move_line_tree_hsn_l10n_in"), "list")],
+                            views=[(self.env['ir.ui.view'].ref('l10n_in.view_move_line_tree_hsn_l10n_in').id, "list")],
                             domain=[('id', 'in', lines.ids)]
                         ),
                         'action_text': action_text,
@@ -399,7 +398,7 @@ class AccountMove(models.Model):
     def action_l10n_in_print_self_invoice(self):
         self.ensure_one()
 
-        report = self.env.ref('account.account_invoices')
+        report = self.env['ir.actions.report'].ref('account.account_invoices')
         content, _ = report._render_qweb_pdf(report.id, res_ids=self.ids)
 
         self.message_post(
@@ -435,7 +434,7 @@ class AccountMove(models.Model):
                     "res_model": "res.company",
                     "type": "ir.actions.act_window",
                     "res_id" : move.company_id.id,
-                    "views": [[self.env.ref("base.view_company_form").id, "form"]],
+                    "views": [[self.env['ir.ui.view'].ref('base.view_company_form').id, "form"]],
                 }
                 raise RedirectWarning(msg, action, _('Go to Company configuration'))
             move.l10n_in_gstin = move.partner_id.vat
@@ -506,7 +505,7 @@ class AccountMove(models.Model):
             invl = base_line['record']
             tax = tax_data['tax']
             if self.l10n_in_gst_treatment in ('overseas', 'special_economic_zone') and all(
-                self.env.ref("l10n_in.tax_tag_igst") in rl.tag_ids
+                self.env['account.account.tag'].ref('l10n_in.tax_tag_igst') in rl.tag_ids
                 for rl in tax.invoice_repartition_line_ids if rl.repartition_type == 'tax'
             ):
                 tax_data['is_reverse_charge'] = False
@@ -514,12 +513,12 @@ class AccountMove(models.Model):
             line_code = "other"
             xmlid_to_res_id = self.env['ir.model.data']._xmlid_to_res_id
             if not invl.currency_id.is_zero(tax_data['tax_amount_currency']):
-                if xmlid_to_res_id("l10n_in.tax_tag_cess") in tag_ids:
+                if self.env['account.account.tag'].ref('l10n_in.tax_tag_cess').id in tag_ids:
                     if tax.amount_type != "percent":
                         line_code = "cess_non_advol"
                     else:
                         line_code = "cess"
-                elif xmlid_to_res_id("l10n_in.tax_tag_state_cess") in tag_ids:
+                elif self.env['account.account.tag'].ref('l10n_in.tax_tag_state_cess').id in tag_ids:
                     if tax.amount_type != "percent":
                         line_code = "state_cess_non_advol"
                     else:

@@ -16,7 +16,7 @@ class ResCompany(models.Model):
                     ('code', '=', 'worldline'),
                     ('company_id', 'in', updated_companies.ids),
                 ])
-                or self.env.ref('payment.payment_provider_worldline').sudo().filtered(
+                or self.env['payment.provider']._payment__payment_provider_worldline.sudo().filtered(
                     lambda provider: provider.company_id in updated_companies
                 )
             )

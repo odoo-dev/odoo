@@ -47,7 +47,7 @@ class L10n_It_Edi_DoiDeclaration_Of_Intent(models.Model):
     currency_id = fields.Many2one(
         comodel_name='res.currency',
         string='Currency',
-        default=lambda self: self.env.ref('base.EUR').id,
+        default=lambda self: self.env['res.currency'].ref('base.EUR').id,
         required=True,
         readonly=True,
     )
@@ -291,8 +291,8 @@ class L10n_It_Edi_DoiDeclaration_Of_Intent(models.Model):
             'type': 'ir.actions.act_window',
             'res_model': 'sale.order',
             'domain': [('id', 'in', self.sale_order_ids.ids)],
-            'views': [(self.env.ref('l10n_it_edi_doi.view_quotation_tree').id, 'list'), (False, 'form')],
-            'search_view_id': [self.env.ref('sale.sale_order_view_search_inherit_quotation').id],
+            'views': [(self.env['ir.ui.view'].ref('l10n_it_edi_doi.view_quotation_tree').id, 'list'), (False, 'form')],
+            'search_view_id': [self.env['ir.ui.view'].ref('sale.sale_order_view_search_inherit_quotation').id],
             'context': {
                 'search_default_sales': 1,
             },
@@ -305,8 +305,8 @@ class L10n_It_Edi_DoiDeclaration_Of_Intent(models.Model):
             'type': 'ir.actions.act_window',
             'res_model': 'account.move',
             'domain': [('id', 'in', self.invoice_ids.ids)],
-            'views': [(self.env.ref('l10n_it_edi_doi.view_move_tree').id, 'list'), (False, 'form')],
-            'search_view_id': [self.env.ref('account.view_account_invoice_filter').id],
+            'views': [(self.env['ir.ui.view'].ref('l10n_it_edi_doi.view_move_tree').id, 'list'), (False, 'form')],
+            'search_view_id': [self.env['ir.ui.view'].ref('account.view_account_invoice_filter').id],
             'context': {
                 'search_default_posted': 1,
             },

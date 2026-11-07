@@ -26,9 +26,9 @@ class AccountMove(models.Model):
 
             first_type = self.invoice_line_ids.product_id.type
             if first_type == "service":
-                document_type = self.env.ref("l10n_br.dt_SE")
+                document_type = self.env['l10n_latam.document.type'].ref('l10n_br.dt_SE')
             elif first_type:
-                document_type = self.env.ref("l10n_br.dt_55")
+                document_type = self.env['l10n_latam.document.type'].ref('l10n_br.dt_55')
 
             self.l10n_latam_document_type_id = document_type
 

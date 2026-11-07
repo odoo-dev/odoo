@@ -321,7 +321,7 @@ class HrLeave(models.Model):
             'name': self.env._('Time Off Calendar'),
             'type': 'ir.actions.act_window',
             'res_model': 'hr.leave',
-            'views': [[self.env.ref('hr_holidays.hr_leave_employee_view_dashboard').id, 'calendar']],
+            'views': [[self.env['ir.ui.view'].ref('hr_holidays.hr_leave_employee_view_dashboard').id, 'calendar']],
             'domain': [('employee_id', '=', self.employee_id.id)],
             'context': {
                 'default_employee_id': self.employee_id.id,
@@ -2649,8 +2649,8 @@ class HrLeave(models.Model):
         activity_vals = []
         today = fields.Date.context_today(self)
         model_id = self.env['ir.model']._get_id('hr.leave')
-        confirm_activity = self.env.ref('hr_holidays.mail_act_leave_approval')
-        approval_activity = self.env.ref('hr_holidays.mail_act_leave_second_approval')
+        confirm_activity = self.env['mail.activity.type'].ref('hr_holidays.mail_act_leave_approval')
+        approval_activity = self.env['mail.activity.type'].ref('hr_holidays.mail_act_leave_second_approval')
         for holiday in self:
             if holiday.state in ['confirm', 'validate1']:
                 if holiday.work_entry_type_id.leave_validation_type != 'no_validation':
@@ -2728,7 +2728,7 @@ class HrLeave(models.Model):
     def _track_log_get_default_subtype(self, track_init_values):
         if 'state' in track_init_values and self.state == 'validate':
             leave_notif_subtype = self.work_entry_type_id.leave_notif_subtype_id
-            return leave_notif_subtype or self.env.ref('hr_holidays.mt_leave')
+            return leave_notif_subtype or self.env['mail.message.subtype'].ref('hr_holidays.mt_leave')
         return super()._track_log_get_default_subtype(track_init_values)
 
     def message_subscribe(self, partner_ids=None, subtype_ids=None):
@@ -2744,7 +2744,7 @@ class HrLeave(models.Model):
             return False
 
         leave_model_description = self.env['ir.model']._get(self._name).display_name
-        subject = self.env.ref('hr_holidays.new_timeoff_request_template')._render_field('subject', self.ids, compute_lang=True)
+        subject = self.env['mail.template'].ref('hr_holidays.new_timeoff_request_template')._render_field('subject', self.ids, compute_lang=True)
         for holiday in self:
             if holiday.work_entry_type_id.leave_validation_type == 'no_validation':
                 continue
@@ -2753,7 +2753,7 @@ class HrLeave(models.Model):
 
             if not partner_ids:
                 continue
-            leave_msg = self.env.ref('hr_holidays.new_timeoff_request_template').with_context(
+            leave_msg = self.env['mail.template'].ref('hr_holidays.new_timeoff_request_template').with_context(
                 manager=', '.join(partner_ids.mapped('name'))
             )._render_field(
                 'body_html',

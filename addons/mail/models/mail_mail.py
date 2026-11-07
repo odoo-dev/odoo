@@ -716,7 +716,7 @@ class MailMail(models.Model):
 
                 mail.scheduled_date = server_limit_minute
 
-            self.env.ref('mail.ir_cron_mail_scheduler_action')._trigger(
+            self.env['ir.cron'].ref('mail.ir_cron_mail_scheduler_action')._trigger(
                 min(to_delay.mapped('scheduled_date')) + relativedelta(seconds=59))
 
         _logger.info(

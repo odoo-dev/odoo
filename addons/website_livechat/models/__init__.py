@@ -10,3 +10,4 @@ from . import res_config_settings
 from . import website
 from . import website_visitor
 from . import website_page
+from . import res_partner

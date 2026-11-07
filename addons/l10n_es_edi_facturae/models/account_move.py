@@ -187,7 +187,7 @@ class AccountMove(models.Model):
     def _l10n_es_edi_facturae_get_tax_period(self):
         self.ensure_one()
         if self.env['res.company'].fields_get(['account_return_periodicity']):
-            period_start, period_end = self.env.ref('l10n_es_reports.es_mod303_tax_return_type')._get_period_boundaries(self.company_id, self.date)
+            period_start, period_end = self.env.ref('l10n_es_reports.es_mod303_tax_return_type')._get_period_boundaries(self.company_id, self.date)  # pylint: disable=ref-literal-xmlid
         else:
             period_start = date_utils.start_of(self.date, 'month')
             period_end = date_utils.end_of(self.date, 'month')

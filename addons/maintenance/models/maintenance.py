@@ -119,7 +119,7 @@ class MaintenanceEquipment(models.Model):
     def _track_log_get_default_subtype(self, track_init_values):
         self.ensure_one()
         if 'owner_user_id' in track_init_values and self.owner_user_id:
-            return self.env.ref('maintenance.mt_mat_assign')
+            return self.env['mail.message.subtype'].ref('maintenance.mt_mat_assign')
         return super()._track_log_get_default_subtype(track_init_values)
 
     @api.depends('serial_no')
@@ -249,12 +249,12 @@ class MaintenanceRequest(models.Model):
         return self.env['maintenance.stage'].search([], limit=1)
 
     def _creation_subtype(self):
-        return self.env.ref('maintenance.mt_req_created')
+        return self.env['mail.message.subtype'].ref('maintenance.mt_req_created')
 
     def _track_log_get_default_subtype(self, track_init_values):
         self.ensure_one()
         if 'stage_id' in track_init_values:
-            return self.env.ref('maintenance.mt_req_status')
+            return self.env['mail.message.subtype'].ref('maintenance.mt_req_status')
         return super()._track_log_get_default_subtype(track_init_values)
 
     def _get_default_team_id(self):

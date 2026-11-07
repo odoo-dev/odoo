@@ -33,7 +33,7 @@ class GamificationBadgeUser(models.Model):
             'res_id': self.id,
             'target': 'new',
             'view_mode': 'form',
-            'view_id': self.env.ref("hr_gamification.view_current_badge_form").id,
+            'view_id': self.env['ir.ui.view'].ref('hr_gamification.view_current_badge_form').id,
             'context': {"dialog_size": "medium"},
         }
 

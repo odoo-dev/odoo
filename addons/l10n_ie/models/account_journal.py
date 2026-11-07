@@ -14,7 +14,7 @@ class AccountJournal(models.Model):
             # of the Irish BS and PL tags reports.
             account_vals.setdefault('tag_ids', [])
             account_vals['tag_ids'] += [
-                Command.link(self.env.ref('l10n_ie.l10n_ie_account_tag_cash_bank_hand').id),
+                Command.link(self.env['account.account.tag'].ref('l10n_ie.l10n_ie_account_tag_cash_bank_hand').id),
             ]
 
         return account_vals

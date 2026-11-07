@@ -25,7 +25,7 @@ class DigestDigest(models.Model):
 
     def _get_kpi_custom_settings(self, company, user):
         res = super()._get_kpi_custom_settings(company, user)
-        menu_id = self.env.ref('project.menu_main_pm').id
+        menu_id = self.env['ir.ui.menu'].ref('project.menu_main_pm').id
         res['kpi_action']['kpi_project_task_opened'] = f'project.open_view_project_all?menu_id={menu_id}'
         res['kpi_sequence']['kpi_project_task_opened'] = 7500
         return res

@@ -166,7 +166,7 @@ class ResConfigSettings(models.TransientModel):
             "type": "ir.actions.act_window",
             "res_model": self._name,
             "res_id": self.id,
-            "views": [(self.env.ref("mail.res_config_settings_view_form_sfu_client_source").id, "form")],
+            "views": [(self.env['ir.ui.view'].ref('mail.res_config_settings_view_form_sfu_client_source').id, "form")],
             "target": "new",
             "context": {"dialog_size": "extra-large"},
         }

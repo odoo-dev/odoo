@@ -4,6 +4,7 @@ from odoo import fields, models, Command
 class TalentPoolAddApplicants(models.TransientModel):
     _name = "talent.pool.add.applicants"
     _description = "Add applicants to talent pool"
+
     applicant_ids = fields.Many2many(
         "hr.applicant",
         string="Applicants",
@@ -63,7 +64,7 @@ class TalentPoolAddApplicants(models.TransientModel):
                 "view_mode": "form",
                 "views": [
                     (
-                        self.env.ref("hr_recruitment.hr_applicant_view_form").id,
+                        self.env['ir.ui.view'].ref('hr_recruitment.hr_applicant_view_form').id,
                         "form",
                     )
                 ],

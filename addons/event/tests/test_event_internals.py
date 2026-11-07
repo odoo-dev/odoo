@@ -502,7 +502,9 @@ class TestEventData(TestEventInternalsCommon):
         This is important to be able to show only relevant mail templates on the related
         field "template_ref".
         """
-        self.env['mail.template'].search([('model', '=', 'event.registration')]).unlink()
+        # remove all the templates, including the ones protected by a models.Ref
+        with mute_logger('odoo.models'):
+            self.env['mail.template'].search([('model', '=', 'event.registration')]).with_context(force_delete=True).unlink()
         self.env['mail.template'].create({'model_id': self.env['ir.model']._get('event.registration').id, 'name': 'test template'})
         self.env['mail.template'].create({'model_id': self.env['ir.model']._get('res.partner').id, 'name': 'test template'})
         templates = self.env['mail.template'].with_context(filter_template_on_event=True).name_search('test template')

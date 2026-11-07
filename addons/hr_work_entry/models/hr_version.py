@@ -128,7 +128,7 @@ class HrVersion(models.Model):
                 interval_start = interval[0].astimezone(UTC).replace(tzinfo=None)
                 interval_stop = interval[1].astimezone(UTC).replace(tzinfo=None)
                 return self._get_leave_work_entry_type_dates(leave[2], interval_start, interval_stop, self.employee_id)
-        return self.env.ref('hr_work_entry.generic_work_entry_type_leave')
+        return self.env['hr.work.entry.type']._hr_work_entry__generic_work_entry_type_leave
 
     def _get_sub_leave_domain(self):
         """Return the calendar part of the domain of :meth:`_get_leave_domain`.

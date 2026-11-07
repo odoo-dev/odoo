@@ -144,7 +144,7 @@ class ResPartner(models.Model):
         if (
             specific_scheme
             or drom_com_territories.is_france_territory(country_code)
-            or self.country_id in self.env.ref('base.europe').country_ids
+            or self.country_id in self.env['res.country.group'].ref('base.europe').country_ids
         ):
             return ('0223', partner_vat) if len(partner_vat) > 1 else (False, False)
         if country_code and self.name:

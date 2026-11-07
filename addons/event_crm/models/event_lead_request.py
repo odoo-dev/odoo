@@ -73,7 +73,7 @@ class EventLeadRequest(models.Model):
 
         if generate_requests - fulfilled_requests:
             # we still have unfinished requests: run the CRON again
-            self.env.ref('event_crm.ir_cron_generate_leads')._trigger()
+            self.env['ir.cron'].ref('event_crm.ir_cron_generate_leads')._trigger()
 
         if fulfilled_requests:
             fulfilled_requests.unlink()

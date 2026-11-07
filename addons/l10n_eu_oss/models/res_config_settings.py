@@ -11,6 +11,6 @@ class ResConfigSettings(models.TransientModel):
 
     @api.depends('company_id')
     def _compute_l10n_eu_oss_european_country(self):
-        european_countries = self.env.ref('base.europe').country_ids
+        european_countries = self.env['res.country.group'].ref('base.europe').country_ids
         for record in self:
             record.l10n_eu_oss_eu_country = record.company_id.account_fiscal_country_id in european_countries

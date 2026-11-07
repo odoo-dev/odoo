@@ -15,6 +15,6 @@ class IrModuleModule(models.Model):
             return False
 
         delivery_type = module_name.removeprefix("delivery_")  # dhl, fedex, etc.
-        action = self.env.ref("delivery.action_delivery_carrier_form").read()[0]
+        action = self.env['ir.actions.act_window'].ref('delivery.action_delivery_carrier_form').read()[0]
         action["context"] = {"search_default_delivery_type": delivery_type}
         return action

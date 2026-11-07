@@ -62,7 +62,7 @@ class BaseLanguageExport(models.TransientModel):
 
         self.write({'state': 'get', 'data': out, 'name': name})
         return {
-            'name': self.env.ref('base.action_wizard_lang_export').name,
+            'name': self.env['ir.actions.act_window'].ref('base.action_wizard_lang_export').name,
             'type': 'ir.actions.act_window',
             'res_model': 'base.language.export',
             'view_mode': 'form',

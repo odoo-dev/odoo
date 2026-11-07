@@ -843,7 +843,7 @@ class MrpWorkorder(models.Model):
         return {
             'name': self.env._('Manufacturing Orders'),
             'res_model': 'mrp.production',
-            'views': [(self.env.ref('mrp.mrp_production_to_plan').id, 'list')],
+            'views': [(self.env['ir.ui.view'].ref('mrp.mrp_production_to_plan').id, 'list')],
             'type': 'ir.actions.act_window',
             'context': {
                 'search_default_filter_confirmed': True,
@@ -1140,7 +1140,7 @@ class MrpWorkorder(models.Model):
             'name': _("Productions"),
             'domain': [('id', 'in', backorder_ids)],
             'view_mode': 'list,form',
-            'views': [(self.env.ref('mrp.mrp_production_workorder_tree_view_backorders').id, 'list'), (False, 'form')],
+            'views': [(self.env['ir.ui.view'].ref('mrp.mrp_production_workorder_tree_view_backorders').id, 'list'), (False, 'form')],
         }
 
     def _set_cost_mode(self):

@@ -1250,10 +1250,10 @@ class SurveySurvey(models.Model):
             'domain': "['&', ('survey_id', '=', %s), ('scoring_success', '=', True)]" % self.id,
             'computation_mode': 'count',
             'display_mode': 'boolean',
-            'model_id': self.env.ref('survey.model_survey_user_input').id,
+            'model_id': self.env['ir.model'].ref('survey.model_survey_user_input').id,
             'condition': 'higher',
             'batch_mode': True,
-            'batch_distinctive_field': self.env.ref('survey.field_survey_user_input__partner_id').id,
+            'batch_distinctive_field': self.env['ir.model.fields'].ref('survey.field_survey_user_input__partner_id').id,
             'batch_user_expression': 'user.partner_id.id'
         })
         challenge = self.env['gamification.challenge'].create({

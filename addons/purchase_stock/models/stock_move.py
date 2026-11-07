@@ -154,7 +154,7 @@ class StockMove(models.Model):
         self.ensure_one()
         return self.location_dest_id.usage == "supplier"\
             or self.origin_returned_move_id and (
-                self.location_dest_id == self.env['stock.location']._inter_company_location or
+                self.location_dest_id == self.env['stock.location']._stock__stock_location_inter_company or
                 self.origin_returned_move_id.location_usage == "supplier"
             )
 

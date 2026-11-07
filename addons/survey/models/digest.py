@@ -34,7 +34,7 @@ class Digest(models.Model):
 
     def _get_kpi_custom_settings(self, company, user):
         res = super()._get_kpi_custom_settings(company, user)
-        menu_root_id = self.env.ref('survey.menu_surveys').id
+        menu_root_id = self.env['ir.ui.menu'].ref('survey.menu_surveys').id
         res['kpi_action']['kpi_nbr_of_answers'] = f'survey.action_survey_user_input?menu_id={menu_root_id}'
         res['kpi_action']['kpi_nbr_of_certified_participants'] = (
             f'survey.survey_user_input_action_certified?menu_id={menu_root_id}')

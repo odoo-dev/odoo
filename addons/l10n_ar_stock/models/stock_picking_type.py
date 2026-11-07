@@ -58,8 +58,8 @@ class StockPickingType(models.Model):
     def _get_allowed_document_type_ids(self):
         """Limit document types to only those used for Remitos in Argentina"""
         return [
-            self.env.ref('l10n_ar.dc_r_r').id,
-            self.env.ref('l10n_ar.dc_remito_x').id
+            self.env['l10n_latam.document.type'].ref('l10n_ar.dc_r_r').id,
+            self.env['l10n_latam.document.type'].ref('l10n_ar.dc_remito_x').id
         ]
 
     # === CONSTRAINT METHODS === #

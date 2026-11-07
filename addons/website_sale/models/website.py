@@ -37,10 +37,7 @@ class Website(models.Model):
         return None
 
     def _default_recovery_mail_template(self):
-        try:
-            return self.env.ref("website_sale.mail_template_sale_cart_recovery").id
-        except ValueError:
-            return False
+        return self.env['mail.template'].ref('website_sale.mail_template_sale_cart_recovery').id
 
     def _default_confirmation_email_template(self):
         template_id = (

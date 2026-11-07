@@ -17,7 +17,7 @@ class HrRecruitmentSource(models.Model):
             source.url = urls.urljoin(source.job_id.get_base_url(), "%s?%s" % (
                 source.job_id.website_url,
                 url_encode({
-                    'utm_campaign': self.env.ref('hr_recruitment.utm_campaign_job').name,
+                    'utm_campaign': self.env['utm.campaign']._hr_recruitment__utm_campaign_job.name,
                     'utm_medium': source.medium_id.name or self.env['utm.mixin']._utm_ref('utm.utm_medium_website').name,
                     'utm_source': source.source_id.name or None
                 }),

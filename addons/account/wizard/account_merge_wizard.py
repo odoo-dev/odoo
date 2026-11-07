@@ -91,7 +91,7 @@ class AccountMergeWizard(models.TransientModel):
         return {
             'type': 'ir.actions.act_window',
             'name': _("Merge Accounts"),
-            'view_id': self.env.ref('account.account_merge_wizard_form').id,
+            'view_id': self.env['ir.ui.view'].ref('account.account_merge_wizard_form').id,
             'context': self.env.context,
             'res_model': 'account.merge.wizard',
             'res_id': self.id,

@@ -181,7 +181,7 @@ class StockPicking(models.Model):
             'type': 'ir.actions.act_window',
             'view_mode': 'form',
             'res_model': 'repair.order',
-            'view_id': self.env.ref('repair.view_repair_order_form').id,
+            'view_id': self.env['ir.ui.view'].ref('repair.view_repair_order_form').id,
             'context': ctx,
         }
 

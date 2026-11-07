@@ -574,9 +574,9 @@ class EventTrack(models.Model):
     def _track_log_get_default_subtype(self, track_init_values):
         self.ensure_one()
         if 'kanban_state' in track_init_values and self.kanban_state == 'blocked':
-            return self.env.ref('website_event_track.mt_track_blocked')
+            return self.env['mail.message.subtype'].ref('website_event_track.mt_track_blocked')
         elif 'kanban_state' in track_init_values and self.kanban_state == 'done':
-            return self.env.ref('website_event_track.mt_track_ready')
+            return self.env['mail.message.subtype'].ref('website_event_track.mt_track_ready')
         return super()._track_log_get_default_subtype(track_init_values)
 
     # ------------------------------------------------------------
@@ -594,7 +594,7 @@ class EventTrack(models.Model):
         }
 
     def get_backend_menu_id(self):
-        return self.env.ref('event.event_main_menu').id
+        return self.env['ir.ui.menu'].ref('event.event_main_menu').id
 
     # ------------------------------------------------------------
     # TOOLS

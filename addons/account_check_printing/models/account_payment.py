@@ -142,7 +142,7 @@ class AccountPayment(models.Model):
         return result
 
     def action_post(self):
-        payment_method_check = self.env.ref('account_check_printing.account_payment_method_check')
+        payment_method_check = self.env['account.payment.method'].ref('account_check_printing.account_payment_method_check')
         for payment in self.filtered(lambda p: p.payment_method_id == payment_method_check and p.check_manual_sequencing):
             sequence = payment.journal_id.check_sequence_id
             payment.check_number = sequence.next_by_id()
@@ -197,14 +197,13 @@ class AccountPayment(models.Model):
 
     def do_print_checks(self):
         check_layout = self.journal_id.bank_check_printing_layout or self.company_id.account_check_printing_layout
-        redirect_action = self.env.ref('account.action_account_config')
         if not check_layout or check_layout == 'disabled':
             msg = _("You have to choose a check layout. For this, go in Invoicing/Accounting Settings, search for 'Checks layout' and set one.")
-            raise RedirectWarning(msg, redirect_action.id, _('Go to the configuration panel'))
+            raise RedirectWarning(msg, self.env['ir.actions.act_window'].ref('account.action_account_config').id, _('Go to the configuration panel'))
         report_action = self.env.ref(check_layout, False)
         if not report_action:
             msg = _("Something went wrong with Check Layout, please select another layout in Invoicing/Accounting Settings and try again.")
-            raise RedirectWarning(msg, redirect_action.id, _('Go to the configuration panel'))
+            raise RedirectWarning(msg, self.env['ir.actions.act_window'].ref('account.action_account_config').id, _('Go to the configuration panel'))
         self.write({'is_sent': True})
         return report_action.report_action(self)
 

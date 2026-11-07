@@ -218,6 +218,6 @@ class SurveyUser_Input(models.Model):
         ''' Shows the lead associated, created from inputs '''
         self.ensure_one()
         action = self.env['ir.actions.act_window']._for_xml_id('crm.crm_lead_opportunities')
-        action['views'] = [((self.env.ref('crm.crm_lead_view_form').id), 'form')]
+        action['views'] = [((self.env['ir.ui.view'].ref('crm.crm_lead_view_form').id), 'form')]
         action['res_id'] = self.lead_id.id
         return action

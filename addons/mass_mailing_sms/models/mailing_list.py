@@ -29,7 +29,6 @@ class MailingList(models.Model):
         return action
 
     def action_send_mailing_sms(self):
-        view = self.env.ref('mass_mailing_sms.mailing_mailing_view_form_sms')
         action = self.env["ir.actions.actions"]._for_xml_id('mass_mailing_sms.mailing_mailing_action_sms')
         action.update({
             'context': {
@@ -39,7 +38,7 @@ class MailingList(models.Model):
             },
             'target': 'current',
             'view_type': 'form',
-            'views': [(view.id, 'form')],
+            'views': [(self.env['ir.ui.view'].ref('mass_mailing_sms.mailing_mailing_view_form_sms').id, 'form')],
         })
 
         return action

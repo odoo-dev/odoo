@@ -36,4 +36,4 @@ class PosDetailsWizard(models.TransientModel):
 
     def generate_report(self):
         data = {'date_start': self.start_date, 'date_stop': self.end_date, 'config_ids': self.pos_config_ids.ids}
-        return self.env.ref('point_of_sale.sale_details_report').report_action([], data=data)
+        return self.env['ir.actions.report'].ref('point_of_sale.sale_details_report').report_action([], data=data)

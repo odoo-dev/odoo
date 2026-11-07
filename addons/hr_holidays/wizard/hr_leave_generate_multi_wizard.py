@@ -126,7 +126,7 @@ class HrLeaveGenerateMultiWizard(models.TransientModel):
         return {
             'type': 'ir.actions.act_window',
             'name': self.env._('Generated Time Off'),
-            "views": [[self.env.ref('hr_holidays.hr_leave_view_tree').id, "list"], [self.env.ref('hr_holidays.hr_leave_view_form_manager').id, "form"]],
+            "views": [[self.env['ir.ui.view'].ref('hr_holidays.hr_leave_view_tree').id, "list"], [self.env['ir.ui.view'].ref('hr_holidays.hr_leave_view_form_manager').id, "form"]],
             'view_mode': 'list',
             'res_model': 'hr.leave',
             'domain': [('id', 'in', leaves.ids)],

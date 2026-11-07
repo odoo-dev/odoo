@@ -146,7 +146,7 @@ class AuthPasskeyKey(models.Model):
             'name': _('Rename Passkey'),
             'type': 'ir.actions.act_window',
             'res_model': 'auth.passkey.key',
-            'view_id': self.env.ref('auth_passkey.auth_passkey_key_rename').id,
+            'view_id': self.env['ir.ui.view'].ref('auth_passkey.auth_passkey_key_rename').id,
             'view_mode': 'form',
             'target': 'new',
             'res_id': self.id,

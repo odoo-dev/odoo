@@ -20,8 +20,8 @@ class ResPartner(models.Model):
             'type': 'ir.actions.act_window',
             'res_model': 'l10n_it_edi_doi.declaration_of_intent',
             'domain': [('partner_id', '=', self.commercial_partner_id.id)],
-            'views': [(self.env.ref('l10n_it_edi_doi.view_l10n_it_edi_doi_tree').id, 'list'),
-                      (self.env.ref('l10n_it_edi_doi.view_l10n_it_edi_doi_form').id, 'form')],
+            'views': [(self.env['ir.ui.view'].ref('l10n_it_edi_doi.view_l10n_it_edi_doi_tree').id, 'list'),
+                      (self.env['ir.ui.view'].ref('l10n_it_edi_doi.view_l10n_it_edi_doi_form').id, 'form')],
             'context': {
                 'default_partner_id': self.id,
             },

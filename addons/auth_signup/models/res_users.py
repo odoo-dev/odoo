@@ -222,7 +222,7 @@ class ResUsers(models.Model):
                 else:
                     user_lang = user.lang or self.env.lang or 'en_US'
                     body = self.env['mail.render.mixin'].with_context(lang=user_lang)._render_template(
-                        self.env.ref('auth_signup.reset_password_email'),
+                        self.env['ir.ui.view'].ref('auth_signup.reset_password_email'),
                         model='res.users', res_ids=user.ids,
                         engine='qweb_view', options={'post_process': True})[user.id]
                     body_html = self.env['mail.render.mixin'].with_context(lang=user_lang)._render_encapsulate(

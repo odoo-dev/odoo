@@ -99,7 +99,7 @@ class ProjectTaskType(models.Model):
             'name': _('Delete Stage'),
             'view_mode': 'form',
             'res_model': 'project.task.type.delete.wizard',
-            'views': [(self.env.ref('project.view_project_task_type_delete_wizard').id, 'form')],
+            'views': [(self.env['ir.ui.view'].ref('project.view_project_task_type_delete_wizard').id, 'form')],
             'type': 'ir.actions.act_window',
             'res_id': wizard.id,
             'target': 'new',
@@ -114,10 +114,9 @@ class ProjectTaskType(models.Model):
             rating_active = vals['rating_active']
             task_types = self.env['project.task.type'].search([('rating_active', '=', True)])
             if (not task_types and rating_active) or (task_types and task_types <= self and not rating_active):
-                mt_project_task_rating = self.env.ref('project.mt_project_task_rating')
-                mt_project_task_rating.hidden = not rating_active
-                mt_project_task_rating.default = rating_active
-                self.env.ref('project.mt_task_rating').hidden = not rating_active
+                self.env['mail.message.subtype'].ref('project.mt_project_task_rating').hidden = not rating_active
+                self.env['mail.message.subtype'].ref('project.mt_project_task_rating').default = rating_active
+                self.env['mail.message.subtype'].ref('project.mt_task_rating').hidden = not rating_active
         return super().write(vals)
 
     @api.ondelete(at_uninstall=False)
@@ -201,7 +200,7 @@ class ProjectTaskType(models.Model):
                 'name': _('Unarchive Tasks'),
                 'view_mode': 'form',
                 'res_model': 'project.task.type.delete.wizard',
-                'views': [(self.env.ref('project.view_project_task_type_unarchive_wizard').id, 'form')],
+                'views': [(self.env['ir.ui.view'].ref('project.view_project_task_type_unarchive_wizard').id, 'form')],
                 'type': 'ir.actions.act_window',
                 'res_id': wizard.id,
                 'target': 'new',

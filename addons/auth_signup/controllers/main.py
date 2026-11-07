@@ -51,8 +51,7 @@ class AuthSignupHome(Home):
                 # Set user to public if they were not signed in by do_signup
                 # (mfa enabled)
                 if request.session.uid is None:
-                    public_user = request.env.ref('base.public_user')
-                    request.update_env(user=public_user)
+                    request.update_env(user=request.env['res.users']._base__public_user)
 
                 # Send an account creation confirmation email
                 User = request.env['res.users']

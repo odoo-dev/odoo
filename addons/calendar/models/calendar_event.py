@@ -1598,7 +1598,7 @@ class CalendarEvent(models.Model):
 
     def _track_log_get_default_subtype(self, track_init_values):
         if {'start', 'stop', 'location'} & track_init_values.keys():
-            return self.env.ref('calendar.mt_calendar_event_updated')
+            return self.env['mail.message.subtype'].ref('calendar.mt_calendar_event_updated')
         return super()._track_log_get_default_subtype(track_init_values)
 
     def _get_mail_tz(self):
@@ -1657,7 +1657,7 @@ class CalendarEvent(models.Model):
 
     def _setup_alarms(self):
         """ Schedule cron triggers for future events """
-        cron = self.env.ref('calendar.ir_cron_scheduler_alarm').sudo()
+        cron = self.env['ir.cron'].ref('calendar.ir_cron_scheduler_alarm').sudo()
         alarm_types = self._get_trigger_alarm_types()
         events_to_notify = self.env['calendar.event']
         for event in self:
@@ -2048,7 +2048,7 @@ class CalendarEvent(models.Model):
         """Build sanitized HTML with the organizer details and the details
         of the contact partner (only when there is a single non-organizer attendee).
         """
-        odoobot = self.env.ref('base.user_root')
+        odoobot = self.env['res.users']._base__user_root
         contact_description = []
         # Organizer
         if organizer and organizer != odoobot:

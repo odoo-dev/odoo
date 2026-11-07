@@ -14,6 +14,7 @@ class HrWorkEntryType(models.Model):
     _rec_names_search = ('name', 'code', 'display_code')
 
     _hr_work_entry__generic_work_entry_type_attendance = models.Ref('hr_work_entry.generic_work_entry_type_attendance', required=False)
+    _hr_work_entry__generic_work_entry_type_leave = models.Ref('hr_work_entry.generic_work_entry_type_leave')
     _hr_work_entry__generic_work_entry_type_public_holiday = models.Ref('hr_work_entry.generic_work_entry_type_public_holiday', required=False)
 
     name = fields.Char(required=True, translate=True, tracking=True)

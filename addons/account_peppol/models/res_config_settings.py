@@ -169,7 +169,7 @@ class ResConfigSettings(models.TransientModel):
             action_name = self.env._("Go to module")
             warning = self.env._("To use the Approved Platform for French E-Invoicing install the module '%s'.", module_name)
         else:
-            action = self.env.ref('base.action_view_base_module_update').id
+            action = self.env['ir.actions.act_window'].ref('base.action_view_base_module_update').id
             action_name = self.env._("Update App List")
             warning = self.env._("To use the Approved Platform for French E-Invoicing install the module '%s'.\n"
                                  "The module was not found. Please update the app list first.",

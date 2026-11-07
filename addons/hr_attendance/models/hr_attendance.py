@@ -369,9 +369,9 @@ class HrAttendance(models.Model):
         # Load employees, schedules, departments and partners
         convert.convert_file(env_sudo, 'hr_attendance', 'data/scenarios/hr_attendance_scenario.xml', None, mode='init')
 
-        employee_sj = self.env.ref('hr.employee_sj')
-        employee_mw = self.env.ref('hr.employee_mw')
-        employee_eg = self.env.ref('hr.employee_eg')
+        employee_sj = self.env['hr.employee']._hr__employee_sj
+        employee_mw = self.env['hr.employee']._hr__employee_mw
+        employee_eg = self.env['hr.employee']._hr__employee_eg
 
         # Retrieve employee from xml file
         # Calculate attendances records for the previous month and the current until today

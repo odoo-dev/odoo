@@ -6,6 +6,7 @@ from odoo import api, models
 class IrAttachment(models.Model):
     _inherit = 'ir.attachment'
 
+    _web__image_placeholder = models.Ref('web.image_placeholder')
     _web__asset_styles_company_report = models.Ref('web.asset_styles_company_report', required=False)
 
     @api.model

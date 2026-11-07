@@ -110,12 +110,8 @@ class IrActionsActions(models.Model):
 
     @api.ondelete(at_uninstall=True)
     def _unlink_reset_todo_open_menu(self):
-        try:
-            todo_open_menu = self.env.ref('base.open_menu')
-            todo_default_action = self.env.ref('base.action_client_base_menu')
-            todo_default_action_id = todo_default_action.id  # different model, same id
-        except ValueError:
-            return
+        todo_open_menu = self.env['ir.actions.todo'].ref('base.open_menu')
+        todo_default_action_id = self.env['ir.actions.client'].ref('base.action_client_base_menu').id  # different model, same id
         if todo_open_menu.action_id.id in self.ids:
             todo_open_menu.action_id = todo_default_action_id
 
@@ -1429,14 +1425,12 @@ class IrActionsTodo(models.Model):
 
     def unlink(self):
         if self:
-            try:
-                todo_open_menu = self.env.ref('base.open_menu')
-                # don't remove base.open_menu todo but set its original action
-                if todo_open_menu in self:
-                    todo_open_menu.action_id = self.env.ref('base.action_client_base_menu').id
-                    self -= todo_open_menu
-            except ValueError:
-                pass
+            todo_open_menu = self.ref('base.open_menu')
+            todo_default_action = self.env['ir.actions.client'].ref('base.action_client_base_menu')
+            # don't remove base.open_menu todo but set its original action
+            if todo_open_menu in self:
+                todo_open_menu.action_id = todo_default_action.id
+                self -= todo_open_menu
         return super().unlink()
 
     def action_launch(self):

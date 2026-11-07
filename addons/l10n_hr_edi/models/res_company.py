@@ -301,7 +301,7 @@ class ResCompany(models.Model):
 
             imported_documents.update({company.id: proxy_acks})
         if need_retrigger:
-            self.env.ref('l10n_hr_edi.ir_cron_mer_get_new_documents')._trigger()
+            self.env['ir.cron'].ref('l10n_hr_edi.ir_cron_mer_get_new_documents')._trigger()
         # Return the documents that were successfully imported
         return imported_documents
 

@@ -13,10 +13,14 @@ from odoo.tools.date_utils import sum_intervals
 class HrEmployee(models.Model):
     _inherit = "hr.employee"
 
+    _hr__employee_eg = models.Ref('hr.employee_eg', required=False)
+    _hr__employee_mw = models.Ref('hr.employee_mw', required=False)
+    _hr__employee_sj = models.Ref('hr.employee_sj', required=False)
+
     attendance_based = fields.Boolean(readonly=False, related="version_id.attendance_based", inherited=True, groups="hr.group_hr_user")
 
     def _get_attendance_manager_domain(self):
-        return "[('share', '=', False), ('company_ids', 'in', company_id), ('role', 'in', ['regular_user', 'group_system']), ('all_group_ids', 'in', %s)]" % self.env.ref('hr_attendance.group_hr_attendance_own').id
+        return "[('share', '=', False), ('company_ids', 'in', company_id), ('role', 'in', ['regular_user', 'group_system']), ('all_group_ids', 'in', %s)]" % self.env['res.groups'].ref('hr_attendance.group_hr_attendance_own').id
 
     attendance_manager_id = fields.Many2one(
         'res.users', store=True, readonly=False,

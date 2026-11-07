@@ -516,7 +516,7 @@ class Picking(models.Model):
             return errors  # return prematurely because all the end location fields depend on this field
 
         # Location fields
-        country_ro = self.env.ref('base.ro')
+        country_ro = self.env['res.country'].ref('base.ro')
         for location in ('start', 'end'):
             loc_value = data[f'l10n_ro_edi_stock_{location}_loc_type']
             loc_group = _("'Start Location'") if location == 'start' else _("'End Location'")

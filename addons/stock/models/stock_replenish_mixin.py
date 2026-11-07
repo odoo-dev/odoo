@@ -24,7 +24,7 @@ class StockReplenishMixin(models.AbstractModel):
     # TODO: remove dynamic domain
     # OVERWRITE in 'Drop Shipping', 'Dropship and Subcontracting Management' and 'Dropship and Subcontracting Management' to hide it
     def _get_allowed_route_domain(self):
-        stock_location_inter_company_id = self.env.ref('stock.stock_location_inter_company').id
+        stock_location_inter_company_id = self.env['stock.location']._stock__stock_location_inter_company.id
 
         base_domain = Domain('product_selectable', '=', True)
         if self.warehouse_id:

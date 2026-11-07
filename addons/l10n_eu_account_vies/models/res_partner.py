@@ -92,7 +92,7 @@ class ResPartner(models.Model):
     @api.model
     def _get_iap_vies_endpoint(self):
         prod, test = 'https://vies.api.odoo.com', 'https://vies.test.odoo.com'
-        default_endpoint = test if self.env.ref('base.module_l10n_eu_account_vies').demo else prod
+        default_endpoint = test if self.env['ir.module.module'].ref('base.module_l10n_eu_account_vies').demo else prod
         endpoint = self.env['ir.config_parameter'].sudo().get_str('iap_vies.endpoint', default_endpoint)
         if endpoint not in (prod, test):
             raise UserError(self.env._('Invalid IAP VIES endpoint'))

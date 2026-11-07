@@ -12,5 +12,5 @@ class IrUiMenu(models.Model):
             self.env.user.has_group('hr_attendance.group_hr_attendance_manager') and
             self.env.user.has_group('hr_holidays.group_hr_holidays_user')
         ):
-            res.append(self.env.ref('hr_holidays_attendance.hr_leave_attendance_report').id)
+            res.append(self.ref('hr_holidays_attendance.hr_leave_attendance_report').id)
         return res

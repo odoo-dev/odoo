@@ -27,7 +27,7 @@ class HrRecruitmentSource(models.Model):
                                          or self.env.company.alias_domain_id)
 
     def create_alias(self):
-        campaign = self.env.ref('hr_recruitment.utm_campaign_job')
+        campaign = self.env['utm.campaign']._hr_recruitment__utm_campaign_job
         medium = self.env['utm.mixin']._utm_ref('utm.utm_medium_email')
         for source in self.filtered(lambda s: not s.alias_id):
             vals = {

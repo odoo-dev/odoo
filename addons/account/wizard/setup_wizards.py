@@ -92,7 +92,7 @@ class AccountFinancialYearOp(models.TransientModel):
         step_state = self.env['onboarding.onboarding.step'].sudo().with_company(self.company_id).action_validate_step('account.onboarding_onboarding_step_fiscal_year')
         # move the state to DONE to avoid an update in the web_read
         if step_state == 'JUST_DONE':
-            self.env.ref('account.onboarding_onboarding_account_dashboard').sudo()._prepare_rendering_values()
+            self.env['onboarding.onboarding'].ref('account.onboarding_onboarding_account_dashboard').sudo()._prepare_rendering_values()
         return {'type': 'ir.actions.client', 'tag': 'soft_reload'}
 
 

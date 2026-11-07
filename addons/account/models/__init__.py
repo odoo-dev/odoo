@@ -55,3 +55,4 @@ from . import uom_uom
 
 from . import res_groups
 from . import ir_actions_client
+from . import onboarding_onboarding

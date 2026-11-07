@@ -1392,7 +1392,7 @@ class ProductTemplate(models.Model):
 
     @api.model
     def _get_alternative_product_filter(self):
-        return self.env.ref("website_sale.dynamic_filter_cross_selling_alternative_products").id
+        return self.env['website.snippet.filter']._website_sale__dynamic_filter_cross_selling_alternative_products.id
 
     @api.model
     def _get_product_types_allow_zero_price(self):  # noqa: PLR6301

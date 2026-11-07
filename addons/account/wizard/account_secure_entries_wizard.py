@@ -200,7 +200,7 @@ class AccountSecureEntriesWizard(models.TransientModel):
                     'action_text': _("Review Entries"),
                     'action': {
                         **self.env['account.journal']._show_sequence_holes(list(domain)),
-                        'views': [[self.env.ref('account.view_move_tree_multi_edit').id, 'list'], [self.env.ref('account.view_move_form').id, 'form']],
+                        'views': [[self.env['ir.ui.view'].ref('account.view_move_tree_multi_edit').id, 'list'], [self.env['ir.ui.view'].ref('account.view_move_form').id, 'form']],
                     }
                 }
 
@@ -244,8 +244,8 @@ class AccountSecureEntriesWizard(models.TransientModel):
             'res_model': 'account.move',
             'type': 'ir.actions.act_window',
             'domain': [('id', 'in', moves.ids)],
-            'search_view_id': [self.env.ref('account.view_account_move_filter').id, 'search'],
-            'views': [[self.env.ref('account.view_move_tree_multi_edit').id, 'list'], [self.env.ref('account.view_move_form').id, 'form']],
+            'search_view_id': [self.env['ir.ui.view'].ref('account.view_account_move_filter').id, 'search'],
+            'views': [[self.env['ir.ui.view'].ref('account.view_move_tree_multi_edit').id, 'list'], [self.env['ir.ui.view'].ref('account.view_move_form').id, 'form']],
         }
 
     def action_show_draft_moves_in_hashed_period(self):
@@ -256,8 +256,8 @@ class AccountSecureEntriesWizard(models.TransientModel):
             'res_model': 'account.move',
             'type': 'ir.actions.act_window',
             'domain': list(self._get_draft_moves_in_hashed_period_domain()),
-            'search_view_id': [self.env.ref('account.view_account_move_filter').id, 'search'],
-            'views': [[self.env.ref('account.view_move_tree_multi_edit').id, 'list'], [self.env.ref('account.view_move_form').id, 'form']],
+            'search_view_id': [self.env['ir.ui.view'].ref('account.view_account_move_filter').id, 'search'],
+            'views': [[self.env['ir.ui.view'].ref('account.view_move_tree_multi_edit').id, 'list'], [self.env['ir.ui.view'].ref('account.view_move_form').id, 'form']],
         }
 
     def action_secure_entries(self):

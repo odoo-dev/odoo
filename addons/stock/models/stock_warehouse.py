@@ -100,12 +100,9 @@ class StockWarehouse(models.Model):
 
     @api.onchange('company_id')
     def _onchange_company_id(self):
-        group_user = self.env.ref('base.group_user')
-        group_stock_multi_warehouses = self.env.ref('stock.group_stock_multi_warehouses')
-        group_stock_multi_location = self.env.ref('stock.group_stock_multi_locations')
         if (
-            group_stock_multi_warehouses not in group_user.implied_ids
-            and group_stock_multi_location not in group_user.implied_ids
+            self.env['res.groups'].ref('stock.group_stock_multi_warehouses') not in self.env['res.groups'].ref('base.group_user').implied_ids
+            and self.env['res.groups'].ref('stock.group_stock_multi_locations') not in self.env['res.groups'].ref('base.group_user').implied_ids
             and self.with_company(self.company_id).search_count([('company_id', '=', self.company_id.id)], limit=1)
         ):
             return {
@@ -171,11 +168,10 @@ class StockWarehouse(models.Model):
     def _warehouse_redirect_warning(self):
         if not self.env.registry.ready:  # don't raise warning during module installation
             return
-        warehouse_action = self.env.ref('stock.action_warehouse_form')
         msg = _('Please create a warehouse for company %s.', self.env.company.display_name)
         if not self.env.user.has_group('stock.group_stock_manager'):
             raise UserError(self.env._('Please contact your administrator to configure your warehouse.'))
-        raise RedirectWarning(msg, warehouse_action.id, _('Go to Warehouses'))
+        raise RedirectWarning(msg, self.env['ir.actions.act_window'].ref('stock.action_warehouse_form').id, _('Go to Warehouses'))
 
     def write(self, vals):
         if 'company_id' in vals:
@@ -314,19 +310,18 @@ class StockWarehouse(models.Model):
         cnt_by_company = self.env['stock.warehouse'].sudo()._read_group([('active', '=', True)], ['company_id'], aggregates=['__count'])
         if cnt_by_company:
             max_count = max(count for company, count in cnt_by_company)
-            group_user = self.env.ref('base.group_user')
-            group_stock_multi_warehouses = self.env.ref('stock.group_stock_multi_warehouses')
-            group_stock_multi_locations = self.env.ref('stock.group_stock_multi_locations')
+            group_user = self.env['res.groups'].ref('base.group_user')
+            group_stock_multi_warehouses = self.env['res.groups'].ref('stock.group_stock_multi_warehouses')
             if max_count <= 1 and group_stock_multi_warehouses in group_user.implied_ids:
                 group_user.write({'implied_ids': [(3, group_stock_multi_warehouses.id)]})
                 group_stock_multi_warehouses.write({'user_ids': [(3, user.id) for user in group_user.all_user_ids]})
                 self.env.user._bus_send("stock_group_sync", {})
             if max_count > 1 and group_stock_multi_warehouses not in group_user.implied_ids:
-                if group_stock_multi_locations not in group_user.implied_ids:
+                if self.env['res.groups'].ref('stock.group_stock_multi_locations') not in group_user.implied_ids:
                     self.env['res.config.settings'].create({
                         'group_stock_multi_locations': True,
                     }).execute()
-                group_user.write({'implied_ids': [(4, group_stock_multi_warehouses.id), (4, group_stock_multi_locations.id)]})
+                group_user.write({'implied_ids': [(4, group_stock_multi_warehouses.id), (4, self.env['res.groups'].ref('stock.group_stock_multi_locations').id)]})
                 self.env.user._bus_send("stock_group_sync", {})
 
     def _create_or_update_sequences_and_picking_types(self):

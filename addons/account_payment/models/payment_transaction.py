@@ -57,7 +57,7 @@ class PaymentTransaction(models.Model):
             invoice = invoice_ids[0]
             action['res_id'] = invoice
             action['view_mode'] = 'form'
-            action['views'] = [(self.env.ref('account.view_move_form').id, 'form')]
+            action['views'] = [(self.env['ir.ui.view'].ref('account.view_move_form').id, 'form')]
         else:
             action['view_mode'] = 'list,form'
             action['domain'] = [('id', 'in', invoice_ids)]

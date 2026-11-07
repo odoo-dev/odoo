@@ -11,6 +11,8 @@ from odoo.tools import BinaryBytes
 class WebsiteSnippetFilter(models.Model):
     _inherit = "website.snippet.filter"
 
+    _website_sale__dynamic_filter_cross_selling_alternative_products = models.Ref('website_sale.dynamic_filter_cross_selling_alternative_products')
+
     product_cross_selling = fields.Boolean(
         string="About cross selling products",
         help="True only for product filters that require a product_id because they relate to"

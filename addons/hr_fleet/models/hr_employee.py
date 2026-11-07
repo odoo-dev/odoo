@@ -22,7 +22,7 @@ class HrEmployee(models.Model):
             "type": "ir.actions.act_window",
             "res_model": "fleet.vehicle.assignation.log",
             "views": [
-                [self.env.ref("hr_fleet.fleet_vehicle_assignation_log_employee_view_list").id, "list"],
+                [self.env['ir.ui.view'].ref('hr_fleet.fleet_vehicle_assignation_log_employee_view_list').id, "list"],
                 [False, "form"],
             ],
             "domain": [("driver_employee_id", "in", self.ids), ("driver_id", "in", self.work_contact_id.ids)],

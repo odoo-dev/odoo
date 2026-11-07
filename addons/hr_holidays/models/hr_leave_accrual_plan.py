@@ -137,7 +137,7 @@ class HrLeaveAccrualPlan(models.Model):
             'res_model': 'hr.leave.accrual.level',
             'view_mode': 'form',
             'views': [[False, 'form']],
-            'view_id': self.env.ref('hr_holidays.hr_accrual_level_view_form').id,
+            'view_id': self.env['ir.ui.view'].ref('hr_holidays.hr_accrual_level_view_form').id,
             'target': 'new',
             'context': dict(
                 self.env.context,

@@ -19,8 +19,8 @@ class AccountJournal(models.Model):
             'res_model': 'account.move',
             'view_mode': 'list,form',
             'views': [
-                (self.env.ref('account.view_out_invoice_tree').id, 'list'),
-                (self.env.ref('account.view_move_form').id, 'form')
+                (self.env['ir.ui.view'].ref('account.view_out_invoice_tree').id, 'list'),
+                (self.env['ir.ui.view'].ref('account.view_move_form').id, 'form')
             ],
             'domain': [
                 ('journal_id', '=', self.id),

@@ -112,7 +112,7 @@ class ProjectShareWizard(models.TransientModel):
             'name': _('Confirmation'),
             'type': 'ir.actions.act_window',
             'view_mode': 'form',
-            'views': [(self.env.ref('project.project_share_wizard_confirm_form').id, 'form')],
+            'views': [(self.env['ir.ui.view'].ref('project.project_share_wizard_confirm_form').id, 'form')],
             'res_model': 'project.share.wizard',
             'res_id': self.id,
             'target': 'new',

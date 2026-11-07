@@ -31,7 +31,7 @@ class ProjectTaskTypeDeleteWizard(models.TransientModel):
             'name': _('Confirmation'),
             'view_mode': 'form',
             'res_model': 'project.task.type.delete.wizard',
-            'views': [(self.env.ref('project.view_project_task_type_delete_confirmation_wizard').id, 'form')],
+            'views': [(self.env['ir.ui.view'].ref('project.view_project_task_type_delete_confirmation_wizard').id, 'form')],
             'type': 'ir.actions.act_window',
             'res_id': self.id,
             'target': 'new',

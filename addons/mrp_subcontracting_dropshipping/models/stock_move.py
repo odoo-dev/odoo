@@ -56,7 +56,7 @@ class StockMove(models.Model):
 
     def _get_partner_id(self):
         if self.raw_material_production_id.subcontractor_id:
-            route_drop_shipping = self.env['stock.route']._stock_dropshipping__route_drop_shipping_optional
+            route_drop_shipping = self.env['stock.route']._stock_dropshipping__route_drop_shipping
             if route_drop_shipping and self.rule_id.route_id == route_drop_shipping:
                 return self.raw_material_production_id.subcontractor_id.id
         return super()._get_partner_id()

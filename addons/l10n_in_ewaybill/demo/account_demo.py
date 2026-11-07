@@ -31,7 +31,7 @@ class AccountChartTemplate(models.AbstractModel):
         ]
         default_ewaybill_vals = {
             'distance': 20,
-            'type_id': self.env.ref("l10n_in_ewaybill.type_tax_invoice_sub_type_supply").id,
+            'type_id': self.env['l10n.in.ewaybill.type']._l10n_in_ewaybill__type_tax_invoice_sub_type_supply.id,
             'mode': "1",
             'vehicle_no': "GJ11AA1234",
             'vehicle_type': "R",

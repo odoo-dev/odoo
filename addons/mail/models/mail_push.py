@@ -68,4 +68,4 @@ class MailPush(models.Model):
 
         # restart the cron if needed
         if self.search_count([]) > 0:
-            self.env.ref('mail.ir_cron_web_push_notification')._trigger()
+            self.env['ir.cron'].ref('mail.ir_cron_web_push_notification')._trigger()

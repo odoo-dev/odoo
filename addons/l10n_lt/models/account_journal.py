@@ -13,7 +13,7 @@ class AccountJournal(models.Model):
         if company.account_fiscal_country_id.code == 'LT':
             account_vals.setdefault('tag_ids', [])
             account_vals['tag_ids'] += [
-                Command.link(self.env.ref('l10n_lt.account_account_tag_b_4').id),
+                Command.link(self.env['account.account.tag'].ref('l10n_lt.account_account_tag_b_4').id),
             ]
 
         return account_vals

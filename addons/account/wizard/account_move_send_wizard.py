@@ -285,7 +285,7 @@ class AccountMoveSendWizard(models.TransientModel):
         return {
             'type': 'ir.actions.act_window',
             'view_mode': 'form',
-            'view_id': self.env.ref('mail.mail_compose_message_view_form_template_save').id,
+            'view_id': self.env['ir.ui.view'].ref('mail.mail_compose_message_view_form_template_save').id,
             'name': _('Create a Mail Template'),
             'res_model': 'account.move.send.wizard',
             'context': {'dialog_size': 'medium'},

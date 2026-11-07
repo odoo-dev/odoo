@@ -140,7 +140,7 @@ class AccountEdiUBLCenEn16931(models.AbstractModel):
         nsmap = document_node['_nsmap']
         invoice = vals['invoice']
 
-        eu_countries = self.env.ref('base.europe').country_ids
+        eu_countries = self.env['res.country.group'].ref('base.europe').country_ids
         intracom_delivery = (
             vals['customer'].country_id in eu_countries
             and vals['supplier'].country_id in eu_countries

@@ -134,4 +134,4 @@ class AccountMoveSend(models.AbstractModel):
                     )],
                 }
 
-            self.env.ref('l10n_pl_edi.cron_auto_checks_the_polish_invoice_status')._trigger()
+            self.env['ir.cron'].ref('l10n_pl_edi.cron_auto_checks_the_polish_invoice_status')._trigger()

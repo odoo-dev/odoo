@@ -65,7 +65,7 @@ class AccountMove(models.Model):
                  'invoice_line_ids.tax_ids.l10n_es_type', 'amount_total_signed')
     def _compute_l10n_es_invoice_type(self):
         simplified_partner = self.env['res.partner']._l10n_es__partner_simplified_optional
-        europe = self.env.ref('base.europe')
+        europe = self.env['res.country.group'].ref('base.europe')
         for move in self:
             if move.state == 'posted' and move.l10n_es_invoice_type:
                 continue

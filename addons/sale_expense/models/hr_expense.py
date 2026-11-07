@@ -88,7 +88,7 @@ class HrExpense(models.Model):
         return {
             'type': 'ir.actions.act_window',
             'res_model': 'sale.order',
-            'views': [(self.env.ref("sale.view_order_form").id, 'form')],
+            'views': [(self.env['ir.ui.view'].ref('sale.view_order_form').id, 'form')],
             'view_mode': 'form',
             'target': 'current',
             'name': self.sale_order_id.display_name,

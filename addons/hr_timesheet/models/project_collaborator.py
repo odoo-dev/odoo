@@ -11,6 +11,6 @@ class ProjectCollaborator(models.Model):
     def _toggle_project_sharing_portal_rules(self, active):
         super()._toggle_project_sharing_portal_rules(active)
         # ir.access
-        timesheet_portal_ir_rule = self.env.ref('hr_timesheet.timesheet_line_rule_portal_user').sudo()
+        timesheet_portal_ir_rule = self.env['ir.access'].ref('hr_timesheet.timesheet_line_rule_portal_user').sudo()
         if timesheet_portal_ir_rule.active != active:
             timesheet_portal_ir_rule.write({'active': active})

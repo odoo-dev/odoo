@@ -16,8 +16,8 @@ class ProductCatalogMixin(models.AbstractModel):
     @api.readonly
     def action_add_from_catalog(self) -> dict:
         self.ensure_one()
-        kanban_view_id = self.env.ref("product.product_view_kanban_catalog").id
-        search_view_id = self.env.ref("product.product_view_search_catalog").id
+        kanban_view_id = self.env['ir.ui.view'].ref('product.product_view_kanban_catalog').id
+        search_view_id = self.env['ir.ui.view'].ref('product.product_view_search_catalog').id
         additional_context = self._get_action_add_from_catalog_extra_context()
         context = {**self.env.context, **additional_context}
         context.pop('form_view_ref', None)

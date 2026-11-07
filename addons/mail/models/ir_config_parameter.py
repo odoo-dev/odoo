@@ -87,8 +87,8 @@ class IrConfig_Parameter(models.Model):
     @api.model
     def set_bool(self, key, value):
         if key == 'mail.restrict.template.rendering':
-            group_user = self.env.ref('base.group_user')
-            group_mail_template_editor = self.env.ref('mail.group_mail_template_editor')
+            group_user = self.env['res.groups'].ref('base.group_user')
+            group_mail_template_editor = self.env['res.groups'].ref('mail.group_mail_template_editor')
 
             if not value and group_mail_template_editor not in group_user.implied_ids:
                 group_user._apply_group(group_mail_template_editor)

@@ -788,7 +788,7 @@ class MailActivity(models.Model):
          access to the related record."""
         self.ensure_one()
         if not self.res_model:
-            view_id = self.env.ref('mail.mail_activity_view_form_popup').id
+            view_id = self.env['ir.ui.view'].ref('mail.mail_activity_view_form_popup').id
             return {
                 'res_id': self.id,
                 'type': 'ir.actions.act_window',
@@ -805,7 +805,7 @@ class MailActivity(models.Model):
                 'target': 'current',
                 'type': 'ir.actions.act_window',
                 'view_mode': 'form',
-                'views': [(self.env.ref('mail.mail_activity_view_form_without_record_access').id, 'form')],
+                'views': [(self.env['ir.ui.view'].ref('mail.mail_activity_view_form_without_record_access').id, 'form')],
             }
         return {
             'res_id': self.res_id,

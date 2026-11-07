@@ -57,7 +57,7 @@ class L10n_ChQr_InvoiceWizard(models.TransientModel):
         Triggered by the Print All button
         '''
         all_invoices_ids = self.env.context.get('inv_ids')
-        return self.env.ref('account.account_invoices').report_action(all_invoices_ids)
+        return self.env['ir.actions.report'].ref('account.account_invoices').report_action(all_invoices_ids)
 
     def action_view_faulty_invoices(self):
         '''

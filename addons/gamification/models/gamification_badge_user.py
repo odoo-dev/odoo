@@ -33,7 +33,7 @@ class GamificationBadgeUser(models.Model):
         The stats counters are incremented
         :param ids: list(int) of badge users that will receive the badge
         """
-        body_html = self.env.ref('gamification.email_template_badge_received')._render_field('body_html', self.ids)[self.id]
+        body_html = self.env['mail.template'].ref('gamification.email_template_badge_received')._render_field('body_html', self.ids)[self.id]
         for badge_user in self:
             badge_user.with_context(
                 email_notification_force_header=True,

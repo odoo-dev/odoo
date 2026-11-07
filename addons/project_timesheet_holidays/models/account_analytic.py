@@ -19,12 +19,12 @@ class AccountAnalyticLine(models.Model):
         return super()._is_readonly() or self.holiday_id or self.global_leave_id
 
     def _get_redirect_action(self):
-        leave_form_view_id = self.env.ref('hr_holidays.hr_leave_view_form').id
+        leave_form_view_id = self.env['ir.ui.view'].ref('hr_holidays.hr_leave_view_form').id
         action_data = {
            'name': _('Time Off'),
            'type': 'ir.actions.act_window',
            'res_model': 'hr.leave',
-           'views': [(self.env.ref('hr_holidays.hr_leave_view_tree_my').id, 'list'), (leave_form_view_id, 'form')],
+           'views': [(self.env['ir.ui.view'].ref('hr_holidays.hr_leave_view_tree_my').id, 'list'), (leave_form_view_id, 'form')],
            'domain': [('id', 'in', self.holiday_id.ids)],
         }
         if len(self.holiday_id) == 1:

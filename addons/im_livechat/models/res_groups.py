@@ -12,7 +12,7 @@ class ResGroups(models.Model):
 
     def write(self, vals):
         if vals.get("user_ids"):
-            operator_group = self.env.ref("im_livechat.im_livechat_group_user")
+            operator_group = self.ref('im_livechat.im_livechat_group_user')
             if operator_group in self.all_implied_ids:
                 operators = operator_group.all_user_ids
                 result = super().write(vals)

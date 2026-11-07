@@ -556,5 +556,5 @@ class ResConfigSettings(models.TransientModel):
         if not template_user.exists():
             raise UserError(_('Invalid template user. It seems it has been deleted.'))
         action['res_id'] = template_user_id
-        action['views'] = [[self.env.ref('base.view_users_form').id, 'form']]
+        action['views'] = [[self.env['ir.ui.view'].ref('base.view_users_form').id, 'form']]
         return action

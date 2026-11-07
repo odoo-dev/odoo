@@ -1307,12 +1307,10 @@ class AccountChartTemplate(models.AbstractModel):
                                     'name': self.env._('Need to update'),
                                     'res_model': 'ir.module.module',
                                     'type': 'ir.actions.act_window',
-                                    'views': [(self.env.ref('base.module_view_kanban').id, 'kanban')],
+                                    'views': [(self.env['ir.ui.view'].ref('base.module_view_kanban').id, 'kanban')],
                                     'context': {
                                         'search_default_name': country.name,
-                                        'search_default_category_id': self.env.ref(
-                                            'base.module_category_accounting_localizations_account_charts'
-                                        ).id,
+                                        'search_default_category_id': self.env['ir.module.category'].ref('base.module_category_accounting_localizations_account_charts').id,
                                     },
                                 },
                                 button_text=self.env._("Update app"),

@@ -53,7 +53,7 @@ class LinkTrackerClick(models.Model):
         By default, no grouping is applied.
         :param graph_mode: when `True`, the graph mode will be set to `pie`."""
         context = {**self.env.context, 'create': False}
-        views = [(self.env.ref('mass_mailing.link_tracker_click_view_list_simplified').id, 'list')]
+        views = [(self.env['ir.ui.view'].ref('mass_mailing.link_tracker_click_view_list_simplified').id, 'list')]
         view_mode = 'list'
         if graph_mode:
             context = {**self.env.context, 'graph_mode': 'pie', 'stacked': False}

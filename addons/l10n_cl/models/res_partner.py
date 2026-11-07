@@ -8,6 +8,8 @@ from odoo.addons.l10n_cl.tools.partner_identifiers import CL_ADDITIONAL_IDENTIFI
 class ResPartner(models.Model):
     _inherit = 'res.partner'
 
+    _l10n_cl__demo_partner_cl_fee_receipts = models.Ref('l10n_cl.demo_partner_cl_fee_receipts', required=False)
+
     l10n_cl_sii_taxpayer_type = fields.Selection(
         [
             ('1', 'VAT Affected (1st Category)'),

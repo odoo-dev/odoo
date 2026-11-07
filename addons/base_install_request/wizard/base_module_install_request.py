@@ -23,11 +23,11 @@ class BaseModuleInstallRequest(models.TransientModel):
 
     @api.depends('module_id')
     def _compute_user_ids(self):
-        users = self.env.ref('base.group_system').all_user_ids
+        users = self.env['res.groups'].ref('base.group_system').all_user_ids
         self.user_ids = [(6, 0, users.ids)]
 
     def action_send_request(self):
-        menu_id = self.env.ref('base.menu_apps').id
+        menu_id = self.env['ir.ui.menu'].ref('base.menu_apps').id
         for user in self.user_ids:
             mail_content_html = self.env['ir.qweb']._render(self.qweb_template_xmlid,
                 {

@@ -63,7 +63,7 @@ class HrExpenseSplit(models.TransientModel):
         comodel_name='res.users',
         string="Manager",
         readonly=True,
-        domain=lambda self: [('all_group_ids', 'in', self.env.ref('hr_expense.group_hr_expense_team_approver').id)],
+        domain=lambda self: [('all_group_ids', 'in', self.env['res.groups'].ref('hr_expense.group_hr_expense_team_approver').id)],
     )
 
     @api.depends('total_amount_currency', 'tax_ids')

@@ -65,7 +65,7 @@ class ResPartner(models.Model):
 
     @api.depends('country_id')
     def _compute_l10n_es_edi_facturae_residence_type(self):
-        eu_country_ids = self.env.ref('base.europe').country_ids.ids
+        eu_country_ids = self.env['res.country.group'].ref('base.europe').country_ids.ids
         for partner in self:
             country = partner.country_id
             if country.code == 'ES':

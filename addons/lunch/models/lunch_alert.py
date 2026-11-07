@@ -112,7 +112,7 @@ class LunchAlert(models.Model):
     def create(self, vals_list):
         crons = self.env['ir.cron'].sudo().create([
             {
-                'user_id': self.env.ref('base.user_root').id,
+                'user_id': self.env['res.users']._base__user_root.id,
                 'active': False,
                 'interval_type': 'days',
                 'interval_number': 1,

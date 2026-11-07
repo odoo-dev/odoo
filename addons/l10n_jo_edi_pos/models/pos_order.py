@@ -101,7 +101,7 @@ class PosOrder(models.Model):
         if not self._l10n_jo_edi_pos_get_payment_type():
             error_msgs.append(self.env._("Please select the payment methods that are consistent with the value set in 'JoFotara Cash'. If set, the payment method is Cash. If empty, then it is Receivable."))
         else:
-            jod = self.env.ref('base.JOD')
+            jod = self.env['res.currency'].ref('base.JOD')
             amount_total_jod = self.amount_total if self.currency_id == jod else self.currency_id._convert(self.amount_total, jod, self.company_id, self.date_order)
             amount_total_requires_customer = jod.compare_amounts(amount_total_jod, 10_000) == 1
             if not self.partner_id and (self._l10n_jo_edi_pos_get_payment_type() == 'receivable' or amount_total_requires_customer):

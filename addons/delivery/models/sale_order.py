@@ -107,7 +107,7 @@ class SaleOrder(models.Model):
         return True
 
     def action_open_delivery_wizard(self):
-        view_id = self.env.ref("delivery.choose_delivery_carrier_view_form").id
+        view_id = self.env['ir.ui.view'].ref('delivery.choose_delivery_carrier_view_form').id
         if self.env.context.get("carrier_recompute"):
             name = self.env._("Update shipping cost")
             carrier = self.carrier_id

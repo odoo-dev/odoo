@@ -24,7 +24,7 @@ class ResPartner(models.Model):
         return {
             "type": "ir.actions.act_window",
             "res_model": "fleet.vehicle.assignation.log",
-            "views": [[self.env.ref("fleet.fleet_vehicle_assignation_log_view_list").id, "list"],
+            "views": [[self.env['ir.ui.view'].ref('fleet.fleet_vehicle_assignation_log_view_list').id, "list"],
                       [False, "form"]],
             "domain": [("driver_id", "in", self.ids)],
             "context": dict(self.env.context, default_driver_id=self.id),

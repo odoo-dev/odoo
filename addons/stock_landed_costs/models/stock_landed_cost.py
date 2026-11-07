@@ -102,7 +102,7 @@ class StockLandedCost(models.Model):
 
     def _track_log_get_default_subtype(self, track_init_values):
         if 'state' in track_init_values and self.state == 'done':
-            return self.env.ref('stock_landed_costs.mt_stock_landed_cost_open')
+            return self.env['mail.message.subtype'].ref('stock_landed_costs.mt_stock_landed_cost_open')
         return super()._track_log_get_default_subtype(track_init_values)
 
     def button_cancel(self):

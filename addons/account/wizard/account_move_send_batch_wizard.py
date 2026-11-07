@@ -123,7 +123,7 @@ class AccountMoveSendBatchWizard(models.TransientModel):
             self.env['account.move.send']._generate_and_send_invoices(self.move_ids, allow_fallback_pdf=allow_fallback_pdf)
             return
 
-        account_move_send_cron = self.env.ref('account.ir_cron_account_move_send')
+        account_move_send_cron = self.env['ir.cron'].ref('account.ir_cron_account_move_send')
         if not account_move_send_cron.sudo().active:
             if self.env.user.has_group('base.group_system'):
                 raise RedirectWarning(

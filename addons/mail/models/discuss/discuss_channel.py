@@ -498,7 +498,7 @@ class DiscussChannel(models.Model):
             if channel.parent_channel_id:
                 channel.group_public_id = channel.parent_channel_id.group_public_id
             elif not channel.group_public_id:
-                channel.group_public_id = self.env.ref("base.group_user")
+                channel.group_public_id = self.env['res.groups'].ref('base.group_user')
         (self - channels).group_public_id = None
 
     @api.depends('uuid')
@@ -608,7 +608,7 @@ class DiscussChannel(models.Model):
 
     @api.model
     def _setup_builtin_channels(self):
-        admin_lang = self.env.ref("base.partner_admin").lang
+        admin_lang = self.env['res.partner']._base__partner_admin.lang
         translate_env = self.env(context=dict(self.env.context, lang=admin_lang))
         if not self._mail__channel_all_employees.name:
             self._mail__channel_all_employees.write({
@@ -796,7 +796,7 @@ class DiscussChannel(models.Model):
             channel_ids = cr.postcommit.data["mail.sync_last_interest_dt"] = OrderedSet()
             dbname = cr.dbname
             # sudo: ir.cron - the poster may be a public/guest visitor with no access to the cron.
-            trigger = self.env.ref("mail.ir_cron_discuss_channel_sync_last_interest_dt").sudo()._trigger(
+            trigger = self.env['ir.cron'].ref('mail.ir_cron_discuss_channel_sync_last_interest_dt').sudo()._trigger(
                 at=fields.Datetime.now() + timedelta(minutes=1)
             )
 
@@ -863,7 +863,7 @@ class DiscussChannel(models.Model):
         to let the lock holders release.
         """
         LastInterestUpdate = self.env["discuss.channel.last.interest.update"]
-        cron = self.env.ref("mail.ir_cron_discuss_channel_sync_last_interest_dt")
+        cron = self.env['ir.cron'].ref('mail.ir_cron_discuss_channel_sync_last_interest_dt')
         with tools.mute_logger('odoo.models.unlink'):
             self.env["ir.cron.trigger"].search([("cron_id", "=", cron.id)]).unlink()
         channel_ids = LastInterestUpdate.search_fetch([], limit=batch_size).channel_id.ids

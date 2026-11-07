@@ -29,7 +29,7 @@ class AccountAnalyticAccount(models.Model):
             raise UserError(_("Before we can bid farewell to these accounts, you need to tidy up the projects linked to them by removing their existing tasks!"))
 
     def action_view_projects(self):
-        kanban_view_id = self.env.ref('project.view_project_kanban').id
+        kanban_view_id = self.env['ir.ui.view'].ref('project.view_project_kanban').id
         result = {
             "type": "ir.actions.act_window",
             "res_model": "project.project",

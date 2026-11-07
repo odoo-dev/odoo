@@ -14,6 +14,7 @@ class ResPartner(models.Model):
         'l10n_vn_edi_viettel_pos.partner_walk_in_customer',
         message=_lt("Deleting the partner %(name)s is not allowed because it is required by the Vietnam point of sale."),
     )
+    _l10n_vn_edi_viettel_pos__partner_walk_in_customer = models.Ref('l10n_vn_edi_viettel_pos.partner_walk_in_customer')
 
     @api.model
     def _load_pos_data_domain(self, data):

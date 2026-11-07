@@ -444,7 +444,7 @@ class IrModuleModule(models.Model):
         existing_urls = {url_wrapped['url'] for url_wrapped in existing_urls}
 
         themes = self.env['ir.module.module'].with_context(active_test=False).search([
-            ('category_id', 'child_of', self.env.ref('base.module_category_theme').id),
+            ('category_id', 'child_of', self.env['ir.module.category'].ref('base.module_category_theme').id),
         ], order='name')
 
         for theme in themes:

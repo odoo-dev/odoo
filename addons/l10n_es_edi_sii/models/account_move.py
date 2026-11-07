@@ -71,7 +71,7 @@ class AccountMove(models.Model):
 
     @api.depends('move_type', 'company_id', 'commercial_partner_id.country_id.country_group_codes', 'commercial_partner_id.state_id', 'invoice_line_ids.tax_ids')
     def _compute_l10n_es_edi_is_required(self):
-        eu_vat_country_group = self.env.ref('account.europe_vat')
+        eu_vat_country_group = self.env['res.country.group'].ref('account.europe_vat')
         for move in self:
             if not move.is_invoice() or move.country_code != 'ES' or not move.company_id.l10n_es_sii_tax_agency:
                 move.l10n_es_edi_is_required = False
@@ -100,7 +100,7 @@ class AccountMove(models.Model):
             sii_tax_agency=table.company_id.l10n_es_sii_tax_agency,
         )
 
-        eu_vat_group_id = self.env.ref('account.europe_vat').id
+        eu_vat_group_id = self.env['res.country.group'].ref('account.europe_vat').id
         partner_in_eu = SQL(
             """(%(partner_country_id)s IS NULL OR EXISTS (
                 SELECT 1

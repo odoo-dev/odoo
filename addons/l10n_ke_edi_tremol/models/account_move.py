@@ -63,7 +63,7 @@ class AccountMove(models.Model):
             if move.country_code != 'KE':
                 move_errors.append(_("This invoice is not a Kenyan invoice and therefore can not be sent to the device."))
 
-            if move.company_id.currency_id != self.env.ref('base.KES'):
+            if move.company_id.currency_id != self.env['res.currency'].ref('base.KES'):
                 move_errors.append(_("This invoice's company currency is not in Kenyan Shillings, conversion to KES is not possible."))
 
             if move.state != 'posted':

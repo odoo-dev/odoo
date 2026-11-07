@@ -118,7 +118,7 @@ class WebsiteVisitor(models.Model):
         """ Copy sessions of the secondary visitors to the main partner visitor. """
         target.discuss_channel_ids |= self.discuss_channel_ids
         self.discuss_channel_ids.channel_partner_ids = [
-            (3, self.env.ref('base.public_partner').id),
+            (3, self.env['res.partner']._base__public_partner.id),
             (4, target.partner_id.id),
         ]
         return super()._merge_visitor(target)

@@ -47,7 +47,7 @@ class FleetVehicle(models.Model):
     active = fields.Boolean('Active', default=True, tracking=True)
     manager_id = fields.Many2one(
         'res.users', 'Fleet Manager',
-        domain=lambda self: f"[('share', '=', False), ('company_ids', 'in', company_id), ('all_group_ids', 'in', {self.env.ref('fleet.fleet_group_user').id})]",
+        domain=lambda self: f"[('share', '=', False), ('company_ids', 'in', company_id), ('all_group_ids', 'in', {self.env['res.groups'].ref('fleet.fleet_group_user').id})]",
         tracking=True,
     )
     company_id = fields.Many2one(
@@ -543,7 +543,7 @@ class FleetVehicle(models.Model):
     def _track_log_get_default_subtype(self, track_init_values):
         self.ensure_one()
         if 'driver_id' in track_init_values or 'future_driver_id' in track_init_values:
-            return self.env.ref('fleet.mt_fleet_driver_updated')
+            return self.env['mail.message.subtype'].ref('fleet.mt_fleet_driver_updated')
         return super()._track_log_get_default_subtype(track_init_values)
 
     def open_assignation_logs(self):

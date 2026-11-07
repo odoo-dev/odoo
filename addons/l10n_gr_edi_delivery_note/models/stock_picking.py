@@ -322,10 +322,8 @@ class StockPicking(models.Model):
         """
         self.ensure_one()
         errors = {}
-        company_required_fields_view = self.env.ref('l10n_gr_edi_delivery_note.view_company_form_inherit_mydata_required_fields')
-        partner_required_fields_view = self.env.ref('l10n_gr_edi_delivery_note.view_partner_form_inherit_mydata_required_fields')
-        error_action_company = {'action_text': self.env._("View Company"), 'action': self.company_id._get_records_action(name=self.env._("Company"), views=[(company_required_fields_view.id, 'form')])}
-        error_action_partner = {'action_text': self.env._("View Partner"), 'action': self.partner_id._get_records_action(name=self.env._("Partner"), views=[(partner_required_fields_view.id, 'form')])}
+        error_action_company = {'action_text': self.env._("View Company"), 'action': self.company_id._get_records_action(name=self.env._("Company"), views=[(self.env['ir.ui.view'].ref('l10n_gr_edi_delivery_note.view_company_form_inherit_mydata_required_fields').id, 'form')])}
+        error_action_partner = {'action_text': self.env._("View Partner"), 'action': self.partner_id._get_records_action(name=self.env._("Partner"), views=[(self.env['ir.ui.view'].ref('l10n_gr_edi_delivery_note.view_partner_form_inherit_mydata_required_fields').id, 'form')])}
         error_action_gr_settings = {
             'action_text': self.env._("View Settings"),
             'action': {

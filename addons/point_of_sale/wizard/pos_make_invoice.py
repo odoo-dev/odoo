@@ -51,7 +51,7 @@ class PosMakeInvoice(models.TransientModel):
                 return {
                     'name': _('Warning'),
                     'view_mode': 'form',
-                    'view_id': self.env.ref('point_of_sale.view_confirm_action_wizard').id,
+                    'view_id': self.env['ir.ui.view'].ref('point_of_sale.view_confirm_action_wizard').id,
                     'res_model': 'pos.confirmation.wizard',
                     'target': 'new',
                     'type': 'ir.actions.act_window',

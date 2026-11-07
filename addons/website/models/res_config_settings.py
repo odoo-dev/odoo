@@ -223,7 +223,7 @@ class ResConfigSettings(models.TransientModel):
         return {
             'name': _('Add Website'),
             'view_mode': 'form',
-            'view_id': self.env.ref('website.view_website_form_view_themes_modal').id,
+            'view_id': self.env['ir.ui.view'].ref('website.view_website_form_view_themes_modal').id,
             'res_model': 'website',
             'type': 'ir.actions.act_window',
             'target': 'new',

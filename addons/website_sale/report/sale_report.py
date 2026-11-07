@@ -25,7 +25,7 @@ class SaleReport(models.Model):
                 table.order_id.date_order, table.order_id.website_id.cart_abandoned_delay,
                 table.order_id.website_id.id,
                 table.order_id.state,
-                table.order_id.partner_id, self.env.ref("base.public_partner").id,
+                table.order_id.partner_id, self.env['res.partner']._base__public_partner.id,
             ),
         }
 

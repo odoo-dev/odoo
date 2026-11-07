@@ -240,7 +240,7 @@ class SaleOrder(models.Model):
     def action_recovery_email_send(self):
         for order in self:
             order._portal_ensure_token()
-        composer_form_view_id = self.env.ref("mail.email_compose_message_wizard_form").id
+        composer_form_view_id = self.env['ir.ui.view'].ref('mail.email_compose_message_wizard_form').id
 
         template_id = self._get_cart_recovery_template().id
 

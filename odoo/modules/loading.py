@@ -84,10 +84,9 @@ def load_demo(env: Environment, package: ModuleNode, idref: IdRef, mode: LoadMod
             "Module %s demo data failed to install, installed without demo data",
             package.name, exc_info=True)
 
-        todo = env.ref('base.demo_failure_todo', raise_if_not_found=False)
         Failure = env.get('ir.demo_failure')
-        if todo and Failure is not None:
-            todo.state = 'open'
+        if Failure is not None:
+            env['ir.actions.todo'].ref('base.demo_failure_todo_optional').state = 'open'
             Failure.create({'module_id': package.id, 'error': traceback.format_exc()})
         return False
 
@@ -532,10 +531,9 @@ def load_modules(
         # Cleanup orphan records
         env['ir.model.data']._process_end(registry.updated_modules)
         # Cleanup cron
-        vacuum_cron = env.ref('base.autovacuum_job', raise_if_not_found=False)
-        if vacuum_cron:
-            # trigger after a small delay to give time for assets to regenerate
-            vacuum_cron._trigger(at=datetime.datetime.now() + datetime.timedelta(minutes=1))
+        vacuum_cron = env['ir.cron'].ref('base.autovacuum_job_optional')
+        # trigger after a small delay to give time for assets to regenerate
+        vacuum_cron._trigger(at=datetime.datetime.now() + datetime.timedelta(minutes=1))
 
         # Compute the groups as light or regular
         # When `_apply_group_regular()` runs, thes groups already exists in the

@@ -14,5 +14,5 @@ class ResUsers(models.Model):
             [('attendance_manager_id', 'in', self.ids)]).attendance_manager_id
         officers_to_remove_ids = self - attendance_officers
         if officers_to_remove_ids:
-            self.env.ref('hr_attendance.group_hr_attendance_officer').user_ids = [(3, user.id) for user in
+            self.env['res.groups'].ref('hr_attendance.group_hr_attendance_officer').user_ids = [(3, user.id) for user in
                                                                                officers_to_remove_ids]

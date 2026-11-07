@@ -115,7 +115,7 @@ class ProductTemplate(models.Model):
         return res
 
     def _get_backend_root_menu_ids(self):
-        return super()._get_backend_root_menu_ids() + [self.env.ref('mrp.menu_mrp_root').id]
+        return super()._get_backend_root_menu_ids() + [self.env['ir.ui.menu'].ref('mrp.menu_mrp_root').id]
 
 
 class ProductProduct(models.Model):
@@ -414,7 +414,7 @@ class ProductProduct(models.Model):
         return res
 
     def _get_backend_root_menu_ids(self):
-        return super()._get_backend_root_menu_ids() + [self.env.ref('mrp.menu_mrp_root').id]
+        return super()._get_backend_root_menu_ids() + [self.env['ir.ui.menu'].ref('mrp.menu_mrp_root').id]
 
     def _update_uom(self, to_uom_id):
         for uom, product_template, boms in self.env['mrp.bom']._read_group(

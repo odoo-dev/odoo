@@ -602,12 +602,12 @@ class PurchaseOrder(models.Model):
         self.ensure_one()
         if 'state' in track_init_values and self.state == 'purchase':
             if track_init_values['state'] == 'to approve':
-                return self.env.ref('purchase.mt_rfq_approved')
-            return self.env.ref('purchase.mt_rfq_confirmed')
+                return self.env['mail.message.subtype'].ref('purchase.mt_rfq_approved')
+            return self.env['mail.message.subtype'].ref('purchase.mt_rfq_confirmed')
         elif 'state' in track_init_values and self.state == 'to approve':
-            return self.env.ref('purchase.mt_rfq_confirmed')
+            return self.env['mail.message.subtype'].ref('purchase.mt_rfq_confirmed')
         elif 'state' in track_init_values and self.state == 'sent':
-            return self.env.ref('purchase.mt_rfq_sent')
+            return self.env['mail.message.subtype'].ref('purchase.mt_rfq_sent')
         return super()._track_log_get_default_subtype(track_init_values)
 
     # ------------------------------------------------------------
@@ -778,7 +778,7 @@ class PurchaseOrder(models.Model):
                 ('matching_id', '=', 0),
                 ('aml_id.purchase_order_id', '=', self.id),
             ],
-            'views': [(self.env.ref('purchase.purchase_bill_line_match_tree').id, 'list')],
+            'views': [(self.env['ir.ui.view'].ref('purchase.purchase_bill_line_match_tree').id, 'list')],
         }
 
     def _prepare_down_payment_section_values(self):
@@ -1201,9 +1201,9 @@ class PurchaseOrder(models.Model):
 
     def action_add_from_catalog(self):
         res = super().action_add_from_catalog()
-        kanban_view_id = self.env.ref('purchase.product_view_kanban_catalog_purchase_only').id
+        kanban_view_id = self.env['ir.ui.view'].ref('purchase.product_view_kanban_catalog_purchase_only').id
         res['views'][0] = (kanban_view_id, 'kanban')
-        res['search_view_id'] = [self.env.ref('purchase.product_view_search_catalog').id, 'search']
+        res['search_view_id'] = [self.env['ir.ui.view'].ref('purchase.product_view_search_catalog').id, 'search']
         return res
 
     def _get_action_add_from_catalog_extra_context(self):

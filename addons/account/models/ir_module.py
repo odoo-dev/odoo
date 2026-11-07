@@ -39,10 +39,9 @@ class IrModuleModule(models.Model):
     def _get_module_template(self):
         self.ensure_one()
         if self.name not in TEMPLATE_REGISTER:
-            chart_category = self.env.ref('base.module_category_accounting_localizations_account_charts')
             templates = {}
             if (
-                (self.category_id == chart_category or self.name == 'account')
+                (self.category_id == self.env['ir.module.category'].ref('base.module_category_accounting_localizations_account_charts') or self.name == 'account')
                 and (modules.Manifest.for_addon(self.name) or {}).get('installable')
             ):
                 try:

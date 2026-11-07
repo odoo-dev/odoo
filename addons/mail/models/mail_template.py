@@ -298,7 +298,7 @@ class MailTemplate(models.Model):
 
     def create_action(self):
         ActWindow = self.env['ir.actions.act_window']
-        view = self.env.ref('mail.email_compose_message_wizard_form')
+        view = self.env['ir.ui.view'].ref('mail.email_compose_message_wizard_form')
         for template in self:
             context = {
                 'default_composition_mode': 'mass_mail',
@@ -321,7 +321,7 @@ class MailTemplate(models.Model):
         return True
 
     def action_open_mail_preview(self):
-        action = self.env.ref('mail.mail_template_preview_action')._get_action_dict()
+        action = self.env['ir.actions.act_window'].ref('mail.mail_template_preview_action')._get_action_dict()
         action.update({'name': _('Template Preview: "%(template_name)s"', template_name=self.name)})
         return action
 

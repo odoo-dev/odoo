@@ -452,7 +452,7 @@ class StockQuant(models.Model):
         ctx = dict(self.env.context or {})
         if self.env.user.has_group('stock.group_stock_user') and not self.env.user.has_group('stock.group_stock_manager'):
             ctx['search_default_my_count'] = True
-        view_id = self.env.ref('stock.view_stock_quant_tree_inventory_editable').id
+        view_id = self.env['ir.ui.view'].ref('stock.view_stock_quant_tree_inventory_editable').id
         action = {
             'name': _('Physical Inventory'),
             'view_mode': 'list',
@@ -514,7 +514,7 @@ class StockQuant(models.Model):
             'name': _('History'),
             'view_mode': 'list,form',
             'res_model': 'stock.move.line',
-            'views': [(self.env.ref('stock.view_move_line_tree').id, 'list'), (False, 'form')],
+            'views': [(self.env['ir.ui.view'].ref('stock.view_move_line_tree').id, 'list'), (False, 'form')],
             'type': 'ir.actions.act_window',
             'context': {
                 'search_default_inventory': 1,
@@ -1167,7 +1167,7 @@ class StockQuant(models.Model):
         this method is often called in batch and each unlink invalidate
         the cache. We defer the calls to unlink in this method.
         """
-        precision_digits = max(6, self.sudo().env.ref('uom.decimal_product_uom').digits * 2)
+        precision_digits = max(6, self.env['decimal.precision'].sudo().ref('uom.decimal_product_uom').digits * 2)
         # Use a select instead of ORM search for UoM robustness.
         query = """SELECT id FROM stock_quant WHERE (round(quantity::numeric, %s) = 0 OR quantity IS NULL)
                                                      AND round(reserved_quantity::numeric, %s) = 0
@@ -1278,7 +1278,7 @@ class StockQuant(models.Model):
     @api.model
     def _get_inventory_user_groups(self):
         """ Users of these groups count inventory and can be assigned counts. """
-        return self.env.ref('stock.group_stock_user')
+        return self.env['res.groups'].ref('stock.group_stock_user')
 
     @api.model
     def _is_inventory_user(self):
@@ -1373,11 +1373,11 @@ class StockQuant(models.Model):
             ('product_id.company_id', 'parent_of', ctx.get('allowed_company_ids', [])),
             ('product_id.company_id', '=', False)
         ]
-        form_view = self.env.ref('stock.view_stock_quant_form_editable').id
+        form_view = self.env['ir.ui.view'].ref('stock.view_stock_quant_form_editable').id
         if self.env.context.get('inventory_mode') and self.env.user.has_group('stock.group_stock_user'):
-            action['view_id'] = self.env.ref('stock.view_stock_quant_tree_editable').id
+            action['view_id'] = self.env['ir.ui.view'].ref('stock.view_stock_quant_tree_editable').id
         else:
-            action['view_id'] = self.env.ref('stock.view_stock_quant_tree').id
+            action['view_id'] = self.env['ir.ui.view'].ref('stock.view_stock_quant_tree').id
         action.update({
             'views': [
                 (action['view_id'], 'list'),
@@ -1391,8 +1391,8 @@ class StockQuant(models.Model):
                 'views': [
                     (action['view_id'], 'list'),
                     (form_view, 'form'),
-                    (self.env.ref('stock.view_stock_quant_pivot').id, 'pivot'),
-                    (self.env.ref('stock.stock_quant_view_graph').id, 'graph'),
+                    (self.env['ir.ui.view'].ref('stock.view_stock_quant_pivot').id, 'pivot'),
+                    (self.env['ir.ui.view'].ref('stock.stock_quant_view_graph').id, 'graph'),
                 ],
             })
         # It's mainly define in the server action in order to call _get_quants_action when using the url
@@ -1462,7 +1462,7 @@ class StockQuant(models.Model):
         aggregate_barcode = ""
 
         # Searches all GS1 rules linked to an UoM other than Unit and retrieves their AI.
-        uom_unit_id = self.env.ref('uom.product_uom_unit').id
+        uom_unit_id = self.env['uom.uom'].ref('uom.product_uom_unit').id
         gs1_quantity_rules = self.env['barcode.rule'].search([
             ('associated_uom_id', '!=', False),
             ('associated_uom_id', '!=', uom_unit_id),

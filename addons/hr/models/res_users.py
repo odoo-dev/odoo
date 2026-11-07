@@ -454,7 +454,7 @@ class ResUsers(models.Model):
             user = self.env['res.users'].browse(access_uid).sudo()
 
         if self.env.context.get('default_create_employee_id') and user.has_group('base.group_erp_manager'):
-            res['views'] = [(self.env.ref('base.view_users_form').id, 'form')]
+            res['views'] = [(self.env['ir.ui.view'].ref('base.view_users_form').id, 'form')]
 
         return res
 

@@ -727,7 +727,7 @@ class SurveyUser_Input(models.Model):
     def _notify_new_participation_subscribers(self):
         if not self.ids:
             return
-        author_id = self.env.ref('base.partner_root').id if self.env.user.is_public else self.env.user.partner_id.id
+        author_id = self.env['res.partner']._base__partner_root.id if self.env.user.is_public else self.env.user.partner_id.id
         # Only post if there are any followers
         recipients_data = self.env['mail.followers']._get_recipient_data(self.survey_id, 'notification', self.env['mail.message.subtype'].ref('survey.mt_survey_survey_user_input_completed').id)
         followed_survey_ids = [survey_id for survey_id, followers in recipients_data.items() if followers]

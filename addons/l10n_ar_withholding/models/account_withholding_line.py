@@ -9,7 +9,7 @@ class AccountWithholdingLine(models.AbstractModel):
     def _compute_amount(self):
         """ EXTENDS 'l10n_account_withholding_tax' - AR withholding purchase taxes needs special computation. """
         ar_lines = self.filtered(lambda l: l.country_code == 'AR' and l.tax_id.type_tax_use == 'purchase')
-        ars_currency = self.env.ref('base.ARS')
+        ars_currency = self.env['res.currency'].ref('base.ARS')
         for line in ar_lines:
             # ARCA scales amounts are in ARS, explicitly convert amount to it to avoid summing apples and pears
             line_currency, date = line.comodel_currency_id, line.comodel_date

@@ -248,7 +248,7 @@ class WebsiteMenu(models.Model):
         if 'group_ids' in vals and not self.env.context.get("adding_designer_group_to_menu"):
             self.filtered("group_ids").with_context(
                 adding_designer_group_to_menu=True
-            ).group_ids += self.env.ref("website.group_website_designer")
+            ).group_ids += self.env['res.groups'].ref('website.group_website_designer')
         return res
 
     def unlink(self):

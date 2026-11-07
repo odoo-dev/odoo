@@ -127,7 +127,7 @@ class EventRegistration(models.Model):
         return {}
 
     def _sale_order_registration_data_change_notify(self, new_record_field, new_record):
-        fallback_user_id = self.env.user.id if not self.env.user._is_public() else self.env.ref("base.user_admin").id
+        fallback_user_id = self.env.user.id if not self.env.user._is_public() else self.env['res.users']._base__user_admin.id
         for registration in self:
             render_context = {
                 'registration': registration,

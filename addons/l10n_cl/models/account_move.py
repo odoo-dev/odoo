@@ -31,7 +31,7 @@ class AccountMove(models.Model):
 
     def _get_l10n_latam_documents_domain(self):
         self.ensure_one()
-        if self.journal_id.company_id.account_fiscal_country_id != self.env.ref('base.cl') or not \
+        if self.journal_id.company_id.account_fiscal_country_id != self.env['res.country'].ref('base.cl') or not \
                 self.l10n_latam_use_documents:
             return super()._get_l10n_latam_documents_domain()
         if self.journal_id.type == 'sale':

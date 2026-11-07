@@ -456,7 +456,7 @@ class AccountAutomaticEntryWizard(models.TransientModel):
             'res_model': 'account.move',
             'view_mode': 'list,form',
             'type': 'ir.actions.act_window',
-            'views': [(self.env.ref('account.view_move_tree').id, 'list'), (False, 'form')],
+            'views': [(self.env['ir.ui.view'].ref('account.view_move_tree').id, 'list'), (False, 'form')],
         }
         if len(created_moves) == 1:
             action.update({'view_mode': 'form', 'res_id': created_moves.id})

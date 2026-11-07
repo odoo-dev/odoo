@@ -46,7 +46,7 @@ class SmsTemplate(models.Model):
 
     def action_create_sidebar_action(self):
         ActWindow = self.env['ir.actions.act_window']
-        view = self.env.ref('sms.sms_composer_view_form')
+        view = self.env['ir.ui.view'].ref('sms.sms_composer_view_form')
 
         for template in self:
             button_name = _('Send SMS (%s)', template.name)

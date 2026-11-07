@@ -29,9 +29,9 @@ class AccountMove(models.Model):
         result.append(("code", "in", ("01", "03", "07", "08", "20", "40")))
         if self.partner_id.l10n_pe_sunat_id_code != PE_RUC_SUNAT_CODE and self.move_type == 'out_invoice':
             result.append(('id', 'in', (
-                self.env.ref('l10n_pe.document_type08b')
-                | self.env.ref('l10n_pe.document_type02')
-                | self.env.ref('l10n_pe.document_type07b')
+                self.env['l10n_latam.document.type'].ref('l10n_pe.document_type08b')
+                | self.env['l10n_latam.document.type'].ref('l10n_pe.document_type02')
+                | self.env['l10n_latam.document.type'].ref('l10n_pe.document_type07b')
             ).ids))
         return result
 

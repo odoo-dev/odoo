@@ -71,17 +71,12 @@ class AccountMoveLine(models.Model):
         return False
 
     def _get_l10n_in_tax_tag_ids(self):
-        xmlid_to_res_id = self.env['ir.model.data']._xmlid_to_res_id
-        tag_refs = {
-            'sgst': ['l10n_in.tax_tag_base_sgst', 'l10n_in.tax_tag_sgst'],
-            'cgst': ['l10n_in.tax_tag_base_cgst', 'l10n_in.tax_tag_cgst'],
-            'igst': ['l10n_in.tax_tag_base_igst', 'l10n_in.tax_tag_igst'],
-            'cess': ['l10n_in.tax_tag_base_cess', 'l10n_in.tax_tag_cess'],
-            'eco_9_5': ['l10n_in.tax_tag_eco_9_5'],
-        }
         return {
-            categ: [xmlid_to_res_id(xml_id) for xml_id in ref]
-            for categ, ref in tag_refs.items()
+            'sgst': [self.env['account.account.tag'].ref('l10n_in.tax_tag_base_sgst').id, self.env['account.account.tag'].ref('l10n_in.tax_tag_sgst').id],
+            'cgst': [self.env['account.account.tag'].ref('l10n_in.tax_tag_base_cgst').id, self.env['account.account.tag'].ref('l10n_in.tax_tag_cgst').id],
+            'igst': [self.env['account.account.tag'].ref('l10n_in.tax_tag_base_igst').id, self.env['account.account.tag'].ref('l10n_in.tax_tag_igst').id],
+            'cess': [self.env['account.account.tag'].ref('l10n_in.tax_tag_base_cess').id, self.env['account.account.tag'].ref('l10n_in.tax_tag_cess').id],
+            'eco_9_5': [self.env['account.account.tag'].ref('l10n_in.tax_tag_eco_9_5').id],
         }
 
     def _get_l10n_in_gstr_section(self, tax_tags_dict):

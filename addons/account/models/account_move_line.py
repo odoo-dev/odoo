@@ -3572,7 +3572,7 @@ class AccountMoveLine(models.Model):
                     'res_model': 'account.move.line',
                     'type': 'ir.actions.act_window',
                     'domain': [('id', 'in', lines_with_missing_analytic_distribution.ids)],
-                    'views': [(self.env.ref('account.view_move_line_tree').id, 'list')],
+                    'views': [(self.env['ir.ui.view'].ref('account.view_move_line_tree').id, 'list')],
                 },
                 button_text=_("See items"),
             )

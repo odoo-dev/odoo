@@ -62,7 +62,7 @@ class PaymentProvider(models.Model):
         if self.code != "mollie":
             return super()._build_request_headers(*args, **kwargs)
 
-        module_version = self.env.ref("base.module_payment_mollie").installed_version
+        module_version = self.env['ir.module.module'].ref('base.module_payment_mollie').installed_version
         return {
             "Accept": "application/json",
             "Authorization": f"Bearer {self.mollie_api_key}",

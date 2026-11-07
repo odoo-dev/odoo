@@ -301,13 +301,12 @@ class IapAccount(models.Model):
     def get_config_account_url(self):
         """ Called notably by ajax partner_autocomplete. """
         account = self.env['iap.account'].get('partner_autocomplete')
-        menu = self.env.ref('iap.iap_account_menu')
         if not self.env.user.has_group('base.group_no_one'):
             return False
         if account:
-            url = f"/odoo/action-iap.iap_account_action/{account.id}?menu_id={menu.id}"
+            url = f"/odoo/action-iap.iap_account_action/{account.id}?menu_id={self.env['ir.ui.menu'].ref('iap.iap_account_menu').id}"
         else:
-            url = f"/odoo/action-iap.iap_account_action?menu_id={menu.id}"
+            url = f"/odoo/action-iap.iap_account_action?menu_id={self.env['ir.ui.menu'].ref('iap.iap_account_menu').id}"
         return url
 
     @api.model

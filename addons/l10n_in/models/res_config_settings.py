@@ -143,7 +143,7 @@ class ResConfigSettings(models.TransientModel):
                 'res_model': 'res.company',
                 'type': 'ir.actions.act_window',
                 'res_id': company.id,
-                'views': [[self.env.ref('base.view_company_form').id, 'form']],
+                'views': [[self.env['ir.ui.view'].ref('base.view_company_form').id, 'form']],
             }
             raise RedirectWarning(_("Please set a valid GST number on company."), action, _("Go to Company"))
 

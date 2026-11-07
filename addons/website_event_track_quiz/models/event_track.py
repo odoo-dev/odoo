@@ -72,12 +72,11 @@ class EventTrack(models.Model):
 
     def action_add_quiz(self):
         self.ensure_one()
-        event_quiz_form = self.env.ref('website_event_track_quiz.event_quiz_view_form')
         return {
             'type': 'ir.actions.act_window',
             'view_mode': 'form',
             'res_model': 'event.quiz',
-            'view_id': event_quiz_form.id,
+            'view_id': self.env['ir.ui.view'].ref('website_event_track_quiz.event_quiz_view_form').id,
             'context': {
                 'default_event_track_id': self.id,
                 'create': False,
@@ -86,13 +85,12 @@ class EventTrack(models.Model):
 
     def action_view_quiz(self):
         self.ensure_one()
-        event_quiz_form = self.env.ref('website_event_track_quiz.event_quiz_view_form')
         return {
             'type': 'ir.actions.act_window',
             'view_mode': 'form',
             'res_model': 'event.quiz',
             'res_id' : self.quiz_id.id,
-            'view_id': event_quiz_form.id,
+            'view_id': self.env['ir.ui.view'].ref('website_event_track_quiz.event_quiz_view_form').id,
             'context': {
                 'create': False,
             }

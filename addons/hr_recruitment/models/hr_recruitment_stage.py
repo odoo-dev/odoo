@@ -9,6 +9,8 @@ class HrRecruitmentStage(models.Model):
     _description = "Recruitment Stage"
     _order = 'sequence'
 
+    _hr_recruitment__stage_job0 = models.Ref('hr_recruitment.stage_job0')
+
     name = fields.Char("Stage Name", required=True, translate=True)
     sequence = fields.Integer(
         "Sequence", default=10)

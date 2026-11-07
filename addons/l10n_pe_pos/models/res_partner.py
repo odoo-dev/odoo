@@ -12,6 +12,7 @@ class ResPartner(models.Model):
         'l10n_pe_pos.partner_pe_cf',
         message=_lt("Deleting the partner %(name)s is not allowed because it is required by the Peruvian point of sale."),
     )
+    _l10n_pe_pos__partner_pe_cf = models.Ref('l10n_pe_pos.partner_pe_cf')
 
     @api.model
     def _load_pos_data_fields(self, config):

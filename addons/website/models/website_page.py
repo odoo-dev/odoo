@@ -369,7 +369,7 @@ class WebsitePage(models.Model):
             'res_model': 'ir.ui.view',
             'res_id': self.view_id.id,
             'view_mode': 'form',
-            'view_id': self.env.ref('website.view_view_form_extend').id,
+            'view_id': self.env['ir.ui.view'].ref('website.view_view_form_extend').id,
         }
 
     def open_website_url(self):

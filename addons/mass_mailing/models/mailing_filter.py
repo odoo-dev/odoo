@@ -61,7 +61,7 @@ class MailingFilter(models.Model):
         buttons will be hidden."""
         self.ensure_one()
         if self.mailing_model_name == 'mailing.contact':
-            views = [(self.env.ref('mass_mailing.mailing_contact_view_list_from_filter').id, 'list'), (False, 'form')]
+            views = [(self.env['ir.ui.view'].ref('mass_mailing.mailing_contact_view_list_from_filter').id, 'list'), (False, 'form')]
         else:
             views = [(False, 'list'), (False, 'form')]
 

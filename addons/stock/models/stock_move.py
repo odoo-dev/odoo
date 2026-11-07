@@ -983,7 +983,7 @@ Please change the quantity done or the rounding precision in your settings.""",
             # Avoids to write the exact same message multiple times.
             if last_message and last_message.subject == msg_subject:
                 continue
-            odoobot_id = self.env['res.partner']._base__partner_root_optional.id
+            odoobot_id = self.env['res.partner']._base__partner_root.id
             doc.message_post(body=msg, author_id=odoobot_id, subject=msg_subject)
 
     def action_add_packages(self):
@@ -997,7 +997,7 @@ Please change the quantity done or the rounding precision in your settings.""",
             'type': 'ir.actions.act_window',
             'res_model': 'stock.package',
             'view_mode': 'list',
-            'views': [(self.env.ref('stock.stock_package_view_add_list').id, 'list')],
+            'views': [(self.env['ir.ui.view'].ref('stock.stock_package_view_add_list').id, 'list')],
             'target': 'new',
             'domain': [('location_id', 'child_of', picking.location_id.id)],
             'context': {
@@ -1012,15 +1012,14 @@ Please change the quantity done or the rounding precision in your settings.""",
             'docids': self.ids,
             'quantity': quantities,
         }
-        return self.env.ref('stock.label_picking').report_action(self, data=data, config=False)
+        return self.env['ir.actions.report'].ref('stock.label_picking').report_action(self, data=data, config=False)
 
     def action_open_label_layout(self):
-        view = self.env.ref('stock.product_label_layout_form_picking')
         return {
             'name': _('Choose Labels Layout'),
             'type': 'ir.actions.act_window',
             'res_model': 'product.label.layout',
-            'views': [(view.id, 'form')],
+            'views': [(self.env['ir.ui.view'].ref('stock.product_label_layout_form_picking').id, 'form')],
             'target': 'new',
             'context': {
                 'default_product_ids': self.product_id.ids,
@@ -1035,14 +1034,13 @@ Please change the quantity done or the rounding precision in your settings.""",
         checked on the picking type.
         """
         self.ensure_one()
-        view = self.env.ref('stock.view_stock_move_operations')
         action = {
             'name': _('Detailed Operations'),
             'type': 'ir.actions.act_window',
             'view_mode': 'form',
             'res_model': 'stock.move',
-            'views': [(view.id, 'form')],
-            'view_id': view.id,
+            'views': [(self.env['ir.ui.view'].ref('stock.view_stock_move_operations').id, 'form')],
+            'view_id': self.env['ir.ui.view'].ref('stock.view_stock_move_operations').id,
             'target': 'new',
             'res_id': self.id,
             'context': dict(
@@ -2989,7 +2987,7 @@ Please change the quantity done or the rounding precision in your settings.""",
                 'name': self.env._('%(product)s: Insufficient Quantity To Scrap', product=self.product_id.display_name),
                 'view_mode': 'form',
                 'res_model': 'stock.warn.insufficient.qty.scrap',
-                'view_id': self.env.ref('stock.stock_warn_insufficient_qty_scrap_form_view').id,
+                'view_id': self.env['ir.ui.view'].ref('stock.stock_warn_insufficient_qty_scrap_form_view').id,
                 'type': 'ir.actions.act_window',
                 'context': ctx,
                 'target': 'new'

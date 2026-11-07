@@ -1106,7 +1106,7 @@ class StockMoveLine(models.Model):
 
     def _check_destinations(self):
         if len(self.location_dest_id) > 1:
-            view_id = self.env.ref('stock.stock_package_destination_form_view').id
+            view_id = self.env['ir.ui.view'].ref('stock.stock_package_destination_form_view').id
             wiz = self.env['stock.package.destination'].create({
                 'move_line_ids': self.ids,
                 'location_dest_id': self[0].location_dest_id.id,

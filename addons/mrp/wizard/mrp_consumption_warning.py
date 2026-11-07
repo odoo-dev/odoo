@@ -47,7 +47,7 @@ class MrpConsumptionWarning(models.TransientModel):
             return {
                 'type': 'ir.actions.act_window',
                 'res_model': 'mrp.production',
-                'views': [[self.env.ref('mrp.mrp_production_form_view').id, 'form']],
+                'views': [[self.env['ir.ui.view'].ref('mrp.mrp_production_form_view').id, 'form']],
                 'res_id': self.mrp_production_ids.id,
                 'target': 'main',
             }

@@ -98,11 +98,8 @@ class ResConfigSettings(models.TransientModel):
             self.group_stock_multi_locations = True
 
     def set_values(self):
-        warehouse_grp = self.env.ref('stock.group_stock_multi_warehouses')
-        location_grp = self.env.ref('stock.group_stock_multi_locations')
-        base_user = self.env.ref('base.group_user')
-        base_user_implied_ids = base_user.implied_ids
-        if not self.group_stock_multi_locations and location_grp in base_user_implied_ids and warehouse_grp in base_user_implied_ids:
+        base_user_implied_ids = self.env['res.groups'].ref('base.group_user').implied_ids
+        if not self.group_stock_multi_locations and self.env['res.groups'].ref('stock.group_stock_multi_locations') in base_user_implied_ids and self.env['res.groups'].ref('stock.group_stock_multi_warehouses') in base_user_implied_ids:
             raise UserError(_("You can't deactivate the multi-location feature if you have more than one warehouse per company"))
 
         # Update all picking types of this company to keep their move_type aligned with the configured picking policy

@@ -300,7 +300,7 @@ class SaleOrder(models.Model):
         tracking=2,
         domain=lambda self: (
             "[('all_group_ids', 'in', {}), ('share', '=', False), ('company_ids', '=', company_id)]".format(  # noqa: E501
-                self.env.ref("sales_team.group_sale_salesman").ids
+                self.env['res.groups'].ref('sales_team.group_sale_salesman').ids
             )
         ),
     )
@@ -1902,7 +1902,7 @@ class SaleOrder(models.Model):
         if len(invoices) > 1:
             action["domain"] = [("id", "in", invoices.ids)]
         elif len(invoices) == 1:
-            form_view = [(self.env.ref("account.view_move_form").id, "form")]
+            form_view = [(self.env['ir.ui.view'].ref('account.view_move_form').id, "form")]
             if "views" in action:
                 action["views"] = form_view + [
                     (state, view) for state, view in action["views"] if view != "form"
@@ -2281,9 +2281,9 @@ class SaleOrder(models.Model):
     def _track_log_get_default_subtype(self, track_init_values):
         self.ensure_one()
         if "state" in track_init_values and self.state == "sale":
-            return self.env.ref("sale.mt_order_confirmed")
+            return self.env['mail.message.subtype'].ref('sale.mt_order_confirmed')
         if "state" in track_init_values and self.state == "sent":
-            return self.env.ref("sale.mt_order_sent")
+            return self.env['mail.message.subtype'].ref('sale.mt_order_sent')
         return super()._track_log_get_default_subtype(track_init_values)
 
     def _get_model_description(self, model_name):
@@ -2433,7 +2433,7 @@ class SaleOrder(models.Model):
     def _get_portal_return_action(self):
         """Return the action used to display orders when returning from customer portal."""
         self.ensure_one()
-        return self.env.ref("sale.action_quotations_with_onboarding")
+        return self.env['ir.actions.act_window'].ref('sale.action_quotations_with_onboarding')
 
     def _get_name_portal_content_view(self):
         """Determine the template used to display the SO on the portal.

@@ -32,7 +32,7 @@ class AccountMove(models.Model):
         )
 
     def action_debit_note(self):
-        action = self.env.ref('account_debit_note.action_view_account_move_debit')._get_action_dict()
+        action = self.env['ir.actions.act_window'].ref('account_debit_note.action_view_account_move_debit')._get_action_dict()
         return action
 
     def _get_last_sequence_domain(self, relaxed=False):

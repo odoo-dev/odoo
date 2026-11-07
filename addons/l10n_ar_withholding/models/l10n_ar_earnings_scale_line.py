@@ -14,7 +14,7 @@ class L10n_ArEarningsScaleLine(models.Model):
     )
     currency_id = fields.Many2one(
         comodel_name='res.currency',
-        default=lambda self: self.env.ref('base.ARS'),
+        default=lambda self: self.env['res.currency'].ref('base.ARS'),
         store=False,
     )
     from_amount = fields.Monetary(

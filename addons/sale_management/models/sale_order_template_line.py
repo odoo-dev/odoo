@@ -295,7 +295,7 @@ class SaleOrderTemplateLine(models.Model):
 
     @api.depends("display_type")
     def _compute_section_uom_id(self):
-        default_uom_id = self.env.ref("uom.product_uom_unit").id
+        default_uom_id = self.env['uom.uom'].ref('uom.product_uom_unit').id
         for line in self:
             if line.display_type in {"line_section", "line_subsection"}:
                 line.section_uom_id = default_uom_id

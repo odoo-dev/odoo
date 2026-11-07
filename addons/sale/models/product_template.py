@@ -215,7 +215,7 @@ class ProductTemplate(models.Model):
                 template.invoice_policy = "order"
 
     def _get_backend_root_menu_ids(self):
-        return super()._get_backend_root_menu_ids() + [self.env.ref("sale.sale_menu_root").id]
+        return super()._get_backend_root_menu_ids() + [self.env['ir.ui.menu'].ref('sale.sale_menu_root').id]
 
     def _get_product_accounts(self):
         accounts = super()._get_product_accounts()

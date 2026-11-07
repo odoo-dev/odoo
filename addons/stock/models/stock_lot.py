@@ -297,12 +297,11 @@ class StockLot(models.Model):
     def action_lot_open_transfers(self):
         self.ensure_one()
         delivered_lot_move_lines = self._get_delivery_move_lines_by_lot().get(self.id, [])
-        list_view = self.env.ref('stock.stock_move_line_view_list')
         return {
             'name': self.env._("Delivery move lines of %s", self.display_name),
             'res_model': 'stock.move.line',
             'type': 'ir.actions.act_window',
-            'views': [(list_view.id, 'list'), (False, 'form')],
+            'views': [(self.env['ir.ui.view'].ref('stock.stock_move_line_view_list').id, 'list'), (False, 'form')],
             'view_mode': 'list,form',
             'domain': [
                 ('id', 'in', delivered_lot_move_lines),
@@ -402,7 +401,7 @@ class StockLot(models.Model):
             'type': 'ir.actions.act_window',
             'name': _('Scraps of %s', self.name),
             'res_model': 'stock.move',
-            'views': [(self.env.ref('stock.view_scrap_move_list').id, 'list'), (self.env.ref('stock.view_scrap_move_form').id, 'form')],
+            'views': [(self.env['ir.ui.view'].ref('stock.view_scrap_move_list').id, 'list'), (self.env['ir.ui.view'].ref('stock.view_scrap_move_form').id, 'form')],
             'domain': [('move_line_ids.lot_id', '=', self.id), ('is_scrap', '=', True)],
         }
 
@@ -426,6 +425,6 @@ class StockLot(models.Model):
             'type': 'ir.actions.act_window',
             'name': _('Scrap %(lot_name)s', lot_name=self.name),
             'res_model': 'stock.move',
-            'views': [(self.env.ref('stock.view_scrap_move_form').id, 'form')],
+            'views': [(self.env['ir.ui.view'].ref('stock.view_scrap_move_form').id, 'form')],
             'context': context,
         }

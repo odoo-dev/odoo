@@ -1231,8 +1231,7 @@ class AccountPayment(models.Model):
         (self.move_id - draft_moves).button_cancel()
 
     def action_print_receipt(self):
-        report_action = self.env.ref("account.action_report_payment_receipt")
-        return report_action.report_action(self)
+        return self.env['ir.actions.report'].ref('account.action_report_payment_receipt').report_action(self)
 
     def button_request_cancel(self):
         return self.move_id.button_request_cancel()

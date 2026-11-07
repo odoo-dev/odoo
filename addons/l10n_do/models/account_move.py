@@ -42,7 +42,8 @@ class AccountMove(models.Model):
         if self.country_code != 'DO' or not self.l10n_latam_use_documents:
             return domain
         if self.move_type == 'out_invoice' and not self.debit_origin_id:
-            allowed_docs = [self.env.ref('l10n_do.ecf_31').id, self.env.ref('l10n_do.ecf_32').id] if self.partner_id._l10n_do_has_rnc() else [self.env.ref('l10n_do.ecf_32').id]
+            ecf_32 = self.env['l10n_latam.document.type'].ref('l10n_do.ecf_32')
+            allowed_docs = [self.env['l10n_latam.document.type'].ref('l10n_do.ecf_31').id, ecf_32.id] if self.partner_id._l10n_do_has_rnc() else [ecf_32.id]
             domain.append(('id', 'in', allowed_docs))
         return domain
 

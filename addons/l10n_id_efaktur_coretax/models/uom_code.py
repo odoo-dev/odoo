@@ -6,6 +6,8 @@ class EfakturUomCode(models.Model):
     _name = "l10n_id_efaktur_coretax.uom.code"
     _description = "UOM categorization according to E-Faktur"
 
+    _l10n_id_efaktur_coretax__uom_code_0018 = models.Ref('l10n_id_efaktur_coretax.uom_code_0018')
+
     code = fields.Char()
     name = fields.Char()
 

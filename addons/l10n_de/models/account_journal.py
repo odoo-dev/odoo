@@ -12,7 +12,7 @@ class AccountJournal(models.Model):
 
         if company.account_fiscal_country_id.code == 'DE':
             tag_ids = res.get('tag_ids', [])
-            tag_ids.append((4, self.env.ref('l10n_de.tag_de_asset_bs_B_IV').id))
+            tag_ids.append((4, self.env['account.account.tag'].ref('l10n_de.tag_de_asset_bs_B_IV').id))
             res['tag_ids'] = tag_ids
 
         return res

@@ -285,12 +285,12 @@ class AccountMove(models.Model):
         """ Get the invoice currency / HUF rate. """
         self.ensure_one()
 
-        if self.company_currency_id == self.env.ref('base.HUF'):
+        if self.company_currency_id == self.env['res.currency'].ref('base.HUF'):
             return 1 / self.invoice_currency_rate
         else:
             return self.env['res.currency']._get_conversion_rate(
                 from_currency=self.currency_id,
-                to_currency=self.env.ref('base.HUF'),
+                to_currency=self.env['res.currency'].ref('base.HUF'),
                 company=self.company_id,
                 date=self._get_invoice_currency_rate_date(),
             )
@@ -457,7 +457,7 @@ class AccountMove(models.Model):
             errors['l10n_hu_edi_company_credentials_missing'] = {
                 'message': _('Please set NAV credentials in the Accounting Settings!'),
                 'action_text': _('Open Accounting Settings'),
-                'action': self.env.ref('account.action_account_config').with_company(companies_missing_credentials[0])._get_action_dict(),
+                'action': self.env['ir.actions.act_window'].ref('account.action_account_config').with_company(companies_missing_credentials[0])._get_action_dict(),
             }
         return errors
 
@@ -820,7 +820,7 @@ class AccountMove(models.Model):
         return 'l10n_hu_edi.nav_online_invoice_xml_3_0'
 
     def _l10n_hu_edi_get_invoice_values(self):
-        eu_country_codes = set(self.env.ref('base.europe').country_ids.mapped('code'))
+        eu_country_codes = set(self.env['res.country.group'].ref('base.europe').country_ids.mapped('code'))
 
         def get_vat_data(partner, force_vat=None):
             if partner.country_code == 'HU' or force_vat:
@@ -846,7 +846,7 @@ class AccountMove(models.Model):
         supplier_bank = self.partner_bank_id if self.partner_bank_id and self.move_type == "out_invoice" else supplier.bank_ids[:1]
         customer_bank = self.partner_bank_id if self.partner_bank_id and self.move_type == "out_refund" else customer.bank_ids[:1]
 
-        currency_huf = self.env.ref('base.HUF')
+        currency_huf = self.env['res.currency'].ref('base.HUF')
         currency_rate = self._l10n_hu_get_currency_rate()
 
         base_invoice = self._l10n_hu_get_chain_base()
@@ -1057,12 +1057,11 @@ class AccountMove(models.Model):
                 for tax_group in subtotal['tax_groups']:
                     invert_dict(tax_group, fields_to_reverse)
 
-        currency_huf = self.env.ref('base.HUF')
         tax_totals['total_vat_amount_in_huf'] = sum(
             line.balance for line in self.line_ids.filtered(lambda l: l.tax_line_id.l10n_hu_tax_type)
         ) * (1 if self.is_purchase_document() else -1)
         tax_totals['formatted_total_vat_amount_in_huf'] = formatLang(
-            self.env, tax_totals['total_vat_amount_in_huf'], currency_obj=currency_huf
+            self.env, tax_totals['total_vat_amount_in_huf'], currency_obj=self.env['res.currency'].ref('base.HUF')
         )
 
         return tax_totals

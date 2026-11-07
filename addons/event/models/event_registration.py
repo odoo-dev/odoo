@@ -376,7 +376,6 @@ class EventRegistration(models.Model):
             message loaded by default
         """
         self.ensure_one()
-        compose_form = self.env.ref('mail.email_compose_message_wizard_form')
         ctx = dict(
             default_model='event.registration',
             default_res_ids=self.ids,
@@ -388,8 +387,8 @@ class EventRegistration(models.Model):
             'type': 'ir.actions.act_window',
             'view_mode': 'form',
             'res_model': 'mail.compose.message',
-            'views': [(compose_form.id, 'form')],
-            'view_id': compose_form.id,
+            'views': [(self.env['ir.ui.view'].ref('mail.email_compose_message_wizard_form').id, 'form')],
+            'view_id': self.env['ir.ui.view'].ref('mail.email_compose_message_wizard_form').id,
             'target': 'new',
             'context': ctx,
         }
@@ -418,8 +417,8 @@ class EventRegistration(models.Model):
         # either trigger the cron, either run schedulers immediately (scaling choice)
         async_scheduler = self.env['ir.config_parameter'].sudo().get_bool('event.event_mail_async')
         if async_scheduler or self.env.context.get('import_file'):
-            self.env.ref('event.event_mail_scheduler')._trigger()
-            self.env.ref('mail.ir_cron_mail_scheduler_action')._trigger()
+            self.env['ir.cron'].ref('event.event_mail_scheduler')._trigger()
+            self.env['ir.cron'].ref('mail.ir_cron_mail_scheduler_action')._trigger()
         else:
             # we could simply call _create_missing_mail_registrations and let cron do their job
             # but it currently leads to several delays. We therefore call execute until

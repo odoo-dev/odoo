@@ -140,8 +140,7 @@ class AccountMove(models.Model):
             return False
 
     def _get_l10n_hr_fiscal_user_id_domain(self):
-        internal_users = self.env.ref('base.group_user')
-        domain = [('user_ids', 'in', internal_users.user_ids.ids)]
+        domain = [('user_ids', 'in', self.env['res.groups'].ref('base.group_user').user_ids.ids)]
         return domain
 
     @api.model

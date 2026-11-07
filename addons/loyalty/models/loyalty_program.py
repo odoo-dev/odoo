@@ -662,7 +662,7 @@ class LoyaltyProgram(models.Model):
             action = self.env["ir.actions.act_window"]._for_xml_id(
                 "loyalty.loyalty_program_discount_loyalty_action"
             )
-            view_id = self.env.ref("loyalty.loyalty_program_view_form").id
+            view_id = self.env['ir.ui.view'].ref('loyalty.loyalty_program_view_form').id
             action["views"] = [[view_id, "form"]]
         action["view_mode"] = "form"
         action["res_id"] = program.id

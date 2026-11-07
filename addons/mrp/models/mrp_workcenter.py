@@ -490,6 +490,9 @@ class MrpWorkcenterProductivityLoss(models.Model):
     _description = "Workcenter Productivity Loss"
     _order = "sequence, id"
 
+    _mrp__block_reason4 = models.Ref('mrp.block_reason4')
+    _mrp__block_reason7 = models.Ref('mrp.block_reason7')
+
     name = fields.Char('Blocking Reason', required=True, translate=True)
     sequence = fields.Integer('Sequence', default=1)
     manual = fields.Boolean('Is a Blocking Reason', default=True)
@@ -601,9 +604,9 @@ class MrpWorkcenterProductivity(models.Model):
     def _loss_type_change(self):
         self.ensure_one()
         if self.workorder_id.duration > self.workorder_id.duration_expected:
-            self.loss_id = self.env.ref("mrp.block_reason4").id
+            self.loss_id = self.env['mrp.workcenter.productivity.loss']._mrp__block_reason4.id
         else:
-            self.loss_id = self.env.ref("mrp.block_reason7").id
+            self.loss_id = self.env['mrp.workcenter.productivity.loss']._mrp__block_reason7.id
 
     def _close(self):
         underperformance_timers = self.env['mrp.workcenter.productivity']
@@ -657,4 +660,4 @@ class MrpWorkcenterCapacity(models.Model):
     @api.depends('product_id')
     def _compute_uom_id(self):
         for capacity in self:
-            capacity.uom_id = capacity.product_id.uom_id or self.env.ref('uom.product_uom_unit')
+            capacity.uom_id = capacity.product_id.uom_id or self.env['uom.uom'].ref('uom.product_uom_unit')

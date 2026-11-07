@@ -225,7 +225,7 @@ class EventRegistration(models.Model):
         """
         sorted_self = self.sorted("id")
         valid_partner = next(
-            (reg.partner_id for reg in sorted_self if reg.partner_id != self.env.ref('base.public_partner')),
+            (reg.partner_id for reg in sorted_self if reg.partner_id != self.env['res.partner']._base__public_partner),
             self.env['res.partner']
         )  # CHECKME: broader than just public partner
 

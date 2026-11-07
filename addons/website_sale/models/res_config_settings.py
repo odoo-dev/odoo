@@ -147,9 +147,7 @@ class ResConfigSettings(models.TransientModel):
                 view.active = True
 
         # Activate / deactivate the automation of suggested products
-        suggested_products_cron_sudo = self.sudo().env.ref(
-            "website_sale.update_suggested_products_cron"
-        )
+        suggested_products_cron_sudo = self.env['ir.cron'].sudo().ref('website_sale.update_suggested_products_cron')
         if self.group_automate_suggested_products and not had_group_asp:  # Enable the feature
             suggested_products_cron_sudo.active = True
             suggested_products_cron_sudo._trigger()

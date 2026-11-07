@@ -27,7 +27,7 @@ class L10nHuEdiReceiveBillsWizard(models.TransientModel):
             message = self.env._("Bills were successfully received from NAV.")
             action = moves._get_records_action(
                 name=self.env._("Bills received from NAV"),
-                views=[(self.env.ref('account.view_in_invoice_bill_tree').id, 'list'), (False, 'form')] if len(moves) > 1 else [(False, 'form')],
+                views=[(self.env['ir.ui.view'].ref('account.view_in_invoice_bill_tree').id, 'list'), (False, 'form')] if len(moves) > 1 else [(False, 'form')],
             )
         else:
             message = self.env._("No bills received from NAV.")

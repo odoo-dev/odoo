@@ -1340,7 +1340,7 @@ class SlideSlide(models.Model):
         return self.env['slide.slide']
 
     def get_backend_menu_id(self):
-        return self.env.ref('website_slides.website_slides_menu_root').id
+        return self.env['ir.ui.menu'].ref('website_slides.website_slides_menu_root').id
 
     @api.model
     def _search_get_detail(self, website, order, options):

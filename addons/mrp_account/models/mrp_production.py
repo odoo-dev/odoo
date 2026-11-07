@@ -83,7 +83,7 @@ class MrpProduction(models.Model):
                 'name': _("WIP Entries of %s", self.name),
                 'domain': [('id', 'in', self.wip_move_ids.ids)],
                 'view_mode': 'list,form',
-                'views': [(self.env.ref('account.view_move_tree').id, 'list')],
+                'views': [(self.env['ir.ui.view'].ref('account.view_move_tree').id, 'list')],
             })
         return action
 

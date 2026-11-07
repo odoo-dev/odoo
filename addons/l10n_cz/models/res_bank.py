@@ -49,7 +49,7 @@ class ResPartnerBank(models.Model):
     def _get_error_messages_for_qr(self, qr_method, debtor_partner, currency):
         if qr_method == 'czk_qr':
             error_messages = []
-            if currency.id != self.env.ref('base.CZK').id:
+            if currency.id != self.env['res.currency'].ref('base.CZK').id:
                 error_messages.append(self.env._("The bank account currency must be CZK to generate the QR code."))
             if self.account_type != 'iban':
                 error_messages.append(self.env._("The bank account type must be IBAN to generate the QR code."))

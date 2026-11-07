@@ -348,9 +348,8 @@ class AccountMove(models.Model):
         if not company.street or not company.state_id or not company.country_id:
             errors.append(_('The street, state and country of company %s must be provided.', company.display_name))
         if self.company_currency_id.name != 'VND':
-            vnd = self.env.ref('base.VND')
-            rate = vnd.with_context(date=self.invoice_date or self.date).rate
-            if not vnd.active or rate == 1:
+            rate = self.env['res.currency'].ref('base.VND').with_context(date=self.invoice_date or self.date).rate
+            if not self.env['res.currency'].ref('base.VND').active or rate == 1:
                 errors.append(_('Please make sure that the VND currency is enabled, and that the exchange rates are set.'))
         return errors
 
@@ -436,7 +435,7 @@ class AccountMove(models.Model):
             # Sinvoice only allow upto 2 decimal place for exchange rate
             exchange_rate = self.env['res.currency']._get_conversion_rate(
                 from_currency=self.currency_id,
-                to_currency=self.env.ref('base.VND'),
+                to_currency=self.env['res.currency'].ref('base.VND'),
                 company=self.company_id,
                 date=self.invoice_date or self.date,
             )

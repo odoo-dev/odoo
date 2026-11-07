@@ -144,7 +144,7 @@ class AccountMove(models.Model):
             'view_mode': 'form',
             'res_model': 'account.move',
             'res_id': move.id,
-            'views': [(self.env.ref('account.view_move_form').id, 'form')],
+            'views': [(self.env['ir.ui.view'].ref('account.view_move_form').id, 'form')],
             'context': self.env.context,
         }
 

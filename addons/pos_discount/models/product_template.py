@@ -15,6 +15,4 @@ class ProductTemplate(models.Model):
         return data
 
     def _get_special_products_to_archive(self):
-        return super()._get_special_products_to_archive() | self.env.ref(
-            "pos_discount.product_product_consumable"
-        ).product_tmpl_id
+        return super()._get_special_products_to_archive() | self.env['product.product']._pos_discount__product_product_consumable.product_tmpl_id

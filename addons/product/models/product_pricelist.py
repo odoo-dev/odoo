@@ -521,7 +521,7 @@ class ProductPricelist(models.Model):
             "res_model": "product.pricelist.item",
             "view_mode": "calendar,form",
             "views": [
-                (self.env.ref('product.product_pricelist_item_calendar').id, 'calendar'),
+                (self.env['ir.ui.view'].ref('product.product_pricelist_item_calendar').id, 'calendar'),
                 (False, 'form'),
             ],
             "domain": [

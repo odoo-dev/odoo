@@ -312,12 +312,12 @@ class StockPicking(models.Model):
         report_actions = []
         shipping_labels_to_print = self.filtered(lambda p: p.picking_type_id.auto_print_carrier_labels)
         if shipping_labels_to_print:
-            action = self.env.ref("stock_delivery.action_report_shipping_labels").report_action(shipping_labels_to_print.ids, config=False)
+            action = self.env['ir.actions.report'].ref('stock_delivery.action_report_shipping_labels').report_action(shipping_labels_to_print.ids, config=False)
             clean_action(action, self.env)
             report_actions.append(action)
         shipping_documents_to_print = self.filtered(lambda p: p.picking_type_id.auto_print_export_documents)
         if shipping_documents_to_print:
-            action = self.env.ref("stock_delivery.action_report_shipping_docs").report_action(shipping_documents_to_print.ids, config=False)
+            action = self.env['ir.actions.report'].ref('stock_delivery.action_report_shipping_docs').report_action(shipping_documents_to_print.ids, config=False)
             clean_action(action, self.env)
             report_actions.append(action)
         return report_actions + super()._get_autoprint_report_actions()

@@ -16,7 +16,7 @@ class SlideChannel(models.Model):
             view_mode='form',
             target='current',
             context=dict(
-                default_mailing_model_id=self.env.ref('base.model_res_partner').id,
+                default_mailing_model_id=self.env['ir.model'].ref('base.model_res_partner').id,
                 default_mailing_domain=domain,
                 # even if excluded, consider attendee communication might be important
                 # (update on courses, etc)

@@ -20,7 +20,7 @@ class StockPicking(models.Model):
 
     def _action_generate_expired_wizard(self):
         expired_move_lines = self._get_move_lines_with_removal_warning()
-        view_id = self.env.ref('product_expiry.confirm_expiry_view').id
+        view_id = self.env['ir.ui.view'].ref('product_expiry.confirm_expiry_view').id
         context = dict(self.env.context)
 
         expired_lot_ids = expired_move_lines.lot_id.ids

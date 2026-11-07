@@ -311,7 +311,7 @@ class Base(models.AbstractModel):
             all_emails += defaults['partners'].mapped('email_normalized')
         ban_emails = []
         # ban emails: don't propose odoobot unless another active partner has the same email
-        root_email = self.env.ref('base.partner_root').email_normalized
+        root_email = self.env['res.partner']._base__partner_root.email_normalized
         if root_email in all_emails and not self.env['res.partner'].search_count([('email_normalized', '=', root_email)], limit=1):
             ban_emails.append(root_email)
         ban_emails += self.env['mail.alias.domain'].sudo()._find_aliases(
@@ -474,7 +474,7 @@ class Base(models.AbstractModel):
             all_emails |= (set(records_emails[record]) | set(partners.mapped('email_normalized'))
                            | set(cc_partners.mapped('email_normalized')))
         # ban emails: never propose odoobot nor aliases
-        ban_emails = [self.env.ref('base.partner_root').email_normalized]
+        ban_emails = [self.env['res.partner']._base__partner_root.email_normalized]
         ban_emails += self.env['mail.alias.domain'].sudo()._find_aliases(
             [email_key(e) for e in all_emails if e and e.strip()]
         )

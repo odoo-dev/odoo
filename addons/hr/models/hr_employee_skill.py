@@ -55,7 +55,7 @@ class HrEmployeeSkill(models.Model):
                 'show_employee': True,
                 'default_skill_type_id': self.env['hr.skill.type'].search([('is_certification', '=', True)], limit=1).id
             },
-            'views': [(self.env.ref('hr.employee_skill_view_inherit_certificate_form').id, 'form')],
+            'views': [(self.env['ir.ui.view'].ref('hr.employee_skill_view_inherit_certificate_form').id, 'form')],
         }
 
     def action_save(self):

@@ -48,7 +48,7 @@ class SurveyUser_Input(models.Model):
                         # skip if user still has attempts left
                         continue
 
-                    self.env.ref('website_slides_survey.mail_template_user_input_certification_failed').send_mail(
+                    self.env['mail.template'].ref('website_slides_survey.mail_template_user_input_certification_failed').send_mail(
                         user_input.id, email_layout_xmlid="mail.mail_notification_light"
                     )
 

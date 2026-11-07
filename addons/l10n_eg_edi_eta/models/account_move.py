@@ -568,7 +568,7 @@ class AccountMove(models.Model):
             })
             totals['discount_total'] += discount_amount
             totals['total_price_subtotal_before_discount'] += price_subtotal_before_discount
-            if self.currency_id != self.env.ref('base.EGP'):
+            if self.currency_id != self.env['res.currency'].ref('base.EGP'):
                 lines[-1]['unitValue']['currencyExchangeRate'] = self._l10n_eg_edi_round(self._l10n_eg_edi_exchange_currency_rate())
                 lines[-1]['unitValue']['amountSold'] = line.price_unit
         return lines, totals

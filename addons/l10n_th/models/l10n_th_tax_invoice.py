@@ -106,4 +106,4 @@ class L10nThTaxInvoice(models.Model):
 
     def action_print_tax_invoice_pdf(self):
         self.ensure_one()
-        return self.env.ref('l10n_th.action_report_tax_invoice').report_action(self.ids, config=False)
+        return self.env['ir.actions.report'].ref('l10n_th.action_report_tax_invoice').report_action(self.ids, config=False)

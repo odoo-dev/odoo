@@ -253,7 +253,7 @@ class PosOrderReceipt(models.AbstractModel):
             },
             'conditions': {
                 'basic_receipt': basic_receipt,
-                'display_vat': self.company_id.country_id.id in self.env.ref("base.europe").country_ids.ids,
+                'display_vat': self.company_id.country_id.id in self.env['res.country.group'].ref('base.europe').country_ids.ids,
                 'display_qr_code': use_qr_code,
                 'display_url': self.company_id.point_of_sale_ticket_portal_url_display_mode != 'qr_code',
                 'use_self_invoicing': self.company_id.point_of_sale_use_ticket_qr_code,
@@ -623,7 +623,7 @@ class PosOrderReceipt(models.AbstractModel):
             "group": group,
             "combo_line_ids": line.combo_line_ids.ids,
             "combo_parent_uuid": line.combo_parent_id.uuid,
-            "uom_is_base_unit": line.product_id.uom_id.id == self.env.ref('uom.product_uom_unit').id
+            "uom_is_base_unit": line.product_id.uom_id.id == self.env['uom.uom'].ref('uom.product_uom_unit').id
         }
 
     def _get_line_category_group(self, line):

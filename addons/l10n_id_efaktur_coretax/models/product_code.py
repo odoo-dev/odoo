@@ -9,6 +9,7 @@ class EfakturProductCode(models.Model):
     _rec_name = "code"
     _rec_names_search = ('code', 'description')
 
+    _l10n_id_efaktur_coretax__product_code_000000_goods = models.Ref('l10n_id_efaktur_coretax.product_code_000000_goods')
     _l10n_id_efaktur_coretax__product_code_000000_goods_optional = models.Ref('l10n_id_efaktur_coretax.product_code_000000_goods', required=False)
     _l10n_id_efaktur_coretax__product_code_000000_service = models.Ref('l10n_id_efaktur_coretax.product_code_000000_service', required=False)
 

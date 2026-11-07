@@ -240,7 +240,7 @@ class AccountMove(models.Model):
                 ('qty_to_invoice_raw', '!=', 0),
                 ('qty_to_invoice', '!=', 0),
             ],
-            'views': [(self.env.ref('purchase.purchase_bill_line_match_tree').id, 'list')],
+            'views': [(self.env['ir.ui.view'].ref('purchase.purchase_bill_line_match_tree').id, 'list')],
         }
 
     def action_view_source_purchase_orders(self):
@@ -250,7 +250,7 @@ class AccountMove(models.Model):
         if len(source_orders) > 1:
             result['domain'] = [('id', 'in', source_orders.ids)]
         elif len(source_orders) == 1:
-            result['views'] = [(self.env.ref('purchase.purchase_order_form').id, 'form')]
+            result['views'] = [(self.env['ir.ui.view'].ref('purchase.purchase_order_form').id, 'form')]
             result['res_id'] = source_orders.id
         else:
             result = {'type': 'ir.actions.act_window_close'}

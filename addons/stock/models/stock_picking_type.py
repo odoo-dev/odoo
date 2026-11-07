@@ -455,7 +455,7 @@ class StockPickingType(models.Model):
                 self.env['stock.warehouse']._warehouse_redirect_warning()
             stock_location = picking_type.warehouse_id.lot_stock_id
             if picking_type.code == 'incoming':
-                picking_type.default_location_src_id = self.env.ref('stock.stock_location_suppliers').id
+                picking_type.default_location_src_id = self.env['stock.location']._stock__stock_location_suppliers.id
             else:
                 picking_type.default_location_src_id = stock_location.id
 
@@ -466,7 +466,7 @@ class StockPickingType(models.Model):
                 self.env['stock.warehouse']._warehouse_redirect_warning()
             stock_location = picking_type.warehouse_id.lot_stock_id
             if picking_type.code == 'outgoing':
-                picking_type.default_location_dest_id = self.env.ref('stock.stock_location_customers').id
+                picking_type.default_location_dest_id = self.env['stock.location']._stock__stock_location_customers.id
             else:
                 picking_type.default_location_dest_id = stock_location.id
 

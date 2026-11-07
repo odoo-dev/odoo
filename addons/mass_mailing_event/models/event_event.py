@@ -15,7 +15,7 @@ class EventEvent(models.Model):
             'view_mode': 'form',
             'target': 'current',
             'context': {
-                'default_mailing_model_id': self.env.ref('event.model_event_registration').id,
+                'default_mailing_model_id': self.env['ir.model'].ref('event.model_event_registration').id,
                 'default_mailing_domain': repr([('event_id', 'in', self.ids), ('state', 'not in', ['cancel', 'draft'])]),
                 'default_subject': _("Event: %s", self.name),
                 # even if excluded, consider event communication might be important
@@ -32,7 +32,7 @@ class EventEvent(models.Model):
             'view_mode': 'form',
             'target': 'current',
             'context': {
-                'default_mailing_model_id': self.env.ref('base.model_res_partner').id,
+                'default_mailing_model_id': self.env['ir.model'].ref('base.model_res_partner').id,
                 'default_subject': _("Event: %s", self.name),
             },
         }

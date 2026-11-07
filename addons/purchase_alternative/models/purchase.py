@@ -32,13 +32,12 @@ class PurchaseOrder(models.Model):
         if self.alternative_po_ids and not self.env.context.get('skip_alternative_check', False):
             alternative_po_ids = self.alternative_po_ids.filtered(lambda po: po.state in ['draft', 'sent', 'to approve'] and po.id not in self.ids)
             if alternative_po_ids:
-                view = self.env.ref('purchase_alternative.purchase_alternative_warning_form')
                 return {
                     'name': _("What about the alternative Requests for Quotations?"),
                     'type': 'ir.actions.act_window',
                     'view_mode': 'form',
                     'res_model': 'purchase.alternative.warning',
-                    'views': [(view.id, 'form')],
+                    'views': [(self.env['ir.ui.view'].ref('purchase_alternative.purchase_alternative_warning_form').id, 'form')],
                     'target': 'new',
                     'context': dict(self.env.context, default_alternative_po_ids=alternative_po_ids.ids, default_po_ids=self.ids),
                 }
@@ -88,7 +87,7 @@ class PurchaseOrder(models.Model):
             'type': 'ir.actions.act_window',
             'view_mode': 'form',
             'res_model': 'purchase.alternative.create',
-            'view_id': self.env.ref('purchase_alternative.purchase_alternative_create_form').id,
+            'view_id': self.env['ir.ui.view'].ref('purchase_alternative.purchase_alternative_create_form').id,
             'target': 'new',
             'context': ctx,
         }
@@ -99,7 +98,7 @@ class PurchaseOrder(models.Model):
             search_default_groupby_product=True,
             purchase_order_id=self.id,
         )
-        view_id = self.env.ref('purchase_alternative.purchase_order_line_view_compare_list').id
+        view_id = self.env['ir.ui.view'].ref('purchase_alternative.purchase_order_line_view_compare_list').id
         return {
             'name': _('Compare Order Lines'),
             'type': 'ir.actions.act_window',

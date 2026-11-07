@@ -37,8 +37,8 @@ class HrJob(models.Model):
 
     def _recruiter_domain(self):
         recruiter_groups = [
-            self.env.ref("hr_recruitment.group_hr_recruitment_manager").id,
-            self.env.ref("hr_recruitment.group_hr_recruitment_user").id,
+            self.env['res.groups'].ref('hr_recruitment.group_hr_recruitment_manager').id,
+            self.env['res.groups'].ref('hr_recruitment.group_hr_recruitment_user').id,
         ]
         return [
             ("user_id", "!=", False),
@@ -444,7 +444,7 @@ class HrJob(models.Model):
         return res
 
     def _creation_subtype(self):
-        return self.env.ref('hr_recruitment.mt_job_new')
+        return self.env['mail.message.subtype'].ref('hr_recruitment.mt_job_new')
 
     def _get_accessible_applicants(self):
         return self.application_ids
@@ -461,9 +461,9 @@ class HrJob(models.Model):
             },
             'view_mode': 'list',
             'views': [
-                (self.env.ref('hr_recruitment.ir_attachment_hr_recruitment_list_view').id, 'list')
+                (self.env['ir.ui.view'].ref('hr_recruitment.ir_attachment_hr_recruitment_list_view').id, 'list')
             ],
-            'search_view_id': self.env.ref('hr_recruitment.ir_attachment_view_search_inherit_hr_recruitment').ids,
+            'search_view_id': self.env['ir.ui.view'].ref('hr_recruitment.ir_attachment_view_search_inherit_hr_recruitment').ids,
             'domain': ['|',
                 '&', ('res_model', '=', 'hr.job'), ('res_id', 'in', self.ids),
                 '&', ('res_model', '=', 'hr.applicant'), ('res_id', 'in', self._get_accessible_applicants().ids),
@@ -485,7 +485,7 @@ class HrJob(models.Model):
     @api.model
     def _action_load_recruitment_scenario(self):
 
-        admin_user = self.env.ref('base.user_admin')
+        admin_user = self.env['res.users']._base__user_admin
         employee_admin = self.env['hr.employee'].search([('user_id', '=', admin_user.id)], limit=1)
 
         if not employee_admin:
@@ -493,7 +493,7 @@ class HrJob(models.Model):
                 'name': admin_user.name,
                 'user_id': admin_user.id,
                 'image_1920': admin_user.image_1920,
-                'structure_type_id': self.env.ref('hr.structure_type_employee').id,
+                'structure_type_id': self.env['hr.payroll.structure.type']._hr__structure_type_employee.id,
             })
 
         convert_file(
@@ -552,7 +552,7 @@ class HrJob(models.Model):
         action.update({
             'name': self.env._("Matching Applicants"),
             'views': [
-                (self.env.ref('hr_recruitment.crm_case_tree_view_inherit_hr_recruitment_skills').id, 'list'),
+                (self.env['ir.ui.view'].ref('hr_recruitment.crm_case_tree_view_inherit_hr_recruitment_skills').id, 'list'),
                 (False, 'form'),
             ],
             'context': context,
@@ -570,7 +570,7 @@ class HrJob(models.Model):
             "type": "ir.actions.act_window",
             "res_model": "job.add.applicants",
             "target": "new",
-            "views": [[self.env.ref('hr_recruitment.job_add_applicants_from_job_view_form').id, "form"]],
+            "views": [[self.env['ir.ui.view'].ref('hr_recruitment.job_add_applicants_from_job_view_form').id, "form"]],
             "context": {
                 "is_modal": True,
                 "default_job_ids": self.ids

@@ -274,7 +274,7 @@ class AccountLock_Exception(models.Model):
             'name':  self.env._("Audit Trail"),
             'type': 'ir.actions.act_window',
             'res_model': 'mail.message',
-            'view_id': self.env.ref('account.view_message_tree_audit_log').id,
+            'view_id': self.env['ir.ui.view'].ref('account.view_message_tree_audit_log').id,
             'view_mode': 'list',
             'domain': self._get_audit_trail_during_exception_domain(),
        }

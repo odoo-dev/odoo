@@ -642,8 +642,8 @@ class PosSession(models.Model):
             'res_model': 'account.move',
             'domain': [('id', 'in', all_related_moves.ids)],
             'views': [
-                (self.env.ref('account.view_move_tree').id, 'list'),
-                (self.env.ref('account.view_move_form').id, 'form'),
+                (self.env['ir.ui.view'].ref('account.view_move_tree').id, 'list'),
+                (self.env['ir.ui.view'].ref('account.view_move_form').id, 'form'),
             ],
         }
 
@@ -746,8 +746,8 @@ class PosSession(models.Model):
             'res_model': 'pos.order',
             'view_mode': 'list,form',
             'views': [
-                (self.env.ref('point_of_sale.view_pos_order_tree_no_session_id').id, 'list'),
-                (self.env.ref('point_of_sale.view_pos_pos_form').id, 'form'),
+                (self.env['ir.ui.view'].ref('point_of_sale.view_pos_order_tree_no_session_id').id, 'list'),
+                (self.env['ir.ui.view'].ref('point_of_sale.view_pos_pos_form').id, 'form'),
                 ],
             'type': 'ir.actions.act_window',
             'domain': [('session_id', 'in', self.ids)],

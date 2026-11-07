@@ -83,9 +83,8 @@ class AccountJournal(models.Model):
             },
         }
         if not self.company_id.l10n_ar_afip_responsibility_type_id:
-            action = self.env.ref('base.action_res_company_form')
             msg = _('Can not create chart of account until you configure your company ARCA Responsibility and VAT.')
-            raise RedirectWarning(msg, action.id, _('Go to Companies'))
+            raise RedirectWarning(msg, self.env['ir.actions.act_window'].ref('base.action_res_company_form').id, _('Go to Companies'))
 
         letters = letters_data['issued' if self.l10n_ar_is_pos else 'received'][
             self.company_id.l10n_ar_afip_responsibility_type_id.code]

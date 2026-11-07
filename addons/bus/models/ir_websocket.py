@@ -104,5 +104,4 @@ class IrWebsocket(models.AbstractModel):
         if wsrequest.session.uid is not None:
             check(wsrequest.session, wsrequest)
         else:
-            public_user = wsrequest.env.ref('base.public_user')
-            wsrequest.update_env(user=public_user.id)
+            wsrequest.update_env(user=wsrequest.env['res.users']._base__public_user.id)

@@ -71,7 +71,7 @@ class ResConfigSettings(models.TransientModel):
             'view_mode': 'form',
             'res_model': 'res.groups',
             'res_id': default_group.id,
-            'views': [(self.env.ref('base.view_default_groups_form').id, 'form')],
+            'views': [(self.env['ir.ui.view'].ref('base.view_default_groups_form').id, 'form')],
             'target': 'new',
         }
 

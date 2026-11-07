@@ -22,7 +22,7 @@ class StockPackage(models.Model):
     def _compute_weight_is_kg(self):
         self.weight_is_kg = False
         uom_id = self.env['product.template']._get_weight_uom_id_from_ir_config_parameter()
-        if uom_id == self.env.ref('uom.product_uom_kgm'):
+        if uom_id == self.env['uom.uom'].ref('uom.product_uom_kgm'):
             self.weight_is_kg = True
         digits = self.env['decimal.precision'].precision_get('Product Unit')
         self.weight_uom_rounding = 10 ** -digits

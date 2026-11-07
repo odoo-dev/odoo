@@ -259,7 +259,7 @@ class ResCompany(models.Model):
                 company.l10n_fr_pdp_send_to_ppf
                 and company.account_peppol_edi_user
                 and company.account_fiscal_country_id.code == 'FR'
-                and company.currency_id == self.env.ref('base.EUR')
+                and company.currency_id == self.env['res.currency'].ref('base.EUR')
             )
             if not previous_state and company.l10n_fr_f10_enable_reporting:
                 changed_companies += company

@@ -91,7 +91,7 @@ class ResPartner(models.Model):
 
     def _action_show(self):
         """If self is a singleton, directly access the form view. If it is a recordset, open a list view"""
-        view_id = self.env.ref('base.view_partner_form').id
+        view_id = self.env['ir.ui.view'].ref('base.view_partner_form').id
         action = {
             'type': 'ir.actions.act_window',
             'res_model': 'res.partner',

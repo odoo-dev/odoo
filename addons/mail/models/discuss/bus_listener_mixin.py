@@ -18,7 +18,7 @@ class BusListenerMixin(models.AbstractModel):
         store.add_model_values(
             "mail.message",
             lambda res: (
-                res.one("author_id", [], value=self.env.ref("base.partner_root")),
+                res.one("author_id", [], value=self.env['res.partner']._base__partner_root),
                 res.attr("body", Markup("<span class='o_mail_notification'>%s</span>") % content),
                 res.attr("id", message_id),
                 res.attr("is_transient", True),

@@ -75,10 +75,10 @@ class StockPicking(models.Model):
         productions = self._get_subcontract_production().filtered(lambda m: m.state != 'cancel')
         ctx = {"mrp_subcontracting": True}
         if self.env.user._is_portal():
-            form_view_id = self.env.ref('mrp_subcontracting.mrp_production_subcontracting_portal_form_view')
+            form_view_id = self.env['ir.ui.view'].ref('mrp_subcontracting.mrp_production_subcontracting_portal_form_view')
             ctx.update(no_breadcrumbs=False)
         else:
-            form_view_id = self.env.ref('mrp_subcontracting.mrp_production_subcontracting_form_view')
+            form_view_id = self.env['ir.ui.view'].ref('mrp_subcontracting.mrp_production_subcontracting_form_view')
         action = {
             'type': 'ir.actions.act_window',
             'res_model': 'mrp.production',
@@ -89,7 +89,7 @@ class StockPicking(models.Model):
             action.update({
                 'name': _('Subcontracting MOs'),
                 'views': [
-                    (self.env.ref('mrp_subcontracting.mrp_production_subcontracting_tree_view').id, 'list'),
+                    (self.env['ir.ui.view'].ref('mrp_subcontracting.mrp_production_subcontracting_tree_view').id, 'list'),
                     (form_view_id.id, 'form'),
                 ],
                 'domain': [('id', 'in', productions.ids)],

@@ -33,7 +33,7 @@ class ProductTemplate(models.Model):
             template.purchased_product_qty = template.uom_id.round(sum(p.purchased_product_qty for p in template.product_variant_ids))
 
     def _get_backend_root_menu_ids(self):
-        return super()._get_backend_root_menu_ids() + [self.env.ref('purchase.menu_purchase_root').id]
+        return super()._get_backend_root_menu_ids() + [self.env['ir.ui.menu'].ref('purchase.menu_purchase_root').id]
 
     @api.model
     def get_import_templates(self):
@@ -164,7 +164,7 @@ class ProductProduct(models.Model):
         return action
 
     def _get_backend_root_menu_ids(self):
-        return super()._get_backend_root_menu_ids() + [self.env.ref('purchase.menu_purchase_root').id]
+        return super()._get_backend_root_menu_ids() + [self.env['ir.ui.menu'].ref('purchase.menu_purchase_root').id]
 
     def _update_uom(self, to_uom_id):
         for uom, product, po_lines in self.env['purchase.order.line']._read_group(

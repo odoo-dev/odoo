@@ -22,7 +22,7 @@ class PosConfirmationWizard(models.TransientModel):
         return {
             'name': _('Create Invoice(s)'),
             'view_mode': 'form',
-            'view_id': self.env.ref('point_of_sale.view_pos_make_invoice').id,
+            'view_id': self.env['ir.ui.view'].ref('point_of_sale.view_pos_make_invoice').id,
             'res_model': 'pos.make.invoice',
             'target': 'new',
             'type': 'ir.actions.act_window',

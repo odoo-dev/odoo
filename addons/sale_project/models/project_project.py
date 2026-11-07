@@ -274,7 +274,7 @@ class ProjectProject(models.Model):
                 'default_company_id': self.company_id.id,
                 'default_order_id': self.sale_order_id.id,
             },
-            'views': [(self.env.ref('sale_project.sale_order_line_view_form_editable').id, 'form')],
+            'views': [(self.env['ir.ui.view'].ref('sale_project.sale_order_line_view_form_editable').id, 'form')],
         }
         if len(all_sale_order_lines) <= 1:
             action_window['res_id'] = all_sale_order_lines.id
@@ -282,8 +282,8 @@ class ProjectProject(models.Model):
             action_window.update({
                 'domain': [('id', 'in', all_sale_order_lines.ids)],
                 'views': [
-                    (self.env.ref('sale_project.view_order_line_tree_with_create').id, 'list'),
-                    (self.env.ref('sale_project.sale_order_line_view_form_editable').id, 'form'),
+                    (self.env['ir.ui.view'].ref('sale_project.view_order_line_tree_with_create').id, 'list'),
+                    (self.env['ir.ui.view'].ref('sale_project.sale_order_line_view_form_editable').id, 'form'),
                 ],
             })
             if not self.partner_id:
@@ -315,7 +315,7 @@ class ProjectProject(models.Model):
     def action_get_list_view(self):
         action = super().action_get_list_view()
         if self.allow_billable:
-            action['views'] = [(self.env.ref('sale_project.project_milestone_view_tree').id, view_type) if view_type == 'list' else (view_id, view_type) for view_id, view_type in action['views']]
+            action['views'] = [(self.env['ir.ui.view'].ref('sale_project.project_milestone_view_tree').id, view_type) if view_type == 'list' else (view_id, view_type) for view_id, view_type in action['views']]
         return action
 
     @api.depends('sale_order_id.invoice_status', 'tasks.sale_order_id.invoice_status')

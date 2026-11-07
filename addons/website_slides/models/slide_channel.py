@@ -605,17 +605,17 @@ class SlideChannel(models.Model):
             raise AccessError(_('Not enough karma to review'))
         if parent_id:
             parent_message = self.env['mail.message'].sudo().browse(parent_id)
-            if parent_message.subtype_id and parent_message.subtype_id == self.env.ref('website_slides.mt_channel_slide_published'):
-                subtype_id = self.env.ref('mail.mt_note').id
+            if parent_message.subtype_id and parent_message.subtype_id == self.env['mail.message.subtype'].ref('website_slides.mt_channel_slide_published'):
+                subtype_id = self.env['mail.message.subtype'].ref('mail.mt_note').id
         message = super().message_post(parent_id=parent_id, subtype_id=subtype_id, **kwargs)
         if self.env.user._is_internal() and not message.rating_value:
             return message
-        if message.subtype_id == self.env.ref("mail.mt_comment"):
+        if message.subtype_id == self.env['mail.message.subtype'].ref('mail.mt_comment'):
             domain = [
                 ("res_id", "=", self.id),
                 ("author_id", "=", message.author_id.id),
                 ("model", "=", "slide.channel"),
-                ("subtype_id", "=", self.env.ref("mail.mt_comment").id),
+                ("subtype_id", "=", self.env['mail.message.subtype'].ref('mail.mt_comment').id),
                 ("rating_ids", "!=", False),
             ]
             if self.env["mail.message"].search_count(domain, limit=2) > 1:
@@ -779,7 +779,7 @@ class SlideChannel(models.Model):
             for channel, partner_ids in result_channel_partners_map.items():
                 channel.message_subscribe(
                     partner_ids=partner_ids,
-                    subtype_ids=[self.env.ref('website_slides.mt_channel_slide_published').id]
+                    subtype_ids=[self.env['mail.message.subtype'].ref('website_slides.mt_channel_slide_published').id]
                 )
         return result_channel_partners
 
@@ -1052,7 +1052,7 @@ class SlideChannel(models.Model):
             })
 
     def get_backend_menu_id(self):
-        return self.env.ref('website_slides.website_slides_menu_root').id
+        return self.env['ir.ui.menu'].ref('website_slides.website_slides_menu_root').id
 
     @api.model
     def _search_get_detail(self, website, order, options):

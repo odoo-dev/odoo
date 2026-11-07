@@ -14,7 +14,7 @@ class BaseModuleUpdate(models.TransientModel):
         updated, added = self.env['ir.module.module'].update_list()
         # Only load uninstalled modules' terms for the admin users' languages.
         # If an admin user changes languages, they can trigger `update_list` to load the missing terms.
-        langs = self.env.ref('base.group_system').all_user_ids.mapped('lang')
+        langs = self.env['res.groups'].ref('base.group_system').all_user_ids.mapped('lang')
         self.env['ir.module.module']._load_non_installed_modules_manifest_terms(langs)
         self.write({'updated': updated, 'added': added, 'state': 'done'})
 

@@ -13,7 +13,7 @@ class AccountJournal(models.Model):
     def _default_outbound_payment_methods(self):
         res = super()._default_outbound_payment_methods()
         if self._is_payment_method_available('check_printing'):
-            res |= self.env.ref('account_check_printing.account_payment_method_check')
+            res |= self.env['account.payment.method'].ref('account_check_printing.account_payment_method_check')
         return res
 
     check_manual_sequencing = fields.Boolean(

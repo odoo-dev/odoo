@@ -630,8 +630,8 @@ class ForumPost(models.Model):
         if any(post.parent_id or post.state != 'close' or not post.can_close for post in self):
             return False
 
-        reason_offensive = self.env.ref('website_forum.reason_7')
-        reason_spam = self.env.ref('website_forum.reason_8')
+        reason_offensive = self.env['forum.post.reason']._website_forum__reason_7
+        reason_spam = self.env['forum.post.reason']._website_forum__reason_8
         for post in self:
             if post.closed_reason_id in (reason_offensive, reason_spam):
                 _logger.info('Upvoting user <%s>, reopening spam/offensive question',
@@ -651,8 +651,8 @@ class ForumPost(models.Model):
         if any(post.parent_id for post in self):
             return False
 
-        reason_offensive = self.env.ref('website_forum.reason_7').id
-        reason_spam = self.env.ref('website_forum.reason_8').id
+        reason_offensive = self.env['forum.post.reason']._website_forum__reason_7.id
+        reason_spam = self.env['forum.post.reason']._website_forum__reason_8.id
         if reason_id in (reason_offensive, reason_spam):
             for post in self:
                 _logger.info('Downvoting user <%s> for posting spam/offensive contents',
@@ -753,7 +753,7 @@ class ForumPost(models.Model):
         elif key == 'post_id':
             spams = self.filtered(lambda x: x.id in values)
 
-        reason_id = self.env.ref('website_forum.reason_8').id
+        reason_id = self.env['forum.post.reason']._website_forum__reason_8.id
         _logger.info('User %s marked as spams (in batch): %s' % (self.env.uid, spams))
         return spams._mark_as_offensive(reason_id)
 

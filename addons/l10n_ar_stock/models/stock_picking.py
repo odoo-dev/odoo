@@ -89,7 +89,7 @@ class StockPicking(models.Model):
             self._l10n_ar_send_delivery_guide(force_send=True)
             return None
         self.l10n_ar_delivery_guide_cron_user_id = self.env.user
-        self.env.ref('l10n_ar_stock.ir_cron_l10n_ar_send_delivery_guide')._trigger()
+        self.env['ir.cron'].ref('l10n_ar_stock.ir_cron_l10n_ar_send_delivery_guide')._trigger()
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
@@ -136,10 +136,9 @@ class StockPicking(models.Model):
         PDFs are rendered in a single wkhtmltopdf call and split per record,
         which is dramatically faster than per-record rendering for batches.
         """
-        template = self.env.ref('l10n_ar_stock.email_template_ar_remitos_delivery_guide')
-        pdf_action = self.env.ref('l10n_ar_stock.action_delivery_guide_report_pdf')
+        template = self.env['mail.template'].ref('l10n_ar_stock.email_template_ar_remitos_delivery_guide')
 
-        pdf_contents = self._l10n_ar_render_delivery_guide_pdfs(pdf_action)
+        pdf_contents = self._l10n_ar_render_delivery_guide_pdfs(self.env['ir.actions.report'].ref('l10n_ar_stock.action_delivery_guide_report_pdf'))
 
         attachment_vals = [{
             'name': f'Remito - {picking.l10n_ar_delivery_guide_number}.pdf',

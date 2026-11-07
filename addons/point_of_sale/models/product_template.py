@@ -264,11 +264,7 @@ class ProductTemplate(models.Model):
                 ))
 
     def _get_special_products_to_archive(self):
-        return self.env.ref(
-            "point_of_sale.product_product_tip"
-        ).product_tmpl_id | self.env.ref(
-            "point_of_sale.product_product_service_fee"
-        ).product_tmpl_id
+        return self.env['product.product']._point_of_sale__product_product_tip.product_tmpl_id | self.env['product.product']._point_of_sale__product_product_service_fee.product_tmpl_id
 
     def action_archive(self):
         special_products = self._get_special_products_to_archive()

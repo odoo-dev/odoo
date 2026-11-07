@@ -148,7 +148,7 @@ class NemhandelRegistration(models.TransientModel):
         if not self.env.company.vat:
             raise RedirectWarning(
                 _("Please fill in your company's VAT"),
-                self.env.ref('base.action_res_company_form').id,
+                self.env['ir.actions.act_window'].ref('base.action_res_company_form').id,
                 _('Company settings')
             )
 

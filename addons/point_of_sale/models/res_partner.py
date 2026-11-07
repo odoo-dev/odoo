@@ -128,7 +128,7 @@ class ResPartner(models.Model):
             'view_mode': 'form',
             'type': 'ir.actions.act_window',
             'res_model': 'res.partner',
-            'views': [(self.env.ref('point_of_sale.view_partner_form_pos_ui').id, 'form')],
+            'views': [(self.env['ir.ui.view'].ref('point_of_sale.view_partner_form_pos_ui').id, 'form')],
         }
 
     def _get_current_partner(self, *, pos_order=False, **kwargs):

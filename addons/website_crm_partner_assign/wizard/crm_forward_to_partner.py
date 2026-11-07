@@ -57,7 +57,7 @@ class CrmLeadForwardToPartner(models.TransientModel):
     def action_forward(self):
         self.ensure_one()
         template = self.env['mail.template'].ref('website_crm_partner_assign.email_template_lead_forward_mail')
-        portal_group = self.env.ref('base.group_portal')
+        portal_group = self.env['res.groups'].ref('base.group_portal')
 
         local_context = self.env.context.copy()
         if not (self.forward_type == 'single'):
@@ -86,9 +86,8 @@ class CrmLeadForwardToPartner(models.TransientModel):
 
         for partner_id, partner_leads in partners_leads.items():
             in_portal = False
-            if portal_group:
-                for contact in (partner.child_ids or partner).filtered(lambda contact: contact.user_ids):
-                    in_portal = portal_group.id in [g.id for g in contact.user_ids[0].all_group_ids]
+            for contact in (partner.child_ids or partner).filtered(lambda contact: contact.user_ids):
+                in_portal = portal_group.id in [g.id for g in contact.user_ids[0].all_group_ids]
 
             local_context['partner_id'] = partner_leads['partner']
             local_context['partner_leads'] = partner_leads['leads']
