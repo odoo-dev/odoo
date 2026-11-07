@@ -708,11 +708,11 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
             'action_trigger_download': 'l10n_pl_edi_batch.ir_cron_download',
             'action_trigger_import': 'l10n_pl_edi_batch.ir_cron_import',
         }
-        # A plain internal user, without access to the crons, can use the buttons
+        # An invoicing user, without access to the crons, can use the buttons
         user = self.env['res.users'].create({
             'name': 'KSeF user',
             'login': 'ksef_user',
-            'groups_id': [Command.set([self.env.ref('base.group_user').id])],
+            'groups_id': [Command.set([self.env.ref('account.group_account_invoice').id])],
             'company_id': self.company.id,
             'company_ids': [Command.set([self.company.id])],
         })

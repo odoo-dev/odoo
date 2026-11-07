@@ -11,7 +11,9 @@ from odoo.exceptions import UserError
 from odoo.tools import str2bool
 
 from odoo.addons.l10n_pl_edi.exceptions import KSeFRateLimitError
-from odoo.addons.l10n_pl_edi_batch.tools.ksef_api_service import KsefApiServiceBatch as Service
+from odoo.addons.l10n_pl_edi_batch.tools.ksef_api_service import (
+    KsefApiServiceBatch as Service,
+)
 
 _logger = logging.getLogger(__name__)
 
@@ -107,9 +109,9 @@ class BatchDownload(models.Model):
         self.ensure_one()
         if self.is_expired or code not in (KSEF_IN_PROGRESS, KSEF_READY):
             return 'failed'
-        elif code == KSEF_IN_PROGRESS:
+        if code == KSEF_IN_PROGRESS:
             return 'requested'
-        elif code == KSEF_READY and self.part_ids:
+        if code == KSEF_READY and self.part_ids:
             parts_missing = self.part_ids.filtered(lambda part: not part.with_context(bin_size=True).decrypted_file)
             return 'downloading' if parts_missing else 'downloaded'
         return 'done'
@@ -290,25 +292,21 @@ class BatchDownload(models.Model):
 
         def check_status(company):
             if batch := self.search([('company_id', '=', company.id), ('state', '=', 'requested')], order='date_to desc', limit=1):
-                service = Service(company)
-                data = service.download_batch_status(batch.name)
-                code = data['content'].get('status', {}).get('code') or KSEF_IN_PROGRESS
-                state = batch._compute_state_by_code(code)
-                if state == 'downloading':
-                    self.env.ref('l10n_pl_edi_batch.ir_cron_download')._trigger()
-                    # In case it's truncated, we create another batch to get the rest
-                    if batch.kind == 'historic':
-                        package = (data.get('content') or {}).get('package', {})
-                        if package.get('isTruncated'):
-                            last_date = parse(package['lastInvoicingDate']).astimezone(timezone.utc).replace(tzinfo=None)
-                            old_date_to = batch.date_to
-                            data['date_to'] = last_date
-                            self._create_batch_download(batch.company_id, last_date, old_date_to)
-                elif state == 'requested':
-                    batch.retry_count += 1
-                    batch._delayed_trigger('l10n_pl_edi_batch.ir_cron_check_status')
+                data = Service(company).download_batch_status(batch.name)
+                old_date_to = batch.date_to
+                package = data['content'].get('package') or {}
+                if is_truncated := (batch.kind == 'historic' and package.get('isTruncated')):
+                    data['date_to'] = parse(package['lastInvoicingDate']).astimezone(timezone.utc).replace(tzinfo=None)
 
                 batch.update(data)
+                if batch.state == 'downloading':
+                    self.env.ref('l10n_pl_edi_batch.ir_cron_download')._trigger()
+                    # A truncated historic export: this batch now ends where KSeF stopped, request the rest
+                    if is_truncated:
+                        self._create_batch_download(company, batch.date_to, old_date_to)
+                elif batch.state == 'requested':
+                    batch.retry_count += 1
+                    batch._delayed_trigger('l10n_pl_edi_batch.ir_cron_check_status')
 
         self._run_for_all_companies(check_status, 'l10n_pl_edi_batch.ir_cron_check_status')
 
@@ -321,7 +319,7 @@ class BatchDownload(models.Model):
                     missing_parts[:1].download()
                 except UserError as e:
                     if batch._raise_retry_count(str(e)):
-                        self._delayed_trigger('l10n_pl_edi_batch.ir_cron_download')  # retry
+                        batch._delayed_trigger('l10n_pl_edi_batch.ir_cron_download')  # retry
                     return
                 if batch.state == 'downloading':
                     self.env['ir.cron']._notify_progress(done=1, remaining=len(missing_parts) - 1)
@@ -356,8 +354,8 @@ class BatchDownload(models.Model):
                 except zipfile.BadZipFile as e:
                     batch.part_ids.decrypted_file = False
                     batch.part_ids.invalidate_recordset(['decrypted_file'])
-                    batch._raise_retry_count(self.env._("The KSeF batch ZIP is corrupt: %s", e))
-                    batch._delayed_trigger('l10n_pl_edi_batch.download')  # retry
+                    if batch._raise_retry_count(self.env._("The KSeF batch ZIP is corrupt: %s", e)):
+                        batch._delayed_trigger('l10n_pl_edi_batch.ir_cron_download')  # retry
                     return
 
                 with zip_file:
@@ -418,7 +416,7 @@ class BatchDownload(models.Model):
         self.env.ref(cron_ref)._trigger(at=fields.Datetime.now() + timedelta(seconds=10 * 2 ** self.retry_count))
 
     def _raise_retry_count(self, error):
-        """ Count a retry, and run the cron again once the batch is due. After the last retry, or once the package
+        """ Count a retry, and return whether the batch can be retried. After the last retry, or once the package
             expired with parts still missing, the batch fails with `error`. """
         self.ensure_one()
         self.retry_count += 1
@@ -427,7 +425,7 @@ class BatchDownload(models.Model):
                 **(self.content or {}),
                 'status': {'code': ODOO_ERROR, 'description': "Odoo Error", 'details': [error]},
             }
-        return failed
+        return not failed
 
     def action_trigger_check_status(self):
         self.env.ref('l10n_pl_edi_batch.ir_cron_check_status').sudo()._trigger()
