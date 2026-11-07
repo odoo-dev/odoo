@@ -151,9 +151,9 @@
     </record>
 
     <menuitem
-        id="menu_l10n_pl_edi_batch_download"
+        id="l10n_pl_edi_batch_download_menu"
         name="KSeF Batch Downloads"
-        parent="account.menu_finance_receivables"
+        parent="account.menu_finance_payables"
         action="l10n_pl_edi_batch_download_action"
         sequence="50"/>
 
