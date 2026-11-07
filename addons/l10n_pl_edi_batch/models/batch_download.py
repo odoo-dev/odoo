@@ -326,8 +326,7 @@ class BatchDownload(models.Model):
                 try:
                     missing_parts[:1].download()
                 except UserError as e:
-                    if batch._raise_retry_count(str(e)):
-                        batch._delayed_trigger('l10n_pl_edi_batch.ir_cron_download')  # retry
+                    batch._retry_download(str(e))
                     return
                 if batch.state != 'downloading':
                     self.env.ref('l10n_pl_edi_batch.ir_cron_import')._trigger()
@@ -361,8 +360,7 @@ class BatchDownload(models.Model):
                 except zipfile.BadZipFile as e:
                     batch.part_ids.decrypted_file = False
                     batch.part_ids.invalidate_recordset(['decrypted_file'])
-                    if batch._raise_retry_count(self.env._("The KSeF batch ZIP is corrupt: %s", e)):
-                        batch._delayed_trigger('l10n_pl_edi_batch.ir_cron_download')  # retry
+                    batch._retry_download(self.env._("The KSeF batch ZIP is corrupt: %s", e))
                     return
 
                 with zip_file:
@@ -423,6 +421,15 @@ class BatchDownload(models.Model):
     def _delayed_trigger(self, cron_ref):
         """ Run the cron once the batch, just written, is due again. """
         self.env.ref(cron_ref)._trigger(at=fields.Datetime.now() + timedelta(seconds=10 * 2 ** self.retry_count))
+
+    def _retry_download(self, error):
+        """ Count a download retry, and download again once due. After the last retry, the batch fails
+            with `error`, and the same window is requested again. """
+        self.ensure_one()
+        if self._raise_retry_count(error):
+            self._delayed_trigger('l10n_pl_edi_batch.ir_cron_download')
+        else:
+            self._create_batch_download(self.company_id, self.date_from, self.date_to)
 
     def _raise_retry_count(self, error):
         """ Count a retry, and return whether the batch can be retried. After the last retry, or once the package
