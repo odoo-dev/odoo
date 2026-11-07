@@ -364,7 +364,7 @@ class BatchDownload(models.Model):
                         if name.endswith('.xml')
                     }
                     existing_ksef_numbers = set(AccountMove.search([
-                        ('l10n_pl_edi_number', 'in', ksef_numbers),
+                        ('l10n_pl_edi_number', 'in', list(ksef_numbers)),
                         ('company_id', '=', batch.company_id.id),
                         ('move_type', '=', 'in_invoice'),
                     ]).mapped('l10n_pl_edi_number'))
