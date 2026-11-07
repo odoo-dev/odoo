@@ -321,7 +321,7 @@ class BatchDownload(models.Model):
             if batch := self._get_company_batches(company, 'downloading')[:1]:
                 missing_parts = batch.part_ids.with_context(bin_size=True).filtered(lambda part: not part.decrypted_file)
                 try:
-                    missing_parts[:1].download()
+                    missing_parts[:1]._download()
                 except UserError as e:
                     batch._retry_download(str(e))
                     return

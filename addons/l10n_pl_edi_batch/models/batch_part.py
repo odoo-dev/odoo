@@ -69,7 +69,7 @@ class BatchDownloadPart(models.Model):
         self.invalidate_recordset(['decrypted_file'])
         self.modified(['decrypted_file'])
 
-    def download(self):
+    def _download(self):
         """ Download and decrypt the parts. A failure raises a UserError with the reason. """
         for record in self:
             with tempfile.NamedTemporaryFile(mode='w+b') as tmpf:
