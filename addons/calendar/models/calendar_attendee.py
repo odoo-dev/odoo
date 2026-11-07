@@ -18,6 +18,8 @@ class CalendarAttendee(models.Model):
     _description = 'Calendar Attendee Information'
     _order = 'create_date ASC'
 
+    _calendar__calendar_template_meeting_invitation = models.Ref('calendar.calendar_template_meeting_invitation', 'mail.template', required=False)
+
     def _default_access_token(self):
         return uuid.uuid4().hex
 
@@ -116,7 +118,7 @@ class CalendarAttendee(models.Model):
          Notably inside appointment to use a different mail template from the appointment type. """
         now = fields.Datetime.now()
         self.filtered(lambda attendee: attendee.event_id.start > now)._notify_attendees(
-            self.env.ref('calendar.calendar_template_meeting_invitation', raise_if_not_found=False),
+            self._calendar__calendar_template_meeting_invitation,
             force_send=True,
         )
 

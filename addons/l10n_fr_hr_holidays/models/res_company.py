@@ -8,8 +8,10 @@ from odoo.exceptions import ValidationError
 class ResCompany(models.Model):
     _inherit = 'res.company'
 
+    _hr_holidays__l10n_fr_work_entry_type_paid_time_off = models.Ref('hr_holidays.l10n_fr_work_entry_type_paid_time_off', 'hr.work.entry.type', required=False)
+
     def _default_work_entry_type_id(self):
-        return self.env.ref('hr_holidays.l10n_fr_work_entry_type_paid_time_off', raise_if_not_found=False)
+        return self._hr_holidays__l10n_fr_work_entry_type_paid_time_off
 
     l10n_fr_reference_work_entry_type = fields.Many2one(
         'hr.work.entry.type',

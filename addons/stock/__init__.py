@@ -35,11 +35,9 @@ def _assign_default_mail_template_picking_id(env):
     company_ids_without_default_mail_template_id = env['res.company'].search([
         ('stock_mail_confirmation_template_id', '=', False)
     ])
-    default_mail_template_id = env.ref('stock.mail_template_data_delivery_confirmation', raise_if_not_found=False)
-    if default_mail_template_id:
-        company_ids_without_default_mail_template_id.write({
-            'stock_mail_confirmation_template_id': default_mail_template_id.id,
-        })
+    company_ids_without_default_mail_template_id.write({
+        'stock_mail_confirmation_template_id': env['mail.template']._stock__mail_template_data_delivery_confirmation.id,
+    })
 
 
 def _create_inventory_adjustment(env):

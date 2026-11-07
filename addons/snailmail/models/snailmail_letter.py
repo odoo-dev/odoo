@@ -38,6 +38,8 @@ class SnailmailLetter(models.Model):
     _name = 'snailmail.letter'
     _description = 'Snailmail Letter'
 
+    _l10n_de__external_layout_din5008 = models.Ref('l10n_de.external_layout_din5008', 'ir.ui.view', required=False)
+
     user_id = fields.Many2one('res.users', 'Sent by')
     model = fields.Char('Model', required=True)
     res_id = fields.Integer('Document ID', required=True)
@@ -315,7 +317,7 @@ class SnailmailLetter(models.Model):
                         'error_code': 'ATTACHMENT_ERROR'
                     })
                     continue
-                if letter.company_id.external_report_layout_id == self.env.ref('l10n_de.external_layout_din5008', False):
+                if letter.company_id.external_report_layout_id == self._l10n_de__external_layout_din5008:
                     document.update({
                         'rightaddress': 0,
                     })

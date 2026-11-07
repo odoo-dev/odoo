@@ -6,6 +6,8 @@ from odoo.addons.account.models.chart_template import template
 class AccountChartTemplate(models.AbstractModel):
     _inherit = 'account.chart.template'
 
+    _l10n_cr__demo_partner_zona_franca = models.Ref('l10n_cr.demo_partner_zona_franca', 'res.partner', required=False)
+
     @template(model='account.move', demo=True)
     def _get_demo_data_move(self, template_code):
         move_data = super()._get_demo_data_move(template_code)
@@ -20,7 +22,6 @@ class AccountChartTemplate(models.AbstractModel):
         super()._post_load_demo_data(chart_template)
         if chart_template != 'cr':
             return
-        partner = self.env.ref('l10n_cr.demo_partner_zona_franca', raise_if_not_found=False)
         fiscal_position = self.ref('fiscal_position_cr_zona_franca', raise_if_not_found=False)
-        if partner and fiscal_position:
-            partner.property_account_position_id = fiscal_position
+        if fiscal_position:
+            self._l10n_cr__demo_partner_zona_franca.property_account_position_id = fiscal_position

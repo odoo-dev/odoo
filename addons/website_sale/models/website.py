@@ -28,10 +28,15 @@ class Website(models.Model):
     _inherit = "website"
     _check_company_auto = True
 
+    _sale__mail_template_sale_confirmation = models.Ref('sale.mail_template_sale_confirmation', 'mail.template', required=False)
+    _sales_team__salesteam_website_sales = models.Ref('sales_team.salesteam_website_sales', 'crm.team', required=False)
+    _website_sale__ir_cron_send_abandoned_email = models.Ref('website_sale.ir_cron_send_abandoned_email', 'ir.cron', required=False)
+    _website_sale__mail_template_sale_order_rating = models.Ref('website_sale.mail_template_sale_order_rating', 'mail.template', required=False)
+
     # === DEFAULT METHODS ===#
 
     def _default_salesteam_id(self):
-        team = self.env.ref("sales_team.salesteam_website_sales", raise_if_not_found=False)
+        team = self._sales_team__salesteam_website_sales
         if team and team.active:
             return team.id
         return None
@@ -49,7 +54,7 @@ class Website(models.Model):
         default_template = template_id and self.env["mail.template"].browse(template_id).exists()
         if default_template:
             return default_template
-        return self.env.ref("sale.mail_template_sale_confirmation", raise_if_not_found=False)
+        return self._sale__mail_template_sale_confirmation
 
     # === FIELDS ===#
 
@@ -102,9 +107,7 @@ class Website(models.Model):
     rating_email_template_id = fields.Many2one(
         comodel_name="mail.template",
         domain=[("model", "=", "sale.order")],
-        default=lambda self: self.env.ref(
-            "website_sale.mail_template_sale_order_rating", raise_if_not_found=False
-        ),
+        default=lambda self: self._website_sale__mail_template_sale_order_rating,
     )
     shop_page_container = fields.Selection(
         selection=[("regular", "Regular"), ("fluid", "Full-width")], default="regular"
@@ -1073,10 +1076,9 @@ class Website(models.Model):
     def _toggle_abandoned_cart_email_cron(self):
         """Enable the abandoned cart email cron if the feature is enabled on some website,
         disable it otherwise."""
-        cron = self.env.ref("website_sale.ir_cron_send_abandoned_email", raise_if_not_found=False)
-        if not cron:
+        if not self._website_sale__ir_cron_send_abandoned_email:
             return
-        cron.sudo().active = bool(
+        self._website_sale__ir_cron_send_abandoned_email.sudo().active = bool(
             self.sudo().search_count(
                 [
                     ("send_abandoned_cart_followup", "=", True),

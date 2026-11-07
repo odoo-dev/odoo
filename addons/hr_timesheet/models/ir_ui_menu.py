@@ -6,8 +6,10 @@ from odoo import models
 class IrUiMenu(models.Model):
     _inherit = 'ir.ui.menu'
 
+    _hr_timesheet__timesheet_menu_activity_user = models.Ref('hr_timesheet.timesheet_menu_activity_user', 'ir.ui.menu', required=False)
+
     def _load_menus_blacklist(self):
         res = super()._load_menus_blacklist()
-        if self.env.user.has_group('hr_timesheet.group_hr_timesheet_approver') and (time_menu := self.env.ref('hr_timesheet.timesheet_menu_activity_user', raise_if_not_found=False)):
+        if self.env.user.has_group('hr_timesheet.group_hr_timesheet_approver') and (time_menu := self._hr_timesheet__timesheet_menu_activity_user):
             res.append(time_menu.id)
         return res

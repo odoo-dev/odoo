@@ -22,6 +22,8 @@ class Base(models.AbstractModel):
     _inherit = 'base'
     _mail_defaults_to_email = False
 
+    _mail__mt_comment_optional = models.Ref('mail.mt_comment', 'mail.message.subtype', required=False)
+
     # ------------------------------------------------------------
     # ORM
     # ------------------------------------------------------------
@@ -560,7 +562,7 @@ class Base(models.AbstractModel):
         Dedicated method to ease override and csutom behavior for filtering
         and sorting messages in '_message_get_suggested_recipients' """
         subtype_ids = self._creation_subtype().ids if hasattr(self, '_creation_subtype') else []
-        subtype_ids.append(self.env['ir.model.data']._xmlid_to_res_id('mail.mt_comment'))
+        subtype_ids.append(self._mail__mt_comment_optional.id)
         return messages.filtered(
             lambda msg: (
                 msg.message_type in ('email', 'comment') and

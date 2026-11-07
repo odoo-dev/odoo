@@ -65,6 +65,8 @@ class GamificationChallenge(models.Model):
 
     _CUSTOMER_HEADERS_LIMIT_COUNT = 0  # never use X-Msg-To headers
 
+    _gamification__simple_report_template = models.Ref('gamification.simple_report_template', 'mail.template', required=False)
+
     @api.model
     def default_get(self, fields):
         res = super().default_get(fields)
@@ -185,9 +187,7 @@ class GamificationChallenge(models.Model):
                 challenge.next_report_date = False
 
     def _get_report_template(self):
-        template = self.env.ref('gamification.simple_report_template', raise_if_not_found=False)
-
-        return template.id if template else False
+        return self._gamification__simple_report_template.id
 
     @api.model_create_multi
     def create(self, vals_list):

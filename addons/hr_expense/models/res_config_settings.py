@@ -4,6 +4,8 @@ from odoo import api, fields, models
 class ResConfigSettings(models.TransientModel):
     _inherit = 'res.config.settings'
 
+    _hr_expense__mail_alias_expense = models.Ref('hr_expense.mail_alias_expense', 'mail.alias', required=False)
+
     hr_expense_alias_prefix = fields.Char(
         'Default Alias Name for Expenses',
         compute='_compute_hr_expense_alias_prefix',
@@ -31,7 +33,7 @@ class ResConfigSettings(models.TransientModel):
     @api.model
     def get_values(self):
         res = super(ResConfigSettings, self).get_values()
-        expense_alias = self.env.ref('hr_expense.mail_alias_expense', raise_if_not_found=False)
+        expense_alias = self._hr_expense__mail_alias_expense
         res.update(
             hr_expense_alias_prefix=expense_alias.alias_name if expense_alias else False,
             hr_expense_alias_domain_id=expense_alias.alias_domain_id if expense_alias else False,
@@ -40,7 +42,7 @@ class ResConfigSettings(models.TransientModel):
 
     def set_values(self):
         super().set_values()
-        expense_alias = self.env.ref('hr_expense.mail_alias_expense', raise_if_not_found=False)
+        expense_alias = self._hr_expense__mail_alias_expense
         if not expense_alias and self.hr_expense_alias_prefix:
             # create data again
             alias = self.env['mail.alias'].sudo().create({
@@ -56,7 +58,7 @@ class ResConfigSettings(models.TransientModel):
                 'noupdate': True,
                 'res_id': alias.id,
             })
-        elif expense_alias and expense_alias.alias_name != self.hr_expense_alias_prefix:
+        elif expense_alias.alias_name != self.hr_expense_alias_prefix:
             expense_alias.alias_name = self.hr_expense_alias_prefix
 
     @api.depends('hr_expense_use_mailgateway')
@@ -68,7 +70,7 @@ class ResConfigSettings(models.TransientModel):
         self.filtered(lambda w: not w.hr_expense_use_mailgateway).hr_expense_alias_domain_id = False
 
     def _inverse_hr_expense_alias_domain_id(self):
-        expense_alias = self.env.ref('hr_expense.mail_alias_expense', raise_if_not_found=False)
+        expense_alias = self._hr_expense__mail_alias_expense
         for record in self:
-            if expense_alias and expense_alias.alias_domain_id != record.hr_expense_alias_domain_id:
+            if expense_alias.alias_domain_id != record.hr_expense_alias_domain_id:
                 expense_alias.alias_domain_id = record.hr_expense_alias_domain_id

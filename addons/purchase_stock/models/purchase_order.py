@@ -13,6 +13,8 @@ from odoo.tools.misc import OrderedSet
 class PurchaseOrder(models.Model):
     _inherit = 'purchase.order'
 
+    _stock__view_picking_form_optional = models.Ref('stock.view_picking_form', 'ir.ui.view', required=False)
+
     @api.model
     def _default_picking_type(self):
         return self._get_picking_type(self.env.context.get('company_id') or self.env.company.id)
@@ -313,8 +315,7 @@ class PurchaseOrder(models.Model):
         if not pickings or len(pickings) > 1:
             result['domain'] = [('id', 'in', pickings.ids)]
         elif len(pickings) == 1:
-            res = self.env.ref('stock.view_picking_form', False)
-            form_view = [(res and res.id or False, 'form')]
+            form_view = [(self._stock__view_picking_form_optional.id, 'form')]
             result['views'] = form_view + [(state, view) for state, view in result.get('views', []) if view != 'form']
             result['res_id'] = pickings.id
         return result

@@ -6,6 +6,8 @@ from odoo import api, fields, models
 class SurveySurvey(models.Model):
     _inherit = 'survey.survey'
 
+    _hr_recruitment_survey__survey_survey_view_form = models.Ref('hr_recruitment_survey.survey_survey_view_form', 'ir.ui.view', required=False)
+
     survey_type = fields.Selection(selection_add=[('recruitment', 'Recruitment')], ondelete={'recruitment': 'set default'})
     hr_job_ids = fields.One2many("hr.job", "survey_id", string="Job Position")
     job_count = fields.Integer("Job Count", compute='_compute_job_count')
@@ -35,7 +37,7 @@ class SurveySurvey(models.Model):
         if self.survey_type == 'recruitment':
             access_user = self.env['res.users'].browse(access_uid) if access_uid else self.env.user
             if not access_user.has_group('survey.group_survey_user'):
-                if view := self.env.ref('hr_recruitment_survey.survey_survey_view_form', raise_if_not_found=False):
+                if view := self._hr_recruitment_survey__survey_survey_view_form:
                     return view.id
         return super().get_formview_id(access_uid=access_uid)
 

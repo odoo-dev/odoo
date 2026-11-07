@@ -40,3 +40,5 @@ from . import update
 from . import hr_headcount
 from . import hr_headcount_line
 from . import hr_headcount_working_rate
+from . import ir_access
+from . import ir_actions_report

@@ -7,3 +7,4 @@ from . import hr_recruitment_source
 from . import website
 from . import website_page
 from . import website_published_multi_mixin
+from . import utm_source

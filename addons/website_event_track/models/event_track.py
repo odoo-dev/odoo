@@ -39,6 +39,8 @@ class EventTrack(models.Model):
     ]
     _primary_email = 'contact_email'
 
+    _mail__mt_note_optional = models.Ref('mail.mt_note', 'mail.message.subtype', required=False)
+
     @api.model
     def _get_default_stage_id(self):
         return self.env['event.track.stage'].search([], limit=1).id
@@ -567,7 +569,7 @@ class EventTrack(models.Model):
             res['stage_id'] = (track.stage_id.mail_template_id, {
                 'auto_delete_keep_log': False,
                 'composition_mode': 'comment',
-                'subtype_id': self.env['ir.model.data']._xmlid_to_res_id('mail.mt_note'),
+                'subtype_id': self._mail__mt_note_optional.id,
             })
         return res
 

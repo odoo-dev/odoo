@@ -4,6 +4,8 @@ from odoo import models
 class AccountJournal(models.Model):
     _inherit = 'account.journal'
 
+    _l10n_pk__action_l10n_pk_edi_activate = models.Ref('l10n_pk.action_l10n_pk_edi_activate', 'ir.actions.server', required=False)
+
     def _get_onboarding_action_data(self):
         # EXTENDS 'account'
         self.ensure_one()
@@ -13,12 +15,11 @@ class AccountJournal(models.Model):
         if edi_module.state != 'installed':
             # A server action, so the module is installed on click rather than on dashboard render.
             # Missing when the code is updated before l10n_pk is.
-            activate_action = self.env.ref('l10n_pk.action_l10n_pk_edi_activate', raise_if_not_found=False)
-            if not activate_action:
+            if not self._l10n_pk__action_l10n_pk_edi_activate:
                 return super()._get_onboarding_action_data()
             return {
                 'title': self.env._("Activate E-Invoicing"),
-                'action': activate_action._get_action_dict(),
+                'action': self._l10n_pk__action_l10n_pk_edi_activate._get_action_dict(),
             }
         return {
             'title': self.env._("E-Invoicing Settings"),

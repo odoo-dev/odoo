@@ -46,3 +46,5 @@ from . import (
 )
 
 from . import res_groups
+from . import ir_access
+from . import mail_template

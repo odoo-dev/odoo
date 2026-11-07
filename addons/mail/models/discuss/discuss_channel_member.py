@@ -25,6 +25,8 @@ class DiscussChannelMember(models.Model):
     _description = "Channel Member"
     _rec_names_search = ("channel_id", "partner_id", "guest_id")
 
+    _mail__mt_important_notification = models.Ref('mail.mt_important_notification', 'mail.message.subtype', required=False)
+
     # identity
     partner_id = fields.Many2one("res.partner", "Partner", ondelete="cascade", index=True)
     guest_id = fields.Many2one("mail.guest", "Guest", ondelete="cascade", index=True)
@@ -202,9 +204,7 @@ class DiscussChannelMember(models.Model):
                     SQL("mail_message"),
                     SQL("discuss_channel_member.channel_id"),
                 ),
-                subtype_id=self.env["ir.model.data"]._xmlid_to_res_id(
-                    "mail.mt_important_notification",
-                ),
+                subtype_id=self._mail__mt_important_notification.id,
             ))
             unread_counter_by_member = {res['id']: res['count'] for res in self.env.cr.dictfetchall()}
             for member in self:
@@ -236,7 +236,7 @@ class DiscussChannelMember(models.Model):
                 table.channel_id,
             ),
             separator=table.new_message_separator,
-            subtype_id=self.env["ir.model.data"]._xmlid_to_res_id("mail.mt_important_notification"),
+            subtype_id=self._mail__mt_important_notification.id,
         )
 
     @api.depends("partner_id.name", "guest_id.name", "channel_id.display_name")

@@ -25,6 +25,8 @@ class MailingContact(models.Model):
     _order = 'name ASC, id DESC'
     _mailing_enabled = True
 
+    _mass_mailing__mailing_contact_view_tree_split_name_optional = models.Ref('mass_mailing.mailing_contact_view_tree_split_name', 'ir.ui.view', required=False)
+
     @api.model
     def default_get(self, fields):
         """ When coming from a mailing list we may have a default_list_ids context
@@ -312,8 +314,7 @@ class MailingContact(models.Model):
     @api.model
     def _is_name_split_activated(self):
         """ Return whether the contact names are populated as first and last name or as a single field (name). """
-        view = self.env.ref("mass_mailing.mailing_contact_view_tree_split_name", raise_if_not_found=False)
-        return view and view.sudo().active
+        return self._mass_mailing__mailing_contact_view_tree_split_name_optional.sudo().active
 
     def _creation_message(self):
         self.ensure_one()

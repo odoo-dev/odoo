@@ -22,6 +22,8 @@ class StockPicking(models.Model):
     _order = "priority desc, scheduled_date asc, id desc"
     _priority_field = 'priority'
 
+    _mail__mt_comment_optional = models.Ref('mail.mt_comment', 'mail.message.subtype', required=False)
+
     def _default_picking_type_id(self):
         picking_type_code = self.env.context.get('restricted_picking_type_code')
         if picking_type_code:
@@ -1088,7 +1090,7 @@ class StockPicking(models.Model):
             moves.move_line_ids.result_package_id.unpack()
 
     def _send_confirmation_email(self):
-        subtype_id = self.env['ir.model.data']._xmlid_to_res_id('mail.mt_comment')
+        subtype_id = self._mail__mt_comment_optional.id
         for stock_pick in self.filtered(lambda p: p.company_id.stock_move_email_validation and p.picking_type_id.code == 'outgoing'):
             delivery_template = stock_pick.company_id.stock_mail_confirmation_template_id
             stock_pick.with_context(force_send=True).message_post_with_source(

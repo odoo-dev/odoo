@@ -2442,6 +2442,8 @@ class Base(models.AbstractModel):
 class ResCompany(models.Model):
     _inherit = 'res.company'
 
+    _web__asset_styles_company_report = models.Ref('web.asset_styles_company_report', 'ir.attachment', required=False)
+
     @api.model_create_multi
     def create(self, vals_list):
         companies = super().create(vals_list)
@@ -2467,7 +2469,7 @@ class ResCompany(models.Model):
         return BinaryBytes(company_styles.encode())
 
     def _update_asset_style(self):
-        asset_attachment = self.env.ref('web.asset_styles_company_report', raise_if_not_found=False)
+        asset_attachment = self._web__asset_styles_company_report
         if not asset_attachment:
             return
         asset_attachment = asset_attachment.sudo()

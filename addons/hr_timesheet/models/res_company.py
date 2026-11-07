@@ -8,13 +8,16 @@ from odoo.exceptions import ValidationError
 class ResCompany(models.Model):
     _inherit = 'res.company'
 
+    _hr_timesheet__internal_project_default_stage = models.Ref('hr_timesheet.internal_project_default_stage', 'project.task.type', required=False)
+    _uom__product_uom_hour_optional = models.Ref('uom.product_uom_hour', 'uom.uom', required=False)
+
     @api.model
     def _default_project_time_mode_id(self):
-        return self.env.ref('uom.product_uom_hour', raise_if_not_found=False)
+        return self._uom__product_uom_hour_optional
 
     @api.model
     def _default_timesheet_encode_uom_id(self):
-        return self.env.ref('uom.product_uom_hour', raise_if_not_found=False)
+        return self._uom__product_uom_hour_optional
 
     project_time_mode_id = fields.Many2one('uom.uom', string='Project Time Unit',
         default=_default_project_time_mode_id,
@@ -45,8 +48,7 @@ class ResCompany(models.Model):
 
     def _create_internal_project_task(self):
         results = []
-        type_ids_ref = self.env.ref('hr_timesheet.internal_project_default_stage', raise_if_not_found=False)
-        type_ids = [(4, type_ids_ref.id)] if type_ids_ref else []
+        type_ids = [(4, self._hr_timesheet__internal_project_default_stage.id)] if self._hr_timesheet__internal_project_default_stage else []
         for company in self:
             company = company.with_company(company)
             results += [{

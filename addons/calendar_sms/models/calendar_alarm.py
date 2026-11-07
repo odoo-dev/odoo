@@ -7,6 +7,8 @@ from odoo import api, fields, models
 class CalendarAlarm(models.Model):
     _inherit = 'calendar.alarm'
 
+    _calendar_sms__sms_template_data_calendar_reminder = models.Ref('calendar_sms.sms_template_data_calendar_reminder', 'sms.template', required=False)
+
     alarm_type = fields.Selection(selection_add=[
         ('sms', 'SMS')
     ], ondelete={'sms': 'set default'})
@@ -20,6 +22,6 @@ class CalendarAlarm(models.Model):
     def _compute_sms_template_id(self):
         for alarm in self:
             if alarm.alarm_type == 'sms' and not alarm.sms_template_id:
-                alarm.sms_template_id = self.env['ir.model.data']._xmlid_to_res_id('calendar_sms.sms_template_data_calendar_reminder')
+                alarm.sms_template_id = self._calendar_sms__sms_template_data_calendar_reminder.id
             elif alarm.alarm_type != 'sms' or not alarm.sms_template_id:
                 alarm.sms_template_id = False

@@ -5,6 +5,8 @@ from odoo.exceptions import UserError
 class PosOrder(models.Model):
     _inherit = 'pos.order'
 
+    _l10n_es__partner_simplified_optional = models.Ref('l10n_es.partner_simplified', 'res.partner', required=False)
+
     l10n_es_edi_verifactu_required = fields.Boolean(
         string="Veri*Factu Required",
         related='company_id.l10n_es_edi_verifactu_required',
@@ -211,8 +213,7 @@ class PosOrder(models.Model):
             if refunded_order:
                 if not self.l10n_es_invoice_type:
                     raise UserError(_("You have to specify a refund reason."))
-                simplified_partner = self.env.ref('l10n_es.partner_simplified', raise_if_not_found=False)
-                partner_specified = self.partner_id and self.partner_id != simplified_partner
+                partner_specified = self.partner_id and self.partner_id != self._l10n_es__partner_simplified_optional
                 if not partner_specified and self.l10n_es_invoice_type != 'R5':
                     raise UserError(_("A partner has to be specified for the selected Veri*Factu Refund Reason."))
 

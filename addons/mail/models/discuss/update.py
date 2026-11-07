@@ -8,11 +8,13 @@ from odoo import SUPERUSER_ID, api, models
 class Publisher_WarrantyContract(models.AbstractModel):
     _inherit = "publisher_warranty.contract"
 
+    _mail__channel_all_employees = models.Ref('mail.channel_all_employees', 'discuss.channel', required=False)
+
     @api.model
     def _post_publisher_messages(self, messages):
         super()._post_publisher_messages(messages)
         # sudo: discuss.channel - can post the messages of the publisher warranty server in General
-        poster = self.sudo().env.ref("mail.channel_all_employees", raise_if_not_found=False)
+        poster = self.sudo()._mail__channel_all_employees
         if not poster:
             return
         # sudo: res.users - can read the partner of the superuser to add it as recipient

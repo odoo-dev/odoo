@@ -22,6 +22,8 @@ class CrmTeam(models.Model):
     _description = 'Sales Team'
     _explanation = "Represents a group of salespeople. It handles the assignment of leads/opportunities and can have its own pipeline stages and goals."
 
+    _crm__ir_cron_crm_lead_assign = models.Ref('crm.ir_cron_crm_lead_assign', 'ir.cron', required=False)
+
     use_leads = fields.Boolean('Leads', help="Check this box to filter and qualify incoming requests as leads before converting them into opportunities and assigning them to a salesperson.")
     use_opportunities = fields.Boolean('Pipeline', default=True, help="Check this box to manage a presales process with opportunities.")
     alias_id = fields.Many2one(help="The email address associated with this channel. New emails received will automatically create new leads assigned to the channel.")
@@ -69,8 +71,7 @@ class CrmTeam(models.Model):
         assign_enabled = self.env['crm.lead']._is_rule_based_assignment_activated()
         auto_assign_enabled = False
         if assign_enabled:
-            assign_cron = self.sudo().env.ref('crm.ir_cron_crm_lead_assign', raise_if_not_found=False)
-            auto_assign_enabled = assign_cron.active if assign_cron else False
+            auto_assign_enabled = self.sudo()._crm__ir_cron_crm_lead_assign.active
         self.assignment_enabled = assign_enabled
         self.assignment_auto_enabled = auto_assign_enabled
 

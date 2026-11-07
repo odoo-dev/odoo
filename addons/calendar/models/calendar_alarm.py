@@ -10,6 +10,8 @@ class CalendarAlarm(models.Model):
 
     _interval_selection = {'minutes': 'Minutes', 'hours': 'Hours', 'days': 'Days'}
 
+    _calendar__calendar_template_meeting_reminder = models.Ref('calendar.calendar_template_meeting_reminder', 'mail.template', required=False)
+
     name = fields.Char('Name', translate=True, required=True)
     alarm_type = fields.Selection(
         [('notification', 'Notification'), ('email', 'Email')],
@@ -44,7 +46,7 @@ class CalendarAlarm(models.Model):
     def _compute_mail_template_id(self):
         for alarm in self:
             if alarm.alarm_type == 'email' and not alarm.mail_template_id:
-                alarm.mail_template_id = self.env['ir.model.data']._xmlid_to_res_id('calendar.calendar_template_meeting_reminder')
+                alarm.mail_template_id = self._calendar__calendar_template_meeting_reminder.id
             elif alarm.alarm_type != 'email' or not alarm.mail_template_id:
                 alarm.mail_template_id = False
 

@@ -41,6 +41,8 @@ class IrActionsReport(models.Model):
     _order = 'name, id'
     _allow_sudo_commands = False
 
+    _web__minimal_layout = models.Ref('web.minimal_layout', 'ir.ui.view', required=False)
+
     type = fields.Char(default='ir.actions.report')
     binding_type = fields.Selection(default='report')
     model = fields.Char(required=True, string='Model Name')
@@ -189,7 +191,7 @@ class IrActionsReport(models.Model):
         return self.env.ref(xml_id).get_paperformat() if xml_id else self.env.company.paperformat_id
 
     def _get_layout(self):
-        return self.env.ref('web.minimal_layout', raise_if_not_found=False)
+        return self._web__minimal_layout
 
     def _get_report_url(self, layout=None):
         report_url = self.env['ir.config_parameter'].sudo().get_str('report.url')

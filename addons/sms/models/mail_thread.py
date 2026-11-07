@@ -13,6 +13,8 @@ _logger = logging.getLogger(__name__)
 class MailThread(models.AbstractModel):
     _inherit = 'mail.thread'
 
+    _mail__mt_note_optional = models.Ref('mail.mt_note', 'mail.message.subtype', required=False)
+
     message_has_sms_error = fields.Boolean(
         'SMS Delivery error', compute='_compute_message_has_sms_error', search='_search_message_has_sms_error',
         help="If checked, some messages have a delivery error.")
@@ -126,7 +128,7 @@ class MailThread(models.AbstractModel):
                     sms_numbers = [False]
 
         if subtype_id is False:
-            subtype_id = self.env['ir.model.data']._xmlid_to_res_id('mail.mt_note')
+            subtype_id = self._mail__mt_note_optional.id
 
         return self.message_post(
             body=body, partner_ids=partner_ids or [],  # TDE FIXME: temp fix otherwise crash mail_thread.py

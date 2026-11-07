@@ -11,6 +11,9 @@ from odoo.tools import format_list
 class ResConfigSettings(models.TransientModel):
     _inherit = 'res.config.settings'
 
+    _crm__group_use_lead = models.Ref('crm.group_use_lead', 'res.groups', required=False)
+    _crm__ir_cron_crm_lead_assign = models.Ref('crm.ir_cron_crm_lead_assign', 'ir.cron', required=False)
+
     group_use_lead = fields.Boolean(string="Leads", implied_group='crm.group_use_lead')
     group_use_recurring_revenues = fields.Boolean(string="Recurring Revenues", implied_group='crm.group_use_recurring_revenues')
     # Membership
@@ -55,7 +58,7 @@ class ResConfigSettings(models.TransientModel):
 
     @api.depends('crm_use_auto_assignment')
     def _compute_crm_auto_assignment_data(self):
-        assign_cron = self.sudo().env.ref('crm.ir_cron_crm_lead_assign', raise_if_not_found=False)
+        assign_cron = self.sudo()._crm__ir_cron_crm_lead_assign
         for setting in self:
             if setting.crm_use_auto_assignment and assign_cron:
                 setting.crm_auto_assignment_action = 'auto' if assign_cron.active else 'manual'
@@ -135,7 +138,7 @@ class ResConfigSettings(models.TransientModel):
                 setting.predictive_lead_scoring_field_labels = _('Stage')
 
     def set_values(self):
-        group_use_lead_id = self.env['ir.model.data']._xmlid_to_res_id('crm.group_use_lead')
+        group_use_lead_id = self._crm__group_use_lead.id
         has_group_lead_before = group_use_lead_id in self.env.user.all_group_ids.ids
         super(ResConfigSettings, self).set_values()
         # update use leads / opportunities setting on all teams according to settings update
@@ -146,7 +149,7 @@ class ResConfigSettings(models.TransientModel):
             for team in teams:
                 team.alias_id.write(team._alias_get_creation_values())
         # synchronize cron with settings
-        assign_cron = self.sudo().env.ref('crm.ir_cron_crm_lead_assign', raise_if_not_found=False)
+        assign_cron = self.sudo()._crm__ir_cron_crm_lead_assign
         if assign_cron:
             # Writing on a cron tries to grab a write-lock on the table. This
             # could be avoided when saving a res.config without modifying this specific

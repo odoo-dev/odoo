@@ -6,5 +6,5 @@ from . import wizard
 
 
 def uninstall_hook(env):
-    if access := env.ref('hr.access_hr_job_user', raise_if_not_found=False):
+    if access := env['ir.access']._hr__access_hr_job_user:
         access.active = True

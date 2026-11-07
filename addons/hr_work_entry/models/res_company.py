@@ -6,6 +6,8 @@ from odoo import api, fields, models
 class ResCompany(models.Model):
     _inherit = 'res.company'
 
+    _hr_work_entry__generic_work_entry_type_attendance = models.Ref('hr_work_entry.generic_work_entry_type_attendance', 'hr.work.entry.type', required=False)
+
     external_code = fields.Char("External Code", groups="hr.group_hr_user", copy=False, help="Use this code to export your data to a third party")
     allowed_work_entry_type_ids = fields.Many2many(
         'hr.work.entry.type', compute='_compute_allowed_work_entry_type_ids')
@@ -23,7 +25,7 @@ class ResCompany(models.Model):
             ('code', '=', '002.00'),
             ('country_code', '=', country_code),
         ], limit=1)
-        return country_type or self.env.ref('hr_work_entry.generic_work_entry_type_attendance', raise_if_not_found=False)
+        return country_type or self._hr_work_entry__generic_work_entry_type_attendance
 
     @api.depends('partner_id.country_id')
     def _compute_allowed_work_entry_type_ids(self):

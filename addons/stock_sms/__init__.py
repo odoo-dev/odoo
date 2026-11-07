@@ -9,11 +9,10 @@ def _assign_default_sms_template_picking_id(env):
     company_ids_without_default_sms_template_id = env['res.company'].search([
         ('stock_sms_confirmation_template_id', '=', False)
     ])
-    default_sms_template_id = env.ref('stock_sms.sms_template_data_stock_delivery', raise_if_not_found=False)
-    if default_sms_template_id:
+    if env['sms.template']._stock_sms__sms_template_data_stock_delivery:
         company_ids_without_default_sms_template_id.write({
             'stock_text_confirmation': True,
-            'stock_sms_confirmation_template_id': default_sms_template_id.id,
+            'stock_sms_confirmation_template_id': env['sms.template']._stock_sms__sms_template_data_stock_delivery.id,
         })
 
 

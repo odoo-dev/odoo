@@ -7,6 +7,8 @@ from odoo.fields import Domain
 class ResConfigSettings(models.TransientModel):
     _inherit = 'res.config.settings'
 
+    _website__menu_website_website_settings = models.Ref('website.menu_website_website_settings', 'ir.ui.menu', required=False)
+
     # === COMPUTE METHODS === #
 
     @api.depends('company_id', 'website_id')
@@ -25,5 +27,4 @@ class ResConfigSettings(models.TransientModel):
 
     # Unique name to avoid colliding with `sale`.
     def action_w_payment_start_payment_onboarding(self):
-        menu = self.env.ref('website.menu_website_website_settings', raise_if_not_found=False)
-        return self.company_id._start_payment_onboarding(menu and menu.id)
+        return self.company_id._start_payment_onboarding(self._website__menu_website_website_settings.id)

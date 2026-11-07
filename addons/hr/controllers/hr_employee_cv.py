@@ -21,18 +21,13 @@ class HrEmployeeCV(Controller):
         if not request.env.user.has_group('hr.group_hr_user') and employees.ids != request.env.user.employee_id.ids:
             return request.not_found()
 
-        resume_type_education = request.env.ref('hr.resume_type_education', raise_if_not_found=False)
-        skill_type_language = request.env.ref('hr.hr_skill_type_lang', raise_if_not_found=False)
-
-        report = request.env.ref('hr.action_report_employee_cv', False)
-
         try:
             pdf_content, _dummy = request.env['ir.actions.report'].sudo()._render_qweb_pdf(
-                report, employees.ids, data={
+                request.env['ir.actions.report']._hr__action_report_employee_cv, employees.ids, data={
                 'color_primary': color_primary,
                 'color_secondary': color_secondary,
-                'resume_type_education': resume_type_education,
-                'skill_type_language': skill_type_language,
+                'resume_type_education': request.env['hr.resume.line.type']._hr__resume_type_education,
+                'skill_type_language': request.env['hr.skill.type']._hr__hr_skill_type_lang,
                 'show_skills': 'show_skills' in post,
                 'show_contact': 'show_contact' in post,
                 'show_others': 'show_others' in post,

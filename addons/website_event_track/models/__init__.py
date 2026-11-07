@@ -14,3 +14,4 @@ from . import website
 from . import website_event_menu
 from . import website_menu
 from . import website_visitor
+from . import mail_template

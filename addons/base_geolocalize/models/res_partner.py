@@ -8,6 +8,8 @@ from odoo.addons.base_geolocalize.models.base_geocoder import GeoCodingError
 class ResPartner(models.Model):
     _inherit = "res.partner"
 
+    _base_geolocalize__ir_cron_geolocalize_required_partners = models.Ref('base_geolocalize.ir_cron_geolocalize_required_partners', 'ir.cron', required=False)
+
     date_localization = fields.Datetime(string='Geolocation Updated On')
     should_be_geolocalized = fields.Boolean(
         compute='_compute_should_be_geolocalized', store=True, readonly=False, default=False,
@@ -116,7 +118,7 @@ class ResPartner(models.Model):
         if (
             (vals.keys() & self._display_address_depends())
             and self.filtered('should_be_geolocalized')
-            and (geo_localize_cron := self.env.ref('base_geolocalize.ir_cron_geolocalize_required_partners', raise_if_not_found=False))
+            and (geo_localize_cron := self._base_geolocalize__ir_cron_geolocalize_required_partners)
         ):
             geo_localize_cron._trigger()
         return res

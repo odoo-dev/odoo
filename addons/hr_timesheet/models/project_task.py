@@ -30,6 +30,11 @@ PROJECT_TASK_READABLE_FIELDS = {
 class ProjectTask(models.Model):
     _inherit = "project.task"
 
+    _hr_timesheet__hr_timesheet_line_portal_tree = models.Ref('hr_timesheet.hr_timesheet_line_portal_tree', 'ir.ui.view', required=False)
+    _hr_timesheet__timesheet_view_form_portal_user_optional = models.Ref('hr_timesheet.timesheet_view_form_portal_user', 'ir.ui.view', required=False)
+    _hr_timesheet__view_kanban_account_analytic_line_portal_user = models.Ref(
+        'hr_timesheet.view_kanban_account_analytic_line_portal_user', 'ir.ui.view', required=False)
+
     @api.model
     def _get_portal_timesheet_domain(self):
         return Domain('project_id', '!=', False)
@@ -194,17 +199,17 @@ class ProjectTask(models.Model):
                 continue
             if not is_internal_user:
                 if view[1] == 'list':
-                    tree_view_id = self.env['ir.model.data']._xmlid_to_res_id('hr_timesheet.hr_timesheet_line_portal_tree')
+                    tree_view_id = self._hr_timesheet__hr_timesheet_line_portal_tree.id
                     if tree_view_id:
                         new_views.insert(0, (tree_view_id, 'list'))
                         continue
                 elif view[1] == 'form':
-                    form_view_id = self.env['ir.model.data']._xmlid_to_res_id('hr_timesheet.timesheet_view_form_portal_user')
+                    form_view_id = self._hr_timesheet__timesheet_view_form_portal_user_optional.id
                     if form_view_id:
                         new_views.append((form_view_id, 'form'))
                         continue
                 elif view[1] == 'kanban':
-                    kanban_view_id = self.env['ir.model.data']._xmlid_to_res_id('hr_timesheet.view_kanban_account_analytic_line_portal_user')
+                    kanban_view_id = self._hr_timesheet__view_kanban_account_analytic_line_portal_user.id
                     if kanban_view_id:
                         new_views.append((kanban_view_id, 'kanban'))
                         continue

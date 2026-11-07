@@ -8,6 +8,8 @@ class HrResumeLineType(models.Model):
     _description = "Type of a resume line"
     _order = "sequence"
 
+    _hr__resume_type_education = models.Ref('hr.resume_type_education', 'hr.resume.line.type', required=False)
+
     name = fields.Char(required=True, translate=True)
     sequence = fields.Integer('Sequence', default=10)
     is_course = fields.Boolean('Course', default=False)

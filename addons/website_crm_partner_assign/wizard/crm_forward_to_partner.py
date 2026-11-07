@@ -13,6 +13,9 @@ class CrmLeadForwardToPartner(models.TransientModel):
     _name = 'crm.lead.forward.to.partner'
     _description = 'Lead forward to partner'
 
+    _website_crm_partner_assign__email_template_lead_forward_mail = models.Ref(
+        'website_crm_partner_assign.email_template_lead_forward_mail', 'mail.template', required=False)
+
     @api.model
     def _convert_to_assignation_line(self, lead, partner):
         lead_location = []
@@ -38,9 +41,8 @@ class CrmLeadForwardToPartner(models.TransientModel):
         res = super(CrmLeadForwardToPartner, self).default_get(fields)
         active_ids = self.env.context.get('active_ids')
         if 'body' in fields:
-            template = self.env.ref('website_crm_partner_assign.email_template_lead_forward_mail', False)
-            if template:
-                res['body'] = template.body_html
+            if self._website_crm_partner_assign__email_template_lead_forward_mail:
+                res['body'] = self._website_crm_partner_assign__email_template_lead_forward_mail.body_html
         if active_ids:
             default_composition_mode = self.env.context.get('default_composition_mode')
             res['assignation_lines'] = []
@@ -58,7 +60,7 @@ class CrmLeadForwardToPartner(models.TransientModel):
 
     def action_forward(self):
         self.ensure_one()
-        template = self.env.ref('website_crm_partner_assign.email_template_lead_forward_mail', False)
+        template = self._website_crm_partner_assign__email_template_lead_forward_mail
         if not template:
             raise UserError(_('The Forward Email Template is not in the database'))
         portal_group = self.env.ref('base.group_portal')

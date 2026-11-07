@@ -4,6 +4,8 @@ from odoo import api, fields, models, exceptions, _
 class RatingRating(models.Model):
     _inherit = 'rating.rating'
 
+    _website__group_website_restricted_editor = models.Ref('website.group_website_restricted_editor', 'res.groups', required=False)
+
     # Adding information for comment a rating message
     publisher_comment = fields.Text("Publisher comment")
     publisher_id = fields.Many2one('res.partner', 'Commented by',
@@ -29,7 +31,7 @@ class RatingRating(models.Model):
         (done here by fetching the group record then using has_group, as it may
         not be defined and we do not want to make a complete bridge module just
         for that). Either write access on document is granted. """
-        editor_group = self.env['ir.model.data']._xmlid_to_res_id('website.group_website_restricted_editor')
+        editor_group = self._website__group_website_restricted_editor.id
         if editor_group and self.env.user.has_group('website.group_website_restricted_editor'):
             return
         for model, model_data in self._classify_by_model().items():

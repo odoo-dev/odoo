@@ -13,6 +13,8 @@ class ResCompany(models.Model):
     _inherit = "res.company"
     _check_company_auto = True
 
+    _sale__send_invoice_cron = models.Ref('sale.send_invoice_cron', 'ir.cron', required=False)
+
     account_invoices_to_issue_id = fields.Many2one(
         'account.account',
         string='Invoices to be Issued Account',
@@ -116,11 +118,10 @@ class ResCompany(models.Model):
         return result
 
     def _sync_automatic_invoice_cron(self):
-        automatic_invoice_cron = self.env.ref("sale.send_invoice_cron", raise_if_not_found=False)
-        if not automatic_invoice_cron:
+        if not self._sale__send_invoice_cron:
             return
         active_companies = self.search_count([("sale_automatic_invoice", "=", True)], limit=1)
-        automatic_invoice_cron.sudo().active = bool(active_companies)
+        self._sale__send_invoice_cron.sudo().active = bool(active_companies)
 
     def _get_accrual_candidate_lines(self, date=False):
         candidates = super()._get_accrual_candidate_lines(date=date)

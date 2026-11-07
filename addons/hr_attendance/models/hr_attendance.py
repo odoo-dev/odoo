@@ -30,6 +30,8 @@ class HrAttendance(models.Model):
     _time_rule_span_start_field = 'check_in'
     _time_rule_span_end_field = 'check_out'
 
+    _hr_attendance__resource_calendar_std_38h = models.Ref('hr_attendance.resource_calendar_std_38h', 'resource.calendar', required=False)
+
     def _default_employee(self):
         return self.env.user.employee_id
 
@@ -359,8 +361,7 @@ class HrAttendance(models.Model):
         if not self.env.user.has_group("hr_attendance.group_hr_attendance_user"):
             return True
         # This record only exists if the scenario has been already launched
-        demo_tag = self.env.ref('hr_attendance.resource_calendar_std_38h', raise_if_not_found=False)
-        return bool(demo_tag) or bool(self.env['ir.module.module'].search_count([('demo', '=', True)]))
+        return bool(self._hr_attendance__resource_calendar_std_38h) or bool(self.env['ir.module.module'].search_count([('demo', '=', True)]))
 
     def _load_demo_data(self):
         if self.has_demo_data():

@@ -31,6 +31,8 @@ class WebsiteVisitor(models.Model):
     _description = 'Website Visitor'
     _order = 'id DESC'
 
+    _mail__email_compose_message_wizard_form_optional = models.Ref('mail.email_compose_message_wizard_form', 'ir.ui.view', required=False)
+
     def _get_access_token(self):
         """ Either the user's partner.id or a hash. """
         if not request:
@@ -201,7 +203,6 @@ class WebsiteVisitor(models.Model):
         if not self._check_for_message_composer():
             raise UserError(_("There are no contact and/or no email linked to this visitor."))
         visitor_composer_ctx = self._prepare_message_composer_context()
-        compose_form = self.env.ref('mail.email_compose_message_wizard_form', False)
         compose_ctx = dict(
             default_composition_mode='comment',
         )
@@ -211,8 +212,8 @@ class WebsiteVisitor(models.Model):
             'type': 'ir.actions.act_window',
             'view_mode': 'form',
             'res_model': 'mail.compose.message',
-            'views': [(compose_form.id, 'form')],
-            'view_id': compose_form.id,
+            'views': [(self._mail__email_compose_message_wizard_form_optional.id, 'form')],
+            'view_id': self._mail__email_compose_message_wizard_form_optional.id,
             'target': 'new',
             'context': compose_ctx,
         }

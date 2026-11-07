@@ -427,8 +427,7 @@ class EventTrackController(http.Controller):
     def send_email_reminder(self, track_id, email_to):
         """ Send email, to email_to if the user is public otherwise to the user email address,
         with tracks' reminders for external calendars. """
-        template = self.env.ref("website_event_track.mail_template_data_track_reminder", raise_if_not_found=False)
-        if not template:
+        if not self.env['mail.template']._website_event_track__mail_template_data_track_reminder:
             return {'success': False, 'error': 'missing_template'}
 
         track_su = self.env['event.track'].sudo().browse(track_id)
@@ -447,7 +446,7 @@ class EventTrackController(http.Controller):
         if error_message:
             return {'success': False, 'message': error_message}
 
-        template.sudo().with_context(
+        self.env['mail.template']._website_event_track__mail_template_data_track_reminder.sudo().with_context(
             lang=request.cookies.get('frontend_lang') if request.env.user._is_public() else request.env.context.get('lang', request.env.user.lang)
         ).send_mail(track.id, email_values={'email_to': valid_email_to})
         return {'success': True}

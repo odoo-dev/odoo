@@ -8,6 +8,8 @@ from odoo.tools import format_datetime, groupby
 class MailMessage(models.Model):
     _inherit = 'mail.message'
 
+    _mail__mt_note_optional = models.Ref('mail.mt_note', 'mail.message.subtype', required=False)
+
     def _compute_is_current_user_or_guest_author(self):
         super()._compute_is_current_user_or_guest_author()
         portal_data = self.env.context.get("portal_data", {})
@@ -114,7 +116,7 @@ class MailMessage(models.Model):
         }
         vals_list = self._read_format(fnames)
 
-        note_id = self.env['ir.model.data']._xmlid_to_res_id('mail.mt_note')
+        note_id = self._mail__mt_note_optional.id
         for message, values in zip(self, vals_list):
             values["body"] = ["markup", values["body"]]
             if message_to_attachments:

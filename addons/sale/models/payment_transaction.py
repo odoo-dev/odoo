@@ -10,6 +10,8 @@ from odoo import SUPERUSER_ID, Command, api, fields, models
 class PaymentTransaction(models.Model):
     _inherit = "payment.transaction"
 
+    _sale__send_invoice_cron = models.Ref('sale.send_invoice_cron', 'ir.cron', required=False)
+
     sale_order_ids = fields.Many2many(
         comodel_name="sale.order",
         relation="sale_order_transaction_rel",
@@ -108,9 +110,7 @@ class PaymentTransaction(models.Model):
             super(PaymentTransaction, done_tx)._post_process()  # Post the invoices.
             if auto_invoice and not self.env.context.get("skip_sale_auto_invoice_send"):
                 if self.env["ir.config_parameter"].sudo().get_bool("sale.async_emails") and (
-                    send_invoice_cron := self.env.ref(
-                        "sale.send_invoice_cron", raise_if_not_found=False
-                    )
+                    send_invoice_cron := self._sale__send_invoice_cron
                 ):
                     send_invoice_cron._trigger()
                 else:

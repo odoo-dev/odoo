@@ -13,6 +13,8 @@ _logger = logging.getLogger(__name__)
 class ResCompany(models.Model):
     _inherit = 'res.company'
 
+    _hr_work_entry__generic_work_entry_type_attendance = models.Ref('hr_work_entry.generic_work_entry_type_attendance', 'hr.work.entry.type', required=False)
+
     attendance_kiosk_mode = fields.Selection([
         ('barcode', 'Barcode / RFID'),
         ('barcode_manual', 'Barcode / RFID and Manual Selection'),
@@ -74,7 +76,7 @@ class ResCompany(models.Model):
 
     @api.depends('country_id')
     def _compute_attendance_work_entry_type_id(self):
-        fallback = self.env.ref('hr_work_entry.generic_work_entry_type_attendance', raise_if_not_found=False)
+        fallback = self._hr_work_entry__generic_work_entry_type_attendance
         country_codes = self.mapped('country_id.code')
         country_types = self.env['hr.work.entry.type'].sudo().search([
             ('count_as', '=', 'working_time'),

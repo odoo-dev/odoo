@@ -19,6 +19,9 @@ ACCOUNT_DOCUMENT_LAYOUT_COMPANY_FIELDS = {
 class BaseDocumentLayout(models.TransientModel):
     _inherit = 'base.document.layout'
 
+    _account__onboarding_onboarding_step_base_document_layout = models.Ref(
+        'account.onboarding_onboarding_step_base_document_layout', 'onboarding.onboarding.step', required=False)
+
     from_invoice = fields.Boolean()
     qr_code = fields.Boolean(related='company_id.qr_code', readonly=False)
     vat = fields.Char(related='company_id.vat', readonly=False,)
@@ -59,7 +62,7 @@ class BaseDocumentLayout(models.TransientModel):
     def document_layout_save(self):
         """Save layout and onboarding step progress, return super() result"""
         res = super(BaseDocumentLayout, self).document_layout_save()
-        if step := self.env.ref('account.onboarding_onboarding_step_base_document_layout', raise_if_not_found=False):
+        if step := self._account__onboarding_onboarding_step_base_document_layout:
             for company_id in self.company_id:
                 # Account users cannot write the technical onboarding progress records so we must use sudo.
                 step.sudo().with_company(company_id).action_set_just_done()

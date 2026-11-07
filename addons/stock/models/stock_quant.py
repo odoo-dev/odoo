@@ -24,6 +24,10 @@ class StockQuant(models.Model):
     _rec_name = 'product_id'
     _rec_names_search = ('location_id', 'lot_id', 'package_id', 'owner_id')
 
+    _stock__inventory_warning_reset_view = models.Ref('stock.inventory_warning_reset_view', 'ir.ui.view', required=False)
+    _stock__inventory_warning_set_view = models.Ref('stock.inventory_warning_set_view', 'ir.ui.view', required=False)
+    _stock__stock_inventory_adjustment_name_form_view = models.Ref('stock.stock_inventory_adjustment_name_form_view', 'ir.ui.view', required=False)
+
     def _domain_location_id(self):
         if self._is_inventory_user():
             return "[('usage', 'in', ['internal', 'transit'])] if context.get('inventory_mode') else []"
@@ -541,13 +545,12 @@ class StockQuant(models.Model):
         quants_already_set = self.filtered(lambda quant: quant.inventory_quantity_set)
         if quants_already_set:
             ctx = dict(self.env.context or {}, default_quant_ids=self.ids)
-            view = self.env.ref('stock.inventory_warning_set_view', False)
             return {
                 'name': _('Quantities Already Set'),
                 'type': 'ir.actions.act_window',
                 'view_mode': 'form',
-                'views': [(view.id, 'form')],
-                'view_id': view.id,
+                'views': [(self._stock__inventory_warning_set_view.id, 'form')],
+                'view_id': self._stock__inventory_warning_set_view.id,
                 'res_model': 'stock.inventory.warning',
                 'target': 'new',
                 'context': ctx,
@@ -561,11 +564,10 @@ class StockQuant(models.Model):
     def action_apply_all(self):
         quant_ids = self.env['stock.quant'].search(self.env.context['active_domain']).ids
         ctx = dict(self.env.context or {}, default_quant_ids=quant_ids)
-        view = self.env.ref('stock.stock_inventory_adjustment_name_form_view', False)
         return {
             'name': _('Inventory Adjustment'),
             'type': 'ir.actions.act_window',
-            'views': [(view.id, 'form')],
+            'views': [(self._stock__stock_inventory_adjustment_name_form_view.id, 'form')],
             'res_model': 'stock.inventory.adjustment.name',
             'target': 'new',
             'context': ctx,
@@ -573,13 +575,12 @@ class StockQuant(models.Model):
 
     def action_reset(self):
         ctx = dict(self.env.context or {}, default_quant_ids=self.ids)
-        view = self.env.ref('stock.inventory_warning_reset_view', False)
         return {
             'name': _('Quantities To Reset'),
             'type': 'ir.actions.act_window',
             'view_mode': 'form',
-            'views': [(view.id, 'form')],
-            'view_id': view.id,
+            'views': [(self._stock__inventory_warning_reset_view.id, 'form')],
+            'view_id': self._stock__inventory_warning_reset_view.id,
             'res_model': 'stock.inventory.warning',
             'target': 'new',
             'context': ctx,

@@ -8,6 +8,8 @@ from odoo import models, fields
 class ResUsers(models.Model):
     _inherit = 'res.users'
 
+    _base__partner_root_optional = models.Ref('base.partner_root', 'res.partner', required=False)
+
     odoobot_state = fields.Selection(
         [
             ('not_initialized', 'Not initialized'),
@@ -28,7 +30,7 @@ class ResUsers(models.Model):
 
     def _init_odoobot(self):
         self.ensure_one()
-        odoobot_id = self.env['ir.model.data']._xmlid_to_res_id("base.partner_root")
+        odoobot_id = self._base__partner_root_optional.id
         channel = self.env['discuss.channel']._get_or_create_chat([odoobot_id, self.partner_id.id])
         message = Markup("%s<br/>%s<br/><b>%s</b>") % (
             self.env._("Hello 👋"),

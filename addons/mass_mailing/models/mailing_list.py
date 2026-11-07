@@ -17,6 +17,8 @@ class MailingList(models.Model):
     # As this model has their own data merge, avoid to enable the generic data_cleaning on that model.
     _disable_data_merge = True
 
+    _mail__mt_note_optional = models.Ref('mail.mt_note', 'mail.message.subtype', required=False)
+
     name = fields.Char(string='Mailing List', required=True)
     active = fields.Boolean(default=True)
     color = fields.Integer(string='Color', default=0)
@@ -409,7 +411,7 @@ class MailingList(models.Model):
                 )
             contact.with_context(mail_post_autofollow_author_skip=True).message_post(
                 body=body,
-                subtype_id=self.env['ir.model.data']._xmlid_to_res_id('mail.mt_note'),
+                subtype_id=self._mail__mt_note_optional.id,
             )
         self._post_subscribe_hook(contacts_to_subscribe, contacts_to_unsubscribe)
         return contacts

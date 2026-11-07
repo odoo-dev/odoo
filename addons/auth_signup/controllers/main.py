@@ -59,9 +59,8 @@ class AuthSignupHome(Home):
                 user_sudo = User.sudo().search(
                     User._get_login_domain(qcontext.get('login')), order=User._get_login_order(), limit=1
                 )
-                template = request.env.ref('auth_signup.mail_template_user_signup_account_created', raise_if_not_found=False)
-                if user_sudo and template:
-                    template.sudo().with_context(
+                if user_sudo and request.env['mail.template']._auth_signup__mail_template_user_signup_account_created:
+                    request.env['mail.template']._auth_signup__mail_template_user_signup_account_created.sudo().with_context(
                         email_notification_force_header=True,
                         email_notification_force_footer=True,
                         email_notification_subtitles=[_lt("Your Account"), user_sudo.name or ''],

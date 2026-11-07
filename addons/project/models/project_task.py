@@ -108,6 +108,12 @@ class ProjectTask(models.Model):
     _track_duration_field = 'stage_id'
     _priority_field = 'priority'
 
+    _mail__mt_note_optional = models.Ref('mail.mt_note', 'mail.message.subtype', required=False)
+    _project__mt_project_task_new = models.Ref('project.mt_project_task_new', 'mail.message.subtype', required=False)
+    _project__mt_task_rating_optional = models.Ref('project.mt_task_rating', 'mail.message.subtype', required=False)
+    _project__project_message_user_assigned = models.Ref('project.project_message_user_assigned', 'ir.ui.view', required=False)
+    _project__task_invitation_follower = models.Ref('project.task_invitation_follower', 'ir.ui.view', required=False)
+
     def _get_versioned_fields(self):
         return [ProjectTask.description.name]
 
@@ -1385,7 +1391,7 @@ class ProjectTask(models.Model):
         project_link_per_task_id = {}
         if vals.get('project_id'):
             project = self.env['project.project'].browse(vals.get('project_id'))
-            notification_subtype_id = self.env['ir.model.data']._xmlid_to_res_id('project.mt_project_task_new')
+            notification_subtype_id = self._project__mt_project_task_new.id
             partner_ids = project.message_follower_ids.filtered(lambda follower: notification_subtype_id in follower.subtype_ids.ids).partner_id.ids
             if partner_ids:
                 link_per_project_id = {}
@@ -1578,7 +1584,7 @@ class ProjectTask(models.Model):
     def _send_email_notify_to_cc(self, partners_to_notify):
         # TDE TODO: this should be removed with email-like recipients management
         self.ensure_one()
-        template_id = self.env['ir.model.data']._xmlid_to_res_id('project.task_invitation_follower', raise_if_not_found=False)
+        template_id = self._project__task_invitation_follower.id
         if not template_id:
             return
         task_model_description = self.env['ir.model']._get(self._name).display_name
@@ -1602,7 +1608,7 @@ class ProjectTask(models.Model):
         if self.env.context.get('mail_auto_subscribe_no_notify'):
             return
         # Utility method to send assignation notification upon writing/creation.
-        template_id = self.env['ir.model.data']._xmlid_to_res_id('project.project_message_user_assigned', raise_if_not_found=False)
+        template_id = self._project__project_message_user_assigned.id
         if not template_id:
             return
         task_model_description = self.env['ir.model']._get(self._name).display_name
@@ -1656,7 +1662,7 @@ class ProjectTask(models.Model):
         if 'stage_id' in tracked_fields and test_task.stage_id.mail_template_id and not test_task.is_template:
             res['stage_id'] = (test_task.stage_id.mail_template_id, {
                 'auto_delete_keep_log': False,
-                'subtype_id': self.env['ir.model.data']._xmlid_to_res_id('mail.mt_note'),
+                'subtype_id': self._mail__mt_note_optional.id,
             })
         return res
 
@@ -2230,7 +2236,7 @@ class ProjectTask(models.Model):
         return rating
 
     def _rating_apply_get_default_subtype_id(self):
-        return self.env['ir.model.data']._xmlid_to_res_id("project.mt_task_rating")
+        return self._project__mt_task_rating_optional.id
 
     def _rating_get_parent_field_name(self):
         return 'project_id'

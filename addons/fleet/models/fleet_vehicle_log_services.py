@@ -11,6 +11,8 @@ class FleetVehicleLogServices(models.Model):
     _rec_name = 'service_type_id'
     _description = 'Services for vehicles'
 
+    _fleet__type_service_service_7 = models.Ref('fleet.type_service_service_7', 'fleet.service.type', required=False)
+
     active = fields.Boolean(default=True)
     vehicle_id = fields.Many2one('fleet.vehicle', 'Vehicle', required=True, index=True)
     model_id = fields.Many2one('fleet.vehicle.model', 'Model', related='vehicle_id.model_id', store=True)
@@ -34,7 +36,7 @@ class FleetVehicleLogServices(models.Model):
     notes = fields.Text()
     service_type_id = fields.Many2one(
         'fleet.service.type', 'Service Type', required=True,
-        default=lambda self: self.env.ref('fleet.type_service_service_7', raise_if_not_found=False),
+        default=lambda self: self._fleet__type_service_service_7,
     )
     state = fields.Selection([
         ('new', 'New'),

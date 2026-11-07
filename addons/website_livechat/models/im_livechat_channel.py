@@ -6,6 +6,8 @@ from odoo import api, models
 class Im_LivechatChannel(models.Model):
     _inherit = 'im_livechat.channel'
 
+    _im_livechat__chatbot_script_welcome_bot = models.Ref('im_livechat.chatbot_script_welcome_bot', 'chatbot.script', required=False)
+
     def _get_livechat_discuss_channel_vals(self, /, *, chatbot_script=None, agent=None, operator_partner, operator_model, **kwargs):
         discuss_channel_vals = super()._get_livechat_discuss_channel_vals(
             agent=agent,
@@ -44,7 +46,7 @@ class Im_LivechatChannel(models.Model):
     def create(self, vals_list):
         channels = super().create(vals_list)
         if self.env.context.get("create_from_website"):
-            bot = self.env.ref("im_livechat.chatbot_script_welcome_bot", raise_if_not_found=False)
+            bot = self._im_livechat__chatbot_script_welcome_bot
             self.env.website.channel_id = channels[0].id
             channel_rule_vals = []
             for channel in channels:

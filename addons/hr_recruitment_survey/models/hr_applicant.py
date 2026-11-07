@@ -9,6 +9,9 @@ from odoo.fields import Domain
 class HrApplicant(models.Model):
     _inherit = "hr.applicant"
 
+    _hr_recruitment_survey__mail_template_applicant_interview_invite = models.Ref(
+        'hr_recruitment_survey.mail_template_applicant_interview_invite', 'mail.template', required=False)
+
     survey_id = fields.Many2one('survey.survey', related='job_id.survey_id', string="Survey", readonly=True)
     response_ids = fields.One2many('survey.user_input', 'applicant_id', string="Responses")
 
@@ -54,7 +57,7 @@ class HrApplicant(models.Model):
         return action
 
     def action_send_survey(self):
-        template = self.env.ref('hr_recruitment_survey.mail_template_applicant_interview_invite', raise_if_not_found=False)
+        template = self._hr_recruitment_survey__mail_template_applicant_interview_invite
 
         applicant_partner_ids = self.env['res.partner']
         applicant_survey_ids = self.env['survey.survey']
@@ -72,7 +75,7 @@ class HrApplicant(models.Model):
             default_survey_ids=applicant_survey_ids.ids,
             default_partner_ids=applicant_partner_ids.ids,
             default_use_template=bool(template),
-            default_template_id=template and template.id or False,
+            default_template_id=template.id,
             default_deadline=fields.Datetime.now() + timedelta(days=15),
             hide_mail_template_management_options=True,
             dialog_size='large',

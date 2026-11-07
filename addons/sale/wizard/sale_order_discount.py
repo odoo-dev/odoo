@@ -10,6 +10,8 @@ class SaleOrderDiscount(models.TransientModel):
     _name = "sale.order.discount"
     _description = "Discount Wizard"
 
+    _product__product_category_services = models.Ref('product.product_category_services', 'product.category', required=False)
+
     sale_order_id = fields.Many2one(
         "sale.order", default=lambda self: self.env.context.get("active_id"), required=True
     )
@@ -47,11 +49,8 @@ class SaleOrderDiscount(models.TransientModel):
             "company_id": self.company_id.id,
             "taxes_id": None,
         }
-        services_category = self.env.ref(
-            "product.product_category_services", raise_if_not_found=False
-        )
-        if services_category:
-            values["categ_id"] = services_category.id
+        if self._product__product_category_services:
+            values["categ_id"] = self._product__product_category_services.id
         return values
 
     def _prepare_global_discount_so_lines(self, base_lines):

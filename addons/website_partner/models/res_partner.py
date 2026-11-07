@@ -8,6 +8,9 @@ class ResPartner(models.Model):
     _name = 'res.partner'
     _inherit = ['res.partner', 'website.seo.metadata', 'website.structured_data.mixin']
 
+    _website_partner__mt_partner_published = models.Ref('website_partner.mt_partner_published', 'mail.message.subtype', required=False)
+    _website_partner__mt_partner_unpublished = models.Ref('website_partner.mt_partner_unpublished', 'mail.message.subtype', required=False)
+
     website_description = fields.Html('Website Partner Full Description', strip_style=True, sanitize_overridable=True, translate=html_translate, prefetch=False)
     website_short_description = fields.Text('Website Partner Short Description', translate=True)
     is_published = fields.Boolean(tracking=True)
@@ -22,8 +25,8 @@ class ResPartner(models.Model):
         self.ensure_one()
         if 'is_published' in track_init_values:
             if self.is_published:
-                return self.env.ref('website_partner.mt_partner_published', raise_if_not_found=False) or super()._track_log_get_default_subtype(track_init_values)
-            return self.env.ref('website_partner.mt_partner_unpublished', raise_if_not_found=False) or super()._track_log_get_default_subtype(track_init_values)
+                return self._website_partner__mt_partner_published or super()._track_log_get_default_subtype(track_init_values)
+            return self._website_partner__mt_partner_unpublished or super()._track_log_get_default_subtype(track_init_values)
         return super()._track_log_get_default_subtype(track_init_values)
 
     def _prepare_jsonld_vals(self):

@@ -101,6 +101,11 @@ class CalendarEvent(models.Model):
     _mail_post_access = 'read'
     _systray_view = 'calendar'
 
+    _calendar__alarm_notif_1 = models.Ref('calendar.alarm_notif_1', 'calendar.alarm', required=False)
+    _calendar__calendar_template_meeting_changedate = models.Ref('calendar.calendar_template_meeting_changedate', 'mail.template', required=False)
+    _calendar__calendar_template_meeting_invitation = models.Ref('calendar.calendar_template_meeting_invitation', 'mail.template', required=False)
+    _calendar__calendar_template_meeting_update = models.Ref('calendar.calendar_template_meeting_update', 'mail.template', required=False)
+
     DISCUSS_ROUTE = 'calendar/join_videocall'
 
     @api.model
@@ -381,7 +386,7 @@ class CalendarEvent(models.Model):
     @api.depends('allday')
     def _compute_alarm_ids(self):
         """ Set a default alarm on the event if it's not all day. No default alarm if all day."""
-        default_alarm_id = self.env.ref('calendar.alarm_notif_1', raise_if_not_found=False)
+        default_alarm_id = self._calendar__alarm_notif_1
         for event in self:
             if event.alarm_ids and event.alarm_ids._origin != default_alarm_id:
                 continue
@@ -1110,7 +1115,7 @@ class CalendarEvent(models.Model):
                 (current_attendees & previous_attendees).with_context(
                     calendar_template_ignore_recurrence=not update_recurrence
                 )._notify_attendees(
-                    self.env.ref('calendar.calendar_template_meeting_changedate', raise_if_not_found=False),
+                    self._calendar__calendar_template_meeting_changedate,
                     force_send=True,
                 )
 
@@ -1512,14 +1517,14 @@ class CalendarEvent(models.Model):
     def action_sendmail(self):
         if self.env.user.email:
             self.attendee_ids._notify_attendees(
-                self.env.ref('calendar.calendar_template_meeting_invitation', raise_if_not_found=False),
+                self._calendar__calendar_template_meeting_invitation,
             )
         return True
 
     def action_open_composer(self):
         if not self.partner_ids:
             raise UserError(_("There are no attendees on these events"))
-        template_id = self.env['ir.model.data']._xmlid_to_res_id('calendar.calendar_template_meeting_update', raise_if_not_found=False)
+        template_id = self._calendar__calendar_template_meeting_update.id
         # The mail is sent with datetime corresponding to the sending user TZ
         default_composition_mode = self.env.context.get('default_composition_mode', self.env.context.get('composition_mode', 'comment'))
         compose_ctx = dict(

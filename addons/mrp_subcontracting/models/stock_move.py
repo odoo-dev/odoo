@@ -11,6 +11,8 @@ from odoo.tools.misc import OrderedSet
 class StockMove(models.Model):
     _inherit = 'stock.move'
 
+    _mrp_subcontracting__route_resupply_subcontractor_mto = models.Ref('mrp_subcontracting.route_resupply_subcontractor_mto', 'stock.route', required=False)
+
     is_subcontract = fields.Boolean('The move is a subcontract receipt')
     show_subcontracting_details_visible = fields.Boolean(
         compute='_compute_show_subcontracting_details_visible'
@@ -301,8 +303,7 @@ class StockMove(models.Model):
 
     def _get_partner_id(self):
         if self.raw_material_production_id.subcontractor_id:
-            route = self.env.ref('mrp_subcontracting.route_resupply_subcontractor_mto', raise_if_not_found=False)
-            if route and self.rule_id.route_id == route:
+            if self._mrp_subcontracting__route_resupply_subcontractor_mto and self.rule_id.route_id == self._mrp_subcontracting__route_resupply_subcontractor_mto:
                 return self.raw_material_production_id.subcontractor_id.id
         return super()._get_partner_id()
 

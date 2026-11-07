@@ -11,6 +11,8 @@ class HrSkillType(models.Model):
     _description = "Skill Type"
     _order = "sequence, name"
 
+    _hr__hr_skill_type_lang = models.Ref('hr.hr_skill_type_lang', 'hr.skill.type', required=False)
+
     def _get_default_color(self):
         return randint(1, 11)
 

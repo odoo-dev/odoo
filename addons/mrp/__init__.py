@@ -14,7 +14,7 @@ def _create_warehouse_data(env):
     warehouse_ids.write({'manufacture_to_resupply': True})
 
 def uninstall_hook(env):
-    if act_window := env.ref('stock.action_product_stock_view', raise_if_not_found=False):
+    if act_window := env['ir.actions.act_window']._stock__action_product_stock_view:
         act_window.domain = [("is_storable", "=", True)]
     warehouses = env["stock.warehouse"].search([])
     pbm_routes = warehouses.mapped("pbm_route_id")

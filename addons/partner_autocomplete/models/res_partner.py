@@ -14,6 +14,8 @@ _logger = logging.getLogger(__name__)
 class ResPartner(models.Model):
     _inherit = 'res.partner'
 
+    _iap_mail__enrich_company_by_dnb = models.Ref('iap_mail.enrich_company_by_dnb', 'ir.ui.view', required=False)
+
     @api.model
     def _iap_replace_location_codes(self, iap_data):
         country_code, country_name = iap_data.pop('country_code', False), iap_data.pop('country_name', False)
@@ -243,8 +245,7 @@ class ResPartner(models.Model):
         """
          Post a chatter note containing company enrichment data received from IAP
         """
-        template = self.env.ref('iap_mail.enrich_company_by_dnb', raise_if_not_found=False)
-        if not template:
+        if not self._iap_mail__enrich_company_by_dnb:
             return
         company = {
             'phone': self.phone,

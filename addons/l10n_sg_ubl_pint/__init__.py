@@ -3,7 +3,7 @@ from . import models
 
 
 def post_init_hook(env):
-    if registering_cron := env.ref('account_peppol.ir_cron_peppol_auto_register_services', raise_if_not_found=False):
+    if registering_cron := env['ir.cron']._account_peppol__ir_cron_peppol_auto_register_services:
         registering_cron._trigger()
 
 

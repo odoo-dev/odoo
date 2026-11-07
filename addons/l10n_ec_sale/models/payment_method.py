@@ -6,6 +6,10 @@ from odoo import api, fields, models
 class PaymentMethod(models.Model):
     _inherit = 'payment.method'
 
+    _l10n_ec__P19 = models.Ref('l10n_ec.P19', 'l10n_ec.sri.payment', required=False)
+    _l10n_ec__P20 = models.Ref('l10n_ec.P20', 'l10n_ec.sri.payment', required=False)
+    _l10n_ec__P21 = models.Ref('l10n_ec.P21', 'l10n_ec.sri.payment', required=False)
+
     def _get_fiscal_country_codes(self):
         return ','.join(self.env.companies.mapped('account_fiscal_country_id.code'))
 
@@ -23,10 +27,10 @@ class PaymentMethod(models.Model):
     def _compute_l10n_ec_sri_payment_id(self):
         for method in self:
             if method.code == 'card':
-                method.l10n_ec_sri_payment_id = self.env.ref('l10n_ec.P19', raise_if_not_found=False)
+                method.l10n_ec_sri_payment_id = self._l10n_ec__P19
             elif method.code == 'bank_transfer':
-                method.l10n_ec_sri_payment_id = self.env.ref('l10n_ec.P20', raise_if_not_found=False)
+                method.l10n_ec_sri_payment_id = self._l10n_ec__P20
             elif method.code == 'bank_account':
-                method.l10n_ec_sri_payment_id = self.env.ref('l10n_ec.P21', raise_if_not_found=False)
+                method.l10n_ec_sri_payment_id = self._l10n_ec__P21
             else:
                 method.l10n_ec_sri_payment_id = False

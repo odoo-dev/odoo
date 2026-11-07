@@ -282,6 +282,9 @@ class ResPartner(models.Model):
     # the partner types that must be added to a partner's complete name, like "Delivery"
     _complete_name_displayed_types = ('invoice', 'delivery', 'other')
 
+    _base__partner_root_optional = models.Ref('base.partner_root', 'res.partner', required=False)
+    _base__user_root_optional = models.Ref('base.user_root', 'res.users', required=False)
+
     def _default_category(self):
         return self.env['res.partner.category'].browse(self.env.context.get('category_id'))
 
@@ -527,8 +530,8 @@ class ResPartner(models.Model):
         for partner in partners:
             users = partner.user_ids & active_users
             # Special case for OdooBot as its user might be archived.
-            if not users and partner.id == self.env["ir.model.data"]._xmlid_to_res_id("base.partner_root"):
-                partner.main_user_id = self.env["ir.model.data"]._xmlid_to_res_id("base.user_root")
+            if not users and partner.id == self._base__partner_root_optional.id:
+                partner.main_user_id = self._base__user_root_optional.id
                 continue
             partner.main_user_id = users.sorted(
                 lambda u: (not u.share, -u.id), reverse=True,

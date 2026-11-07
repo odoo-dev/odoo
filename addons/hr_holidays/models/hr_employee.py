@@ -17,6 +17,8 @@ from odoo.tools.intervals import Intervals
 class HrEmployee(models.Model):
     _inherit = 'hr.employee'
 
+    _hr_holidays__group_hr_holidays_responsible = models.Ref('hr_holidays.group_hr_holidays_responsible', 'res.groups', required=False)
+
     def _get_leave_manager_domain(self):
         return "[('share', '=', False), ('company_ids', 'in', company_id), ('role', 'in', ['regular_user', 'group_system']), ('all_group_ids', 'in', %s)]" % self.env.ref('hr_holidays.group_hr_holidays_employee').id
     leave_manager_id = fields.Many2one(
@@ -322,13 +324,13 @@ class HrEmployee(models.Model):
         """Default the time off approver to the manager's user and give it the approver group."""
         if self.env.context.get('salary_simulation'):
             return super().create(vals_list)
-        approver_group = self.env.ref('hr_holidays.group_hr_holidays_responsible', raise_if_not_found=False)
+        approver_group = self._hr_holidays__group_hr_holidays_responsible
         group_updates = []
         for vals in vals_list:
             if 'parent_id' in vals:
                 manager = self.env['hr.employee'].browse(vals['parent_id']).user_id
                 vals['leave_manager_id'] = vals.get('leave_manager_id', manager.id)
-            if approver_group and vals.get('leave_manager_id'):
+            if vals.get('leave_manager_id'):
                 group_updates.append((4, vals['leave_manager_id']))
         if group_updates:
             approver_group.sudo().write({'user_ids': group_updates})
@@ -358,7 +360,7 @@ class HrEmployee(models.Model):
             if values['leave_manager_id']:
                 leave_manager = self.env['res.users'].browse(values['leave_manager_id'])
                 old_managers -= leave_manager
-                approver_group = self.env.ref('hr_holidays.group_hr_holidays_responsible', raise_if_not_found=False)
+                approver_group = self._hr_holidays__group_hr_holidays_responsible
                 if approver_group and not leave_manager.has_group('hr_holidays.group_hr_holidays_responsible'):
                     leave_manager.sudo().write({'group_ids': [(4, approver_group.id)]})
 

@@ -14,6 +14,8 @@ _logger = logging.getLogger(__name__)
 class ResPartner(models.Model):
     _inherit = 'res.partner'
 
+    _l10n_eu_account_vies__vies_iap_check_update = models.Ref('l10n_eu_account_vies.vies_iap_check_update', 'ir.cron', required=False)
+
     vies_valid = fields.Boolean(
         string="Intra-Community Valid",
         compute='_compute_vies_valid', store=True, readonly=False,
@@ -64,7 +66,7 @@ class ResPartner(models.Model):
         """
         # No existing cron = no way for db to pull updates, thus no need to bother IAP
         if (
-            not self.env.ref('l10n_eu_account_vies.vies_iap_check_update', raise_if_not_found=False)
+            not self._l10n_eu_account_vies__vies_iap_check_update
             or tools.config['test_enable']
             or modules.module.current_test
         ):

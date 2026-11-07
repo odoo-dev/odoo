@@ -28,6 +28,9 @@ class PurchaseOrder(models.Model):
     _mailing_enabled = True
     _priority_field = 'priority'
 
+    _account__view_move_form_optional = models.Ref('account.view_move_form', 'ir.ui.view', required=False)
+    _purchase__email_template_edi_purchase_reminder = models.Ref('purchase.email_template_edi_purchase_reminder', 'mail.template', required=False)
+
     @api.depends('order_line.price_subtotal', 'company_id', 'currency_id')
     def _amount_all(self):
         AccountTax = self.env['account.tax']
@@ -649,7 +652,7 @@ class PurchaseOrder(models.Model):
         lang = self.env.context.get('lang')
         if {'default_template_id', 'default_model', 'default_res_id'} <= ctx.keys():
             template = self.env['mail.template'].browse(ctx['default_template_id'])
-            if template and template.lang:
+            if template.lang:
                 lang = template._render_lang([ctx['default_res_id']])[ctx['default_res_id']]
 
         self = self.with_context(lang=lang)
@@ -1016,8 +1019,7 @@ class PurchaseOrder(models.Model):
         if len(invoices) > 1:
             result['domain'] = [('id', 'in', invoices.ids)]
         elif len(invoices) == 1:
-            res = self.env.ref('account.view_move_form', False)
-            form_view = [(res and res.id or False, 'form')]
+            form_view = [(self._account__view_move_form_optional.id, 'form')]
             if 'views' in result:
                 result['views'] = form_view + [(state, view) for state, view in result['views'] if view != 'form']
             else:
@@ -1123,7 +1125,7 @@ class PurchaseOrder(models.Model):
         if not self.env.user.has_group('purchase.group_send_reminder'):
             return
 
-        template = self.env.ref('purchase.email_template_edi_purchase_reminder', raise_if_not_found=False)
+        template = self._purchase__email_template_edi_purchase_reminder
         if template:
             orders = self if send_single else self._get_orders_to_remind()
             for order in orders:
@@ -1143,9 +1145,8 @@ class PurchaseOrder(models.Model):
         if not self.env.user.has_group('purchase.group_send_reminder'):
             return
 
-        template = self.env.ref('purchase.email_template_edi_purchase_reminder', raise_if_not_found=False)
-        if template and self.env.user.email and self.id:
-            template.with_context(is_reminder=True).send_mail(
+        if self._purchase__email_template_edi_purchase_reminder and self.env.user.email and self.id:
+            self._purchase__email_template_edi_purchase_reminder.with_context(is_reminder=True).send_mail(
                 self.id,
                 force_send=True,
                 raise_exception=False,
@@ -1172,7 +1173,7 @@ class PurchaseOrder(models.Model):
         lang = self.env.context.get('lang')
         if {'default_template_id', 'default_model', 'default_res_id'} <= ctx.keys():
             template = self.env['mail.template'].browse(ctx['default_template_id'])
-            if template and template.lang:
+            if template.lang:
                 lang = template._render_lang([ctx['default_res_id']])[ctx['default_res_id']]
         self = self.with_context(lang=lang)
         ctx['model_description'] = _('Purchase Order')

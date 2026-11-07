@@ -6,6 +6,8 @@ class ProjectTemplateCreateWizard(models.TransientModel):
     _name = 'project.template.create.wizard'
     _description = 'Project Template create Wizard'
 
+    _project__project_project_view_form_simplified_template = models.Ref('project.project_project_view_form_simplified_template', 'ir.ui.view', required=False)
+
     def _default_role_to_users_ids(self):
         res = []
         template = self.env['project.project'].browse(self.env.context.get('template_id'))
@@ -49,14 +51,13 @@ class ProjectTemplateCreateWizard(models.TransientModel):
 
     @api.model
     def action_open_template_view(self):
-        view = self.env.ref('project.project_project_view_form_simplified_template', raise_if_not_found=False)
-        if not view:
+        if not self._project__project_project_view_form_simplified_template:
             return {}
         return {
             'name': self.env._('Create Project (Template: %s)', self.env.context.get('template_name')),
             'type': 'ir.actions.act_window',
             'view_mode': 'form',
-            'views': [(view.id, 'form')],
+            'views': [(self._project__project_project_view_form_simplified_template.id, 'form')],
             'res_model': 'project.template.create.wizard',
             'target': 'new',
             'context': {

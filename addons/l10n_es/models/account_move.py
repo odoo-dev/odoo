@@ -11,6 +11,8 @@ INVOICE_TYPES_BY_USE = {
 class AccountMove(models.Model):
     _inherit = 'account.move'
 
+    _l10n_es__partner_simplified_optional = models.Ref('l10n_es.partner_simplified', 'res.partner', required=False)
+
     l10n_es_original_invoice_credited = fields.Char(string='Original Invoice Credited', store=False)
     l10n_es_invoice_type_available = fields.Char(
         string='Invoice Types Available',
@@ -64,7 +66,7 @@ class AccountMove(models.Model):
     @api.depends('move_type', 'partner_id', 'invoice_line_ids.price_total',
                  'invoice_line_ids.tax_ids.l10n_es_type', 'amount_total_signed')
     def _compute_l10n_es_invoice_type(self):
-        simplified_partner = self.env.ref('l10n_es.partner_simplified', raise_if_not_found=False)
+        simplified_partner = self._l10n_es__partner_simplified_optional
         europe = self.env.ref('base.europe')
         for move in self:
             if move.state == 'posted' and move.l10n_es_invoice_type:

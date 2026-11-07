@@ -7,9 +7,9 @@ from . import report
 
 
 def uninstall_hook(env):
-    if rule := env.ref("account.account_analytic_line_rule_billing_user", raise_if_not_found=False):
+    if rule := env['ir.access']._account__account_analytic_line_rule_billing_user:
         rule.active = True
-    if rule := env.ref("account.account_analytic_line_rule_readonly_user", raise_if_not_found=False):
+    if rule := env['ir.access']._account__account_analytic_line_rule_readonly_user:
         rule.active = True
 
 

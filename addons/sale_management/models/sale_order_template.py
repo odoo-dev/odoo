@@ -11,6 +11,8 @@ class SaleOrderTemplate(models.Model):
     _inherit = ["product.catalog.mixin"]
     _order = "sequence, id"
 
+    _sale_management__sale_order_template_1 = models.Ref('sale_management.sale_order_template_1', 'sale.order.template', required=False)
+
     active = fields.Boolean(
         default=True,
         help="If unchecked, it will allow you to hide the Order template without removing it.",
@@ -188,9 +190,7 @@ class SaleOrderTemplate(models.Model):
 
     @api.model
     def _demo_configure_template(self):
-        demo_template = self.env.ref(
-            "sale_management.sale_order_template_1", raise_if_not_found=False
-        )
+        demo_template = self._sale_management__sale_order_template_1
         if not demo_template or demo_template.sale_order_template_line_ids:
             # Skip if template not found, or already configured
             return

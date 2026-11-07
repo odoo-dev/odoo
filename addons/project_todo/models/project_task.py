@@ -8,6 +8,12 @@ from odoo.tools import html2plaintext
 class ProjectTask(models.Model):
     _inherit = 'project.task'
 
+    _project_todo__project_task_view_todo_activity = models.Ref('project_todo.project_task_view_todo_activity', 'ir.ui.view', required=False)
+    _project_todo__project_task_view_todo_calendar = models.Ref('project_todo.project_task_view_todo_calendar', 'ir.ui.view', required=False)
+    _project_todo__project_task_view_todo_form = models.Ref('project_todo.project_task_view_todo_form', 'ir.ui.view', required=False)
+    _project_todo__project_task_view_todo_kanban = models.Ref('project_todo.project_task_view_todo_kanban', 'ir.ui.view', required=False)
+    _project_todo__project_task_view_todo_tree = models.Ref('project_todo.project_task_view_todo_tree', 'ir.ui.view', required=False)
+
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
@@ -40,11 +46,11 @@ class ProjectTask(models.Model):
         :rtype: list(tuple())
         """
         return [
-            (self.env['ir.model.data']._xmlid_to_res_id("project_todo.project_task_view_todo_kanban"), "kanban"),
-            (self.env['ir.model.data']._xmlid_to_res_id("project_todo.project_task_view_todo_tree"), "list"),
-            (self.env['ir.model.data']._xmlid_to_res_id("project_todo.project_task_view_todo_form"), "form"),
-            (self.env['ir.model.data']._xmlid_to_res_id("project_todo.project_task_view_todo_calendar"), "calendar"),
-            (self.env['ir.model.data']._xmlid_to_res_id("project_todo.project_task_view_todo_activity"), "activity"),
+            (self._project_todo__project_task_view_todo_kanban.id, "kanban"),
+            (self._project_todo__project_task_view_todo_tree.id, "list"),
+            (self._project_todo__project_task_view_todo_form.id, "form"),
+            (self._project_todo__project_task_view_todo_calendar.id, "calendar"),
+            (self._project_todo__project_task_view_todo_activity.id, "activity"),
         ]
 
     def _notify_get_recipients_groups(self, message, model_description):

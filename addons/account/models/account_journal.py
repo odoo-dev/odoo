@@ -48,6 +48,9 @@ class AccountJournal(models.Model):
     _check_company_domain = models.check_company_domain_parent_of
     _rec_names_search = ('name', 'code')
 
+    _account__mail_template_einvoice_notification = models.Ref('account.mail_template_einvoice_notification', 'mail.template', required=False)
+    _account__mail_template_invoice_subscriber = models.Ref('account.mail_template_invoice_subscriber', 'mail.template', required=False)
+
     def _default_inbound_payment_methods(self):
         return self.env.ref('account.account_payment_method_manual_in')
 
@@ -1297,8 +1300,7 @@ class AccountJournal(models.Model):
     def _notify_einvoices_received(self, moves):
         self.ensure_one()
         # legacy if module was not upgraded
-        new_mail_template = self.env.ref('account.mail_template_invoice_subscriber', raise_if_not_found=False)
-        if new_mail_template:
+        if self._account__mail_template_invoice_subscriber:
             # if module was upgraded, this is handled in _notify_invoice_subscribers
             return
 
@@ -1306,7 +1308,7 @@ class AccountJournal(models.Model):
         if not moves or not emails:
             return
 
-        if not (mail_template := self.env.ref('account.mail_template_einvoice_notification', raise_if_not_found=False)):
+        if not (mail_template := self._account__mail_template_einvoice_notification):
             return
 
         mail_template.with_context(einvoices=moves).send_mail(self.id, force_send=True)
@@ -1331,7 +1333,7 @@ class AccountJournal(models.Model):
         if not recipients:
             return
 
-        if not (template := self.env.ref('account.mail_template_invoice_subscriber', raise_if_not_found=False)):
+        if not (template := self._account__mail_template_invoice_subscriber):
             # we add the template in stable, thus this might happen if the module was not upgraded
             self._notify_einvoices_received(invoice)
             return

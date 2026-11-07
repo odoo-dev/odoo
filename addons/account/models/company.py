@@ -74,6 +74,8 @@ class ResCompany(models.Model):
     _name = 'res.company'
     _inherit = ["res.company", "mail.thread"]
 
+    _account__account_move_view_list_stock_closing = models.Ref('account.account_move_view_list_stock_closing', 'ir.ui.view', required=False)
+
     fiscalyear_last_day = fields.Integer(default=31, required=True)
     fiscalyear_last_month = fields.Selection(MONTH_SELECTION, default='12', required=True)
     fiscalyear_lock_date = fields.Date(
@@ -1321,10 +1323,9 @@ class ResCompany(models.Model):
             if auto_post:
                 closing_move.with_context(tz=self._get_company_tz())._post()
 
-        list_view = self.env.ref('account.account_move_view_list_stock_closing', raise_if_not_found=False)
         return (closing_move | accrual_moves)._get_records_action(
             name=_("Journal Items"),
-            views=[(list_view and list_view.id, "list"), (False, "form")],
+            views=[(self._account__account_move_view_list_stock_closing.id, "list"), (False, "form")],
         )
 
     def _get_accrual_candidate_lines(self, date=False):

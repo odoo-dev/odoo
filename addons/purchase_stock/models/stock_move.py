@@ -10,6 +10,8 @@ from odoo.tools.sql import SQL
 class StockMove(models.Model):
     _inherit = 'stock.move'
 
+    _stock__stock_location_inter_company_optional = models.Ref('stock.stock_location_inter_company', 'stock.location', required=False)
+
     purchase_line_id = fields.Many2one(
         'purchase.order.line', 'Purchase Order Line',
         ondelete='set null', index='btree_not_null', readonly=True)
@@ -154,7 +156,7 @@ class StockMove(models.Model):
         self.ensure_one()
         return self.location_dest_id.usage == "supplier"\
             or self.origin_returned_move_id and (
-                self.location_dest_id == self.env.ref('stock.stock_location_inter_company', raise_if_not_found=False) or
+                self.location_dest_id == self._stock__stock_location_inter_company_optional or
                 self.origin_returned_move_id.location_usage == "supplier"
             )
 

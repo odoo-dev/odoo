@@ -15,6 +15,8 @@ class SmsComposer(models.TransientModel):
     _name = 'sms.composer'
     _description = 'Send SMS Wizard'
 
+    _mail__mt_note_optional = models.Ref('mail.mt_note', 'mail.message.subtype', required=False)
+
     @api.model
     def default_get(self, fields):
         result = super().default_get(fields)
@@ -390,7 +392,7 @@ class SmsComposer(models.TransientModel):
             'number_field': self.number_field_name,
             'sms_numbers': self.sanitized_numbers.split(',') if self.sanitized_numbers else None,
             'sms_type': self.sms_type,
-            'subtype_id': self.env['ir.model.data']._xmlid_to_res_id('mail.mt_note'),
+            'subtype_id': self._mail__mt_note_optional.id,
         }
 
     def _action_send_sms_comment_record(self, record, body, **kwargs):

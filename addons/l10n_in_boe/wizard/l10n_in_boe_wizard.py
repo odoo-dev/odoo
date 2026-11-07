@@ -7,6 +7,8 @@ class L10n_InBoeWizard(models.TransientModel):
     _name = 'l10n_in.boe.wizard'
     _description = "Bill Of Entry Wizard"
 
+    _l10n_in_boe__product_custom_duty = models.Ref('l10n_in_boe.product_custom_duty', 'product.product', required=False)
+
     @api.model
     def default_get(self, fields_list):
         defaults = super().default_get(fields_list)
@@ -263,7 +265,7 @@ class L10n_InBoeWizard(models.TransientModel):
             ))
 
     def _get_l10n_in_find_or_create_custom_duty_product(self):
-        custom_duty_product = self.env.ref('l10n_in_boe.product_custom_duty', raise_if_not_found=False)
+        custom_duty_product = self._l10n_in_boe__product_custom_duty
         if not custom_duty_product:
             custom_duty_product = self.env['product.product'].sudo().create({
                 'name': self.env._("Custom Duty"),

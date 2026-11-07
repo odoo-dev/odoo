@@ -62,6 +62,8 @@ def get_datetime(tree, xpath):
 class AccountMove(models.Model):
     _inherit = 'account.move'
 
+    _l10n_it_edi__l10n_it_edi_professional_fees_tag = models.Ref('l10n_it_edi.l10n_it_edi_professional_fees_tag', 'account.account.tag', required=False)
+
     l10n_it_edi_state = fields.Selection(
         string="SDI State",
         selection=[
@@ -1084,7 +1086,7 @@ class AccountMove(models.Model):
             If one line has the tag for professional fee then we return True
         """
         self.ensure_one()
-        professional_fee_tag = self.env.ref('l10n_it_edi.l10n_it_edi_professional_fees_tag', raise_if_not_found=False)
+        professional_fee_tag = self._l10n_it_edi__l10n_it_edi_professional_fees_tag
         if not professional_fee_tag:
             return False
 

@@ -214,12 +214,8 @@ class WebsiteHrRecruitment(WebsiteForm):
                 if website_medium:
                     data['record']['medium_id'] = website_medium.id
             if not request.cookies.get('odoo_utm_source'):
-                website_source = request.env.ref(
-                    'website_hr_recruitment.utm_source_website_page_generator',
-                    raise_if_not_found=False
-                )
-                if website_source:
-                    data['record']['source_id'] = website_source.id
+                if request.env['utm.source']._website_hr_recruitment__utm_source_website_page_generator:
+                    data['record']['source_id'] = request.env['utm.source']._website_hr_recruitment__utm_source_website_page_generator.id
         return data
 
     def _should_log_authenticate_message(self, record):

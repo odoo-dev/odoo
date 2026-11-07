@@ -10,6 +10,8 @@ from odoo.tools import html2plaintext
 class SurveyUser_Input(models.Model):
     _inherit = 'survey.user_input'
 
+    _hr_survey__resume_type_certification = models.Ref('hr_survey.resume_type_certification', 'hr.resume.line.type', required=False)
+
     def _mark_done(self):
         """ Will add certification to employee's resume if
         - The survey is a certification
@@ -41,7 +43,7 @@ class SurveyUser_Input(models.Model):
             ))
         resume_survey_by_ids = resume_lines.grouped(
             lambda resume_line: (resume_line.employee_id, resume_line.survey_id))
-        line_type = self.env.ref('hr_survey.resume_type_certification', raise_if_not_found=False)
+        line_type = self._hr_survey__resume_type_certification
 
         lines_to_create = []
         today = fields.Date.context_today(self)
@@ -56,7 +58,7 @@ class SurveyUser_Input(models.Model):
                     'date_start': date_start,
                     'date_end': date_start + relativedelta(months=validity_month) if validity_month else False,
                     'description': html2plaintext(survey.description) if survey.description else '',
-                    'line_type_id': line_type.id if line_type else False,
+                    'line_type_id': line_type.id,
                     'survey_id': survey.id,
                 }
                 if existing_resume_survey := resume_survey_by_ids.get((employee, survey)):

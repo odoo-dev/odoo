@@ -4,13 +4,16 @@ from odoo import api, Command, models
 class AccountAccount(models.Model):
     _inherit = 'account.account'
 
+    _l10n_mx__tag_credit_balance_account = models.Ref('l10n_mx.tag_credit_balance_account', 'account.account.tag', required=False)
+    _l10n_mx__tag_debit_balance_account = models.Ref('l10n_mx.tag_debit_balance_account', 'account.account.tag', required=False)
+
     @api.model_create_multi
     def create(self, vals_list):
         # EXTENDS account - ensure there is a tag on created MX accounts
         # The computation is a bit naive and might not be correct in all cases.
         accounts = super().create(vals_list)
-        debit_tag = self.env.ref('l10n_mx.tag_debit_balance_account', raise_if_not_found=False)
-        credit_tag = self.env.ref('l10n_mx.tag_credit_balance_account', raise_if_not_found=False)
+        debit_tag = self._l10n_mx__tag_debit_balance_account
+        credit_tag = self._l10n_mx__tag_credit_balance_account
         if not debit_tag or not credit_tag:
             return accounts
         mx_account_no_tags = accounts.filtered(

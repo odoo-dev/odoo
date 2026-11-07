@@ -10,6 +10,9 @@ from odoo.tools.business_data import split_vat
 class ResPartner(models.Model):
     _inherit = 'res.partner'
 
+    _base__europe_optional = models.Ref('base.europe', 'res.country.group', required=False)
+    _l10n_it_edi__res_partner_tree_l10n_it = models.Ref('l10n_it_edi.res_partner_tree_l10n_it', 'ir.ui.view', required=False)
+
     invoice_edi_format = fields.Selection(selection_add=[('it_edi_xml', 'Italy (Factura PA)')])
     l10n_it_pec_email = fields.Char(string="PEC e-mail")
     l10n_it_codice_fiscale = fields.Char(string="Codice Fiscale", size=16)
@@ -77,8 +80,7 @@ class ResPartner(models.Model):
         if not self or len(self) > 1:
             return {}
 
-        europe = self.env.ref('base.europe', raise_if_not_found=False)
-        in_eu = not europe or not self.country_id or self.country_id in europe.country_ids
+        in_eu = not self._base__europe_optional or not self.country_id or self.country_id in self._base__europe_optional.country_ids
         is_sm = self.country_id and self.country_id.code == "SM"
 
         # VAT number and country code
@@ -167,8 +169,7 @@ class ResPartner(models.Model):
     def _l10n_it_edi_export_check(self, checks=None):
         checks = checks or ['partner_vat_codice_fiscale_missing', 'partner_address_missing']
         single_views = [(False, 'form')]
-        list_view = self.env.ref('l10n_it_edi.res_partner_tree_l10n_it', raise_if_not_found=False)
-        multi_views = [(list_view.id if list_view else False, 'list'), (False, 'form')]
+        multi_views = [(self._l10n_it_edi__res_partner_tree_l10n_it.id, 'list'), (False, 'form')]
 
         def build_error(errors, key, message, invalid_records):
             views = single_views if len(invalid_records) == 1 else multi_views

@@ -13,6 +13,9 @@ from odoo.addons.l10n_gr_edi.models.preferred_classification import (
 class AccountMoveLine(models.Model):
     _inherit = 'account.move.line'
 
+    _l10n_gr_edi__default_preferred_classification = models.Ref(
+        'l10n_gr_edi.default_preferred_classification', 'l10n_gr_edi.preferred_classification', required=False)
+
     l10n_gr_edi_available_cls_category = fields.Char(compute='_compute_l10n_gr_edi_available_cls_category')
     l10n_gr_edi_available_cls_type = fields.Char(compute='_compute_l10n_gr_edi_available_cls_type')
     l10n_gr_edi_available_cls_vat = fields.Char(compute='_compute_l10n_gr_edi_available_cls_type')
@@ -149,7 +152,7 @@ class AccountMoveLine(models.Model):
 
         # If by the end nothing is still found, set the default preferred classification as [ 1.1 inv-type | 1.2 category | E3_561_007 type ]
         if not preferred_id:
-            preferred_id = self.env.ref('l10n_gr_edi.default_preferred_classification', raise_if_not_found=False)
+            preferred_id = self._l10n_gr_edi__default_preferred_classification
         if not preferred_id:
             preferred_id = self.env['l10n_gr_edi.preferred_classification'].create([{
                 'l10n_gr_edi_inv_type': '1.1',

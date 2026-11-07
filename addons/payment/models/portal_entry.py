@@ -6,10 +6,12 @@ from odoo import models
 class PortalEntryPayment(models.Model):
     _inherit = "portal.entry"
 
+    _payment__payment_methods_portal_entry = models.Ref('payment.payment_methods_portal_entry', 'portal.entry', required=False)
+
     def _filter_visible_portal_cards(self):
         visible_entries = super()._filter_visible_portal_cards()
-        payment_methods_entry = self.env.ref("payment.payment_methods_portal_entry", raise_if_not_found=False)
-        if payment_methods_entry and payment_methods_entry in self:
+        payment_methods_entry = self._payment__payment_methods_portal_entry
+        if payment_methods_entry in self:
             partner_sudo = self.env.user.partner_id.sudo()
             providers_sudo = (
                 self

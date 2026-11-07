@@ -9,6 +9,9 @@ from odoo.addons.payment import utils as payment_utils
 class PaymentProvider(models.Model):
     _inherit = "payment.provider"
 
+    _account_payment_custom__cron_auto_confirm_paid_wire_transfer_txs = models.Ref(
+        'account_payment_custom.cron_auto_confirm_paid_wire_transfer_txs', 'ir.cron', required=False)
+
     # === CRUD METHODS === #
 
     @api.model_create_multi
@@ -27,14 +30,11 @@ class PaymentProvider(models.Model):
 
         :return: None
         """
-        wire_transfer_cron = self.env.ref(
-            "account_payment_custom.cron_auto_confirm_paid_wire_transfer_txs", False
-        )
-        if wire_transfer_cron:
+        if self._account_payment_custom__cron_auto_confirm_paid_wire_transfer_txs:
             any_wire_transfer_provider = bool(
                 self.sudo().search_count([("custom_mode", "=", "wire_transfer")], limit=1)
             )
-            wire_transfer_cron.active = any_wire_transfer_provider
+            self._account_payment_custom__cron_auto_confirm_paid_wire_transfer_txs.active = any_wire_transfer_provider
 
     # === SETUP METHODS === #
 

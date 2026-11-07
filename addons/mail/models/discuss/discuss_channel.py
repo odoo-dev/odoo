@@ -90,6 +90,11 @@ class DiscussChannel(models.Model):
     _mail_message_reaction_access = "read"
     _inherit = ["mail.thread", "bus.sync.mixin"]
 
+    _mail__channel_admin = models.Ref('mail.channel_admin', 'discuss.channel', required=False)
+    _mail__channel_all_employees = models.Ref('mail.channel_all_employees', 'discuss.channel', required=False)
+    _mail__module_install_notification = models.Ref('mail.module_install_notification', 'mail.message', required=False)
+    _mail__mt_important_notification = models.Ref('mail.mt_important_notification', 'mail.message.subtype', required=False)
+
     MAX_BOUNCE_LIMIT = 10
 
     @api.model
@@ -607,22 +612,22 @@ class DiscussChannel(models.Model):
     def _setup_builtin_channels(self):
         admin_lang = self.env.ref("base.partner_admin").lang
         translate_env = self.env(context=dict(self.env.context, lang=admin_lang))
-        channel_general = self.env.ref("mail.channel_all_employees", raise_if_not_found=False)
-        if channel_general and not channel_general.name:
+        channel_general = self._mail__channel_all_employees
+        if not channel_general.name:
             channel_general.write({
                 "name": translate_env._("General"),
                 "description": translate_env._(
                     "A place to connect and exchange news with colleagues across the company.",
                 ),
             })
-        channel_admin = self.env.ref("mail.channel_admin", raise_if_not_found=False)
-        if channel_admin and not channel_admin.name:
+        channel_admin = self._mail__channel_admin
+        if not channel_admin.name:
             channel_admin.write({
                 "name": translate_env._("Administrators"),
                 "description": translate_env._("General channel for administrators."),
             })
-        welcome_message = self.env.ref("mail.module_install_notification", raise_if_not_found=False)
-        if welcome_message and not welcome_message.body:
+        welcome_message = self._mail__module_install_notification
+        if not welcome_message.body:
             welcome_message.body = Markup("%s<br/>%s") % (
                 translate_env._("Welcome to the #General channel 🎉"),
                 translate_env._("This is a space for the whole team to connect and share updates."),
@@ -1278,7 +1283,7 @@ class DiscussChannel(models.Model):
             message_type not in ("comment", "email", "email_outgoing", "whatsapp_message")
             and not (
                 message_type == "notification"
-                and message.subtype_id.id == self.env["ir.model.data"]._xmlid_to_res_id("mail.mt_important_notification")
+                and message.subtype_id.id == self._mail__mt_important_notification.id
             )
         ):
             return []

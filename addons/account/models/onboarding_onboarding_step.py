@@ -6,6 +6,9 @@ from odoo import _, api, models
 class OnboardingOnboardingStep(models.Model):
     _inherit = 'onboarding.onboarding.step'
 
+    _account__onboarding_onboarding_step_base_document_layout = models.Ref(
+        'account.onboarding_onboarding_step_base_document_layout', 'onboarding.onboarding.step', required=False)
+
     # COMMON STEPS
     @api.model
     def action_open_step_company_data(self):
@@ -36,8 +39,7 @@ class OnboardingOnboardingStep(models.Model):
     @api.model
     def action_validate_step_base_document_layout(self):
         """Set the onboarding(s) step as done only if layout is set."""
-        step = self.env.ref('account.onboarding_onboarding_step_base_document_layout', raise_if_not_found=False)
-        if not step or not self.env.company.external_report_layout_id:
+        if not self._account__onboarding_onboarding_step_base_document_layout or not self.env.company.external_report_layout_id:
             return False
         return self.action_validate_step('account.onboarding_onboarding_step_base_document_layout')
 

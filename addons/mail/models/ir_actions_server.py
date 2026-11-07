@@ -11,6 +11,8 @@ class IrActionsServer(models.Model):
     _description = 'Server Action'
     _inherit = ['ir.actions.server', 'mail.thread', 'mail.activity.mixin']
 
+    _mail__mt_comment_optional = models.Ref('mail.mt_comment', 'mail.message.subtype', required=False)
+
     name = fields.Char(tracking=True)
     model_id = fields.Many2one(tracking=True)
     crud_model_id = fields.Many2one(tracking=True)
@@ -425,7 +427,7 @@ class IrActionsServer(models.Model):
         cleaned_ctx['mail_post_autofollow'] = self.mail_post_autofollow
         if isinstance(self.env[self.model_name], self.env.registry.get("mail.thread")):
             records = self.env[self.model_name].with_context(cleaned_ctx).browse(res_ids)
-            subtype_id = self.env['ir.model.data']._xmlid_to_res_id('mail.mt_comment')
+            subtype_id = self._mail__mt_comment_optional.id
             records.message_post_with_source(
                 self.template_id,
                 message_type='auto_comment',

@@ -14,6 +14,8 @@ class LoyaltyCard(models.Model):
     _description = "Loyalty Coupon"
     _rec_name = "code"
 
+    _mail__email_compose_message_wizard_form_optional = models.Ref('mail.email_compose_message_wizard_form', 'ir.ui.view', required=False)
+
     @api.model
     def _generate_code(self):
         """Barcode identifiable codes."""
@@ -178,7 +180,6 @@ class LoyaltyCard(models.Model):
         """
         self.ensure_one()
         default_template = self._get_default_template()
-        compose_form = self.env.ref("mail.email_compose_message_wizard_form", False)
         ctx = dict(
             default_model="loyalty.card",
             default_res_ids=self.ids,
@@ -191,8 +192,8 @@ class LoyaltyCard(models.Model):
             "type": "ir.actions.act_window",
             "view_mode": "form",
             "res_model": "mail.compose.message",
-            "views": [(compose_form.id, "form")],
-            "view_id": compose_form.id,
+            "views": [(self._mail__email_compose_message_wizard_form_optional.id, "form")],
+            "view_id": self._mail__email_compose_message_wizard_form_optional.id,
             "target": "new",
             "context": ctx,
         }

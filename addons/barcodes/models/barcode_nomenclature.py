@@ -19,6 +19,8 @@ class BarcodeNomenclature(models.Model):
     _name = 'barcode.nomenclature'
     _description = 'Barcode Nomenclature'
 
+    _barcodes__default_barcode_nomenclature = models.Ref('barcodes.default_barcode_nomenclature', 'barcode.nomenclature', required=False)
+
     name = fields.Char(string='Barcode Format', required=True, help='An internal identification of the barcode format')
     rule_ids = fields.One2many('barcode.rule', 'barcode_nomenclature_id', string='Rules', help='The list of barcode rules')
     upc_ean_conv = fields.Selection(

@@ -23,6 +23,8 @@ class ResUsers(models.Model):
     _inherit = ['mail.thread', 'mail.activity.mixin', 'res.users']
     _mail_post_access = 'read'
 
+    _mail__group_mail_notification_type_inbox_optional = models.Ref('mail.group_mail_notification_type_inbox', 'res.groups', required=False)
+
     name = fields.Char(tracking=1)
     email = fields.Char(tracking=2)
     phone = fields.Char(tracking=3)
@@ -99,7 +101,7 @@ class ResUsers(models.Model):
         # e.g. if you add HR > Manager to a user, this method will be called.
         # It should therefore be written to be as performant as possible, and make the less change/write as possible
         # when it's not `mail.group_mail_notification_type_inbox` or `share` that are being changed.
-        inbox_group_id = self.env['ir.model.data']._xmlid_to_res_id('mail.group_mail_notification_type_inbox')
+        inbox_group_id = self._mail__group_mail_notification_type_inbox_optional.id
 
         self.filtered_domain([
             ('group_ids', 'in', inbox_group_id), ('notification_type', '!=', 'inbox')

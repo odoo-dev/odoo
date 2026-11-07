@@ -11,6 +11,8 @@ class ApplicantGetRefuseReason(models.TransientModel):
     _inherit = ['mail.composer.mixin']
     _description = 'Get Refuse Reason'
 
+    _mail__mt_note_optional = models.Ref('mail.mt_note', 'mail.message.subtype', required=False)
+
     def _default_refuse_reason_id(self):
         return self.env['hr.applicant.refuse.reason'].search([], limit=1)
 
@@ -166,7 +168,7 @@ class ApplicantGetRefuseReason(models.TransientModel):
         return related_original_applicants
 
     def _prepare_send_refusal_mails(self):
-        subtype_id = self.env['ir.model.data']._xmlid_to_res_id('mail.mt_note')
+        subtype_id = self._mail__mt_note_optional.id
         # The refusal is sent to the contact of the applicant, the email doesn't create it
         self.applicant_ids._find_or_create_partner()
         for applicant in self.applicant_ids:

@@ -12,18 +12,19 @@ from odoo.tools.translate import _
 class ProjectProject(models.Model):
     _inherit = 'project.project'
 
+    _sale_timesheet__time_product_optional = models.Ref('sale_timesheet.time_product', 'product.product', required=False)
+
     @api.model
     def default_get(self, fields):
         """ Pre-fill timesheet product as "Time" data product when creating new project allowing billable tasks by default. """
         result = super().default_get(fields)
         if 'timesheet_product_id' in fields and result.get('allow_billable') and result.get('allow_timesheets') and not result.get('timesheet_product_id'):
-            default_product = self.env.ref('sale_timesheet.time_product', False)
-            if default_product:
-                result['timesheet_product_id'] = default_product.id
+            if self._sale_timesheet__time_product_optional:
+                result['timesheet_product_id'] = self._sale_timesheet__time_product_optional.id
         return result
 
     def _default_timesheet_product_id(self):
-        return self.env.ref('sale_timesheet.time_product', False)
+        return self._sale_timesheet__time_product_optional
 
     pricing_type = fields.Selection([
         ('task_rate', 'Task rate'),
@@ -112,7 +113,7 @@ class ProjectProject(models.Model):
 
     @api.depends('allow_timesheets', 'allow_billable')
     def _compute_timesheet_product_id(self):
-        default_product = self.env.ref('sale_timesheet.time_product', False)
+        default_product = self._sale_timesheet__time_product_optional
         for project in self:
             if not project.allow_timesheets or not project.allow_billable:
                 project.timesheet_product_id = False

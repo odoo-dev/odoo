@@ -18,6 +18,8 @@ class EventRegistration(models.Model):
     _order = 'id desc'
     _mail_defaults_to_email = True
 
+    _event__event_registration_mail_template_badge = models.Ref('event.event_registration_mail_template_badge', 'mail.template', required=False)
+
     @api.model
     def _get_random_barcode(self):
         """Generate a string representation of a pseudo-random 8-byte number for barcode
@@ -376,12 +378,11 @@ class EventRegistration(models.Model):
             message loaded by default
         """
         self.ensure_one()
-        template = self.env.ref('event.event_registration_mail_template_badge', raise_if_not_found=False)
         compose_form = self.env.ref('mail.email_compose_message_wizard_form')
         ctx = dict(
             default_model='event.registration',
             default_res_ids=self.ids,
-            default_template_id=template.id if template else False,
+            default_template_id=self._event__event_registration_mail_template_badge.id,
             default_composition_mode='comment',
         )
         return {

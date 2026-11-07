@@ -25,3 +25,4 @@ from . import stock_quant
 from . import stock_replenish_mixin
 
 from . import res_groups
+from . import ir_actions_act_window

@@ -21,3 +21,4 @@ from . import mail_message
 from . import res_users_settings
 from . import digest
 from . import utm
+from . import ir_actions_report

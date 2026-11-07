@@ -8,6 +8,8 @@ class CalendarEventArchiveOrUnlinkWizard(models.TransientModel):
     _inherit = ['mail.composer.mixin']
     _description = 'Calendar Event Archive Or Unlink Wizard'
 
+    _calendar__calendar_template_delete_event = models.Ref('calendar.calendar_template_delete_event', 'mail.template', required=False)
+
     block_mail = fields.Boolean(default=False)
     calendar_event_id = fields.Many2one('calendar.event', 'Calendar Event', required=True)
     recipient_ids = fields.Many2many(
@@ -50,7 +52,7 @@ class CalendarEventArchiveOrUnlinkWizard(models.TransientModel):
             )[wizard.calendar_event_id.id]
 
     def _compute_template_id(self):
-        self.template_id = self.env.ref('calendar.calendar_template_delete_event', raise_if_not_found=False)
+        self.template_id = self._calendar__calendar_template_delete_event
 
     @api.depends('calendar_event_id', 'template_id')
     def _compute_body(self):

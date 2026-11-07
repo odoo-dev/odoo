@@ -143,6 +143,10 @@ class MailThread(models.AbstractModel):
 
     _CUSTOMER_HEADERS_LIMIT_COUNT = 50
 
+    _mail__mt_comment_optional = models.Ref('mail.mt_comment', 'mail.message.subtype', required=False)
+    _mail__mt_important_notification = models.Ref('mail.mt_important_notification', 'mail.message.subtype', required=False)
+    _mail__mt_note_optional = models.Ref('mail.mt_note', 'mail.message.subtype', required=False)
+
     _Attachment = namedtuple('Attachment', ('fname', 'content', 'info'))
 
     message_is_follower = fields.Boolean(
@@ -1435,9 +1439,9 @@ class MailThread(models.AbstractModel):
             partner_ids = []
             if not subtype_id:
                 if message_dict.get('is_internal'):
-                    subtype_id = self.env['ir.model.data']._xmlid_to_res_id('mail.mt_note')
+                    subtype_id = self._mail__mt_note_optional.id
                 else:
-                    subtype_id = self.env['ir.model.data']._xmlid_to_res_id('mail.mt_comment')
+                    subtype_id = self._mail__mt_comment_optional.id
             # additional recipients
             # - internal: ping parent message author to ensure they are notified of a private answer
             # - from a customer: ping parent message author to be sure he is notified (will be removed
@@ -2378,7 +2382,7 @@ class MailThread(models.AbstractModel):
         if subtype_xmlid:
             subtype_id = self.env['ir.model.data']._xmlid_to_res_id(subtype_xmlid)
         if not subtype_id:
-            subtype_id = self.env['ir.model.data']._xmlid_to_res_id('mail.mt_note')
+            subtype_id = self._mail__mt_note_optional.id
 
         # automatically subscribe recipients if asked to
         if self.env.context.get('mail_post_autofollow') and all_partner_ids:
@@ -2440,7 +2444,7 @@ class MailThread(models.AbstractModel):
         author_subscribe = (
             not self.env.context.get('mail_post_autofollow_author_skip') and
             msg_values['message_type'] not in ('notification', 'user_notification', 'auto_comment', 'out_of_office') and
-            subtype_id == self.env['ir.model.data']._xmlid_to_res_id('mail.mt_comment')
+            subtype_id == self._mail__mt_comment_optional.id
         )
         if author_subscribe:
             # TDE note: somehow propagate "real author" ?
@@ -2703,7 +2707,7 @@ class MailThread(models.AbstractModel):
             'message_type': message_type,
             # subtype is not really used in mass mail mode as it is used mainly
             # when posting, but keep it in case it is used in post send
-            'subtype_id': kwargs.pop('subtype_id', False) or self.env['ir.model.data']._xmlid_to_res_id('mail.mt_note'),
+            'subtype_id': kwargs.pop('subtype_id', False) or self._mail__mt_note_optional.id,
             **kwargs,
         }
         composer_ctx = {
@@ -2789,7 +2793,7 @@ class MailThread(models.AbstractModel):
         if subtype_xmlid:
             subtype_id = self.env['ir.model.data']._xmlid_to_res_id(subtype_xmlid)
         if not subtype_id:
-            subtype_id = self.env['ir.model.data']._xmlid_to_res_id('mail.mt_note')
+            subtype_id = self._mail__mt_note_optional.id
 
         messages_all = self.env['mail.message']
         # message_post (aka no template) does not support batch
@@ -2914,7 +2918,7 @@ class MailThread(models.AbstractModel):
         if subtype_xmlid:
             subtype_id = self.env['ir.model.data']._xmlid_to_res_id(subtype_xmlid)
         if not subtype_id:
-            subtype_id = self.env['ir.model.data']._xmlid_to_res_id('mail.mt_note')
+            subtype_id = self._mail__mt_note_optional.id
 
         msg_values = {
             # author
@@ -3067,7 +3071,7 @@ class MailThread(models.AbstractModel):
             'message_type': message_type,
             'is_internal': True,
             'subject': subject,
-            'subtype_id': self.env['ir.model.data']._xmlid_to_res_id('mail.mt_note'),
+            'subtype_id': self._mail__mt_note_optional.id,
             # recipients
             'email_add_signature': False,  # False as no notification -> no need to compute signature
             'message_id': generate_tracking_message_id('message-notify'),  # why? this is all but a notify
@@ -3925,7 +3929,7 @@ class MailThread(models.AbstractModel):
         record_name = textwrap.shorten(force_record_name or message.with_context(lang=lang).record_name or '', width=100, placeholder='...')
 
         subtype_id = message.subtype_id.id
-        is_discussion = subtype_id == self.env['ir.model.data']._xmlid_to_res_id('mail.mt_comment')
+        is_discussion = subtype_id == self._mail__mt_comment_optional.id
 
         if 'email_notification_subtitles' in self.env.context:
             subtitles = [str(sub) for sub in self.env.context['email_notification_subtitles']]
@@ -4544,9 +4548,7 @@ class MailThread(models.AbstractModel):
         notif_pids_notinbox = []
         for recipient in (r for r in recipients_data if r['active'] and r['id']):
             notif_pids.append(recipient['id'])
-            if recipient["notif"] != "inbox" and message.subtype_id.id != self.env[
-                "ir.model.data"
-            ]._xmlid_to_res_id("mail.mt_important_notification"):
+            if recipient["notif"] != "inbox" and message.subtype_id.id != self._mail__mt_important_notification.id:
                 notif_pids_notinbox.append(recipient["id"])
         if not notif_pids:
             return []
@@ -4982,7 +4984,7 @@ class MailThread(models.AbstractModel):
             domain &= Domain("res_model", "=", thread._name)
             domain &= Domain("partner_id", "!=", thread.env.user.partner_id.id)
             if filter_recipients:
-                mt_comment_id = thread.env["ir.model.data"]._xmlid_to_res_id("mail.mt_comment")
+                mt_comment_id = self._mail__mt_comment_optional.id
                 domain &= Domain("subtype_ids", "=", mt_comment_id)
                 domain &= Domain("partner_id.active", "=", True)
             if after:
@@ -5225,7 +5227,7 @@ class MailThread(models.AbstractModel):
             # follower list with limit
             self._store_message_followers_fields(res, reset=True)
             # recipient count
-            mt_comment_id = self.env["ir.model.data"]._xmlid_to_res_id("mail.mt_comment")
+            mt_comment_id = self._mail__mt_comment_optional.id
             recipient_count = self.env["mail.followers"]._read_group(
                 domain
                 & ~self_partner_domain

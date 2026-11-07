@@ -22,6 +22,8 @@ class StockMove(models.Model):
     _order = 'sequence, id'
     _rec_name = 'reference'
 
+    _base__partner_root_optional = models.Ref('base.partner_root', 'res.partner', required=False)
+
     sequence = fields.Integer('Sequence', default=10)
     priority = fields.Selection(
         PROCUREMENT_PRIORITIES, 'Priority', default='0',
@@ -983,7 +985,7 @@ Please change the quantity done or the rounding precision in your settings.""",
             # Avoids to write the exact same message multiple times.
             if last_message and last_message.subject == msg_subject:
                 continue
-            odoobot_id = self.env['ir.model.data']._xmlid_to_res_id("base.partner_root")
+            odoobot_id = self._base__partner_root_optional.id
             doc.message_post(body=msg, author_id=odoobot_id, subject=msg_subject)
 
     def action_add_packages(self):

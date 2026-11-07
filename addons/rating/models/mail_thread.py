@@ -9,6 +9,8 @@ from odoo import _, fields, models, tools
 class MailThread(models.AbstractModel):
     _inherit = 'mail.thread'
 
+    _mail__mt_comment_optional = models.Ref('mail.mt_comment', 'mail.message.subtype', required=False)
+
     rating_ids = fields.One2many('rating.rating', 'res_id', string='Ratings', groups='base.group_user',
                                  domain=lambda self: [('res_model', '=', self._name)], bypass_search_access=True)
 
@@ -27,7 +29,7 @@ class MailThread(models.AbstractModel):
     # --------------------------------------------------
 
     def _rating_apply_get_default_subtype_id(self):
-        return self.env['ir.model.data']._xmlid_to_res_id("mail.mt_comment")
+        return self._mail__mt_comment_optional.id
 
     def _rating_get_operator(self):
         """ Return the operator (partner) that is the person who is rated.

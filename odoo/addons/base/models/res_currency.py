@@ -58,6 +58,9 @@ class ResCurrency(models.CachedModel):
     _cached_data_domain = [('active', '=', True)]
     _cached_data_fields = ('name', 'symbol', 'position', 'decimal_places', 'active')
 
+    _base__group_multi_currency = models.Ref('base.group_multi_currency', 'res.groups', required=False)
+    _base__group_user_optional = models.Ref('base.group_user', 'res.groups', required=False)
+
     # Note: 'code' column was removed as of v6.0, the 'name' should now hold the ISO code.
     name = fields.Char(string='Currency', size=3, required=True, help="Currency Code (ISO 4217)")
     iso_numeric = fields.Integer(string="Currency numeric code.", help="Currency Numeric Code (ISO 4217).")
@@ -119,17 +122,13 @@ class ResCurrency(models.CachedModel):
 
     @api.model
     def _activate_group_multi_currency(self):
-        group_user = self.env.ref('base.group_user', raise_if_not_found=False)
-        group_mc = self.env.ref('base.group_multi_currency', raise_if_not_found=False)
-        if group_user and group_mc:
-            group_user.sudo()._apply_group(group_mc)
+        if self._base__group_user_optional and self._base__group_multi_currency:
+            self._base__group_user_optional.sudo()._apply_group(self._base__group_multi_currency)
 
     @api.model
     def _deactivate_group_multi_currency(self):
-        group_user = self.env.ref('base.group_user', raise_if_not_found=False)
-        group_mc = self.env.ref('base.group_multi_currency', raise_if_not_found=False)
-        if group_user and group_mc:
-            group_user.sudo()._remove_group(group_mc.sudo())
+        if self._base__group_user_optional and self._base__group_multi_currency:
+            self._base__group_user_optional.sudo()._remove_group(self._base__group_multi_currency.sudo())
 
     @api.constrains('active')
     def _check_company_currency_stays_active(self):

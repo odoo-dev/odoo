@@ -10,6 +10,8 @@ TRANSACTION_TYPES = ('party', 'nominal', 'export', 'summary', 'self_bill')
 class AccountMove(models.Model):
     _inherit = 'account.move'
 
+    _l10n_sa_edi__transaction_type_export = models.Ref('l10n_sa_edi.transaction_type_export', 'l10n_sa_edi.transaction.type', required=False)
+
     l10n_sa_edi_transaction_type_ids = fields.Many2many(
         comodel_name="l10n_sa_edi.transaction.type",
         string="Transaction type",
@@ -24,7 +26,7 @@ class AccountMove(models.Model):
     def _compute_l10n_sa_edi_transaction_type_ids(self):
         for move in self:
             if move.commercial_partner_id.country_id.code != 'SA' and move.l10n_sa_invoice_type == 'tax':
-                move.l10n_sa_edi_transaction_type_ids = self.env.ref('l10n_sa_edi.transaction_type_export', raise_if_not_found=False)
+                move.l10n_sa_edi_transaction_type_ids = self._l10n_sa_edi__transaction_type_export
             else:
                 move.l10n_sa_edi_transaction_type_ids = None
 

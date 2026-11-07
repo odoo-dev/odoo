@@ -47,6 +47,7 @@ class StockRule(models.Model):
     _check_company_auto = True
 
     _location_customers = models.Ref('stock.stock_location_customers', 'stock.location', required=False)
+    _stock__stock_location_inter_company_optional = models.Ref('stock.stock_location_inter_company', 'stock.location', required=False)
 
     @api.model
     def default_get(self, fields):
@@ -608,8 +609,7 @@ class StockRule(models.Model):
             if not inter_comp_location_checked and self._check_intercomp_location(location):
                 # Add the intercomp location to candidate_locations as the intercomp domain was added
                 # above in the call to _get_rule_domain.
-                inter_comp_location = self.env.ref('stock.stock_location_customers', raise_if_not_found=False)
-                candidate_locations |= inter_comp_location
+                candidate_locations |= self._location_customers
                 inter_comp_location_checked = True
             for candidate_location in candidate_locations:
                 result = get_rule_for_routes(
@@ -629,8 +629,7 @@ class StockRule(models.Model):
     @api.model
     def _check_intercomp_location(self, locations):
         if locations.filtered(lambda location: location.usage == 'transit'):
-            inter_comp_location = self.env.ref('stock.stock_location_inter_company', raise_if_not_found=False)
-            return inter_comp_location and inter_comp_location.id in locations.ids
+            return self._stock__stock_location_inter_company_optional.id in locations.ids
 
     @api.model
     def _get_rule_domain(self, locations, values):

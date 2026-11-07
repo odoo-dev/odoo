@@ -15,13 +15,10 @@ class L10nMYPortalAccount(PortalAccount):
         l10n_my_identification_types = dict(request.env['res.partner']._fields['l10n_my_identification_type'].selection)
         # BRN applies only to companies. It must not be selectable for individuals, and it's enforced companies.
         l10n_my_identification_types.pop('BRN')
-        default_classification = request.env.ref(
-            'l10n_my_edi.class_00000', raise_if_not_found=False,
-        )
         rendering_values.update({
             'l10n_my_identification_types': l10n_my_identification_types,
             'l10n_my_edi_industrial_classifications': request.env['l10n_my_edi.industry_classification'].sudo().search([]),
-            'default_industrial_classification_id': default_classification.id if default_classification else False,
+            'default_industrial_classification_id': request.env['l10n_my_edi.industry_classification']._l10n_my_edi__class_00000.id,
         })
         return rendering_values
 

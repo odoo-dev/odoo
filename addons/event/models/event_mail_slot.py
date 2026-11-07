@@ -8,6 +8,8 @@ class EventMailRegistration(models.Model):
     _rec_name = 'scheduler_id'
     _order = 'scheduled_date DESC, id ASC'
 
+    _event__event_mail_scheduler_optional = models.Ref('event.event_mail_scheduler', 'ir.cron', required=False)
+
     event_slot_id = fields.Many2one('event.slot', 'Slot', ondelete='cascade', required=True, index=True)
     scheduled_date = fields.Datetime('Schedule Date', compute='_compute_scheduled_date', store=True)
     scheduler_id = fields.Many2one('event.mail', 'Mail Scheduler', ondelete='cascade', required=True, index=True)
@@ -27,5 +29,5 @@ class EventMailRegistration(models.Model):
             mail_slot.scheduled_date = date.replace(microsecond=0) + _INTERVALS[scheduler.interval_unit](sign * scheduler.interval_nbr) if date else False
 
         next_schedule = self.filtered('scheduled_date').mapped('scheduled_date')
-        if next_schedule and (cron := self.env.ref('event.event_mail_scheduler', raise_if_not_found=False)):
+        if next_schedule and (cron := self._event__event_mail_scheduler_optional):
             cron._trigger(next_schedule)

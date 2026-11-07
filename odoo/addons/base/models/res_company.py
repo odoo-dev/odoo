@@ -67,6 +67,8 @@ class ResCompany(models.CachedModel):
     _clear_asset_cache_on_fields = {'font', 'primary_color', 'secondary_color', 'external_report_layout_id'}
     _cached_data_fields = ('name', 'active', 'sequence', 'currency_id', 'parent_id', 'partner_id')
 
+    _base__paperformat_euro_optional = models.Ref('base.paperformat_euro', 'report.paperformat', required=False)
+
     def copy(self, default=None):
         raise UserError(self.env._('Duplicating a company is not allowed. Please create a new company instead.'))
 
@@ -127,7 +129,7 @@ class ResCompany(models.CachedModel):
     has_vat = fields.Boolean(related='partner_id.has_vat', depends=['vat'])
     additional_identifiers = fields.Json(related='partner_id.additional_identifiers', readonly=False)
     available_additional_identifiers_metadata = fields.Json(related='partner_id.available_additional_identifiers_metadata')
-    paperformat_id = fields.Many2one('report.paperformat', 'Paper format', default=lambda self: self.env.ref('base.paperformat_euro', raise_if_not_found=False))
+    paperformat_id = fields.Many2one('report.paperformat', 'Paper format', default=lambda self: self._base__paperformat_euro_optional)
     external_report_layout_id = fields.Many2one('ir.ui.view', 'Document Template')
     report_tables_id = fields.Selection([
         ('light', 'Light'),
@@ -151,9 +153,8 @@ class ResCompany(models.CachedModel):
 
     def init(self):
         for company in self.search([('paperformat_id', '=', False)]):
-            paperformat_euro = self.env.ref('base.paperformat_euro', False)
-            if paperformat_euro:
-                company.write({'paperformat_id': paperformat_euro.id})
+            if self._base__paperformat_euro_optional:
+                company.write({'paperformat_id': self._base__paperformat_euro_optional.id})
         if any(hasattr(f, 'company_default_for') for f in self._fields.values()):
             def init_company_defaults(env):
                 env['res.company'].with_context(active_test=False).search([])._init_company_defaults()

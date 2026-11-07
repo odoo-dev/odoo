@@ -6,6 +6,9 @@ from odoo import api, models, fields
 class ResourceCalendarLeaves(models.Model):
     _inherit = 'resource.calendar.leaves'
 
+    _hr_work_entry__generic_work_entry_type_public_holiday = models.Ref(
+        'hr_work_entry.generic_work_entry_type_public_holiday', 'hr.work.entry.type', required=False)
+
     work_entry_type_id = fields.Many2one(
         'hr.work.entry.type', 'Time Type',
         domain="[('id', 'in', allowed_work_entry_type_ids)]",
@@ -31,7 +34,7 @@ class ResourceCalendarLeaves(models.Model):
             if leave.resource_id:
                 continue
             country = leave.calendar_id.company_id.country_id or leave.company_id.country_id or self.env.company.country_id
-            leave.work_entry_type_id = public_holiday_types.get(country, self.env.ref('hr_work_entry.generic_work_entry_type_public_holiday', raise_if_not_found=False))
+            leave.work_entry_type_id = public_holiday_types.get(country, self._hr_work_entry__generic_work_entry_type_public_holiday)
 
     @api.depends('calendar_id.company_id', 'company_id')
     def _compute_allowed_work_entry_type_ids(self):

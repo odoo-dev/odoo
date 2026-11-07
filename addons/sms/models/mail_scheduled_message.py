@@ -5,6 +5,8 @@ from odoo.tools import html2plaintext
 class MailScheduledMessage(models.Model):
     _inherit = 'mail.scheduled.message'
 
+    _mail__mt_note_optional = models.Ref('mail.mt_note', 'mail.message.subtype', required=False)
+
     send_method = fields.Selection(
         selection=[
             ('email', 'Email'),
@@ -22,7 +24,7 @@ class MailScheduledMessage(models.Model):
             return self.env['sms.composer']._action_send_sms_comment_record(
                 record=record,
                 body=html2plaintext(self.body, include_references=False) if isinstance(self.body, str) else self.body,
-                subtype_id=self.env['ir.model.data']._xmlid_to_res_id('mail.mt_note') if self.is_note else False,
+                subtype_id=self._mail__mt_note_optional.id if self.is_note else False,
             )
 
         return super()._post_message_send(record)

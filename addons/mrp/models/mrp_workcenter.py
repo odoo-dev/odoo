@@ -25,6 +25,8 @@ class MrpWorkcenter(models.Model):
     _inherit = ['mail.thread', 'resource.mixin']
     _check_company_auto = True
 
+    _mrp__mrp_workcenter_calendar = models.Ref('mrp.mrp_workcenter_calendar', 'resource.calendar', required=False)
+
     _barcode_company_uniq = models.Constraint(
         'unique (barcode, company_id)',
         'The barcode for a workcenter must be unique per company.',
@@ -84,7 +86,7 @@ class MrpWorkcenter(models.Model):
     capacity_ids = fields.One2many('mrp.workcenter.capacity', 'workcenter_id', string='Product Capacities',
         help="Specific number of pieces that can be produced in parallel per product.", copy=True)
     kanban_dashboard_graph = fields.Text(compute='_compute_kanban_dashboard_graph')
-    resource_calendar_id = fields.Many2one(check_company=True, default=lambda self: self.env.ref('mrp.mrp_workcenter_calendar', raise_if_not_found=False))
+    resource_calendar_id = fields.Many2one(check_company=True, default=lambda self: self._mrp__mrp_workcenter_calendar)
 
     def _compute_display_name(self):
         super()._compute_display_name()

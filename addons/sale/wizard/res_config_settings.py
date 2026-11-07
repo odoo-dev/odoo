@@ -6,6 +6,9 @@ from odoo import api, fields, models
 class ResConfigSettings(models.TransientModel):
     _inherit = "res.config.settings"
 
+    _sale__menu_sale_general_settings = models.Ref('sale.menu_sale_general_settings', 'ir.ui.menu', required=False)
+    _sale__view_order_form_mandatory_product = models.Ref('sale.view_order_form_mandatory_product', 'ir.ui.view', required=False)
+
     # Groups
     group_auto_done_setting = fields.Boolean(
         string="Lock Confirmed Sales", implied_group="sale.group_auto_done_setting"
@@ -122,14 +125,10 @@ class ResConfigSettings(models.TransientModel):
 
     def set_values(self):
         super().set_values()
-        if mandatory_product_view := self.env.ref(
-            "sale.view_order_form_mandatory_product", raise_if_not_found=False
-        ):
-            mandatory_product_view.active = self.sale_order_mandatory_product
+        self._sale__view_order_form_mandatory_product.active = self.sale_order_mandatory_product
 
     # === ACTION METHODS === #
 
     # Unique name to avoid colliding with `website_payment`.
     def action_sale_start_payment_onboarding(self):
-        menu = self.env.ref("sale.menu_sale_general_settings", raise_if_not_found=False)
-        return self.company_id._start_payment_onboarding(menu and menu.id)
+        return self.company_id._start_payment_onboarding(self._sale__menu_sale_general_settings.id)

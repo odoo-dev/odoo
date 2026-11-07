@@ -4,6 +4,9 @@ from odoo import api, fields, models
 class CrmLead(models.Model):
     _inherit = 'crm.lead'
 
+    _crm_sale_project__crm_project_view_form_simplified_template = models.Ref(
+        'crm_sale_project.crm_project_view_form_simplified_template', 'ir.ui.view', required=False)
+
     project_ids = fields.One2many('project.project', inverse_name='lead_id', groups="project.group_project_user", export_string_translation=False)
     project_count = fields.Integer(compute='_compute_project_count', groups="project.group_project_user", export_string_translation=False)
     task_count = fields.Integer(compute='_compute_task_count', groups="project.group_project_user", export_string_translation=False)
@@ -71,11 +74,10 @@ class CrmLead(models.Model):
 
     def action_create_project(self):
         self.ensure_one()
-        view_id = self.env.ref('crm_sale_project.crm_project_view_form_simplified_template', raise_if_not_found=False)
         return {
             **self.env['project.template.create.wizard'].action_open_template_view(),
             'name': self.env._('Create a Project'),
-            'views': [(view_id.id, 'form')],
+            'views': [(self._crm_sale_project__crm_project_view_form_simplified_template.id, 'form')],
             'context': {
                 **self._get_project_create_from_lead_context(),
                 'default_name': self.name,

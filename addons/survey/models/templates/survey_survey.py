@@ -15,6 +15,8 @@ class SurveySurvey(models.Model):
 
     _inherit = 'survey.survey'
 
+    _survey__mail_template_certification_optional = models.Ref('survey.mail_template_certification', 'mail.template', required=False)
+
     @api.model
     def action_load_survey_template_sample(self, template_key):
         template_values = self._get_survey_template_values(template_key)
@@ -203,10 +205,9 @@ class SurveySurvey(models.Model):
                 }),
             ]
         }
-        mail_template = self.env.ref('survey.mail_template_certification', raise_if_not_found=False)
-        if mail_template:
+        if self._survey__mail_template_certification_optional:
             survey_values.update({
-                'certification_mail_template_id': mail_template.id
+                'certification_mail_template_id': self._survey__mail_template_certification_optional.id
             })
         return survey_values
 

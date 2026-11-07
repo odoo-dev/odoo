@@ -6,10 +6,12 @@ from odoo import models
 class PortalEntryDiscuss(models.Model):
     _inherit = "portal.entry"
 
+    _portal_discuss__portal_entry_discuss = models.Ref('portal_discuss.portal_entry_discuss', 'portal.entry', required=False)
+
     def _filter_visible_portal_cards(self):
         visible_entries = super()._filter_visible_portal_cards()
-        discuss_entry = self.env.ref("portal_discuss.portal_entry_discuss", raise_if_not_found=False)
-        if discuss_entry and discuss_entry in self:
+        discuss_entry = self._portal_discuss__portal_entry_discuss
+        if discuss_entry in self:
             is_visible = bool(
                 self.env["discuss.channel.member"].search_count(
                     [("partner_id", "=", self.env.user.partner_id.id)],

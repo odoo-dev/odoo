@@ -20,8 +20,8 @@ def _pre_init_pdp(env):
 
 
 def _post_init_pdp(env):
-    demo_company_partner = env.ref('base.partner_demo_company_fr', raise_if_not_found=False)
-    demo_company_partner = demo_company_partner and demo_company_partner.filtered_domain(env['res.partner']._domain_peppol_do_not_modify_routing_identifier())
+    demo_company_partner = env['res.partner']._base__partner_demo_company_fr
+    demo_company_partner = demo_company_partner.filtered_domain(env['res.partner']._domain_peppol_do_not_modify_routing_identifier())
     if demo_company_partner:
         demo_company_partner.routing_scheme = False
         demo_company_partner.routing_endpoint = False

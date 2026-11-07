@@ -37,6 +37,8 @@ class AccountFiscalPosition(models.Model):
     _check_company_auto = True
     _check_company_domain = models.check_company_domain_parent_of
 
+    _account__account_tax_fiscal_position_view_tree = models.Ref('account.account_tax_fiscal_position_view_tree', 'ir.ui.view', required=False)
+
     sequence = fields.Integer()
     name = fields.Char(string='Fiscal Position', required=True, translate=True)
     active = fields.Boolean(default=True,
@@ -291,7 +293,6 @@ class AccountFiscalPosition(models.Model):
         return all_auto_apply_fpos._get_first_matching_fpos(delivery)
 
     def action_open_related_taxes(self):
-        list_view = self.env.ref('account.account_tax_fiscal_position_view_tree', raise_if_not_found=False)
         domain = [
             *self.env['account.tax']._check_company_domain(self.company_id),
             '|',
@@ -302,7 +303,7 @@ class AccountFiscalPosition(models.Model):
             'type': 'ir.actions.act_window',
             'name': self.env._("%s taxes", self.display_name),
             'res_model': 'account.tax',
-            'views': [(list_view.id if list_view else False, 'list'), (False, 'form')],
+            'views': [(self._account__account_tax_fiscal_position_view_tree.id, 'list'), (False, 'form')],
             'domain': domain,
             'context': {'active_test': False},
         }

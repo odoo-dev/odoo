@@ -4,6 +4,10 @@ from odoo import Command, api, models
 class PosConfig(models.Model):
     _inherit = 'pos.config'
 
+    _pos_restaurant__pos_category_cocktails = models.Ref('pos_restaurant.pos_category_cocktails', 'pos.category', required=False)
+    _pos_restaurant__pos_delivery_preset = models.Ref('pos_restaurant.pos_delivery_preset', 'pos.preset', required=False)
+    _pos_restaurant__pos_takeout_preset = models.Ref('pos_restaurant.pos_takeout_preset', 'pos.preset', required=False)
+
     def _create_takeaway_fiscal_position(self, config):
         ChartTemplate = self.env['account.chart.template'].with_company(self.env.company)
         tax_21 = ChartTemplate.ref('attn_VAT-OUT-21-L', raise_if_not_found=False)
@@ -34,8 +38,8 @@ class PosConfig(models.Model):
                     'noupdate': True,
                 }])
             presets = self.env['pos.preset']
-            presets |= self.env.ref('pos_restaurant.pos_takeout_preset', raise_if_not_found=False) or presets
-            presets |= self.env.ref('pos_restaurant.pos_delivery_preset', raise_if_not_found=False) or presets
+            presets |= self._pos_restaurant__pos_takeout_preset
+            presets |= self._pos_restaurant__pos_delivery_preset
             if presets:
                 presets.write({'fiscal_position_id': fp.id})
 
@@ -44,10 +48,9 @@ class PosConfig(models.Model):
         if (self.env.company.chart_template or '').startswith('be'):
             ChartTemplate = self.env['account.chart.template'].with_company(self.env.company)
             tax_alcohol = ChartTemplate.ref('tax_alcohol_luxury')
-            cocktails_category = self.env.ref('pos_restaurant.pos_category_cocktails', raise_if_not_found=False)
-            if cocktails_category:
+            if self._pos_restaurant__pos_category_cocktails:
                 self.env['product.template'].search([
-                    ('pos_categ_ids', 'in', [cocktails_category.id])
+                    ('pos_categ_ids', 'in', [self._pos_restaurant__pos_category_cocktails.id])
                 ]).write({'taxes_id': [(6, 0, [tax_alcohol.id])]})
 
     @api.model

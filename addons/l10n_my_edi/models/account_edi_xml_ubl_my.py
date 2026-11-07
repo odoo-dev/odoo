@@ -49,6 +49,8 @@ class AccountEdiXmlUBLMyInvoisMY(models.AbstractModel):
     _name = 'account.edi.xml.ubl_myinvois_my'
     _description = "Malaysian implementation of ubl for the MyInvois portal"
 
+    _l10n_my_edi__class_00000 = models.Ref('l10n_my_edi.class_00000', 'l10n_my_edi.industry_classification', required=False)
+
     # -----------------------
     # EXPORT
     # -----------------------
@@ -111,7 +113,7 @@ class AccountEdiXmlUBLMyInvoisMY(models.AbstractModel):
                     'city': 'NA',
                     'l10n_my_identification_type': 'BRN',
                     'l10n_my_identification_number': 'NA',
-                    'l10n_my_edi_industrial_classification': self.env.ref('l10n_my_edi.class_00000', raise_if_not_found=False),
+                    'l10n_my_edi_industrial_classification': self._l10n_my_edi__class_00000,
                 })
 
             partner_shipping = None

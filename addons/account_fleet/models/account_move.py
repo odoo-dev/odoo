@@ -7,6 +7,8 @@ from odoo.tools import SQL
 class AccountMove(models.Model):
     _inherit = 'account.move'
 
+    _account_fleet__data_fleet_service_type_vendor_bill = models.Ref('account_fleet.data_fleet_service_type_vendor_bill', 'fleet.service.type', required=False)
+
     service_count = fields.Integer(compute="_compute_service_count", string='Services')
 
     @api.depends("line_ids.vehicle_log_service_ids")
@@ -15,8 +17,7 @@ class AccountMove(models.Model):
             record.service_count = len(record.line_ids.vehicle_log_service_ids)
 
     def _post(self, soft=True):
-        vendor_bill_service = self.env.ref('account_fleet.data_fleet_service_type_vendor_bill', raise_if_not_found=False)
-        if not vendor_bill_service:
+        if not self._account_fleet__data_fleet_service_type_vendor_bill:
             return super()._post(soft)
 
         val_list = []
@@ -52,6 +53,8 @@ class AccountMove(models.Model):
 class AccountMoveLine(models.Model):
     _inherit = 'account.move.line'
 
+    _account_fleet__data_fleet_service_type_vendor_bill = models.Ref('account_fleet.data_fleet_service_type_vendor_bill', 'fleet.service.type', required=False)
+
     vehicle_id = fields.Many2one('fleet.vehicle', string='Vehicle', index='btree_not_null')
     # used to decide whether the vehicle_id field is editable
     need_vehicle = fields.Boolean(compute='_compute_need_vehicle')
@@ -79,9 +82,8 @@ class AccountMoveLine(models.Model):
         return (*super()._get_query_tax_details_aml_fields(), 'vehicle_id')
 
     def _prepare_fleet_log_service(self):
-        vendor_bill_service = self.env.ref('account_fleet.data_fleet_service_type_vendor_bill', raise_if_not_found=False)
         return {
-            'service_type_id': vendor_bill_service.id,
+            'service_type_id': self._account_fleet__data_fleet_service_type_vendor_bill.id,
             'vehicle_id': self.vehicle_id.id,
             'vendor_id': self.partner_id.id,
             'description': self.name,

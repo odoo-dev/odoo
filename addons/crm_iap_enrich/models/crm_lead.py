@@ -13,6 +13,8 @@ _logger = logging.getLogger(__name__)
 class CrmLead(models.Model):
     _inherit = 'crm.lead'
 
+    _crm_iap_enrich__ir_cron_lead_enrichment_optional = models.Ref('crm_iap_enrich.ir_cron_lead_enrichment', 'ir.cron', required=False)
+
     iap_enrich_done = fields.Boolean(string='Enrichment done', help='Whether IAP service for lead enrichment based on email has been performed on this lead.')
     show_enrich_button = fields.Boolean(string='Allow manual enrich', compute="_compute_show_enrich_button")
 
@@ -43,9 +45,8 @@ class CrmLead(models.Model):
         leads = super().create(vals_list)
         enrich_mode = self.env['ir.config_parameter'].sudo().get_str('crm.iap.lead.enrich.setting') or 'auto'
         if enrich_mode == 'auto':
-            cron = self.env.ref('crm_iap_enrich.ir_cron_lead_enrichment', raise_if_not_found=False)
-            if cron:
-                cron._trigger()
+            if self._crm_iap_enrich__ir_cron_lead_enrichment_optional:
+                self._crm_iap_enrich__ir_cron_lead_enrichment_optional._trigger()
         return leads
 
     def _process_leads(self, send_notification=True):

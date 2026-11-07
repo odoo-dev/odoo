@@ -67,6 +67,8 @@ class HrLeave(models.Model):
         'leave_time_rule_trim': True,
     }
 
+    _hr__contract_type_company_executive = models.Ref('hr.contract_type_company_executive', 'hr.employee.type', required=False)
+
     @api.model
     def default_get(self, fields):
         defaults = super().default_get(fields)
@@ -1499,7 +1501,7 @@ class HrLeave(models.Model):
 
     @api.constrains('employee_id')
     def _check_executive_employee_type(self):
-        executive_type = self.env.ref('hr.contract_type_company_executive', raise_if_not_found=False)
+        executive_type = self._hr__contract_type_company_executive
         for holiday in self:
             if executive_type and holiday.employee_id.employee_type_id == executive_type:
                 raise ValidationError(_("You cannot create a time off request for an employee of type company executive."))

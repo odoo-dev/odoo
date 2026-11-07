@@ -40,6 +40,13 @@ class SlideChannel(models.Model):
 
     _CUSTOMER_HEADERS_LIMIT_COUNT = 0  # never use X-Msg-To headers
 
+    _website_slides__mail_template_channel_completed = models.Ref('website_slides.mail_template_channel_completed', 'mail.template', required=False)
+    _website_slides__mail_template_channel_shared = models.Ref('website_slides.mail_template_channel_shared', 'mail.template', required=False)
+    _website_slides__mail_template_slide_channel_enroll = models.Ref('website_slides.mail_template_slide_channel_enroll', 'mail.template', required=False)
+    _website_slides__mail_template_slide_channel_invite = models.Ref('website_slides.mail_template_slide_channel_invite', 'mail.template', required=False)
+    _website_slides__slide_template_published = models.Ref('website_slides.slide_template_published', 'mail.template', required=False)
+    _website_slides__slide_template_shared = models.Ref('website_slides.slide_template_shared', 'mail.template', required=False)
+
     def _default_cover_properties(self):
         """ Cover properties defaults are overridden to keep a consistent look for the slides
         channels headers across Odoo versions (pre-customization, with purple gradient fitting the
@@ -116,19 +123,19 @@ class SlideChannel(models.Model):
     publish_template_id = fields.Many2one(
         'mail.template', string='New Content Notification',
         help="Defines the email your Attendees will receive each time you upload new content.",
-        default=lambda self: self.env['ir.model.data']._xmlid_to_res_id('website_slides.slide_template_published'),
+        default=lambda self: self._website_slides__slide_template_published.id,
         domain=[('model', '=', 'slide.slide')])
     share_channel_template_id = fields.Many2one(
         'mail.template', string='Channel Share Template',
         help='Email template used when sharing a channel',
-        default=lambda self: self.env['ir.model.data']._xmlid_to_res_id('website_slides.mail_template_channel_shared'))
+        default=lambda self: self._website_slides__mail_template_channel_shared.id)
     share_slide_template_id = fields.Many2one(
         'mail.template', string='Share Template',
         help="Email template used when sharing a slide",
-        default=lambda self: self.env['ir.model.data']._xmlid_to_res_id('website_slides.slide_template_shared'))
+        default=lambda self: self._website_slides__slide_template_shared.id)
     completed_template_id = fields.Many2one(
         'mail.template', string='Completion Notification', help="Defines the email your Attendees will receive once they reach the end of your course.",
-        default=lambda self: self.env['ir.model.data']._xmlid_to_res_id('website_slides.mail_template_channel_completed'),
+        default=lambda self: self._website_slides__mail_template_channel_completed.id,
         domain=[('model', '=', 'slide.channel.partner')])
     enroll = fields.Selection([
         ('public', 'Open'), ('invite', 'On Invitation')],
@@ -683,12 +690,10 @@ class SlideChannel(models.Model):
         return self.action_redirect_to_members('invited')
 
     def action_channel_enroll(self):
-        template = self.env.ref('website_slides.mail_template_slide_channel_enroll', raise_if_not_found=False)
-        return self._action_channel_open_invite_wizard(template, enroll_mode=True)
+        return self._action_channel_open_invite_wizard(self._website_slides__mail_template_slide_channel_enroll, enroll_mode=True)
 
     def action_channel_invite(self):
-        template = self.env.ref('website_slides.mail_template_slide_channel_invite', raise_if_not_found=False)
-        return self._action_channel_open_invite_wizard(template)
+        return self._action_channel_open_invite_wizard(self._website_slides__mail_template_slide_channel_invite)
 
     def _action_channel_open_invite_wizard(self, mail_template, enroll_mode=False):
         """ Open the invitation wizard to invite and add attendees to the course(s) in self.

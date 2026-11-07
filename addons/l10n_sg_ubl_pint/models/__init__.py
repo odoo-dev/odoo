@@ -3,3 +3,4 @@ from . import account_edi_xml_pint_sg
 from . import account_move
 from . import res_company
 from . import res_partner
+from . import ir_cron

@@ -51,12 +51,8 @@ def _mock_call_peppol_proxy(func, self, endpoint, params=None):
 
     def _mock_send_document(user):
         # Trigger the reception of vendor bills
-        get_messages_cron = user.env['ir.cron'].sudo().env.ref(
-            'account_peppol.ir_cron_peppol_get_new_documents',
-            raise_if_not_found=False,
-        )
-        if get_messages_cron:
-            get_messages_cron._trigger()
+        if user.env['ir.cron'].sudo().env['ir.cron']._account_peppol__ir_cron_peppol_get_new_documents_optional:
+            user.env['ir.cron'].sudo().env['ir.cron']._account_peppol__ir_cron_peppol_get_new_documents_optional._trigger()
         return {
             'messages': [{
                 'message_uuid': 'demo_%s' % uuid.uuid4(),

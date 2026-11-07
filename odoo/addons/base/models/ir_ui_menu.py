@@ -20,6 +20,8 @@ class IrUiMenu(models.Model):
     _allow_sudo_commands = False
     _clear_cache_name = 'default'
 
+    _base__group_no_one = models.Ref('base.group_no_one', 'res.groups', required=False)
+
     name = fields.Char(string='Menu', required=True, translate=True)
     active = fields.Boolean(default=True)
     sequence = fields.Integer(default=10)
@@ -73,7 +75,7 @@ class IrUiMenu(models.Model):
         # "Technical Features" is a developer tool: it is only effective in debug
         # mode, and a light user has no technical menu at all.
         if not debug or not self.env.user._is_regular():
-            group_ids.discard(self.env['ir.model.data']._xmlid_to_res_id('base.group_no_one', raise_if_not_found=False))
+            group_ids.discard(self._base__group_no_one.id)
 
         # retrieve menus with a domain to filter out menus with groups the user does not have.
         # It will be used to determine which ones are visible

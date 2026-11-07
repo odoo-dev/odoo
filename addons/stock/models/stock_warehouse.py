@@ -25,6 +25,11 @@ class StockWarehouse(models.Model):
     _description = "Warehouse"
     _order = 'sequence,id'
     _check_company_auto = True
+
+    _stock__stock_location_customers_optional = models.Ref('stock.stock_location_customers', 'stock.location', required=False)
+    _stock__stock_location_inter_company_optional = models.Ref('stock.stock_location_inter_company', 'stock.location', required=False)
+    _stock__stock_location_suppliers_optional = models.Ref('stock.stock_location_suppliers', 'stock.location', required=False)
+
     # namedtuple used in helper methods generating values for routes
     Routing = namedtuple('Routing', ['from_loc', 'dest_loc', 'picking_type', 'action'])
 
@@ -751,14 +756,14 @@ class StockWarehouse(models.Model):
                 self.lot_stock_id if delivery_steps == 'ship_only' else self.wh_output_stock_loc_id)
 
     def _get_transit_locations(self):
-        return self.company_id.internal_transit_location_id, self.env.ref('stock.stock_location_inter_company', raise_if_not_found=False) or self.env['stock.location']
+        return self.company_id.internal_transit_location_id, self._stock__stock_location_inter_company_optional
 
     @api.model
     def _get_partner_locations(self):
         ''' returns a tuple made of the browse record of customer location and the browse record of supplier location'''
         Location = self.env['stock.location']
-        customer_loc = self.env.ref('stock.stock_location_customers', raise_if_not_found=False)
-        supplier_loc = self.env.ref('stock.stock_location_suppliers', raise_if_not_found=False)
+        customer_loc = self._stock__stock_location_customers_optional
+        supplier_loc = self._stock__stock_location_suppliers_optional
         if not customer_loc:
             customer_loc = Location.search([('usage', '=', 'customer')], limit=1)
         if not supplier_loc:

@@ -41,6 +41,8 @@ class WebsitePage(models.Model):
     # for how long a cache entry is considered valid (in seconds)
     _CACHE_DURATION = 3600
 
+    _base__default_website = models.Ref('base.default_website', 'website', required=False)
+
     name = fields.Char(
         string="Page Name",
         compute='_compute_name', inverse='_inverse_name', store=True,
@@ -373,9 +375,8 @@ class WebsitePage(models.Model):
         }
 
     def open_website_url(self):
-        default_website = self.env.ref('base.default_website', raise_if_not_found=False)
         current_website = self.env.website or self.env.website.browse(self.env.context.get('host_id'))
-        if current_website == default_website == self.website_id:
+        if current_website == self._base__default_website == self.website_id:
             return self.env['website'].get_client_action(self.website_url, False, self.website_id.id)
         return super().open_website_url()
 

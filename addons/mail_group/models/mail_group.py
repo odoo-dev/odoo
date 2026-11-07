@@ -37,6 +37,9 @@ class MailGroup(models.Model):
     _inherit = ['mail.alias.mixin']
     _order = 'is_closed ASC, create_date DESC, id DESC'
 
+    _mail_group__mail_group_notify_moderation = models.Ref('mail_group.mail_group_notify_moderation', 'ir.ui.view', required=False)
+    _mail_group__mail_template_guidelines = models.Ref('mail_group.mail_template_guidelines', 'mail.template', required=False)
+
     @api.model
     def default_get(self, fields):
         res = super().default_get(fields)
@@ -381,7 +384,7 @@ class MailGroup(models.Model):
         if self.is_closed:
             raise UserError(_("You can not send guidelines for a closed group."))
 
-        template = self.env.ref('mail_group.mail_template_guidelines', raise_if_not_found=False)
+        template = self._mail_group__mail_template_guidelines
         if not template:
             raise UserError(_('Template "mail_group.mail_template_guidelines" was not found. No email has been sent. Please contact an administrator to fix this issue.'))
 
@@ -492,8 +495,7 @@ class MailGroup(models.Model):
 
     def _notify_moderators(self):
         """Push a notification (Inbox / Email) to the moderators whose an action is waiting."""
-        template = self.env.ref('mail_group.mail_group_notify_moderation', raise_if_not_found=False)
-        if not template:
+        if not self._mail_group__mail_group_notify_moderation:
             _logger.warning('Template "mail_group.mail_group_notify_moderation" was not found. Cannot send reminder notifications.')
             return
 

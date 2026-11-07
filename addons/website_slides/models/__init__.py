@@ -22,3 +22,4 @@ from . import res_partner
 from . import mail_activity
 from . import website_track
 from . import website_visitor
+from . import mail_message_subtype

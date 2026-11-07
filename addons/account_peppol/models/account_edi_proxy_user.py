@@ -29,6 +29,8 @@ REMOVE_EMBEDDED_DOCUMENT_BINARY_OBJECT_RE = re.compile(
 class Account_Edi_Proxy_ClientUser(models.Model):
     _inherit = 'account_edi_proxy_client.user'
 
+    _account_peppol__ir_cron_peppol_auto_register_services = models.Ref('account_peppol.ir_cron_peppol_auto_register_services', 'ir.cron', required=False)
+
     proxy_type = fields.Selection(selection_add=[('peppol', 'Peppol')], ondelete={'peppol': 'cascade'})
 
     # -------------------------------------------------------------------------
@@ -235,7 +237,7 @@ class Account_Edi_Proxy_ClientUser(models.Model):
                 )
                 failed = True
         if failed:
-            if registering_cron := self.env.ref('account_peppol.ir_cron_peppol_auto_register_services', raise_if_not_found=False):
+            if registering_cron := self._account_peppol__ir_cron_peppol_auto_register_services:
                 registering_cron._trigger(at=datetime.now() + timedelta(hours=4))
 
     # -------------------------------------------------------------------------

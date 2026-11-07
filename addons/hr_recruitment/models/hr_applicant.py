@@ -38,6 +38,9 @@ class HrApplicant(models.Model):
     _primary_email = 'email_from'
     _track_duration_field = 'stage_id'
 
+    _hr_recruitment__mt_talent_new = models.Ref('hr_recruitment.mt_talent_new', 'mail.message.subtype', required=False)
+    _mail__mt_note_optional = models.Ref('mail.mt_note', 'mail.message.subtype', required=False)
+
     def _recruiter_domain(self):
         recruiter_groups = [
             self.env.ref("hr_recruitment.group_hr_recruitment_manager").id,
@@ -1093,14 +1096,14 @@ class HrApplicant(models.Model):
             and not applicant.env.context.get('just_unarchived'):
             res['stage_id'] = (applicant.stage_id.template_id, {
                 'auto_delete_keep_log': False,
-                'subtype_id': self.env['ir.model.data']._xmlid_to_res_id('mail.mt_note'),
+                'subtype_id': self._mail__mt_note_optional.id,
             })
         return res
 
     def _creation_subtype(self):
         self.ensure_one()
         if self.is_pool_applicant:
-            return self.env.ref('hr_recruitment.mt_talent_new', raise_if_not_found=False)
+            return self._hr_recruitment__mt_talent_new
         return self.env.ref('hr_recruitment.mt_applicant_new')
 
     def _track_log_get_default_subtype(self, track_init_values):

@@ -17,6 +17,8 @@ class AccountAnalyticAccount(models.Model):
     _check_company_domain = models.check_company_domain_parent_of
     _rec_names_search = ('name', 'code')
 
+    _analytic__view_account_analytic_line_tree = models.Ref('analytic.view_account_analytic_line_tree', 'ir.ui.view', required=False)
+
     name = fields.Char(
         string='Analytic Account',
         index='trigram',
@@ -201,7 +203,6 @@ class AccountAnalyticAccount(models.Model):
                 (current_fname, 'in', accounts.ids),
             ]
             if self.env['account.analytic.line'].sudo().search_count(domain, limit=1):
-                list_view = self.env.ref('analytic.view_account_analytic_line_tree', raise_if_not_found=False)
                 raise RedirectWarning(
                     message=_("Whoa there! Making this change would wipe out your current data. Let's avoid that, shall we?"),
                     action={
@@ -209,7 +210,7 @@ class AccountAnalyticAccount(models.Model):
                         'type': 'ir.actions.act_window',
                         'domain': domain,
                         'target': 'new',
-                        'views': [(list_view and list_view.id, 'list')]
+                        'views': [(self._analytic__view_account_analytic_line_tree.id, 'list')]
                     },
                     button_text=_("See them"),
                 )

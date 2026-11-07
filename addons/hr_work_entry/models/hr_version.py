@@ -17,6 +17,8 @@ from odoo.tools.intervals import Intervals
 class HrVersion(models.Model):
     _inherit = 'hr.version'
 
+    _hr_work_entry__generic_work_entry_type_attendance = models.Ref('hr_work_entry.generic_work_entry_type_attendance', 'hr.work.entry.type', required=False)
+
     def _get_default_work_entry_type_id(self):
         """Return the id of the work entry type used for worked time without explicit type.
 
@@ -33,7 +35,7 @@ class HrVersion(models.Model):
             ('code', '=', '002.00'),
             ('country_code', '=', country_code),
         ], limit=1)
-        attendance = country_attendance or self.env.ref('hr_work_entry.generic_work_entry_type_attendance', raise_if_not_found=False)
+        attendance = country_attendance or self._hr_work_entry__generic_work_entry_type_attendance
         return attendance.id if attendance else False
 
     def _get_leave_work_entry_type_dates(self, leave, date_from, date_to, employee):

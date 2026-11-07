@@ -7,6 +7,8 @@ class DeliveryNoteWizard(models.TransientModel):
     _name = "delivery.note.wizard"
     _description = "Delivery Note Wizard"
 
+    _delivery__mail_template_data_delivery_note = models.Ref('delivery.mail_template_data_delivery_note', 'mail.template', required=False)
+
     name = fields.Char(string="Note Reference", default="/")
     note_line_ids = fields.One2many(
         string="Operations", comodel_name="delivery.note.wizard.line", inverse_name="note_id"
@@ -49,9 +51,7 @@ class DeliveryNoteWizard(models.TransientModel):
     def _send_shipping_confirmation_email(self):
         """Send an email to the customer confirming the shipment."""
         self.ensure_one()
-        delivery_note_template = self.env.ref(
-            "delivery.mail_template_data_delivery_note", raise_if_not_found=False
-        )
+        delivery_note_template = self._delivery__mail_template_data_delivery_note
         if delivery_note_template:
             rendered_template = delivery_note_template._generate_template(
                 [self.id], ["body_html", "subject", "partner_to"]

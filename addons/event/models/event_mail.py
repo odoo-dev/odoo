@@ -31,6 +31,8 @@ class EventMail(models.Model):
     _rec_name = 'event_id'
     _description = 'Event Automated Mailing'
 
+    _event__event_mail_scheduler_optional = models.Ref('event.event_mail_scheduler', 'ir.cron', required=False)
+
     event_id = fields.Many2one('event.event', string='Event', required=True, index=True, ondelete='cascade')
     sequence = fields.Integer('Display order')
     interval_nbr = fields.Integer('Interval', default=1)
@@ -100,7 +102,7 @@ class EventMail(models.Model):
             scheduler.scheduled_date = date.replace(microsecond=0) + _INTERVALS[scheduler.interval_unit](sign * scheduler.interval_nbr) if date else False
 
         next_schedule = self.filtered('scheduled_date').mapped('scheduled_date')
-        if next_schedule and (cron := self.env.ref('event.event_mail_scheduler', raise_if_not_found=False)):
+        if next_schedule and (cron := self._event__event_mail_scheduler_optional):
             cron._trigger(next_schedule)
 
     @api.depends('error_datetime', 'interval_type', 'mail_done', 'event_id')

@@ -13,8 +13,10 @@ class EventTypeTicket(models.Model):
     _inherit = 'event.type.ticket'
     _order = "sequence, price, name, id"
 
+    _event_product__product_product_event = models.Ref('event_product.product_product_event', 'product.product', required=False)
+
     def _default_product_id(self):
-        return self.env.ref('event_product.product_product_event', raise_if_not_found=False)
+        return self._event_product__product_product_event
 
     description = fields.Text(compute='_compute_description', readonly=False, store=True)
     # product

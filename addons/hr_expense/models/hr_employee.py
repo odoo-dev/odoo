@@ -7,6 +7,8 @@ from odoo.fields import Domain
 class HrEmployee(models.Model):
     _inherit = 'hr.employee'
 
+    _hr_expense__group_hr_expense_team_approver_optional = models.Ref('hr_expense.group_hr_expense_team_approver', 'res.groups', required=False)
+
     def _group_hr_expense_user_domain(self):
         # We return the domain only if the group exists for the following reason:
         # When a group is created (at module installation), the `res.users` form view is
@@ -14,7 +16,7 @@ class HrEmployee(models.Model):
         # reads the related field `expense_manager_id` of `res.users` and retrieve its domain.
         # This is a problem because the `group_hr_expense_team_approver` record has already been created but
         # not its associated `ir.model.data` which makes `self.env.ref(...)` fail.
-        group = self.env.ref('hr_expense.group_hr_expense_team_approver', raise_if_not_found=False)
+        group = self._hr_expense__group_hr_expense_team_approver_optional
         return [
             '|', ('id', 'parent_of', self.ids), ('all_group_ids', 'in', group.ids)
         ] if group else [('id', 'parent_of', self.ids)]

@@ -35,6 +35,8 @@ class ProjectProject(models.Model):
     _rating_satisfaction_days = 30  # takes 30 days by default
     _track_duration_field = 'stage_id'
 
+    _mail__mt_note_optional = models.Ref('mail.mt_note', 'mail.message.subtype', required=False)
+
     def __compute_task_count(self, count_field='task_count', additional_domain=None):
         count_fields = {fname for fname in self._fields if 'count' in fname}
         if count_field not in count_fields:
@@ -964,7 +966,7 @@ class ProjectProject(models.Model):
         if self.env.user.has_group('project.group_project_stages') and 'stage_id' in tracked_fields and project.stage_id.mail_template_id:
             res['stage_id'] = (project.stage_id.mail_template_id, {
                 'auto_delete_keep_log': False,
-                'subtype_id': self.env['ir.model.data']._xmlid_to_res_id('mail.mt_note'),
+                'subtype_id': self._mail__mt_note_optional.id,
             })
         return res
 

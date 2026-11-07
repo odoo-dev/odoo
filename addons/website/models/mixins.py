@@ -461,6 +461,8 @@ class WebsitePublishedMixin(models.AbstractModel):
     _inherit = ['website.located.mixin']
     _description = 'Website Published Mixin'
 
+    _website__ir_cron_publish_scheduled_pages = models.Ref('website.ir_cron_publish_scheduled_pages', 'ir.cron', required=False)
+
     website_published = fields.Boolean('Visible on current website', related='is_published', readonly=False)
     is_published = fields.Boolean('Is Published', copy=False, default=lambda self: self._default_is_published(), index=True)
     publish_on = fields.Datetime(
@@ -533,10 +535,7 @@ class WebsitePublishedMixin(models.AbstractModel):
                     return
 
     def _manage_next_scheduled_action(self):
-        scheduled_action = self.env.ref(
-            'website.ir_cron_publish_scheduled_pages',
-            raise_if_not_found=False,
-        )
+        scheduled_action = self._website__ir_cron_publish_scheduled_pages
         if not scheduled_action:
             raise UserError(
                 _(

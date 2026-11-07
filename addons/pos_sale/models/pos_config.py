@@ -7,11 +7,16 @@ from odoo import fields, models, Command
 class PosConfig(models.Model):
     _inherit = 'pos.config'
 
+    _pos_sale__default_downpayment_product = models.Ref('pos_sale.default_downpayment_product', 'product.product', required=False)
+    _pos_sale__default_sol_product = models.Ref('pos_sale.default_sol_product', 'product.product', required=False)
+    _product__product_category_services = models.Ref('product.product_category_services', 'product.category', required=False)
+    _uom__product_uom_unit_optional = models.Ref('uom.product_uom_unit', 'uom.uom', required=False)
+
     def _get_default_down_payment_product(self):
-        return self.env.ref('pos_sale.default_downpayment_product', raise_if_not_found=False)
+        return self._pos_sale__default_downpayment_product
 
     def _get_default_sol_product(self):
-        return self.env.ref('pos_sale.default_sol_product', raise_if_not_found=False)
+        return self._pos_sale__default_sol_product
 
     crm_team_id = fields.Many2one(
         'crm.team', string="Sales Team", ondelete="set null", index='btree_not_null',
@@ -38,8 +43,8 @@ class PosConfig(models.Model):
         )
 
     def _init_column_default_products(self):
-        category_id = (self.env.ref('product.product_category_services', raise_if_not_found=False) or self.env['product.category']).id
-        uom_unit_id = (self.env.ref('uom.product_uom_unit', raise_if_not_found=False) or self.env['uom.uom']).id
+        category_id = self._product__product_category_services.id
+        uom_unit_id = self._uom__product_uom_unit_optional.id
 
         to_create = []
         xmlids_needed = []
@@ -57,7 +62,7 @@ class PosConfig(models.Model):
             })
             xmlids_needed.append('default_downpayment_product')
 
-        if not self.env.ref('pos_sale.default_sol_product', raise_if_not_found=False):
+        if not self._pos_sale__default_sol_product:
             to_create.append({
                 'name': 'Default Product (POS)',
                 'available_in_pos': False,

@@ -7,6 +7,8 @@ from odoo import api, fields, models
 class SaleOrder(models.Model):
     _inherit = "sale.order"
 
+    _l10n_in__state_in_oc_optional = models.Ref('l10n_in.state_in_oc', 'res.country.state', required=False)
+
     l10n_in_reseller_partner_id = fields.Many2one('res.partner',
         string='Reseller', domain="[('has_vat', '=', True), '|', ('company_id', '=', False), ('company_id', '=', company_id)]", readonly=False)
 
@@ -59,7 +61,7 @@ class SaleOrder(models.Model):
 
         foreign_country = self.env['res.country'].new({'name': 'Not India', 'code': '!!'})
         foreign_state = self.env['res.country.state'].new({'country_id': foreign_country})
-        sez_state = self.env.ref('l10n_in.state_in_oc', raise_if_not_found=False)
+        sez_state = self._l10n_in__state_in_oc_optional
         for state, orders in orders_without_fiscal.grouped(_get_fiscal_state).items():
             virtual_partner = self.env['res.partner'].new({
                 'state_id': state.id,

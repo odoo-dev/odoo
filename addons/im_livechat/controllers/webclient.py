@@ -92,5 +92,5 @@ class WebClient(WebclientController):
         )
         res.attr(
             "can_download_transcript",
-            bool(request.env.ref("im_livechat.action_report_livechat_conversation", False)),
+            bool(request.env['ir.actions.report']._im_livechat__action_report_livechat_conversation),
         )

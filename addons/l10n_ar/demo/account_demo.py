@@ -8,12 +8,16 @@ from odoo.addons.account.models.chart_template import template
 class AccountChartTemplate(models.AbstractModel):
     _inherit = "account.chart.template"
 
+    _base__company_exento = models.Ref('base.company_exento', 'res.company', required=False)
+    _base__company_mono = models.Ref('base.company_mono', 'res.company', required=False)
+    _base__company_ri = models.Ref('base.company_ri', 'res.company', required=False)
+
     def _l10n_ar_has_static_demo(self):
         # Do not load generic demo data on these companies
         return self.env.company in (
-            self.env.ref('base.company_mono', raise_if_not_found=False),
-            self.env.ref('base.company_exento', raise_if_not_found=False),
-            self.env.ref('base.company_ri', raise_if_not_found=False),
+            self._base__company_mono,
+            self._base__company_exento,
+            self._base__company_ri,
         )
 
     @template(model='account.move', demo=True)

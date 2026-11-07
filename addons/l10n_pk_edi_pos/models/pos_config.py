@@ -4,6 +4,8 @@ from odoo import api, fields, models
 class PosConfig(models.Model):
     _inherit = 'pos.config'
 
+    _l10n_pk_edi_pos__product_product_fbr_service_fee = models.Ref('l10n_pk_edi_pos.product_product_fbr_service_fee', 'product.product', required=False)
+
     l10n_pk_edi_pos_enabled = fields.Boolean(
         string="Pakistan electronic receipts (FBR)",
         help="Submit your orders to the FBR to generate compliant receipts.",
@@ -27,9 +29,7 @@ class PosConfig(models.Model):
     l10n_pk_edi_pos_service_fee_product_id = fields.Many2one(
         comodel_name='product.product',
         string="Service Fee Product",
-        default=lambda self: self.env.ref(
-            'l10n_pk_edi_pos.product_product_fbr_service_fee', raise_if_not_found=False
-        ),
+        default=lambda self: self._l10n_pk_edi_pos__product_product_fbr_service_fee,
         help="Product used to charge the FBR service fee on the receipt.",
     )
     l10n_pk_edi_pos_sandbox = fields.Boolean(
@@ -55,8 +55,6 @@ class PosConfig(models.Model):
     def _get_special_products(self):
         # EXTENDS 'point_of_sale'
         products = super()._get_special_products()
-        default_fee_product = self.env.ref('l10n_pk_edi_pos.product_product_fbr_service_fee', raise_if_not_found=False)
-        if default_fee_product:
-            products |= default_fee_product
+        products |= self._l10n_pk_edi_pos__product_product_fbr_service_fee
         configs = self.env['pos.config'].search([])
         return products | configs.l10n_pk_edi_pos_service_fee_product_id

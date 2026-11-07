@@ -25,6 +25,8 @@ class SurveySurvey(models.Model):
     _rec_name = 'title'
     _inherit = ['mail.thread', 'mail.activity.mixin']
 
+    _survey__mail_template_user_input_invite = models.Ref('survey.mail_template_user_input_invite', 'mail.template', required=False)
+
     @api.model
     def _get_default_access_token(self):
         return str(uuid.uuid4())
@@ -1058,12 +1060,10 @@ class SurveySurvey(models.Model):
         """ Open a window to compose an email, pre-filled with the survey message """
         self.check_validity()
 
-        template = self.env.ref('survey.mail_template_user_input_invite', raise_if_not_found=False)
-
         local_context = dict(
             self.env.context,
             default_survey_id=self.id,
-            default_template_id=template and template.id or False,
+            default_template_id=self._survey__mail_template_user_input_invite.id,
             default_send_email=(self.access_mode != 'public'),
             hide_mail_template_management_options=True,
         )

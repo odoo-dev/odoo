@@ -7,6 +7,9 @@ from odoo import api, fields, models
 class ResConfigSettings(models.TransientModel):
     _inherit = 'res.config.settings'
 
+    _uom__product_uom_day_optional = models.Ref('uom.product_uom_day', 'uom.uom', required=False)
+    _uom__product_uom_hour_optional = models.Ref('uom.product_uom_hour', 'uom.uom', required=False)
+
     module_project_timesheet_holidays = fields.Boolean("Time Off",
         compute="_compute_timesheet_modules", store=True, readonly=False)
     reminder_user_allow = fields.Boolean(string="Employee Reminder")
@@ -24,13 +27,13 @@ class ResConfigSettings(models.TransientModel):
 
     @api.depends('company_id')
     def _compute_timesheet_encode_method(self):
-        uom_day = self.env.ref('uom.product_uom_day', raise_if_not_found=False)
+        uom_day = self._uom__product_uom_day_optional
         for settings in self:
             settings.timesheet_encode_method = 'days' if settings.company_id.timesheet_encode_uom_id == uom_day else 'hours'
 
     def _inverse_timesheet_encode_method(self):
-        uom_day = self.env.ref('uom.product_uom_day', raise_if_not_found=False)
-        uom_hour = self.env.ref('uom.product_uom_hour', raise_if_not_found=False)
+        uom_day = self._uom__product_uom_day_optional
+        uom_hour = self._uom__product_uom_hour_optional
         for settings in self:
             settings.company_id.timesheet_encode_uom_id = uom_day if settings.timesheet_encode_method == 'days' else uom_hour
 

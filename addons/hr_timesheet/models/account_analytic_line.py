@@ -13,6 +13,9 @@ from odoo.tools.translate import _
 class AccountAnalyticLine(models.Model):
     _inherit = 'account.analytic.line'
 
+    _mrp_account__wip_report = models.Ref('mrp_account.wip_report', 'ir.actions.report', required=False)
+    _uom__product_uom_hour_optional = models.Ref('uom.product_uom_hour', 'uom.uom', required=False)
+
     def _get_favorite_project_id_domain(self, employee_id=False):
         employee_id = employee_id or self.env.user.employee_id.id
         return [
@@ -397,7 +400,7 @@ class AccountAnalyticLine(models.Model):
             wip_report_id = None
 
             def get_wip_report_id():
-                return self.env['ir.model.data']._xmlid_to_res_id("mrp_account.wip_report", raise_if_not_found=False)
+                return self._mrp_account__wip_report.id
 
             for view_data in res['views'].values():
                 print_data_list = view_data.get('toolbar', {}).get('print')
@@ -517,7 +520,7 @@ class AccountAnalyticLine(models.Model):
 
     @api.model
     def _ensure_uom_hours(self):
-        uom_hours = self.env.ref('uom.product_uom_hour', raise_if_not_found=False)
+        uom_hours = self._uom__product_uom_hour_optional
         if not uom_hours:
             uom_hours = self.env['uom.uom'].create({
                 'name': "Hours",

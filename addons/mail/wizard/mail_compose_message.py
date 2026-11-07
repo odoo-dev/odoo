@@ -47,6 +47,9 @@ class MailComposeMessage(models.TransientModel):
     _log_access = True
     _batch_size = 50
 
+    _mail__mt_comment_optional = models.Ref('mail.mt_comment', 'mail.message.subtype', required=False)
+    _mail__mt_note_optional = models.Ref('mail.mt_note', 'mail.message.subtype', required=False)
+
     @api.model
     def default_get(self, fields):
         """ Handle composition mode and contextual computation, until moving
@@ -512,14 +515,14 @@ class MailComposeMessage(models.TransientModel):
         mass mail mode, and is comment for comment mode. """
         comment_composers = self.filtered(lambda comp: comp.composition_mode == 'comment')
         if comment_composers:
-            comment_composers.subtype_id = self.env['ir.model.data']._xmlid_to_res_id('mail.mt_comment')
+            comment_composers.subtype_id = self._mail__mt_comment_optional.id
         (self - comment_composers).subtype_id = False
 
     @api.depends('subtype_id')
     def _compute_subtype_is_log(self):
         """ In comment mode, tells whether the subtype is a note. Subtype has
         no use in email mode, and this field will be False. """
-        note_id = self.env['ir.model.data']._xmlid_to_res_id('mail.mt_note')
+        note_id = self._mail__mt_note_optional.id
         self.subtype_is_log = False
         for composer in self.filtered('subtype_id'):
             composer.subtype_is_log = composer.subtype_id.id == note_id
@@ -1183,7 +1186,7 @@ class MailComposeMessage(models.TransientModel):
         elif self.subtype_id:
             subtype_id = self.subtype_id.id
         else:
-            subtype_id = self.env['ir.model.data']._xmlid_to_res_id('mail.mt_comment')
+            subtype_id = self._mail__mt_comment_optional.id
 
         values = {
             'author_id': self.author_id.id,

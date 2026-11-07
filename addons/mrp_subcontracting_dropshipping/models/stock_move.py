@@ -7,6 +7,8 @@ from odoo import models
 class StockMove(models.Model):
     _inherit = "stock.move"
 
+    _stock_dropshipping__route_drop_shipping_optional = models.Ref('stock_dropshipping.route_drop_shipping', 'stock.route', required=False)
+
     def _is_purchase_return(self):
         res = super()._is_purchase_return()
         return res or self._is_dropshipped_returned()
@@ -56,7 +58,6 @@ class StockMove(models.Model):
 
     def _get_partner_id(self):
         if self.raw_material_production_id.subcontractor_id:
-            route = self.env.ref('stock_dropshipping.route_drop_shipping', raise_if_not_found=False)
-            if route and self.rule_id.route_id == route:
+            if self._stock_dropshipping__route_drop_shipping_optional and self.rule_id.route_id == self._stock_dropshipping__route_drop_shipping_optional:
                 return self.raw_material_production_id.subcontractor_id.id
         return super()._get_partner_id()

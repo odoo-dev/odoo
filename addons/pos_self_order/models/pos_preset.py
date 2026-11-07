@@ -10,6 +10,8 @@ _IMPERIAL_COUNTRY_CODES = {'US', 'GB', 'MM', 'LR'}
 class PosPreset(models.Model):
     _inherit = "pos.preset"
 
+    _pos_self_order__product_delivery_template = models.Ref('pos_self_order.product_delivery_template', 'product.template', required=False)
+
     available_in_self = fields.Boolean(string='Available in self', default=False)
     service_at = fields.Selection(
         [("counter", "Pickup zone"), ("table", "Table"), ("delivery", "Delivery")],
@@ -48,10 +50,7 @@ class PosPreset(models.Model):
     delivery_product_id = fields.Many2one(
         comodel_name="product.product",
         string="Delivery Product",
-        default=lambda self: (
-            self.env.ref("pos_self_order.product_delivery_template", raise_if_not_found=False)
-            or self.env["product.template"]
-        ).with_context(active_test=False).product_variant_ids[:1],
+        default=lambda self: self._pos_self_order__product_delivery_template.with_context(active_test=False).product_variant_ids[:1],
         help="Product used for delivery fees in self order.",
     )
     delivery_product_price = fields.Float(

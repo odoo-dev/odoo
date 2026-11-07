@@ -6,6 +6,8 @@ from odoo import api, fields, models
 class ResConfigSettings(models.TransientModel):
     _inherit = "res.config.settings"
 
+    _website_sale__product_comment = models.Ref('website_sale.product_comment', 'ir.ui.view', required=False)
+
     # Groups
     group_product_price_comparison = fields.Boolean(
         string="Comparison Price",
@@ -142,7 +144,7 @@ class ResConfigSettings(models.TransientModel):
                 website._populate_product_feeds()
         # if Request ratings option is enabled activate Customer Reviews view
         if self.send_order_rating_emails:
-            view = self.env.ref("website_sale.product_comment", raise_if_not_found=False)
+            view = self._website_sale__product_comment
             if view and not view.active:
                 view.active = True
 

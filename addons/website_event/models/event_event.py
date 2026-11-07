@@ -32,6 +32,11 @@ class EventEvent(models.Model):
     ]
     _website_track_field = 'event_id'
 
+    _website_event__mt_event_published = models.Ref('website_event.mt_event_published', 'mail.message.subtype', required=False)
+    _website_event__mt_event_scheduled = models.Ref('website_event.mt_event_scheduled', 'mail.message.subtype', required=False)
+    _website_event__mt_event_unpublished = models.Ref('website_event.mt_event_unpublished', 'mail.message.subtype', required=False)
+    _website_event__mt_event_unscheduled = models.Ref('website_event.mt_event_unscheduled', 'mail.message.subtype', required=False)
+
     def _default_cover_properties(self):
         res = super()._default_cover_properties()
         res.update({
@@ -479,12 +484,12 @@ class EventEvent(models.Model):
         self.ensure_one()
         if track_init_values.keys() & {'publish_on'}:
             if self.publish_on:
-                return self.env.ref('website_event.mt_event_scheduled', raise_if_not_found=False) or super()._track_log_get_default_subtype(track_init_values)
-            return self.env.ref('website_event.mt_event_unscheduled', raise_if_not_found=False) or super()._track_log_get_default_subtype(track_init_values)
+                return self._website_event__mt_event_scheduled or super()._track_log_get_default_subtype(track_init_values)
+            return self._website_event__mt_event_unscheduled or super()._track_log_get_default_subtype(track_init_values)
         if track_init_values.keys() & {'is_published', 'website_published'}:
             if self.is_published:
-                return self.env.ref('website_event.mt_event_published', raise_if_not_found=False) or super()._track_log_get_default_subtype(track_init_values)
-            return self.env.ref('website_event.mt_event_unpublished', raise_if_not_found=False) or super()._track_log_get_default_subtype(track_init_values)
+                return self._website_event__mt_event_published or super()._track_log_get_default_subtype(track_init_values)
+            return self._website_event__mt_event_unpublished or super()._track_log_get_default_subtype(track_init_values)
         return super()._track_log_get_default_subtype(track_init_values)
 
     def _get_event_resource_urls(self, slot=False):

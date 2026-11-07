@@ -8,6 +8,8 @@ class AccountMove(models.Model):
     _name = "account.move"
     _inherit = ["account.move", "utm.mixin"]
 
+    _sale__send_invoice_cron = models.Ref('sale.send_invoice_cron', 'ir.cron', required=False)
+
     team_id = fields.Many2one(
         "crm.team",
         string="Sales Team",
@@ -190,9 +192,8 @@ class AccountMove(models.Model):
         res = super()._action_invoice_ready_to_be_sent()
 
         # Make sure the send invoice CRON is called when an invoice becomes ready to be sent.
-        send_invoice_cron = self.env.ref("sale.send_invoice_cron", raise_if_not_found=False)
-        if send_invoice_cron:
-            send_invoice_cron._trigger()
+        if self._sale__send_invoice_cron:
+            self._sale__send_invoice_cron._trigger()
 
         return res
 

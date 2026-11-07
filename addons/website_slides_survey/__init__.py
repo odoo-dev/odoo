@@ -5,6 +5,5 @@ from . import models
 from . import controllers
 
 def uninstall_hook(env):
-    dt = env.ref('website_slides.badge_data_certification_goal', raise_if_not_found=False)
-    if dt:
-        dt.domain = "[('completed', '=', True), (0, '=', 1)]"
+    if env['gamification.goal.definition']._website_slides__badge_data_certification_goal:
+        env['gamification.goal.definition']._website_slides__badge_data_certification_goal.domain = "[('completed', '=', True), (0, '=', 1)]"

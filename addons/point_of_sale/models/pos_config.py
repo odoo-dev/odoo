@@ -28,6 +28,11 @@ class PosConfig(models.Model):
     _tip_product = models.Ref('point_of_sale.product_product_tip', 'product.product', required=False)
     _check_company_auto = True
 
+    _base__main_company_optional = models.Ref('base.main_company', 'res.company', required=False)
+    _point_of_sale__default_session_closing_partner = models.Ref('point_of_sale.default_session_closing_partner', 'res.partner', required=False)
+    _point_of_sale__pos_closed_session_2 = models.Ref('point_of_sale.pos_closed_session_2', 'pos.session', required=False)
+    _point_of_sale__menu_pos_preparation_printer = models.Ref('point_of_sale.menu_pos_preparation_printer', 'ir.ui.menu', required=False)
+
     def _default_sale_journal(self):
         return self.env['account.journal']._ensure_company_account_journal()
 
@@ -65,7 +70,7 @@ class PosConfig(models.Model):
         return self.env.ref('point_of_sale.group_pos_user')
 
     def _get_default_tip_product(self):
-        tip_product_id = self.env.ref("point_of_sale.product_product_tip", raise_if_not_found=False)
+        tip_product_id = self._tip_product
         if not tip_product_id or (tip_product_id.sudo().company_id and tip_product_id.sudo().company_id != self.env.company):
             tip_product_id = self.env['product.product'].search([('default_code', '=', 'TIPS')], limit=1)
         return tip_product_id
@@ -690,7 +695,7 @@ class PosConfig(models.Model):
 
     def _get_or_create_default_partner(self):
         """Get or create the default PoS partner for the current company."""
-        partner = self.env.ref('point_of_sale.default_session_closing_partner', raise_if_not_found=False)
+        partner = self._point_of_sale__default_session_closing_partner
         default_receivable = self.env.company.account_default_pos_receivable_account_id
         # The closing invoice puts its payment_term lines on this account, so it must be receivable
         if default_receivable.account_type != 'asset_receivable':
@@ -772,16 +777,14 @@ class PosConfig(models.Model):
 
     def _reset_default_on_vals(self, vals):
         if 'tip_product_id' in vals and not vals['tip_product_id'] and 'iface_tipproduct' in vals and vals['iface_tipproduct']:
-            default_product = self.env.ref('point_of_sale.product_product_tip', False)
-            if default_product:
-                vals['tip_product_id'] = default_product.id
+            if self._tip_product:
+                vals['tip_product_id'] = self._tip_product.id
             else:
                 raise UserError(_('The default tip product is missing. Please manually specify the tip product. (See Tips field.)'))
 
     def _update_preparation_printers_menuitem_visibility(self):
-        prepa_printers_menuitem = self.sudo().env.ref('point_of_sale.menu_pos_preparation_printer', raise_if_not_found=False)
-        if prepa_printers_menuitem:
-            prepa_printers_menuitem.active = self.sudo().env['pos.config'].search_count([('use_order_printer', '=', True)], limit=1) > 0
+        if self.sudo()._point_of_sale__menu_pos_preparation_printer:
+            self.sudo()._point_of_sale__menu_pos_preparation_printer.active = self.sudo().env['pos.config'].search_count([('use_order_printer', '=', True)], limit=1) > 0
 
     def _can_use_cash_payment_method(self, cash_method):
         self.ensure_one()
@@ -1140,10 +1143,8 @@ class PosConfig(models.Model):
         return False
 
     def _get_special_products(self):
-        default_tip = self.env.ref('point_of_sale.product_product_tip', raise_if_not_found=False) or self.env['product.product']
-        default_fee = self.env.ref('point_of_sale.product_product_service_fee', raise_if_not_found=False) or self.env['product.product']
         fee_products = self.env['pos.preset'].search([('service_fee', '=', True)]).mapped('service_fee_product_id')
-        return default_tip | default_fee | fee_products
+        return self._tip_product | self._service_fee_product | fee_products
 
     def update_customer_display(self, order, identifier):
         self.ensure_one()
@@ -1375,7 +1376,7 @@ class PosConfig(models.Model):
             'noupdate': True,
         }])
         config._load_onboarding_furniture_demo_data(with_demo_data)
-        existing_session = self.env.ref('point_of_sale.pos_closed_session_2', raise_if_not_found=False)
+        existing_session = self._point_of_sale__pos_closed_session_2
         if with_demo_data and self.env.company.id == self.env.ref('base.main_company').id and not existing_session:
             convert.convert_file(self._env_with_clean_context(), 'point_of_sale', 'data/orders_demo.xml', idref=None, mode='init', noupdate=True)
         return {'config_id': config.id}
@@ -1421,8 +1422,7 @@ class PosConfig(models.Model):
 
     def _get_suffixed_ref_name(self, ref_name):
         """Suffix the given ref_name with the id of the current company if it's not the main company."""
-        main_company = self.env.ref('base.main_company', raise_if_not_found=False)
-        if main_company and self.env.company.id == main_company.id:
+        if self.env.company.id == self._base__main_company_optional.id:
             return ref_name
         return f"{ref_name}_{self.env.company.id}"
 
@@ -1432,12 +1432,11 @@ class PosConfig(models.Model):
             self._check_company_domain(self.env.company),
         ))
         has_chart_template = bool(self.env.company.chart_template)
-        main_company = self.env.ref('base.main_company', raise_if_not_found=False)
         return {
             "has_pos_config": has_pos_config,
             "has_chart_template": has_chart_template,
             "is_restaurant_installed": bool(self.env['ir.module.module'].search_count([('name', '=', 'pos_restaurant'), ('state', '=', 'installed')])),
-            "is_main_company": (main_company and self.env.company.id == main_company.id) or False,
+            "is_main_company": self.env.company.id == self._base__main_company_optional.id,
         }
 
     @api.model

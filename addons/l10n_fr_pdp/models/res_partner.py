@@ -20,6 +20,8 @@ siren_siret_re = re.compile(r'(?:\d{9}|\d{14})(?:_.*)?', flags=re.ASCII)
 class ResPartner(models.Model):
     _inherit = 'res.partner'
 
+    _base__partner_demo_company_fr = models.Ref('base.partner_demo_company_fr', 'res.partner', required=False)
+
     invoice_edi_format = fields.Selection(selection_add=[('ubl_21_fr', "France E-Invoicing (UBL 2.1)")])
     l10n_fr_is_pdp = fields.Boolean(compute='_compute_l10n_fr_is_pdp')
     pdp_verification_display_state = fields.Selection(

@@ -107,6 +107,9 @@ class L10nEsEdiVerifactuDocument(models.Model):
     _description = "Veri*Factu Document"
     _order = 'create_date DESC, id DESC'
 
+    _l10n_es__partner_simplified_optional = models.Ref('l10n_es.partner_simplified', 'res.partner', required=False)
+    _l10n_es_edi_verifactu__cron_verifactu_batch = models.Ref('l10n_es_edi_verifactu.cron_verifactu_batch', 'ir.cron', required=False)
+
     company_id = fields.Many2one(
         string="Company",
         comodel_name='res.company',
@@ -384,8 +387,7 @@ class L10nEsEdiVerifactuDocument(models.Model):
         if need_refund_reason and not vals['invoice_type']:
             errors.append(_("The refund reason is not specified."))
 
-        simplified_partner = self.env.ref('l10n_es.partner_simplified', raise_if_not_found=False)
-        partner_specified = vals['partner'] and vals['partner'] != simplified_partner
+        partner_specified = vals['partner'] and vals['partner'] != self._l10n_es__partner_simplified_optional
         if need_refund_reason and vals['invoice_type'] != 'R5' and vals['is_simplified']:
             errors.append(_("A refund with Refund Reason %(refund_reason)s is not simplified (it needs a partner).",
                             refund_reason=vals['invoice_type']))
@@ -1033,9 +1035,8 @@ class L10nEsEdiVerifactuDocument(models.Model):
                 next_trigger_time = min(next_trigger_time or datetime.max, issuer_next_trigger_time)
 
         if next_trigger_time:
-            cron = self.env.ref('l10n_es_edi_verifactu.cron_verifactu_batch', raise_if_not_found=False)
-            if cron:
-                cron._trigger(at=next_trigger_time)
+            if self._l10n_es_edi_verifactu__cron_verifactu_batch:
+                self._l10n_es_edi_verifactu__cron_verifactu_batch._trigger(at=next_trigger_time)
 
     @api.model
     def _send_batch(self, batch_dict):

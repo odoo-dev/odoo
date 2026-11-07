@@ -49,6 +49,8 @@ class ProductTemplate(models.Model):
     _check_company_auto = True
     _add_seo_rels = True
 
+    _website_sale__product_donation = models.Ref('website_sale.product_donation', 'product.template', required=False)
+
     # === DEFAULT METHODS ===#
 
     @api.model
@@ -408,9 +410,7 @@ class ProductTemplate(models.Model):
         if not self:
             return False
         self.ensure_one()
-        return self.id == self.env["ir.model.data"]._xmlid_to_res_id(
-            "website_sale.product_donation"
-        )
+        return self.id == self._website_sale__product_donation.id
 
     # === BUSINESS METHODS ===#
 

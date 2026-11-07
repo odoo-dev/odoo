@@ -9,8 +9,7 @@ def post_init(env):
         be sure the internal project/task of res.company are set. (Since timesheet_generate field
         is true by default, those 2 fields are required on the leave type).
     """
-    type_ids_ref = env.ref('hr_timesheet.internal_project_default_stage', raise_if_not_found=False)
-    type_ids = [(4, type_ids_ref.id)] if type_ids_ref else []
+    type_ids = [(4, env['project.task.type']._hr_timesheet__internal_project_default_stage.id)] if env['project.task.type']._hr_timesheet__internal_project_default_stage else []
     companies = env['res.company'].search(['|', ('internal_project_id', '=', False), ('leave_timesheet_task_id', '=', False)])
     internal_projects_by_company_dict = None
     project = env['project.project']

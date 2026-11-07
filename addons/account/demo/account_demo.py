@@ -22,6 +22,8 @@ def file_read(path: str) -> BinaryBytes:
 class AccountChartTemplate(models.AbstractModel):
     _inherit = "account.chart.template"
 
+    _base__main_company_optional = models.Ref('base.main_company', 'res.company', required=False)
+
     def _get_demo_exception_product_template_xml_ids(self):
         """ Return demo product template xml ids to not put taxes on"""
         return []
@@ -34,7 +36,7 @@ class AccountChartTemplate(models.AbstractModel):
     def _get_demo_data_product_product(self, template_code):
         # Only needed for the first company
         company = self.env.company
-        if company != self.env.ref('base.main_company', raise_if_not_found=False):
+        if company != self._base__main_company_optional:
             return {}
 
         taxes = {}
@@ -55,7 +57,7 @@ class AccountChartTemplate(models.AbstractModel):
     def _get_demo_data_products_template(self, template_code):
         company = self.env.company
         # Only needed for the first company
-        if company != self.env.ref('base.main_company', raise_if_not_found=False):
+        if company != self._base__main_company_optional:
             return {}
 
         taxes = {}

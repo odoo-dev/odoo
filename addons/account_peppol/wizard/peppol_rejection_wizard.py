@@ -6,6 +6,9 @@ class PeppolRejectionWizard(models.TransientModel):
     _name = 'account.peppol.rejection.wizard'
     _description = "Peppol Rejection wizard"
 
+    _account_peppol__peppol_clarification_reason_unr = models.Ref(
+        'account_peppol.peppol_clarification_reason_unr', 'account.peppol.clarification', required=False)
+
     move_ids = fields.Many2many(
         comodel_name='account.move',
         required=True,
@@ -13,7 +16,7 @@ class PeppolRejectionWizard(models.TransientModel):
     reason_ids = fields.Many2many(
         comodel_name='account.peppol.clarification',
         relation='account_peppol_rejection_reason_rel',
-        default=lambda self: self.env.ref('account_peppol.peppol_clarification_reason_unr', raise_if_not_found=False),
+        default=lambda self: self._account_peppol__peppol_clarification_reason_unr,
         domain="[('list_identifier', '=', 'OPStatusReason')]",
         required=True,
         string='Rejection reasons',

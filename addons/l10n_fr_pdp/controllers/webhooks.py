@@ -15,11 +15,7 @@ class PdpWebhookController(http.Controller):
     def webhook_regulatory_message(self, token):
         edi_client = request.env['account_edi_proxy_client.user'].sudo()._get_user_from_token(token, url=request.httprequest.url)
 
-        cron = request.env.ref(
-            'l10n_fr_pdp.ir_cron_pdp_get_regulatory_documents',
-            raise_if_not_found=False,
-        )
-        if edi_client and cron:
-            cron.sudo()._trigger()
+        if edi_client and request.env['ir.cron']._l10n_fr_pdp__ir_cron_pdp_get_regulatory_documents_optional:
+            request.env['ir.cron']._l10n_fr_pdp__ir_cron_pdp_get_regulatory_documents_optional.sudo()._trigger()
 
         return http.Response(status=204)

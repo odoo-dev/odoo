@@ -28,6 +28,8 @@ class StockLot(models.Model):
     _check_company_auto = True
     _order = 'name, id'
 
+    _stock__sequence_production_lots = models.Ref('stock.sequence_production_lots', 'ir.sequence', required=False)
+
     @api.model
     def default_get(self, fields):
         context = dict(self.env.context)
@@ -73,7 +75,7 @@ class StockLot(models.Model):
     def generate_lot_names(self, first_lot, count, product_sequence=False):
         """Generate `lot_names` from a string."""
         # Get the lot sequence in order to extract prefix and suffix
-        seq = product_sequence or self.env.ref('stock.sequence_production_lots', raise_if_not_found=False)
+        seq = product_sequence or self._stock__sequence_production_lots
         sequence_prefix = sequence_suffix = ''
         if seq:
             sequence_prefix, sequence_suffix = seq._get_prefix_suffix()

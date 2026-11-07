@@ -9,6 +9,8 @@ from odoo.tools import html2plaintext
 class SlideChannelPartner(models.Model):
     _inherit = 'slide.channel.partner'
 
+    _hr__resume_type_training = models.Ref('hr.resume_type_training', 'hr.resume.line.type', required=False)
+
     def _post_completion_update_hook(self, completed=True):
         res = super()._post_completion_update_hook(completed)
         if not completed:
@@ -25,8 +27,7 @@ class SlideChannelPartner(models.Model):
 
         if employees:
             HrResumeLine = self.env['hr.resume.line'].sudo()
-            line_type = self.env.ref('hr.resume_type_training', raise_if_not_found=False)
-            line_type_id = line_type and line_type.id
+            line_type_id = self._hr__resume_type_training.id
 
             lines_for_channel_by_employee = dict(HrResumeLine._read_group([
                 ('employee_id', 'in', employees.ids),

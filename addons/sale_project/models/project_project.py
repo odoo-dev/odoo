@@ -13,6 +13,13 @@ from odoo.tools.translate import _
 class ProjectProject(models.Model):
     _inherit = 'project.project'
 
+    _sale_project__account_analytic_line_view_graph_for_single_project = models.Ref(
+        'sale_project.account_analytic_line_view_graph_for_single_project', 'ir.ui.view', required=False)
+    _sale_project__account_analytic_line_view_list_margins_no_group = models.Ref(
+        'sale_project.account_analytic_line_view_list_margins_no_group', 'ir.ui.view', required=False)
+    _sale_project__view_account_analytic_line_inherit_sale_project_pivot_single = models.Ref(
+        'sale_project.view_account_analytic_line_inherit_sale_project_pivot_single', 'ir.ui.view', required=False)
+
     def _domain_sale_line_id(self):
         domain = Domain.AND([
             self.env['sale.order.line']._sellable_lines_domain(),
@@ -547,11 +554,11 @@ class ProjectProject(models.Model):
         self.ensure_one()
         embedded_action_context = self.env.context.get('from_embedded_action', False)
         view_ids_per_type = {}
-        if pivot_view := self.env.ref('sale_project.view_account_analytic_line_inherit_sale_project_pivot_single', raise_if_not_found=False):
+        if pivot_view := self._sale_project__view_account_analytic_line_inherit_sale_project_pivot_single:
             view_ids_per_type['pivot'] = pivot_view.id
-        if list_view := self.env.ref('sale_project.account_analytic_line_view_list_margins_no_group', raise_if_not_found=False):
+        if list_view := self._sale_project__account_analytic_line_view_list_margins_no_group:
             view_ids_per_type['list'] = list_view.id
-        if graph_view := self.env.ref('sale_project.account_analytic_line_view_graph_for_single_project', raise_if_not_found=False):
+        if graph_view := self._sale_project__account_analytic_line_view_graph_for_single_project:
             view_ids_per_type['graph'] = graph_view.id
         action = self.env['ir.actions.act_window']._for_xml_id('sale_project.action_analytic_reporting_inherit_sale_project')
         if view_ids_per_type:

@@ -16,6 +16,8 @@ from odoo.fields import Domain
 class PosConfig(models.Model):
     _inherit = "pos.config"
 
+    _pos_self_order__product_delivery_template = models.Ref('pos_self_order.product_delivery_template', 'product.template', required=False)
+
     def _self_order_kiosk_default_languages(self):
         return self.sudo().env["res.lang"]._get_active_langs().sorted('name')
 
@@ -169,10 +171,9 @@ class PosConfig(models.Model):
 
     def write(self, vals):
         self._prepare_self_order_splash_screen([vals])
-        product_delivery_template = self.env.ref('pos_self_order.product_delivery_template', raise_if_not_found=False)
+        product_delivery_template = self._pos_self_order__product_delivery_template
         if (
             vals.get('self_ordering_mode') in ('kiosk', 'mobile')
-            and product_delivery_template
             and not product_delivery_template.active
         ):
             product_delivery_template.active = True

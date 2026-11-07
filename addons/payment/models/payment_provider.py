@@ -23,6 +23,8 @@ class PaymentProvider(models.Model):
     _check_company_auto = True
     _check_company_domain = models.check_company_domain_parent_of
 
+    _payment__post_processing_cron_optional = models.Ref('payment.post_processing_cron', 'ir.cron', required=False)
+
     def _valid_field_parameter(self, field, name):
         return name == "required_if_provider" or super()._valid_field_parameter(field, name)
 
@@ -1284,10 +1286,7 @@ class PaymentProvider(models.Model):
 
         :return: None
         """
-        post_processing_cron = self.env.ref(
-            "payment.post_processing_cron", raise_if_not_found=False
-        )
-        if post_processing_cron:
+        if self._payment__post_processing_cron_optional:
             any_installed_provider = bool(
                 self.sudo().search_count(
                     [
@@ -1298,7 +1297,7 @@ class PaymentProvider(models.Model):
                     limit=1,
                 )
             )
-            post_processing_cron.active = any_installed_provider
+            self._payment__post_processing_cron_optional.active = any_installed_provider
 
     def _get_code(self):
         """Return the code of the provider.

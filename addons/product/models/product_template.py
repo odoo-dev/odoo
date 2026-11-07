@@ -25,6 +25,8 @@ class ProductTemplate(models.Model):
     _check_company_auto = True
     _check_company_domain = models.check_company_domain_parent_of
 
+    _product__product_template_acoustic_bloc_screens = models.Ref('product.product_template_acoustic_bloc_screens', 'product.template', required=False)
+
     @api.model
     def default_get(self, fields):
         res = super().default_get(fields)
@@ -1879,9 +1881,7 @@ class ProductTemplate(models.Model):
 
     @api.model
     def _demo_configure_variants(self):
-        acoustic_bloc_screens = self.env.ref(
-            'product.product_template_acoustic_bloc_screens', raise_if_not_found=False
-        )
+        acoustic_bloc_screens = self._product__product_template_acoustic_bloc_screens
         if acoustic_bloc_screens:
             acoustic_bloc_screens.product_variant_ids[0].default_code = 'FURN_6666'
             acoustic_bloc_screens.product_variant_ids[1].default_code = 'FURN_6667'

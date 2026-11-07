@@ -15,6 +15,8 @@ class ProductProduct(models.Model):
     _website_track_field = "product_id"
     _mail_post_access = "read"
 
+    _website_sale__email_template_back_in_stock = models.Ref('website_sale.email_template_back_in_stock', 'mail.template', required=False)
+
     variant_ribbon_id = fields.Many2one(string="Variant Ribbon", comodel_name="product.ribbon")
     website_id = fields.Many2one(related="product_tmpl_id.website_id", readonly=False)
 
@@ -510,9 +512,7 @@ class ProductProduct(models.Model):
         - website salesperson email
         - company email_formatted, which includes the mail alias domain catchall
         """
-        email_template = self.env.ref(
-            "website_sale.email_template_back_in_stock", raise_if_not_found=False
-        )
+        email_template = self._website_sale__email_template_back_in_stock
         if not email_template:
             return
         grouped_notifications = self.env["product.stock.notification"]._read_group(

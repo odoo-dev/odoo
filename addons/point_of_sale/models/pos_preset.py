@@ -11,6 +11,8 @@ class PosPreset(models.Model):
     _description = 'Easily load a set of configuration options'
     _order = 'sequence, id'
 
+    _point_of_sale__product_product_service_fee_optional = models.Ref('point_of_sale.product_product_service_fee', 'product.product', required=False)
+
     def _default_sequence(self):
         return (self.search([], order="sequence desc", limit=1).sequence or 0) + 1
 
@@ -28,7 +30,7 @@ class PosPreset(models.Model):
 
     # Service Fee
     service_fee = fields.Boolean(string='Service Fee', default=False)
-    service_fee_product_id = fields.Many2one('product.product', string='Service Fee Product', default=lambda self: self.env.ref('point_of_sale.product_product_service_fee', raise_if_not_found=False))
+    service_fee_product_id = fields.Many2one('product.product', string='Service Fee Product', default=lambda self: self._point_of_sale__product_product_service_fee_optional)
     service_fee_type = fields.Selection([('fixed', 'Fixed Price'), ('percent', 'Percent')], string='Type', default='percent')
     service_fee_amount = fields.Float(string='Amount', default=0.0)
     service_fee_based_on = fields.Selection([('pre_discount', 'Order total before discount(s)'), ('post_discount', 'Order total after discount(s)')], string='Based on', default='pre_discount')

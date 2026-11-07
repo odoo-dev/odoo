@@ -26,3 +26,4 @@ from . import hr_job_platform
 from . import hr_job_tag
 
 from . import res_groups
+from . import ir_access

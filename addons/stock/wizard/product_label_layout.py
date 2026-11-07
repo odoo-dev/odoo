@@ -8,6 +8,8 @@ from odoo import fields, models
 class ProductLabelLayout(models.TransientModel):
     _inherit = 'product.label.layout'
 
+    _uom__product_uom_unit_optional = models.Ref('uom.product_uom_unit', 'uom.uom', required=False)
+
     move_ids = fields.Many2many('stock.move')
     print_packaging = fields.Boolean(
         'Print Packaging',
@@ -57,7 +59,7 @@ class ProductLabelLayout(models.TransientModel):
                     continue
                 quantities[move.product_id] += quantity
         else:
-            uom_unit = self.env.ref('uom.product_uom_unit', raise_if_not_found=False)
+            uom_unit = self._uom__product_uom_unit_optional
             for line in move_lines:
                 if line.uom_id._has_common_reference(uom_unit):
                     if (line.lot_id or line.lot_name) and int(line.quantity):

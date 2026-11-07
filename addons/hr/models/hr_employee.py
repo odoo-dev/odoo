@@ -51,6 +51,8 @@ class HrEmployee(models.Model):
     _inherits = {'hr.version': 'version_id'}
     _check_inherits_access = False
 
+    _hr__employee_category_demo = models.Ref('hr.employee_category_demo', 'hr.employee.category', required=False)
+
     # versions
     version_id = fields.Many2one(
         'hr.version',
@@ -2526,8 +2528,7 @@ class HrEmployee(models.Model):
         return None
 
     def _load_scenario(self):
-        demo_tag = self.env.ref('hr.employee_category_demo', raise_if_not_found=False)
-        if demo_tag:
+        if self._hr__employee_category_demo:
             return
         convert.convert_file(self.env, 'hr', 'data/scenarios/hr_scenario.xml', None, mode='init')
 

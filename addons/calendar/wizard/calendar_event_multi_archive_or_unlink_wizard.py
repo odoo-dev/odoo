@@ -5,6 +5,8 @@ class CalendarEventMultiArchiveOrUnlinkWizard(models.TransientModel):
     _name = 'calendar.event.multi.archive.or.unlink.wizard'
     _description = 'Calendar Event Multi Archive Or Unlink Wizard'
 
+    _calendar__calendar_template_delete_event = models.Ref('calendar.calendar_template_delete_event', 'mail.template', required=False)
+
     block_mail = fields.Boolean(default=False)
     calendar_event_ids = fields.Many2many(
         'calendar.event',
@@ -51,5 +53,5 @@ class CalendarEventMultiArchiveOrUnlinkWizard(models.TransientModel):
     @api.model
     def _send_mails_from_template(self, events_to_notify):
         """This method is meant to be overridden."""
-        if template := self.env.ref('calendar.calendar_template_delete_event', raise_if_not_found=False):
+        if template := self._calendar__calendar_template_delete_event:
             template.send_mail_batch(events_to_notify.ids, email_values={'res_id': False})

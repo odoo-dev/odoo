@@ -15,7 +15,7 @@ def create_internal_project(env):
     # installation, as there is no analytic account for them.
     env['project.project'].search([]).write({'allow_timesheets': True})
 
-    admin = env.ref('base.user_admin', raise_if_not_found=False)
+    admin = env['res.users']._base__user_admin_optional
     if not admin:
         return
     project_ids = env['res.company'].search([])._create_internal_project_task()
@@ -48,5 +48,5 @@ def _uninstall_hook(env):
 
     env['ir.model.data'].search([('name', 'ilike', 'internal_project_default_stage')]).unlink()
 
-    if rule := env.ref('project.account_analytic_line_rule_manager', raise_if_not_found=False):
+    if rule := env['ir.access']._project__account_analytic_line_rule_manager:
         rule.active = True

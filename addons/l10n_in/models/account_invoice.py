@@ -24,6 +24,8 @@ _logger = logging.getLogger(__name__)
 class AccountMove(models.Model):
     _inherit = "account.move"
 
+    _l10n_in__state_in_oc_optional = models.Ref('l10n_in.state_in_oc', 'res.country.state', required=False)
+
     l10n_in_gst_treatment = fields.Selection(
         selection=[
             ('regular', 'Registered Business - Regular'),
@@ -112,7 +114,7 @@ class AccountMove(models.Model):
 
     @api.depends('partner_id', 'partner_shipping_id', 'company_id')
     def _compute_l10n_in_state_id(self):
-        foreign_state = self.env.ref('l10n_in.state_in_oc', raise_if_not_found=False)
+        foreign_state = self._l10n_in__state_in_oc_optional
         for move in self:
             if move.country_code == 'IN' and move.is_sale_document(include_receipts=True):
                 partner = (

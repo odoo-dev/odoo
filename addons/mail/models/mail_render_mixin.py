@@ -64,6 +64,8 @@ class MailRenderMixin(models.AbstractModel):
     # If False, we need the group "Template Editor" to render the model fields
     _unrestricted_rendering = False
 
+    _mail__mt_comment_optional = models.Ref('mail.mt_comment', 'mail.message.subtype', required=False)
+
     # language for rendering
     lang = fields.Char(
         'Language',
@@ -220,7 +222,7 @@ class MailRenderMixin(models.AbstractModel):
             template_ctx['subtype_internal'] = False
         else:
             if 'is_discussion' not in template_ctx:
-                template_ctx['is_discussion'] = subtype.id == self.env['ir.model.data']._xmlid_to_res_id('mail.mt_comment')
+                template_ctx['is_discussion'] = subtype.id == self._mail__mt_comment_optional.id
             if 'subtype_internal' not in template_ctx:
                 template_ctx['subtype_internal'] = subtype.is_internal
         template_ctx.setdefault('subtype', subtype)

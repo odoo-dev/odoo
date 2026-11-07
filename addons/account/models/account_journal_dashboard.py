@@ -23,6 +23,13 @@ def group_by_journal(vals_list):
 class AccountJournal(models.Model):
     _inherit = "account.journal"
 
+    _account__action_account_cashflow_analysis = models.Ref('account.action_account_cashflow_analysis', 'ir.actions.act_window', required=False)
+    _account_reports__action_account_report_ap = models.Ref('account_reports.action_account_report_ap', 'ir.actions.client', required=False)
+    _account_reports__action_account_report_ar = models.Ref('account_reports.action_account_report_ar', 'ir.actions.client', required=False)
+    _account_reports__action_account_report_pl = models.Ref('account_reports.action_account_report_pl', 'ir.actions.client', required=False)
+    _account_reports__profit_and_loss_optional = models.Ref('account_reports.profit_and_loss', 'account.report', required=False)
+    _base__res_partner_2 = models.Ref('base.res_partner_2', 'res.partner', required=False)
+
     kanban_dashboard = fields.Text(compute='_kanban_dashboard')
     kanban_dashboard_graph = fields.Text(compute='_kanban_dashboard_graph')
     json_activity_data = fields.Text(compute='_get_json_activity_data')
@@ -91,10 +98,9 @@ class AccountJournal(models.Model):
         today = fields.Date.context_today(self)
         fiscal_year = self.env.company.compute_fiscalyear_dates(today)
 
-        profit_and_loss_report = self.env.ref('account_reports.profit_and_loss', raise_if_not_found=False)
         currency_translation = (
-            profit_and_loss_report.sudo().currency_translation
-            if profit_and_loss_report
+            self._account_reports__profit_and_loss_optional.sudo().currency_translation
+            if self._account_reports__profit_and_loss_optional
             else 'current'
         )
 
@@ -197,22 +203,6 @@ class AccountJournal(models.Model):
         expenses = profitability_amounts['expenses']
 
         invoice_analysis_action = self.env.ref('account.action_account_invoice_report_all')
-        profit_and_loss_action = self.env.ref(
-            'account_reports.action_account_report_pl',
-            raise_if_not_found=False,
-        )
-        aged_receivable_action = self.env.ref(
-            'account_reports.action_account_report_ar',
-            raise_if_not_found=False,
-        )
-        aged_payable_action = self.env.ref(
-            'account_reports.action_account_report_ap',
-            raise_if_not_found=False,
-        )
-        cashflow_analysis_action = self.env.ref(
-            'account.action_account_cashflow_analysis',
-            raise_if_not_found=False,
-        )
         invoice_layout_action = self.env.ref('account.action_base_document_layout_configurator')
 
         unpaid_amounts = self._get_sale_purchase_kpi_amounts()
@@ -231,25 +221,25 @@ class AccountJournal(models.Model):
                 'id': 'expenses',
                 'name': self.env._('Expenses'),
                 'value': format_amount(expenses),
-                'action_id': profit_and_loss_action.id if profit_and_loss_action else False,
+                'action_id': self._account_reports__action_account_report_pl.id,
             },
             {
                 'id': 'cash',
                 'name': self.env._('Cash'),
                 'value': format_amount(cashflow_amount),
-                'action_id': cashflow_analysis_action.id if cashflow_analysis_action else False,
+                'action_id': self._account__action_account_cashflow_analysis.id,
             },
             {
                 'id': 'receivable',
                 'name': self.env._('Receivable'),
                 'value': format_amount(customer_unpaid),
-                'action_id': aged_receivable_action.id if aged_receivable_action else False,
+                'action_id': self._account_reports__action_account_report_ar.id,
             },
             {
                 'id': 'payable',
                 'name': self.env._('Payable'),
                 'value': format_amount(supplier_unpaid),
-                'action_id': aged_payable_action.id if aged_payable_action else False,
+                'action_id': self._account_reports__action_account_report_ap.id,
             },
         ]
         if (
@@ -1137,10 +1127,9 @@ class AccountJournal(models.Model):
         """
         context = dict(self.env.context)
         purchase_journal = self.browse(context.get('default_journal_id')) or self.search([('type', '=', 'purchase')], limit=1)
-        partner = self.env.ref('base.res_partner_2', raise_if_not_found=False)
         if not purchase_journal:
             raise UserError(self._build_no_journal_error_msg(self.env.company.display_name, ['purchase']))
-        if not partner:
+        if not self._base__res_partner_2:
             raise UserError(_('You may only use samples in demo mode, try uploading one of your invoices instead.'))
         context['default_move_type'] = 'in_invoice'
         invoice_date = fields.Date.context_today(self) - timedelta(days=12)
@@ -1149,7 +1138,7 @@ class AccountJournal(models.Model):
         ref = 'DE%s' % invoice_date.strftime('%Y%m')
         bill = self.env['account.move'].with_context(default_extract_state='done').create({
             'move_type': 'in_invoice',
-            'partner_id': partner.id,
+            'partner_id': self._base__res_partner_2.id,
             'ref': ref,
             'invoice_date': invoice_date,
             'invoice_date_due': invoice_date + timedelta(days=30),

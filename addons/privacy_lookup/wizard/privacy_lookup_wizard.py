@@ -14,6 +14,10 @@ class PrivacyLookupWizard(models.TransientModel):
     _transient_max_count = 0
     _transient_max_hours = 24
 
+    _base__model_res_partner_optional = models.Ref('base.model_res_partner', 'ir.model', required=False)
+    _base__model_res_users = models.Ref('base.model_res_users', 'ir.model', required=False)
+    _mail__model_mail_message = models.Ref('mail.model_mail_message', 'ir.model', required=False)
+
     name = fields.Char(required=True)
     email = fields.Char(required=True)
     line_ids = fields.One2many('privacy.lookup.wizard.line', 'wizard_id')
@@ -91,11 +95,11 @@ class PrivacyLookupWizard(models.TransientModel):
             # Indirect references CTE
             email_normalized, name,
             # Search on res.partner
-            self.env['ir.model.data']._xmlid_to_res_id('base.model_res_partner'),
+            self._base__model_res_partner_optional.id,
             # Search on res.users
-            self.env['ir.model.data']._xmlid_to_res_id('base.model_res_users'), email, email, name,
+            self._base__model_res_users.id, email, email, name,
             # Direct messages
-            self.env['ir.model.data']._xmlid_to_res_id('mail.model_mail_message'),
+            self._mail__model_mail_message.id,
         )
 
         # Step 3: Retrieve info on other models

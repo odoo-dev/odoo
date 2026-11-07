@@ -8,6 +8,11 @@ from odoo.exceptions import UserError
 class ResConfigSettings(models.TransientModel):
     _inherit = 'res.config.settings'
 
+    _delivery__action_delivery_carrier_form_optional = models.Ref('delivery.action_delivery_carrier_form', 'ir.actions.act_window', required=False)
+    _stock__route_warehouse0_mto = models.Ref('stock.route_warehouse0_mto', 'stock.route', required=False)
+    _stock__stock_location_view_form_editable = models.Ref('stock.stock_location_view_form_editable', 'ir.ui.view', required=False)
+    _stock__stock_location_view_tree2_editable = models.Ref('stock.stock_location_view_tree2_editable', 'ir.ui.view', required=False)
+
     module_product_expiry = fields.Boolean("Expiration Dates",
         help="Track following dates on lots & serial numbers: best before, removal, end of life, alert. \n Such dates are set automatically at lot/serial number creation based on values set on the product (in days).")
     group_stock_production_lot = fields.Boolean("Lots & Serial Numbers",
@@ -50,14 +55,11 @@ class ResConfigSettings(models.TransientModel):
     picking_policy = fields.Selection(related="company_id.picking_policy", readonly=False, required=True)
 
     def _compute_replenish_on_order(self):
-        route = self.env.ref('stock.route_warehouse0_mto', raise_if_not_found=False)
-        if route:
-            self.replenish_on_order = route.active
+        if self._stock__route_warehouse0_mto:
+            self.replenish_on_order = self._stock__route_warehouse0_mto.active
 
     def _inverse_replenish_on_order(self):
-        route = self.env.ref('stock.route_warehouse0_mto', raise_if_not_found=False)
-        if route:
-            route.active = self.replenish_on_order
+        self._stock__route_warehouse0_mto.active = self.replenish_on_order
 
     @api.onchange('group_stock_multi_locations')
     def _onchange_group_stock_multi_locations(self):
@@ -132,8 +134,8 @@ class ResConfigSettings(models.TransientModel):
             # Disable the views removing the create button from the location list and form.
             # Be resilient if the views have been deleted manually.
             for view in (
-                self.env.ref('stock.stock_location_view_tree2_editable', raise_if_not_found=False),
-                self.env.ref('stock.stock_location_view_form_editable', raise_if_not_found=False),
+                self._stock__stock_location_view_tree2_editable,
+                self._stock__stock_location_view_form_editable,
             ):
                 if view:
                     view.active = False
@@ -145,8 +147,8 @@ class ResConfigSettings(models.TransientModel):
             # Enable the views removing the create button from the location list and form.
             # Be resilient if the views have been deleted manually.
             for view in (
-                self.env.ref('stock.stock_location_view_tree2_editable', raise_if_not_found=False),
-                self.env.ref('stock.stock_location_view_form_editable', raise_if_not_found=False),
+                self._stock__stock_location_view_tree2_editable,
+                self._stock__stock_location_view_form_editable,
             ):
                 if view:
                     view.active = True
@@ -158,6 +160,6 @@ class ResConfigSettings(models.TransientModel):
         return
 
     def action_view_delivery_methods(self):
-        if action := self.env.ref('delivery.action_delivery_carrier_form', raise_if_not_found=False):
+        if action := self._delivery__action_delivery_carrier_form_optional:
             return action._get_action_dict()
         return

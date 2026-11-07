@@ -6,6 +6,8 @@ from odoo import api, fields, models
 class MaintenanceEquipment(models.Model):
     _inherit = 'maintenance.equipment'
 
+    _stock__action_production_lot_form = models.Ref('stock.action_production_lot_form', 'ir.actions.act_window', required=False)
+
     location_id = fields.Many2one('stock.location', 'Location', domain="[('usage', '=', 'internal')]")
     match_serial = fields.Boolean(compute='_compute_match_serial')
 
@@ -25,10 +27,9 @@ class MaintenanceEquipment(models.Model):
 
     def action_open_matched_serial(self):
         self.ensure_one()
-        action = self.env.ref('stock.action_production_lot_form', raise_if_not_found=False)
-        if not action:
+        if not self._stock__action_production_lot_form:
             return True
-        action_dict = action._get_action_dict()
+        action_dict = self._stock__action_production_lot_form._get_action_dict()
         matching_serials = self.env['stock.lot'].search([('name', '=', self.serial_no)])
         if len(matching_serials) == 1:
             action_dict.update({

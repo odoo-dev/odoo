@@ -8,6 +8,8 @@ from odoo.exceptions import UserError
 class ResConfigSettings(models.TransientModel):
     _inherit = 'res.config.settings'
 
+    _base__default_user_group = models.Ref('base.default_user_group', 'res.groups', required=False)
+
     company_id = fields.Many2one('res.company', string='Company', required=True,
         default=lambda self: self.env.company)
     is_root_company = fields.Boolean(compute='_compute_is_root_company')
@@ -53,7 +55,7 @@ class ResConfigSettings(models.TransientModel):
         }
 
     def open_new_user_default_groups(self):
-        default_group = self.env.ref('base.default_user_group', raise_if_not_found=False)
+        default_group = self._base__default_user_group
         if not default_group:
             default_group = self.env['res.groups'].create({
                 'name': _('Default access for new users'),

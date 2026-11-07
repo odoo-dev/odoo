@@ -8,6 +8,8 @@ from odoo.exceptions import ValidationError
 class PosConfig(models.Model):
     _inherit = 'pos.config'
 
+    _payment__payment_provider_demo = models.Ref('payment.payment_provider_demo', 'payment.provider', required=False)
+
     @api.constrains('payment_method_ids')
     def _check_online_payment_methods(self):
         """ Checks the journal currency with _get_online_payment_providers(..., error_if_invalid=True)"""
@@ -32,7 +34,7 @@ class PosConfig(models.Model):
             if module_payment_demo := self.env['ir.module.module'].search([('name', '=', 'payment_demo'), ('state', '=', 'uninstalled')]):
                 module_payment_demo.button_install()
             new_online_pm = self.env['pos.payment.method'].sudo()._get_or_create_online_payment_method(self.env.company.id, False)
-            if demo_provider := self.env.ref('payment.payment_provider_demo', raise_if_not_found=False):
+            if demo_provider := self._payment__payment_provider_demo:
                 new_online_pm.write({'online_payment_provider_ids': [(6, 0, demo_provider.ids)]})
             return new_online_pm
 

@@ -8,15 +8,15 @@ from odoo.addons.payment_custom import const
 class AccountBankStatementLine(models.Model):
     _inherit = "account.bank.statement.line"
 
+    _account_payment_custom__cron_auto_confirm_paid_wire_transfer_txs = models.Ref(
+        'account_payment_custom.cron_auto_confirm_paid_wire_transfer_txs', 'ir.cron', required=False)
+
     @api.model_create_multi
     def create(self, vals_list):
         statement_lines = super().create(vals_list)
 
-        wire_transfer_cron = self.env.ref(
-            "account_payment_custom.cron_auto_confirm_paid_wire_transfer_txs", False
-        )
-        if wire_transfer_cron:
-            wire_transfer_cron._trigger()
+        if self._account_payment_custom__cron_auto_confirm_paid_wire_transfer_txs:
+            self._account_payment_custom__cron_auto_confirm_paid_wire_transfer_txs._trigger()
 
         return statement_lines
 

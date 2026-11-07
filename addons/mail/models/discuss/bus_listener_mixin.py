@@ -11,6 +11,8 @@ from odoo.addons.mail.tools.discuss import Store
 class BusListenerMixin(models.AbstractModel):
     _inherit = "bus.listener.mixin"
 
+    _mail__mt_note_optional = models.Ref('mail.mt_note', 'mail.message.subtype', required=False)
+
     def _bus_send_transient_message(self, channel, content):
         """Posts a fake message in the given ``channel``, only visible for ``self`` listeners."""
         message_id = _select_nextval(self.env.cr, "mail_message_id_seq")[0]
@@ -22,7 +24,7 @@ class BusListenerMixin(models.AbstractModel):
                 res.attr("body", Markup("<span class='o_mail_notification'>%s</span>") % content),
                 res.attr("id", message_id),
                 res.attr("is_transient", True),
-                res.attr("subtype_id", self.env["ir.model.data"]._xmlid_to_res_id("mail.mt_note")),
+                res.attr("subtype_id", self._mail__mt_note_optional.id),
                 res.one("thread", [], as_thread=True, value=channel),
             ),
         )

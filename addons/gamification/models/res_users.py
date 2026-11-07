@@ -8,6 +8,8 @@ from odoo.tools import SQL
 class ResUsers(models.Model):
     _inherit = 'res.users'
 
+    _gamification__mail_template_data_new_rank_reached = models.Ref('gamification.mail_template_data_new_rank_reached', 'mail.template', required=False)
+
     karma = fields.Integer('Karma', compute='_compute_karma', store=True, readonly=False)
     karma_tracking_ids = fields.One2many('gamification.karma.tracking', 'user_id', string='Karma Changes', groups="base.group_system")
     badge_ids = fields.One2many('gamification.badge.user', 'user_id', string='Badges', copy=False)
@@ -265,7 +267,7 @@ WHERE sub.user_id IN %s""",
             # avoid sending emails in install mode (prevents spamming users when creating data ranks)
             return
 
-        template = self.env.ref('gamification.mail_template_data_new_rank_reached', raise_if_not_found=False)
+        template = self._gamification__mail_template_data_new_rank_reached
         if template:
             for u in self:
                 if u.rank_id.karma_min > 0:

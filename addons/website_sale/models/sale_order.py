@@ -26,6 +26,9 @@ class SaleOrder(models.Model):
         "website.checkout.alert.mixin",
     ]
 
+    _account__account_payment_term_immediate = models.Ref('account.account_payment_term_immediate', 'account.payment.term', required=False)
+    _website_sale__mail_template_sale_cart_recovery = models.Ref('website_sale.mail_template_sale_cart_recovery', 'mail.template', required=False)
+
     website_id = fields.Many2one(
         string="eCommerce Website",
         help="Website through which this order was placed for eCommerce orders.",
@@ -129,9 +132,7 @@ class SaleOrder(models.Model):
             return
 
         # Try to find a payment term even if there wasn't any set on the partner
-        default_pt = self.env.ref(
-            "account.account_payment_term_immediate", raise_if_not_found=False
-        )
+        default_pt = self._account__account_payment_term_immediate
         for order in website_orders:
             if default_pt and (
                 order.company_id == default_pt.company_id or not default_pt.company_id
@@ -272,9 +273,7 @@ class SaleOrder(models.Model):
         """
         websites = self.mapped("website_id")
         template = websites.cart_recovery_mail_template_id if len(websites) == 1 else False
-        template = template or self.env.ref(
-            "website_sale.mail_template_sale_cart_recovery", raise_if_not_found=False
-        )
+        template = template or self._website_sale__mail_template_sale_cart_recovery
         return template or self.env["mail.template"]
 
     # === BUSINESS METHODS ===#

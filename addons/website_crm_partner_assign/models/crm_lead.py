@@ -12,6 +12,11 @@ from odoo.fields import Domain
 class CrmLead(models.Model):
     _inherit = "crm.lead"
 
+    _website_crm_partner_assign__tag_portal_lead_is_spam = models.Ref('website_crm_partner_assign.tag_portal_lead_is_spam', 'crm.tag', required=False)
+    _website_crm_partner_assign__tag_portal_lead_own_opp = models.Ref('website_crm_partner_assign.tag_portal_lead_own_opp', 'crm.tag', required=False)
+    _website_crm_partner_assign__tag_portal_lead_partner_unavailable = models.Ref(
+        'website_crm_partner_assign.tag_portal_lead_partner_unavailable', 'crm.tag', required=False)
+
     partner_latitude = fields.Float('Latitude', digits=(10, 7))
     partner_longitude = fields.Float('Longitude', digits=(10, 7))
     partner_assigned_id = fields.Many2one('res.partner', 'Assigned Partner', tracking=True, domain="['|', ('company_id', '=', False), ('company_id', '=', company_id)]", index='btree_not_null')
@@ -100,9 +105,8 @@ class CrmLead(models.Model):
             if not partner_id:
                 partner_id = partner_dict.get(lead.id, False)
             if not partner_id:
-                tag_to_add = self.env.ref('website_crm_partner_assign.tag_portal_lead_partner_unavailable', False)
-                if tag_to_add:
-                    lead.write({'tag_ids': [(4, tag_to_add.id, False)]})
+                if self._website_crm_partner_assign__tag_portal_lead_partner_unavailable:
+                    lead.write({'tag_ids': [(4, self._website_crm_partner_assign__tag_portal_lead_partner_unavailable.id, False)]})
                 continue
             lead.assign_geo_localize(lead.partner_latitude, lead.partner_longitude)
             partner = self.env['res.partner'].browse(partner_id)
@@ -241,7 +245,7 @@ class CrmLead(models.Model):
         }
 
         if spam:
-            tag_spam = self.env.ref('website_crm_partner_assign.tag_portal_lead_is_spam', False)
+            tag_spam = self._website_crm_partner_assign__tag_portal_lead_is_spam
             if tag_spam and tag_spam not in self.sudo().tag_ids:
                 values['tag_ids'] = [(4, tag_spam.id, False)]
         if partner_ids:
@@ -306,7 +310,7 @@ class CrmLead(models.Model):
             return {
                 'errors': _('All fields are required!')
             }
-        tag_own = self.env.ref('website_crm_partner_assign.tag_portal_lead_own_opp', False)
+        tag_own = self._website_crm_partner_assign__tag_portal_lead_own_opp
         values = {
             'contact_name': values['contact_name'],
             'name': values['title'],

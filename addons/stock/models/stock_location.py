@@ -28,6 +28,8 @@ class StockLocation(models.Model):
     )
     _check_company_domain = models.check_company_domain_parent_of
 
+    _stock__stock_location_inter_company_optional = models.Ref('stock.stock_location_inter_company', 'stock.location', required=False)
+
     @api.model
     def default_get(self, fields):
         res = super().default_get(fields)
@@ -482,8 +484,7 @@ class StockLocation(models.Model):
         if self.usage == 'customer':
             return True
         # Can also be True if location is inter-company transit
-        inter_comp_location = self.env.ref('stock.stock_location_inter_company', raise_if_not_found=False)
-        return self._child_of(inter_comp_location)
+        return self._child_of(self._stock__stock_location_inter_company_optional)
 
     def _get_weight(self, excluded_sml_ids=False):
         """Returns a dictionary with the net and forecasted weight of the location.

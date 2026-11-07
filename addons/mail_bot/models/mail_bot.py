@@ -11,6 +11,8 @@ class MailBot(models.AbstractModel):
     _name = 'mail.bot'
     _description = 'Mail Bot'
 
+    _base__partner_root_optional = models.Ref('base.partner_root', 'res.partner', required=False)
+
     def _apply_logic(self, channel, message, command=None):
         """ Apply bot logic to generate an answer (or not) for the user
         The logic will only be applied if odoobot is in a chat with a user or
@@ -21,7 +23,7 @@ class MailBot(models.AbstractModel):
          :param command: the name of the called command if the logic is not triggered by a message_post
         """
         channel.ensure_one()
-        odoobot_id = self.env['ir.model.data']._xmlid_to_res_id("base.partner_root")
+        odoobot_id = self._base__partner_root_optional.id
         message = message or self.env['mail.message']
         if message.author_id.id == odoobot_id or message.message_type != "comment" and not command:
             return

@@ -17,6 +17,8 @@ class ResConfigSettings(models.TransientModel):
     the alias domain. """
     _inherit = 'res.config.settings'
 
+    _mail__mail_notification_layout = models.Ref('mail.mail_notification_layout', 'ir.ui.view', required=False)
+
     external_email_server_default = fields.Boolean(
         "Use Custom Email Servers",
         config_parameter='base_setup.default_external_email_server')
@@ -177,14 +179,13 @@ class ResConfigSettings(models.TransientModel):
         return {"type": "ir.actions.act_window_close"}
 
     def open_email_layout(self):
-        layout = self.env.ref('mail.mail_notification_layout', raise_if_not_found=False)
-        if not layout:
+        if not self._mail__mail_notification_layout:
             raise UserError(_("This layout seems to no longer exist."))
         return {
             'type': 'ir.actions.act_window',
             'name': _('Mail Layout'),
             'view_mode': 'form',
-            'res_id': layout.id,
+            'res_id': self._mail__mail_notification_layout.id,
             'res_model': 'ir.ui.view',
         }
 

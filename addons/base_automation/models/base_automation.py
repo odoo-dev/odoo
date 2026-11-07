@@ -130,6 +130,8 @@ class BaseAutomation(models.Model):
     _description = 'Automation Rule'
     _inherit = ['mail.thread', 'mail.activity.mixin']
 
+    _base_automation__ir_cron_data_base_automation_check_optional = models.Ref('base_automation.ir_cron_data_base_automation_check', 'ir.cron', required=False)
+
     name = fields.Char(string="Automation Rule Name", required=True, translate=True, tracking=True)
     description = fields.Html(string="Description")
     model_id = fields.Many2one(
@@ -519,8 +521,7 @@ class BaseAutomation(models.Model):
         return record_copy
 
     def action_open_scheduled_action(self):
-        cron = self.env.ref('base_automation.ir_cron_data_base_automation_check', raise_if_not_found=False)
-        if not cron:
+        if not self._base_automation__ir_cron_data_base_automation_check_optional:
             message = _("The scheduled action for Automation Rules seems to have vanished.")
             raise exceptions.MissingError(message)
         return {
@@ -528,7 +529,7 @@ class BaseAutomation(models.Model):
             'name': _('Scheduled Action'),
             'view_mode': 'form',
             'res_model': 'ir.cron',
-            'res_id': cron.id,
+            'res_id': self._base_automation__ir_cron_data_base_automation_check_optional.id,
         }
 
     def action_rotate_webhook_uuid(self):
@@ -640,7 +641,7 @@ class BaseAutomation(models.Model):
         the smallest automation delay, or restore the default 4 hours if there
         is no time based automation.
         """
-        cron = self.env.ref('base_automation.ir_cron_data_base_automation_check', raise_if_not_found=False)
+        cron = self._base_automation__ir_cron_data_base_automation_check_optional
         if cron:
             try:
                 cron.lock_for_update(allow_referencing=True)
