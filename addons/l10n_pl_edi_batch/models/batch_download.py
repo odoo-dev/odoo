@@ -103,7 +103,7 @@ class BatchDownload(models.Model):
             return [('id', 'in', batches.ids)]
         return [('id', 'not in', batches.ids)]
 
-    def _compute_state_by_code(self, code):
+    def _get_state_by_code(self, code):
         self.ensure_one()
         if self.is_expired or code not in (KSEF_IN_PROGRESS, KSEF_READY):
             return 'failed'
@@ -118,7 +118,7 @@ class BatchDownload(models.Model):
     def _compute_state(self):
         for batch in self:
             code = (batch.content or {}).get('status', {}).get('code') or KSEF_IN_PROGRESS
-            batch.state = batch._compute_state_by_code(code)
+            batch.state = batch._get_state_by_code(code)
 
     def _search_state(self, operator, value):
         if operator not in ('=', '!=', 'in', 'not in'):
