@@ -95,7 +95,7 @@ class AccountMove(models.Model):
         action = self.env['ir.actions.act_window']._for_xml_id('point_of_sale.action_pos_pos_form')
 
         if len(self.pos_order_ids) == 1:
-            action['views'] = [(self.env.ref('point_of_sale.view_pos_pos_form', False).id, 'form')]
+            action['views'] = [(self.env.ref('point_of_sale.view_pos_pos_form').id, 'form')]
             action['res_id'] = self.pos_order_ids.id
         else:
             action['domain'] = [('id', 'in', self.pos_order_ids.ids)]

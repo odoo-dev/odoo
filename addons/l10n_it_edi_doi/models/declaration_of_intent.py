@@ -47,7 +47,7 @@ class L10n_It_Edi_DoiDeclaration_Of_Intent(models.Model):
     currency_id = fields.Many2one(
         comodel_name='res.currency',
         string='Currency',
-        default=lambda self: self.env.ref('base.EUR', raise_if_not_found=False).id,
+        default=lambda self: self.env.ref('base.EUR').id,
         required=True,
         readonly=True,
     )

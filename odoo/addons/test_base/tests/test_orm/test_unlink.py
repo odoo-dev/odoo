@@ -1,5 +1,6 @@
 
-from odoo.exceptions import MissingError
+from odoo import models
+from odoo.exceptions import MissingError, UserError
 from odoo.fields import Command
 from odoo.tests import TransactionCase, tagged
 from odoo.tools import mute_logger
@@ -177,3 +178,189 @@ class TestUnlink(TransactionCase):
         # 1 query to update test_orm.unlink.null.has_container
         with self.assertQueryCount(10):
             containers.unlink()
+
+
+@tagged('at_install', '-post_install')
+class TestUnlinkRef(TransactionCase):
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.RefModel = cls.env['test_orm.unlink.ref']
+        cls.protected = cls.env.ref('test_base.unlink_ref_protected')
+        cls.custom = cls.env.ref('test_base.unlink_ref_custom')
+
+    def test_declaration(self):
+        ref = self.registry['test_orm.unlink.ref']._ref_protected
+        self.assertIsInstance(ref, models.Ref)
+        self.assertEqual(ref.name, '_ref_protected')
+        self.assertEqual(ref.model, 'test_orm.unlink.ref')
+        self.assertEqual(ref._module, 'test_base')
+        self.assertIs(self.RefModel._refs['_ref_protected'], ref)
+        # only protecting references
+        self.assertEqual(
+            self.registry.refs_targeting['test_orm.unlink.ref'],
+            (ref, self.RefModel._refs['_ref_custom']),
+        )
+
+    def test_access(self):
+        record = self.RefModel.create({})
+        self.assertEqual(record._ref_protected, self.protected)
+        self.assertEqual(self.RefModel._ref_protected, self.protected)
+        # browsed in the environment of the recordset
+        user = self.env['res.users'].search([('id', '!=', self.env.uid)], limit=1)
+        self.assertEqual(record.with_user(user)._ref_protected.env.uid, user.id)
+        with self.assertQueryCount(0):
+            record._ref_protected
+
+    def test_access_optional(self):
+        record = self.RefModel._ref_optional
+        self.assertEqual(record, self.RefModel)
+        self.assertFalse(record.id)
+
+    @mute_logger('odoo.models')
+    def test_access_missing(self):
+        self.protected.with_context(force_delete=True).unlink()
+        with self.assertRaisesRegex(UserError, r"test_base\.unlink_ref_protected.*Update the module test_base"):
+            self.RefModel._ref_protected
+
+    def test_access_wrong_model(self):
+        self.env['ir.model.data'].create({
+            'module': 'test_base',
+            'name': 'unlink_ref_missing',
+            'model': 'test_orm.unlink',
+            'res_id': self.env['test_orm.unlink'].create({}).id,
+        })
+        with self.assertRaisesRegex(TypeError, r"references a record of model 'test_orm.unlink'"):
+            self.RefModel._ref_optional
+
+    def test_unlink_protected(self):
+        with self.assertRaisesRegex(UserError, r"You cannot delete Protected: the module test_base requires it\. Archive it instead\."):
+            self.protected.unlink()
+        with self.assertRaisesRegex(UserError, r"^Custom is precious\.$"):
+            (self.RefModel.create({'name': 'Other'}) + self.custom).unlink()
+        self.assertTrue(self.protected.exists())
+        self.assertTrue(self.custom.exists())
+
+    @mute_logger('odoo.models.unlink')
+    def test_unlink_unprotected(self):
+        other = self.RefModel.create({'name': 'Other'})
+        other.unlink()
+        self.assertFalse(other.exists())
+
+        # an optional reference does not protect its record
+        unprotected = self.env.ref('test_base.unlink_ref_unprotected')
+        self.assertEqual(self.RefModel._ref_unprotected, unprotected)
+        unprotected.unlink()
+        self.assertFalse(unprotected.exists())
+        self.assertEqual(self.RefModel._ref_unprotected, self.RefModel)
+
+    def test_unlink_cascade(self):
+        parent = self.RefModel.create({'name': 'Parent'})
+        self.protected.parent_id = parent
+        with self.assertRaisesRegex(UserError, r"^Deleting Parent would also delete Protected, which the module test_base requires\. Archive it instead\.$"):
+            parent.unlink()
+        self.assertTrue(parent.exists())
+
+    @mute_logger('odoo.models.unlink')
+    def test_unlink_force_delete(self):
+        with self.assertLogs('odoo.models', 'WARNING') as capture:
+            self.protected.with_context(force_delete=True).unlink()
+        self.assertFalse(self.protected.exists())
+        self.assertIn("required by module test_base", capture.output[0])
+
+    @mute_logger('odoo.models.unlink')
+    def test_unlink_uninstalling(self):
+        self.patch(self.registry, 'uninstalling_modules', {'test_base'})
+        self.protected.unlink()
+        self.assertFalse(self.protected.exists())
+
+    def test_xmlid_protected(self):
+        data = self.env['ir.model.data'].search([('module', '=', 'test_base'), ('name', '=', 'unlink_ref_protected')])
+        self.assertTrue(data)
+        with self.assertRaisesRegex(UserError, r"You cannot delete the External ID test_base\.unlink_ref_protected: the module test_base requires it\."):
+            data.unlink()
+        with self.assertRaisesRegex(UserError, r"You cannot modify the External ID test_base\.unlink_ref_protected"):
+            data.name = 'renamed'
+        with self.assertRaisesRegex(UserError, r"You cannot modify the External ID test_base\.unlink_ref_protected"):
+            data.res_id = self.custom.id
+        # the custom message is about the record, not its XML ID
+        data_custom = self.env['ir.model.data'].search([('module', '=', 'test_base'), ('name', '=', 'unlink_ref_custom')])
+        with self.assertRaisesRegex(UserError, r"You cannot delete the External ID test_base\.unlink_ref_custom"):
+            data_custom.unlink()
+        # writing the same values or other fields is fine
+        data.write({'name': 'unlink_ref_protected', 'noupdate': True})
+
+
+@tagged('at_install', '-post_install')
+class TestUnlinkXmlidMixin(TransactionCase):
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.Model = cls.env['test_orm.unlink.xmlid']
+        cls.record = cls.env.ref('test_base.unlink_xmlid')
+
+    def test_ref(self):
+        self.assertEqual(self.Model.ref('test_base.unlink_xmlid'), self.record)
+        # browsed in the environment of the recordset
+        user = self.env['res.users'].search([('id', '!=', self.env.uid)], limit=1)
+        self.assertEqual(self.Model.with_user(user).ref('test_base.unlink_xmlid').env.uid, user.id)
+        with self.assertQueryCount(0):
+            self.Model.ref('test_base.unlink_xmlid')
+
+    def test_ref_invalid(self):
+        with self.assertRaisesRegex(UserError, r"^The record test_base\.unlink_xmlid_missing is missing\. Update the module test_base"):
+            self.Model.ref('test_base.unlink_xmlid_missing')
+        with self.assertRaisesRegex(TypeError, r"test_base\.unlink_ref_protected is a record of model 'test_orm\.unlink\.ref'"):
+            self.Model.ref('test_base.unlink_ref_protected')
+
+    def test_unlink_protected(self):
+        with self.assertRaisesRegex(UserError, r"^You cannot delete Module Data: the module test_base defines it\. Archive it instead\.$"):
+            self.record.unlink()
+        parent = self.Model.create({'name': 'Parent'})
+        self.record.parent_id = parent
+        with self.assertRaisesRegex(UserError, r"^Deleting Parent would also delete Module Data, which the module test_base defines\. Archive it instead\.$"):
+            parent.unlink()
+        self.assertTrue(self.record.exists())
+
+    @mute_logger('odoo.models.unlink')
+    def test_unlink_unprotected(self):
+        # records without the XML ID of an installed module
+        other = self.Model.create({'name': 'Other'})
+        other.unlink()
+        self.assertFalse(other.exists())
+        self.env['ir.module.module'].create({'name': 'test_imported', 'state': 'installed', 'imported': True})
+        imported = self.Model.create({'name': 'Imported'})
+        self.env['ir.model.data'].create({
+            'module': 'test_imported', 'name': 'imported', 'model': imported._name, 'res_id': imported.id,
+        })
+        imported.unlink()
+        self.assertFalse(imported.exists())
+
+    @mute_logger('odoo.models.unlink')
+    def test_unlink_module_data(self):
+        # removed with the data of its module, without warning
+        with self.assertNoLogs('odoo.models', 'WARNING'):
+            self.record.with_context(force_delete=True).unlink()
+        self.assertFalse(self.record.exists())
+
+    @mute_logger('odoo.models.unlink')
+    def test_unlink_module_loading(self):
+        self.record.with_context(install_module='test_base').unlink()
+        self.assertFalse(self.record.exists())
+
+    @mute_logger('odoo.models.unlink')
+    def test_unlink_uninstalling(self):
+        self.patch(self.registry, 'uninstalling_modules', {'test_base'})
+        self.record.unlink()
+        self.assertFalse(self.record.exists())
+
+    def test_xmlid_protected(self):
+        data = self.env['ir.model.data'].search([('module', '=', 'test_base'), ('name', '=', 'unlink_xmlid')])
+        self.assertTrue(data)
+        with self.assertRaisesRegex(UserError, r"^You cannot delete the External ID test_base\.unlink_xmlid: the module test_base defines it\."):
+            data.unlink()
+        with self.assertRaisesRegex(UserError, r"^You cannot modify the External ID test_base\.unlink_xmlid: the module test_base defines it\.$"):
+            data.name = 'renamed'
+        data.write({'name': 'unlink_xmlid', 'noupdate': True})

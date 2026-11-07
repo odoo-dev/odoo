@@ -6,6 +6,9 @@ class ProductProduct(models.Model):
     _name = 'product.product'
     _inherit = ['product.product', 'pos.load.mixin']
 
+    _service_fee_product = models.Ref('point_of_sale.product_product_service_fee', required=False)
+    _tip_product = models.Ref('point_of_sale.product_product_tip', required=False)
+
     @api.model
     def create(self, vals_list):
         new_product = super().create(vals_list)

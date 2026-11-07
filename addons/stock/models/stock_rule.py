@@ -636,7 +636,7 @@ class StockRule(models.Model):
         # If the method is called to find rules towards the Inter-company location, also add the 'Customer' location in the domain.
         # This is to avoid having to duplicate every rules that deliver to Customer to have the Inter-company part.
         if self._check_intercomp_location(locations):
-            location_ids.append(self.env.ref('stock.stock_location_customers', raise_if_not_found=False).id)
+            location_ids.extend(self.env['stock.location']._location_customers.ids)
         domain = Domain('location_dest_id', 'in', location_ids) & Domain('action', '!=', 'push')
         # In case the method is called by the superuser, we need to restrict the rules to the
         # ones of the company. This is not useful as a regular user since there is a record

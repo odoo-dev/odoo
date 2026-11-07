@@ -60,6 +60,7 @@ class TestPyLint(LintCase):
                 'gettext-placeholders',
                 'gettext-repr',
                 'raise-unlink-override',
+                'ref-optional-dereference',
             ]),
             '--reports=n',
             "--msg-template='{msg} ({msg_id}) at {path}:{line}'",
@@ -69,6 +70,7 @@ class TestPyLint(LintCase):
                 "_odoo_checker_sql_injection",
                 "_odoo_checker_gettext",
                 "_odoo_checker_unlink_override",
+                "_odoo_checker_ref",
             ]),
             '--bad-functions=input',
             '--deprecated-modules=' + ','.join([

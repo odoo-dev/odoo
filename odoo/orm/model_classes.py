@@ -200,6 +200,7 @@ def add_to_registry(registry: Registry, model_def: type[BaseModel]) -> type[Base
             '_fields__': {},                        # populated in _setup()
             '_fields_update_order__': {},           # populated in _post_model_setup__()
             '_table_objects': frozendict(),         # populated in _setup()
+            '_refs': frozendict(),                  # populated in _setup()
         })
         model_cls._fields = MappingProxyType(model_cls._fields__)
 
@@ -491,6 +492,15 @@ def _setup(model_cls: type[BaseModel], env: Environment):
         for cls in reversed(model_cls._model_classes__)
         if isinstance(cls, models.MetaModel)
         for cons in cls._table_object_definitions
+    })
+
+    # 8. determine record references
+    assert not model_cls._ref_definitions, "model_cls is a registry model"
+    model_cls._refs = frozendict({
+        ref.name: ref
+        for cls in reversed(model_cls._model_classes__)
+        if isinstance(cls, models.MetaModel)
+        for ref in cls._ref_definitions
     })
 
 

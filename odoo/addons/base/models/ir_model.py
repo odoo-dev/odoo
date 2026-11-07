@@ -223,6 +223,36 @@ class Unknown(models.AbstractModel):
     _description = 'Unknown'
 
 
+class XmlidMixin(models.AbstractModel):
+    """ Mixin for the models of master data defined by modules (views, actions,
+    groups, countries, currencies...).  The code gets their records with
+    :meth:`ref`, without declaring a :class:`~odoo.models.Ref`, and their
+    records that have the XML ID of an installed module cannot be deleted,
+    nor their XML ID modified, as long as that module is installed.
+    """
+    _name = 'xmlid.mixin'
+    _description = "Master data defined by modules"
+
+    @api.model
+    def ref(self, xmlid: str) -> typing.Self:
+        """ Return the record with the given XML ID, browsed in the environment
+        of ``self``.
+
+        :param xmlid: the XML ID of the record, as ``'module.name'``
+        :raise UserError: if the record is missing
+        :raise TypeError: if the record belongs to another model
+        """
+        res_model, res_id = self.env['ir.model.data']._xmlid_to_res_model_res_id(xmlid)
+        if not res_id:
+            raise UserError(self.env._(
+                "The record %(xmlid)s is missing. Update the module %(module)s to restore it.",
+                xmlid=xmlid, module=xmlid.partition('.')[0],
+            ))
+        if res_model != self._name:
+            raise TypeError(f"{xmlid} is a record of model {res_model!r}, not {self._name!r}")
+        return self.browse(res_id)
+
+
 class IrModel(models.Model):
     _name = 'ir.model'
     _description = "Model"
@@ -2420,11 +2450,46 @@ class IrModelData(models.Model):
         return res
 
     def write(self, vals):
+        self._check_ref_protection_write(vals)
         self.env.transaction.invalidate_ormcache()  # _xmlid_lookup
         res = super().write(vals)
         if vals.get('model') == 'res.groups' and any(self._ids):
             self.env.transaction.invalidate_ormcache('groups')
         return res
+
+    def _check_ref_protection_write(self, vals):
+        """ Refuse to change the XML ID or the target of a record required by a
+        :class:`~odoo.models.Ref`, or of a record of a model inheriting
+        ``xmlid.mixin`` defined by an installed module. """
+        fnames = [fname for fname in ('module', 'name', 'model', 'res_id') if fname in vals]
+        if not fnames or self.env.context.get('force_delete'):
+            return
+        refs_by_xmlid = self.pool.refs_by_xmlid
+        uninstalling = self.pool.uninstalling_modules
+        changed = self.sudo().filtered(lambda data: any(data[fname] != vals[fname] for fname in fnames))
+        for data in changed:
+            for ref in refs_by_xmlid.get(f"{data.module}.{data.name}", ()):
+                if ref._module not in uninstalling:
+                    raise UserError(_(
+                        "You cannot modify the External ID %(xmlid)s: the module %(module)s requires it.",
+                        xmlid=ref.xmlid, module=ref._module,
+                    ))
+        excluded = {*uninstalling, self.env.context.get('install_module')}
+        mixin = self.pool['xmlid.mixin']
+        module_data = changed.filtered(lambda data: (
+            data.module not in excluded and data.model in self.pool and issubclass(self.pool[data.model], mixin)
+        ))
+        if module_data:
+            installed = {name for [name] in self.env.execute_query(SQL(
+                "SELECT name FROM ir_module_module WHERE name IN %s AND state IN ('installed', 'to upgrade') AND imported IS NOT TRUE",
+                tuple(set(module_data.mapped('module'))),
+            ))}
+            for data in module_data:
+                if data.module in installed:
+                    raise UserError(_(
+                        "You cannot modify the External ID %(xmlid)s: the module %(module)s defines it.",
+                        xmlid=data.complete_name, module=data.module,
+                    ))
 
     @api.ondelete(at_uninstall=True)
     def _delete_clear_groups_hook(self):

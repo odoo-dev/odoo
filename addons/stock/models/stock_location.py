@@ -20,6 +20,8 @@ class StockLocation(models.Model):
     _check_company_auto = True
     _check_company_domain = models.check_company_domain_parent_of
 
+    _location_customers = models.Ref('stock.stock_location_customers', required=False)
+
     @api.model
     def default_get(self, fields):
         res = super().default_get(fields)

@@ -285,7 +285,8 @@ form: module.record_id""" % (xml_id,)
                 _logger.warning('Skipping deletion for missing XML ID `%r`', d_id, exc_info=True)
 
         if records:
-            records.unlink()
+            # a module may delete its own records protected by implicit references
+            records.with_context(install_module=self.module).unlink()
 
     def _tag_function(self, rec):
         if self.noupdate and self.mode != 'init':
