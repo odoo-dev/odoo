@@ -92,6 +92,7 @@ class IrCron(models.Model):
     # loaded yet or was already unloaded (e.g. 'force_db_wakeup' or something)
     # See also odoo.cron
     _name = 'ir.cron'
+    _inherit = ['xmlid.mixin']
     _order = 'cron_name, id'
     _description = 'Scheduled Action'
     _allow_sudo_commands = False

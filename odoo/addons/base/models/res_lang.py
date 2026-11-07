@@ -82,6 +82,7 @@ class LangDataDict(Mapping):
 
 class ResLang(models.CachedModel):
     _name = 'res.lang'
+    _inherit = ['xmlid.mixin']
     _description = "Language"
     _order = "active desc,name"
     _allow_sudo_commands = False

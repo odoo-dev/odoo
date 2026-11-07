@@ -3,6 +3,7 @@ from odoo import fields, models
 
 class ResGroupsPrivilege(models.Model):
     _name = 'res.groups.privilege'
+    _inherit = ['xmlid.mixin']
     _description = "Privilege"
     _order = 'sequence, name, id'
 

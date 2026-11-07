@@ -45,6 +45,7 @@ AGGREGATION_ENGINE_FORMULA_REGEX = re.compile(
 
 class AccountReport(models.Model):
     _name = 'account.report'
+    _inherit = ['xmlid.mixin']
     _description = "Accounting Report"
     _order = 'sequence, id'
 
@@ -404,6 +405,7 @@ class AccountReport(models.Model):
 
 class AccountReportLine(models.Model):
     _name = 'account.report.line'
+    _inherit = ['xmlid.mixin']
     _description = "Accounting Report Line"
     _order = 'sequence, id'
 
@@ -653,6 +655,7 @@ class AccountReportLine(models.Model):
 
 class AccountReportExpression(models.Model):
     _name = 'account.report.expression'
+    _inherit = ['xmlid.mixin']
     _description = "Accounting Report Expression"
     _rec_name = 'report_line_name'
 
@@ -1028,6 +1031,7 @@ class AccountReportExpression(models.Model):
 
 class AccountReportColumn(models.Model):
     _name = 'account.report.column'
+    _inherit = ['xmlid.mixin']
     _description = "Accounting Report Column"
     _order = 'sequence, id'
 

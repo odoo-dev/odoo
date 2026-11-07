@@ -4,6 +4,7 @@ from odoo import fields, models, api
 
 class L10n_LatamDocumentType(models.Model):
     _name = 'l10n_latam.document.type'
+    _inherit = ['xmlid.mixin']
 
     _description = 'Latam Document Type'
     _order = 'sequence, id'

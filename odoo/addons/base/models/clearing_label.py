@@ -3,6 +3,7 @@ from odoo import api, fields, models
 
 class ClearingLabel(models.Model):
     _name = 'clearing.label'
+    _inherit = ['xmlid.mixin']
     _description = 'Bank Account Clearing Number Label'
     _order = 'country_id NULLS FIRST'
     _rec_names_search = ('name', 'country_id')

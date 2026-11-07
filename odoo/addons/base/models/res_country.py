@@ -46,6 +46,7 @@ SEPA_COUNTRIES = [
 
 class ResCountry(models.CachedModel):
     _name = 'res.country'
+    _inherit = ['xmlid.mixin']
     _description = 'Country'
     _explanation = "Represents a nation or territory. Used for addressing, tax rules (fiscal positions), and localization settings."
     _order = 'name, id'
@@ -191,6 +192,7 @@ class ResCountry(models.CachedModel):
 
 class ResCountryGroup(models.Model):
     _name = 'res.country.group'
+    _inherit = ['xmlid.mixin']
     _description = "Country Group"
 
     name = fields.Char(required=True, translate=True)
@@ -218,6 +220,7 @@ class ResCountryGroup(models.Model):
 
 class ResCountryState(models.Model):
     _name = 'res.country.state'
+    _inherit = ['xmlid.mixin']
     _description = "Country state"
     _explanation = "Represents a sub-division of a country, such as a state, province, or region."
     _order = 'code, id'

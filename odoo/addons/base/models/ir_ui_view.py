@@ -145,6 +145,7 @@ WRONGCLASS = re.compile(r"(@class\s*=|=\s*@class|contains\(@class)")
 
 class IrUiView(models.Model):
     _name = 'ir.ui.view'
+    _inherit = ['xmlid.mixin']
     _description = 'View'
     _order = "priority,name,id"
     _parent_name = 'inherit_id'

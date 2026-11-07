@@ -13,6 +13,7 @@ class MailActivityType(models.Model):
     available for all models using activities; or specific to a model in which
     case res_model field should be used. """
     _name = 'mail.activity.type'
+    _inherit = ['xmlid.mixin']
     _description = 'Activity Type'
     _order = 'sequence, id'
     _rec_name = 'name'

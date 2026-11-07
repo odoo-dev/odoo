@@ -8,6 +8,7 @@ from odoo.exceptions import ValidationError
 
 class OnboardingOnboardingStep(models.Model):
     _name = 'onboarding.onboarding.step'
+    _inherit = ['xmlid.mixin']
     _description = 'Onboarding Step'
     _order = 'sequence asc, id asc'
     _rec_name = 'title'

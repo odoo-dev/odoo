@@ -36,7 +36,7 @@ _logger = logging.getLogger(__name__)
 class IrActionsReport(models.Model):
     _name = 'ir.actions.report'
     _description = 'Report Action'
-    _inherit = ['ir.actions.actions']
+    _inherit = ['ir.actions.actions', 'xmlid.mixin']
     _table = 'ir_act_report_xml'
     _order = 'name, id'
     _allow_sudo_commands = False

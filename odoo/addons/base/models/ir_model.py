@@ -255,6 +255,7 @@ class XmlidMixin(models.AbstractModel):
 
 class IrModel(models.Model):
     _name = 'ir.model'
+    _inherit = ['xmlid.mixin']
     _description = "Model"
     _order = 'model'
     _rec_names_search = ('name', 'model')
@@ -618,6 +619,7 @@ FIELD_INDEX_TYPES = [
 
 class IrModelFields(models.Model):
     _name = 'ir.model.fields'
+    _inherit = ['xmlid.mixin']
     _description = "Field"
     _order = "name, id"
     _rec_name = 'field_description'
@@ -1775,6 +1777,7 @@ class IrModelInherit(models.Model):
 
 class IrModelFieldsSelection(models.Model):
     _name = 'ir.model.fields.selection'
+    _inherit = ['xmlid.mixin']
     _order = 'sequence, id'
     _description = "Fields Selection"
     _allow_sudo_commands = False

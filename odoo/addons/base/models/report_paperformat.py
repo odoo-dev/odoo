@@ -164,6 +164,7 @@ PAPER_SIZES = [
 
 class ReportPaperformat(models.Model):
     _name = 'report.paperformat'
+    _inherit = ['xmlid.mixin']
     _description = "Paper Format Config"
 
     name = fields.Char('Name', required=True)

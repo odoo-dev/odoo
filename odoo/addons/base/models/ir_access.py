@@ -64,6 +64,7 @@ class AccessInfo(typing.NamedTuple):
 class IrAccess(models.Model):
     """ Access control records with domains. """
     _name = 'ir.access'
+    _inherit = ['xmlid.mixin']
     _description = "Access"
     _order = 'model_id, group_id, id'
     _allow_sudo_commands = False

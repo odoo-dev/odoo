@@ -6,6 +6,7 @@ from odoo.fields import Domain
 
 class AccountPaymentMethod(models.Model):
     _name = 'account.payment.method'
+    _inherit = ['xmlid.mixin']
     _description = "Payment Method"
 
     name = fields.Char(required=True, translate=True)

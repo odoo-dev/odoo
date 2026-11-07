@@ -8,6 +8,7 @@ class MailMessageSubtype(models.Model):
         the follower subscription, allowing only some subtypes to be pushed
         on the Wall. """
     _name = 'mail.message.subtype'
+    _inherit = ['xmlid.mixin']
     _description = 'Message Subtype'
     _order = 'sequence, id'
     _clear_cache_name = 'default'  # _get_auto_subscription_subtypes

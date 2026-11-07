@@ -246,7 +246,7 @@ class IrActionsAct_Window(models.Model):
     _name = 'ir.actions.act_window'
     _description = 'Action Window'
     _table = 'ir_act_window'
-    _inherit = ['ir.actions.actions']
+    _inherit = ['ir.actions.actions', 'xmlid.mixin']
     _order = 'name, id'
     _allow_sudo_commands = False
 
@@ -435,7 +435,7 @@ class IrActionsAct_Url(models.Model):
     _name = 'ir.actions.act_url'
     _description = 'Action URL'
     _table = 'ir_act_url'
-    _inherit = ['ir.actions.actions']
+    _inherit = ['ir.actions.actions', 'xmlid.mixin']
     _order = 'name, id'
     _allow_sudo_commands = False
 
@@ -575,7 +575,7 @@ class IrActionsServer(models.Model):
     _name = 'ir.actions.server'
     _description = 'Server Action'
     _table = 'ir_act_server'
-    _inherit = ['ir.actions.actions']
+    _inherit = ['ir.actions.actions', 'xmlid.mixin']
     _order = 'sequence,name,id'
     _allow_sudo_commands = False
 
@@ -1396,6 +1396,7 @@ class IrActionsTodo(models.Model):
     Configuration Wizards
     """
     _name = 'ir.actions.todo'
+    _inherit = ['xmlid.mixin']
     _description = "Configuration Wizard"
     _rec_name = 'action_id'
     _order = "sequence, id"
@@ -1473,7 +1474,7 @@ class IrActionsTodo(models.Model):
 class IrActionsClient(models.Model):
     _name = 'ir.actions.client'
     _description = 'Client Action'
-    _inherit = ['ir.actions.actions']
+    _inherit = ['ir.actions.actions', 'xmlid.mixin']
     _table = 'ir_act_client'
     _order = 'name, id'
     _allow_sudo_commands = False

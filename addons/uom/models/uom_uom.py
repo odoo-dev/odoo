@@ -16,6 +16,7 @@ if TYPE_CHECKING:
 
 class UomUom(models.Model):
     _name = 'uom.uom'
+    _inherit = ['xmlid.mixin']
     _description = 'Product Unit of Measure'
     _parent_name = 'relative_uom_id'
     _parent_store = True

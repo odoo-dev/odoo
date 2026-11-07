@@ -13,6 +13,7 @@ REGULAR_VALUE = object()
 
 class ResGroups(models.Model):
     _name = 'res.groups'
+    _inherit = ['xmlid.mixin']
     _description = "Access Groups"
     _rec_name = 'full_name'
     _allow_sudo_commands = False

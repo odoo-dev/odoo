@@ -79,6 +79,7 @@ def assert_log_admin_access[T](method: T, /) -> T:
 
 class IrModuleCategory(models.Model):
     _name = 'ir.module.category'
+    _inherit = ['xmlid.mixin']
     _description = "Application"
     _order = 'sequence, name, id'
     _allow_sudo_commands = False
@@ -160,6 +161,7 @@ XML_DECLARATION = (
 
 class IrModuleModule(models.Model):
     _name = 'ir.module.module'
+    _inherit = ['xmlid.mixin']
     _rec_name = "shortdesc"
     _rec_names_search = ('name', 'shortdesc', 'summary')
     _description = "Module"

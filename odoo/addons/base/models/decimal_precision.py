@@ -8,6 +8,7 @@ _logger = logging.getLogger(__name__)
 
 class DecimalPrecision(models.Model):
     _name = 'decimal.precision'
+    _inherit = ['xmlid.mixin']
     _description = 'Decimal Precision'
     _clear_cache_name = 'stable'
 
