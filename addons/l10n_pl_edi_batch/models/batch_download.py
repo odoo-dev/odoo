@@ -380,7 +380,7 @@ class BatchDownload(models.Model):
                     for ksef_number in (ksef_numbers - existing_ksef_numbers):
 
                         # create the move and the attachment
-                        move = AccountMove.create([{'move_type': 'in_invoice'}])
+                        move = AccountMove.create([{'move_type': 'in_invoice', 'l10n_pl_edi_number': ksef_number}])
                         attachment = self.env['ir.attachment'].create({
                             'name': ksef_number,
                             'mimetype': 'application/xml',
@@ -403,7 +403,6 @@ class BatchDownload(models.Model):
                                 'res_field': 'l10n_pl_edi_attachment_file',
                             })
                             move.write({
-                                'l10n_pl_edi_number': ksef_number,
                                 'l10n_pl_edi_status': 'fetched',
                                 'l10n_pl_edi_attachment_id': attachment.id,
                             })
