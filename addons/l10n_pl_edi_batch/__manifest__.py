@@ -11,6 +11,7 @@ Opt-in: enable "KSeF batch download" in the Accounting settings.
 """,
     'data': [
         'security/ir.model.access.csv',
+        'security/ir_rule.xml',
         'data/ir_cron_data.xml',
         'views/l10n_pl_edi_batch_views.xml',
         'views/res_config_settings_views.xml',
