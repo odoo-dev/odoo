@@ -40,11 +40,17 @@ class ResetMicrosoftAccount(models.TransientModel):
         if self.sync_policy == 'all':
             events.with_context(dont_notify=True).update({
                 'microsoft_id': False,
+                'ms_universal_event_id': False,
                 'need_sync_m': True,
             })
 
         if self.delete_policy in ('delete_odoo', 'delete_both'):
-            events.with_context(dont_notify=True).microsoft_id = False
+            # Without its universal id, unlink() no longer treats the event as synced
+            # and does not request its deletion from Outlook.
+            events.with_context(dont_notify=True).write({
+                'microsoft_id': False,
+                'ms_universal_event_id': False,
+            })
             events.unlink()
 
         # We commit to make sure the _microsoft_delete are called when we still have a token on the user.
