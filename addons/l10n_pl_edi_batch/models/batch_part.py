@@ -9,6 +9,7 @@ from cryptography.exceptions import InvalidKey, InvalidSignature, UnsupportedAlg
 
 from odoo import api, fields, models
 from odoo.exceptions import UserError
+from odoo.addons.l10n_pl_edi.tools.ksef_api_service import TIMEOUT
 from odoo.addons.l10n_pl_edi_batch.tools.ksef_api_service import KsefApiServiceBatch as Service
 
 _logger = logging.getLogger(__name__)
@@ -73,7 +74,7 @@ class BatchDownloadPart(models.Model):
         for record in self:
             with tempfile.NamedTemporaryFile(mode='w+b') as tmpf:
                 try:
-                    response = requests.request(record.download_method, record.download_url, stream=True)
+                    response = requests.request(record.download_method, record.download_url, stream=True, timeout=TIMEOUT)
                     _logger.debug("KSeF part download %s %s %s", record.download_method, record.download_url, response.status_code)
                     response.raise_for_status()
                     for decrypted_chunk in record._decrypt_stream(response):
@@ -87,4 +88,4 @@ class BatchDownloadPart(models.Model):
                 tmpf.seek(0)
                 content = tmpf.read()
             record._store_decrypted_file(content)
-            _logger.info("KSeF Batch part %s downloaded succesfully", record.part_name)
+            _logger.info("KSeF Batch part %s downloaded successfully", record.part_name)
