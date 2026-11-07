@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="unlink_ref_protected" model="test_orm.unlink.ref">
+        <field name="name">Protected</field>
+    </record>
+    <record id="unlink_ref_custom" model="test_orm.unlink.ref">
+        <field name="name">Custom</field>
+    </record>
+    <record id="unlink_ref_unprotected" model="test_orm.unlink.ref">
+        <field name="name">Unprotected</field>
+    </record>
+</odoo>

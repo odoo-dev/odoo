@@ -91,6 +91,38 @@ class TestGetTextLint(TestPylintChecks):
         self.assertEqual(errs[0]['line'], 2, errs)
 
 
+@unittest.skipUnless(pylint and pylint_bin, "testing lints requires pylint")
+class TestRefLint(TestPylintChecks):
+    def check(self, testtext):
+        return super().check(testtext, "_odoo_checker_ref", "ref-optional-dereference")
+
+    def test_optional_dereference(self):
+        r, errs = self.check("""
+        def method(self):
+            return self.env.ref('base.EUR', raise_if_not_found=False).id
+        """)
+        self.assertTrue(r, "should have raised on keyword raise_if_not_found=False")
+        self.assertEqual(errs[0]['line'], 2, errs)
+
+        r, errs = self.check("""
+        def method(self):
+            return self.env.ref('base.EUR', False).sudo()
+        """)
+        self.assertTrue(r, "should have raised on positional raise_if_not_found=False")
+
+    def test_optional_checked(self):
+        r, errs = self.check("""
+        def method(self):
+            currency = self.env.ref('base.EUR', raise_if_not_found=False)
+            a = currency and currency.id
+            b = (self.env.ref('base.USD', False) or self.env['res.currency']).id
+            c = self.env.ref('base.CHF').id
+            d = self.env.ref('base.GBP', raise_if_not_found=True).id
+            return a, b, c, d
+        """)
+        self.assertFalse(r, errs)
+
+
 class TestSqlLint(LintCase):
     def setUp(self):
         super().setUp()

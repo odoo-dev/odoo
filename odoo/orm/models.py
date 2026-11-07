@@ -74,6 +74,7 @@ if typing.TYPE_CHECKING:
     from collections.abc import Collection, Iterator, Reversible, Sequence
     from types import MappingProxyType
     from typing import Self
+    from .refs import Ref
     from .table_objects import TableObject
     from .environments import Environment
     from .registry import Registry, TriggerTree
@@ -235,6 +236,7 @@ class MetaModel(type):
 
     _field_definitions: list[Field]
     _table_object_definitions: list[TableObject]
+    _ref_definitions: list[Ref]
     _name: str
     _register: bool  # need to define on each Model, default: True
     _log_access: bool  # when defined, add update log columns
@@ -250,6 +252,8 @@ class MetaModel(type):
         attrs.setdefault('_field_definitions', [])
         # this collects the table object definitions on the class (via TableObject.__set_name__())
         attrs.setdefault('_table_object_definitions', [])
+        # this collects the record references on the class (via Ref.__set_name__())
+        attrs.setdefault('_ref_definitions', [])
 
         if attrs.get('_register', True):
             # determine '_module'
@@ -462,6 +466,7 @@ class BaseModel(metaclass=MetaModel):
     _check_inherits_access: bool = True           #: check access for _inherits models
     _table: str = ''                 #: SQL table name used by model if :attr:`_auto`
     _table_objects: dict[str, TableObject] = frozendict()  #: SQL/Table objects
+    _refs: dict[str, Ref] = frozendict()  #: record references, see :class:`~odoo.models.Ref`
     _inherit_children: OrderedSet[str]
 
     _rec_name: str = ''                           #: field to use for labeling records, default: ``name``
@@ -3680,6 +3685,10 @@ class BaseModel(metaclass=MetaModel):
                         assert callable(post_delete), f"ondelete {func} should return a Callable or None"
                         post_delete_hooks.append(post_delete)
 
+        # refuse to delete records protected by a models.Ref, once the ondelete
+        # methods had a chance to refuse it with a more specific message
+        self._check_ref_protection(all_deleted_records)
+
         # ensure that many2one fields are up to date before deletion
         for records in all_deleted_records:
             targeting_fields = many2one_targeting.get(records._name, ())
@@ -3767,6 +3776,89 @@ class BaseModel(metaclass=MetaModel):
         _unlink.info(msg, *args)
 
         return True
+
+    @typing.final
+    def _check_ref_protection(self, all_deleted_records: Iterable[BaseModel]) -> None:
+        """ Refuse to delete records that are protected by a :class:`~odoo.models.Ref`,
+        or the XML IDs of those records.
+
+        ``self`` are the records explicitly deleted, and ``all_deleted_records``
+        all the records deleted with them, including ``self``.  The check is
+        skipped for references declared by modules being uninstalled.  Module
+        data removal (``force_delete`` in context) is never refused, but logs a
+        warning, since the declaring module will then break.
+        """
+        targeting = self.pool.refs_targeting
+        if not targeting:
+            return
+        uninstalling = self.pool.uninstalling_modules
+        lookup = self.env['ir.model.data']._xmlid_to_res_model_res_id
+        deleted_ids = {records._name: records._ids for records in all_deleted_records}
+        violations: list[tuple[BaseModel, Ref]] = []
+
+        for records in all_deleted_records:
+            for ref in targeting.get(records._name, ()):
+                if ref._module in uninstalling:
+                    continue
+                res_model, res_id = lookup(ref.xmlid)
+                if res_model == records._name and res_id in records._ids:
+                    violations.append((records.browse(res_id), ref))
+
+        # the XML IDs of required records are protected too, unless their
+        # record is deleted with them
+        if data_ids := deleted_ids.get('ir.model.data'):
+            refs_by_xmlid = self.pool.refs_by_xmlid
+            for data in self.env['ir.model.data'].sudo().browse(data_ids):
+                for ref in refs_by_xmlid.get(f"{data.module}.{data.name}", ()):
+                    if (
+                        ref._module not in uninstalling
+                        and data.res_id not in deleted_ids.get(data.model, ())
+                    ):
+                        violations.append((data, ref))
+
+        if not violations:
+            return
+
+        if self.env.context.get('force_delete'):
+            for record, ref in violations:
+                _logger.warning(
+                    "Module data removal deletes %s, required by module %s via %s",
+                    record, ref._module, ref,
+                )
+            return
+
+        raise UserError(self._ref_protection_message(*violations[0]))
+
+    def _ref_protection_message(self, record: BaseModel, ref: Ref) -> str:
+        """ Return the message explaining why deleting ``self`` is refused,
+        because it would delete ``record``, which is required by ``ref``.
+        """
+        if record._name == ref.model and (message := ref.get_error_message(record)):
+            return message
+        env = self.env
+        record_name = record.sudo().display_name
+        if record._name == 'ir.model.data':
+            message = env._(
+                "You cannot delete the External ID %(xmlid)s: the module %(module)s requires it.",
+                xmlid=ref.xmlid, module=ref._module,
+            )
+        elif record._name == self._name and record.id in self._ids:
+            message = env._(
+                "You cannot delete %(record)s: the module %(module)s requires it.",
+                record=record_name, module=ref._module,
+            )
+        else:
+            deleted = self[:3].sudo()
+            deleted_names = format_list(env, deleted.mapped('display_name'))
+            if len(self) > len(deleted):
+                deleted_names = env._("%(names)s and %(count)s more", names=deleted_names, count=len(self) - len(deleted))
+            message = env._(
+                "Deleting %(deleted)s would also delete %(record)s, which the module %(module)s requires.",
+                deleted=deleted_names, record=record_name, module=ref._module,
+            )
+        if self._active_name:
+            message += " " + env._("Archive it instead.")
+        return message
 
     def _delete_extra(self) -> Iterator[BaseModel]:
         """ Return records that must also be deleted whenever ``self`` is deleted.

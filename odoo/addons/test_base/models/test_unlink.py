@@ -1,6 +1,9 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, models
+from odoo.tools.translate import LazyTranslate
+
+_lt = LazyTranslate(__name__)
 
 
 class Test_OrmUnlink(models.Model):
@@ -61,3 +64,17 @@ class Test_OrmUnlinkNull(models.Model):
     def _compute_cascade_count(self):
         for rec in self:
             rec.cascade_count = len(rec.cascade_ids)
+
+
+class Test_OrmUnlinkRef(models.Model):
+    _name = 'test_orm.unlink.ref'
+    _description = 'Test Unlink protected by models.Ref'
+
+    name = fields.Char()
+    active = fields.Boolean(default=True)
+    parent_id = fields.Many2one('test_orm.unlink.ref', ondelete='cascade')
+
+    _ref_protected = models.Ref('test_base.unlink_ref_protected', 'test_orm.unlink.ref')
+    _ref_custom = models.Ref('test_base.unlink_ref_custom', 'test_orm.unlink.ref', message=_lt("%(name)s is precious."))
+    _ref_optional = models.Ref('test_base.unlink_ref_missing', 'test_orm.unlink.ref', required=False)
+    _ref_unprotected = models.Ref('test_base.unlink_ref_unprotected', 'test_orm.unlink.ref', required=False)

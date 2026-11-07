@@ -7,6 +7,8 @@ from odoo.fields import Domain
 class StockReplenishMixin(models.AbstractModel):
     _inherit = 'stock.replenish.mixin'
 
+    _route_drop_shipping = models.Ref('stock_dropshipping.route_drop_shipping', 'stock.route', required=False)
+
     def _get_allowed_route_domain(self):
         domains = super()._get_allowed_route_domain()
-        return Domain.AND([domains, [('id', '!=', self.env.ref('stock_dropshipping.route_drop_shipping', raise_if_not_found=False).id)]])
+        return Domain.AND([domains, [('id', '!=', self._route_drop_shipping.id)]])

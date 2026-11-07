@@ -23,6 +23,9 @@ class PosConfig(models.Model):
     _name = 'pos.config'
     _inherit = ['pos.bus.mixin', 'pos.load.mixin']
     _description = 'Point of Sale Configuration'
+
+    _service_fee_product = models.Ref('point_of_sale.product_product_service_fee', 'product.product', required=False)
+    _tip_product = models.Ref('point_of_sale.product_product_tip', 'product.product', required=False)
     _check_company_auto = True
 
     def _default_sale_journal(self):
@@ -708,8 +711,8 @@ class PosConfig(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        service_fee_product = self.env.ref('point_of_sale.product_product_service_fee', raise_if_not_found=False).product_tmpl_id
-        if not service_fee_product.active:
+        service_fee_product = self._service_fee_product.product_tmpl_id
+        if service_fee_product and not service_fee_product.active:
             service_fee_product.active = True
         for vals in vals_list:
             if not vals.get('iface_tipproduct', False):
@@ -795,8 +798,8 @@ class PosConfig(models.Model):
             vals['tip_product_id'] = False
             vals['set_tip_after_payment'] = False
         else:
-            product = self.env.ref('point_of_sale.product_product_tip', raise_if_not_found=False).product_tmpl_id
-            if vals.get('iface_tipproduct') and not product.active:
+            product = self._tip_product.product_tmpl_id
+            if vals.get('iface_tipproduct') and product and not product.active:
                 product.active = True
             if 'tip_product_id' not in vals \
                     and not all(config.tip_product_id for config in self) \

@@ -44,6 +44,7 @@ if typing.TYPE_CHECKING:
     from odoo.models import BaseModel
     from odoo.sql_db import BaseCursor, Connection, Cursor
     from odoo.modules import module_graph
+    from .refs import Ref
 
 
 _logger = logging.getLogger('odoo.registry')
@@ -654,6 +655,37 @@ class Registry(Mapping[str, type["BaseModel"]]):
         return {
             model_name: tuple(fields) for model_name, fields in result.items()
         }
+
+    @functools.cached_property
+    def refs_targeting(self) -> dict[str, tuple[Ref, ...]]:
+        """ Maps each model name to the protecting references (see
+        :class:`~odoo.models.Ref`) targeting records of that model.
+
+        The map is derived from code only, references declared by uninstalling
+        modules must be filtered out by the caller.
+        """
+        result = defaultdict(dict)
+        for Model in self.models.values():
+            for ref in Model._refs.values():
+                if ref.required:
+                    # the same declaration is inherited by many models, and
+                    # a module may declare a record on several models
+                    key = (ref.xmlid, ref._module)
+                    refs = result[ref.model]
+                    if key not in refs or (ref.message and not refs[key].message):
+                        refs[key] = ref
+        return {
+            model_name: tuple(refs.values()) for model_name, refs in result.items()
+        }
+
+    @functools.cached_property
+    def refs_by_xmlid(self) -> dict[str, tuple[Ref, ...]]:
+        """ Maps each XML ID to the protecting references targeting it. """
+        result = defaultdict(list)
+        for refs in self.refs_targeting.values():
+            for ref in refs:
+                result[ref.xmlid].append(ref)
+        return {xmlid: tuple(refs) for xmlid, refs in result.items()}
 
     @functools.cached_property
     def field_computed(self) -> dict[Field, list[Field]]:

@@ -2420,11 +2420,29 @@ class IrModelData(models.Model):
         return res
 
     def write(self, vals):
+        self._check_ref_protection_write(vals)
         self.env.transaction.invalidate_ormcache()  # _xmlid_lookup
         res = super().write(vals)
         if vals.get('model') == 'res.groups' and any(self._ids):
             self.env.transaction.invalidate_ormcache('groups')
         return res
+
+    def _check_ref_protection_write(self, vals):
+        """ Refuse to change the XML ID or the target of a record required by a
+        :class:`~odoo.models.Ref`. """
+        refs_by_xmlid = self.pool.refs_by_xmlid
+        fnames = [fname for fname in ('module', 'name', 'model', 'res_id') if fname in vals]
+        if not (refs_by_xmlid and fnames) or self.env.context.get('force_delete'):
+            return
+        uninstalling = self.pool.uninstalling_modules
+        for data in self.sudo():
+            if any(data[fname] != vals[fname] for fname in fnames):
+                for ref in refs_by_xmlid.get(f"{data.module}.{data.name}", ()):
+                    if ref._module not in uninstalling:
+                        raise UserError(_(
+                            "You cannot modify the External ID %(xmlid)s: the module %(module)s requires it.",
+                            xmlid=ref.xmlid, module=ref._module,
+                        ))
 
     @api.ondelete(at_uninstall=True)
     def _delete_clear_groups_hook(self):
