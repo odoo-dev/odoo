@@ -268,11 +268,11 @@ class BatchDownload(models.Model):
             period_has_fetched_invoices = self.env['account.move'].search([
                 ('company_id', '=', company.id),
                 ('move_type', '=', 'in_invoice'),
-                ('date', '>=', date_from),
-                ('date', '<', date_to),
+                ('invoice_date', '>=', date_from),
+                ('invoice_date', '<', date_to),
                 ('l10n_pl_edi_number', '!=', False),
                 ('l10n_pl_edi_status', '=', 'fetched'),
-            ])
+            ], limit=1)
 
             # Download invoices for this period
             self._create_batch_download(company, date_from, date_to)
