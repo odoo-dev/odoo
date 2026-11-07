@@ -11,9 +11,7 @@ from odoo.exceptions import UserError
 from odoo.tools import str2bool
 
 from odoo.addons.l10n_pl_edi.exceptions import KSeFRateLimitError
-from odoo.addons.l10n_pl_edi_batch.tools.ksef_api_service import (
-    KsefApiServiceBatch as Service,
-)
+from odoo.addons.l10n_pl_edi_batch.tools.ksef_api_service import KsefApiServiceBatch as Service
 
 _logger = logging.getLogger(__name__)
 
@@ -109,9 +107,9 @@ class BatchDownload(models.Model):
         self.ensure_one()
         if self.is_expired or code not in (KSEF_IN_PROGRESS, KSEF_READY):
             return 'failed'
-        if code == KSEF_IN_PROGRESS:
+        elif code == KSEF_IN_PROGRESS:
             return 'requested'
-        if code == KSEF_READY and self.part_ids:
+        elif code == KSEF_READY and self.part_ids:
             parts_missing = self.part_ids.filtered(lambda part: not part.with_context(bin_size=True).decrypted_file)
             return 'downloading' if parts_missing else 'downloaded'
         return 'done'
@@ -210,17 +208,23 @@ class BatchDownload(models.Model):
             - run per each company that has an access_token available
             - on rate limit hit, rollback and be retriggered after ``retry_after`` seconds
             - commit per company
+            - notify the progress once for all companies: ``method`` returns the work left for its company
+              when it did some, None otherwise
         """
         if not self._is_enabled():
             return
         retry_at = False
+        done = remaining = 0
         CompanySudo = self.env['res.company'].sudo()
         companies = CompanySudo.search([('l10n_pl_edi_access_token', '!=', False), *(company_domain or [])])
 
         for company in companies:
             try:
-                method(company)
+                company_remaining = method(company)
                 self._commit()
+                if company_remaining is not None:
+                    done += 1
+                    remaining += company_remaining
             except KSeFRateLimitError as e:
                 self._rollback()
                 current_retry_at = fields.Datetime.now() + timedelta(seconds=e.retry_after or 60)
@@ -232,6 +236,8 @@ class BatchDownload(models.Model):
 
         if retry_at:
             self.env.ref(cron_xmlid)._trigger(at=retry_at)
+        if done:
+            self.env['ir.cron']._notify_progress(done=done, remaining=remaining)
 
     @api.model
     def _cron_request_today(self):
@@ -271,9 +277,7 @@ class BatchDownload(models.Model):
             # Download invoices for this period
             self._create_batch_download(company, date_from, date_to)
 
-            # In that case, it's the last we download, as the rest is already done by non-batched download
-            if period_has_fetched_invoices:
-                company.l10n_pl_edi_batch_historic_date = first_day
+            company.l10n_pl_edi_batch_historic_date = first_day if period_has_fetched_invoices else date_from
 
         self._run_for_all_companies(
             request_historic,
@@ -321,10 +325,9 @@ class BatchDownload(models.Model):
                     if batch._raise_retry_count(str(e)):
                         batch._delayed_trigger('l10n_pl_edi_batch.ir_cron_download')  # retry
                     return
-                if batch.state == 'downloading':
-                    self.env['ir.cron']._notify_progress(done=1, remaining=len(missing_parts) - 1)
-                else:
+                if batch.state != 'downloading':
                     self.env.ref('l10n_pl_edi_batch.ir_cron_import')._trigger()
+                return len(missing_parts) - 1
         self._run_for_all_companies(do_download, 'l10n_pl_edi_batch.ir_cron_download')
 
     @api.model
@@ -407,7 +410,7 @@ class BatchDownload(models.Model):
 
                 batch.part_ids.unlink()
 
-            self.env['ir.cron']._notify_progress(done=1, remaining=len(batches) - 1)
+            return len(batches) - 1
 
         self._run_for_all_companies(do_import, 'l10n_pl_edi_batch.ir_cron_import')
 
