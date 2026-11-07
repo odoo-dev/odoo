@@ -414,6 +414,8 @@ class BatchDownload(models.Model):
 
                 batch.part_ids.unlink()
 
+            if batch.kind == 'historic':
+                self.env.ref('l10n_pl_edi_batch.ir_cron_request_historic')._trigger()  # request the next window
             return len(batches) - 1
 
         self._run_for_all_companies(do_import, 'l10n_pl_edi_batch.ir_cron_import')
