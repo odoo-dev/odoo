@@ -338,8 +338,6 @@ class BatchDownload(models.Model):
             if not batches:
                 return
             batch = batches[:1]
-            if not batch.part_ids:
-                return
 
             AccountMove = self.env['account.move'].with_company(batch.company_id)
             with tempfile.TemporaryFile(mode='w+b') as zip_stream:
