@@ -8,16 +8,19 @@ class AccountMove(models.Model):
 
     @api.model
     def _cron_l10n_pl_edi_download_bills(self):
-        Batch = self.env['l10n_pl_edi_batch.download']
-        if Batch._is_enabled():
-            Batch._cron_request_today()
-        else:
-            super()._cron_l10n_pl_edi_download_bills()
+        """ Per company: a today batch with the batch download enabled, the single-invoice download otherwise. """
+        companies = self.env['res.company'].search([('l10n_pl_edi_access_token', '!=', False)])
+        batch_companies = companies.filtered('l10n_pl_edi_batch_enabled')
+        if batch_companies:
+            self.env['l10n_pl_edi_batch.download']._cron_request_today()
+        for company in companies - batch_companies:
+            if self.with_company(company)._l10n_pl_edi_download_bills_from_ksef():
+                break
 
     def action_l10n_pl_edi_import_from_ksef(self):
         """ With batches enabled, the crons download the new bills: the action only fills the bills the
             single-invoice download left half-fetched (fetch_ready, fetch_failed), one by one by KSeF number. """
-        if not self.env['l10n_pl_edi_batch.download']._is_enabled():
+        if not self.env.company.l10n_pl_edi_batch_enabled:
             return super().action_l10n_pl_edi_import_from_ksef()
         half_fetched_bills = self.search([
             ('l10n_pl_edi_number', '!=', False),

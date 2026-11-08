@@ -9,7 +9,6 @@ from dateutil.parser import parse
 
 from odoo import api, fields, models
 from odoo.exceptions import UserError
-from odoo.tools import str2bool
 
 from odoo.addons.l10n_pl_edi.exceptions import KSeFRateLimitError
 from odoo.addons.l10n_pl_edi_batch.tools.ksef_api_service import KsefApiServiceBatch as Service
@@ -173,12 +172,6 @@ class BatchDownload(models.Model):
         ]):
             finished_batches.unlink()
 
-    @api.model
-    def _is_enabled(self):
-        """ The batch download replaces the single-invoice download only when explicitly enabled. """
-        value = self.env['ir.config_parameter'].sudo().get_param('l10n_pl_edi_batch.enabled', 'False')
-        return str2bool(value, default=False)
-
     def _commit(self):
         if self.env['account.move']._can_commit():
             self.env.cr.commit()
@@ -213,19 +206,20 @@ class BatchDownload(models.Model):
 
     def _run_for_all_companies(self, method, cron_xmlid, company_domain=None):
         """ Every KSeF cron must:
-            - only run if the batched download parameter is up
-            - run per each company that has an access_token available
+            - run per each company that has the batch download enabled and an access_token available
             - on rate limit hit, rollback and be retriggered after ``retry_after`` seconds
             - commit per company
             - notify the progress once for all companies: ``method`` returns the work left for its company
               when it did some, None otherwise
         """
-        if not self._is_enabled():
-            return
         retry_at = False
         done = remaining = 0
         CompanySudo = self.env['res.company'].sudo()
-        companies = CompanySudo.search([('l10n_pl_edi_access_token', '!=', False), *(company_domain or [])])
+        companies = CompanySudo.search([
+            ('l10n_pl_edi_batch_enabled', '=', True),
+            ('l10n_pl_edi_access_token', '!=', False),
+            *(company_domain or []),
+        ])
 
         for company in companies:
             try:

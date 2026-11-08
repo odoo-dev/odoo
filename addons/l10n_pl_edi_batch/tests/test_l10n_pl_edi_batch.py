@@ -366,9 +366,8 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
         )
 
     def _enable_batches(self, *companies):
-        self.env['ir.config_parameter'].sudo().set_param('l10n_pl_edi_batch.enabled', 'True')
         for company in companies:
-            company.sudo().l10n_pl_edi_access_token = 'token'
+            company.sudo().write({'l10n_pl_edi_batch_enabled': True, 'l10n_pl_edi_access_token': 'token'})
 
     def _company_batches(self, company):
         return self.Batch.search([('company_id', '=', company.id)], order='id')
@@ -422,7 +421,7 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
 
     def test_cron_today_disabled(self):
         self._enable_batches(self.company)
-        self.env['ir.config_parameter'].sudo().set_param('l10n_pl_edi_batch.enabled', 'False')
+        self.company.sudo().l10n_pl_edi_batch_enabled = False
         AccountMove = type(self.env['account.move'])
         with (
             self._mock_batch_requests(),
@@ -497,7 +496,7 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
         self.assertEqual(self.company.l10n_pl_edi_batch_historic_date, historic_date)
 
         # Disabled: nothing requested
-        self.env['ir.config_parameter'].sudo().set_param('l10n_pl_edi_batch.enabled', 'False')
+        self.company.sudo().l10n_pl_edi_batch_enabled = False
         with freeze_time(now), self._mock_batch_requests():
             self.Batch.sudo()._cron_request_historic()
         self.assertFalse(self._company_batches(self.company))
@@ -772,6 +771,7 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
         self.assertTrue(any("Error importing attachment" in body for body in failing_messages))
 
     def test_list_buttons_trigger_the_crons(self):
+        self._enable_batches(self.company)
         now = fields.Datetime.now().replace(microsecond=0)
         buttons = {
             'action_trigger_check_status': 'l10n_pl_edi_batch.ir_cron_check_status',
@@ -913,7 +913,7 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
         self.assertEqual(half_fetched_bills.mapped('l10n_pl_edi_status'), ['fetched', 'fetched'])
 
         # Disabled: the single-invoice download, as before
-        self.env['ir.config_parameter'].sudo().set_param('l10n_pl_edi_batch.enabled', 'False')
+        self.company.sudo().l10n_pl_edi_batch_enabled = False
         with patch.object(AccountMove, '_l10n_pl_edi_download_bills_from_ksef') as single_download:
             self.env['account.move'].with_company(self.company).action_l10n_pl_edi_import_from_ksef()
         single_download.assert_called_once()
@@ -921,19 +921,32 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
     def test_setting_enables_batches(self):
         now = fields.Datetime.now().replace(microsecond=0)
         self.company.sudo().l10n_pl_edi_batch_historic_date = datetime(2026, 2, 10)
+        crons = self.env['ir.cron'].sudo().browse([
+            self.env.ref(xmlid).id
+            for xmlid in (
+                'l10n_pl_edi_batch.ir_cron_request_historic',
+                'l10n_pl_edi_batch.ir_cron_check_status',
+                'l10n_pl_edi_batch.ir_cron_download',
+                'l10n_pl_edi_batch.ir_cron_import',
+            )
+        ])
 
-        # Enabled: the historic walk starts again from yesterday, where the today batches start
+        # Enabled on a company: the batch crons run, and its historic walk starts again from yesterday
         with freeze_time(now):
-            settings = self.env['res.config.settings'].create({'l10n_pl_edi_batch_enabled': True})
+            settings = self.env['res.config.settings'].with_company(self.company).create({'l10n_pl_edi_batch_enabled': True})
             settings.execute()
-        self.assertTrue(self.Batch._is_enabled())
+        self.assertTrue(self.company.l10n_pl_edi_batch_enabled)
+        self.assertEqual(crons.mapped('active'), [True] * 4)
         self.assertEqual(
             self.company.l10n_pl_edi_batch_historic_date,
             fields.Datetime.start_of(now, 'day') - timedelta(days=1),
         )
-        settings = self.env['res.config.settings'].create({'l10n_pl_edi_batch_enabled': False})
+
+        # Disabled on the last company: the batch crons stop
+        settings = self.env['res.config.settings'].with_company(self.company).create({'l10n_pl_edi_batch_enabled': False})
         settings.execute()
-        self.assertFalse(self.Batch._is_enabled())
+        self.assertFalse(self.company.l10n_pl_edi_batch_enabled)
+        self.assertEqual(crons.mapped('active'), [False] * 4)
 
     def test_crons_end_to_end_historic(self):
         self._enable_batches(self.company)
