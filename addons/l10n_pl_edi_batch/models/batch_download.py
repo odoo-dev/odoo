@@ -291,7 +291,8 @@ class BatchDownload(models.Model):
         """
 
         def check_status(company):
-            if batch := self._get_company_batches(company, 'requested')[:1]:
+            batches = self._get_company_batches(company, 'requested')
+            if batch := batches[:1]:
                 data = Service(company).download_batch_status(batch.name)
                 old_date_to = batch.date_to
                 package = data['content'].get('package') or {}
@@ -316,6 +317,10 @@ class BatchDownload(models.Model):
                         batch.retry_count = 0  # stop the quick retries, the next run asks again
                 elif batch.state == 'failed':
                     self._create_batch_download(company, batch.date_from, batch.date_to)  # request the same window again
+
+                # this batch is no longer waiting: check the next requested one right away
+                if batch.state != 'requested' and len(batches) > 1:
+                    self.env.ref('l10n_pl_edi_batch.ir_cron_check_status')._trigger()
 
         self._run_for_all_companies(check_status, 'l10n_pl_edi_batch.ir_cron_check_status')
 

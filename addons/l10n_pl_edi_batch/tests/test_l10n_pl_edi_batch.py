@@ -540,6 +540,31 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
         self.assertEqual(len(requested_batch.part_ids), 1)
         self.assertIn(now, self._cron_triggers('l10n_pl_edi_batch.ir_cron_download'))
 
+    def test_cron_check_status_next_requested_batch(self):
+        self._enable_batches(self.company)
+        now = fields.Datetime.now().replace(microsecond=0)
+        cron_xmlid = 'l10n_pl_edi_batch.ir_cron_check_status'
+        today_batch = self._create_batch('today')
+        historic_batch = self._create_batch('historic')
+        historic_batch.sudo().write({'date_from': now - timedelta(days=9), 'date_to': now - timedelta(days=2)})
+        today_batch.sudo().write({'date_from': now - timedelta(days=1), 'date_to': now})
+        ready_answer = {
+            'status': {'code': 200},
+            'packageExpirationDate': (now + timedelta(days=1)).isoformat() + '+00:00',
+            'package': {'parts': [{'ordinalNumber': 1, 'url': 'https://ksef.test/part-001.zip.aes', 'method': 'get'}]},
+        }
+
+        # The latest batch is ready: the status of the next requested one is checked right away
+        with freeze_time(now), self._mock_ksef(ready_answer):
+            self.Batch.sudo()._cron_check_status()
+        self.assertEqual(today_batch.state, 'downloading')
+        self.assertEqual(historic_batch.state, 'requested')
+        self.assertIn(now, self._cron_triggers(cron_xmlid))
+
+        with freeze_time(now), self._mock_ksef(ready_answer):
+            self.Batch.sudo()._cron_check_status()
+        self.assertEqual(historic_batch.state, 'downloading')
+
     def test_cron_check_status_retries_used_up(self):
         self._enable_batches(self.company)
         now = fields.Datetime.now().replace(microsecond=0)
