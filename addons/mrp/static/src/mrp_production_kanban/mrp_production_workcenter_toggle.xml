@@ -15,26 +15,7 @@
                         <span t-attf-class="o_wo_status o_wo_bubble {{this.statusColor}}"/>
                     </button>
                     <t t-set-slot="content">
-                        <DropdownItem class="`d-flex align-items-center`" onSelected="() => this.setState('blocked')">
-                            <span class="oi oi-lg text-warning me-2" data-icon="error"/>
-                            <span>Blocked</span>
-                        </DropdownItem>
-                        <DropdownItem class="`d-flex align-items-center`" onSelected="() => this.setState('ready')">
-                            <span class="oi oi-lg oi-filled text-muted me-2" data-icon="circle"/>
-                            <span>To Do</span>
-                        </DropdownItem>
-                        <DropdownItem class="`d-flex align-items-center`" onSelected="() => this.setState('progress')">
-                            <span class="oi oi-lg oi-filled text-info me-2" data-icon="play_circle"/>
-                            <span>In Progress</span>
-                        </DropdownItem>
-                        <DropdownItem class="`d-flex align-items-center`" onSelected="() => this.setState('cancel')">
-                            <span class="oi oi-lg oi-filled text-danger me-2" data-icon="cancel"/>
-                            <span>Cancelled</span>
-                        </DropdownItem>
-                        <DropdownItem class="`d-flex align-items-center`" onSelected="() => this.setState('done')">
-                            <span class="oi oi-lg oi-filled text-success me-2" data-icon="check_circle"/>
-                            <span>Done</span>
-                        </DropdownItem>
+                        <t t-call="mrp.WorkorderStateDropdownItems"/>
                     </t>
                 </Dropdown>
             </div>

@@ -1,4 +1,5 @@
 import { useService } from "@web/core/utils/hooks";
+import { formatFloat } from "@web/views/fields/formatters";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { View } from "@web/views/view";
@@ -35,6 +36,7 @@ export class StockForecasted extends Component {
             this.reloadReport();
         }
         this.warehouses = proxy([]);
+        this.state = proxy({ makingToOrder: false });
 
         onWillStart(this._getReportValues);
     }
@@ -58,6 +60,32 @@ export class StockForecasted extends Component {
             lead_horizon_date: this.context.lead_horizon_date,
             qty_to_order: this.context.qty_to_order,
         };
+    }
+
+    formatQuantity(quantity) {
+        return formatFloat(quantity, { digits: [0, this.docs.precision] });
+    }
+
+    /**
+     * Order the shortage of a move (purchase, manufacture, ... depending on the
+     * product routes), linked to it as make to order.
+     */
+    async makeToOrder(shortage) {
+        this.state.makingToOrder = true;
+        try {
+            const action = await this.orm.call(
+                "stock.forecasted_product_product",
+                "action_make_to_order",
+                [shortage.move_id, shortage.quantity],
+                { context: this.context }
+            );
+            if (action) {
+                await this.action.doAction(action);
+            }
+        } finally {
+            this.state.makingToOrder = false;
+        }
+        await this.reloadReport();
     }
 
     async _getResModel(){

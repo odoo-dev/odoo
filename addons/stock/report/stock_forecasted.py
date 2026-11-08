@@ -4,6 +4,7 @@ from collections import defaultdict
 from datetime import date, datetime
 
 from odoo import api, models
+from odoo.exceptions import UserError
 from odoo.fields import Domain
 from odoo.tools import format_date, OrderedSet
 
@@ -168,7 +169,61 @@ class StockForecasted_Product_Product(models.AbstractModel):
 
         res['lines'] = self._get_report_lines(product_template_ids, product_ids, wh_location_ids, wh_stock_location)
         res['user_can_edit_pickings'] = self.env.user.has_group('stock.group_stock_user')
+        res['make_to_order'] = self._get_make_to_order_data(res['lines'])
         return res
+
+    def _get_make_to_order_data(self, lines):
+        """ The shortages of the moves the report was opened from (a sales order
+        line, a component of a manufacturing order, ...) that can be ordered for
+        them (see `stock.move._action_make_to_order`). """
+        move_to_match_ids = self.env.context.get('move_to_match_ids')
+        if not move_to_match_ids or not self.env.user.has_group('stock.group_stock_user'):
+            return []
+        missing = defaultdict(float)
+        for line in lines:
+            if line['move_out'] and not line['replenishment_filled'] and line['move_out']['id'] in move_to_match_ids:
+                missing[line['move_out']['id']] += line['quantity']
+        res = []
+        for move in self.env['stock.move'].browse(list(missing)):
+            quantity, candidates = move._get_make_to_order_quantity(missing[move.id])
+            if not candidates or move.product_id.uom_id.is_zero(quantity):
+                continue
+            rule = self.env['stock.rule']._get_rule(move.product_id, candidates[0].location_id, {
+                'warehouse_id': candidates[0].warehouse_id or candidates[0].location_id.warehouse_id,
+                'route_ids': candidates[0].route_ids,
+            })
+            document = move.sudo()._get_source_document()
+            res.append({
+                'move_id': move.id,
+                'product': {'id': move.product_id.id, 'display_name': move.product_id.display_name},
+                'document': document.display_name if document else move.reference,
+                'quantity': quantity,
+                'uom': move.product_id.uom_id.display_name,
+                'route': rule.route_id.display_name if rule else False,
+            })
+        return res
+
+    @api.model
+    def action_make_to_order(self, move_id, quantity):
+        """ Order the shortage of the move (in the product UoM), as shown by the
+        report: at most what is neither reserved nor ordered for it yet. """
+        mto_moves = self.env['stock.move'].browse(move_id)._action_make_to_order(quantity)
+        if not mto_moves:
+            raise UserError(self.env._("There is nothing left to order for this move."))
+        documents = {
+            doc.display_name
+            for move in mto_moves.with_context(include_draft_documents=True)
+            for doc, _user, _visited in move._get_upstream_documents_and_responsibles(self.env['stock.move'])
+        }
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'type': 'success',
+                'message': self.env._("Ordered: %s", ", ".join(sorted(documents))) if documents
+                    else self.env._("The products have been ordered."),
+            },
+        }
 
     def _prepare_report_line(self, quantity, move_out=None, move_in=None, replenishment_filled=True, product=False, reserved_move=False, in_transit=False, read=True):
         product = product or (move_out.product_id if move_out else move_in.product_id)

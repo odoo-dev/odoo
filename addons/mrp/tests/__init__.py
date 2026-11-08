@@ -24,3 +24,4 @@ from . import test_workorder
 from . import test_mrp_reports
 from . import test_mrp_product_qty
 from . import test_production_workcenters
+from . import test_make_to_order

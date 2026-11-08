@@ -29,6 +29,9 @@ class MrpWorkorder(models.Model):
     name = fields.Char(
         'Work Order', required=True, copy=True)
     sequence = fields.Integer("Sequence", compute='_compute_sequence', store=True, readonly=False, precompute=True)
+    wc_sequence = fields.Integer(
+        "Sequence at Work Center", copy=False,
+        help="Position of the work order in the queue of its work center (empty: last)")
     barcode = fields.Char(compute='_compute_barcode', store=True)
     workcenter_id = fields.Many2one(
         'mrp.workcenter', 'Work Center', index=True, tracking=True, ondelete='restrict',
@@ -65,7 +68,7 @@ class MrpWorkorder(models.Model):
     is_produced = fields.Boolean(string="Has Been Produced",
         compute='_compute_is_produced')
     state = fields.Selection([
-        ('blocked', 'Blocked'),
+        ('blocked', 'Waiting'),
         ('ready', 'To Do'),
         ('progress', 'In Progress'),
         ('done', 'Done'),
@@ -103,6 +106,8 @@ class MrpWorkorder(models.Model):
     operation_id = fields.Many2one(
         'mrp.routing.workcenter', 'Operation', check_company=True, index='btree_not_null')
         # Should be used differently as BoM can change in the meantime
+    operation_worksheet = fields.Binary('Worksheet', related='operation_id.worksheet')
+    operation_worksheet_name = fields.Char(related='operation_id.worksheet_name')
     move_raw_ids = fields.One2many(
         'stock.move', 'workorder_id', 'Raw Moves',
         domain=[('raw_material_production_id', '!=', False), ('production_id', '=', False)])
@@ -450,7 +455,7 @@ class MrpWorkorder(models.Model):
     def _onchange_operation_id(self):
         if self.operation_id:
             self.name = self.operation_id.name
-            self.workcenter_id = self.operation_id.workcenter_id.id
+            self.workcenter_id = self.operation_id._get_workcenter(self.production_id).id
 
     @api.onchange('date_start', 'duration_expected', 'workcenter_id')
     def _onchange_date_start(self):
@@ -553,38 +558,52 @@ class MrpWorkorder(models.Model):
             workorder.duration_expected = workorder._get_duration_expected()
             if workorder.date_start:
                 workorder.with_context(bypass_duration_calculation=True).date_finished = workorder._calculate_date_finished(new_workcenter=new_workcenter)
+        if values.get('workcenter_id'):
+            self._link_operation_from_workcenter()
         if values.get('state') == 'done':
             self._create_next_operation_workorders()
         if 'workcenter_id' in values or 'state' in values:
             self._invalidate_production_workcenters()
         return res
 
+    def _link_operation_from_workcenter(self):
+        """ Link the work orders without operation to the next operation of the
+        bill of materials that can be performed at their work center. """
+        for workorder in self.filtered(lambda wo: not wo.operation_id and wo.workcenter_id and wo.production_id.bom_id):
+            operation = workorder.production_id._get_operation_for_workcenter(workorder.workcenter_id)
+            if not operation:
+                continue
+            vals = {'operation_id': operation.id}
+            if workorder.name in workorder.production_id._get_default_workorder_names():
+                vals['name'] = operation.name
+            workorder.write(vals)
+
     def _create_next_operation_workorders(self):
-        """ Create the work order of the operation following the one of each
-        work order (in the bill of materials), if it doesn't exist yet: work
-        orders are created one at a time, as the previous ones are done. """
+        """ Work orders are created one at a time, as the previous ones are done:
+        create the work order of the operation following the one of each work
+        order (in the bill of materials) if it doesn't exist yet. When the
+        production has no work order to process left otherwise (e.g. a work
+        order without operation, or one done out of order), create the one of
+        its first operation without work order, so that it goes on. """
+        if self.env.context.get('mrp_producing'):
+            return
         vals_list = []
-        for production, workorders in self.filtered('operation_id').grouped('production_id').items():
+        for production, workorders in self.grouped('production_id').items():
             if production.state in ('done', 'cancel'):
                 continue
             operations = list(production._get_operations_to_process())
+            if not operations:
+                continue
             existing = production.workorder_ids.operation_id
-            for workorder in workorders:
-                if workorder.operation_id not in operations:
-                    continue
+            to_create = []
+            for workorder in workorders.filtered(lambda wo: wo.operation_id in operations):
                 index = operations.index(workorder.operation_id)
                 next_operation = operations[index + 1] if index + 1 < len(operations) else False
-                if not next_operation or next_operation in existing:
-                    continue
-                existing |= next_operation
-                vals_list.append({
-                    'name': next_operation.name,
-                    'production_id': production.id,
-                    'workcenter_id': next_operation.workcenter_id.id,
-                    'uom_id': production.uom_id.id,
-                    'operation_id': next_operation.id,
-                    'state': 'ready',
-                })
+                if next_operation and next_operation not in existing and next_operation not in to_create:
+                    to_create.append(next_operation)
+            if not to_create and not production.workorder_ids.filtered(lambda wo: wo.state not in ('done', 'cancel')):
+                to_create = [operation for operation in operations if operation not in existing][:1]
+            vals_list += [production._prepare_operation_workorder_values(operation) for operation in to_create]
         if vals_list:
             # created after the confirmation of their production
             self.create(vals_list)._set_cost_mode()
@@ -592,13 +611,26 @@ class MrpWorkorder(models.Model):
     def init(self):
         super().init()
         # relation of `mrp.production.workcenter_ids`: the work centers of the
-        # work orders still to process
+        # work orders still to process; a production whose work orders are all
+        # done stays at the work center of its last one until it is closed
         self.env.cr.execute(SQL("""
             CREATE OR REPLACE VIEW mrp_production_workcenter_rel AS (
-                SELECT production_id, workcenter_id
+                SELECT DISTINCT production_id, workcenter_id
                   FROM mrp_workorder
                  WHERE workcenter_id IS NOT NULL
                    AND state NOT IN ('done', 'cancel')
+                 UNION ALL
+                (SELECT DISTINCT ON (wo.production_id) wo.production_id, wo.workcenter_id
+                   FROM mrp_workorder wo
+                   JOIN mrp_production mo ON mo.id = wo.production_id
+                  WHERE wo.workcenter_id IS NOT NULL
+                    AND wo.state = 'done'
+                    AND mo.state NOT IN ('done', 'cancel')
+                    AND NOT EXISTS (
+                        SELECT 1 FROM mrp_workorder other
+                         WHERE other.production_id = wo.production_id
+                           AND other.state NOT IN ('done', 'cancel'))
+               ORDER BY wo.production_id, wo.date_finished DESC NULLS LAST, wo.id DESC)
             )
         """))
 
@@ -606,12 +638,14 @@ class MrpWorkorder(models.Model):
         """ `mrp.production.workcenter_ids` is a many2many whose relation is a
         view on the table of work orders: the ORM can't know that changing work
         orders changes it, so flush them and drop the cached values. """
-        self.flush_model(['production_id', 'workcenter_id', 'state'])
+        self.flush_model(['production_id', 'workcenter_id', 'state', 'date_finished'])
+        self.env['mrp.production'].flush_model(['state'])
         self.env['mrp.production'].invalidate_model(['workcenter_ids'])
 
     @api.model_create_multi
     def create(self, vals_list):
         res = super().create(vals_list)
+        res._link_operation_from_workcenter()
         res._invalidate_production_workcenters()
 
         # resequence the workorders if necessary
@@ -660,7 +694,7 @@ class MrpWorkorder(models.Model):
         if ignore_schedule:
             workcenters = workorders_to_plan.production_id.workorder_ids.workcenter_id
             if alternative:
-                workcenters |= workcenters.alternative_workcenter_ids
+                workcenters |= workcenters.alternative_workcenter_ids | workorders_to_plan.production_id.workorder_ids.operation_id.workcenter_ids  # alternative ones
             now = max(from_date or datetime.now(), datetime.now())
             leaves_to_ignore = self.env['resource.calendar.leaves'].search([
                 ('resource_id', 'in', workcenters.resource_id.ids),
@@ -693,7 +727,8 @@ class MrpWorkorder(models.Model):
                 done_wo.add(wo.id)
                 continue
             if alternative:
-                workcenters |= wo.workcenter_id.alternative_workcenter_ids
+                # the other work centers of the operation are alternatives too
+                workcenters |= wo.workcenter_id.alternative_workcenter_ids | wo.operation_id.workcenter_ids
             best_date_finished = datetime.max
             vals = {}
             for workcenter in workcenters:

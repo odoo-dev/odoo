@@ -1073,6 +1073,97 @@ Please change the quantity done or the rounding precision in your settings.""",
             action['context']['warehouse_id'] = warehouse.id
         return action
 
+    # ------------------------------------------------------------
+    # Make to order from the forecasted report
+    # ------------------------------------------------------------
+
+    def _get_make_to_order_sources(self):
+        """ The moves taking the products of `self` from the stock: `self`, or the
+        first steps of its chain in a multi-step route (e.g. the pick of a ship).
+        The steps fed from outside the warehouse (a receipt, a production) end it.
+        """
+        self.ensure_one()
+        sources = self.env['stock.move']
+        visited = self.env['stock.move']
+        moves = self
+        while moves:
+            visited |= moves
+            origs = moves.move_orig_ids.filtered(
+                lambda m: m.state not in ('done', 'cancel') and m.product_id == self.product_id
+                and m.location_id.usage == 'internal'
+            ) - visited
+            sources |= moves.filtered(lambda m: not (m.move_orig_ids & origs))
+            moves = origs
+        return sources
+
+    def _get_reserved_product_qty(self):
+        self.ensure_one()
+        if self.state not in ('partially_available', 'assigned'):
+            return 0.0
+        return self.uom_id._compute_quantity(self.quantity, self.product_id.uom_id)
+
+    def _get_make_to_order_quantity(self, missing_qty):
+        """ Return the quantity (in the product UoM) that still has to be ordered for
+        `self`, given the `missing_qty` its forecast lacks, and the moves to order it for.
+        """
+        self.ensure_one()
+        sources = self._get_make_to_order_sources()
+        # already ordered for this move, and not received yet
+        pending_qty = sum(
+            move.product_qty - move._get_reserved_product_qty()
+            for move in sources if move.procure_method == 'make_to_order'
+        )
+        candidates = sources.filtered(
+            lambda m: m.procure_method == 'make_to_stock' and m.state in ('confirmed', 'partially_available')
+            and not m._should_bypass_reservation()
+        )
+        free_qty = sum(move.product_qty - move._get_reserved_product_qty() for move in candidates)
+        quantity = self.product_id.uom_id.round(max(min(missing_qty - pending_qty, free_qty), 0.0))
+        return quantity, candidates
+
+    def _action_make_to_order(self, quantity):
+        """ Order `quantity` (in the product UoM) of the shortage of `self`: its
+        sources taking it from stock become make to order for that quantity (split if
+        needed), so that the procurement (a purchase, a manufacturing order, ...) is
+        linked to them as for any make to order move.
+
+        :returns: the make to order moves
+        """
+        self.ensure_one()
+        quantity, candidates = self._get_make_to_order_quantity(quantity)
+        uom = self.product_id.uom_id
+        to_procure = self.env['stock.move']
+        mto_moves = self.env['stock.move']
+        for move in candidates:
+            if uom.is_zero(quantity):
+                break
+            unreserved_qty = move.product_qty - move._get_reserved_product_qty()
+            qty = min(quantity, unreserved_qty)
+            quantity -= qty
+            if uom.compare(qty, move.product_qty) == 0:
+                # nothing reserved and all of it is missing: order the move itself
+                move.procure_method = 'make_to_order'
+                to_procure |= move
+                mto_moves |= move
+                continue
+            new_move_vals = move._split(qty)
+            for vals in new_move_vals:
+                vals['procure_method'] = 'make_to_order'
+            new_moves = self.create(new_move_vals)
+            # confirming a make to order move launches its procurement
+            new_moves._action_confirm(merge=False)
+            mto_moves |= new_moves
+        if to_procure:
+            self.env['stock.rule'].run([
+                self.env['stock.rule'].Procurement(
+                    move.product_id, move.product_uom_qty, move.uom_id, move.location_id,
+                    move.rule_id.name or "/", move._prepare_procurement_origin(), move.company_id,
+                    move._prepare_procurement_values(),
+                ) for move in to_procure
+            ])
+            to_procure._recompute_state()
+        return mto_moves
+
     def _do_unreserve(self):
         moves_to_unreserve = OrderedSet()
         for move in self:

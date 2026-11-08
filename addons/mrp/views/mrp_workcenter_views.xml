@@ -107,7 +107,7 @@
         <record model="ir.actions.act_window" id="mrp_workorder_report">
             <field name="name">Work Orders Analysis</field>
             <field name="res_model">mrp.workorder</field>
-            <field name="path">work-orders-analysis</field>
+            <field name="path" eval="False"/> <!-- its path is now the one of mrp_workorder_analysis_action -->
             <field name="domain">[]</field>
             <field name="context">{'search_default_workcenter': 1,
                                    'search_default_ready': True,

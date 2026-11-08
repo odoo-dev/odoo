@@ -6,3 +6,4 @@ from . import stock_forecasted
 from . import stock_traceability
 from . import report_stock_rule
 from . import mrp_report_mo_overview
+from . import mrp_workorder_analysis

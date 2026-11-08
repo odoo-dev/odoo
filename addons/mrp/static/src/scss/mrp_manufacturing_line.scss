@@ -1,0 +1,8 @@
+// Manufacturing lines: roomy cards, the footer at their bottom
+.o_mrp_manufacturing_line_kanban .o_kanban_record {
+    min-height: 160px;
+
+    > main {
+        flex-grow: 1;
+    }
+}

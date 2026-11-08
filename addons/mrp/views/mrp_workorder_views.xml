@@ -10,7 +10,7 @@
                 <field name="product_id"/>
                 <filter string="Draft" name="draft" domain="[('production_state', '=', 'draft')]"/>
                 <filter string="To Do" name="ready" domain="[('production_state', '!=', 'draft'), ('state','=','ready')]"/>
-                <filter string="Blocked" name="blocked" domain="[('state','=','blocked')]"/>
+                <filter string="Waiting" name="blocked" domain="[('state','=','blocked')]"/>
                 <filter string="In Progress" name="progress" domain="[('state','=','progress')]"/>
                 <filter string="Done" name="done" domain="[('state','=', 'done')]"/>
                 <filter string="Cancelled" name="cancel" domain="[('state', '=', 'cancel')]"/>
@@ -185,7 +185,7 @@
                 <field name="move_raw_ids" string="Component" filter_domain="[('move_raw_ids.product_id', 'ilike', self)]"/>
                 <filter string="Draft" name="draft" domain="[('production_state', '=', 'draft')]"/>
                 <filter string="To Do" name="ready" domain="[('production_state', '!=', 'draft'), ('state', '=', 'ready')]"/>
-                <filter string="Blocked" name="blocked" domain="[('state', '=', 'blocked')]"/>
+                <filter string="Waiting" name="blocked" domain="[('state', '=', 'blocked')]"/>
                 <filter string="In Progress" name="progress" domain="[('state', '=', 'progress')]"/>
                 <filter string="Done" name="finish" domain="[('state', '=', 'done')]"/>
                 <filter string="Cancelled" name="cancel" domain="[('state', '=', 'cancel')]"/>
@@ -405,6 +405,12 @@
                 </group>
                     <field name="properties" columns="2"/>
                 <notebook>
+                    <page string="Instructions" name="instructions" invisible="not operation_worksheet">
+                        <group>
+                            <field name="operation_worksheet" filename="operation_worksheet_name" widget="binary" readonly="1"/>
+                            <field name="operation_worksheet_name" invisible="1"/>
+                        </group>
+                    </page>
                     <page string="Time Tracking" name="time_tracking" groups="mrp.group_mrp_manager">
                         <field name="time_ids" nolabel="1" context="{'default_workcenter_id': workcenter_id, 'default_workorder_id': id}" readonly="production_state in ('done', 'cancel')">
                             <list editable="bottom">

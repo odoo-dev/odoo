@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="mrp_workorder_analysis_view_list" model="ir.ui.view">
+        <field name="name">mrp.workorder.analysis.list</field>
+        <field name="model">mrp.workorder.analysis</field>
+        <field name="arch" type="xml">
+            <list string="Work Orders Analysis" create="0" edit="0" delete="0" action="action_open_record" type="object"
+                  decoration-muted="state == 'upcoming'">
+                <field name="production_id"/>
+                <field name="name"/>
+                <field name="product_id" optional="show"/>
+                <field name="workcenter_id"/>
+                <field name="date_start" optional="show"/>
+                <field name="date_finished" optional="hide"/>
+                <field name="duration_expected" widget="float_time" options="{'unit': 'minutes'}" sum="Expected Duration"/>
+                <field name="duration" widget="float_time" options="{'unit': 'minutes'}" sum="Real Duration" optional="show"/>
+                <field name="state" widget="badge"
+                       decoration-muted="state == 'upcoming'"
+                       decoration-warning="state == 'blocked'"
+                       decoration-info="state == 'progress'"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="mrp_workorder_analysis_view_pivot" model="ir.ui.view">
+        <field name="name">mrp.workorder.analysis.pivot</field>
+        <field name="model">mrp.workorder.analysis</field>
+        <field name="arch" type="xml">
+            <pivot string="Work Orders Analysis" sample="1">
+                <field name="workcenter_id" type="row"/>
+                <field name="state" type="col"/>
+                <field name="duration_expected" type="measure" widget="float_time"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="mrp_workorder_analysis_view_graph" model="ir.ui.view">
+        <field name="name">mrp.workorder.analysis.graph</field>
+        <field name="model">mrp.workorder.analysis</field>
+        <field name="arch" type="xml">
+            <graph string="Work Orders Analysis" type="bar" stacked="1" sample="1">
+                <field name="workcenter_id"/>
+                <field name="state"/>
+                <field name="duration_expected" type="measure" widget="float_time"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="mrp_workorder_analysis_view_search" model="ir.ui.view">
+        <field name="name">mrp.workorder.analysis.search</field>
+        <field name="model">mrp.workorder.analysis</field>
+        <field name="arch" type="xml">
+            <search string="Work Orders Analysis">
+                <field name="production_id"/>
+                <field name="name"/>
+                <field name="product_id"/>
+                <field name="workcenter_id"/>
+                <filter string="Upcoming" name="upcoming" domain="[('state', '=', 'upcoming')]"
+                        help="Operations of open manufacturing orders without work order yet"/>
+                <filter string="Waiting" name="blocked" domain="[('state', '=', 'blocked')]"/>
+                <filter string="To Do" name="ready" domain="[('state', '=', 'ready')]"/>
+                <filter string="In Progress" name="progress" domain="[('state', '=', 'progress')]"/>
+                <separator/>
+                <filter string="Start Date" name="date_start" date="date_start"/>
+                <group>
+                    <filter string="Work Center" name="workcenter" context="{'group_by': 'workcenter_id'}"/>
+                    <filter string="Manufacturing Order" name="production" context="{'group_by': 'production_id'}"/>
+                    <filter string="Product" name="product" context="{'group_by': 'product_id'}"/>
+                    <filter string="Status" name="status" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="mrp_workorder_analysis_action" model="ir.actions.act_window">
+        <field name="name">Work Orders Analysis</field>
+        <field name="res_model">mrp.workorder.analysis</field>
+        <field name="path">work-orders-analysis</field>
+        <field name="view_mode">graph,pivot,list</field>
+        <field name="search_view_id" ref="mrp_workorder_analysis_view_search"/>
+        <field name="context">{'show_workcenter_status': True}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_empty_folder">
+                No work order to analyze
+            </p><p>
+                The work orders of the manufacturing orders, including the ones of their
+                operations not started yet.
+            </p>
+        </field>
+    </record>
+</odoo>

@@ -375,17 +375,20 @@
                             </div>
                         </button>
                     </div>
-                    <div class="oe_title">
-                        <h1 class="o_outlined d-flex align-items-center gap-2">
-                            <field name="priority" widget="priority"/>
-                            <field name="name" placeholder="Manufacturing Reference"/>
-                            <field name="state" widget="badge" class="ms-auto fs-6 flex-shrink-0"
-                                decoration-success="state in ('done', 'to_close')"
-                                decoration-warning="state == 'progress'"
-                                decoration-muted="state == 'confirmed'"
-                                decoration-danger="state == 'cancel'"
-                                decoration-info="state == 'draft'"/>
-                        </h1>
+                    <div class="d-flex align-items-start gap-2">
+                        <div class="oe_title flex-grow-1">
+                            <h1 class="o_outlined d-flex align-items-center gap-2">
+                                <field name="priority" widget="priority"/>
+                                <field name="name" placeholder="Manufacturing Reference"/>
+                            </h1>
+                        </div>
+                        <!-- status, at the right border of the sheet -->
+                        <field name="state" widget="badge" class="ms-auto mt-2 fs-6 flex-shrink-0 o_mrp_production_state"
+                            decoration-success="state in ('done', 'to_close')"
+                            decoration-warning="state == 'progress'"
+                            decoration-muted="state == 'confirmed'"
+                            decoration-danger="state == 'cancel'"
+                            decoration-info="state == 'draft'"/>
                     </div>
                     <group>
                         <group>
@@ -671,6 +674,8 @@
                     <field name="reservation_state"/>
                     <field name="components_availability_state"/>
                     <field name="workorder_ids"/>
+                    <field name="is_operations_done"/> <!-- turns the card green, see MrpProductionKanbanRecord -->
+                    <field name="workcenter_states"/> <!-- colors the cards at several work centers, see MrpProductionKanbanRecord -->
                     <templates>
                         <t t-name="card">
                             <div class="d-flex mb-1 align-items-center justify-content-between">
@@ -702,6 +707,11 @@
                                         <field name="date_deadline" widget="datetime" options="{'show_time': false}" decoration-danger="is_delayed" decoration-warning="is_due_today"/>
                                     </div>
                                     <div t-if="record.workorder_ids.raw_value.length &amp;&amp; !['done', 'cancel'].includes(record.state.raw_value)" class="d-flex text-nowrap overflow-hidden text-overflow-ellipsis">
+                                        <!-- start of the work orders (at the column's work center), as "3pm30" today, else "May 4" -->
+                                        <t t-if="record.wc_date_start.raw_value || record.date_start.raw_value">
+                                            <i class="oi mx-1 mt-1" data-icon="schedule" role="img" title="Start"/>
+                                            <field name="wc_date_start" widget="mrp_short_datetime" class="me-1"/>
+                                        </t>
                                         <i class="oi mx-1 mt-1" data-icon="hourglass_bottom" role="img" title="Remaining Time"/>
                                         <field name="remaining_time" widget="float_time" options="{'unit': 'minutes'}"/>
                                     </div>
@@ -731,7 +741,11 @@
             <field name="name">mrp.production.kanban</field>
             <field name="model">mrp.production</field>
             <field name="arch" type="xml">
-                <kanban class="o_kanban_mobile" card_id="%(mrp.mrp_production_card_view)d" sample="1" default_group_by="workcenter_ids" js_class="mrp_production_kanban">
+                <kanban class="o_kanban_mobile" card_id="%(mrp.mrp_production_card_view)d" sample="1" default_group_by="workcenter_ids" default_order="wc_date_start, wc_sequence, priority desc, date_start, id" js_class="mrp_production_kanban">
+                    <!-- the queue of each work center: by start date at the column's work center, then position;
+                         reordering it reschedules the work orders there (see mrp.production.web_resequence) -->
+                    <field name="wc_date_start"/>
+                    <field name="wc_sequence" widget="handle"/>
                     <progressbar field="state" colors='{"draft": "info", "confirmed": "300", "progress": "warning", "to_close": "success", "done": "success", "cancel": "danger"}'/>
                 </kanban>
             </field>
@@ -919,9 +933,9 @@
                 groups="group_mrp_routings"/>
 
         <menuitem id="menu_mrp_work_order_report"
-            name="Work Orders"
+            name="Planning"
             parent="menu_mrp_reporting"
-            action="mrp_workorder_report"
+            action="mrp_workorder_analysis_action"
             groups="group_mrp_routings"
             sequence="10"/>
 

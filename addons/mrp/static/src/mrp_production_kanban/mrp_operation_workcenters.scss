@@ -1,0 +1,4 @@
+// Operations of a BoM using a work center outside the BoM's manufacturing line
+.o_list_renderer td.o_mrp_operation_workcenters.text-danger {
+    background-color: var(--danger-bg-subtle, #{rgba($danger, .15)});
+}

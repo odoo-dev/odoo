@@ -28,6 +28,7 @@
         'views/mrp_workcenter_views.xml',
         'views/mrp_manufacturing_line_views.xml',
         'views/mrp_bom_views.xml',
+        'report/mrp_workorder_analysis_views.xml',  # its action is the one of the Work Orders reporting menu
         'views/mrp_production_views.xml',
         'views/mrp_routing_views.xml',
         'views/product_views.xml',

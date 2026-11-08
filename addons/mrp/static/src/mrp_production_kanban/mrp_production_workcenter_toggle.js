@@ -5,9 +5,10 @@ import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { standardWidgetProps } from "@web/views/widgets/standard_widget_props";
+import { WORKORDER_STATE_COLORS } from "../components/wo_list_view_dropdown/wo_list_view_dropdown";
 
 const STATE_LABELS = {
-    blocked: _t("Blocked"),
+    blocked: _t("Waiting"),
     ready: _t("To Do"),
     progress: _t("In Progress"),
     cancel: _t("Cancelled"),
@@ -27,13 +28,7 @@ export class MrpProductionWorkcenterToggle extends Component {
     setup() {
         this.orm = useService("orm");
         this.action = useService("action");
-        this.colorIcons = {
-            blocked: "text-bg-warning",
-            ready: "text-bg-secondary",
-            progress: "text-bg-info",
-            cancel: "text-bg-danger",
-            done: "text-bg-success",
-        };
+        this.colorIcons = WORKORDER_STATE_COLORS;
         this.stateLabels = STATE_LABELS;
     }
 
@@ -48,13 +43,8 @@ export class MrpProductionWorkcenterToggle extends Component {
     }
 
     get workingUsers() {
-        const usersByWorkcenter = this.props.record.data.working_user_ids || {};
-        const users = new Map();
-        for (const key of this._workcenterKeys(usersByWorkcenter)) {
-            for (const [id, name] of usersByWorkcenter[key] || []) {
-                users.set(id, name);
-            }
-        }
+        const states = this.props.record.data.workcenter_states || {};
+        const users = new Map(this._workcenterKeys(states).flatMap((key) => states[key]?.users || []));
         return [...users].map(([id, name]) => ({ id, name }));
     }
 
@@ -105,6 +95,5 @@ registry.category("view_widgets").add("mrp_production_workcenter_toggle", {
     fieldDependencies: [
         { name: "state", type: "selection" },
         { name: "workcenter_states", type: "json" },
-        { name: "working_user_ids", type: "json" },
     ],
 });

@@ -7,6 +7,14 @@ import { useService } from "@web/core/utils/hooks";
 import { BadgeField, badgeField } from "@web/views/fields/badge/badge_field";
 import { _t } from "@web/core/l10n/translation";
 
+export const WORKORDER_STATE_COLORS = {
+    blocked: "text-bg-warning",
+    ready: "text-bg-secondary",
+    progress: "text-bg-info",
+    cancel: "text-bg-danger",
+    done: "text-bg-success",
+};
+
 export class MOListViewDropdown extends BadgeField {
     static template = "mrp.MOViewListDropdown";
     static components = {
@@ -22,13 +30,7 @@ export class MOListViewDropdown extends BadgeField {
     setup() {
         this.orm = useService("orm");
         this.action = useService("action");
-        this.colorIcons = {
-            "blocked": "text-bg-warning",
-            "ready": "text-bg-secondary",
-            "progress": "text-bg-info",
-            "cancel": "text-bg-danger",
-            "done": "text-bg-success",
-        };
+        this.colorIcons = WORKORDER_STATE_COLORS;
     }
 
     async reload(){

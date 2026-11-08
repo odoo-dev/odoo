@@ -1515,6 +1515,7 @@ class TestBoM(TestMrpCommon):
         # Produces 3 qties to check if the operations' duration will be correctly divided by 3.
         mo_3 = create_mo(3)
         mo_3.action_confirm()
+        mo_3.workorder_ids.unlink()  # the default work order: the operations are the ones added below
         mo_form = Form(mo_3)
         with mo_form.workorder_ids.new() as operation:
             operation.name = "Kiss the Monster on its Forehead 😘"

@@ -2365,10 +2365,8 @@ class BaseModel(metaclass=MetaModel):
 
     @api.model
     def _read_group_expand_full(self, groups: ModelType, domain: DomainType) -> ModelType:
-        """Extend the group to include all target records by default, keeping the
-        groups that already hold records (e.g. archived ones), all ordered by the
-        default order of the target model (e.g. by sequence)."""
-        return (groups.search([]) | groups).sorted()
+        """Extend the group to include all target records by default."""
+        return groups.search([])
 
     @typing.final
     def _field_to_sql(self, alias: str, field_expr: str, query: (Query | None) = None) -> SQL:

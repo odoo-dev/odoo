@@ -281,7 +281,7 @@ class ReportMrpReport_Mo_Overview(models.AbstractModel):
             upcoming = [op for op in production._get_operations_to_process() if op not in existing_operations]
             for index, operation in enumerate(upcoming, start=len(operations)):
                 duration = production._get_operation_duration_expected(operation)
-                mo_cost = duration / 60.0 * operation.workcenter_id.costs_hour
+                mo_cost = duration / 60.0 * operation._get_workcenter(production).costs_hour
                 operations.append({
                     'level': level,
                     'index': f"{current_index}W{index}",

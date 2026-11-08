@@ -60,3 +60,5 @@ access_mrp_finished_product_label_layout,mrp.finished.product.label.layout,mrp.f
 access_mrp_manufacturing_line,mrp.manufacturing.line,mrp.manufacturing.line,mrp.group_mrp_user,r,
 access_mrp_manufacturing_line_manager,mrp.manufacturing.line.manager,mrp.manufacturing.line,mrp.group_mrp_manager,crud,
 mrp_manufacturing_line_rule,mrp_manufacturing_line multi-company,mrp.manufacturing.line,,crud,"[('company_id', 'in', company_ids + [False])]"
+access_mrp_workorder_analysis,mrp.workorder.analysis,mrp.workorder.analysis,mrp.group_mrp_user,r,
+mrp_workorder_analysis_rule,mrp_workorder_analysis multi-company,mrp.workorder.analysis,,r,"[('company_id', 'in', company_ids)]"

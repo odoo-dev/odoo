@@ -51,23 +51,13 @@ class MrpManufacturingLine(models.Model):
         """ Kanban of the manufacturing orders in a work center of the line, with
         a column per work center of the line. """
         self.ensure_one()
-        action = self.env['ir.actions.act_window']._for_xml_id('mrp.mrp_production_action')
-        kanban_view = self.env.ref('mrp.mrp_production_kanban_view')
-        action.update({
-            'name': self.name,
-            'domain': [
-                ('picking_type_id.active', '=', True),
-                ('workcenter_ids', 'in', self.workcenter_ids.ids),
-            ],
-            'view_mode': 'kanban,list,form',
-            'views': [(kanban_view.id, 'kanban'), (False, 'list'), (False, 'form')],
-            'context': {
-                'search_default_todo': True,
-                'default_company_id': (self.company_id or self.env.company).id,
-                'manufacturing_line_workcenter_ids': self.workcenter_ids.ids,
-                'default_manufacturing_line_id': self.id,
-            },
+        action = self._get_production_kanban_action({
+            'default_company_id': (self.company_id or self.env.company).id,
+            'manufacturing_line_workcenter_ids': self.workcenter_ids.ids,
+            'default_manufacturing_line_id': self.id,
         })
+        action['name'] = self.name
+        action['domain'] = [('picking_type_id.active', '=', True), ('workcenter_ids', 'in', self.workcenter_ids.ids)]
         return action
 
     @api.model
@@ -76,14 +66,14 @@ class MrpManufacturingLine(models.Model):
         there is one, otherwise the kanban of all work centers. """
         if self.search_count([], limit=1):
             return self.env['ir.actions.act_window']._for_xml_id('mrp.mrp_manufacturing_line_kanban_action')
+        return self._get_production_kanban_action({'default_company_id': self.env.company.id})
+
+    @api.model
+    def _get_production_kanban_action(self, context):
         action = self.env['ir.actions.act_window']._for_xml_id('mrp.mrp_production_action')
-        kanban_view = self.env.ref('mrp.mrp_production_kanban_view')
         action.update({
             'view_mode': 'kanban,list,form',
-            'views': [(kanban_view.id, 'kanban'), (False, 'list'), (False, 'form')],
-            'context': {
-                'search_default_todo': True,
-                'default_company_id': self.env.company.id,
-            },
+            'views': [(self.env.ref('mrp.mrp_production_kanban_view').id, 'kanban'), (False, 'list'), (False, 'form')],
+            'context': {'search_default_todo': True, **context},
         })
         return action

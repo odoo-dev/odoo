@@ -13,6 +13,26 @@
         </ControlPanel>
         <div class="o-content pt-3 container-fluid overflow-auto o_stock_forecasted_page">
             <ForecastedHeader docs="this.docs" openView.bind="this.openView"/>
+            <div t-foreach="this.docs.make_to_order || []" t-as="shortage" t-key="shortage.move_id"
+                 class="alert alert-warning d-flex align-items-center gap-3 o_forecasted_make_to_order" role="alert">
+                <i class="fa fa-exclamation-triangle fa-lg" title="Not enough stock"/>
+                <div class="flex-grow-1">
+                    Not enough stock for <strong t-out="shortage.document"/>:
+                    <strong><t t-out="this.formatQuantity(shortage.quantity)"/> <t t-out="shortage.uom"/></strong>
+                    of <t t-out="shortage.product.display_name"/> missing.
+                    <span t-if="shortage.route" class="text-muted">
+                        It will be replenished on order with the route <t t-out="shortage.route"/>.
+                    </span>
+                    <span t-else="" class="text-muted">
+                        No route replenishes this product: set one (e.g. Buy or Manufacture) on it first.
+                    </span>
+                </div>
+                <button t-if="shortage.route" class="btn btn-primary text-nowrap" name="make_to_order"
+                        t-att-disabled="this.state.makingToOrder"
+                        t-on-click="() => this.makeToOrder(shortage)">
+                    Make to Order
+                </button>
+            </div>
             <t t-if="this.context.warehouse_id">
                 <View type="'graph'"
                 viewId="this.stock_report_view_graph"

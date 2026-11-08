@@ -860,7 +860,7 @@ class ReportMrpReport_Bom_Structure(models.AbstractModel):
                 self._simulate_operation_planning(op, product, start_date, quantity, planning_per_operation, simulated_leaves_per_workcenter)
             date_start = max(date_start, planning_per_operation[op]['date_finished'])
         # Consider workcenter and alternatives
-        workcenters = operation.workcenter_id | operation.workcenter_id.alternative_workcenter_ids
+        workcenters = operation.workcenter_id | operation.workcenter_id.alternative_workcenter_ids | operation.workcenter_ids
         best_date_finished = datetime.max
         best_date_start = best_workcenter = best_duration_expected = None
         for workcenter in workcenters:

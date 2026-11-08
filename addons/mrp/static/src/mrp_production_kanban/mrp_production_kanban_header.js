@@ -7,11 +7,19 @@ export class MrpProductionKanbanHeader extends KanbanHeader {
         ...KanbanHeader.components,
         ColumnProgress: MrpProductionColumnProgress,
     };
+    /**
+     * Remaining time of the column: when grouped by work center, of the work orders
+     * at the column's work center only.
+     */
     get groupAggregate() {
-        const value = this.props.group.list.records.reduce(
-            (sum, record) => sum + Math.max(0, record.data.remaining_time),
-            0
-        );
-        return { value, title: _t("Total Remaining Time")};
+        const byWorkcenter = this.group.groupByField?.name === "workcenter_ids";
+        const key = String(this.group.value || 0);
+        const value = this.props.group.list.records.reduce((sum, record) => {
+            const remaining = byWorkcenter
+                ? record.data.workcenter_states?.[key]?.remaining_time || 0
+                : record.data.remaining_time;
+            return sum + Math.max(0, remaining);
+        }, 0);
+        return { value, title: _t("Total Remaining Time") };
     }
 }
