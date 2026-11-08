@@ -325,6 +325,7 @@ class BatchDownload(models.Model):
                 try:
                     missing_parts[:1]._download()
                 except UserError as e:
+                    _logger.info("KSeF batch %s download failed (retry %s): %s", batch.name, batch.retry_count + 1, e)
                     batch._retry_download(str(e))
                     return
                 if batch.state != 'downloading':
