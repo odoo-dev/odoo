@@ -43,7 +43,9 @@ class BatchDownloadPart(models.Model):
 
     def _decrypt_stream(self, response_stream):
         self.ensure_one()
-        key, iv = Service.u64(self.batch_id.raw_symmetric_key), Service.u64(self.batch_id.raw_iv)
+        # parts are often browsed with bin_size, which would give the key's size instead of the key
+        batch = self.batch_id.with_context(bin_size=False)
+        key, iv = Service.u64(batch.raw_symmetric_key), Service.u64(batch.raw_iv)
         cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
         decryptor = cipher.decryptor()
         unpadder = padding.PKCS7(128).unpadder()
