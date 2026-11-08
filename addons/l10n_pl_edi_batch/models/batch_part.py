@@ -1,11 +1,11 @@
 import logging
 import tempfile
 
-import requests
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import padding
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.exceptions import InvalidKey, InvalidSignature, UnsupportedAlgorithm
+from requests import request, RequestException
 
 from odoo import api, fields, models
 from odoo.exceptions import UserError
@@ -43,7 +43,6 @@ class BatchDownloadPart(models.Model):
 
     def _decrypt_stream(self, response_stream):
         self.ensure_one()
-        # parts are often browsed with bin_size, which would give the key's size instead of the key
         batch = self.batch_id.with_context(bin_size=False)
         key, iv = Service.u64(batch.raw_symmetric_key), Service.u64(batch.raw_iv)
         cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
@@ -66,8 +65,6 @@ class BatchDownloadPart(models.Model):
             'res_id': self.id,
             'raw': content,
         })
-        # Not written through the field: drop its cached values (bin_size reads included), and have the
-        # fields that depend on it, like the batch's state, recomputed
         self.invalidate_recordset(['decrypted_file'])
         self.modified(['decrypted_file'])
 
@@ -76,15 +73,12 @@ class BatchDownloadPart(models.Model):
         for record in self:
             with tempfile.NamedTemporaryFile(mode='w+b') as tmpf:
                 try:
-                    with requests.request(record.download_method, record.download_url, stream=True, timeout=TIMEOUT) as response:
+                    with request(record.download_method, record.download_url, stream=True, timeout=TIMEOUT) as response:
                         _logger.debug("KSeF part download %s %s %s", record.download_method, record.download_url, response.status_code)
                         response.raise_for_status()
                         for decrypted_chunk in record._decrypt_stream(response):
                             tmpf.write(decrypted_chunk)
-                except (
-                    requests.RequestException, ValueError, TypeError,
-                    InvalidKey, InvalidSignature, UnsupportedAlgorithm,
-                ) as e:
+                except (RequestException, ValueError, TypeError, InvalidKey, InvalidSignature, UnsupportedAlgorithm) as e:
                     raise UserError(self.env._("Couldn't download KSeF batch part %(part)s: %(error)s", part=record.part_name, error=e)) from e
                 tmpf.flush()
                 tmpf.seek(0)

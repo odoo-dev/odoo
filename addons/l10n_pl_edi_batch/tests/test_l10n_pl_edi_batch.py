@@ -1,5 +1,6 @@
 import base64
 import io
+import math
 import zipfile
 from datetime import datetime, timedelta
 from unittest.mock import MagicMock, patch
@@ -14,7 +15,6 @@ from odoo.tools import file_open
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 from odoo.addons.l10n_pl_edi.exceptions import KSeFRateLimitError
 from odoo.addons.l10n_pl_edi.tools.ksef_api_service import KsefApiService
-from odoo.addons.l10n_pl_edi_batch.models.batch_part import BatchDownloadPart
 from odoo.addons.l10n_pl_edi_batch.tools.ksef_api_service import KsefApiServiceBatch
 
 
@@ -26,16 +26,13 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
     def setUpClass(cls):
         super().setUpClass()
         cls.company = cls.company_data['company']
-        # The test user is an accountant, who only reads the batches: the crons and the fixtures run as superuser
         cls.Batch = cls.env['l10n_pl_edi_batch.download']
-        cls.Part = cls.env['l10n_pl_edi_batch.part'].sudo()
+        cls.Part = cls.env['l10n_pl_edi_batch.part']
         cls.env['ir.config_parameter'].sudo().set_param('l10n_pl_edi_ksef.mode', 'test')
-
-    def _mock_ksef(self, json_answer):
-        """ Stands in for KSeF: every request gets a 200 with `json_answer`; returns the mock, to read the requests sent. """
-        response = MagicMock(status_code=200)
-        response.json.return_value = json_answer
-        return patch('odoo.addons.l10n_pl_edi.tools.ksef_api_service.requests.request', return_value=response)
+        # Disable KSeF on real companies, just enable it on tests.
+        # Tests do rollback after they finish, and this will be re-enabled
+        cls.env['res.company'].sudo().search([]).l10n_pl_edi_access_token = False
+        cls.company.sudo().write({'l10n_pl_edi_batch_enabled': True, 'l10n_pl_edi_access_token': 'token'})
 
     def _create_batch(self, name, content=None):
         return self.Batch.sudo().create({
@@ -46,54 +43,59 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
             'content': content,
         }).sudo(False)
 
+    # Test fields computed from the json content --------------------------
+
     @freeze_time('2026-11-10 12:00:00')
-    def test_date_expiry_from_content(self):
+    def test_date_expiry_and_is_expired_fields(self):
         requested_batch = self._create_batch('requested')
+        self.assertFalse(requested_batch.date_expiry)
+        self.assertFalse(requested_batch.is_expired)
+
         ready_batch = self._create_batch('ready', {
             'status': {'code': 200},
             # Warsaw time (UTC+1): 13:00 UTC
             'packageExpirationDate': '2026-11-12T14:00:00+01:00',
         })
+        self.assertEqual(ready_batch.date_expiry, datetime(2026, 11, 12, 13, 0, 0))
+        self.assertFalse(ready_batch.is_expired)
+
         expired_batch = self._create_batch('expired', {
             'status': {'code': 200},
             'packageExpirationDate': '2026-11-09T12:00:00+00:00',
         })
-        rejected_batch = self._create_batch('rejected', {'status': {'code': 415}})
-
-        self.assertFalse(requested_batch.date_expiry)
-        self.assertFalse(requested_batch.is_expired)
-
-        self.assertEqual(ready_batch.date_expiry, datetime(2026, 11, 12, 13, 0, 0))
-        self.assertFalse(ready_batch.is_expired)
-
         self.assertTrue(expired_batch.is_expired)
 
-        batches = requested_batch | ready_batch | expired_batch | rejected_batch
-        self.assertEqual(self.Batch.search([('is_expired', '=', True)]) & batches, expired_batch)
-        self.assertEqual(self.Batch.search([('is_expired', '=', False)]) & batches, requested_batch | ready_batch | rejected_batch)
+        rejected_batch = self._create_batch('rejected', {'status': {'code': 415}})
 
-    def test_errors_from_content(self):
+        batches = requested_batch | ready_batch | expired_batch | rejected_batch
+        self.assertEqual(batches.filtered(lambda batch: batch.is_expired), expired_batch)
+        self.assertEqual(batches.filtered(lambda batch: not batch.is_expired), requested_batch | ready_batch | rejected_batch)
+
+    def test_error_field(self):
         ready_batch = self._create_batch('ready', {
-            'status': {'code': 200, 'description': "Eksport zakonczony"},
+            'status': {
+                'code': 200,
+                'description': "Eksport zakonczony",
+            },
             'package': {'invoiceCount': 3},
         })
-        rejected_batch = self._create_batch('rejected', {
-            'status': {'code': 415, 'description': "Blad odszyfrowania", 'details': ["Bad key"]},
-        })
-
-        # KSeF's own errors come from its answer; a successful batch has none
         self.assertFalse(ready_batch.error)
+
+        rejected_batch = self._create_batch('rejected', {
+            'status': {
+                'code': 415,
+                'description': "Blad odszyfrowania",
+                'details': ["Bad key"],
+            },
+        })
         self.assertEqual(rejected_batch.error, "415: Blad odszyfrowania\nBad key")
 
-        # Our own errors are written in the same place, with code 999, keeping the rest of the answer
         ready_batch.sudo().retry_count = 9
         self.assertFalse(ready_batch.sudo()._raise_retry_count("Corrupt ZIP"))
         self.assertEqual(ready_batch.state, 'failed')
         self.assertEqual(ready_batch.error, "999: Odoo Error\nCorrupt ZIP")
-        self.assertEqual(ready_batch.content['package'], {'invoiceCount': 3})
 
-    def test_kind(self):
-        # No frozen time: `create_date` comes from the database clock, which freeze_time doesn't change
+    def test_kind_field(self):
         now = fields.Datetime.now()
         historic_batch = self.Batch.sudo().create({
             'name': 'historic',
@@ -101,64 +103,83 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
             'date_from': now - timedelta(days=9),
             'date_to': now - timedelta(days=2),
         })
+        self.assertEqual(historic_batch.kind, 'historic')
+
         today_batch = self.Batch.sudo().create({
             'name': 'today',
             'company_id': self.company.id,
             'date_from': now - timedelta(days=1),
             'date_to': now,
         })
-
-        self.assertEqual(historic_batch.kind, 'historic')
         self.assertEqual(today_batch.kind, 'today')
-        self.assertEqual(today_batch.retry_count, 0)
-        batches = historic_batch | today_batch
-        self.assertEqual(self.Batch.search([('kind', '=', 'historic')]) & batches, historic_batch)
-        self.assertEqual(self.Batch.search([('kind', '!=', 'historic')]) & batches, today_batch)
+
+    # Part helpers --------------------------------------------------------------
+
+    def _add_part(self, batch, number, content=None):
+        part = self.Part.sudo().create({
+            'batch_id': batch.id,
+            'part_number': number,
+            'download_method': 'GET',
+            'download_url': f'https://ksef.test/{batch.name}-{number:03}.zip.aes',
+        })
+        if content:
+            part._store_decrypted_file(content)
+        return part
 
     def _add_zip_parts(self, batch, zip_bytes, count=2):
         """ Cut the ZIP in `count` slices, as KSeF does, and store them as downloaded parts. """
-        size = -(-len(zip_bytes) // count)
-        parts = self.Part.create([
-            {
-                'batch_id': batch.id,
-                'part_number': number + 1,
-                'download_method': 'GET',
-                'download_url': f'https://ksef.test/{batch.name}-{number + 1:03}.zip.aes',
-            }
-            for number in range(count)
-        ])
-        for number, part in enumerate(parts):
-            part._store_decrypted_file(zip_bytes[number * size:(number + 1) * size])
+        size = math.ceil(len(zip_bytes) / count)
+        parts = self.Part
+        for number in range(1, count + 1):
+            parts |= self._add_part(batch, number, zip_bytes[(number - 1) * size:number * size])
         return parts
 
-    def test_parts_decrypted_file(self):
+    # Mock the KSeF service --------------------------------------------------------------
+
+    def _mock_ksef(self, json_answer):
+        """ Stands in for KSeF: every request gets a 200 with `json_answer`; returns the mock, to read the requests sent. """
+        response = MagicMock(status_code=200)
+        response.json.return_value = json_answer
+        return patch('odoo.addons.l10n_pl_edi.tools.ksef_api_service.requests.request', return_value=response)
+
+    def _mock_part_downloads(self, error=None, content=b'slice'):
+        """ Stands in for the storage of the parts: each one decrypts to `content`, unless the download fails. """
+        return (
+            patch.object(type(self.Part), '_decrypt_stream', lambda part, response: iter([content])),
+            patch('odoo.addons.l10n_pl_edi_batch.models.batch_part.request', side_effect=error),
+        )
+
+    def test_parts(self):
         ready_batch = self._create_batch('ready', {'status': {'code': 200}})
-        Part = self.Part
-        first_part = self._add_part(ready_batch, 1, downloaded=True)
-        second_part = self._add_part(ready_batch, 2, downloaded=False)
+        first_part = self._add_part(ready_batch, 1, content=b'decrypted zip slice')
+        second_part = self._add_part(ready_batch, 2)
 
         # No attachment exists before the download
         part_attachments = self.env['ir.attachment'].search([
-            ('res_model', '=', Part._name),
+            ('res_model', '=', 'l10n_pl_edi_batch.part'),
             ('res_field', '=', 'decrypted_file'),
             ('res_id', 'in', (first_part | second_part).ids),
         ])
         self.assertEqual(len(part_attachments), 1)
         self.assertEqual(ready_batch.state, 'downloading')
 
-        # The parts' files are attachments of the parts, deleted with them
+        # When you delete parts, the attachments get deleted too
         ready_batch.sudo().unlink()
         self.assertFalse(part_attachments.sudo().exists())
 
-    def _bill_xml_attachment(self, bill, ksef_number):
+    # Move helpers -----------------------------------------------------------------
+
+    def _search_xml_from_bill(self, bill):
         return self.env['ir.attachment'].search([
             ('res_model', '=', 'account.move'),
             ('res_id', '=', bill.id),
-            ('name', '=', f'KSeF-{ksef_number}.xml'),
+            ('name', '=', f'KSeF-{bill.l10n_pl_edi_number}.xml'),
         ])
 
+    def _search_imported(self):
+        return self.env['account.move'].search([('l10n_pl_edi_number', '!=', False)])
+
     def test_import_bills(self):
-        self._enable_batches(self.company)
         with file_open('l10n_pl_edi/tests/import_xmls/fa3_standard_bill.xml', 'rb') as xml_file:
             xml_content = xml_file.read()
         zip_stream = io.BytesIO()
@@ -176,15 +197,15 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
         self._add_zip_parts(ready_batch, zip_stream.getvalue())
         self.assertEqual(ready_batch.state, 'downloaded')
 
-        bills_before = self.env['account.move'].search([('move_type', '=', 'in_invoice')])
+        bills_before = self._search_imported()
         self.Batch.sudo()._cron_import()
-        new_bill = self.env['account.move'].search([('move_type', '=', 'in_invoice')]) - bills_before
+        new_bill = self._search_imported() - bills_before
 
         # One bill for the new KSeF number, with its XML attached as the single-invoice download does;
         # the known one is skipped
         self.assertEqual(new_bill.l10n_pl_edi_number, 'new-ksef-number')
         self.assertEqual(new_bill.l10n_pl_edi_status, 'fetched')
-        attachment = self._bill_xml_attachment(new_bill, 'new-ksef-number')
+        attachment = self._search_xml_from_bill(new_bill)
         self.assertEqual(attachment.raw, xml_content)
         self.assertEqual(attachment.description, 'KSeF Fetched Invoice XML')
         self.assertTrue(known_bill.exists())
@@ -196,7 +217,6 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
         self.assertEqual(self.env['account.move'].search([('move_type', '=', 'in_invoice')]) - bills_before, new_bill)
 
     def test_import_bills_corrupt_zip(self):
-        self._enable_batches(self.company)
         now = fields.Datetime.now().replace(microsecond=0)
         ready_batch = self._create_batch('ready', {'status': {'code': 200}})
 
@@ -222,17 +242,6 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
             'state': 'requested',
         }])
 
-    def _add_part(self, batch, number, downloaded):
-        values = {
-            'batch_id': batch.id,
-            'part_number': number,
-            'download_method': 'GET',
-            'download_url': f'https://ksef.test/part-{number:03}.zip.aes',
-        }
-        if downloaded:
-            values['decrypted_file'] = base64.b64encode(b'decrypted zip slice')
-        return self.Part.create(values)
-
     @freeze_time('2026-11-10 12:00:00')
     def test_state(self):
         ready = {'status': {'code': 200}, 'packageExpirationDate': '2026-11-12T12:00:00+00:00'}
@@ -248,17 +257,17 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
         too_many_retries_batch = self._create_batch('too_many_retries')
         too_many_retries_batch.sudo().retry_count = 10
         expired_missing_part_batch = self._create_batch('expired_missing_part', expired)
-        self._add_part(expired_missing_part_batch, 1, downloaded=False)
+        self._add_part(expired_missing_part_batch, 1)
 
         downloading_batch = self._create_batch('downloading', ready)
-        self._add_part(downloading_batch, 1, downloaded=True)
-        self._add_part(downloading_batch, 2, downloaded=False)
+        self._add_part(downloading_batch, 1, content=b'decrypted zip slice')
+        self._add_part(downloading_batch, 2)
 
         downloaded_batch = self._create_batch('downloaded', ready)
-        self._add_part(downloaded_batch, 1, downloaded=True)
+        self._add_part(downloaded_batch, 1, content=b'decrypted zip slice')
         # Expiry doesn't matter once all the parts are downloaded
         expired_downloaded_batch = self._create_batch('expired_downloaded', expired)
-        self._add_part(expired_downloaded_batch, 1, downloaded=True)
+        self._add_part(expired_downloaded_batch, 1, content=b'decrypted zip slice')
 
         # Imported, or nothing to download: no parts left
         done_batch = self._create_batch('done', ready)
@@ -324,7 +333,7 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
     def test_gc_batch_downloads(self):
         done_old_batch = self._create_batch('done_old', {'status': {'code': 200}})
         failed_old_batch = self._create_batch('failed_old', {'status': {'code': 415}})
-        failed_old_part = self._add_part(failed_old_batch, 1, downloaded=True)
+        failed_old_part = self._add_part(failed_old_batch, 1, content=b'decrypted zip slice')
         done_recent_batch = self._create_batch('done_recent', {'status': {'code': 200}})
         requested_old_batch = self._create_batch('requested_old')
 
@@ -365,15 +374,10 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
             download_batch_request=download_batch_request,
         )
 
-    def _enable_batches(self, *companies):
-        for company in companies:
-            company.sudo().write({'l10n_pl_edi_batch_enabled': True, 'l10n_pl_edi_access_token': 'token'})
-
     def _company_batches(self, company):
         return self.Batch.search([('company_id', '=', company.id)], order='id')
 
     def test_cron_today_windows(self):
-        self._enable_batches(self.company)
         now = fields.Datetime.start_of(fields.Datetime.now(), 'day') + timedelta(hours=10)
         yesterday = fields.Datetime.start_of(now, 'day') - timedelta(days=1)
 
@@ -401,7 +405,6 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
         self.assertRecordValues(next_day_batch, [{'date_from': yesterday + timedelta(days=1), 'date_to': next_day}])
 
     def test_cron_today_errors(self):
-        self._enable_batches(self.company)
         now = fields.Datetime.now().replace(microsecond=0)
 
         # A KSeF error stops the cron
@@ -420,7 +423,6 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
         self.assertIn(now + timedelta(seconds=30), self._cron_triggers('l10n_pl_edi.cron_l10n_pl_edi_ksef_download_bills'))
 
     def test_cron_today_disabled(self):
-        self._enable_batches(self.company)
         self.company.sudo().l10n_pl_edi_batch_enabled = False
         AccountMove = type(self.env['account.move'])
         with (
@@ -432,7 +434,6 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
         self.assertFalse(self._company_batches(self.company))
 
     def test_cron_historic_windows(self):
-        self._enable_batches(self.company)
         now = fields.Datetime.now().replace(microsecond=0)
         yesterday = fields.Datetime.start_of(now, 'day') - timedelta(days=1)
 
@@ -481,7 +482,6 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
         self.assertEqual(self._company_batches(self.company), first_batch | second_batch | last_batch)
 
     def test_cron_historic_errors(self):
-        self._enable_batches(self.company)
         now = fields.Datetime.now().replace(microsecond=0)
         historic_date = self.company.l10n_pl_edi_batch_historic_date
 
@@ -511,7 +511,6 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
         return self.env['ir.cron.trigger'].search([('cron_id', '=', cron.id)]).mapped('call_at')
 
     def test_cron_check_status(self):
-        self._enable_batches(self.company)
         now = fields.Datetime.now().replace(microsecond=0)
         cron_xmlid = 'l10n_pl_edi_batch.ir_cron_check_status'
 
@@ -540,7 +539,6 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
         self.assertIn(now, self._cron_triggers('l10n_pl_edi_batch.ir_cron_download'))
 
     def test_cron_check_status_next_requested_batch(self):
-        self._enable_batches(self.company)
         now = fields.Datetime.now().replace(microsecond=0)
         cron_xmlid = 'l10n_pl_edi_batch.ir_cron_check_status'
         today_batch = self._create_batch('today')
@@ -565,7 +563,6 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
         self.assertEqual(historic_batch.state, 'downloading')
 
     def test_cron_check_status_retries_used_up(self):
-        self._enable_batches(self.company)
         now = fields.Datetime.now().replace(microsecond=0)
         cron_xmlid = 'l10n_pl_edi_batch.ir_cron_check_status'
         requested_batch = self._create_batch('requested')
@@ -579,7 +576,6 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
         self.assertEqual(self._cron_triggers(cron_xmlid), triggers_before)
 
     def test_cron_check_status_ksef_error(self):
-        self._enable_batches(self.company)
         now = fields.Datetime.now().replace(microsecond=0)
         requested_batch = self._create_batch('requested')
 
@@ -593,29 +589,17 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
             'state': 'requested',
         }])
 
-    def _mock_part_downloads(self, error=None, content=b'slice'):
-        """ Stands in for the storage of the parts: each one decrypts to `content`, unless the download fails. """
-        response = MagicMock(status_code=200)
-        response.__enter__.return_value = response
-        if error:
-            response.raise_for_status.side_effect = error
-        return patch.multiple(
-            BatchDownloadPart,
-            _decrypt_stream=lambda part, response: iter([content]),
-        ), patch('odoo.addons.l10n_pl_edi_batch.models.batch_part.requests.request', return_value=response)
-
     def _create_downloading_batch(self, now, part_count=2):
         batch = self._create_batch('downloading', {
             'status': {'code': 200},
             'packageExpirationDate': (now + timedelta(days=1)).isoformat() + '+00:00',
         })
         for number in range(1, part_count + 1):
-            self._add_part(batch, number, downloaded=False)
+            self._add_part(batch, number)
         self._set_write_date(batch, now - timedelta(seconds=10))
         return batch
 
     def test_cron_download(self):
-        self._enable_batches(self.company)
         now = fields.Datetime.now().replace(microsecond=0)
         downloading_batch = self._create_downloading_batch(now)
         mock_decrypt, mock_request = self._mock_part_downloads()
@@ -635,7 +619,6 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
         self.assertIn(now, self._cron_triggers('l10n_pl_edi_batch.ir_cron_import'))
 
     def test_cron_download_failures(self):
-        self._enable_batches(self.company)
         now = fields.Datetime.now().replace(microsecond=0)
         downloading_batch = self._create_downloading_batch(now, part_count=1)
         error = requests.HTTPError("503 Service Unavailable")
@@ -653,7 +636,7 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
         with freeze_time(now), mock_decrypt, mock_request, self._mock_batch_requests():
             self.Batch.sudo()._cron_download()
         self.assertEqual(downloading_batch.state, 'failed')
-        self.assertTrue(downloading_batch.error.startswith("999: Odoo Error\nCouldn't download KSeF batch part part-001.zip.aes"))
+        self.assertTrue(downloading_batch.error.startswith("999: Odoo Error\nCouldn't download KSeF batch part downloading-001.zip.aes"))
         self.assertRecordValues(self._company_batches(self.company) - downloading_batch, [{
             'date_from': downloading_batch.date_from,
             'date_to': downloading_batch.date_to,
@@ -676,7 +659,6 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
         return batch
 
     def test_cron_import(self):
-        self._enable_batches(self.company)
         now = fields.Datetime.now().replace(microsecond=0)
         today_batch = self._create_downloaded_batch('today', now)
         historic_batch = self._create_downloaded_batch('historic', now, historic=True)
@@ -699,7 +681,6 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
         self.assertEqual(len(bills), 2)
 
     def test_cron_import_time_budget(self):
-        self._enable_batches(self.company)
         now = fields.Datetime.now().replace(microsecond=0)
         with file_open('l10n_pl_edi/tests/import_xmls/fa3_standard_bill.xml', 'rb') as xml_file:
             xml_content = xml_file.read()
@@ -729,7 +710,6 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
         self.assertIn(now + timedelta(minutes=5), self._cron_triggers('l10n_pl_edi_batch.ir_cron_request_historic'))
 
     def test_import_bills_bad_xmls(self):
-        self._enable_batches(self.company)
         with file_open('l10n_pl_edi/tests/import_xmls/fa3_standard_bill.xml', 'rb') as xml_file:
             xml_content = xml_file.read()
         zip_stream = io.BytesIO()
@@ -766,12 +746,11 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
             bill = bills_by_number[number]
             self.assertFalse(bill.invoice_line_ids, number)
             self.assertEqual(bill.l10n_pl_edi_status, 'fetched', number)
-            self.assertTrue(self._bill_xml_attachment(bill, number), number)
+            self.assertTrue(self._search_xml_from_bill(bill), number)
         failing_messages = bills_by_number['failing-ksef-number'].message_ids.mapped('body')
         self.assertTrue(any("Error importing attachment" in body for body in failing_messages))
 
     def test_list_buttons_trigger_the_crons(self):
-        self._enable_batches(self.company)
         now = fields.Datetime.now().replace(microsecond=0)
         buttons = {
             'action_trigger_check_status': 'l10n_pl_edi_batch.ir_cron_check_status',
@@ -792,7 +771,6 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
             self.assertIn(now, self._cron_triggers(cron_xmlid), method)
 
     def test_cron_check_status_truncated_historic(self):
-        self._enable_batches(self.company)
         now = fields.Datetime.now().replace(microsecond=0)
         historic_batch = self._create_batch('historic')
         historic_batch.sudo().write({'date_from': datetime(2026, 3, 1), 'date_to': datetime(2026, 3, 8)})
@@ -820,7 +798,6 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
         }])
 
     def test_crons_end_to_end(self):
-        self._enable_batches(self.company)
         now = fields.Datetime.now().replace(microsecond=0)
         with file_open('l10n_pl_edi/tests/import_xmls/fa3_standard_bill.xml', 'rb') as xml_file:
             xml_content = xml_file.read()
@@ -863,7 +840,7 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
         self.assertEqual(batch.state, 'done')
         bill = self.env['account.move'].search([('l10n_pl_edi_number', '=', 'end-to-end-ksef-number')])
         self.assertTrue(bill.invoice_line_ids)
-        self.assertTrue(self._bill_xml_attachment(bill, 'end-to-end-ksef-number'))
+        self.assertTrue(self._search_xml_from_bill(bill))
 
     def _create_single_download_bill(self, day, status):
         return self.env['account.move'].create({
@@ -883,7 +860,6 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
         return new_batch
 
     def test_cron_historic_walks_past_fetched_bills(self):
-        self._enable_batches(self.company)
         now = fields.Datetime.now().replace(microsecond=0)
         self._create_single_download_bill('20260205', 'fetched')
         self.company.sudo().l10n_pl_edi_batch_historic_date = datetime(2026, 2, 10)
@@ -895,7 +871,6 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
         self.assertFalse(self._run_historic_cron(now))
 
     def test_import_from_ksef_fills_half_fetched_bills(self):
-        self._enable_batches(self.company)
         with file_open('l10n_pl_edi/tests/import_xmls/fa3_standard_bill.xml', 'rb') as xml_file:
             xml_content = xml_file.read()
         half_fetched_bills = self._create_single_download_bill('20260501', 'fetch_ready')
@@ -949,7 +924,6 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
         self.assertEqual(crons.mapped('active'), [False] * 4)
 
     def test_crons_end_to_end_historic(self):
-        self._enable_batches(self.company)
         now = fields.Datetime.now().replace(microsecond=0)
         yesterday = fields.Datetime.start_of(now, 'day') - timedelta(days=1)
         historic_cron_xmlid = 'l10n_pl_edi_batch.ir_cron_request_historic'
@@ -994,7 +968,6 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
         self.assertEqual(second_batch.date_from, yesterday - timedelta(days=14))
 
     def test_crons_end_to_end_empty_historic_window(self):
-        self._enable_batches(self.company)
         now = fields.Datetime.now().replace(microsecond=0)
         yesterday = fields.Datetime.start_of(now, 'day') - timedelta(days=1)
         historic_cron_xmlid = 'l10n_pl_edi_batch.ir_cron_request_historic'

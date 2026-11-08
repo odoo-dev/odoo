@@ -13,13 +13,12 @@ class ResCompany(models.Model):
     )
 
     def write(self, vals):
+        """ If we are enabling the first batch company, set the historic date on the company and activate the crons """
         res = super().write(vals)
         if 'l10n_pl_edi_batch_enabled' in vals:
-            # the historic walk starts again from yesterday, where the today batches start
             if vals['l10n_pl_edi_batch_enabled']:
                 self.l10n_pl_edi_batch_historic_date = fields.Datetime.start_of(fields.Datetime.now(), 'day') - timedelta(days=1)
-            # the batch crons only run while at least one company downloads in batches
-            any_enabled = bool(self.sudo().search_count([('l10n_pl_edi_batch_enabled', '=', True)], limit=1))
+            any_enabled = self.sudo().search_count([('l10n_pl_edi_batch_enabled', '=', True)], limit=1)
             for cron_xmlid in (
                 'l10n_pl_edi_batch.ir_cron_request_historic',
                 'l10n_pl_edi_batch.ir_cron_check_status',
