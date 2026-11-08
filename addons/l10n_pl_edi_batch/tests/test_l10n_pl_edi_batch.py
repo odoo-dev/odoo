@@ -36,6 +36,9 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
 
         cls.env['ir.config_parameter'].set_param('l10n_pl_edi_ksef.mode', 'test')
 
+        with file_open('l10n_pl_edi/tests/import_xmls/fa3_standard_bill.xml', 'rb') as xml_file:
+            cls.xml_content = xml_file.read()
+
     def _create_batch(self, name, content=None):
         return self.Batch.create({
             'name': name,
@@ -136,6 +139,14 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
             parts |= self._add_part(batch, number, zip_bytes[(number - 1) * size:number * size])
         return parts
 
+    def _make_zip(self, files):
+        """ The bytes of a ZIP with `files`, a dict of file name: content. """
+        zip_stream = io.BytesIO()
+        with zipfile.ZipFile(zip_stream, 'w', compression=zipfile.ZIP_DEFLATED) as zip_file:
+            for name, content in files.items():
+                zip_file.writestr(name, content)
+        return zip_stream.getvalue()
+
     # Mock the KSeF service --------------------------------------------------------------
 
     def _mock_ksef(self, json_answer):
@@ -143,6 +154,17 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
         response = MagicMock(status_code=200)
         response.json.return_value = json_answer
         return patch('odoo.addons.l10n_pl_edi.tools.ksef_api_service.requests.request', return_value=response)
+
+    def _ready_answer(self, now, **package):
+        """ KSeF's status answer for a package ready in one part; `package` adds or overrides its keys. """
+        return {
+            'status': {'code': 200},
+            'packageExpirationDate': (now + timedelta(days=1)).isoformat() + '+00:00',
+            'package': {
+                'parts': [{'ordinalNumber': 1, 'url': 'https://ksef.test/part-001.zip.aes', 'method': 'get'}],
+                **package,
+            },
+        }
 
     def _mock_part_downloads(self, error=None, content=b'slice'):
         """ Stands in for the storage of the parts: each one decrypts to `content`, unless the download fails. """
@@ -182,13 +204,11 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
         return self.env['account.move'].search([('l10n_pl_edi_number', '!=', False)])
 
     def test_import_bills(self):
-        with file_open('l10n_pl_edi/tests/import_xmls/fa3_standard_bill.xml', 'rb') as xml_file:
-            xml_content = xml_file.read()
-        zip_stream = io.BytesIO()
-        with zipfile.ZipFile(zip_stream, 'w', compression=zipfile.ZIP_DEFLATED) as zip_file:
-            zip_file.writestr('new-ksef-number.xml', xml_content)
-            zip_file.writestr('known-ksef-number.xml', xml_content)
-            zip_file.writestr('_metadata.json', '{}')
+        zip_bytes = self._make_zip({
+            'new-ksef-number.xml': self.xml_content,
+            'known-ksef-number.xml': self.xml_content,
+            '_metadata.json': '{}',
+        })
 
         known_bill = self.env['account.move'].create({
             'move_type': 'in_invoice',
@@ -196,7 +216,7 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
             'l10n_pl_edi_number': 'known-ksef-number',
         })
         ready_batch = self._create_batch('ready', {'status': {'code': 200}})
-        self._add_zip_parts(ready_batch, zip_stream.getvalue())
+        self._add_zip_parts(ready_batch, zip_bytes)
         self.assertEqual(ready_batch.state, 'downloaded')
 
         bills_before = self._search_imported()
@@ -208,7 +228,7 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
         self.assertEqual(new_bill.l10n_pl_edi_number, 'new-ksef-number')
         self.assertEqual(new_bill.l10n_pl_edi_status, 'fetched')
         attachment = self._search_xml_from_bill(new_bill)
-        self.assertEqual(attachment.raw, xml_content)
+        self.assertEqual(attachment.raw, self.xml_content)
         self.assertEqual(attachment.description, 'KSeF Fetched Invoice XML')
         self.assertTrue(known_bill.exists())
         self.assertFalse(ready_batch.part_ids)
@@ -529,12 +549,7 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
         self.assertIn(now + timedelta(seconds=20), self._cron_triggers(cron_xmlid))
 
         # 200: the parts are created, the retries start again from 0, and the download starts
-        ready_answer = {
-            'status': {'code': 200},
-            'packageExpirationDate': (now + timedelta(days=1)).isoformat() + '+00:00',
-            'package': {'parts': [{'ordinalNumber': 1, 'url': 'https://ksef.test/part-001.zip.aes', 'method': 'get'}]},
-        }
-        with freeze_time(now), self._mock_ksef(ready_answer):
+        with freeze_time(now), self._mock_ksef(self._ready_answer(now)):
             self.Batch._cron_check_status()
         self.assertRecordValues(requested_batch, [{'state': 'downloading', 'retry_count': 0}])
         self.assertEqual(len(requested_batch.part_ids), 1)
@@ -547,11 +562,7 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
         historic_batch = self._create_batch('historic')
         historic_batch.write({'date_from': now - timedelta(days=9), 'date_to': now - timedelta(days=2)})
         today_batch.write({'date_from': now - timedelta(days=1), 'date_to': now})
-        ready_answer = {
-            'status': {'code': 200},
-            'packageExpirationDate': (now + timedelta(days=1)).isoformat() + '+00:00',
-            'package': {'parts': [{'ordinalNumber': 1, 'url': 'https://ksef.test/part-001.zip.aes', 'method': 'get'}]},
-        }
+        ready_answer = self._ready_answer(now)
 
         # The latest batch is ready: the status of the next requested one is checked right away
         with freeze_time(now), self._mock_ksef(ready_answer):
@@ -646,17 +657,12 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
         }])
 
     def _create_downloaded_batch(self, name, now, historic=False):
-        with file_open('l10n_pl_edi/tests/import_xmls/fa3_standard_bill.xml', 'rb') as xml_file:
-            xml_content = xml_file.read()
-        zip_stream = io.BytesIO()
-        with zipfile.ZipFile(zip_stream, 'w', compression=zipfile.ZIP_DEFLATED) as zip_file:
-            zip_file.writestr(f'{name}-ksef-number.xml', xml_content)
         batch = self._create_batch(name, {'status': {'code': 200}})
         if historic:
             batch.write({'date_from': now - timedelta(days=9), 'date_to': now - timedelta(days=2)})
         else:
             batch.write({'date_from': now - timedelta(days=1), 'date_to': now})
-        self._add_zip_parts(batch, zip_stream.getvalue(), count=1)
+        self._add_zip_parts(batch, self._make_zip({f'{name}-ksef-number.xml': self.xml_content}), count=1)
         self._set_write_date(batch, now - timedelta(seconds=10))
         return batch
 
@@ -684,15 +690,10 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
 
     def test_cron_import_time_budget(self):
         now = fields.Datetime.now().replace(microsecond=0)
-        with file_open('l10n_pl_edi/tests/import_xmls/fa3_standard_bill.xml', 'rb') as xml_file:
-            xml_content = xml_file.read()
-        zip_stream = io.BytesIO()
-        with zipfile.ZipFile(zip_stream, 'w', compression=zipfile.ZIP_DEFLATED) as zip_file:
-            for number in range(3):
-                zip_file.writestr(f'budget-{number}-ksef-number.xml', xml_content)
+        zip_bytes = self._make_zip({f'budget-{number}-ksef-number.xml': self.xml_content for number in range(3)})
         batch = self._create_batch('budget', {'status': {'code': 200}})
         batch.write({'date_from': now - timedelta(days=9), 'date_to': now - timedelta(days=2)})
-        self._add_zip_parts(batch, zip_stream.getvalue(), count=2)
+        self._add_zip_parts(batch, zip_bytes, count=2)
         import_cron_xmlid = 'l10n_pl_edi_batch.ir_cron_import'
 
         # No time left: each run imports one bill, and triggers the import again for the rest
@@ -712,15 +713,13 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
         self.assertIn(now + timedelta(minutes=5), self._cron_triggers('l10n_pl_edi_batch.ir_cron_request_historic'))
 
     def test_import_bills_bad_xmls(self):
-        with file_open('l10n_pl_edi/tests/import_xmls/fa3_standard_bill.xml', 'rb') as xml_file:
-            xml_content = xml_file.read()
-        zip_stream = io.BytesIO()
-        with zipfile.ZipFile(zip_stream, 'w', compression=zipfile.ZIP_DEFLATED) as zip_file:
-            zip_file.writestr('unreadable-ksef-number.xml', b'<not xml')
-            zip_file.writestr('failing-ksef-number.xml', xml_content)
-            zip_file.writestr('good-ksef-number.xml', xml_content)
+        zip_bytes = self._make_zip({
+            'unreadable-ksef-number.xml': b'<not xml',
+            'failing-ksef-number.xml': self.xml_content,
+            'good-ksef-number.xml': self.xml_content,
+        })
         ready_batch = self._create_batch('ready', {'status': {'code': 200}})
-        self._add_zip_parts(ready_batch, zip_stream.getvalue())
+        self._add_zip_parts(ready_batch, zip_bytes)
 
         AccountMove = type(self.env['account.move'])
         decode_fa3_ksef = AccountMove._decode_fa3_ksef
@@ -777,15 +776,7 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
         historic_batch = self._create_batch('historic')
         historic_batch.write({'date_from': datetime(2026, 3, 1), 'date_to': datetime(2026, 3, 8)})
         self._set_write_date(historic_batch, now - timedelta(seconds=10))
-        truncated_answer = {
-            'status': {'code': 200},
-            'packageExpirationDate': (now + timedelta(days=1)).isoformat() + '+00:00',
-            'package': {
-                'isTruncated': True,
-                'lastInvoicingDate': '2026-03-05T10:00:00+00:00',
-                'parts': [{'ordinalNumber': 1, 'url': 'https://ksef.test/part-001.zip.aes', 'method': 'get'}],
-            },
-        }
+        truncated_answer = self._ready_answer(now, isTruncated=True, lastInvoicingDate='2026-03-05T10:00:00+00:00')
 
         # The batch ends where its package does, and the rest of its window is requested right away
         with freeze_time(now), self._mock_ksef(truncated_answer), self._mock_batch_requests():
@@ -801,12 +792,7 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
 
     def test_crons_end_to_end(self):
         now = fields.Datetime.now().replace(microsecond=0)
-        with file_open('l10n_pl_edi/tests/import_xmls/fa3_standard_bill.xml', 'rb') as xml_file:
-            xml_content = xml_file.read()
-        zip_stream = io.BytesIO()
-        with zipfile.ZipFile(zip_stream, 'w', compression=zipfile.ZIP_DEFLATED) as zip_file:
-            zip_file.writestr('end-to-end-ksef-number.xml', xml_content)
-            zip_file.writestr('_metadata.json', '{}')
+        zip_bytes = self._make_zip({'end-to-end-ksef-number.xml': self.xml_content, '_metadata.json': '{}'})
 
         # Request: the today cron asks KSeF for the window, and schedules the first status check
         with freeze_time(now), self._mock_batch_requests():
@@ -816,20 +802,15 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
         self.assertIn(now, self._cron_triggers('l10n_pl_edi_batch.ir_cron_check_status'))
 
         # Status: KSeF has the package ready, in one part
-        ready_answer = {
-            'status': {'code': 200},
-            'packageExpirationDate': (now + timedelta(days=1)).isoformat() + '+00:00',
-            'package': {'parts': [{'ordinalNumber': 1, 'url': 'https://ksef.test/part-001.zip.aes', 'method': 'get'}]},
-        }
         self._set_write_date(batch, now - timedelta(seconds=10))
-        with freeze_time(now), self._mock_ksef(ready_answer):
+        with freeze_time(now), self._mock_ksef(self._ready_answer(now)):
             self.Batch._cron_check_status()
         self.assertEqual(batch.state, 'downloading')
         self.assertIn(now, self._cron_triggers('l10n_pl_edi_batch.ir_cron_download'))
 
         # Download: the part is fetched and decrypted
         self._set_write_date(batch, now - timedelta(seconds=10))
-        mock_decrypt, mock_request = self._mock_part_downloads(content=zip_stream.getvalue())
+        mock_decrypt, mock_request = self._mock_part_downloads(content=zip_bytes)
         with freeze_time(now), mock_decrypt, mock_request:
             self.Batch._cron_download()
         self.assertEqual(batch.state, 'downloaded')
@@ -873,15 +854,13 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
         self.assertFalse(self._run_historic_cron(now))
 
     def test_import_from_ksef_fills_half_fetched_bills(self):
-        with file_open('l10n_pl_edi/tests/import_xmls/fa3_standard_bill.xml', 'rb') as xml_file:
-            xml_content = xml_file.read()
         half_fetched_bills = self._create_single_download_bill('20260501', 'fetch_ready')
         half_fetched_bills |= self._create_single_download_bill('20260502', 'fetch_failed')
         AccountMove = type(self.env['account.move'])
 
         # Only the half-fetched bills are downloaded, by KSeF number: no metadata query for new bills
         with (
-            patch.object(KsefApiService, 'get_invoice_by_ksef_number', return_value={'xml_content': xml_content}) as get_invoice,
+            patch.object(KsefApiService, 'get_invoice_by_ksef_number', return_value={'xml_content': self.xml_content}) as get_invoice,
             patch.object(AccountMove, '_fetch_bills_metadata') as fetch_metadata,
         ):
             self.env['account.move'].with_company(self.company).action_l10n_pl_edi_import_from_ksef()
@@ -930,11 +909,7 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
         yesterday = fields.Datetime.start_of(now, 'day') - timedelta(days=1)
         historic_cron_xmlid = 'l10n_pl_edi_batch.ir_cron_request_historic'
         ksef_number = f"5265877635-{(yesterday - timedelta(days=3)).strftime('%Y%m%d')}-010080-DD2B5E-26"
-        with file_open('l10n_pl_edi/tests/import_xmls/fa3_standard_bill.xml', 'rb') as xml_file:
-            xml_content = xml_file.read()
-        zip_stream = io.BytesIO()
-        with zipfile.ZipFile(zip_stream, 'w', compression=zipfile.ZIP_DEFLATED) as zip_file:
-            zip_file.writestr(f'{ksef_number}.xml', xml_content)
+        zip_bytes = self._make_zip({f'{ksef_number}.xml': self.xml_content})
 
         # Request: the historic cron asks for the week before yesterday
         first_batch = self._run_historic_cron(now)
@@ -942,18 +917,13 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
         self.assertRecordValues(first_batch, [{'date_from': yesterday - timedelta(days=7), 'kind': 'historic', 'state': 'requested'}])
 
         # Status, download and import, each cron triggering the next one
-        ready_answer = {
-            'status': {'code': 200},
-            'packageExpirationDate': (now + timedelta(days=1)).isoformat() + '+00:00',
-            'package': {'parts': [{'ordinalNumber': 1, 'url': 'https://ksef.test/part-001.zip.aes', 'method': 'get'}]},
-        }
         self._set_write_date(first_batch, now - timedelta(seconds=10))
-        with freeze_time(now), self._mock_ksef(ready_answer):
+        with freeze_time(now), self._mock_ksef(self._ready_answer(now)):
             self.Batch._cron_check_status()
         self.assertEqual(first_batch.state, 'downloading')
         self.assertNotIn(now + timedelta(minutes=5), self._cron_triggers(historic_cron_xmlid))
         self._set_write_date(first_batch, now - timedelta(seconds=10))
-        mock_decrypt, mock_request = self._mock_part_downloads(content=zip_stream.getvalue())
+        mock_decrypt, mock_request = self._mock_part_downloads(content=zip_bytes)
         with freeze_time(now), mock_decrypt, mock_request:
             self.Batch._cron_download()
         self.assertEqual(first_batch.state, 'downloaded')
@@ -986,14 +956,12 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
         self.assertEqual(second_batch.date_from, yesterday - timedelta(days=14))
 
     def test_part_slice_stored_without_mimetype_guess(self):
-        zip_stream = io.BytesIO()
-        with zipfile.ZipFile(zip_stream, 'w', compression=zipfile.ZIP_DEFLATED) as zip_file:
-            zip_file.writestr('ksef-number.xml', b'<xml/>' * 1000)
+        zip_bytes = self._make_zip({'ksef-number.xml': b'<xml/>' * 1000})
         ready_batch = self._create_batch('ready', {'status': {'code': 200}})
 
         # The first slice starts like a ZIP but isn't a whole one: stored as .zip, its type isn't guessed
         with self.assertNoLogs('odoo.tools.mimetypes', 'WARNING'):
-            parts = self._add_zip_parts(ready_batch, zip_stream.getvalue(), count=2)
+            parts = self._add_zip_parts(ready_batch, zip_bytes, count=2)
         attachment = self.env['ir.attachment'].search([
             ('res_model', '=', 'l10n_pl_edi_batch.part'),
             ('res_field', '=', 'decrypted_file'),
