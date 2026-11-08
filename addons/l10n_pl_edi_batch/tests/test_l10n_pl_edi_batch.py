@@ -291,7 +291,7 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
             batch = self.Batch.sudo()._create_batch_download(self.company, datetime(2026, 3, 8), datetime(2026, 3, 15, 12))
         mock_request.assert_called_once()
         (method, url), kwargs = mock_request.call_args
-        self.assertEqual((method, url), ('POST', 'https://api-test.ksef.mf.gov.pl/v2/invoices/exports'))
+        self.assertEqual((method, url), ('POST', f'{KsefApiServiceBatch(self.company).api_url}/invoices/exports'))
         self.assertEqual(kwargs['json'], {
             'encryption': {'encryptedSymmetricKey': 'RU5D', 'initializationVector': 'SVY='},
             'filters': {
