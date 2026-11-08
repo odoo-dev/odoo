@@ -258,11 +258,7 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
             self.Batch._cron_import()
         self.assertEqual(ready_batch.state, 'failed')
         self.assertTrue(ready_batch.error.startswith("999: Odoo Error\nThe KSeF batch ZIP is corrupt"))
-        self.assertRecordValues(self._company_batches(self.company) - ready_batch, [{
-            'date_from': ready_batch.date_from,
-            'date_to': ready_batch.date_to,
-            'state': 'requested',
-        }])
+        self._assert_requested_again(ready_batch)
 
     @freeze_time('2026-11-10 12:00:00')
     def test_state(self):
@@ -398,6 +394,14 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
 
     def _company_batches(self, company):
         return self.Batch.search([('company_id', '=', company.id)], order='id')
+
+    def _assert_requested_again(self, failed_batch):
+        """ The window of `failed_batch` is requested again, in a new batch. """
+        self.assertRecordValues(self._company_batches(self.company) - failed_batch, [{
+            'date_from': failed_batch.date_from,
+            'date_to': failed_batch.date_to,
+            'state': 'requested',
+        }])
 
     def test_cron_today_windows(self):
         now = fields.Datetime.start_of(fields.Datetime.now(), 'day') + timedelta(hours=10)
@@ -596,11 +600,7 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
         with freeze_time(now), self._mock_ksef({'status': {'code': 415}}), self._mock_batch_requests():
             self.Batch._cron_check_status()
         self.assertEqual(requested_batch.state, 'failed')
-        self.assertRecordValues(self._company_batches(self.company) - requested_batch, [{
-            'date_from': requested_batch.date_from,
-            'date_to': requested_batch.date_to,
-            'state': 'requested',
-        }])
+        self._assert_requested_again(requested_batch)
 
     def _create_downloading_batch(self, now, part_count=2):
         batch = self._create_batch('downloading', {
@@ -650,11 +650,7 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
             self.Batch._cron_download()
         self.assertEqual(downloading_batch.state, 'failed')
         self.assertTrue(downloading_batch.error.startswith("999: Odoo Error\nCouldn't download KSeF batch part downloading-001.zip.aes"))
-        self.assertRecordValues(self._company_batches(self.company) - downloading_batch, [{
-            'date_from': downloading_batch.date_from,
-            'date_to': downloading_batch.date_to,
-            'state': 'requested',
-        }])
+        self._assert_requested_again(downloading_batch)
 
     def _create_downloaded_batch(self, name, now, historic=False):
         batch = self._create_batch(name, {'status': {'code': 200}})
