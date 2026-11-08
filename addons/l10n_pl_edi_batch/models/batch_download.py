@@ -390,10 +390,9 @@ class BatchDownload(models.Model):
                             attachment_ids=attachment.ids,
                         )
 
-                        # if successful
-                        if move.invoice_line_ids:
-                            move.l10n_pl_edi_status = 'fetched'
-                            self._commit()
+                        # fetched even if the import failed: the XML is attached, the error is in the chatter
+                        move.l10n_pl_edi_status = 'fetched'
+                        self._commit()
 
                 batch.part_ids.unlink()
 

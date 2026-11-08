@@ -706,11 +706,12 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
         self.assertTrue(bills_by_number['good-ksef-number'].invoice_line_ids)
         self.assertEqual(bills_by_number['good-ksef-number'].l10n_pl_edi_status, 'fetched')
 
-        # The bills that failed keep their KSeF number and XML, so that they aren't imported twice
+        # The bills that failed are fetched too, blank: they keep their KSeF number and XML, so that they aren't
+        # imported twice
         for number in ('unreadable-ksef-number', 'failing-ksef-number'):
             bill = bills_by_number[number]
             self.assertFalse(bill.invoice_line_ids, number)
-            self.assertFalse(bill.l10n_pl_edi_status, number)
+            self.assertEqual(bill.l10n_pl_edi_status, 'fetched', number)
             self.assertTrue(self._bill_xml_attachment(bill, number), number)
         failing_messages = bills_by_number['failing-ksef-number'].message_ids.mapped('body')
         self.assertTrue(any("Error importing attachment" in body for body in failing_messages))
