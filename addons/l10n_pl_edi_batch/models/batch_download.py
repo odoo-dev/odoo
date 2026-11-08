@@ -11,12 +11,12 @@ from odoo import api, fields, models
 from odoo.exceptions import UserError
 
 from odoo.addons.l10n_pl_edi.exceptions import KSeFRateLimitError
+from odoo.addons.l10n_pl_edi.models.account_move import KSEF_FIRST_DAY
 from odoo.addons.l10n_pl_edi_batch.tools.ksef_api_service import KsefApiServiceBatch as Service
 
 _logger = logging.getLogger(__name__)
 
 KSEF_WINDOW = 7
-KSEF_FIRST_DAY = fields.Date.from_string('2026-01-31')
 KSEF_IN_PROGRESS = 100
 KSEF_READY = 200
 ODOO_ERROR = 999
