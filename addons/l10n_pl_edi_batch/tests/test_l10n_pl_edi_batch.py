@@ -666,11 +666,11 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
         self.assertEqual(historic_batch.state, 'downloaded')
         self.assertEqual(self._cron_triggers(historic_cron_xmlid), historic_triggers_before)
 
-        # A historic batch done: the historic cron requests the next window
+        # A historic batch done: the historic cron requests the next window in 5 minutes
         with freeze_time(now):
             self.Batch.sudo()._cron_import()
         self.assertEqual(historic_batch.state, 'done')
-        self.assertIn(now, self._cron_triggers(historic_cron_xmlid))
+        self.assertIn(now + timedelta(minutes=5), self._cron_triggers(historic_cron_xmlid))
         bills = self.env['account.move'].search([('l10n_pl_edi_number', 'in', ('today-ksef-number', 'historic-ksef-number'))])
         self.assertEqual(len(bills), 2)
 
@@ -702,7 +702,7 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
         bills = self.env['account.move'].search([('l10n_pl_edi_number', 'like', 'budget-%-ksef-number')])
         self.assertEqual(len(bills), 3)
         self.assertEqual(batch.state, 'done')
-        self.assertIn(now, self._cron_triggers('l10n_pl_edi_batch.ir_cron_request_historic'))
+        self.assertIn(now + timedelta(minutes=5), self._cron_triggers('l10n_pl_edi_batch.ir_cron_request_historic'))
 
     def test_import_bills_bad_xmls(self):
         self._enable_batches(self.company)
@@ -937,21 +937,21 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
         with freeze_time(now), self._mock_ksef(ready_answer):
             self.Batch.sudo()._cron_check_status()
         self.assertEqual(first_batch.state, 'downloading')
-        self.assertNotIn(now, self._cron_triggers(historic_cron_xmlid))
+        self.assertNotIn(now + timedelta(minutes=5), self._cron_triggers(historic_cron_xmlid))
         self._set_write_date(first_batch, now - timedelta(seconds=10))
         mock_decrypt, mock_request = self._mock_part_downloads(content=zip_stream.getvalue())
         with freeze_time(now), mock_decrypt, mock_request:
             self.Batch.sudo()._cron_download()
         self.assertEqual(first_batch.state, 'downloaded')
-        self.assertNotIn(now, self._cron_triggers(historic_cron_xmlid))
+        self.assertNotIn(now + timedelta(minutes=5), self._cron_triggers(historic_cron_xmlid))
         self._set_write_date(first_batch, now - timedelta(seconds=10))
         with freeze_time(now):
             self.Batch.sudo()._cron_import()
         self.assertEqual(first_batch.state, 'done')
         self.assertTrue(self.env['account.move'].search([('l10n_pl_edi_number', '=', ksef_number)]))
 
-        # Done: the historic cron runs again right away, for the week before
-        self.assertIn(now, self._cron_triggers(historic_cron_xmlid))
+        # Done: the historic cron runs again in 5 minutes, for the week before
+        self.assertIn(now + timedelta(minutes=5), self._cron_triggers(historic_cron_xmlid))
         second_batch = self._run_historic_cron(now)
         self.assertEqual(second_batch.date_from, yesterday - timedelta(days=14))
 
@@ -963,12 +963,12 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
         first_batch = self._run_historic_cron(now)
         first_batch.sudo().content = False
 
-        # No invoice in the window: done at the status check, and the historic cron runs again right away
+        # No invoice in the window: done at the status check, and the historic cron runs again in 5 minutes
         self._set_write_date(first_batch, now - timedelta(seconds=10))
         with freeze_time(now), self._mock_ksef({'status': {'code': 200}, 'package': {'invoiceCount': 0, 'parts': []}}):
             self.Batch.sudo()._cron_check_status()
         self.assertEqual(first_batch.state, 'done')
-        self.assertIn(now, self._cron_triggers(historic_cron_xmlid))
+        self.assertIn(now + timedelta(minutes=5), self._cron_triggers(historic_cron_xmlid))
         second_batch = self._run_historic_cron(now)
         self.assertEqual(second_batch.date_from, yesterday - timedelta(days=14))
 

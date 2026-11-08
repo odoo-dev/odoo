@@ -31,6 +31,7 @@ STATES = [
 ]
 
 MAX_RETRIES = 9
+HISTORIC_REQUEST_DELAY = timedelta(minutes=5)
 IMPORT_SECONDS = 60
 
 
@@ -305,7 +306,8 @@ class BatchDownload(models.Model):
                     if is_truncated:
                         self._create_batch_download(company, batch.date_to, old_date_to)
                 elif batch.state == 'done' and batch.kind == 'historic':
-                    self.env.ref('l10n_pl_edi_batch.ir_cron_request_historic')._trigger()  # empty window: request the next one
+                    # empty window: request the next one
+                    self.env.ref('l10n_pl_edi_batch.ir_cron_request_historic')._trigger(at=fields.Datetime.now() + HISTORIC_REQUEST_DELAY)
                 elif batch.state == 'requested':
                     if batch.retry_count < MAX_RETRIES:
                         batch.retry_count += 1
@@ -407,7 +409,8 @@ class BatchDownload(models.Model):
                 batch.part_ids.unlink()
 
             if batch.kind == 'historic':
-                self.env.ref('l10n_pl_edi_batch.ir_cron_request_historic')._trigger()  # request the next window
+                # request the next window
+                self.env.ref('l10n_pl_edi_batch.ir_cron_request_historic')._trigger(at=fields.Datetime.now() + HISTORIC_REQUEST_DELAY)
             return len(batches) - 1
 
         self._run_for_all_companies(do_import, 'l10n_pl_edi_batch.ir_cron_import')
