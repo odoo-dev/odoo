@@ -674,6 +674,36 @@ class TestL10nPlEdiBatch(AccountTestInvoicingCommon):
         bills = self.env['account.move'].search([('l10n_pl_edi_number', 'in', ('today-ksef-number', 'historic-ksef-number'))])
         self.assertEqual(len(bills), 2)
 
+    def test_cron_import_time_budget(self):
+        self._enable_batches(self.company)
+        now = fields.Datetime.now().replace(microsecond=0)
+        with file_open('l10n_pl_edi/tests/import_xmls/fa3_standard_bill.xml', 'rb') as xml_file:
+            xml_content = xml_file.read()
+        zip_stream = io.BytesIO()
+        with zipfile.ZipFile(zip_stream, 'w', compression=zipfile.ZIP_DEFLATED) as zip_file:
+            for number in range(3):
+                zip_file.writestr(f'budget-{number}-ksef-number.xml', xml_content)
+        batch = self._create_batch('budget', {'status': {'code': 200}})
+        batch.sudo().write({'date_from': now - timedelta(days=9), 'date_to': now - timedelta(days=2)})
+        self._add_zip_parts(batch, zip_stream.getvalue(), count=2)
+        import_cron_xmlid = 'l10n_pl_edi_batch.ir_cron_import'
+
+        # No time left: each run imports one bill, and triggers the import again for the rest
+        with patch('odoo.addons.l10n_pl_edi_batch.models.batch_download.IMPORT_SECONDS', 0), freeze_time(now):
+            for imported in (1, 2):
+                self.Batch.sudo()._cron_import()
+                bills = self.env['account.move'].search([('l10n_pl_edi_number', 'like', 'budget-%-ksef-number')])
+                self.assertEqual(len(bills), imported)
+                self.assertEqual(batch.state, 'downloaded')
+                self.assertIn(now, self._cron_triggers(import_cron_xmlid))
+
+            # The last bill: the batch is done, and the history moves on
+            self.Batch.sudo()._cron_import()
+        bills = self.env['account.move'].search([('l10n_pl_edi_number', 'like', 'budget-%-ksef-number')])
+        self.assertEqual(len(bills), 3)
+        self.assertEqual(batch.state, 'done')
+        self.assertIn(now, self._cron_triggers('l10n_pl_edi_batch.ir_cron_request_historic'))
+
     def test_import_bills_bad_xmls(self):
         self._enable_batches(self.company)
         with file_open('l10n_pl_edi/tests/import_xmls/fa3_standard_bill.xml', 'rb') as xml_file:

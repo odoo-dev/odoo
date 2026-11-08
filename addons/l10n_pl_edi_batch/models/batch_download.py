@@ -1,6 +1,7 @@
 import base64
 import logging
 import tempfile
+import time
 import zipfile
 from datetime import timedelta, timezone
 
@@ -30,6 +31,7 @@ STATES = [
 ]
 
 MAX_RETRIES = 9
+IMPORT_SECONDS = 60
 
 
 class BatchDownload(models.Model):
@@ -332,6 +334,7 @@ class BatchDownload(models.Model):
 
     @api.model
     def _cron_import(self):
+        deadline = time.monotonic() + IMPORT_SECONDS
 
         def do_import(company):
             batches = self._get_company_batches(company, 'downloaded')
@@ -370,7 +373,8 @@ class BatchDownload(models.Model):
                     ]).mapped('l10n_pl_edi_number'))
 
                     # loop over zipped files
-                    for ksef_number in (ksef_numbers - existing_ksef_numbers):
+                    new_ksef_numbers = ksef_numbers - existing_ksef_numbers
+                    for count, ksef_number in enumerate(new_ksef_numbers, 1):
 
                         # create the move and the attachment
                         move = AccountMove.create([{'move_type': 'in_invoice', 'l10n_pl_edi_number': ksef_number}])
@@ -393,6 +397,11 @@ class BatchDownload(models.Model):
                         # fetched even if the import failed: the XML is attached, the error is in the chatter
                         move.l10n_pl_edi_status = 'fetched'
                         self._commit()
+
+                        # out of time: the next run imports the rest
+                        if count < len(new_ksef_numbers) and time.monotonic() >= deadline:
+                            self.env.ref('l10n_pl_edi_batch.ir_cron_import')._trigger()
+                            return
 
                 batch.part_ids.unlink()
 
