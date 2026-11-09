@@ -56,7 +56,7 @@ class MailActivitySchedule(models.TransientModel):
                               compute='_compute_plan_id', store=True, readonly=False)
     plan_has_user_on_demand = fields.Boolean(related="plan_id.has_user_on_demand")
     plan_schedule_line_ids = fields.One2many('mail.activity.schedule.line', 'activity_schedule_id',
-                                             string='Schedule Lines', compute='_compute_plan_schedule_line_ids')
+                                             string='Schedule Lines', compute='_compute_plan_schedule_line_ids', store=True)
     plan_on_demand_user_id = fields.Many2one(
         'res.users', 'Assigned To',
         help='Choose assignation for activities with on demand assignation.',

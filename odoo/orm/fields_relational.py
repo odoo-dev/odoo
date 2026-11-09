@@ -1210,7 +1210,10 @@ class One2many(_RelationalMulti):
                         link(recs[-1], browse((command[1],)))
                     elif command[0] == Command.CREATE:
                         for record in recs:
-                            link(record, comodel.new(command[2], ref=command[1]))
+                            if is_real:
+                                link(record, comodel.create(command[2]))
+                            else:
+                                link(record, comodel.new(command[2], ref=command[1]))
                     elif command[0] == Command.UPDATE:
                         browse(command[1]).update(command[2])
                     elif command[0] in (Command.DELETE, Command.UNLINK):
