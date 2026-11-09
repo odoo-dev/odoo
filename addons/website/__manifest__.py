@@ -3,6 +3,7 @@
 
 {
     'name': 'Website',
+    'version': '1.1',
     'category': 'Website/Website',
     'sequence': 20,
     'summary': 'Enterprise website builder',
