@@ -1023,3 +1023,26 @@ class TestHrVersion(TestHrCommon):
         self.assertEqual(version_1.date_end, date(2023, 12, 31))
         self.assertEqual(version_2.date_start, date(2024, 1, 1))
         self.assertFalse(version_2.date_end)
+
+    def test_certificate_between_versions(self):
+        """ Certificate is now in a field of the employee version, so each version should be independent. """
+
+        employee = self.env['hr.employee'].create({
+            'name': 'Joaozinho das firula',
+            'date_version': '2026-01-01',
+        })
+
+        version_1 = employee.version_id
+        employee.write({
+            'certificate': 'bachelor',
+        })
+
+        version_2 = employee.create_version({'date_version': '2026-06-06'})
+        version_2.write({
+            'certificate': 'master',
+        })
+
+        self.assertEqual(version_1.certificate, 'bachelor')
+        self.assertEqual(version_2.certificate, 'master')
+        self.assertEqual(employee.with_context(version_id=version_1.id).certificate, 'bachelor')
+        self.assertEqual(employee.certificate, 'master')
