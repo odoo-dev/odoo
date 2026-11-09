@@ -100,6 +100,30 @@ test("test_click_all_orders_keep_customer: all orders keeps the selected custome
     await Utils.checkSelectedCustomer(partner.name);
 });
 
+test.tags("desktop");
+test("test_dismiss_partner_list_keeps_customer: closing the customer popup keeps the customer", async () => {
+    const store = await setupAndMountPosApp();
+
+    const partner = store.models["res.partner"].get(3);
+
+    await Utils.selectCustomer(partner.name);
+    await animationFrame();
+    expect(store.getOrder().getPartner()).toBe(partner);
+
+    // Reopen the list and leave it by clicking outside the dialog.
+    await Utils.clickPartnerButton();
+    await contains(".modal").click();
+    await animationFrame();
+    expect(".partner-list").toHaveCount(0);
+    expect(store.getOrder().getPartner()).toBe(partner);
+
+    // Unselect is the only way to clear it.
+    await Utils.clickPartnerButton();
+    await contains(".partner-info .unselect-tag").click();
+    await animationFrame();
+    expect(store.getOrder().getPartner()).toBe(undefined);
+});
+
 test("PosCategoriesOrder: pos categories keep sequence and hierarchy", async () => {
     const store = await setupAndMountPosApp();
 

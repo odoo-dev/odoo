@@ -2433,6 +2433,10 @@ export class PosStore extends WithLazyGetterTrap {
             partner: currentPartner,
         });
 
+        if (payload === undefined) {
+            return currentPartner;
+        }
+
         this.setPartnerToCurrentOrder(payload || false);
 
         return payload;
