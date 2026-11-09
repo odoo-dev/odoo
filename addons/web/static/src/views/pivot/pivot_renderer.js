@@ -341,14 +341,17 @@ export class PivotRenderer extends Component {
                 delete context[x];
             }
         });
-
         // retrieve form and list view ids from the action
         const { views = [] } = this.env.config;
-        this.views = ["list", "form"].map((viewType) => {
+        const hasKanban = views.some((view) => view[1] === "kanban");
+        const viewTypes = ["list", "form"];
+        if (this.uiService.isSmall && hasKanban) {
+            viewTypes.unshift("kanban");
+        }
+        this.views = viewTypes.map((viewType) => {
             const view = views.find((view) => view[1] === viewType);
             return [view ? view[0] : false, viewType];
         });
-
         const group = { rowValues: cell.groupId[0], colValues: cell.groupId[1] };
         this.openView(this.model.getGroupDomain(group), this.views, context, newWindow);
     }
