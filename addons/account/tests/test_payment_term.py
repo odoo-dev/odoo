@@ -558,6 +558,41 @@ class TestAccountPaymentTerms(AccountTestInvoicingCommon):
         expected_date_special_case = self.invoice.line_ids.filtered(lambda l: l.account_id == self.company_data['default_account_receivable']).mapped('date_maturity'),
         self.assertEqual(expected_date_special_case[0], [fields.Date.from_string('2024-02-29')])
 
+    def test_payment_term_months_after_invoice_date_on_the(self):
+        payment_term = self.env['account.payment.term'].create({
+            'name': 'Months after invoice date on a day',
+            'line_ids': [Command.create({
+                'value': 'percent',
+                'value_amount': 100,
+                'nb_days': 0,
+                'delay_type': 'months_after_invoice_date_on_the',
+                'days_next_month': 10,
+            })],
+        })
+        line = payment_term.line_ids
+
+        self.assertEqual(line._get_due_date('2024-02-11'), fields.Date.from_string('2024-03-10'))
+        line.nb_days = 1
+        self.assertEqual(line._get_due_date('2024-02-11'), fields.Date.from_string('2024-04-10'))
+        line.days_next_month = 20
+        self.assertEqual(line._get_due_date('2024-02-11'), fields.Date.from_string('2024-03-20'))
+        line.days_next_month = 31
+        self.assertEqual(line._get_due_date('2024-01-11'), fields.Date.from_string('2024-02-29'))
+        self.assertEqual(line._get_due_date('2023-01-11'), fields.Date.from_string('2023-02-28'))
+
+    def test_payment_term_months_after_invoice_date_on_the_rejects_zero_day(self):
+        with self.assertRaisesRegex(ValidationError, 'The day of the month must be between 1 and 31.'):
+            self.env['account.payment.term'].create({
+                'name': 'Invalid day of month',
+                'line_ids': [Command.create({
+                    'value': 'percent',
+                    'value_amount': 100,
+                    'nb_days': 0,
+                    'delay_type': 'months_after_invoice_date_on_the',
+                    'days_next_month': 0,
+                })],
+            })
+
     def test_payment_term_labels(self):
         # create a payment term with 40% now, 30% in 30 days and 30% in 60 days
         multiple_installment_term = self.env['account.payment.term'].create({
