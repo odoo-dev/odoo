@@ -388,3 +388,41 @@ class TestPeppolParticipant(PeppolConnectorCommon):
             p_rec = partner_form.save()
             self.assertEqual(p_rec.commercial_partner_id, p_rec)
             self.assertEqual(p_rec.commercial_partner_id.name, "test")
+
+    def test_avoid_recompute_onchange_vat_replace_endpoint(self):
+        test_company = self.env.company
+        test_company.write({
+            'country_id': self.env.ref('base.be').id,
+            'account_peppol_proxy_state': 'receiver',
+            'peppol_eas': 'odemo',
+            'peppol_endpoint': '0123456789',
+        })
+
+        self.assertRecordValues(test_company,[{
+            'peppol_eas': 'odemo',
+            'peppol_endpoint': '0123456789',
+        }])
+
+        test_company.partner_id.vat ='BE0477472701'
+
+        self.assertRecordValues(test_company.partner_id, [{
+            'peppol_eas': 'odemo',
+            'peppol_endpoint': '0123456789',
+        }])
+
+    def test_avoid_recompute_onchange_vat_not_registered(self):
+        test_company = self.env.company
+        test_company.write({
+            'country_id': self.env.ref('base.be').id,
+            'account_peppol_proxy_state': 'receiver',
+            'peppol_eas': 'odemo',
+            'peppol_endpoint': '0123456789',
+        })
+
+        test_company.account_peppol_proxy_state = 'not_registered'
+        test_company.partner_id.vat = 'BE0477472701'
+
+        self.assertRecordValues(test_company.partner_id, [{
+            'peppol_eas': '0208',
+            'peppol_endpoint': '0477472701',
+        }])
