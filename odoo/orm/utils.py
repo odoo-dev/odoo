@@ -168,32 +168,6 @@ class PrefetchRelational(Reversible):  # noqa: PLW1641
                     yield from coids
 
 
-class OriginIds(Reversible):  # noqa: PLW1641
-    """ A reversible iterable returning the origin ids of a collection of ``ids``.
-        Actual ids are returned as is, and ids without origin are not returned.
-    """
-    __slots__ = ['ids']
-
-    def __init__(self, ids):
-        self.ids = ids
-
-    def __eq__(self, other):
-        return isinstance(other, OriginIds) and self.ids == other.ids
-
-    def __hash__(self):
-        return freehash(self.ids) ^ 1
-
-    def __iter__(self):
-        for id_ in self.ids:
-            if id_ := id_ or id_.origin:
-                yield id_
-
-    def __reversed__(self):
-        for id_ in reversed(self.ids):
-            if id_ := id_ or id_.origin:
-                yield id_
-
-
 class PrefetchUnion(Reversible):
     """ A prefetch object for the concatenation/union of recordsets.
     The constructor takes the ids of the concatenation/union and the prefetch
@@ -263,7 +237,6 @@ class PrefetchUnion(Reversible):
 
 class Prefetch:
     relational = PrefetchRelational
-    origin = OriginIds
     union = PrefetchUnion
 
 

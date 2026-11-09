@@ -65,7 +65,7 @@ from .fields_textual import Char, StoredTranslations
 from .identifiers import NewId
 from .query import Query, TableSQL
 from .utils import (
-    OriginIds, Prefetch, ReversibleComparator, check_object_name, parse_field_expr,
+    Prefetch, ReversibleComparator, check_object_name, parse_field_expr,
     COLLECTION_TYPES, SQL_OPERATORS,
     SUPERUSER_ID,
 )
@@ -5514,7 +5514,7 @@ class BaseModel(metaclass=MetaModel):
         """ Return the list of actual record ids corresponding to ``self``. """
         if all(self._ids):
             return list(self._ids)  # already real records
-        return list(OriginIds(self._ids))
+        return list(NewId.origin_ids(self._ids))
 
     #
     # Conversion methods
@@ -6144,12 +6144,21 @@ class BaseModel(metaclass=MetaModel):
         return record
 
     @property
+    def _newed(self) -> Self:
+        """ Return the new records corresponding to ``self``. """
+        if not all(self._ids):
+            return self  # already new records
+        ids = tuple(NewId.new_ids(self._ids))
+        prefetch_ids = NewId.new_ids(self._prefetch_ids)
+        return self.__class__(self.env, ids, prefetch_ids)
+
+    @property
     def _origin(self) -> Self:
         """ Return the actual records corresponding to ``self``. """
         if all(self._ids):
             return self  # already real records
-        ids = tuple(OriginIds(self._ids))
-        prefetch_ids = OriginIds(self._prefetch_ids)
+        ids = tuple(NewId.origin_ids(self._ids))
+        prefetch_ids = NewId.origin_ids(self._prefetch_ids)
         return self.__class__(self.env, ids, prefetch_ids)
 
     #
@@ -6220,6 +6229,8 @@ class BaseModel(metaclass=MetaModel):
             if other._name != self._name:
                 raise TypeError(f"inconsistent models in: {self} + {other}")
             if other:
+                if not all(self._ids) or not all(other._ids):
+                    self, other = self._newed, other._newed  # noqa: PLW0642
                 ids = self._ids + other._ids
                 return self.__class__(self.env, ids, Prefetch.union(ids, self._prefetch_ids, other._prefetch_ids))
         except AttributeError:
@@ -6236,18 +6247,31 @@ class BaseModel(metaclass=MetaModel):
             warnings.warn("Since 20.0, use concat() with only one iterable")
         if self:
             warnings.warn("Since 20.0, use concat() on an empty recordset")
-        ids = []
-        prefetch_ids_list = []
+
+        recs_list = []
         for arg in (self, *it, *args):
             try:
                 if arg._name != self._name:
                     raise TypeError(f"inconsistent models in: {self} + {arg}")
                 if not arg._ids:
                     continue
-                ids.extend(arg._ids)
-                prefetch_ids_list.append(arg._prefetch_ids)
+                recs_list.append(arg)
             except AttributeError:
                 raise TypeError(f"unsupported operand types in: {self} + {arg!r}")
+
+        if not recs_list:
+            return self
+
+        if not all(recs._ids[0] for recs in recs_list):
+            # new records in the concat -> newify all records
+            recs_list = [recs._newed for recs in recs_list]
+
+        ids = []
+        prefetch_ids_list = []
+        for recs in recs_list:
+            ids.extend(recs._ids)
+            prefetch_ids_list.append(recs._prefetch_ids)
+
         ids = tuple(ids)
         if len(prefetch_ids_list) == 1:
             prefetch_ids = prefetch_ids_list[0]
@@ -6289,6 +6313,8 @@ class BaseModel(metaclass=MetaModel):
             if other._name != self._name:
                 raise TypeError(f"inconsistent models in: {self} | {other}")
             if other:
+                if not all(self._ids) or not all(other._ids):
+                    self, other = self._newed, other._newed  # noqa: PLW0642
                 ids = tuple(dict.fromkeys(self._ids + other._ids))
                 return self.__class__(self.env, ids, Prefetch.union(ids, self._prefetch_ids, other._prefetch_ids))
         except AttributeError:
@@ -6305,18 +6331,31 @@ class BaseModel(metaclass=MetaModel):
             warnings.warn("Since 20.0, use union() with only one iterable")
         if self:
             warnings.warn("Since 20.0, use union() on an empty recordset")
-        ids = []
-        prefetch_ids_list = []
+
+        recs_list = []
         for arg in (self, *it, *args):
             try:
                 if arg._name != self._name:
                     raise TypeError(f"inconsistent models in: {self} | {arg}")
                 if not arg._ids:
                     continue
-                ids.extend(arg._ids)
-                prefetch_ids_list.append(arg._prefetch_ids)
+                recs_list.append(arg)
             except AttributeError:
                 raise TypeError(f"unsupported operand types in: {self} | {arg!r}")
+
+        if not recs_list:
+            return self
+
+        if not all(recs._ids[0] for recs in recs_list):
+            # new records in the union -> newify all records
+            recs_list = [recs._newed for recs in recs_list]
+
+        ids = []
+        prefetch_ids_list = []
+        for recs in recs_list:
+            ids.extend(recs._ids)
+            prefetch_ids_list.append(recs._prefetch_ids)
+
         ids = tuple(dict.fromkeys(ids))
         if len(prefetch_ids_list) == 1:
             prefetch_ids = prefetch_ids_list[0]

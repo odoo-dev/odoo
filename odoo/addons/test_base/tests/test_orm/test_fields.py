@@ -2271,6 +2271,18 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
         with self.assertRaises(ValueError):
             Model.browse([real_id, new_id2])
 
+        # concat and union with same kind of ids
+        self.assertEqual((real_record + real_record)._ids, real_record._ids + real_record._ids)
+        self.assertEqual((new_record + new_origin)._ids, new_record._ids + new_origin._ids)
+        self.assertEqual((real_record | real_record)._ids, real_record._ids)
+        self.assertEqual((new_record | new_origin)._ids, new_record._ids + new_origin._ids)
+
+        # concat and union with mixed ids are turned into new ids
+        self.assertEqual((real_record + new_record)._ids, (new_origin + new_record)._ids)
+        self.assertEqual(Model.concat([real_record, new_record])._ids, (new_origin + new_record)._ids)
+        self.assertEqual((real_record | new_record)._ids, (new_origin | new_record)._ids)
+        self.assertEqual(Model.union([real_record, new_record])._ids, (new_origin | new_record)._ids)
+
     def test_40_new_defaults(self):
         """ Test new records with defaults. """
         user = self.env.user

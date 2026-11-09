@@ -1,5 +1,8 @@
 import functools
 import typing
+from collections.abc import Reversible
+
+from odoo.tools.misc import freehash
 
 
 @functools.total_ordering
@@ -49,6 +52,54 @@ class NewId:
         else:
             id_part = hex(id(self))
         return "NewId_%s" % id_part
+
+    class origin_ids(Reversible):
+        """ A reversible iterable returning the origin ids of a collection of ``ids``.
+        Actual ids are returned as is, and ids without origin are not returned.
+        """
+        __slots__ = ['ids']
+
+        def __init__(self, ids):
+            self.ids = ids
+
+        def __eq__(self, other):
+            return isinstance(other, self.__class__) and self.ids == other.ids
+
+        def __hash__(self):
+            return freehash(self.ids) ^ 1
+
+        def __iter__(self):
+            for id_ in self.ids:
+                if id_ := id_ or id_.origin:
+                    yield id_
+
+        def __reversed__(self):
+            for id_ in reversed(self.ids):
+                if id_ := id_ or id_.origin:
+                    yield id_
+
+    class new_ids(Reversible):
+        """ A reversible iterable returning the new ids of a collection of ``ids``.
+        New ids are returned as is, and new ids with origin are returned for the others.
+        """
+        __slots__ = ['ids']
+
+        def __init__(self, ids):
+            self.ids = ids
+
+        def __eq__(self, other):
+            return isinstance(other, self.__class__) and self.ids == other.ids
+
+        def __hash__(self):
+            return freehash(self.ids) ^ 1
+
+        def __iter__(self):
+            for id_ in self.ids:
+                yield id_ and NewId(id_)
+
+        def __reversed__(self):
+            for id_ in reversed(self.ids):
+                yield id_ and NewId(id_)
 
 
 # By default, in the ORM we initialize it as an int, but any type should work.
