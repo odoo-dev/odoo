@@ -17,13 +17,6 @@
                     <div class="o_model_field_selector_popover_title px-2 text-truncate">
                         <t t-out="this.state.page.title"/>
                     </div>
-                    <i class="o_model_field_selector_popover_close btn btn-hover-dark me-n2 oi"
-                       data-icon="times"
-                       data-tooltip="Close"
-                       role="img"
-                       aria-label="Close"
-                       t-on-click="() => this.props.close()"
-                    />
                 </div>
                 <t t-if="this.props.showSearchInput">
                     <div class="o_model_field_selector_popover_search mt-1">

@@ -672,7 +672,7 @@ test("debug input in model field selector popover", async () => {
     await mountWithCleanup(Parent);
     await openModelFieldSelectorPopover();
     await contains(".o_model_field_selector_debug").edit("a", { confirm: "tab" });
-    await contains(".o_model_field_selector_popover_close").click();
+    await contains(document.body).click();
     expect.verifySteps([`[("a", "=", 1)]`]);
     expect(getCurrentPath()).toBe("a");
     expect(".o_model_field_selector_warning").toHaveCount(1);

@@ -130,7 +130,7 @@ test("creating a field chain from scratch", async () => {
     // Remove the current selection and recreate it again
     await openModelFieldSelectorPopover();
     await contains(".o_model_field_selector_popover_prev_page").click();
-    await contains(".o_model_field_selector_popover_close").click();
+    await contains(document.body).click();
     expect.verifySteps(["update: product_id"]);
 
     await openModelFieldSelectorPopover();
@@ -712,14 +712,14 @@ test("debug input", async () => {
     expect(getModelFieldSelectorValues()).toEqual(["a"]);
     expect(".o_model_field_selector_warning").toHaveCount(1);
 
-    await contains(".o_model_field_selector_popover_close").click();
+    await contains(document.body).click();
 
     await openModelFieldSelectorPopover();
     await contains(".o_model_field_selector_debug").edit("foo");
     expect(getModelFieldSelectorValues()).toEqual(["Foo"]);
     expect(".o_model_field_selector_warning").toHaveCount(0);
 
-    await contains(".o_model_field_selector_popover_close").click();
+    await contains(document.body).click();
 });
 
 test("focus on search input", async () => {
@@ -918,7 +918,7 @@ test("Modify path in popover debug input and click away", async () => {
     );
     expect(getModelFieldSelectorValues()).toEqual(["Foo"]);
 
-    await contains(".o_model_field_selector_popover_close").click();
+    await contains(document.body).click();
     expect(getModelFieldSelectorValues()).toEqual(["foooooo"]);
     expect.verifySteps(["foooooo"]);
 });
