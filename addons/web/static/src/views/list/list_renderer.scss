@@ -1,4 +1,14 @@
 /* ------- List renderer ------- */
+
+@property --ListRenderer-shadow-start-color { syntax: "<color>"; inherits: false; initial-value: transparent; }
+@property --ListRenderer-shadow-end-color { syntax: "<color>"; inherits: false; initial-value: transparent; }
+
+@keyframes ListRenderer-scroll-shadow {
+    0% { --ListRenderer-shadow-start-color: transparent; --ListRenderer-shadow-end-color: var(--ListRenderer-shadow-color); }
+    2%, 98% { --ListRenderer-shadow-start-color: var(--ListRenderer-shadow-color); --ListRenderer-shadow-end-color: var(--ListRenderer-shadow-color); }
+    100% { --ListRenderer-shadow-start-color: var(--ListRenderer-shadow-color); --ListRenderer-shadow-end-color: transparent; }
+}
+
 .o_list_renderer {
     --ListRenderer-table-padding-x: var(--o-bs-table-cell-padding-x-sm);
     --ListRenderer-thead-padding-y: var(--o-bs-spacer-4);
@@ -27,6 +37,42 @@
 
     @media print {
         width: 100% !important;
+    }
+
+    @media screen and (max-width: 767.98px) {
+        &.table-responsive {
+            display: grid;
+            align-content: start;
+            container-type: inline-size;
+            scroll-timeline: --ListRenderer-scroll inline;
+
+            > table, &::after {
+                grid-area: 2 / 1;
+            }
+
+            &::after {
+                --ListRenderer-shadow-color: rgba(0, 0, 0, 0.1);
+                --ListRenderer-shadow-size: 1.5rem;
+
+                content: "";
+                position: sticky;
+                inset-inline-start: 0;
+                z-index: calc(var(--sticky-header-zindex) + 1);
+                width: 100cqi;
+                pointer-events: none;
+                background: linear-gradient(
+                    to right,
+                    var(--ListRenderer-shadow-start-color),
+                    transparent var(--ListRenderer-shadow-size),
+                    transparent calc(100% - var(--ListRenderer-shadow-size)),
+                    var(--ListRenderer-shadow-end-color)
+                );
+                @supports (animation-timeline: scroll()) {
+                    animation: ListRenderer-scroll-shadow linear both;
+                    animation-timeline: --ListRenderer-scroll;
+                }
+            }
+        }
     }
 
     th, td {
