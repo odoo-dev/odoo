@@ -14,7 +14,7 @@ import { QuickVideoSettings } from "@mail/discuss/call/common/quick_video_settin
 import { RecordingDialog } from "@mail/discuss/call/common/recording_dialog";
 import { MicrophoneWarning } from "@mail/discuss/call/common/microphone_warning";
 import { TalkingAudioBars } from "@mail/discuss/call/common/talking_audio_bars";
-import { Component, useEffect } from "@odoo/owl";
+import { Component, untrack, useEffect } from "@odoo/owl";
 import { usePopover } from "@web/core/popover/popover_hook";
 
 export const callActionsRegistry = registry.category("discuss.call/actions");
@@ -68,7 +68,7 @@ export const muteAction = {
                 const hasWarning =
                     store.rtc.showMicrophonePermissionWarning ||
                     store.rtc.showMicrophoneSilentWarning;
-                if (!popover.isOpen && action.actionRef() && hasWarning) {
+                if (!untrack(() => popover.isOpen) && action.actionRef() && hasWarning) {
                     popover.open(action.actionRef(), {});
                 } else {
                     popover.close();

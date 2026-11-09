@@ -4,6 +4,7 @@ import {
     signal,
     toRaw,
     types,
+    untrack,
     useEffect,
     usePlugin,
     useProps,
@@ -389,7 +390,7 @@ export class CallActionList extends Component {
                 this.rtc.showFullscreenHint &&
                 hasFullscreenAction &&
                 !moreAction?.overlayState.isOpen;
-            const isOpen = this.fullscreenHintPopover.isOpen;
+            const isOpen = untrack(() => this.fullscreenHintPopover.isOpen);
             if (moreAction && referenceEl && showHint && !isOpen) {
                 this.fullscreenHintPopover.open(referenceEl, {});
             } else if (!showHint && isOpen) {

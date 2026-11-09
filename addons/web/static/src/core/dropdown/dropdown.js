@@ -5,6 +5,7 @@ import {
     onWillDestroy,
     signal,
     t,
+    untrack,
     useEffect,
     useProps,
     xml,
@@ -344,7 +345,7 @@ export class Dropdown extends Component {
     }
 
     openPopover() {
-        if (this.popover.isOpen || !this.isMounted) {
+        if (untrack(() => this.popover.isOpen) || !this.isMounted) {
             return;
         }
         if (!this.target || !this.target.isConnected) {

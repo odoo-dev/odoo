@@ -1,4 +1,4 @@
-import { onWillUnmount, useScope } from "@odoo/owl";
+import { onWillUnmount, signal, untrack, useScope } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 
 /**
@@ -14,7 +14,7 @@ import { useService } from "@web/core/utils/hooks";
  * @property {() => void} close
  *  - Signals the manager to remove the popover.
  * @property {boolean} isOpen
- *  - Whether the popover is currently open.
+ *  - Whether the popover is currently open (reactive).
  */
 
 /**
@@ -24,26 +24,26 @@ import { useService } from "@web/core/utils/hooks";
  * @returns {PopoverHookReturnType}
  */
 export function makePopover(addFn, component, options) {
-    let removeFn = null;
+    const removeFn = signal(null);
     function close() {
-        removeFn?.();
+        untrack(removeFn)?.();
     }
     return {
         open(target, props) {
             close();
             const newOptions = Object.create(options);
             newOptions.onClose = () => {
-                if (removeFn === remove) {
-                    removeFn = null;
+                if (untrack(removeFn) === remove) {
+                    removeFn.set(null);
                 }
                 options.onClose?.();
             };
             const remove = addFn(target, component, props, newOptions);
-            removeFn = remove;
+            removeFn.set(remove);
         },
         close,
         get isOpen() {
-            return Boolean(removeFn);
+            return Boolean(removeFn());
         },
     };
 }
