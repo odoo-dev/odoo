@@ -89,6 +89,11 @@ Help your customers with this chat, and analyse their feedback.
             'web/static/src/views/fields/file_handler.*',
             'web/static/src/views/fields/formatters.js',
             ('include', 'im_livechat.assets_embed_core'),
+            # Already in web.assets_frontend.
+            ('remove', 'im_livechat/static/src/embed/common/misc.js'),
+            ('remove', 'mail/static/src/html_editor/common/state_file_model_patch.js'),
+            ('remove', 'mail/static/src/utils/common/format.js'),
+            ('remove', 'mail/static/src/utils/common/html.js'),
             'im_livechat/static/src/embed/frontend/**/*',
         ],
         'web.assets_backend': [
