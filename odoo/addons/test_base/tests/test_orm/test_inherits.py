@@ -62,6 +62,8 @@ class test_inherits(common.TransactionCase):
     def test_write_4_one2many(self):
         """ Check that we can write on an inherited one2many field. """
         box = self.env.ref('test_base.box_a')
+        # TOFIX: this creates a new record and adds it to the inherited field,
+        # then the inverse method actually creates the line in the parent model
         box.write({'line_ids': [Command.create({'name': 'Line 1'})]})
         self.assertTrue(all(box.line_ids._ids))
         self.assertEqual(box.line_ids.mapped('name'), ['Line 1'])
