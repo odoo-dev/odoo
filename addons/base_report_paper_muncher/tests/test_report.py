@@ -95,7 +95,7 @@ class TestPaperMuncherReport(odoo.tests.HttpCase):
         pdf = self._render_pdf(self.partners.ids)
         self.assertTrue(pdf.startswith(b'%PDF-'), f"Expected a valid PDF got:\n{pdf}")
 
-    def _render_pdf_with_headers(self):
+    def _use_decorated_view(self):
         self.report_view.arch = '''
             <t t-name="base_report_paper_muncher.test_report_partner">
                 <t t-call="web.html_container">
@@ -111,6 +111,9 @@ class TestPaperMuncherReport(odoo.tests.HttpCase):
                 </t>
             </t>
         '''
+
+    def _render_pdf_with_headers(self):
+        self._use_decorated_view()
         served = {}
         serve = PaperMuncherServer.serve
 
@@ -203,6 +206,17 @@ class TestPaperMuncherReport(odoo.tests.HttpCase):
         self.report.paperformat_id = paperformat
         args = self._render_pdf_args()
         self.assertAlmostEqual(self._scale_arg(args), 96 / paperformat.dpi)
+
+    def test_margins_without_decoration(self):
+        paperformat = self.report.paperformat_id
+        args = self._render_pdf_args()
+        top, _right, bottom, _left = args[args.index('--margins') + 1].split()
+        self.assertEqual((top, bottom), (f'{paperformat.margin_top}mm', f'{paperformat.margin_bottom}mm'))
+        self.assertNotIn('--header-size', args)
+        self._use_decorated_view()
+        args = self._render_pdf_args()
+        self.assertTrue(args[args.index('--margins') + 1].startswith('0mm '))
+        self.assertEqual(args[args.index('--header-size') + 1], f'{paperformat.margin_top}mm')
 
     def test_sandboxed(self):
         self.assertIn('--sandboxed', self._render_pdf_args())

@@ -101,12 +101,19 @@ class IrActionsReport(models.Model):
         # zoom (96/dpi) with --disable-smart-shrinking.
         scale = (96 if paperformat.disable_shrinking else 76) / dpi
 
+        header_size = specific_paperformat_args.get('data-report-margin-top', paperformat.margin_top)
+        footer_size = specific_paperformat_args.get('data-report-margin-bottom', paperformat.margin_bottom)
+        # paper-muncher only reserves --header-size/--footer-size when the document exists
+        margin_top = 0 if header else header_size
+        margin_bottom = 0 if footer else footer_size
         extra_args = [
             '--scale', f'{scale}x',
-            '--margins', f'0mm {paperformat.margin_right}mm 0mm {paperformat.margin_left}mm',
-            '--header-size', f'{specific_paperformat_args.get('data-report-margin-top', paperformat.margin_top)}mm',
-            '--footer-size', f'{specific_paperformat_args.get('data-report-margin-bottom', paperformat.margin_bottom)}mm',
+            '--margins', f'{margin_top}mm {paperformat.margin_right}mm {margin_bottom}mm {paperformat.margin_left}mm',
         ]
+        if header:
+            extra_args += ['--header-size', f'{header_size}mm']
+        if footer:
+            extra_args += ['--footer-size', f'{footer_size}mm']
 
         if header and not headers:
             extra_args += ['--header', 'pipe:/paper-muncher/header.html']
