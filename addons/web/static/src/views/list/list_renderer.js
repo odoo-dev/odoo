@@ -27,7 +27,6 @@ import { ViewButton } from "@web/views/view_button/view_button";
 import { useBounceButton } from "@web/views/view_hook";
 import { Widget } from "@web/views/widgets/widget";
 import { useMagicColumnWidths } from "./column_width_hook";
-import { useThrottleForAnimation } from "@web/core/utils/timing";
 
 import {
     Component,
@@ -207,11 +206,9 @@ export class ListRenderer extends Component {
         onWillUnmount(() => window.removeEventListener("click", onGlobalClick, { capture: true }));
         this.odoomark = odoomark;
 
-        this.onScroll = useThrottleForAnimation(this.updateShadowClasses);
         const shadowResizeObserver = new ResizeObserver(() => {
             if (this.uiService.isSmall) {
                 this.updateShadowPosition();
-                this.updateShadowClasses();
             }
         });
         onMounted(() => {
@@ -2715,15 +2712,6 @@ export class ListRenderer extends Component {
             ev.preventDefault();
             this.toggleRecordSelection(record);
         }
-    }
-
-    updateShadowClasses() {
-        const scrollEl = this.rootRef();
-        scrollEl.classList.toggle("o_list_has_shadow_left", scrollEl.scrollLeft > 0);
-        scrollEl.classList.toggle(
-            "o_list_has_shadow_right",
-            scrollEl.scrollLeft + scrollEl.clientWidth < scrollEl.scrollWidth
-        );
     }
 
     updateShadowPosition() {
