@@ -3995,9 +3995,17 @@ class BaseModel(metaclass=MetaModel):
             key=lambda item: self._fields_update_order__[item[0]]
         )                                           # [(field, value)]
         determine_inverses = defaultdict(list)      # {inverse: fields}
+        inherited = defaultdict(dict)               # {parent_field: values}
         fnames_modifying_relations = []
         protected = set()
         for field, value in field_values:
+            if self.pool.is_modifying_relations(field):
+                fnames_modifying_relations.append(field.name)
+            if field.inherited:
+                # special case: don't apply their inverse method
+                parent_name, target_name = field.related.split('.')
+                inherited[parent_name][target_name] = value
+                continue
             if field.inverse:
                 if field.type in ('one2many', 'many2many'):
                     # The written value is a list of commands that must applied
@@ -4008,8 +4016,6 @@ class BaseModel(metaclass=MetaModel):
                     # order to avoid an inconsistent update.
                     self[field.name]
                 determine_inverses[field.inverse].append(field)
-            if self.pool.is_modifying_relations(field):
-                fnames_modifying_relations.append(field.name)
             if field.inverse or (field.compute and not field.readonly):
                 if field.store or field.type not in ('one2many', 'many2many'):
                     # Protect the field from being recomputed while being
@@ -4054,7 +4060,8 @@ class BaseModel(metaclass=MetaModel):
             self.modified(fnames_modifying_relations, before=True)
 
             for field, value in field_values:
-                field.write(self, value)
+                if not field.inherited:
+                    field.write(self, value)
 
             # determine records depending on new values
             #
@@ -4070,6 +4077,11 @@ class BaseModel(metaclass=MetaModel):
             # is then done too soon because the parent_id was not yet written.
             # (`test_01_website_reset_password_tour`)
             self.modified(vals)
+
+            # write on inherited fields (parent field may have been modified)
+            for parent_name in self._inherits.values():
+                if parent_vals := inherited.get(parent_name):
+                    self[parent_name].update(parent_vals)
 
             if self._parent_store and self._parent_name in vals:
                 self.flush_model([self._parent_name])

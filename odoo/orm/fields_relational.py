@@ -1192,6 +1192,13 @@ class One2many(_RelationalMulti):
                 for record in records:
                     self._update_cache(record, (record[self.name] - lines)._ids)
 
+            if is_real:
+                def create(command):
+                    return comodel.create(command[2])
+            else:
+                def create(command):
+                    return comodel.new(command[2], ref=command[1])
+
             for recs, commands in records_commands_list:
                 for command in commands:
                     if command[0] == Command.SET:
@@ -1205,7 +1212,7 @@ class One2many(_RelationalMulti):
                         link(recs[-1], browse((command[1],)))
                     elif command[0] == Command.CREATE:
                         for record in recs:
-                            link(record, comodel.new(command[2], ref=command[1]))
+                            link(record, create(command))
                     elif command[0] == Command.UPDATE:
                         browse(command[1]).update(command[2])
                     elif command[0] in (Command.DELETE, Command.UNLINK):
