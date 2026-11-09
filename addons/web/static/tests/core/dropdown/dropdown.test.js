@@ -31,6 +31,7 @@ import { Dialog } from "@web/core/dialog/dialog";
 import { DropdownPopover } from "@web/core/dropdown/_behaviours/dropdown_popover";
 import { CheckboxItem } from "@web/core/dropdown/checkbox_item";
 import { Dropdown } from "@web/core/dropdown/dropdown";
+import { useDropdownState } from "@web/core/dropdown/dropdown_hooks";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { useActiveElement } from "@web/core/ui/ui_plugin";
 import { useService } from "@web/core/utils/hooks";
@@ -745,6 +746,30 @@ test("onOpened callback props called after the menu has been mounted", async () 
     await animationFrame();
 
     expect.verifySteps(["onOpened"]);
+});
+
+test("clicking outside closes the dropdown state once", async () => {
+    class Parent extends SimpleDropdown {
+        setup() {
+            this.dropdownProps = {
+                state: useDropdownState({ onClose: () => expect.step("close") }),
+            };
+        }
+    }
+    await mountWithCleanup(Parent);
+
+    await click(DROPDOWN_TOGGLE);
+    await animationFrame();
+    expect(DROPDOWN_MENU).toHaveCount(1);
+
+    if (isSmall()) {
+        await click(".o_bottom_sheet_backdrop");
+    } else {
+        await click("div.outside");
+    }
+    await animationFrame();
+    expect(DROPDOWN_MENU).toHaveCount(0);
+    expect.verifySteps(["close"]);
 });
 
 test("dropdown button can be disabled", async () => {

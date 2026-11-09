@@ -176,3 +176,30 @@ test("popover reopened while the previous one closes itself", async () => {
     await animationFrame();
     expect(".o_popover").toHaveCount(0);
 });
+
+test("isOpen is reactive", async () => {
+    class Comp extends Component {
+        static template = xml`<div class="in-popover">in popover</div>`;
+    }
+
+    class Parent extends Component {
+        static template = xml`<span class="state" t-out="this.popover.isOpen ? 'open' : 'closed'"/>`;
+
+        setup() {
+            this.popover = usePopover(Comp);
+        }
+    }
+
+    const parent = await mountWithCleanup(Parent);
+    expect(".state").toHaveText("closed");
+
+    parent.popover.open(queryOne(".state"), {});
+    await animationFrame();
+    expect(".o_popover .in-popover").toHaveCount(1);
+    expect(".state").toHaveText("open");
+
+    await contains(document.body).click();
+    await animationFrame();
+    expect(".o_popover").toHaveCount(0);
+    expect(".state").toHaveText("closed");
+});
