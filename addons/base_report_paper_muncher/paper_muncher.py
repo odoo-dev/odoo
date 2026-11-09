@@ -1,5 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import contextlib
 import datetime as dt
 import logging
 import os
@@ -37,6 +38,7 @@ WRITE_TIMEOUT = 15  # seconds
 SERVE_TIMEOUT = 15 * 60  # 15 minutes
 CHUNK_SIZE = 8192  # 8kiB, buffer size of paper-muncher
 MAX_INCOMPLETE_EVENT_SIZE = 8192  # 8kiB
+STDERR_TAIL_SIZE = 4096  # 4kiB
 
 
 @dataclass(frozen=True)
@@ -74,6 +76,7 @@ class PaperMuncherServer:
         '_request',
         '_request_body',
         '_selector',
+        '_stderr_tail',
         '_wsgi_environ',
     )
 
@@ -92,11 +95,7 @@ class PaperMuncherServer:
             self._args,
             stdin=sp.PIPE,
             stdout=sp.PIPE,
-            stderr=(
-                sys.stderr
-                if logging.NOTSET < _logger_process.level <= logging.DEBUG else
-                sp.DEVNULL
-            ),
+            stderr=sp.PIPE,
             env=self._os_env,
         )
 
@@ -138,16 +137,21 @@ class PaperMuncherServer:
         self._documents = documents
         self._header = header
         self._footer = footer
+        self._stderr_tail = bytearray()
         self._selector = selectors.DefaultSelector()
         with self._selector:
             self._selector.register(self._process.stdout, selectors.EVENT_READ, data='stdout')
+            self._selector.register(self._process.stderr, selectors.EVENT_READ, data='stderr')
 
             while (
                 self._process.poll() is None  # paper-muncher is alive
-                and self._selector.get_map()  # stdout still registered
+                and self._process.stdout in self._selector.get_map()
             ):
-                events = self._selector.select(timeout=_remaining_time(self._deadline))
-                if events:
+                for key, _mask in self._selector.select(timeout=_remaining_time(self._deadline)):
+                    if key.data == 'stderr':
+                        if not self._read_stderr():
+                            self._selector.unregister(self._process.stderr)
+                        continue
                     chunk = os.read(self._process.stdout.fileno(), CHUNK_SIZE)
                     if logging.NOTSET < _logger_pipe.level <= logging.DEBUG:
                         _logger_pipe.debug("read %d bytes:\n%s", len(chunk), chunk)
@@ -157,9 +161,23 @@ class PaperMuncherServer:
                     self._process_data()
 
         if exit_code := self._process.poll():
-            raise sp.CalledProcessError(exit_code, self._args)
+            os.set_blocking(self._process.stderr.fileno(), False)
+            with contextlib.suppress(BlockingIOError):
+                while self._read_stderr():
+                    pass
+            _logger.error("paper-muncher exited with %s, stderr tail:\n%s",
+                          exit_code, self._stderr_tail.decode(errors='replace'))
+            raise sp.CalledProcessError(exit_code, self._args, stderr=bytes(self._stderr_tail))
 
         return self._pdf
+
+    def _read_stderr(self) -> bytes:
+        chunk = os.read(self._process.stderr.fileno(), CHUNK_SIZE)
+        if chunk:
+            _logger_process.debug("%s", chunk.decode(errors='replace'))
+        self._stderr_tail += chunk
+        del self._stderr_tail[:-STDERR_TAIL_SIZE]
+        return chunk
 
     def _process_data(self):
         while True:

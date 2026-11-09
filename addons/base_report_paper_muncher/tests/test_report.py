@@ -1,5 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from subprocess import CalledProcessError
+
 import odoo.tests
 from odoo.tests import patch
 from odoo.tests.common import TEST_CURSOR_COOKIE_NAME, release_test_lock
@@ -220,6 +222,15 @@ class TestPaperMuncherReport(odoo.tests.HttpCase):
 
     def test_sandboxed(self):
         self.assertIn('--sandboxed', self._render_pdf_args())
+
+    def test_failure_logs_stderr(self):
+        with (
+            self.assertLogs('odoo.addons.base_report_paper_muncher.paper_muncher', 'ERROR') as logs,
+            self.assertRaises(CalledProcessError),
+            PaperMuncherServer([paper_muncher().bin, '--no-such-option']) as server,
+        ):
+            server.serve([])
+        self.assertIn('expected subcommand', logs.output[0])
 
     def test_split_decoration_mismatch(self):
         html = '<!DOCTYPE html><html><body><div id="minimal_layout_report_headers"><div>A</div><div>B</div></div></body></html>'
