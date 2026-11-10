@@ -74,7 +74,7 @@ class PurchaseReport(models.Model):
             table.product_id.product_tmpl_id,
             SQL("%s AS category_id", table.product_id.product_tmpl_id.categ_id),
             table.order_id.company_id.currency_id,
-            table.product_id.product_tmpl_id.uom_id,
+            table.product_id.uom_id,
             SQL("EXTRACT(epoch FROM AGE(%s, %s))/(24*60*60)::decimal(16,2) AS delay", table.order_id.date_approve, table.order_id.date_order),
             SQL("EXTRACT(epoch FROM AGE(%s, %s))/(24*60*60)::decimal(16,2) AS delay_pass", table.date_planned, table.order_id.date_order),
             SQL("COUNT(*) AS nbr_lines"),
@@ -111,7 +111,7 @@ class PurchaseReport(models.Model):
             table.order_id.partner_id.id,
             table.product_id.id,
             table.product_id.product_tmpl_id.id,
-            table.product_id.product_tmpl_id.uom_id.id,
+            table.product_id.uom_id.id,
             table.uom_id.id,
         ]
         if table.consolidation_rate != SQL('1'):

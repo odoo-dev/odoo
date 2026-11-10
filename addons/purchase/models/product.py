@@ -172,12 +172,12 @@ class ProductProduct(models.Model):
             ['uom_id', 'product_id'],
             ['id:recordset'],
         ):
-            if uom != product.product_tmpl_id.uom_id:
+            if uom != product.uom_id:
                 raise UserError(_(
                     'As other units of measure (ex : %(problem_uom)s) '
                     'than %(uom)s have already been used for this product, the change of unit of measure can not be done.'
                     'If you want to change it, please archive the product and create a new one.',
-                    problem_uom=uom.display_name, uom=product.product_tmpl_id.uom_id.display_name))
+                    problem_uom=uom.display_name, uom=product.uom_id.display_name))
             po_lines.uom_id = to_uom_id
             po_lines.flush_recordset()
 

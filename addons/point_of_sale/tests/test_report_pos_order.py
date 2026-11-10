@@ -46,6 +46,46 @@ class TestReportPoSOrder(TestPoSCommon):
         self.assertEqual(reports[0].margin, 150)
         self.assertEqual(reports[0].price_total, 150)
 
+    def test_report_pos_order_variant_uom(self):
+        """The average price is based on the unit of the variant, not the one of its template."""
+        attribute = self.env['product.attribute'].create({
+            'name': 'Packaging',
+            'value_ids': [odoo.Command.create({'name': 'Single'}), odoo.Command.create({'name': 'Pack'})],
+        })
+        template = self.env['product.template'].create({
+            'name': 'Water',
+            'available_in_pos': True,
+            'uom_id': self.env.ref('uom.product_uom_unit').id,
+            'attribute_line_ids': [odoo.Command.create({
+                'attribute_id': attribute.id,
+                'value_ids': [odoo.Command.set(attribute.value_ids.ids)],
+            })],
+        })
+        variant_pack = template.product_variant_ids.sorted('id')[1]
+        variant_pack.uom_id = self.env.ref('uom.product_uom_pack_6')
+
+        self.open_new_session()
+        self.env['pos.order'].create({
+            'session_id': self.pos_session.id,
+            'lines': [(0, 0, {
+                'name': "OL/0001",
+                'product_id': variant_pack.id,
+                'price_unit': 60,
+                'discount': 0,
+                'qty': 1.0,
+                'price_subtotal': 60,
+                'price_subtotal_incl': 60,
+            })],
+            'amount_total': 60.0,
+            'amount_tax': 0.0,
+            'amount_paid': 0.0,
+            'amount_return': 0.0,
+        })
+        self.env.flush_all()
+
+        report = self.env['report.pos.order'].sudo().search([('product_id', '=', variant_pack.id)], limit=1)
+        self.assertEqual(report.average_price, 10)
+
     def test_report_pos_order_1(self):
         """Test the margin and price_total of a PoS Order with taxes."""
 

@@ -10,7 +10,7 @@ class ReportStockQuantity(models.Model):
     _description = 'Stock Quantity Report'
 
     _depends = {
-        'product.product': ['product_tmpl_id'],
+        'product.product': ['product_tmpl_id', 'uom_id'],
         'product.template': ['type'],
         'stock.location': ['parent_path'],
         'stock.move': ['company_id', 'date', 'location_dest_id', 'forecasted_location_id', 'location_id', 'product_id', 'product_qty', 'state'],
@@ -71,7 +71,7 @@ WITH
         LEFT JOIN product_product pp on pp.id=m.product_id
         LEFT JOIN product_template pt on pt.id=pp.product_tmpl_id
         LEFT JOIN uom_uom uom_move ON uom_move.id = m.uom_id
-        LEFT JOIN uom_uom uom_product ON uom_product.id = pt.uom_id
+        LEFT JOIN uom_uom uom_product ON uom_product.id = pp.uom_id
         WHERE pt.is_storable = true AND
             source.w_id IS DISTINCT FROM dest.w_id AND
             (m.product_qty != 0 OR m.quantity != 0) AND

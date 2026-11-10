@@ -317,6 +317,34 @@ class TestStockValuationAVCO(TestStockValuationCommon):
         super().setUpClass()
         cls.product = cls.product_avco
 
+    def test_avco_report_variant_uom(self):
+        """ The audit report expresses the quantities in the unit of the variant. """
+        attribute = self.env['product.attribute'].create({
+            'name': 'Packaging',
+            'value_ids': [Command.create({'name': 'Single'}), Command.create({'name': 'Pack'})],
+        })
+        template = self.env['product.template'].create({
+            'name': 'Water',
+            'is_storable': True,
+            'categ_id': self.product.categ_id.id,
+            'uom_id': self.env.ref('uom.product_uom_unit').id,
+            'attribute_line_ids': [Command.create({
+                'attribute_id': attribute.id,
+                'value_ids': [Command.set(attribute.value_ids.ids)],
+            })],
+        })
+        variant_pack = template.product_variant_ids.sorted('id')[1]
+        uom_pack = self.env.ref('uom.product_uom_pack_6')
+        variant_pack.uom_id = uom_pack
+        self._make_in_move(variant_pack, 2, unit_cost=60, uom_id=uom_pack.id)
+        self.env.flush_all()
+
+        report = self.env['stock.avco.report'].sudo().search([
+            ('product_id', '=', variant_pack.id),
+            ('res_model_name', '=', 'stock.move'),
+        ])
+        self.assertEqual(report.quantity, 2)
+
     def test_normal_1(self):
         self._make_in_move(self.product, 10, unit_cost=10)
         self.assertEqual(self.product.standard_price, 10)

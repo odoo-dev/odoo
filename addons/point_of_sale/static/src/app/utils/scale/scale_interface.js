@@ -94,7 +94,7 @@ export class ScaleInterface {
     setProduct(product, decimalAccuracy, unitPrice) {
         this.product = {
             name: product.display_name || _t("Unnamed Product"),
-            unitOfMeasure: product.product_tmpl_id?.uom_id?.name || "kg",
+            unitOfMeasure: product.uom_id?.name || "kg",
             decimalAccuracy,
             unitPrice,
         };

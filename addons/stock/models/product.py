@@ -767,11 +767,11 @@ class ProductProduct(models.Model):
             ['uom_id', 'product_id'],
             ['id:recordset'],
         ):
-            if uom != product.product_tmpl_id.uom_id:
+            if uom != product.uom_id:
                 raise UserError(_('As other units of measure (ex : %(problem_uom)s) '
                 'than %(uom)s have already been used for this product, the change of unit of measure can not be done.'
                 'If you want to change it, please archive the product and create a new one.',
-                problem_uom=uom.name, uom=product.product_tmpl_id.uom_id.name))
+                problem_uom=uom.name, uom=product.uom_id.name))
             moves.uom_id = to_uom_id
 
         for uom, product, move_lines in self.env['stock.move.line']._read_group(
@@ -779,11 +779,11 @@ class ProductProduct(models.Model):
             ['uom_id', 'product_id'],
             ['id:recordset'],
         ):
-            if uom != product.product_tmpl_id.uom_id:
+            if uom != product.uom_id:
                 raise UserError(_('As other units of measure (ex : %(problem_uom)s) '
                 'than %(uom)s have already been used for this product, the change of unit of measure can not be done.'
                 'If you want to change it, please archive the product and create a new one.',
-                problem_uom=uom.name, uom=product.product_tmpl_id.uom_id.name))
+                problem_uom=uom.name, uom=product.uom_id.name))
             move_lines.uom_id = to_uom_id
         return super()._update_uom(to_uom_id)
 
@@ -1368,7 +1368,7 @@ class UomUom(models.Model):
                 ]):
                     raise UserError(error_msg)
                 if self.env['stock.quant'].sudo().search_count([
-                    ('product_id.product_tmpl_id.uom_id', 'in', changed.ids),
+                    ('product_id.uom_id', 'in', changed.ids),
                     ('quantity', '!=', 0),
                 ]):
                     raise UserError(error_msg)
