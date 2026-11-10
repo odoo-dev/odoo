@@ -147,10 +147,10 @@ class LoyaltyReward(models.Model):
         "The discount must be strictly positive.",
     )
 
-    @api.depends("reward_product_id.product_tmpl_id.uom_id", "reward_product_tag_id")
+    @api.depends("reward_product_id.uom_id", "reward_product_tag_id")
     def _compute_reward_product_uom_id(self):
         for reward in self:
-            reward.reward_product_uom_id = reward.reward_product_ids.product_tmpl_id.uom_id[:1]
+            reward.reward_product_uom_id = reward.reward_product_ids.uom_id[:1]
 
     def _find_all_category_children(self, category_id, child_ids):
         if len(category_id.child_id) > 0:

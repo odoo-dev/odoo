@@ -141,7 +141,7 @@ class ProductProduct(models.Model):
         for uom, product, so_lines in self.env["sale.order.line"]._read_group(
             [("product_id", "in", self.ids)], ["product_uom_id", "product_id"], ["id:recordset"]
         ):
-            if so_lines.product_uom_id != product.product_tmpl_id.uom_id:
+            if so_lines.product_uom_id != product.uom_id:
                 raise UserError(
                     self.env._(
                         "As other units of measure (ex : %(problem_uom)s)"
@@ -149,7 +149,7 @@ class ProductProduct(models.Model):
                         " of measure can not be done.\nIf you want to change it, please archive the"
                         " product and create a new one.",
                         problem_uom=uom.display_name,
-                        uom=product.product_tmpl_id.uom_id.display_name,
+                        uom=product.uom_id.display_name,
                     )
                 )
             so_lines.product_uom_id = to_uom_id

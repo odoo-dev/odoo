@@ -64,7 +64,7 @@ LEFT JOIN
 LEFT JOIN
     uom_uom um ON um.id = sm.uom_id
 LEFT JOIN
-    uom_uom up ON up.id = pt.uom_id
+    uom_uom up ON up.id = pp.uom_id
 WHERE
     sm.state = 'done'
     AND (sm.is_in = TRUE OR sm.is_out = TRUE)
