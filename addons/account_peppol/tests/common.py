@@ -86,7 +86,10 @@ class PeppolConnectorCommon(AccountTestInvoicingCommon):
             lambda url, **kwargs: self._empty_result_or_error(success=success),
         )
 
-    def _mock_lookup_participant(self, already_exists=False):
+    def _mock_lookup_participant(self, already_exists=False, services=None):
+
+        if services is None:
+            services = []
 
         def replacement_method(url, **kwargs):
             if not already_exists:
@@ -107,7 +110,7 @@ class PeppolConnectorCommon(AccountTestInvoicingCommon):
                         "smp_base_url": "http://example.com/smp",
                         "ttl": 60,
                         "service_group_url": "http://example.com/smp/iso6523-actorid-upis%3A%3A" + quote_plus(peppol_identifier),
-                        "services": [],
+                        "services": services,
                     },
                 }
 
