@@ -17,8 +17,11 @@
                     <button name="action_l10n_eg_cancel_invoice" type="object"
                             groups="account.group_account_manager"
                             string="Cancel (ETA)"
-                            invisible="country_code != 'EG' or l10n_eg_edi_submission_state not in ['test', 'accepted']"/>
+                            invisible="country_code != 'EG' or move_type not in ('out_invoice', 'out_refund') or l10n_eg_edi_submission_state not in ['test', 'accepted']"/>
                 </xpath>
+                <field name="tax_cash_basis_origin_move_id" position="after">
+                    <field name="l10n_eg_eta_received_uuid" readonly="1" invisible="not l10n_eg_eta_received_uuid"/>
+                </field>
                 <xpath expr="//group[@name='sale_info_group']/field[@name='ref']" position="attributes">
                     <attribute name="readonly" separator="or" add="(country_code == 'EG' and state != 'draft')"/>
                 </xpath>
@@ -80,6 +83,24 @@
                         decoration-success="l10n_eg_edi_submission_state in ['sent', 'test']"
                         decoration-warning="l10n_eg_edi_submission_state == 'rejected'"
                         decoration-danger="l10n_eg_edi_submission_state == 'cancelled'"
+                    />
+                </field>
+            </field>
+        </record>
+
+        <record id="l10n_eg_edi_view_in_invoice_tree_inherit" model="ir.ui.view">
+            <field name="name">l10n_eg_edi.view.in.invoice.tree.inherit</field>
+            <field name="model">account.move</field>
+            <field name="inherit_id" ref="account.view_in_invoice_tree"/>
+            <field name="arch" type="xml">
+                <field name="status_in_payment" position="after">
+                    <field
+                        name="l10n_eg_edi_submission_state"
+                        widget="badge"
+                        optional="hide"
+                        decoration-success="l10n_eg_edi_submission_state in ['accepted', 'test']"
+                        decoration-warning="l10n_eg_edi_submission_state == 'rejected'"
+                        decoration-danger="l10n_eg_edi_submission_state == 'cancel'"
                     />
                 </field>
             </field>
