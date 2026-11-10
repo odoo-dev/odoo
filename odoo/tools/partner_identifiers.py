@@ -25,6 +25,7 @@ from odoo.tools.partner_identifier_validation import (
     ae_tin_validate,
     nl_kvk_validate,
     nl_oin_validate,
+    pg_ipa_validate,
     pk_cn_validate,
     sg_uen_validate,
     th_branch_code_validate,
@@ -366,6 +367,11 @@ TIN_METADATA = {
         'placeholder': _lt('10XXXXXXXXY or 20XXXXXXXXY or 15XXXXXXXXY or 16XXXXXXXXY or 17XXXXXXXXY'),
         'category': 'TIN',
         'countries': ['PE'],
+    },
+    'PG_TIN': {
+        'placeholder': '123456789',
+        'category': 'TIN',
+        'countries': ['PG'],
     },
     'PH_TIN': {
         'placeholder': '123-456-789-123',
@@ -870,6 +876,15 @@ ADDITIONAL_IDENTIFIERS_METADATA = {
         'help': _lt('Peruvian unique taxpayer registry number (RUC).'),
         'placeholder': '101174102',
         'countries': ['PE'],
+    },
+    'PG_IPA': {
+        'sequence': 10,
+        'label': _lt('IPA'),
+        'help': _lt('Investment Promotion Authority (IPA) unique business identifier.'),
+        'placeholder': '1-123456',
+        'category': 'EN',
+        'validation_function': pg_ipa_validate,
+        'countries': ['PG'],
     },
     'PK_CN': {
         'label': _lt('Consumer Identification'),

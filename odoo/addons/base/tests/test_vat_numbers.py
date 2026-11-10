@@ -177,6 +177,20 @@ class TestVatNumbers(TransactionCase):
             with self.assertRaises(ValidationError):
                 test_partner.vat = tin
 
+    def test_vat_pg(self):
+        test_partner = self.env['res.partner'].create({
+            'name': "PG Company",
+            'country_id': self.env.ref('base.pg').id,
+        })
+
+        for tin in ['500123456', '500-123-456', '500 123 456']:
+            test_partner.vat = tin
+            self.assertEqual(test_partner.vat, '500123456')
+
+        for tin in ['50012345', '5001234567', '50012345A', '500-123-45']:
+            with self.assertRaises(ValidationError):
+                test_partner.vat = tin
+
     def test_vat_ca(self):
         test_partner = self.env['res.partner'].create({
             "name": "CA Company",

@@ -249,6 +249,15 @@ class TestPartnerIdentifiers(TransactionCase):
         with self.assertRaisesRegex(ValidationError, "Invalid identifier: SGUENnotauen"):
             self.partner._set_additional_identifier('SG_UEN', 'SGUENnotauen')
 
+    def test_pg_ipa(self):
+        """A Papua New Guinea IPA number is one digit, a hyphen, then 6 to 9 digits."""
+        for ipa in ('1-123456', '1-123456789'):
+            self.partner._set_additional_identifier('PG_IPA', ipa)
+            self.assertEqual(self.partner.additional_identifiers['PG_IPA'], ipa)
+        for ipa in ('123456789', '1-12', '1-1234567890', '12-23456', 'A-123456', '&-123456'):
+            with self.assertRaisesRegex(ValidationError, f"Invalid identifier: {ipa}"):
+                self.partner._set_additional_identifier('PG_IPA', ipa)
+
     def test_preferred_identifier_label_lt(self):
         """ The label of the preferred identifier must return as a plain string."""
         self.partner._set_additional_identifier('FR_SIRET', '33417522101010')

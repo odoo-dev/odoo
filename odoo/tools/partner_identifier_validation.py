@@ -25,6 +25,8 @@ PK_CN_RE = re.compile(r'\d{13}')
 SG_PEPPOL_PREFIX_RE = re.compile(r'(?P<uen_prefix>SGUEN|SGUXN)|(?P<other_prefix>SGTST|SGGST|[A-Z]{2}UID)')
 # AT TIN: 9-digit
 AT_TIN_RE = re.compile(r'\d{9}')
+# PG IPA: one digit, a hyphen, then 6 to 9 digits (e.g. 1-123456)
+PG_IPA_RE = re.compile(r'\d-\d{6,9}')
 
 
 # ===========================================================
@@ -76,6 +78,13 @@ def sg_uen_validate(value):
 def th_branch_code_validate(value):
     """Validate a Thai branch code (exactly 5 digits)."""
     if not TH_BRANCH_CODE_RE.fullmatch(value):
+        raise InvalidFormat()
+    return value
+
+
+def pg_ipa_validate(value):
+    """Validate a Papua New Guinea Investment Promotion Authority (IPA) number."""
+    if not PG_IPA_RE.fullmatch(value):
         raise InvalidFormat()
     return value
 

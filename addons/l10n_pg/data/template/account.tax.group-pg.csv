@@ -1,0 +1,8 @@
+"id","name","country_id"
+"l10n_pg_tax_group_gst_10","GST 10%","base.pg"
+"l10n_pg_tax_group_gst_zero_rated","GST Zero-rated","base.pg"
+"l10n_pg_tax_group_gst_exempt","GST Exempt","base.pg"
+"l10n_pg_tax_group_gst_ncr","GST NCR","base.pg"
+"l10n_pg_tax_group_gst_deferred_import","GST Deferred Import Liabilities","base.pg"
+"l10n_pg_tax_group_wht","WHT","base.pg"
+"l10n_pg_tax_group_gst_s65a","GST S65A","base.pg"
