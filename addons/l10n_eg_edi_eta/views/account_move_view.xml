@@ -19,6 +19,9 @@
                             string="Cancel (ETA)"
                             invisible="country_code != 'EG' or l10n_eg_edi_submission_state not in ['test', 'accepted']"/>
                 </xpath>
+                <field name="tax_cash_basis_origin_move_id" position="after">
+                    <field name="l10n_eg_eta_received_uuid" readonly="1" invisible="not l10n_eg_eta_received_uuid"/>
+                </field>
                 <xpath expr="//group[@name='sale_info_group']/field[@name='ref']" position="attributes">
                     <attribute name="readonly" separator="or" add="(country_code == 'EG' and state != 'draft')"/>
                 </xpath>

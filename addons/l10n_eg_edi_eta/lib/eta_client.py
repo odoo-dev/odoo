@@ -28,6 +28,32 @@ class ETAClient:
             headers=headers,
         )
 
+    def get_access_token_with_status(self, body, headers):
+        return self._request_with_status(
+            self.token_domain,
+            '/connect/token',
+            'POST',
+            data=body,
+            headers=headers,
+        )
+
+    def search_documents(self, params, headers):
+        return self._request_with_status(
+            self.api_domain,
+            '/api/v1.0/documents/search',
+            'GET',
+            params=params,
+            headers=headers,
+        )
+
+    def get_document_raw(self, uuid, headers):
+        return self._request_with_status(
+            self.api_domain,
+            f'/api/v1.0/documents/{uuid}/raw',
+            'GET',
+            headers=headers,
+        )
+
     def submit_invoices(self, body, headers):
         return self._request(
             self.api_domain,
@@ -123,6 +149,20 @@ class ETAClient:
             )
 
         return response.content
+
+    def _request_with_status(self, domain, url, method, **kwargs):
+        """ Send a request and return a ``(status_code, content)`` tuple.
+        The status code is ``None`` when the ETA portal could not be reached.
+        """
+        try:
+            response = requests.request(method, domain + url, timeout=20, **kwargs)
+        except (
+            requests.exceptions.MissingSchema,
+            requests.exceptions.ConnectionError,
+            requests.exceptions.Timeout,
+        ):
+            return None, b''
+        return response.status_code, response.content
 
     @staticmethod
     def _parse_error(message):

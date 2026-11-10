@@ -1,7 +1,9 @@
 import json
+import time
+from datetime import timedelta
 
 from werkzeug.urls import url_encode
-from odoo import api, models, fields
+from odoo import Command, api, models, fields
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools import BinaryBytes, float_is_zero, float_compare
 from odoo.tools.float_utils import json_float_round
@@ -10,6 +12,8 @@ from odoo.addons.l10n_eg_edi_eta.models.eta_submission import ETA_SUBMISSION_STA
 
 
 ETA_INVOICE_SENDING_BATCH_SIZE = 10
+
+ETA_SEARCH_DOCUMENTS_DELAY = 2  # seconds
 
 ETA_INVOICE_SUBMISSION_STATES = ETA_SUBMISSION_STATES + [('to_send', 'To Send')]
 
@@ -53,6 +57,12 @@ class AccountMove(models.Model):
     )
     l10n_eg_signing_time = fields.Datetime(string="Signing Time", copy=False)
     l10n_eg_is_signed = fields.Boolean(string="Is Signed", copy=False)
+    l10n_eg_eta_received_uuid = fields.Char(
+        string="ETA Received Document UUID",
+        copy=False,
+        readonly=True,
+        index='btree_not_null',
+    )
 
     @api.depends('l10n_eg_uuid', 'l10n_eg_long_id')
     def _compute_eta_qr_code_str(self):
@@ -816,13 +826,12 @@ class AccountMove(models.Model):
         }
 
     def _l10n_eg_eta_get_access_token(self):
-        user = self.company_id.sudo().l10n_eg_client_identifier
-        secret = self.company_id.sudo().l10n_eg_client_secret
+        company = self.company_id[:1] or self.env.company
         headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-        body = {'grant_type': 'client_credentials', 'client_id': user, 'client_secret': secret}
+        body = self._l10n_eg_eta_prepare_access_token_body(company)
 
         client = ETAClient(
-            is_production=self.l10n_eg_edi_api_mode == 'production',
+            is_production=company.l10n_eg_edi_api_mode == 'production',
         )
 
         content = client.get_access_token(
@@ -834,3 +843,197 @@ class AccountMove(models.Model):
         if data.get('error'):
             return data
         return {'access_token': data.get('access_token')}
+
+    @api.model
+    def _l10n_eg_eta_prepare_access_token_body(self, company):
+        return {
+            'grant_type': 'client_credentials',
+            'client_id': company.sudo().l10n_eg_client_identifier,
+            'client_secret': company.sudo().l10n_eg_client_secret,
+        }
+
+    # ===================================================
+    # Fetch received bills
+    # ===================================================
+
+    @api.model
+    def _l10n_eg_eta_fetch_received_bills(self, journal):
+        """ Create draft vendor bills in `journal` for the valid documents received on the ETA portal
+        during the last 30 days, skipping the ones already imported in the current company.
+
+        :return: the newly created bills.
+        """
+        company = self.env.company
+        client = ETAClient(is_production=company.l10n_eg_edi_api_mode == 'production')
+        headers = self._l10n_eg_edi_prepare_headers(self._l10n_eg_eta_get_fetch_access_token(client))
+
+        documents = self._l10n_eg_eta_get_received_documents(client, headers)
+        known_uuids = set(self.search_fetch(
+            [
+                ('l10n_eg_eta_received_uuid', 'in', list(documents)),
+                *self._check_company_domain(company),
+            ],
+            ['l10n_eg_eta_received_uuid'],
+        ).mapped('l10n_eg_eta_received_uuid'))
+
+        bills_vals = []
+        for uuid, document in documents.items():
+            if uuid in known_uuids:
+                continue
+            raw_document = self._l10n_eg_eta_parse_fetch_response(client.get_document_raw(uuid, headers))
+            bills_vals.append(self._l10n_eg_eta_prepare_received_bill_vals(journal, document, raw_document))
+
+        bills = self.create(bills_vals)
+        for bill in bills:
+            bill.message_post(body=self.env._("This bill was fetched from the ETA portal."))
+        return bills
+
+    @api.model
+    def _l10n_eg_eta_get_fetch_access_token(self, client):
+        company = self.env.company
+        if not (company.sudo().l10n_eg_client_identifier and company.sudo().l10n_eg_client_secret):
+            raise UserError(self._l10n_eg_eta_fetch_error_message('auth'))
+
+        status_code, content = client.get_access_token_with_status(
+            body=self._l10n_eg_eta_prepare_access_token_body(company),
+            headers={'Content-Type': 'application/x-www-form-urlencoded'},
+        )
+        if status_code is None:
+            raise UserError(self._l10n_eg_eta_fetch_error_message('unreachable'))
+        if status_code >= 500:
+            raise UserError(self._l10n_eg_eta_fetch_error_message('other'))
+        try:
+            data = json.loads(content)
+        except ValueError:
+            raise UserError(self._l10n_eg_eta_fetch_error_message('other')) from None
+        if not isinstance(data, dict):
+            raise UserError(self._l10n_eg_eta_fetch_error_message('other'))
+        if status_code in (400, 401) or data.get('error') or not data.get('access_token'):
+            raise UserError(self._l10n_eg_eta_fetch_error_message('auth'))
+        return data['access_token']
+
+    @api.model
+    def _l10n_eg_eta_get_received_documents(self, client, headers):
+        """ Page through the documents received during the last 30 days (Search Documents API).
+
+        :return: a dict {uuid: document} of the valid documents, in the order given by ETA.
+        """
+        now = fields.Datetime.now()
+        params = {
+            'direction': 'Received',
+            'status': 'Valid',
+            'pageSize': 100,
+            'submissionDateFrom': (now - timedelta(days=30)).strftime('%Y-%m-%dT%H:%M:%S'),
+            'submissionDateTo': now.strftime('%Y-%m-%dT%H:%M:%S'),
+        }
+        documents = {}
+        while True:
+            data = self._l10n_eg_eta_parse_fetch_response(client.search_documents(dict(params), headers))
+            for document in data.get('result') or []:
+                if (
+                    isinstance(document, dict)
+                    and document.get('uuid')
+                    and str(document.get('status') or '').lower() == 'valid'
+                ):
+                    documents.setdefault(document['uuid'], document)
+            token = (data.get('metadata') or {}).get('continuationToken')
+            if not data.get('result') or not token or token == 'EndofResultSet':
+                return documents
+            params['continuationToken'] = token
+            # The API accepts one search request every 2 seconds per taxpayer.
+            time.sleep(ETA_SEARCH_DOCUMENTS_DELAY)
+
+    @api.model
+    def _l10n_eg_eta_parse_fetch_response(self, response):
+        """ Decode a `(status_code, content)` response of the ETA API, raising the matching UserError if it failed."""
+        status_code, content = response
+        if status_code is None:
+            raise UserError(self._l10n_eg_eta_fetch_error_message('unreachable'))
+        if status_code in (401, 403):
+            raise UserError(self._l10n_eg_eta_fetch_error_message('auth'))
+        if not 200 <= status_code < 300:
+            raise UserError(self._l10n_eg_eta_fetch_error_message('other'))
+        try:
+            data = json.loads(content)
+        except ValueError:
+            raise UserError(self._l10n_eg_eta_fetch_error_message('other')) from None
+        if not isinstance(data, dict):
+            raise UserError(self._l10n_eg_eta_fetch_error_message('other'))
+        return data
+
+    @api.model
+    def _l10n_eg_eta_fetch_error_message(self, error_type):
+        return {
+            'unreachable': self.env._("Unable to reach the ETA portal. Please check your connection or try again later."),
+            'auth': self.env._("ETA authentication failed. Please verify your Client ID, Client Secret, and environment in the settings."),
+            'other': self.env._("The ETA portal returned an error. Please try again later."),
+        }[error_type]
+
+    @api.model
+    def _l10n_eg_eta_prepare_received_bill_vals(self, journal, document, raw_document):
+        eta_document = raw_document.get('document') or {}
+        if isinstance(eta_document, str):
+            try:
+                eta_document = json.loads(eta_document)
+            except ValueError:
+                raise UserError(self._l10n_eg_eta_fetch_error_message('other')) from None
+        if not isinstance(eta_document, dict):
+            raise UserError(self._l10n_eg_eta_fetch_error_message('other'))
+
+        partner = self.env['res.partner']
+        if issuer_vat := document.get('issuerId'):
+            partner = partner.search([
+                ('vat', '=', issuer_vat),
+                *partner._check_company_domain(self.env.company),
+            ], limit=1)
+
+        lines_vals = []
+        for line in eta_document.get('invoiceLines') or []:
+            taxes = self._l10n_eg_eta_get_purchase_taxes(line.get('taxableItems'))
+            lines_vals.append(Command.create({
+                'name': line.get('description'),
+                'quantity': line.get('quantity') or 0.0,
+                'price_unit': (line.get('unitValue') or {}).get('amountEGP') or 0.0,
+                'discount': (line.get('discount') or {}).get('rate') or 0.0,
+                # Always set the taxes explicitly so that the default taxes of the account are not applied.
+                'tax_ids': [Command.set(taxes.ids)],
+            }))
+
+        return {
+            'move_type': 'in_refund' if str(document.get('typeName') or '').upper() == 'C' else 'in_invoice',
+            'journal_id': journal.id,
+            'currency_id': self.env.company.currency_id.id,
+            'partner_id': partner.id,
+            'ref': document.get('internalId'),
+            'invoice_date': (document.get('dateTimeIssued') or '')[:10] or False,
+            'l10n_eg_eta_received_uuid': document['uuid'],
+            'invoice_line_ids': lines_vals,
+        }
+
+    @api.model
+    def _l10n_eg_eta_get_purchase_taxes(self, taxable_items):
+        """ Match the `taxableItems` of an ETA invoice line with the purchase taxes of the current company,
+        based on the ETA code and the rate. Items without matching tax are ignored.
+        """
+        items = []
+        for item in taxable_items or []:
+            if not isinstance(item, dict) or not item.get('taxType') or not item.get('subType'):
+                continue
+            rate = item.get('rate') or 0.0
+            if isinstance(rate, (int, float)):
+                items.append((f"{item['taxType']}_{item['subType']}".lower(), rate))
+
+        AccountTax = self.env['account.tax']
+        if not items:
+            return AccountTax
+        candidate_taxes = AccountTax.search([
+            ('type_tax_use', '=', 'purchase'),
+            ('l10n_eg_eta_code', 'in', [code for code, _rate in items]),
+            *AccountTax._check_company_domain(self.env.company),
+        ])
+        taxes = AccountTax
+        for code, rate in items:
+            taxes |= candidate_taxes.filtered(
+                lambda tax: tax.l10n_eg_eta_code == code and float_compare(abs(tax.amount), rate, precision_digits=4) == 0,
+            )[:1]
+        return taxes
