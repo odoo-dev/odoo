@@ -125,3 +125,74 @@ class LRU[K, V](MutableMapping[K, V]):
         with self._lock:
             self._ordering.clear()
             self._values.clear()
+
+
+class LRU2Q[K, V](MutableMapping[K, V]):
+    __slots__ = ('_first', '_lock', '_lru')
+
+    def __init__(self, count: int, pairs: Iterable[tuple[K, V]] = ()):
+        self._first = LRU(count // 2)
+        self._lru = LRU(count, pairs)
+        self._lock = self._lru._lock
+
+    @property
+    def count(self) -> int:
+        return self._lru.count
+
+    @count.setter
+    def count(self, count: int):
+        assert count > 0, "LRU needs a positive count"
+        with self._lock:
+            self._first.count = count // 2
+            self._lru.count = count
+
+    def __contains__(self, key: object) -> bool:
+        return key in self._lru or key in self._first
+
+    def __getitem__(self, key: K) -> V:
+        value = self._lru.get(key, SENTINEL)
+        if value is SENTINEL:
+            with self._lock:
+                value = self._lru.get(key, SENTINEL)
+                if value is SENTINEL:
+                    value = self._first.pop(key)
+                    # would raise if missing
+                    self._lru[key] = value
+        return value
+
+    def __setitem__(self, key: K, val: V):
+        with self._lock:
+            if key in self._lru:
+                self._lru[key] = val
+                return
+            self._first[key] = val
+            self._lru.pop(key, None)
+
+    def __delitem__(self, key: K):
+        self.pop(key)
+
+    def __len__(self) -> int:
+        return len(self.first) + len(self.lru)
+
+    def __iter__(self) -> Iterator[K]:
+        return iter(self.snapshot)
+
+    @property
+    def snapshot(self) -> dict[K, V]:
+        """ Return a copy of the LRU (ordered according to LRU first). """
+        with self._lock:
+            data = self._first.snapshot
+            data.update(self._lru.snapshot)
+            return data
+
+    def pop(self, key: K, /, default=SENTINEL) -> V:
+        with self._lock:
+            value = self._lru.pop(key, SENTINEL)
+            if value is SENTINEL:
+                return self._first.pop(key, default)
+            return value
+
+    def clear(self):
+        with self._lock:
+            self._first.clear()
+            self._lru.clear()
