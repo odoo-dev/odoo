@@ -104,6 +104,7 @@
                     ancestors="[...ancestors, node]"
                     parent="node"
                     node="child"
+                    readonly="1"
                 />
             </div>
         </t>
