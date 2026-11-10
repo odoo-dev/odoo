@@ -520,13 +520,11 @@ class Website(models.CachedModel):
     @api.ondelete(at_uninstall=True)
     def _unlink_recompute_companies(self):
         companies = self.company_id
+        yield
         if not companies:
-            return None
-
-        def recompute_companies():
-            companies.env.transaction.invalidate_ormcache()
-            companies._compute_website_id()
-        return recompute_companies
+            return
+        companies.env.transaction.invalidate_ormcache()
+        companies._compute_website_id()
 
     @api.ondelete(at_uninstall=False)
     def _unlink_except_default_website(self):

@@ -3699,8 +3699,13 @@ class BaseModel(metaclass=MetaModel):
                 ):
                     post_delete = func(records)
                     if post_delete is not None:
-                        assert callable(post_delete), f"ondelete {func} should return a Callable or None"
-                        post_delete_hooks.append(post_delete)
+                        if hasattr(post_delete, '__next__'):  # handle iterator
+                            next(post_delete)  # enter
+                            post_delete_hooks.append(post_delete)
+                        elif callable(post_delete):
+                            post_delete_hooks.append(post_delete)
+                        else:
+                            assert False, f"ondelete {func} should return a generator, Callable or None"
 
         # ensure that many2one fields are up to date before deletion
         for records in all_deleted_records:
@@ -3799,7 +3804,15 @@ class BaseModel(metaclass=MetaModel):
 
         # process post-delete hooks (from ondelete methods)
         for post_delete in post_delete_hooks:
-            post_delete()
+            if hasattr(post_delete, '__next__'):  # handle iterator
+                try:
+                    next(post_delete)
+                except StopIteration:
+                    pass
+                else:
+                    assert False, f"expecting a single yield from {post_delete}"
+            else:
+                post_delete()
 
         # auditing: deletions are infrequent and leave no trace in the database
         msg = 'User #%s deleted %s records with IDs: %r'

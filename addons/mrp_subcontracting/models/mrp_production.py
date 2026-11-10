@@ -23,12 +23,11 @@ class MrpProduction(models.Model):
 
     @api.ondelete(at_uninstall=True)
     def _unlink_invalidate_moves(self):
-        def invalidate_picked():
-            # see test_flow_tracked_1 - need to invalidate after removing a
-            # production so that picked moves are counted correctly
-            self.env['stock.move.line'].invalidate_model()
-            self.env['stock.move'].invalidate_model()
-        return invalidate_picked
+        yield
+        # see test_flow_tracked_1 - need to invalidate after removing a
+        # production so that picked moves are counted correctly
+        self.env['stock.move.line'].invalidate_model()
+        self.env['stock.move'].invalidate_model()
 
     @api.depends('move_raw_ids.move_line_ids')
     def _compute_move_line_raw_ids(self):
