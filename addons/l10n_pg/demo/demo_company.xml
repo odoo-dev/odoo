@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="base.partner_demo_company_pg" model="res.partner" forcecreate="1">
+        <field name="name">PG Company</field>
+        <field name="vat">500123456</field>
+        <field name="street">Section 34, Allotment 12</field>
+        <field name="street2">Waigani Drive</field>
+        <field name="city">Port Moresby</field>
+        <field name="country_id" ref="base.pg"/>
+        <field name="state_id" ref="base.state_pg_15"/>
+        <field name="zip">131</field>
+        <field name="phone">+675 321 4567</field>
+        <field name="email">info@company.pgexample.com</field>
+        <field name="website">www.pgexample.com</field>
+    </record>
+
+    <record id="base.demo_company_pg" model="res.company" forcecreate="1">
+        <field name="name">PG Company</field>
+        <field name="partner_id" ref="base.partner_demo_company_pg"/>
+    </record>
+
+    <function model="res.company" name="_onchange_country_id">
+        <value eval="[ref('base.demo_company_pg')]"/>
+    </function>
+
+    <function model="res.users" name="write">
+        <value eval="[ref('base.user_root'), ref('base.user_admin'), ref('base.user_demo')]"/>
+        <value eval="{'company_ids': [(4, ref('base.demo_company_pg'))]}"/>
+    </function>
+
+    <function model="account.chart.template" name="try_loading">
+        <value eval="[]"/>
+        <value>pg</value>
+        <value model="res.company" eval="obj().env.ref('base.demo_company_pg')"/>
+        <value name="install_demo" eval="True"/>
+    </function>
+</odoo>

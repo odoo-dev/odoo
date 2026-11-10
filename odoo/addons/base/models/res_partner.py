@@ -105,6 +105,7 @@ _ref_vat = frozendict({
     'no': 'NO123456785',
     'nz': _lt('49-098-576 or 49098576'),
     'pe': _lt('10XXXXXXXXY or 20XXXXXXXXY or 15XXXXXXXXY or 16XXXXXXXXY or 17XXXXXXXXY'),
+    'pg': _lt('123456789 [9 digits]'),
     'ph': '123-456-789-123',
     'pk': _lt('1234567 or B594380 or 1234567-8 or 12345-1234567-8'),
     'pl': 'PL1234567883',
@@ -2178,6 +2179,10 @@ class ResPartner(models.Model):
             dig_check = 1
         return int(vat[10]) == dig_check
 
+    def check_vat_pg(self, vat):
+        # Papua New Guinea TIN issued by the IRC: 9 digits.
+        return vat.isdigit() and len(vat) == 9
+
     # Philippines TIN (+ branch code) validation
     _check_vat_ph_re = re.compile(r"\d{3}-\d{3}-\d{3}(-\d{3,5})?$")
 
@@ -2425,6 +2430,10 @@ class ResPartner(models.Model):
         stdnum_vat_format = stdnum.util.get_cc_module('is_', 'vsk').compact
         vat_number = stdnum_vat_format(vat_number)
         return f'{vat_prefix}{vat_number}'
+
+    def format_vat_pg(self, vat):
+        # Accept TINs typed with separators (500-123-456), store the 9 digits only.
+        return clean(vat, ' -.')
 
     def format_vat_pk(self, vat):
         vat = (vat or '').replace('-', '').replace(' ', '')

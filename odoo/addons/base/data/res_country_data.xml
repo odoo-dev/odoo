@@ -1197,6 +1197,7 @@
             <field name="code">pg</field>
             <field name="currency_id" ref="PGK" />
             <field eval="675" name="phone_code" />
+            <field name="vat_label">TIN</field>
         </record>
         <record id="ph" model="res.country">
             <field name="name">Philippines</field>
