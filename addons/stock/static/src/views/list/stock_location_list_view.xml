@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <!-- A location without sub-location is displayed as a simple record, the other ones as groups -->
+    <t t-name="stock.StockLocationListRenderer.GroupRow">
+        <t t-if="this.isLeafLocationGroup(group)">
+            <t t-set="record" t-value="group.record"/>
+            <t t-set="locationLevel" t-value="this.getGroupLevel(group)"/>
+            <t t-set="group" t-value="group._parent.group"/>
+            <t t-call="{{ this.constructor.recordRowTemplate }}"/>
+        </t>
+        <t t-else="" t-call="stock.StockLocationListRenderer.LocationGroupRow"/>
+    </t>
+
+    <t t-name="stock.StockLocationListRenderer.LocationGroupRow" t-inherit="web.ListRenderer.GroupRow" t-inherit-mode="primary">
+        <!-- Add select checkbox -->
+        <xpath expr="//th[contains(@t-attf-class, 'o_group_name')]" position="before">
+            <td t-if="this.hasSelectors and this.isLocationGroup(group)"
+                class="o_list_record_selector user-select-none"
+                tabindex="-1"
+                t-on-click.stop="() => this.toggleRecordSelection(group.record)"
+                t-on-keydown="(ev) => this.onCellKeydown(ev, group)">
+                <CheckBox disabled="!this.canSelectRecord" value="group.record.selected" onChange.alike="() => this.toggleRecordSelection(group.record)"/>
+            </td>
+        </xpath>
+        <!-- Display location record values in the other columns -->
+        <xpath expr="//th[contains(@t-attf-class, 'o_group_name')]" position="after">
+            <t t-if="this.isLocationGroup(group)">
+                <t t-set="record" t-value="group.record"/>
+                <td t-foreach="this.getLocationGroupColumns()" t-as="column" t-key="column.id"
+                    class="o_data_cell"
+                    t-att-class="this.getCellClass(column, record)"
+                    t-att-name="column.name"
+                    t-on-keydown="(ev) => this.onCellKeydown(ev, group)">
+                    <t t-if="column.type === 'field' and column.name in record.data and !this.evalInvisible(column.invisible, record)">
+                        <t t-if="this.canUseFormatter(column, record)" t-out="this.getFormattedValue(column, record)"/>
+                        <Field t-else="" name="column.name" record="record" type="column.widget" class="this.getFieldClass(column)" fieldInfo="column" t-props="this.getFieldProps(record, column)"/>
+                    </t>
+                </td>
+            </t>
+        </xpath>
+    </t>
+
+    <t t-name="stock.StockLocationListRenderer.RecordRow" t-inherit="web.ListRenderer.RecordRow" t-inherit-mode="primary">
+        <xpath expr="//tr" position="attributes">
+            <!-- indent the leaf locations like the location groups of the same level -->
+            <attribute name="t-att-data-location-level">locationLevel</attribute>
+            <attribute name="t-att-style">locationLevel !== undefined ? '--o-stock-location-level: ' + locationLevel : undefined</attribute>
+        </xpath>
+    </t>
+
+</templates>

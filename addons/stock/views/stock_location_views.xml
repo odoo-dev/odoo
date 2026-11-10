@@ -103,7 +103,7 @@
         <field name="model">stock.location</field>
         <field name="priority" eval="2"/>
         <field name="arch" type="xml">
-            <list string="Stock Location" decoration-info="usage=='view'" multi_edit="1">
+            <list string="Stock Location" js_class="stock_location_list_view" default_group_by="warehouse_id" decoration-info="usage=='view'" multi_edit="1">
                 <field name="company_id" column_invisible="True"/> <!-- kept to feed the visible company_id column's groups toggle -->
                 <field name="active" column_invisible="True"/> <!-- used to allow displaying archived locations in this editable list -->
                 <field name="complete_name" string="Location"/>
