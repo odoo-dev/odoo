@@ -1036,7 +1036,7 @@ class AccountEdiCommon(models.AbstractModel):
             delivered_qty = float(quantity_node.text)
             if unece_code := quantity_node.attrib.get('unitCode'):
                 product_uom = self.env['uom.uom']._get_uom_from_unece_code(unece_code)
-        if product and product_uom and not product_uom._has_common_reference(product.product_tmpl_id.uom_id):
+        if product and product_uom and not product_uom._has_common_reference(product.uom_id):
             # uom incompatibility
             product_uom = self.env['uom.uom']
 
@@ -1624,7 +1624,7 @@ class AccountEdiCommon(models.AbstractModel):
                     uom = cache[uom_code] = self.env['uom.uom']._get_uom_from_unece_code(uom_code)
                 if uom:
                     product = line_collected_values['product_values'].get('product')
-                    product_uom = product.product_tmpl_id.uom_id if product else self.env['uom.uom']
+                    product_uom = product.uom_id if product else self.env['uom.uom']
                     if product and not uom._has_common_reference(product_uom):
                         logs.append(_(
                             "The Unit of Measure '%(uom)s' (from unit code '%(code)s') was "

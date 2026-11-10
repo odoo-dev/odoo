@@ -13,8 +13,8 @@ class VendorDelayReport(models.Model):
         'stock.move': ['purchase_line_id', 'product_id', 'date', 'state'],
         'stock.move.line': ['move_id', 'quantity', 'uom_id'],
         'purchase.order.line': ['product_id', 'partner_id', 'product_uom_qty', 'date_promised'],
-        'product.product': ['product_tmpl_id'],
-        'product.template': ['uom_id', 'categ_id'],
+        'product.product': ['product_tmpl_id', 'uom_id'],
+        'product.template': ['categ_id'],
         'uom.uom': ['factor'],
     }
 
@@ -57,7 +57,7 @@ FROM   stock_move m
        JOIN product_template pt
          ON pt.id = p.product_tmpl_id
        JOIN uom_uom pt_uom
-         ON pt_uom.id = pt.uom_id
+         ON pt_uom.id = p.uom_id
        LEFT JOIN product_category pc
          ON pc.id = pt.categ_id
        LEFT JOIN stock_move_line ml

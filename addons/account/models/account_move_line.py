@@ -3913,7 +3913,7 @@ class AccountMoveLine(models.Model):
             'price_discount': gross_price_subtotal - self.price_subtotal,
             'price_discount_unit': (gross_price_subtotal - self.price_subtotal) / self.quantity if self.quantity else 0.0,
             'gross_price_total_unit': self.currency_id.round(gross_price_subtotal / self.quantity) if self.quantity else 0.0,
-            'unece_uom_code': self.product_id.product_tmpl_id.uom_id._get_unece_code(),
+            'unece_uom_code': self.product_id.uom_id._get_unece_code(),
         }
         return res
 

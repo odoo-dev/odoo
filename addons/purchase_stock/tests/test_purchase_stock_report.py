@@ -268,6 +268,44 @@ class TestPurchaseStockReports(TestReportsCommon):
         self.assertEqual(data['qty_total:sum'], 12)
         self.assertEqual(data['on_time_rate:sum'], 100)
 
+    def test_vendor_delay_report_with_variant_uom(self):
+        """ The on time quantity is expressed in the unit of the variant, not the one of its template. """
+        uom_pack = self.env.ref('uom.product_uom_pack_6')
+        attribute = self.env['product.attribute'].create({
+            'name': 'Packaging',
+            'value_ids': [Command.create({'name': 'Single'}), Command.create({'name': 'Pack'})],
+        })
+        template = self.env['product.template'].create({
+            'name': 'Water',
+            'is_storable': True,
+            'uom_id': self.env.ref('uom.product_uom_unit').id,
+            'attribute_line_ids': [Command.create({
+                'attribute_id': attribute.id,
+                'value_ids': [Command.set(attribute.value_ids.ids)],
+            })],
+        })
+        variant_pack = template.product_variant_ids.sorted('id')[1]
+        variant_pack.uom_id = uom_pack
+
+        po = self.env['purchase.order'].create({
+            'partner_id': self.partner.id,
+            'order_line': [Command.create({'product_id': variant_pack.id, 'product_qty': 2, 'uom_id': uom_pack.id})],
+        })
+        po.button_confirm()
+        receipt = po.picking_ids
+        receipt.move_ids.quantity = 2
+        receipt.move_ids.picked = True
+        receipt.button_validate()
+
+        data = self.env['vendor.delay.report'].formatted_read_group(
+            [('product_id', '=', variant_pack.id)],
+            ['product_id'],
+            ['on_time_rate:sum', 'qty_on_time:sum', 'qty_total:sum'],
+        )[0]
+        self.assertEqual(data['qty_on_time:sum'], 2)
+        self.assertEqual(data['qty_total:sum'], 2)
+        self.assertEqual(data['on_time_rate:sum'], 100)
+
     def test_vendor_delay_report_with_multi_location(self):
         """
         PO 10 units x P

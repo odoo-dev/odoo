@@ -93,7 +93,7 @@ export class PosOrderline extends PosOrderlineAccounting {
             if (product_packaging_by_barcode[code.code]) {
                 this.setQuantity(
                     uom_by_id[product_packaging_by_barcode[code.code].uom_id.id].factor /
-                        this.product_id.product_tmpl_id.uom_id.factor
+                        this.product_id.uom_id.factor
                 );
             }
         }

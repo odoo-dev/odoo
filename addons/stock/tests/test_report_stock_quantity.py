@@ -507,3 +507,68 @@ class TestReportStockQuantity(tests.TransactionCase):
             ['product_qty:sum'],
         )
         self.assertEqual(report[0][2], 0.0)
+
+    def _create_template_with_variant_in_uom(self, uom):
+        attribute = self.env['product.attribute'].create({
+            'name': 'Packaging',
+            'value_ids': [Command.create({'name': 'Single'}), Command.create({'name': 'Pack'})],
+        })
+        template = self.env['product.template'].create({
+            'name': 'Water',
+            'is_storable': True,
+            'uom_id': self.uom_unit.id,
+            'attribute_line_ids': [Command.create({
+                'attribute_id': attribute.id,
+                'value_ids': [Command.set(attribute.value_ids.ids)],
+            })],
+        })
+        variant_unit, variant_other = template.product_variant_ids.sorted('id')
+        variant_other.uom_id = uom
+        return template, variant_unit, variant_other
+
+    def test_inter_warehouse_transfer_variant_uom(self):
+        """ Done moves are converted to the unit of the variant, not the one of its template. """
+        uom_box = self.env['uom.uom'].create({
+            'name': 'Box of 25',
+            'relative_uom_id': self.uom_unit.id,
+            'relative_factor': 25.0,
+        })
+        __, __, product = self._create_template_with_variant_in_uom(uom_box)
+        wh1, wh2 = self.env['stock.warehouse'].create([
+            {'name': 'Warehouse 1', 'code': 'WH1'},
+            {'name': 'Warehouse 2', 'code': 'WH2'},
+        ])
+        today = datetime.now()
+        self.env['stock.move'].create({
+            'location_id': self.supplier_location.id,
+            'location_dest_id': wh1.lot_stock_id.id,
+            'product_id': product.id,
+            'uom_id': uom_box.id,
+            'product_uom_qty': 40.0,
+            'quantity': 40.0,
+            'state': 'done',
+            'date': today,
+        })
+        # Transfer 50 units (= 2 boxes) from wh1 to wh2
+        move = self.env['stock.move'].create({
+            'location_id': wh1.lot_stock_id.id,
+            'location_dest_id': wh2.lot_stock_id.id,
+            'product_id': product.id,
+            'uom_id': self.uom_unit.id,
+            'product_uom_qty': 50.0,
+            'date': today,
+        })
+        move._action_confirm()
+        move.quantity = 50.0
+        move.picked = True
+        move._action_done()
+        self.env.flush_all()
+
+        yesterday = fields.Date.to_string(fields.Date.add(fields.Date.today(), days=-1))
+        report = self.env['report.stock.quantity']._read_group(
+            [('state', '=', 'forecast'), ('product_id', '=', product.id), ('warehouse_id', '=', wh1.id),
+             ('date', '=', yesterday)],
+            ['date:day', 'warehouse_id'],
+            ['product_qty:sum'],
+        )
+        self.assertEqual(report[0][2], 0.0)

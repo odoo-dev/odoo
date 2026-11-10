@@ -437,11 +437,11 @@
             <p
                 name="packaging_price_value"
                 class="mb-0 ms-1"
-                t-out="combination_info.get('packaging_prices', {}).get(product.uom_id.id, False)"
+                t-out="combination_info.get('packaging_prices', {}).get(product_variant.uom_id.id, False)"
                 t-options="{'widget': 'monetary', 'display_currency': website.currency_id}"
             />
             /
-            <p t-field="product.uom_name" class="mb-0"/>
+            <p t-field="product_variant.uom_name" class="mb-0"/>
         </span>
     </template>
 
