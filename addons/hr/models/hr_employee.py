@@ -357,8 +357,19 @@ class HrEmployee(models.Model):
         result = super()._create(data_list)
         for (employee, version_id, vals) in zip(result, versions, data_list):
             version = self.env['hr.version'].browse(version_id)
-            version.employee_id = employee.id
-            version.write({**vals.get('inherited', {})['hr.version'], 'employee_id': employee.id})
+            version_vals = vals.get('inherited', {})['hr.version']
+            # x2many values are commands that already ran when creating the version: running them again duplicates
+            # the lines, so protect them from being recomputed instead of writing them again
+            x2many_fields = [
+                version._fields[fname] for fname in version_vals
+                if version._fields[fname].type in ('one2many', 'many2many')
+            ]
+            with self.env.protecting(x2many_fields, version):
+                version.employee_id = employee.id
+                version.write({
+                    **{fname: value for fname, value in version_vals.items() if version._fields[fname] not in x2many_fields},
+                    'employee_id': employee.id,
+                })
         return result
 
     @api.model
