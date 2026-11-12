@@ -268,7 +268,10 @@ class MailMail(models.Model):
                 if failure_type:
                     failed = notifications.filtered(lambda notif:
                         notif.res_partner_id not in success_pids
-                        and notif.mail_email_address not in success_emails
+                        and (
+                            not notif.mail_email_address
+                            or notif.mail_email_address not in success_emails
+                        )
                     )
                 (notifications - failed).sudo().write({
                     'notification_status': 'sent',
@@ -279,7 +282,7 @@ class MailMail(models.Model):
                     failed.sudo().write({
                         'notification_status': 'exception',
                         'failure_type': failure_type,
-                        'failure_reason': failure_reason,
+                        'failure_reason': self.env['mail.notification'].NO_VALID_RECIPIENT if failure_type == 'mail_email_missing' else failure_reason,
                     })
                     messages = notifications.mapped('mail_message_id').filtered(lambda m: m._is_thread_message())
                     # TDE TODO: could be great to notify message-based, not notifications-based, to lessen number of notifs
@@ -793,14 +796,18 @@ class MailMail(models.Model):
                     continue
                 no_recipients = (not (mail.email_to or '').strip() and not mail.recipient_ids and not (mail.email_cc or '').strip())
 
+                if no_recipients:
+                    failure_reason = IrMailServer.NO_VALID_RECIPIENT
+                    failure_type = 'mail_email_missing'
+
                 message_id = mail.message_id
                 # Writing on the mail object may fail (e.g. lock on user) which
                 # would trigger a rollback *after* actually sending the email.
                 # To avoid sending twice the same email, provoke the failure earlier
                 mail.write({
                     'state': 'exception',
-                    'failure_reason': IrMailServer.NO_VALID_RECIPIENT if no_recipients else _('Error without exception. Probably due to sending an email without computed recipients.'),
-                    'failure_type': 'mail_email_missing' if no_recipients else 'unknown',
+                    'failure_reason': failure_reason or _('Error without exception. Probably due to sending an email without computed recipients.'),
+                    'failure_type': failure_type or 'unknown',
                 })
                 # Update notification in a transient exception state to avoid concurrent
                 # update in case an email bounces while sending all emails related to current
@@ -811,10 +818,14 @@ class MailMail(models.Model):
                     ('notification_status', 'not in', ('sent', 'canceled'))
                 ])
                 if notifs:
-                    notif_msg = _('Error without exception. Probably due to concurrent access update of notification records. Please see with an administrator.')
+                    notif_msg = (
+                        self.env['mail.notification'].NO_VALID_RECIPIENT
+                        if not no_recipients
+                        else _('Error without exception. Probably due to concurrent access update of notification records. Please see with an administrator.')
+                    )
                     notifs.sudo().write({
                         'notification_status': 'exception',
-                        'failure_type': 'unknown',
+                        'failure_type': failure_type or 'unknown',
                         'failure_reason': notif_msg,
                     })
                     # `test_mail_bounce_during_send`, force immediate update to obtain the lock.

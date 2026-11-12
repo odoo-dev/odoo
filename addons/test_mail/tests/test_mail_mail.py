@@ -533,8 +533,8 @@ class TestMailMail(MailCommon):
                 self.assertEqual(mail.failure_reason, self.env['ir.mail_server'].NO_VALID_RECIPIENT)
                 self.assertEqual(mail.failure_type, 'mail_email_missing', 'Mail: missing email_to')
                 self.assertEqual(mail.state, 'exception')
-                if email_to == ' ':
-                    self.assertEqual(notification.failure_reason, self.env['ir.mail_server'].NO_VALID_RECIPIENT)
+                if not email_to or email_to == ' ':
+                    self.assertEqual(notification.failure_reason, self.env['mail.notification'].NO_VALID_RECIPIENT)
                     self.assertEqual(notification.failure_type, 'mail_email_missing')
                     self.assertEqual(notification.notification_status, 'exception')
                 else:
@@ -555,7 +555,7 @@ class TestMailMail(MailCommon):
                 self.assertEqual(mail.failure_reason, self.env['ir.mail_server'].NO_VALID_RECIPIENT)
                 self.assertEqual(mail.failure_type, failure_type)
                 self.assertEqual(mail.state, 'exception')
-                self.assertEqual(notification.failure_reason, self.env['ir.mail_server'].NO_VALID_RECIPIENT)
+                self.assertEqual(notification.failure_reason, self.env['mail.notification'].NO_VALID_RECIPIENT)
                 self.assertEqual(notification.failure_type, failure_type, 'Mail: invalid email_to: missing instead of invalid')
                 self.assertEqual(notification.notification_status, 'exception')
 
@@ -569,7 +569,7 @@ class TestMailMail(MailCommon):
                 self.assertEqual(mail.failure_reason, self.env['ir.mail_server'].NO_VALID_RECIPIENT)
                 self.assertEqual(mail.failure_type, 'mail_email_invalid', 'Mail: invalid (ascii) recipient')
                 self.assertEqual(mail.state, 'exception')
-                self.assertEqual(notification.failure_reason, self.env['ir.mail_server'].NO_VALID_RECIPIENT)
+                self.assertEqual(notification.failure_reason, self.env['mail.notification'].NO_VALID_RECIPIENT)
                 self.assertEqual(notification.failure_type, 'mail_email_invalid')
                 self.assertEqual(notification.notification_status, 'exception')
 

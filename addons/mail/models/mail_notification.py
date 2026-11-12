@@ -16,6 +16,7 @@ class MailNotification(models.Model):
     _log_access = False
     _description = 'Message Notifications'
 
+    NO_VALID_RECIPIENT = "A customer or email address is required for inbox or email notifications."
     # origin
     author_id = fields.Many2one('res.partner', 'Author', ondelete='set null')
     mail_message_id = fields.Many2one('mail.message', 'Message', index=True, ondelete='cascade', required=True)
