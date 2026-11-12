@@ -227,6 +227,23 @@ class TestSaleReportCurrencyRate(SaleCommon):
             0,
         )
 
+    def test_sale_report_unit_of_converted_quantities(self):
+        """The quantities are converted to the product unit, which must be the reported unit."""
+        self.product.uom_id = self.uom_pack_6
+        order = self.env["sale.order"].create({
+            "partner_id": self.partner.id,
+            "order_line": [Command.create({
+                "product_id": self.product.id,
+                "product_uom_id": self.uom_unit.id,
+                "product_uom_qty": 12,
+            })],
+        })
+        order.action_confirm()
+        order.order_line.flush_recordset()
+        report_line = self.env["sale.report"].search([("order_reference", "=", f"sale.order,{order.id}")])
+        self.assertEqual(report_line.product_uom_qty, 2)
+        self.assertEqual(report_line.product_uom_id, self.uom_pack_6)
+
     def test_sale_report_productless_line(self):
         """Productless SOLs (no product_id, display_type=NULL) must contribute amounts
         and qtys to the report."""
