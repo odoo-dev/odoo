@@ -240,27 +240,6 @@ class ProductTemplate(models.Model):
             tax_string = " "
         return tax_string
 
-    @api.constrains('uom_id')
-    def _check_uom_not_in_invoice(self):
-        self.env['product.template'].flush_model(['uom_id'])
-        self.env.cr.execute("""
-            SELECT prod_template.id
-              FROM account_move_line line
-              JOIN product_product prod_variant ON line.product_id = prod_variant.id
-              JOIN product_template prod_template ON prod_variant.product_tmpl_id = prod_template.id
-              JOIN uom_uom template_uom ON prod_template.uom_id = template_uom.id
-              JOIN uom_uom line_uom ON line.product_uom_id = line_uom.id
-             WHERE prod_template.id IN %s
-               AND line.parent_state = 'posted'
-               AND template_uom.id != line_uom.id
-             LIMIT 1
-        """, [tuple(self.ids)])
-        if self.env.cr.fetchall():
-            raise ValidationError(_(
-                "This product is already being used in posted Journal Entries.\n"
-                "If you want to change its Unit of Measure, please archive this product and create a new one."
-            ))
-
     @api.onchange('type')
     def _onchange_type(self):
         if self.type == 'combo':
@@ -339,6 +318,24 @@ class ProductProduct(models.Model):
         search="_search_is_in_selected_catalog_section", store=False
     )
     tax_string = fields.Char(compute='_compute_tax_string')
+
+    @api.constrains('uom_id')
+    def _check_uom_not_in_invoice(self):
+        self.env['product.product'].flush_model(['uom_id'])
+        self.env.cr.execute("""
+            SELECT prod_variant.id
+              FROM account_move_line line
+              JOIN product_product prod_variant ON line.product_id = prod_variant.id
+             WHERE prod_variant.id IN %s
+               AND line.parent_state = 'posted'
+               AND prod_variant.uom_id != line.product_uom_id
+             LIMIT 1
+        """, [tuple(self.ids)])
+        if self.env.cr.fetchall():
+            raise ValidationError(_(
+                "This product is already being used in posted Journal Entries.\n"
+                "If you want to change its Unit of Measure, please archive this product and create a new one."
+            ))
 
     def _search_is_in_selected_catalog_section(self, operator, value):
         if operator != 'in':

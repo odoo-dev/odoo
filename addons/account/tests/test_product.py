@@ -2,6 +2,7 @@
 
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 from odoo import Command
+from odoo.exceptions import ValidationError
 from odoo.tests import Form, tagged
 from odoo.tests.common import new_test_user
 
@@ -306,3 +307,26 @@ class TestProduct(AccountTestInvoicingCommon):
         # 4) Assert that a vendor price set for a product variant is not incorrectly applied to other product variants
         # sharing the same template when there is no vendor price set for them specifically
         self.assertEqual(bill.invoice_line_ids[3].balance, 400.0)
+
+    def test_variant_uom_used_in_posted_entries(self):
+        """ Only the variant used in posted entries can't change its unit, not its siblings. """
+        attribute = self.env['product.attribute'].create({
+            'name': 'Packaging',
+            'value_ids': [Command.create({'name': 'Unit'}), Command.create({'name': 'Pack'})],
+        })
+        template = self.env['product.template'].create({
+            'name': 'Water',
+            'uom_id': self.uom_unit.id,
+            'attribute_line_ids': [Command.create({
+                'attribute_id': attribute.id,
+                'value_ids': [Command.set(attribute.value_ids.ids)],
+            })],
+        })
+        variant_unit, variant_pack = template.product_variant_ids.sorted('id')
+        self.init_invoice('out_invoice', products=variant_unit, post=True)
+
+        variant_pack.uom_id = self.uom_pack_6
+        self.assertEqual(variant_unit.uom_id, self.uom_unit)
+        self.assertEqual(template.uom_id, self.uom_unit)
+        with self.assertRaises(ValidationError):
+            variant_unit.uom_id = self.uom_dozen
