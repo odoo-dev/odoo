@@ -83,7 +83,7 @@ class ProductPricelistItem(models.Model):
         ondelete='cascade', check_company=True, index='btree_not_null',
         ui_domain="[('product_tmpl_id', '=', product_tmpl_id)]",
         help="Specify a product if this rule only applies to one product. Keep empty otherwise.")
-    product_uom_name = fields.Char(related='product_tmpl_id.uom_name')
+    product_uom_name = fields.Char(compute='_compute_product_uom_name')
     product_variant_count = fields.Integer(related='product_tmpl_id.product_variant_count')
     uom_id = fields.Many2one(string="Packaging", comodel_name='uom.uom')
     allowed_uom_ids = fields.Many2many('uom.uom', compute='_compute_allowed_uom_ids')
@@ -189,10 +189,17 @@ class ProductPricelistItem(models.Model):
                 or item.env.company.currency_id
             )
 
-    @api.depends('product_tmpl_id', 'product_tmpl_id.uom_id', 'product_tmpl_id.uom_ids')
+    @api.depends('product_tmpl_id', 'product_tmpl_id.uom_id', 'product_tmpl_id.uom_ids', 'product_id', 'product_id.uom_id', 'product_id.extra_uom_ids')
     def _compute_allowed_uom_ids(self):
         for item in self:
             item.allowed_uom_ids = item.product_tmpl_id.uom_id | item.product_tmpl_id.uom_ids
+            if item.product_id:
+                item.allowed_uom_ids |= item.product_id.uom_id | item.product_id.extra_uom_ids
+
+    @api.depends('product_id.uom_name', 'product_tmpl_id.uom_name')
+    def _compute_product_uom_name(self):
+        for item in self:
+            item.product_uom_name = item.product_id.uom_name or item.product_tmpl_id.uom_name
 
     @api.depends('categ_id', 'product_id', 'product_tmpl_id')
     def _compute_applied_on(self):

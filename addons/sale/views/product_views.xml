@@ -207,7 +207,6 @@
                     invisible="not is_storable"
                     readonly="1"
                     optional="show"
-                    sum="Total Free To Use"
                     />
             </field>
         </field>

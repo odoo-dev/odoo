@@ -7,7 +7,7 @@ from collections import defaultdict
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
-from odoo.fields import Domain
+from odoo.fields import Command, Domain
 from odoo.tools import groupby
 from odoo.tools.image import is_image_size_above
 from odoo.tools.sql import SQL
@@ -166,6 +166,7 @@ class ProductTemplate(models.Model):
     purchase_ok = fields.Boolean('Purchase', default=True, compute='_compute_purchase_ok', store=True, readonly=False)
     uom_id = fields.Many2one(
         'uom.uom', 'Unit', tracking=True,
+        compute='_compute_uom_id', store=True, readonly=False,
         default=_default_uom_id, required=True, index=True,
         help="Default unit of measure used for all stock operations.")
     uom_ids = fields.Many2many('uom.uom', string='Packagings', help="Additional packagings for this product which can be used for sales", ui_domain="[('id', '!=', uom_id)]")
@@ -544,6 +545,10 @@ class ProductTemplate(models.Model):
     def _set_volume(self):
         self._set_product_variant_field('volume', update_all_variants=True)
 
+    @api.depends('product_variant_ids.uom_id')
+    def _compute_uom_id(self):
+        self._compute_template_field_from_variant_field('uom_id', multi_variant=True)
+
     @api.depends('product_variant_ids.weight')
     def _compute_weight(self):
         self._compute_template_field_from_variant_field('weight', multi_variant=True)
@@ -696,16 +701,22 @@ class ProductTemplate(models.Model):
 
     @api.onchange('uom_id')
     def _onchange_uom_id(self):
-        if self._origin.uom_id == self.uom_id or not self.with_context(active_test=False).product_variant_ids._trigger_uom_warning():
+        other_uom_variants = self._origin.product_variant_ids.filtered(lambda variant: variant.uom_id != self._origin.uom_id)
+        if self._origin.uom_id == self.uom_id or not (other_uom_variants or self.with_context(active_test=False).product_variant_ids._trigger_uom_warning()):
             return
-        message = _(
+        messages = [_(
             'Changing the unit of measure for your product will apply a conversion 1 %(old_uom_name)s = 1 %(new_uom_name)s.\n'
             'All existing records (Sales orders, Purchase orders, etc.) using this product will be updated by replacing the unit name.',
-            old_uom_name=self._origin.uom_id.display_name, new_uom_name=self.uom_id.display_name)
+            old_uom_name=self._origin.uom_id.display_name, new_uom_name=self.uom_id.display_name)]
+        if other_uom_variants:
+            messages.append(_(
+                "These variants have their own unit of measure, it will also be replaced by %(uom)s:\n%(variants)s",
+                uom=self.uom_id.display_name,
+                variants="\n".join(f"- {variant.display_name}: {variant.uom_id.display_name}" for variant in other_uom_variants)))
         return {
             'warning': {
                 'title': _('What to expect ?'),
-                'message': message,
+                'message': "\n\n".join(messages),
             }
         }
 
@@ -845,10 +856,13 @@ class ProductTemplate(models.Model):
         return templates
 
     def write(self, vals):
+        uom_changed_templates = self.browse()
         if 'uom_id' in vals:
-            products = self.filtered(lambda template: template.uom_id.id != vals['uom_id']).product_variant_ids
-            products.sudo().with_context(skip_uom_conversion=True)._update_uom(vals['uom_id'])
+            uom_changed_templates = self.filtered(lambda template: template.uom_id.id != vals['uom_id'])
         res = super().write(vals)
+        if uom_changed_templates:
+            variants = uom_changed_templates.with_context(active_test=False).product_variant_ids.with_env(self.env)
+            variants.filtered(lambda variant: variant.uom_id.id != vals['uom_id']).write({'uom_id': vals['uom_id']})
         if (self.env.context.get("create_product_product", True) and 'attribute_line_ids' in vals) or (vals.get('active') and len(self.product_variant_ids) == 0):
             self._create_variant_ids()
         if 'active' in vals and not vals.get('active'):
@@ -904,6 +918,28 @@ class ProductTemplate(models.Model):
                 if ptav.price_extra:
                     copied_ptav.price_extra = ptav.price_extra
 
+            # Same for the variants: match each active variant with the one of the copy made of the
+            # copies of its attribute values.
+            copy_variant_by_ptavs = {
+                variant.product_template_variant_value_ids: variant
+                for variant in template_copy.product_variant_ids
+            }
+            variant_mapping = {}
+            for variant in template.product_variant_ids:
+                copy_ptavs = [ptav_mapping.get(ptav) for ptav in variant.product_template_variant_value_ids]
+                if not all(copy_ptavs):
+                    continue
+                copy_ptavs = self.env['product.template.attribute.value'].concat(copy_ptavs)
+                if copy_variant := copy_variant_by_ptavs.get(copy_ptavs):
+                    variant_mapping[variant] = copy_variant
+
+            # The new variants all use the template unit, restore the specific ones
+            if not default or 'uom_id' not in default:
+                for uom, variants in template.product_variant_ids.grouped('uom_id').items():
+                    if uom != template.uom_id:
+                        copy_variants = (variant_mapping[variant] for variant in variants if variant in variant_mapping)
+                        self.env['product.product'].concat(copy_variants).uom_id = uom
+
             if template.company_id != template_copy.company_id:
                 # Don't duplicate pricings when the copy belongs to another company to
                 # avoid multi-company issues.
@@ -924,40 +960,15 @@ class ProductTemplate(models.Model):
             })
 
             # Duplicate variant-specific rules
-            if variant_specific_pricings:
-                def get_combination_key(variant, attribute_line_ids):
-                    return frozenset(
-                        (
-                            attribute_line_ids.index(ptav.attribute_line_id.id),
-                            ptav.product_attribute_value_id.id,
-                        )
-                        for ptav in variant.product_template_variant_value_ids
-                    )
-
-                template_copy_line_ids = template_copy.attribute_line_ids.ids
-                copy_variant_by_attribute_combo = {
-                    get_combination_key(v, template_copy_line_ids): v.id
-                    for v in template_copy.product_variant_ids
-                }
-
-                template_line_ids = template.attribute_line_ids.ids
-                variant_mapping = {}
-                for variant in template.product_variant_ids:
-                    key = get_combination_key(variant, template_line_ids)
-                    if key in copy_variant_by_attribute_combo:
-                        variant_mapping[variant.id] = copy_variant_by_attribute_combo[key]
-
-                for product_id, pricings in variant_specific_pricings.grouped(
-                    lambda pricing: pricing.product_id.id
-                ).items():
-                    if product_id not in variant_mapping:
-                        # Pricings of inactive variants should not be copied
-                        # (removed combinations, archived products ...)
-                        continue
-                    pricings.sudo().copy({
-                        'product_tmpl_id': template_copy.id,
-                        'product_id': variant_mapping.get(product_id),
-                    })
+            for product, pricings in variant_specific_pricings.grouped('product_id').items():
+                if product not in variant_mapping:
+                    # Pricings of inactive variants should not be copied
+                    # (removed combinations, archived products ...)
+                    continue
+                pricings.sudo().copy({
+                    'product_tmpl_id': template_copy.id,
+                    'product_id': variant_mapping[product].id,
+                })
         return copied_tmpls
 
     @api.depends('name', 'default_code')
@@ -1087,16 +1098,18 @@ class ProductTemplate(models.Model):
         prices = dict.fromkeys(self.ids, 0.0)
         for template in self:
             price = template[price_type] or 0.0
+            price_uom = template.uom_id
             price_currency = template.currency_id
             if price_type == 'standard_price':
                 if not price and template.product_variant_ids:
                     price = template.product_variant_ids[0].standard_price
+                    price_uom = template.product_variant_ids[0].uom_id
                 price_currency = template.cost_currency_id
             elif price_type == 'list_price':
                 price += template._get_attributes_extra_price()
 
             if uom:
-                price = template.uom_id._compute_price(price, uom)
+                price = price_uom._compute_price(price, uom)
 
             # Convert from current user company currency to asked one
             # This is right cause a field cannot be in more than one currency
@@ -1115,8 +1128,6 @@ class ProductTemplate(models.Model):
         variants_to_create = []
         variants_to_activate = Product
         variants_to_unlink = Product
-        # {tmpl_id: [(ptav_ids_frozenset, extra_uom_ids), ...]} to propagate to new variants
-        templates_extra_uom_ids = {}
 
         for tmpl_id in self:
             lines_without_no_variants = tmpl_id.valid_product_template_attribute_line_ids._without_no_variant_attributes()
@@ -1196,29 +1207,28 @@ class ProductTemplate(models.Model):
 
             variants_being_replaced = all_variants - current_variants_to_activate
             if current_variants_to_create and variants_being_replaced:
-                extra_uom_mapping = []
-                for variant in variants_being_replaced:
-                    if variant.extra_uom_ids:
-                        ptav_ids = frozenset(variant.product_template_attribute_value_ids.ids)
-                        extra_uom_mapping.append((ptav_ids, variant.extra_uom_ids))
-                if extra_uom_mapping:
-                    templates_extra_uom_ids[tmpl_id.id] = extra_uom_mapping
+                # Keep the unit and the packagings of the replaced variants on the new variants
+                # they are a subset of. The active variants come first, to take the unit from.
+                replaced_variants_by_ptavs = [
+                    (set(variant.product_template_attribute_value_ids.ids), variant)
+                    for variant in variants_being_replaced.sorted(lambda variant: not variant.active)
+                ]
+                for variant_vals in current_variants_to_create:
+                    new_ptav_ids = set(variant_vals['product_template_attribute_value_ids'][0][2])
+                    replaced_variants = Product.concat(
+                        variant for ptav_ids, variant in replaced_variants_by_ptavs if ptav_ids <= new_ptav_ids
+                    )
+                    if replaced_variants:
+                        variant_vals['uom_id'] = replaced_variants[0].uom_id.id
+                        if replaced_variants.extra_uom_ids:
+                            variant_vals['extra_uom_ids'] = [Command.set(replaced_variants.extra_uom_ids.ids)]
             variants_to_unlink += variants_being_replaced
 
         if variants_to_activate:
             # Only activate variants whose template is active
             variants_to_activate.filtered(lambda v: v.product_tmpl_id.active).write({'active': True})
         if variants_to_create:
-            new_variants = Product.create(variants_to_create)
-            extra_uom_mapping = templates_extra_uom_ids.get(new_variants[0].product_tmpl_id.id, [])
-            for new_variant in new_variants:
-                new_ptav_ids = frozenset(new_variant.product_template_attribute_value_ids.ids)
-                inherited_uom_ids = self.env['uom.uom']
-                for old_ptav_ids, old_extra_uom_ids in extra_uom_mapping:
-                    if old_ptav_ids <= new_ptav_ids:  # old is a subset of new
-                        inherited_uom_ids |= old_extra_uom_ids
-                if inherited_uom_ids:
-                    new_variant.extra_uom_ids = inherited_uom_ids
+            Product.create(variants_to_create)
         if variants_to_unlink:
             variants_to_unlink._unlink_or_archive()
             # prevent change if exclusion deleted template by deleting last variant

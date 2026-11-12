@@ -14,8 +14,9 @@
                     groups="product.group_product_variant"
                     readonly="1"
                 />
-                <field name="qty_available" string="On Hand" decoration-danger="qty_available &lt; 0" sum="Total On Hand"/>
-                <field name="virtual_available" string="Forecasted" decoration-danger="virtual_available &lt; 0" decoration-bf="1" sum="Total Forecasted"/>
+                <field name="qty_available" string="On Hand" decoration-danger="qty_available &lt; 0"/>
+                <field name="virtual_available" string="Forecasted" decoration-danger="virtual_available &lt; 0" decoration-bf="1"/>
+                <field name="uom_id" groups="uom.group_uom" readonly="1" options="{'no_open': True}"/>
             </list>
         </field>
     </record>
@@ -477,9 +478,8 @@
                         invisible="not is_storable"
                         optional="show"
                         readonly="1"
-                        sum="Total On Hand"
                     />
-                    <field name="uom_id" groups="uom.group_uom" optional="show" readonly="1" options="{'no_open': True}"/>
+                    <field name="uom_id" groups="uom.group_uom" optional="show" widget="many2one_uom" options="{'no_open': True, 'no_quick_create': True}"/>
                     <field
                         name="extra_uom_ids"
                         widget="many2many_uom_tags"

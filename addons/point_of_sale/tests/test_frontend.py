@@ -2433,6 +2433,27 @@ class TestUi(TestPointOfSaleHttpCommon):
         })
         self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'test_product_configurator_price', login="pos_user")
 
+    def test_variant_specific_uom(self):
+        """ The orderlines use the unit of the variant, not the one of its template. """
+        attribute = self.env['product.attribute'].create({
+            'name': 'Packaging',
+            'create_variant': 'always',
+            'value_ids': [Command.create({'name': 'Single'}), Command.create({'name': 'Pack'})],
+        })
+        template = self.env['product.template'].create({
+            'name': 'Water',
+            'available_in_pos': True,
+            'list_price': 10.0,
+            'uom_id': self.env.ref('uom.product_uom_unit').id,
+            'attribute_line_ids': [Command.create({
+                'attribute_id': attribute.id,
+                'value_ids': [Command.set(attribute.value_ids.ids)],
+            })],
+        })
+        template.product_variant_ids.sorted('id')[1].uom_id = self.env.ref('uom.product_uom_pack_6')
+        self.assertIn('uom_id', self.env['product.product']._load_pos_data_fields(self.main_pos_config))
+        self.start_pos_tour('test_variant_specific_uom')
+
     def test_not_available_pricelist_not_set_on_order(self):
         """ Test that when the pricelist is not available, it is not set on the order """
         not_available_pricelist, available_pricelist = self.env['product.pricelist'].create([{
