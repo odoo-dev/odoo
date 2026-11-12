@@ -1,4 +1,3 @@
-import { SearchState } from "@mail/utils/common/hooks";
 import { SearchStatePlugin } from "@mail/utils/common/search_state_plugin";
 
 import { Component, signal, t, useEffect, useProps } from "@odoo/owl";
@@ -33,7 +32,7 @@ export class SearchInput extends Component {
             onClear: t.function([t.instanceOf(MouseEvent)]).optional(),
             onKeydown: t.function([t.instanceOf(KeyboardEvent)]).optional(),
             placeholder: t.string().optional(),
-            search: t.or([t.instanceOf(SearchStatePlugin), t.instanceOf(SearchState)]),
+            search: t.instanceOf(SearchStatePlugin),
         });
         /** Input element, either owned by the parent (`inputRef` prop) or local. */
         this.inputRef = useProps.static(

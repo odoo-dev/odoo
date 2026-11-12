@@ -1,7 +1,10 @@
-import { SearchState } from "@mail/utils/common/hooks";
+import { StorePlugin } from "@mail/core/common/store_plugin";
+import { Thread } from "@mail/core/common/thread_model";
 import { getInnerHtml } from "@mail/utils/common/html";
-import { proxy } from "@odoo/owl";
-import { useService } from "@web/core/utils/hooks";
+import { SearchStatePlugin } from "@mail/utils/common/search_state_plugin";
+
+import { computed, signal, t, useConfig, usePlugin } from "@odoo/owl";
+
 import { createDocumentFragmentFromContent } from "@web/core/utils/html";
 import { escapeRegExp } from "@web/core/utils/strings";
 
@@ -67,35 +70,72 @@ export function searchHighlight(searchTerm, target) {
     return getInnerHtml(htmlDoc.body);
 }
 
-export class MessageSearchState extends SearchState {
-    count = 0;
-    /** @type {string | undefined} */
-    search_filter = undefined;
-    hasMore = false;
-    /** @type {import('@mail/core/common/message_model').Message[]} */
-    messages = [];
-    searched = false;
-    /** @type {import('models').Thread | undefined} */
-    thread;
+/**
+ * Searches messages in a thread by term and message type.
+ * Config:
+ * - `thread`: function returning the thread to search.
+ */
+export class MessageSearchPlugin extends SearchStatePlugin {
+    /** @type {import("@odoo/owl").Signal<number>} */
+    _count = signal(0);
+    /** @type {import("@odoo/owl").Signal<boolean>} */
+    _hasMore = signal(false);
+    /** @type {import("@odoo/owl").Signal<import("@mail/core/common/message_model").Message[]>} */
+    _messages = signal([]);
+    /** @type {import("@odoo/owl").Signal<boolean>} */
+    _searched = signal(false);
+    /** @type {import("@odoo/owl").Signal<string | undefined>} */
+    _searchFilter = signal(undefined);
+    deps = computed(() => [this.search_filter]);
+    isActive = computed(() => !!this.searchTerm || this.search_filter !== undefined);
     loadMoreBeforeMessageId;
-    /** @type {import("models").Store} */
-    store;
     searchId = 0;
+    store = usePlugin(StorePlugin);
+    thread = useConfig("thread", t.function([], t.instanceOf(Thread).optional()));
 
-    /** @param {import('models').Thread} [initialThread] */
-    constructor(initialThread) {
-        super();
-        this.store = useService("mail.store");
-        this.thread = initialThread;
+    setup() {
+        super.setup();
         this.fetch = this.fetchMessages.bind(this);
     }
 
-    get isActive() {
-        return !!this.searchTerm || this.search_filter !== undefined;
+    get count() {
+        return this._count();
     }
 
-    get deps() {
-        return [this.search_filter];
+    set count(value) {
+        this._count.set(value);
+    }
+
+    get hasMore() {
+        return this._hasMore();
+    }
+
+    set hasMore(value) {
+        this._hasMore.set(value);
+    }
+
+    get messages() {
+        return this._messages();
+    }
+
+    set messages(value) {
+        this._messages.set(value);
+    }
+
+    get search_filter() {
+        return this._searchFilter();
+    }
+
+    set search_filter(value) {
+        this._searchFilter.set(value);
+    }
+
+    get searched() {
+        return this._searched();
+    }
+
+    set searched(value) {
+        this._searched.set(value);
     }
 
     /** @param {string} term */
@@ -114,7 +154,7 @@ export class MessageSearchState extends SearchState {
         const currentSearchId = ++this.searchId;
         const data = await this.store.searchMessagesInThread(
             term,
-            this.thread,
+            this.thread(),
             before ?? false,
             this.search_filter
         );
@@ -125,10 +165,10 @@ export class MessageSearchState extends SearchState {
         this.count = data.count;
         this.hasMore = data.loadMore;
         if (before !== undefined) {
-            this.messages.push(...data.messages);
+            this.messages = [...this.messages, ...data.messages];
         } else {
             this.messages = data.messages;
-            if (data.messages.length === 0) {
+            if (!data.messages.length) {
                 return false;
             }
         }
@@ -158,11 +198,4 @@ export class MessageSearchState extends SearchState {
     highlight(text) {
         return searchHighlight(this.searchTerm, text);
     }
-}
-
-/**
- * @param {import('models').Thread} [initialThread]
- */
-export function useMessageSearch(initialThread) {
-    return proxy(new MessageSearchState(initialThread));
 }
