@@ -108,3 +108,25 @@ registry.category("web_tour.tours").add("test_product_with_single_value_dynamic_
             Chrome.endTour(),
         ].flat(),
 });
+
+registry.category("web_tour.tours").add("test_variant_specific_uom", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+            ProductScreen.clickDisplayedProduct("Water"),
+            ProductConfigurator.pickRadio("Pack"),
+            Dialog.confirm(),
+            ProductScreen.selectedOrderlineHas("Water", "1"),
+            {
+                content: "The orderline uses the unit of the variant",
+                trigger: "body",
+                run: () => {
+                    const uom = window.posmodel.getOrder().lines[0].product_id.uom_id;
+                    if (uom?.name !== "Pack of 6") {
+                        throw new Error(`Unexpected unit on the orderline: ${uom?.name}`);
+                    }
+                },
+            },
+        ].flat(),
+});

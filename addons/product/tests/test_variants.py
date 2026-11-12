@@ -8,7 +8,7 @@ from unittest.mock import patch
 
 from PIL import Image
 
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 from odoo.fields import Command
 from odoo.tests import Form, TransactionCase, tagged
 from odoo.tools import BinaryBytes, mute_logger
@@ -665,6 +665,220 @@ class TestVariants(ProductVariantsCommon):
 
         self.assertFalse(template.product_variant_ids.extra_uom_ids,
             "New variants with no PTAV overlap should have empty extra_uom_ids")
+
+    def test_extra_uom_ids_propagation_on_several_templates(self):
+        """Each template recreating its variants in the same operation keeps the extra_uom_ids of
+        its own variants."""
+        templates = self.env['product.template'].create([{
+            'name': name,
+            'attribute_line_ids': [Command.create({
+                'attribute_id': self.size_attribute.id,
+                'value_ids': [Command.set([self.size_attribute_s.id, self.size_attribute_m.id])],
+            })],
+        } for name in ('Water', 'Juice')])
+        for template, uom in zip(templates, self.uom_gram + self.uom_kgm):
+            template.product_variant_ids.sorted('id')[1].extra_uom_ids = uom
+
+        templates.write({'attribute_line_ids': [Command.create({
+            'attribute_id': self.color_attribute.id,
+            'value_ids': [Command.set([self.color_attribute_red.id, self.color_attribute_blue.id])],
+        })]})
+
+        for template, uom in zip(templates, self.uom_gram + self.uom_kgm):
+            for variant in template.product_variant_ids:
+                size = variant.product_template_attribute_value_ids.product_attribute_value_id & self.size_attribute.value_ids
+                expected_uoms = uom if size == self.size_attribute_m else self.env['uom.uom']
+                self.assertEqual(variant.extra_uom_ids, expected_uoms, f"Unexpected packagings for {variant.display_name}")
+
+    def test_variant_specific_uom(self):
+        """Each variant can have its own unit, the template keeps its own one."""
+        template = self.env['product.template'].create({
+            'name': 'Water',
+            'uom_id': self.uom_unit.id,
+            'attribute_line_ids': [Command.create({
+                'attribute_id': self.size_attribute.id,
+                'value_ids': [Command.set([self.size_attribute_s.id, self.size_attribute_m.id])],
+            })],
+        })
+        variant_s, variant_m = template.product_variant_ids.sorted('id')
+        self.assertEqual(template.product_variant_ids.uom_id, self.uom_unit)
+
+        variant_m.uom_id = self.uom_pack_6
+        self.assertEqual(variant_s.uom_id, self.uom_unit, "Other variants keep their own unit")
+        self.assertEqual(variant_m.uom_id, self.uom_pack_6)
+        self.assertEqual(template.uom_id, self.uom_unit, "The template doesn't follow its variants")
+
+        template.product_variant_ids.uom_id = self.uom_kgm
+        self.assertEqual(template.uom_id, self.uom_kgm, "The template follows when all its variants agree")
+
+    def test_variant_specific_uom_new_variants(self):
+        """New variants use the template unit, recreated ones keep the unit of the variant they replace."""
+        template = self.env['product.template'].create({
+            'name': 'Water',
+            'uom_id': self.uom_unit.id,
+            'attribute_line_ids': [Command.create({
+                'attribute_id': self.size_attribute.id,
+                'value_ids': [Command.set([self.size_attribute_s.id, self.size_attribute_m.id])],
+            })],
+        })
+        variant_s, variant_m = template.product_variant_ids.sorted('id')
+        variant_m.uom_id = self.uom_pack_6
+
+        template.attribute_line_ids.value_ids = [Command.link(self.size_attribute_l.id)]
+        variant_l = template.product_variant_ids - variant_s - variant_m
+        self.assertEqual(variant_l.uom_id, self.uom_unit)
+
+        template.attribute_line_ids = [Command.create({
+            'attribute_id': self.color_attribute.id,
+            'value_ids': [Command.set([self.color_attribute_red.id, self.color_attribute_blue.id])],
+        })]
+        self.assertEqual(len(template.product_variant_ids), 6)
+        for variant in template.product_variant_ids:
+            size = variant.product_template_attribute_value_ids.product_attribute_value_id & self.size_attribute.value_ids
+            expected_uom = self.uom_pack_6 if size == self.size_attribute_m else self.uom_unit
+            self.assertEqual(variant.uom_id, expected_uom, f"Unexpected unit for {variant.display_name}")
+
+        variant = self.env['product.product'].create({'name': 'Pack of water', 'uom_id': self.uom_pack_6.id})
+        self.assertEqual(variant.uom_id, self.uom_pack_6)
+        self.assertEqual(variant.product_tmpl_id.uom_id, self.uom_pack_6, "The template of a new product uses its unit")
+        dynamic_template = self.env['product.template'].create({
+            'name': 'Juice',
+            'uom_id': self.uom_pack_6.id,
+            'attribute_line_ids': [Command.create({
+                'attribute_id': self.dynamic_attribute.id,
+                'value_ids': [Command.set(self.dynamic_attribute.value_ids[:1].ids)],
+            })],
+        })
+        variant = self.env['product.product'].create({
+            'product_tmpl_id': dynamic_template.id,
+            'product_template_attribute_value_ids': [
+                Command.set(dynamic_template.attribute_line_ids.product_template_value_ids.ids),
+            ],
+        })
+        self.assertEqual(variant.uom_id, self.uom_pack_6, "A variant created for a template starts in its unit")
+        template = self.env['product.template'].create({'name': 'Dozen of eggs', 'uom_id': self.uom_dozen.id})
+        self.assertEqual(template.product_variant_ids.uom_id, self.uom_dozen)
+
+    def test_variant_specific_uom_copy(self):
+        """Duplicating a template keeps the unit of each variant, unless a unit is forced."""
+        template = self.env['product.template'].create({
+            'name': 'Water',
+            'uom_id': self.uom_unit.id,
+            'attribute_line_ids': [Command.create({
+                'attribute_id': self.size_attribute.id,
+                'value_ids': [Command.set([self.size_attribute_s.id, self.size_attribute_m.id])],
+            })],
+        })
+        template.product_variant_ids.sorted('id')[1].uom_id = self.uom_pack_6
+
+        template_copy = template.copy()
+        self.assertEqual(template_copy.uom_id, self.uom_unit)
+        for variant in template_copy.product_variant_ids:
+            size = variant.product_template_attribute_value_ids.product_attribute_value_id
+            expected_uom = self.uom_pack_6 if size == self.size_attribute_m else self.uom_unit
+            self.assertEqual(variant.uom_id, expected_uom, f"Unexpected unit for {variant.display_name}")
+
+        template_copy = template.copy({'uom_id': self.uom_dozen.id})
+        self.assertEqual(template_copy.product_variant_ids.uom_id, self.uom_dozen)
+
+    def _create_template_with_variant_in_pack(self):
+        template = self.env['product.template'].create({
+            'name': 'Water',
+            'uom_id': self.uom_unit.id,
+            'attribute_line_ids': [Command.create({
+                'attribute_id': self.size_attribute.id,
+                'value_ids': [Command.set([self.size_attribute_s.id, self.size_attribute_m.id])],
+            })],
+        })
+        variant_s, variant_m = template.product_variant_ids.sorted('id')
+        variant_m.uom_id = self.uom_pack_6
+        return template, variant_s, variant_m
+
+    def test_variant_specific_uom_available_uoms(self):
+        """The main and available units of a variant are based on its own unit."""
+        template, variant_s, variant_m = self._create_template_with_variant_in_pack()
+        template.uom_ids = self.uom_dozen
+
+        self._enable_uom()
+        self.assertEqual(variant_m._get_main_uom(), self.uom_pack_6)
+        self.assertEqual(variant_m._get_available_uoms(), self.uom_pack_6 | self.uom_unit | self.uom_dozen,
+            "The variant can also be sold in the unit of its template")
+        self.assertEqual(variant_m._get_available_uoms()[:1], self.uom_pack_6, "The main unit should come first")
+        self.assertEqual(variant_s._get_available_uoms(), self.uom_unit | self.uom_dozen)
+        self.assertEqual(template._get_available_uoms(), self.uom_unit | self.uom_dozen)
+
+        self._disable_uom()
+        self.assertEqual(variant_m._get_main_uom(), self.uom_pack_6)
+        self.assertEqual(variant_m._get_available_uoms(), self.uom_pack_6)
+
+    def test_variant_specific_uom_pricelist_item(self):
+        """The rules of a variant use the units of this variant, not the ones of its template."""
+        template, __, variant_m = self._create_template_with_variant_in_pack()
+        template.uom_ids = self.uom_dozen
+        template_rule, variant_rule = self.env['product.pricelist.item'].create([
+            {'product_tmpl_id': template.id, 'fixed_price': 1},
+            {'product_tmpl_id': template.id, 'product_id': variant_m.id, 'fixed_price': 6},
+        ])
+        self.assertEqual(template_rule.allowed_uom_ids, self.uom_unit | self.uom_dozen)
+        self.assertEqual(template_rule.product_uom_name, self.uom_unit.name)
+        self.assertEqual(variant_rule.allowed_uom_ids, self.uom_pack_6 | self.uom_unit | self.uom_dozen)
+        self.assertEqual(variant_rule.product_uom_name, self.uom_pack_6.name)
+
+    def test_variant_specific_uom_template_change(self):
+        """Changing the unit of a template applies it to all its variants, with a warning when some have their own."""
+        template, variant_s, variant_m = self._create_template_with_variant_in_pack()
+        warning = template.new({'uom_id': self.uom_dozen.id}, origin=template)._onchange_uom_id()
+        self.assertIn(variant_m.display_name, warning['warning']['message'])
+        self.assertNotIn(variant_s.display_name, warning['warning']['message'], "Only the variants with their own unit are listed")
+
+        template.uom_id = self.uom_dozen
+        self.assertEqual(template.product_variant_ids.uom_id, self.uom_dozen)
+        warning = template.new({'uom_id': self.uom_unit.id}, origin=template)._onchange_uom_id()
+        self.assertFalse(warning, "No warning when all variants use the template unit")
+
+    def test_variant_specific_uom_related_units_only(self):
+        """The quantities of the variants are added up, so their units must be related."""
+        template, variant_s, __ = self._create_template_with_variant_in_pack()
+        with self.assertRaises(ValidationError):
+            variant_s.uom_id = self.uom_kgm
+        self.assertEqual(variant_s.uom_id, self.uom_unit)
+        with self.assertRaises(ValidationError):
+            variant_s.uom_id = self.uom_gram
+        with self.assertRaises(ValidationError):
+            self.env['product.product'].create({'product_tmpl_id': template.id, 'uom_id': self.uom_kgm.id})
+
+        template.uom_id = self.uom_kgm
+        self.assertEqual(template.product_variant_ids.uom_id, self.uom_kgm)
+
+        single_variant = self.env['product.product'].create({'name': 'Water'})
+        single_variant.uom_id = self.uom_kgm
+        self.assertEqual(single_variant.product_tmpl_id.uom_id, self.uom_kgm, "A single variant can use any unit")
+
+    def test_variant_specific_uom_unchanged_template_unit(self):
+        """Writing the current unit of a template (ex: importing it again) doesn't reset its variants."""
+        template, variant_s, variant_m = self._create_template_with_variant_in_pack()
+        template.write({'uom_id': self.uom_unit.id})
+        self.assertEqual(variant_m.uom_id, self.uom_pack_6)
+        self.assertEqual(variant_s.uom_id, self.uom_unit)
+
+        template.uom_id = self.uom_dozen
+        self.assertEqual(template.product_variant_ids.uom_id, self.uom_dozen, "A real change applies to all variants")
+
+    def test_variant_specific_uom_nested_creation(self):
+        """The variants given when creating a template keep their unit."""
+        template = self.env['product.template'].create({
+            'name': 'Water',
+            'uom_id': self.uom_unit.id,
+            'product_variant_ids': [Command.create({'uom_id': self.uom_pack_6.id})],
+        })
+        self.assertEqual(template.product_variant_ids.uom_id, self.uom_pack_6, "The explicit variant unit is kept")
+
+        template = self.env['product.template'].create({
+            'name': 'Water',
+            'uom_id': self.uom_pack_6.id,
+            'product_variant_ids': [Command.create({})],
+        })
+        self.assertEqual(template.product_variant_ids.uom_id, self.uom_pack_6, "Without a unit, use the template one")
 
 
 @tagged('post_install', '-at_install')
@@ -1475,10 +1689,13 @@ class TestVariantsArchive(ProductVariantsCommon):
         template_form = Form(template)
         template_form.uom_id = mm
         template = template_form.save()
+        self.assertEqual(template.product_variant_ids.uom_id, mm)
 
         variant_form = Form(template.product_variant_ids)
         variant_form.uom_id = units
-        variant_form.save()
+        variant = variant_form.save()
+        self.assertEqual(variant.uom_id, units)
+        self.assertEqual(template.uom_id, units)
 
     @mute_logger('odoo.models.unlink')
     def test_dynamic_attributes_archiving(self):

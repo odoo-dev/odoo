@@ -88,6 +88,10 @@ class ProductProduct(models.Model):
 
     combination_indices = fields.Char(compute='_compute_combination_indices', store=True, index=True)
     is_product_variant = fields.Boolean(compute='_compute_is_product_variant')
+    uom_id = fields.Many2one(
+        'uom.uom', 'Unit', tracking=True, required=True, index=True,
+        help="Default unit of measure used for all stock operations.")
+    uom_name = fields.Char(string='Unit Name', related='uom_id.name', readonly=True)
     extra_uom_ids = fields.Many2many(
         'uom.uom', string='Extra Packagings', ui_domain="[('id', '!=', uom_id)]",
         help="Variant-specific additional packagings for this product which can be used for sales")
@@ -654,6 +658,16 @@ class ProductProduct(models.Model):
         for product in self:
             product.base_unit_name = product.base_unit_id.name or product.uom_name
 
+    @api.constrains('uom_id', 'product_tmpl_id')
+    def _check_variants_uom_reference(self):
+        for product in self:
+            if not product.uom_id._has_common_reference(product.product_tmpl_id.uom_id):
+                raise ValidationError(_(
+                    "The unit of measure of \"%(product)s\" must be related to %(uom)s, the one of its template, so that their quantities can be added up.",
+                    product=product.display_name,
+                    uom=product.product_tmpl_id.uom_id.display_name,
+                ))
+
     @api.constrains('base_unit_count')
     def _check_base_unit_count(self):
         if any(product.base_unit_count < 0 for product in self):
@@ -893,6 +907,10 @@ class ProductProduct(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+        for vals in vals_list:
+            if vals.get('product_tmpl_id') and not vals.get('uom_id'):
+                # New variants of an existing template start with the template unit
+                vals['uom_id'] = self.env['product.template'].browse(vals['product_tmpl_id']).uom_id.id
         products = super(ProductProduct, self.with_context(create_product_product=False)).create(
             vals_list
         )
@@ -903,6 +921,9 @@ class ProductProduct(models.Model):
         return products
 
     def write(self, vals):
+        if 'uom_id' in vals:
+            products = self.filtered(lambda product: product.uom_id.id != vals['uom_id'])
+            products.sudo().with_context(skip_uom_conversion=True)._update_uom(vals['uom_id'])
         res = super().write(vals)
         if 'barcode' in vals or 'company_id' in vals:
             self._check_barcode_uniqueness()
@@ -1454,11 +1475,10 @@ class ProductProduct(models.Model):
         return len(self._get_available_uoms()) > 1
 
     def _get_available_uoms(self):
-        res = self.product_tmpl_id._get_available_uoms()
         if self.env["res.groups"]._is_feature_enabled("uom.group_uom"):
-            # Multi-uom disabled, only main product uom matters.
-            return res | self.extra_uom_ids
-        return res
+            return self.uom_id | self.product_tmpl_id.uom_id | self.uom_ids | self.extra_uom_ids
+        # Multi-uom disabled, only main product uom matters.
+        return self.uom_id
 
     def _get_main_uom(self):
-        return self.product_tmpl_id._get_main_uom()
+        return self.uom_id
