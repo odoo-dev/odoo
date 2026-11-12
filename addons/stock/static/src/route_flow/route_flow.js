@@ -34,7 +34,7 @@ const USAGE_ICONS = {
 const USAGE_ORDER = ["supplier", "production", "transit", "internal", "view", "inventory", "customer"];
 
 const ACTION_ICONS = {
-    pull: "call_received",
+    pull: "login", // "call_received" is not in the icon subset
     push: "arrow_forward",
     pull_push: "swap_horiz",
     buy: "shopping_cart",
