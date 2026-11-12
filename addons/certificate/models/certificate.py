@@ -21,7 +21,7 @@ class CertificateCertificate(models.Model):
     _check_company_auto = True
 
     name = fields.Char(string='Name')
-    content = fields.Binary(string='Certificate', readonly=False, required=True)
+    content = fields.Binary(string='Certificate', readonly=False, ui_required=True)
     pkcs12_password = fields.Char(string='Certificate Password', help='Password to decrypt the PKS file.')
     private_key_id = fields.Many2one(
         string='Private Key',

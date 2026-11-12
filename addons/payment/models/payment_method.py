@@ -51,7 +51,7 @@ class PaymentMethod(models.Model):
         help="The base image used for this payment method; in a 64x64 px format.",
         max_width=64,
         max_height=64,
-        required=True,
+        ui_required=True,
     )
     image_payment_form = fields.Image(
         string="The resized image displayed on the payment form.",
