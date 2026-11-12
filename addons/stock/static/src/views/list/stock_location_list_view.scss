@@ -1,12 +1,15 @@
 .o_list_renderer .o_list_table tr.o_data_row[data-location-level] {
-    // align the name of a leaf location with the name of the location groups
-    // of the same level, i.e. after their (indented) caret
+    // Grouped locations have a `margin-inline-start` to have automatique indent,
+    // but not grouped records don't have it. This rule copies it for them,
+    // using padding instead of marging.
     > td.o_list_record_selector + td.o_data_cell,
     > td.o_data_cell:first-child {
+        // calc to get the very precise right lenght, maybe overkill.
         padding-inline-start: calc(
             var(--o-bs-table-cell-padding-x-sm, 0.3rem) +
             var(--o-stock-location-level, 0) * var(--o-bs-spacer-4) +
-            1.28571429em + 0.25rem
+            1.5em
         );
-    }
+        // Original value: 1.28571429em + 0.25rem
+        }
 }
