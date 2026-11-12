@@ -491,3 +491,13 @@ class TestHrWorkEntryType(TestHrHolidaysCommon):
         })
 
         self.assertEqual(leave._get_durations()[leave.id], (0.125, 3.0))
+
+    def test_work_entry_dropdown_on_new_time_off(self):
+        work_entry_type = self.env['hr.work.entry.type'].create({
+            'name': 'Test Time Off Type',
+            'code': 'TESTTO',
+        })
+        domain = [('virtual_remaining_leaves', '>', 0)]
+
+        results = work_entry_type.name_search('', domain)
+        self.assertIsInstance(results, list)
