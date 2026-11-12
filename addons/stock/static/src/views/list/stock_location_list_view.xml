@@ -43,9 +43,13 @@
 
     <t t-name="stock.StockLocationListRenderer.RecordRow" t-inherit="web.ListRenderer.RecordRow" t-inherit-mode="primary">
         <xpath expr="//tr" position="attributes">
-            <!-- indent the leaf locations like the location groups of the same level -->
+            <!-- Add attributes to be able to indent leaf record in the same way than the groups -->
             <attribute name="t-att-data-location-level">locationLevel</attribute>
             <attribute name="t-att-style">locationLevel !== undefined ? '--o-stock-location-level: ' + locationLevel : undefined</attribute>
+        </xpath>
+        <xpath expr="//td[@name='display_name']" position="inside">
+            <span class="o_dummy_group_caret oi oi-fw me-1" data-icon="arrow_right"
+                  t-attf-style="--o-list-group-level: {{this.getGroupLevel(group)}}"/>
         </xpath>
     </t>
 
