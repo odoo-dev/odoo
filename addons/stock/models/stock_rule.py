@@ -625,14 +625,17 @@ class StockRule(models.Model):
         return result
 
     @api.model
-    def get_product_flow(self, product_id, warehouse_id):
+    def get_product_flow(self, product_id, warehouse_id, with_orderpoints=False):
         """ Rules a product goes through in a warehouse, found the same way as
         a real procurement (see `_get_rule` and `_get_push_rule`): the chain
         pulled by a customer need, the replenishment of the locations it takes
-        from, and the push rules applied when the goods arrive.
+        from (and of the locations having a reordering rule), and the push
+        rules applied when the goods arrive.
         Used by the route flow view.
 
-        :return: list of {'rule_id': int, 'role': 'demand'|'replenishment'|'push'}
+        :return: list of {'rule_id': int, 'role': 'demand'|'replenishment'|'push'},
+            or with `with_orderpoints`, {'rules': <that list>, 'replenishments': [
+            {'location_id', 'rule_id', 'orderpoint': {...} or False}]}
         """
         product = self.env['product.product'].browse(product_id)
         warehouse = self.env['stock.warehouse'].browse(warehouse_id)
@@ -640,6 +643,8 @@ class StockRule(models.Model):
         no_route = self.env['stock.route']
         flow = {}
         visited = set()
+        replenishments = []
+        orderpoints = self.env['stock.warehouse.orderpoint'].search([('product_id', '=', product.id)])
 
         def push_from(location, wh):
             while location and location.id not in visited:
@@ -654,7 +659,29 @@ class StockRule(models.Model):
             if not location or (location.id, wh.id) in visited:
                 return
             visited.add((location.id, wh.id))
-            rule = self._get_rule(product, location, {'warehouse_id': wh, 'company_id': warehouse.company_id})
+            values = {'warehouse_id': wh, 'company_id': warehouse.company_id}
+            orderpoint = self.env['stock.warehouse.orderpoint']
+            # A stock point (not a location crossed by a make-to-order chain).
+            is_stock_point = role == 'replenishment' and not chained
+            if is_stock_point:
+                # Same as the reordering rule would do: its route, if set, is used first.
+                orderpoint = orderpoints.filtered(lambda op: op.location_id == location)[:1]
+                if orderpoint.route_id:
+                    values['route_ids'] = orderpoint.route_id
+            rule = self._get_rule(product, location, values)
+            if is_stock_point:
+                replenishments.append({
+                    'location_id': location.id,
+                    'rule_id': rule.id,
+                    'orderpoint': bool(orderpoint) and {
+                        'id': orderpoint.id,
+                        'trigger': orderpoint.trigger,
+                        'min': orderpoint.product_min_qty,
+                        'max': orderpoint.product_max_qty,
+                        'route': orderpoint.route_id.display_name,
+                        'snoozed': bool(orderpoint.snoozed_until),
+                    },
+                })
             if not rule or rule.id in flow:
                 return
             flow[rule.id] = role
@@ -679,7 +706,13 @@ class StockRule(models.Model):
                 pull_to(source, source_wh, role, chained=True)
 
         pull_to(self.env.ref('stock.stock_location_customers'), warehouse, 'demand')
-        return [{'rule_id': rule_id, 'role': role} for rule_id, role in flow.items()]
+        # Locations refilled by a reordering rule, even if the sale does not take from them.
+        for orderpoint in orderpoints.filtered(lambda op: op.warehouse_id == warehouse):
+            pull_to(orderpoint.location_id, warehouse, 'replenishment')
+        rules = [{'rule_id': rule_id, 'role': role} for rule_id, role in flow.items()]
+        if with_orderpoints:
+            return {'rules': rules, 'replenishments': replenishments}
+        return rules
 
     @api.model
     def _check_intercomp_location(self, locations):
