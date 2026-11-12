@@ -572,3 +572,22 @@ class TestReportStockQuantity(tests.TransactionCase):
             ['product_qty:sum'],
         )
         self.assertEqual(report[0][2], 0.0)
+
+    def test_forecasted_header_variant_uom(self):
+        """ The header of a template sums its variants in the template unit. """
+        uom_pack = self.env.ref('uom.product_uom_pack_6')
+        template, variant_unit, variant_pack = self._create_template_with_variant_in_uom(uom_pack)
+        Forecast = self.env['stock.forecasted_product_product']
+
+        self.env['stock.quant']._update_available_quantity(variant_unit, self.wh.lot_stock_id, 3)
+        self.env['stock.quant']._update_available_quantity(variant_pack, self.wh.lot_stock_id, 2)
+
+        report_data = Forecast._get_report_data(product_template_ids=template.ids)
+        self.assertEqual(report_data['header_uom'], self.uom_unit.display_name)
+        self.assertEqual(report_data['product'][variant_pack.id]['header_uom_ratio'], 6)
+        self.assertEqual(report_data['product'][variant_unit.id]['header_uom_ratio'], 1)
+        self.assertEqual(report_data['product'][variant_pack.id]['quantity_on_hand'], 2, "The details use the unit of the variant")
+
+        report_data = Forecast._get_report_data(product_ids=variant_pack.ids)
+        self.assertEqual(report_data['header_uom'], uom_pack.display_name)
+        self.assertEqual(report_data['product'][variant_pack.id]['header_uom_ratio'], 1)

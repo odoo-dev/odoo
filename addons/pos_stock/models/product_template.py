@@ -24,7 +24,10 @@ class ProductTemplate(models.Model):
             'free_qty': (
                     template_or_variant.with_context({'warehouse_id': w.id}).free_qty
                     if product_variant
-                    else sum(self.product_variant_ids.with_context({'warehouse_id': w.id}).mapped('free_qty'))
+                    else sum(
+                        variant._get_quantity_in_template_uom(variant.free_qty)
+                        for variant in self.product_variant_ids.with_context({'warehouse_id': w.id})
+                    )
                 ),
             'forecasted_quantity': template_or_variant.with_context({'warehouse_id': w.id}).virtual_available,
             'uom': template_or_variant.uom_name}

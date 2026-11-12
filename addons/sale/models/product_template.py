@@ -116,15 +116,11 @@ class ProductTemplate(models.Model):
     def _compute_reinvoice_policy(self):
         self.filtered(lambda t: not t.sale_ok).reinvoice_policy = "no"
 
-    @api.depends("product_variant_ids.sales_count")
+    @api.depends("uom_id", "product_variant_ids.uom_id", "product_variant_ids.sales_count")
     def _compute_sales_count(self):
         for product in self:
-            product.sales_count = product.uom_id.round(
-                sum(
-                    p.sales_count
-                    for p in product.with_context(active_test=False).product_variant_ids
-                )
-            )
+            sold_qties = (p._get_quantity_in_template_uom(p.sales_count) for p in product.with_context(active_test=False).product_variant_ids)
+            product.sales_count = product.uom_id.round(sum(sold_qties))
 
     @api.constrains("company_id")
     def _check_sale_product_company(self):

@@ -42,3 +42,16 @@ class TestSaleVariantUom(ProductVariantsCommon, SaleCommon):
 
         line.product_id = self.variant_unit
         self.assertEqual(line.product_uom_id, self.uom_unit)
+
+    def test_sales_count_in_the_template_unit(self):
+        order = self.env["sale.order"].create({
+            "partner_id": self.partner.id,
+            "order_line": [
+                Command.create({"product_id": self.variant_unit.id, "product_uom_qty": 3}),
+                Command.create({"product_id": self.variant_pack.id, "product_uom_qty": 2}),
+            ],
+        })
+        order.action_confirm()
+        order.order_line.flush_recordset()
+        self.assertEqual(self.variant_pack.sales_count, 2)
+        self.assertEqual(self.template.sales_count, 15)

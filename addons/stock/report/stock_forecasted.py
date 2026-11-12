@@ -74,6 +74,7 @@ class StockForecasted_Product_Product(models.AbstractModel):
             if product.id not in res['product']:
                 res['product'][product.id] = {
                     'uom': product.uom_id.display_name,
+                    'header_uom_ratio': product._get_quantity_in_template_uom(1) if product_template_ids else 1,
                     'quantity_on_hand': product.qty_available,
                     'virtual_available': product.virtual_available,
                     'free_qty': product.free_qty,
@@ -84,6 +85,8 @@ class StockForecasted_Product_Product(models.AbstractModel):
                         'out':  0.0,
                     },
                 }
+        # Variants can use different units, the header sums them in the template unit
+        res['header_uom'] = (products.product_tmpl_id if product_template_ids else products)[:1].uom_id.display_name
 
     def _add_product_quantities(self, res, product_template_ids, product_ids, var_name, qty_in={}, qty_out={}):
         products = self._get_products(product_template_ids, product_ids)

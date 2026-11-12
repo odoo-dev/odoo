@@ -58,23 +58,27 @@ export class ForecastedHeader extends Component {
     }
 
     get quantityOnHand() {
-        return Object.values(this.products).reduce((sum, product) => sum + product.quantity_on_hand, 0);
+        return this._sumQuantities("quantity_on_hand");
     }
 
     get incomingQty() {
-        return Object.values(this.products).reduce((sum, product) => sum + product.incoming_qty, 0);
+        return this._sumQuantities("incoming_qty");
     }
 
     get outgoingQty() {
-        return Object.values(this.products).reduce((sum, product) => sum + product.outgoing_qty, 0);
+        return this._sumQuantities("outgoing_qty");
     }
 
     get virtualAvailable() {
-        return Object.values(this.products).reduce((sum, product) => sum + product.virtual_available, 0);
+        return this._sumQuantities("virtual_available");
     }
 
     get uom() {
-        return Object.values(this.products)[0].uom;
+        return this.props.docs.header_uom;
+    }
+
+    _sumQuantities(fieldName) {
+        return Object.values(this.products).reduce((sum, product) => sum + product[fieldName] * product.header_uom_ratio, 0);
     }
 
     addDays(date, days) {

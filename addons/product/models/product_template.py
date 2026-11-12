@@ -496,6 +496,7 @@ class ProductTemplate(models.Model):
         for product in self:
             product.show_qty_update_button = product.product_variant_count > 1
 
+    @api.depends('uom_id', 'product_variant_ids.uom_id')
     def _compute_quantities(self):
         res = self._compute_quantities_dict()
         fields = ['qty_available', 'virtual_available', 'incoming_qty', 'outgoing_qty', 'free_qty']
@@ -513,7 +514,7 @@ class ProductTemplate(models.Model):
             prod_available[template.id] = {field: 0 for field in quantities_fields}
             for p in template.product_variant_ids._origin:
                 for field in quantities_fields:
-                    prod_available[template.id][field] += variants_available[p.id][field]
+                    prod_available[template.id][field] += p._get_quantity_in_template_uom(variants_available[p.id][field])
         return prod_available
 
     def _search_qty_available(self, operator, value):

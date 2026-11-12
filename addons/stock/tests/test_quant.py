@@ -1592,6 +1592,44 @@ class TestStockQuant(TestStockCommon):
             'product_id': self.productA.id,
         }])
 
+    def test_variant_specific_uom(self):
+        """ Variants are counted in their own unit, the template sums them in its own unit. """
+        template = self.env['product.template'].create({
+            'name': 'Water',
+            'is_storable': True,
+            'uom_id': self.uom_unit.id,
+            'attribute_line_ids': [Command.create({
+                'attribute_id': self.size_attribute.id,
+                'value_ids': [Command.set([self.size_attribute_s.id, self.size_attribute_m.id])],
+            })],
+        })
+        variant_unit, variant_pack = template.product_variant_ids.sorted('id')
+        variant_pack.uom_id = self.uom_pack_6
+        self.env['stock.quant']._update_available_quantity(variant_unit, self.stock_location, 3.0)
+        self.env['stock.quant']._update_available_quantity(variant_pack, self.stock_location, 2.0)
+
+        self.assertEqual(variant_unit.qty_available, 3.0)
+        self.assertEqual(variant_pack.qty_available, 2.0)
+        self.assertEqual(variant_pack.stock_quant_ids.uom_id, self.uom_pack_6)
+        self.assertEqual(template.qty_available, 15.0)
+
+        template_in_form = template.new({'uom_id': self.uom_dozen.id}, origin=template)
+        self.assertEqual(template_in_form.qty_available, 15.0, "Editing the unit doesn't convert the quantity")
+
+        template.write({'uom_id': self.uom_unit.id})
+        self.assertEqual(template.qty_available, 15.0, "Writing the same unit doesn't relabel the variants")
+
+        # Documents in the variant unit don't block a change of this variant unit
+        move = self._create_move(variant_pack, self.stock_location, self.customer_location, product_uom_qty=1.0)
+        self.assertEqual(move.uom_id, self.uom_pack_6)
+        variant_pack.uom_id = self.uom_dozen
+        self.assertEqual(move.uom_id, self.uom_dozen)
+        self.assertEqual(variant_unit.uom_id, self.uom_unit)
+        self.assertEqual(template.qty_available, 27.0, "The total should follow the new variant unit")
+
+        template.uom_id = self.uom_dozen
+        self.assertEqual(template.qty_available, 5.0, "The total should follow the new template unit")
+
 
 class TestStockQuantRemovalStrategy(TestStockCommon):
 

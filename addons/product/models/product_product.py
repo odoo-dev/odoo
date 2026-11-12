@@ -1482,3 +1482,7 @@ class ProductProduct(models.Model):
 
     def _get_main_uom(self):
         return self.uom_id
+
+    def _get_quantity_in_template_uom(self, quantity):
+        self.ensure_one()
+        return self.uom_id._compute_quantity(quantity, self.product_tmpl_id.uom_id, round=False)
