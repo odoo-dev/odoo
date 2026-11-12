@@ -9,6 +9,20 @@ export class PortalOptionPlugin extends Plugin {
     static shared = ["getPortalCards", "loadPortalCards", "updatePortalCards"];
     /** @type {import("plugins").WebsiteResources} */
     resources = {
+        history_fields: [
+            {
+                name: "portalCards",
+                apply: ({ after }) => this.setPortalCards(after),
+                revert: ({ before }) => this.setPortalCards(before),
+            },
+            {
+                name: "portalGap",
+                apply: ({ after }) =>
+                    this.document.documentElement.style.setProperty("--portal-card-gap", after),
+                revert: ({ before }) =>
+                    this.document.documentElement.style.setProperty("--portal-card-gap", before),
+            },
+        ],
         builder_actions: {
             SetStylePortalCardAction,
             SetPortalCardGapAction,
@@ -47,20 +61,24 @@ export class PortalOptionPlugin extends Plugin {
     }
 
     async updatePortalCards(entries) {
-        const previousEntries = this.portalCards;
-        const hadPendingChanges = this.hasPendingChanges;
-        this.dependencies.history.stageCustomOperation({
-            apply: () => {
-                this.portalCards = entries;
-                this.hasPendingChanges = true;
-                this.applyPortalCardsToDOM(entries);
-            },
-            revert: () => {
-                this.portalCards = previousEntries;
-                this.hasPendingChanges = hadPendingChanges;
-                this.applyPortalCardsToDOM(previousEntries);
-            },
-        });
+        const before = { entries: this.portalCards, hasPendingChanges: this.hasPendingChanges };
+        const after = { entries, hasPendingChanges: true };
+        this.setPortalCards(after);
+        this.dependencies.history.stage("portalCards", { before, after });
+    }
+
+    /**
+     * Restore the portal card state and update the cards in the DOM.
+     *
+     * @param {Object} state
+     * @param {{id: number, name: string, sequence: number, show_in_portal: boolean}[]} state.entries
+     * @param {boolean} [state.hasPendingChanges]
+     * @returns {void}
+     */
+    setPortalCards({ entries, hasPendingChanges }) {
+        this.portalCards = entries;
+        this.hasPendingChanges = hasPendingChanges;
+        this.applyPortalCardsToDOM(entries);
     }
 
     applyPortalCardsToDOM(entries) {
@@ -123,10 +141,8 @@ export class SetPortalCardGapAction extends BuilderAction {
 
     apply({ value }) {
         const previousValue = this.getValue();
-        this.dependencies.history.stageCustomOperation({
-            apply: () => this.setGap(value),
-            revert: () => this.setGap(previousValue),
-        });
+        this.setGap(value);
+        this.dependencies.history.stage("portalGap", { before: previousValue, after: value });
     }
 
     setGap(value) {

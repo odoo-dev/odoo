@@ -26,6 +26,11 @@ export class WebsitePageConfigOptionPlugin extends Plugin {
     ];
     /** @type {import("plugins").WebsiteResources} */
     resources = {
+        history_fields: {
+            name: "pageVisibility",
+            apply: ({ target, after }) => this.applyHistoryVisibility(target, after),
+            revert: ({ target, before }) => this.applyHistoryVisibility(target, before),
+        },
         builder_actions: {
             SetWebsiteHeaderVisibilityAction,
             SetWebsiteFooterVisibleAction,
@@ -50,6 +55,19 @@ export class WebsitePageConfigOptionPlugin extends Plugin {
             return this.document.querySelector("#wrapwrap div.o_page_breadcrumb");
         }
         return null;
+    }
+
+    /**
+     * Replay a stored header or breadcrumb visibility setting.
+     *
+     * @param {"header" | "breadcrumb"} target
+     * @param {"regular" | "overTheContent" | "hidden"} value
+     * @returns {void}
+     */
+    applyHistoryVisibility(target, value) {
+        const action =
+            target === "header" ? "setWebsiteHeaderVisibility" : "setWebsiteBreadcrumbVisibility";
+        this.dependencies.builderActions.getAction(action).getVisibilityHandlers(target)[value]();
     }
 
     /**
@@ -271,9 +289,11 @@ export class SetWebsiteHeaderVisibilityAction extends BaseWebsitePageConfigActio
     static id = "setWebsiteHeaderVisibility";
     apply({ editingElement, value: headerPositionValue, isPreviewing }) {
         const lastValue = this.websitePageConfig.getVisibilityItem("header");
-        this.history.stageCustomOperation({
-            apply: () => this.headerVisibilityHandlers[headerPositionValue](),
-            revert: () => this.headerVisibilityHandlers[lastValue](),
+        this.headerVisibilityHandlers[headerPositionValue]();
+        this.history.stage("pageVisibility", {
+            target: "header",
+            before: lastValue,
+            after: headerPositionValue,
         });
 
         this.websitePageConfig.setDirty(isPreviewing);
@@ -289,9 +309,11 @@ export class SetWebsiteBreadcrumbVisibilityAction extends BaseWebsitePageConfigA
     }
     apply({ value, isPreviewing }) {
         const lastValue = this.websitePageConfig.getVisibilityItem("breadcrumb");
-        this.history.stageCustomOperation({
-            apply: () => this.breadcrumbVisibilityHandlers[value](),
-            revert: () => this.breadcrumbVisibilityHandlers[lastValue](),
+        this.breadcrumbVisibilityHandlers[value]();
+        this.history.stage("pageVisibility", {
+            target: "breadcrumb",
+            before: lastValue,
+            after: value,
         });
         this.websitePageConfig.setDirty(isPreviewing);
     }

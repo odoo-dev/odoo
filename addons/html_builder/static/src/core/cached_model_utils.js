@@ -24,9 +24,13 @@ export class ModelEdit {
     set(field, value) {
         const previous = this.values[field].current;
         value = JSON.stringify(value);
-        this.history.stageCustomOperation({
-            apply: () => (this.values[field].current = value),
-            revert: () => (this.values[field].current = previous),
+        this.values[field].current = value;
+        this.history.stage("cachedModel", {
+            model: this.model,
+            recordId: this.recordId,
+            field,
+            before: previous,
+            after: value,
         });
     }
     collect(inventory) {
