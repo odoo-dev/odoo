@@ -692,7 +692,7 @@ class TestEdiZatca(TestSaEdiCommon):
 
         self.env.user.group_ids += self.env.ref('sales_team.group_sale_salesman')
 
-        self.company.tax_calculation_rounding_method = 'round_globally'
+        self.company.tax_rounding_policy = 'document'
 
         # Create sale order with 8 lines at 33.34 each (triggers rounding precision issues)
         sale_order = self.env['sale.order'].create({  # noqa: OLS03001

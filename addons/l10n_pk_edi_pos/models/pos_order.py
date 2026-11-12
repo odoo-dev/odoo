@@ -225,7 +225,6 @@ class PosOrder(models.Model):
         base_lines = lines._prepare_base_lines_for_taxes_computation()
         AccountTax = self.env['account.tax']
         AccountTax._add_tax_details_in_base_lines(base_lines, self.company_id)
-        AccountTax._round_base_lines_tax_details(base_lines, self.company_id)
 
         items = []
         for base_line in base_lines:
@@ -238,7 +237,7 @@ class PosOrder(models.Model):
             # The FBR reports the further tax in its own field, so it is kept apart from the sales tax.
             further_tax = currency.round(sum(tax_data['tax_amount_currency'] for tax_data in taxes_data if tax_data['tax'].l10n_pk_is_further_tax))
             tax_charged = currency.round(sum(tax_data['tax_amount_currency'] for tax_data in taxes_data if not tax_data['tax'].l10n_pk_is_further_tax))
-            untaxed = currency.round(tax_details['total_excluded_currency'] + tax_details['delta_total_excluded_currency'])
+            untaxed = currency.round(tax_details['total_excluded_currency'])
 
             # SaleValue is the price before any discount, which no tax detail holds, so the line is
             # priced a second time without its discount. A 3rd Schedule product is taxed on its

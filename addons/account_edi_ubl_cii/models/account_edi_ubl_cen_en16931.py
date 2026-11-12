@@ -1,12 +1,16 @@
 
 from odoo import _, models
 from odoo.addons.account.tools import dict_to_xml
+from odoo.addons.account_edi_ubl_cii.models.account_edi_common import EN16931_TAX_REPRESENTATION_PROFILE
 
 
 class AccountEdiUBLCenEn16931(models.AbstractModel):
     _name = "account.edi.ubl_cen_en16931"
     _inherit = 'account.edi.ubl'
     _description = "UBL CEN-EN16931"
+
+    def _get_tax_representation_profile(self):
+        return EN16931_TAX_REPRESENTATION_PROFILE
 
     # -------------------------------------------------------------------------
     # EXPORT: NODES

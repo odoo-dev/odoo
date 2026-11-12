@@ -271,8 +271,10 @@ class AccountMoveLine(models.Model):
         tracking=True,
         help="Tags assigned to this line by the tax creating it, if any. It determines its impact on financial reports.",
     )
-    # Technical field holding custom data for the taxes computation engine.
-    extra_tax_data = fields.Json()
+    # Technical fields holding custom data for the taxes computation engine (see '_prepare_base_line_for_taxes_computation'):
+    # the subset of lines whose taxes are rounded together, and the tax amounts forced on the line.
+    tax_rounding_subset = fields.Char()
+    tax_pins = fields.Json()
     document_tax_mode = fields.Selection(related='move_id.document_tax_mode')
 
     # === Reconciliation fields === #
@@ -473,9 +475,9 @@ class AccountMoveLine(models.Model):
         digits='Discount',
         default=0.0,
     )
-    tax_calculation_rounding_method = fields.Selection(
-        related='company_id.tax_calculation_rounding_method',
-        string='Tax calculation rounding method', readonly=True)
+    tax_rounding_policy = fields.Selection(
+        related='company_id.tax_rounding_policy',
+        string='Tax Rounding Policy', readonly=True)
     deductible_percentage = fields.Float(
         string="Professional Expense Deductibility Percentage",
         default=1.0,
@@ -1251,10 +1253,11 @@ class AccountMoveLine(models.Model):
         for line in self:
             line.sequence = seq_map.get(line.display_type, 100)
 
-    @api.depends('quantity', 'discount', 'price_unit', 'tax_ids', 'currency_id', 'document_tax_mode', 'extra_tax_data')
+    @api.depends('quantity', 'discount', 'price_unit', 'tax_ids', 'currency_id', 'document_tax_mode', 'tax_rounding_subset', 'tax_pins')
     def _compute_totals(self):
         """ Compute 'price_subtotal' / 'price_total' outside of `_sync_tax_lines` because those values must be visible for the
         user on the UI with draft moves and the dynamic lines are synchronized only when saving the record.
+        When saving, `_sync_tax_lines` adds the share of the rounding of the document they get, as it does for the balance.
         """
         AccountTax = self.env['account.tax']
         for line in self:
@@ -1265,8 +1268,7 @@ class AccountMoveLine(models.Model):
 
             company = line.company_id or self.env.company
             base_line = line.move_id._prepare_product_base_line_for_taxes_computation(line)
-            AccountTax._add_tax_details_in_base_line(base_line, company)
-            AccountTax._round_base_lines_tax_details([base_line], company)
+            AccountTax._add_tax_details_in_base_lines([base_line], company)
             line.price_subtotal = base_line['tax_details']['total_excluded_currency']
             line.price_total = base_line['tax_details']['total_included_currency']
 
@@ -1496,7 +1498,6 @@ class AccountMoveLine(models.Model):
                 for line in invoice_lines
             ]
             AccountTax._add_tax_details_in_base_lines(base_lines, company)
-            AccountTax._round_base_lines_tax_details(base_lines, company)
 
             # store the invoice line record
             for base_line in base_lines:

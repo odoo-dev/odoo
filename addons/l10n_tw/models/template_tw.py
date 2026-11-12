@@ -40,7 +40,7 @@ class AccountChartTemplate(models.AbstractModel):
                 'payable_account_id': 'l10n_tw_account_2171',
                 'account_production_wip_account_id': 'l10n_tw_account_1314',
                 'account_production_wip_overhead_account_id': 'l10n_tw_account_5601',
-                'tax_calculation_rounding_method': 'round_globally',
+                'tax_rounding_policy': 'document',
                 'account_stock_valuation_id': 'l10n_tw_account_1315',
                 'stock_account_production_cost_id': 'l10n_tw_account_5101',
             },

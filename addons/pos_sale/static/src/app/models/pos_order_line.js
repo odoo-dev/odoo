@@ -38,15 +38,14 @@ patch(PosOrderline.prototype, {
         this.price_unit = (isNaN(price) ? parseFloat("" + price) : Number(price)) || 0;
     },
     getBaseLine(opts = {}) {
-        const extraTaxData = this.extra_tax_data;
+        const taxPins = this.tax_pins;
         const quantity = "quantity" in opts ? opts.quantity : this.getQuantity();
-        const storedQty = extraTaxData?.quantity;
+        const storedQty = taxPins?.valid_for?.quantity;
         const signFlipped = storedQty && quantity && Math.sign(storedQty) !== Math.sign(quantity);
         if (signFlipped) {
             return super.getBaseLine({
                 ...opts,
-                extra_tax_data:
-                    accountTaxHelpers.reverse_quantity_base_line_extra_tax_data(extraTaxData),
+                tax_pins: accountTaxHelpers.reverse_quantity_base_line_tax_pins(taxPins),
             });
         }
         return super.getBaseLine(opts);

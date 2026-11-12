@@ -14,7 +14,7 @@ ResCompany._records = [
         partner_id: 1,
         country_id: 75,
         state_id: false,
-        tax_calculation_rounding_method: "round_per_line",
+        tax_rounding_settings: { tax_grain: "line", authority: "mixed" },
         point_of_sale_use_ticket_qr_code: true,
         point_of_sale_ticket_unique_code: false,
         point_of_sale_ticket_portal_url_display_mode: "qr_code_and_url",

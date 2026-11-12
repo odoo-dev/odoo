@@ -5,6 +5,7 @@ from odoo.tests import HttpCase, new_test_user, tagged, save_test_file
 from odoo.tools import BinaryValue, config, file_path, file_open
 from odoo.tools.float_utils import float_round
 
+from odoo.addons.account.models.account_tax import TAX_ROUNDING_POLICIES
 from odoo.addons.product.tests.common import ProductCommon
 
 import json
@@ -1775,8 +1776,8 @@ class TestTaxCommon(AccountTestInvoicingHttpCommon):
         })
 
     @contextmanager
-    def with_tax_calculation_rounding_method(self, rounding_method):
-        self.env.company.tax_calculation_rounding_method = rounding_method
+    def with_tax_rounding_policy(self, policy_key):
+        self.env.company.tax_rounding_policy = policy_key
         yield
 
     def _create_assert_test(
@@ -1891,7 +1892,7 @@ class TestTaxCommon(AccountTestInvoicingHttpCommon):
     def _jsonify_company(self, company):
         return {
             'id': company.id,
-            'tax_calculation_rounding_method': company.tax_calculation_rounding_method,
+            'tax_rounding_settings': company.tax_rounding_settings,
             'account_fiscal_country_id': self._jsonify_country(company.account_fiscal_country_id),
             'currency_id': self._jsonify_currency(company.currency_id),
         }
@@ -1972,7 +1973,6 @@ class TestTaxCommon(AccountTestInvoicingHttpCommon):
             for i, line in enumerate(document_params['lines'])
         ]
         AccountTax._add_tax_details_in_base_lines(base_lines, self.env.company)
-        AccountTax._round_base_lines_tax_details(base_lines, self.env.company)
         return {
             **document_params,
             'lines': base_lines,
@@ -2004,12 +2004,12 @@ class TestTaxCommon(AccountTestInvoicingHttpCommon):
                     float_round(expected_tax, precision_rounding=rounding),
                 )
 
-        is_round_globally = results['rounding_method'] == 'round_globally'
+        is_round_globally = TAX_ROUNDING_POLICIES[results['rounding_policy_key']]['tax_grain'] != 'line'
         excluded_special_modes = results['excluded_special_modes'] or []
         rounding = 0.000001 if is_round_globally else 0.01
         compare_taxes_computation_values(results['results'], rounding)
 
-        # Check the special modes in case of round_globally.
+        # Check the special modes in case of unrounded amounts.
         if is_round_globally:
             # special_mode == 'total_excluded'.
             if 'total_excluded' not in excluded_special_modes:
@@ -2045,16 +2045,15 @@ class TestTaxCommon(AccountTestInvoicingHttpCommon):
                     float_round(results['price_unit'], precision_rounding=rounding),
                 )
 
-    def _create_py_sub_test_taxes_computation(self, taxes, price_unit, quantity, product, product_uom, precision_rounding, rounding_method, excluded_tax_ids):
+    def _create_py_sub_test_taxes_computation(self, taxes, price_unit, quantity, product, product_uom, precision_rounding, rounding_policy, excluded_tax_ids):
         kwargs = {
             'product': product,
             'product_uom': product_uom,
-            'precision_rounding': precision_rounding,
-            'rounding_method': rounding_method,
+            'precision_rounding': precision_rounding if TAX_ROUNDING_POLICIES[rounding_policy]['tax_grain'] == 'line' else None,
             'filter_tax_function': (lambda tax: tax.id not in excluded_tax_ids) if excluded_tax_ids else None,
         }
         results = {'results': taxes._get_tax_details(price_unit, quantity, **kwargs)}
-        if rounding_method == 'round_globally':
+        if kwargs['precision_rounding'] is None:
             results['total_excluded_results'] = taxes._get_tax_details(
                 price_unit=results['results']['total_excluded'] / quantity,
                 quantity=quantity,
@@ -2069,7 +2068,7 @@ class TestTaxCommon(AccountTestInvoicingHttpCommon):
             )
         return results
 
-    def _create_js_sub_test_taxes_computation(self, taxes, price_unit, quantity, product, product_uom, precision_rounding, rounding_method, excluded_tax_ids):
+    def _create_js_sub_test_taxes_computation(self, taxes, price_unit, quantity, product, product_uom, precision_rounding, rounding_policy, excluded_tax_ids):
         return {
             'test': 'taxes_computation',
             'taxes': [self._jsonify_tax(tax) for tax in taxes],
@@ -2077,8 +2076,7 @@ class TestTaxCommon(AccountTestInvoicingHttpCommon):
             'quantity': quantity,
             'product': self._jsonify_product(product, taxes),
             'product_uom': self._jsonify_product_uom(product_uom, taxes),
-            'precision_rounding': precision_rounding,
-            'rounding_method': rounding_method,
+            'precision_rounding': precision_rounding if TAX_ROUNDING_POLICIES[rounding_policy]['tax_grain'] == 'line' else None,
             'excluded_tax_ids': excluded_tax_ids,
         }
 
@@ -2091,13 +2089,13 @@ class TestTaxCommon(AccountTestInvoicingHttpCommon):
         product=None,
         product_uom=None,
         precision_rounding=0.01,
-        rounding_method='round_per_line',
+        rounding_policy='line',
         excluded_special_modes=None,
         excluded_tax_ids=None,
     ):
         def extra_function(results):
             results['excluded_special_modes'] = excluded_special_modes
-            results['rounding_method'] = rounding_method
+            results['rounding_policy_key'] = rounding_policy
             results['price_unit'] = price_unit
             results['quantity'] = quantity
 
@@ -2112,7 +2110,7 @@ class TestTaxCommon(AccountTestInvoicingHttpCommon):
             product,
             product_uom,
             precision_rounding,
-            rounding_method,
+            rounding_policy,
             excluded_tax_ids,
             extra_function=extra_function,
         )
@@ -2203,11 +2201,7 @@ class TestTaxCommon(AccountTestInvoicingHttpCommon):
                 'total_excluded': base_line['tax_details']['total_excluded'],
                 'total_included_currency': base_line['tax_details']['total_included_currency'],
                 'total_included': base_line['tax_details']['total_included'],
-                'delta_total_excluded_currency': base_line['tax_details']['delta_total_excluded_currency'],
-                'delta_total_excluded': base_line['tax_details']['delta_total_excluded'],
-                'manual_total_excluded': base_line['manual_total_excluded'],
-                'manual_total_excluded_currency': base_line['manual_total_excluded_currency'],
-                'manual_tax_amounts': base_line['manual_tax_amounts'],
+                'pins': base_line['pins'],
                 'taxes_data': [
                     {
                         'tax_id': tax_data['tax'].id,
@@ -2310,7 +2304,6 @@ class TestTaxCommon(AccountTestInvoicingHttpCommon):
         new_document = copy.deepcopy(document)
         new_document['lines'] += base_lines
         AccountTax._add_tax_details_in_base_lines(new_document['lines'], self.env.company)
-        AccountTax._round_base_lines_tax_details(new_document['lines'], self.env.company)
         tax_totals = AccountTax._get_tax_totals_summary(
             base_lines=new_document['lines'],
             currency=new_document['currency'],
@@ -2365,7 +2358,6 @@ class TestTaxCommon(AccountTestInvoicingHttpCommon):
         new_document = copy.deepcopy(document)
         new_document['lines'] = base_lines
         AccountTax._add_tax_details_in_base_lines(new_document['lines'], self.env.company)
-        AccountTax._round_base_lines_tax_details(new_document['lines'], self.env.company)
         tax_totals = AccountTax._get_tax_totals_summary(
             base_lines=new_document['lines'],
             currency=new_document['currency'],

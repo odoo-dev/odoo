@@ -179,8 +179,7 @@ class AccountWithholdingLine(models.AbstractModel):
                         currency_id=line_curr,
                         calculate_withholding_taxes=True,
                     )
-                    AccountTax._add_tax_details_in_base_line(base_line, company)
-                    AccountTax._round_base_lines_tax_details([base_line], company)
+                    AccountTax._add_tax_details_in_base_lines([base_line], company)
                     tax_amount = -base_line['tax_details']['taxes_data'][0]['tax_amount_currency']
                 else:
                     tax_amount = 0.0
@@ -321,12 +320,17 @@ class AccountWithholdingLine(models.AbstractModel):
         payment_type = self.comodel_payment_type
         sign = 1 if payment_type == 'inbound' else -1
         # We need to make sure that we use the actual amounts set on the line; in case of manual adjustment.
-        manual_tax_amounts = {str(self.tax_id.id): {
-            'base_amount_currency': self.base_amount,
-            'base_amount': company.currency_id.round(self.base_amount / conversion_rate) if conversion_rate else 0.0,
-            'tax_amount_currency': -self.amount,
-            'tax_amount': company.currency_id.round(-self.amount / conversion_rate) if conversion_rate else 0.0,
-        }}
+        base_amount = company.currency_id.round(self.base_amount / conversion_rate) if conversion_rate else 0.0
+        pins = {
+            'total_excluded_currency': self.base_amount,
+            'total_excluded': base_amount,
+            'tax_amounts': {str(self.tax_id.id): {
+                'base_amount_currency': self.base_amount,
+                'base_amount': base_amount,
+                'tax_amount_currency': -self.amount,
+                'tax_amount': company.currency_id.round(-self.amount / conversion_rate) if conversion_rate else 0.0,
+            }},
+        }
         return self.env['account.tax']._prepare_base_line_for_taxes_computation(
             self,
             tax_ids=self.tax_id,
@@ -339,9 +343,7 @@ class AccountWithholdingLine(models.AbstractModel):
             calculate_withholding_taxes=True,
             manual_tax_line_name=self.name,
             computation_key=str(self.id),
-            manual_total_excluded_currency=self.base_amount,
-            manual_total_excluded=company.currency_id.round(self.base_amount / conversion_rate) if conversion_rate else 0.0,
-            manual_tax_amounts=manual_tax_amounts,
+            pins=pins,
             is_refund=self._is_refund(),
         )
 
@@ -369,10 +371,8 @@ class AccountWithholdingLine(models.AbstractModel):
             if not line.name and line.withholding_sequence_id:
                 line.name = line.withholding_sequence_id.next_by_id()
 
-            base_line = line._prepare_base_line_for_taxes_computation()
-            AccountTax._add_tax_details_in_base_line(base_line, company)
-            base_lines.append(base_line)
-        AccountTax._round_base_lines_tax_details(base_lines, company)
+            base_lines.append(line._prepare_base_line_for_taxes_computation())
+        AccountTax._add_tax_details_in_base_lines(base_lines, company)
         AccountTax._add_accounting_data_in_base_lines_tax_details(base_lines, company)
         tax_results = AccountTax._prepare_tax_lines(base_lines, company)
 
@@ -471,7 +471,6 @@ class AccountWithholdingLine(models.AbstractModel):
             ))
 
         AccountTax._add_tax_details_in_base_lines(new_base_lines, company)
-        AccountTax._round_base_lines_tax_details(new_base_lines, company)
 
         # Map the existing withholding tax lines to their grouping key in order to know which line to update, create or delete.
         existing_withholding_line_map = self.grouped(key=lambda l: l._get_grouping_key())

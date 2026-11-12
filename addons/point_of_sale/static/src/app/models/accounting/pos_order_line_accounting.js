@@ -173,8 +173,7 @@ export class PosOrderlineAccounting extends Base {
             targetTotalIncluded,
             1,
             {
-                precision_rounding: baseLine.currency_id.rounding,
-                rounding_method: "round_globally",
+                precision_rounding: null,
                 product: baseLine.product_id,
                 product_uom: baseLine.product_uom_id,
                 special_mode,

@@ -200,8 +200,7 @@ export class ProductTemplateAccounting extends Base {
     getTaxDetails(opts = {}) {
         const config = this.config;
         const baseLine = this.getBaseLine(opts);
-        accountTaxHelpers.add_tax_details_in_base_line(baseLine, config.company_id);
-        accountTaxHelpers.round_base_lines_tax_details([baseLine], config.company_id);
+        accountTaxHelpers.add_tax_details_in_base_lines([baseLine], config.company_id);
         return baseLine.tax_details;
     }
 
@@ -280,7 +279,6 @@ export class ProductTemplateAccounting extends Base {
             })
         );
         accountTaxHelpers.add_tax_details_in_base_lines(baseLines, this.config.company_id);
-        accountTaxHelpers.round_base_lines_tax_details(baseLines, this.config.company_id);
 
         let taxDetails = baseLines.length > 0 ? baseLines[0].tax_details : null;
         for (let i = 1; i < baseLines.length; i++) {

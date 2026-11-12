@@ -129,10 +129,16 @@ class ResCompany(models.Model):
     account_sale_tax_id = fields.Many2one('account.tax', string="Default Sale Tax", check_company=True)
     account_purchase_tax_id = fields.Many2one('account.tax', string="Default Purchase Tax", check_company=True)
     account_purchase_receipt_fiscal_position_id = fields.Many2one('account.fiscal.position', string="Default Purchase Receipt Fiscal Position", check_company=True)
-    tax_calculation_rounding_method = fields.Selection([
-        ('round_globally', 'Round per Tax'),
-        ('round_per_line', 'Round per Line'),
-        ], default='round_globally', string='Tax Calculation Rounding Method')
+    tax_rounding_policy = fields.Selection(
+        selection=[
+            ('document', 'Round per Tax'),
+            ('line', 'Round per Line'),
+        ],
+        string='Tax Rounding Policy',
+        default='document',
+        help="How the taxes of a document are rounded, see TAX_ROUNDING_POLICIES in account.tax.",
+    )
+    tax_rounding_settings = fields.Json(compute='_compute_tax_rounding_settings')  # the resolved policy, for account_tax.js
     currency_exchange_journal_id = fields.Many2one('account.journal', string="Exchange Gain or Loss Journal", domain=[('type', '=', 'general')])
     income_currency_exchange_account_id = fields.Many2one(
         comodel_name='account.account',
@@ -444,6 +450,11 @@ class ResCompany(models.Model):
                 ]),
             ).sorted(lambda x: x.country_id.id or float('inf')).sorted('sequence')
             company.domestic_fiscal_position_id = potential_domestic_fps[0] if potential_domestic_fps else False
+
+    @api.depends('tax_rounding_policy', 'account_fiscal_country_id')
+    def _compute_tax_rounding_settings(self):
+        for company in self:
+            company.tax_rounding_settings = self.env['account.tax']._get_tax_rounding_policy(company)
 
     @api.depends('account_fiscal_country_id')
     def _compute_account_fiscal_country_group_codes(self):

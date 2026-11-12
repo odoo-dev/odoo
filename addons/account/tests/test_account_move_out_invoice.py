@@ -5086,7 +5086,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
         """Ensure that when the tax rounding method is set to 'global', changing the currency rate directly
          on the invoice results in journal entries that are rounded globally, not per line. """
 
-        self.env.company.tax_calculation_rounding_method = 'round_globally'
+        self.env.company.tax_rounding_policy = 'document'
         eur = self.setup_other_currency('EUR')
         invoice = self.env['account.move'].create({
             'move_type': 'out_invoice',
@@ -5111,7 +5111,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
         """ The amount due of a posted invoice must be the open balance of its payment term lines, even when
         the totals recomputed from the invoice lines no longer match the journal items (here, because the tax
         rounding method changed after posting). Otherwise a fully paid invoice ends up partially paid. """
-        self.env.company.tax_calculation_rounding_method = 'round_per_line'
+        self.env.company.tax_rounding_policy = 'line'
         invoice = self._create_invoice(
             invoice_line_ids=[
                 self._prepare_invoice_line(price_unit=10.0, discount=0.04, tax_ids=self.tax_sale_a)
@@ -5123,7 +5123,7 @@ class TestAccountMoveOutInvoiceOnchanges(AccountTestInvoicingCommon):
         self.assertEqual(invoice.amount_total, 34.5)
 
         # Rounded globally, the same lines only amount to 29.99 + 4.50 = 34.49
-        self.env.company.tax_calculation_rounding_method = 'round_globally'
+        self.env.company.tax_rounding_policy = 'document'
         self.env.invalidate_all()
         self.assertEqual(invoice.tax_totals['total_amount_currency'], 34.49)
 

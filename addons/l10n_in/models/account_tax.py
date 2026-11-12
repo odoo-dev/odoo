@@ -96,10 +96,7 @@ class AccountTax(models.Model):
 
             item = items_map[key]
             item['quantity'] += base_line['quantity']
-            item['amount_untaxed'] += (
-                base_line['tax_details']['total_excluded_currency']
-                + base_line['tax_details']['delta_total_excluded_currency']
-            )
+            item['amount_untaxed'] += base_line['tax_details']['total_excluded_currency']
 
         # Tax amounts.
         def grouping_function(base_line, tax_data):

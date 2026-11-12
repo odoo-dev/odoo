@@ -55,7 +55,7 @@ class TestTaxesTaxTotalsSummary(TestTaxCommon):
             rate=5.0,
         )
         with self.same_tax_group(taxes):
-            with self.with_tax_calculation_rounding_method('round_per_line'):
+            with self.with_tax_rounding_policy('line'):
                 expected_values = {
                     'same_tax_base': True,
                     'currency_id': self.foreign_currency.id,
@@ -88,7 +88,7 @@ class TestTaxesTaxTotalsSummary(TestTaxCommon):
                     ],
                 }
                 yield 1, self.populate_document(document_params), expected_values
-            with self.with_tax_calculation_rounding_method('round_globally'):
+            with self.with_tax_rounding_policy('document'):
                 expected_values = {
                     'same_tax_base': True,
                     'currency_id': self.foreign_currency.id,
@@ -122,7 +122,7 @@ class TestTaxesTaxTotalsSummary(TestTaxCommon):
                 }
                 yield 2, self.populate_document(document_params), expected_values
         with self.different_tax_group(taxes):
-            with self.with_tax_calculation_rounding_method('round_per_line'):
+            with self.with_tax_rounding_policy('line'):
                 expected_values = {
                     'same_tax_base': False,
                     'currency_id': self.foreign_currency.id,
@@ -173,7 +173,7 @@ class TestTaxesTaxTotalsSummary(TestTaxCommon):
                     ],
                 }
                 yield 3, self.populate_document(document_params), expected_values
-            with self.with_tax_calculation_rounding_method('round_globally'):
+            with self.with_tax_rounding_policy('document'):
                 expected_values = {
                     'same_tax_base': False,
                     'currency_id': self.foreign_currency.id,
@@ -236,7 +236,7 @@ class TestTaxesTaxTotalsSummary(TestTaxCommon):
             rate=5.0,
         )
         with self.same_tax_group(taxes):
-            with self.with_tax_calculation_rounding_method('round_per_line'):
+            with self.with_tax_rounding_policy('line'):
                 expected_values = {
                     'same_tax_base': True,
                     'currency_id': self.foreign_currency.id,
@@ -269,7 +269,7 @@ class TestTaxesTaxTotalsSummary(TestTaxCommon):
                     ],
                 }
                 yield 5, self.populate_document(document_params), expected_values
-            with self.with_tax_calculation_rounding_method('round_globally'):
+            with self.with_tax_rounding_policy('document'):
                 expected_values = {
                     'same_tax_base': False,
                     'currency_id': self.foreign_currency.id,
@@ -303,7 +303,7 @@ class TestTaxesTaxTotalsSummary(TestTaxCommon):
                 }
                 yield 6, self.populate_document(document_params), expected_values
         with self.different_tax_group(taxes):
-            with self.with_tax_calculation_rounding_method('round_per_line'):
+            with self.with_tax_rounding_policy('line'):
                 expected_values = {
                     'same_tax_base': False,
                     'currency_id': self.foreign_currency.id,
@@ -354,7 +354,7 @@ class TestTaxesTaxTotalsSummary(TestTaxCommon):
                     ],
                 }
                 yield 7, self.populate_document(document_params), expected_values
-            with self.with_tax_calculation_rounding_method('round_globally'):
+            with self.with_tax_rounding_policy('document'):
                 expected_values = {
                     'same_tax_base': False,
                     'currency_id': self.foreign_currency.id,
@@ -439,7 +439,7 @@ class TestTaxesTaxTotalsSummary(TestTaxCommon):
             rate=3.0,
         )
         with self.same_tax_group(taxes):
-            with self.with_tax_calculation_rounding_method('round_per_line'):
+            with self.with_tax_rounding_policy('line'):
                 expected_values = {
                     'same_tax_base': True,
                     'currency_id': self.foreign_currency.id,
@@ -472,7 +472,7 @@ class TestTaxesTaxTotalsSummary(TestTaxCommon):
                     ],
                 }
                 yield 1, self.populate_document(document_params), expected_values
-            with self.with_tax_calculation_rounding_method('round_globally'):
+            with self.with_tax_rounding_policy('document'):
                 expected_values = {
                     'same_tax_base': True,
                     'currency_id': self.foreign_currency.id,
@@ -506,7 +506,7 @@ class TestTaxesTaxTotalsSummary(TestTaxCommon):
                 }
                 yield 2, self.populate_document(document_params), expected_values
         with self.different_tax_group(taxes):
-            with self.with_tax_calculation_rounding_method('round_per_line'):
+            with self.with_tax_rounding_policy('line'):
                 expected_values = {
                     'same_tax_base': True,
                     'currency_id': self.foreign_currency.id,
@@ -575,7 +575,7 @@ class TestTaxesTaxTotalsSummary(TestTaxCommon):
                     ],
                 }
                 yield 3, self.populate_document(document_params), expected_values
-            with self.with_tax_calculation_rounding_method('round_globally'):
+            with self.with_tax_rounding_policy('document'):
                 expected_values = {
                     'same_tax_base': True,
                     'currency_id': self.foreign_currency.id,
@@ -655,7 +655,7 @@ class TestTaxesTaxTotalsSummary(TestTaxCommon):
             rate=3.0,
         )
         with self.same_tax_group(taxes):
-            with self.with_tax_calculation_rounding_method('round_per_line'):
+            with self.with_tax_rounding_policy('line'):
                 expected_values = {
                     'same_tax_base': False,
                     'currency_id': self.foreign_currency.id,
@@ -688,7 +688,7 @@ class TestTaxesTaxTotalsSummary(TestTaxCommon):
                     ],
                 }
                 yield 5, self.populate_document(document_params), expected_values
-            with self.with_tax_calculation_rounding_method('round_globally'):
+            with self.with_tax_rounding_policy('document'):
                 expected_values = {
                     'same_tax_base': False,
                     'currency_id': self.foreign_currency.id,
@@ -722,7 +722,7 @@ class TestTaxesTaxTotalsSummary(TestTaxCommon):
                 }
                 yield 6, self.populate_document(document_params), expected_values
         with self.different_tax_group(taxes):
-            with self.with_tax_calculation_rounding_method('round_per_line'):
+            with self.with_tax_rounding_policy('line'):
                 expected_values = {
                     'same_tax_base': False,
                     'currency_id': self.foreign_currency.id,
@@ -791,7 +791,7 @@ class TestTaxesTaxTotalsSummary(TestTaxCommon):
                     ],
                 }
                 yield 7, self.populate_document(document_params), expected_values
-            with self.with_tax_calculation_rounding_method('round_globally'):
+            with self.with_tax_rounding_policy('document'):
                 expected_values = {
                     'same_tax_base': False,
                     'currency_id': self.foreign_currency.id,
@@ -891,7 +891,7 @@ class TestTaxesTaxTotalsSummary(TestTaxCommon):
             rate=0.5,
         )
         with self.same_tax_group(taxes):
-            with self.with_tax_calculation_rounding_method('round_per_line'):
+            with self.with_tax_rounding_policy('line'):
                 expected_values = {
                     'same_tax_base': True,
                     'currency_id': self.foreign_currency.id,
@@ -924,7 +924,7 @@ class TestTaxesTaxTotalsSummary(TestTaxCommon):
                     ],
                 }
                 yield 1, self.populate_document(document_params), expected_values
-            with self.with_tax_calculation_rounding_method('round_globally'):
+            with self.with_tax_rounding_policy('document'):
                 expected_values = {
                     'same_tax_base': True,
                     'currency_id': self.foreign_currency.id,
@@ -958,7 +958,7 @@ class TestTaxesTaxTotalsSummary(TestTaxCommon):
                 }
                 yield 2, self.populate_document(document_params), expected_values
         with self.different_tax_group(taxes):
-            with self.with_tax_calculation_rounding_method('round_per_line'):
+            with self.with_tax_rounding_policy('line'):
                 expected_values = {
                     'same_tax_base': False,
                     'currency_id': self.foreign_currency.id,
@@ -1000,7 +1000,7 @@ class TestTaxesTaxTotalsSummary(TestTaxCommon):
                     ],
                 }
                 yield 3, self.populate_document(document_params), expected_values
-            with self.with_tax_calculation_rounding_method('round_globally'):
+            with self.with_tax_rounding_policy('document'):
                 expected_values = {
                     'same_tax_base': False,
                     'currency_id': self.foreign_currency.id,
@@ -1054,7 +1054,7 @@ class TestTaxesTaxTotalsSummary(TestTaxCommon):
             rate=0.5,
         )
         with self.same_tax_group(taxes):
-            with self.with_tax_calculation_rounding_method('round_per_line'):
+            with self.with_tax_rounding_policy('line'):
                 expected_values = {
                     'same_tax_base': True,
                     'currency_id': self.foreign_currency.id,
@@ -1087,7 +1087,7 @@ class TestTaxesTaxTotalsSummary(TestTaxCommon):
                     ],
                 }
                 yield 5, self.populate_document(document_params), expected_values
-            with self.with_tax_calculation_rounding_method('round_globally'):
+            with self.with_tax_rounding_policy('document'):
                 expected_values = {
                     'same_tax_base': True,
                     'currency_id': self.foreign_currency.id,
@@ -1121,7 +1121,7 @@ class TestTaxesTaxTotalsSummary(TestTaxCommon):
                 }
                 yield 6, self.populate_document(document_params), expected_values
         with self.different_tax_group(taxes):
-            with self.with_tax_calculation_rounding_method('round_per_line'):
+            with self.with_tax_rounding_policy('line'):
                 expected_values = {
                     'same_tax_base': False,
                     'currency_id': self.foreign_currency.id,
@@ -1163,7 +1163,7 @@ class TestTaxesTaxTotalsSummary(TestTaxCommon):
                     ],
                 }
                 yield 7, self.populate_document(document_params), expected_values
-            with self.with_tax_calculation_rounding_method('round_globally'):
+            with self.with_tax_rounding_policy('document'):
                 expected_values = {
                     'same_tax_base': False,
                     'currency_id': self.foreign_currency.id,
@@ -1215,7 +1215,7 @@ class TestTaxesTaxTotalsSummary(TestTaxCommon):
             currency=self.foreign_currency,
             rate=0.5,
         )
-        with self.with_tax_calculation_rounding_method('round_globally'):
+        with self.with_tax_rounding_policy('document'):
             expected_values = {
                 'same_tax_base': True,
                 'currency_id': self.foreign_currency.id,
@@ -1273,7 +1273,7 @@ class TestTaxesTaxTotalsSummary(TestTaxCommon):
             {'price_unit': 11999.0, 'tax_ids': tax},
             {'price_unit': 10999.0, 'tax_ids': tax},
         ])
-        with self.with_tax_calculation_rounding_method('round_per_line'):
+        with self.with_tax_rounding_policy('line'):
             expected_values = {
                 'same_tax_base': True,
                 'currency_id': self.currency.id,
@@ -1297,7 +1297,7 @@ class TestTaxesTaxTotalsSummary(TestTaxCommon):
                 ],
             }
             yield 1, self.populate_document(document_params), expected_values
-        with self.with_tax_calculation_rounding_method('round_globally'):
+        with self.with_tax_rounding_policy('document'):
             expected_values = {
                 'same_tax_base': True,
                 'currency_id': self.currency.id,
@@ -1384,7 +1384,7 @@ class TestTaxesTaxTotalsSummary(TestTaxCommon):
             self.assert_invoice_tax_totals_summary(invoice, expected_values)
 
     def _test_reverse_charge_taxes_2(self):
-        self.env.company.tax_calculation_rounding_method = 'round_globally'
+        self.env.company.tax_rounding_policy = 'document'
         tax = self.percent_tax(
             21.0,
             invoice_repartition_line_ids=[
@@ -1436,7 +1436,7 @@ class TestTaxesTaxTotalsSummary(TestTaxCommon):
             self.assert_invoice_tax_totals_summary(invoice, expected_values)
 
     def _test_random_case_tax_included(self):
-        self.env.company.tax_calculation_rounding_method = 'round_globally'
+        self.env.company.tax_rounding_policy = 'document'
         tax = self.percent_tax(20.0, price_include_override='tax_included')
         document_params = self.init_document(lines=[
             {'price_unit': 24.99, 'tax_ids': tax},
@@ -1527,7 +1527,7 @@ class TestTaxesTaxTotalsSummary(TestTaxCommon):
         tax5 = self.division_tax(15)
         taxes = tax1 + tax2 + tax3 + tax4 + tax5
 
-        with self.same_tax_group(taxes), self.with_tax_calculation_rounding_method('round_per_line'):
+        with self.same_tax_group(taxes), self.with_tax_rounding_policy('line'):
             cash_rounding = self.env['account.cash.rounding'].create({
                 'name': 'add_invoice_line',
                 'rounding': 0.05,
@@ -1578,7 +1578,7 @@ class TestTaxesTaxTotalsSummary(TestTaxCommon):
                 ],
             }
             yield 1, self.populate_document(document_params), expected_values
-        with self.different_tax_group(taxes), self.with_tax_calculation_rounding_method('round_per_line'):
+        with self.different_tax_group(taxes), self.with_tax_rounding_policy('line'):
             cash_rounding = self.env['account.cash.rounding'].create({
                 'name': 'biggest_tax',
                 'rounding': 0.05,
@@ -2343,7 +2343,7 @@ class TestTaxesTaxTotalsSummary(TestTaxCommon):
                 }])
 
     def _test_discount_with_round_globally(self):
-        self.env.company.tax_calculation_rounding_method = 'round_globally'
+        self.env.company.tax_rounding_policy = 'document'
         tax = self.percent_tax(21.0)
 
         document_params = self.init_document([
@@ -2460,7 +2460,7 @@ class TestTaxesTaxTotalsSummary(TestTaxCommon):
         self._assert_tax_totals_summary(invoice.tax_totals, expected_values)
 
     def _test_price_included_taxes_with_0_price_excluded_tax(self):
-        self.env.company.tax_calculation_rounding_method = 'round_globally'
+        self.env.company.tax_rounding_policy = 'document'
         tax_21 = self.percent_tax(21.0, price_include_override='tax_included')
         tax_6 = self.percent_tax(6.0, price_include_override='tax_included')
         tax_0 = self.percent_tax(0.0, price_include_override='tax_excluded')

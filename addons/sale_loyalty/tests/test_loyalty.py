@@ -1092,7 +1092,7 @@ class TestLoyalty(TestSaleCouponCommon):
         Assumes global tax rounding, as there's no good way to ensure the tax of the reward product
         equals the sum of taxes of the lines when each of them gets rounded.
         """
-        self.env.company.tax_calculation_rounding_method = "round_globally"
+        self.env.company.tax_rounding_policy = "document"
         loyalty_program = self.env["loyalty.program"].create([
             {
                 "name": "Full Discount",
@@ -1141,7 +1141,7 @@ class TestLoyalty(TestSaleCouponCommon):
 
     def test_discount_on_taxes_with_child_tax(self):
         """Check whether a program discount properly apply when product contain group of tax."""
-        self.env.company.tax_calculation_rounding_method = "round_globally"
+        self.env.company.tax_rounding_policy = "document"
         loyalty_program = self.env["loyalty.program"].create([
             {
                 "name": "90% Discount",

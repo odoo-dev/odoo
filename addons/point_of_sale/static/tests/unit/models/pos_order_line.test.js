@@ -277,7 +277,7 @@ test("[setUnitPrice] preserves price precision when tax data is saved", async ()
     orderLine.setUnitPrice(-2.175);
     expect(orderLine.price_unit).toBe(-2.175);
 
-    orderLine.extra_tax_data = { price_unit: -2.175 };
+    orderLine.tax_pins = { valid_for: { price_unit: -2.175 } };
     orderLine.setUnitPrice(-2.175);
     expect(orderLine.price_unit).toBe(-2.175);
 

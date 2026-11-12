@@ -4,6 +4,7 @@ from odoo.tools.misc import NON_BREAKING_SPACE
 from odoo.tools.partner_identifiers import is_identifier_void
 from datetime import datetime
 from odoo.addons.account_edi_ubl_cii.models.account_edi_common import (
+    EN16931_TAX_REPRESENTATION_PROFILE,
     FloatFmt,
 )
 
@@ -19,6 +20,9 @@ class AccountEdiCii(models.AbstractModel):
     _name = "account.edi.cii"
     _inherit = 'account.edi.common'
     _description = "Base helpers for CII"
+
+    def _get_tax_representation_profile(self):
+        return EN16931_TAX_REPRESENTATION_PROFILE
 
     # -------------------------------------------------------------------------
     # NEW EXPORT : helpers
@@ -57,9 +61,9 @@ class AccountEdiCii(models.AbstractModel):
             self._cii_add_values_delivery_date(vals, invoice.delivery_date or invoice.invoice_date)
 
         AccountTax = self.env['account.tax']
-        AccountTax._round_raw_total_excluded(vals['base_lines'], invoice.company_id)
-        AccountTax._add_and_round_raw_gross_total_excluded_and_discount(vals['base_lines'], invoice.company_id)
-        AccountTax._round_raw_gross_total_excluded_and_discount(vals['base_lines'], invoice.company_id)
+        vals['tax_representation_violations'] = AccountTax._represent_tax_details(
+            vals['base_lines'], invoice.company_id, self._get_tax_representation_profile(), in_company_currency=False,
+        )
 
     def _cii_add_values_delivery_date(self, vals, delivery_date):
         vals['delivery_date'] = delivery_date

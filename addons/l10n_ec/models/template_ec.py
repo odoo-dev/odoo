@@ -45,7 +45,7 @@ class AccountChartTemplate(models.AbstractModel):
                 'receivable_account_id': 'ec1102050101',
                 'payable_account_id': 'ec210301',
                 'downpayment_account_id': 'ec2110',
-                'tax_calculation_rounding_method': 'round_per_line',
+                'tax_rounding_policy': 'line',
                 'account_stock_valuation_id': 'ec110306',
                 'account_production_wip_account_id': 'ec110302',
                 'account_production_wip_overhead_account_id': 'ec51040801',

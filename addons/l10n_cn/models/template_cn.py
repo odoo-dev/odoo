@@ -34,7 +34,7 @@ class AccountChartTemplate(models.AbstractModel):
                 'account_purchase_tax_id': 'l10n_cn_tax_purchase_13_I_S',
                 'expense_account_id': 'l10n_cn_account_5401',
                 'income_account_id': 'l10n_cn_account_5001',
-                'tax_calculation_rounding_method': 'round_per_line',
+                'tax_rounding_policy': 'line',
                 'account_stock_valuation_id': 'l10n_cn_common_account_1403',
             },
         }

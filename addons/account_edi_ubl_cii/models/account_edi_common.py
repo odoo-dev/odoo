@@ -15,6 +15,7 @@ from odoo.tools.misc import formatLang, html_escape
 from odoo.tools.translate import _lt
 from odoo.tools.xml_utils import find_xml_value
 
+from odoo.addons.account.models.account_tax import TAX_REPRESENTATION_PROFILE
 from odoo.addons.base.models.res_country import EUROPEAN_ECONOMIC_AREA_COUNTRY_CODES
 
 _logger = logging.getLogger(__name__)
@@ -144,6 +145,21 @@ SUPPORTED_FILE_TYPES = {
 }
 
 
+# -------------------------------------------------------------------------
+# TAX REPRESENTATION PROFILES (see TAX_REPRESENTATION_PROFILE in account.tax)
+# -------------------------------------------------------------------------
+# The checks of EN 16931 on the tax amounts:
+# - PEPPOL-EN16931-R120: the net amount of a line is its quantity times its net price, plus its charges, minus its allowances.
+# - BR-CO-17: the tax amount of a VAT category is its taxable amount times its rate, within 1 unit of the currency.
+EN16931_TAX_REPRESENTATION_PROFILE = {
+    **TAX_REPRESENTATION_PROFILE,
+    'identities': (
+        ('PEPPOL-EN16931-R120', 'line_net_is_qty_x_price', ('abs', 0.01)),
+        ('BR-CO-17', 'tax_is_base_x_rate', ('abs', 1.0)),
+    ),
+}
+
+
 class FloatFmt(float):
     """ A float with a given precision.
     The precision is used when formatting the float.
@@ -214,6 +230,10 @@ class AccountEdiCommon(models.AbstractModel):
     def _get_currency_decimal_places(self, currency_id):
         # Allows other documents to easily override in case there is a flat max precision number
         return currency_id.decimal_places
+
+    def _get_tax_representation_profile(self):
+        """ The way this format writes the taxes, see TAX_REPRESENTATION_PROFILE in account.tax. """
+        return TAX_REPRESENTATION_PROFILE
 
     def _find_value(self, xpaths, tree, nsmap=False):
         """ Iteratively queries the tree using the xpaths and returns a result as soon as one is found """
@@ -1892,7 +1912,6 @@ class AccountEdiCommon(models.AbstractModel):
             ))
 
         AccountTax._add_tax_details_in_base_lines(base_lines, company)
-        AccountTax._round_base_lines_tax_details(base_lines, company)
 
         # Remove lines having a zero amount.
         collected_values['base_lines'] = [
@@ -1976,28 +1995,13 @@ class AccountEdiCommon(models.AbstractModel):
             if not taxes:
                 continue
 
-            delta_tax_amount_currency = taxes_to_tax_amount_currency[taxes] - sum(
-                tax_data['tax_amount_currency']
-                for _base_line, taxes_data in values['base_line_x_taxes_data']
-                for tax_data in taxes_data
-            )
-            target_factors = [
-                {
-                    'factor': tax_data['raw_tax_amount_currency'],
-                    'tax_data': tax_data,
-                }
-                for _base_line, taxes_data in values['base_line_x_taxes_data']
-                for tax_data in taxes_data
-            ]
-            amounts_to_distribute = AccountTax._distribute_delta_amount_smoothly(
-                precision_digits=currency.decimal_places,
-                delta_amount=delta_tax_amount_currency,
-                target_factors=target_factors,
+            AccountTax._reach_target(
+                [tax_data for _base_line, taxes_data in values['base_line_x_taxes_data'] for tax_data in taxes_data],
+                'tax_amount_currency',
+                taxes_to_tax_amount_currency[taxes],
+                currency.decimal_places,
                 allow_negative_factors=True,
             )
-            for target_factor, amount_to_distribute in zip(target_factors, amounts_to_distribute):
-                tax_data = target_factor['tax_data']
-                tax_data['tax_amount_currency'] += amount_to_distribute
 
         AccountTax._add_accounting_data_in_base_lines_tax_details(base_lines, invoice.company_id, include_caba_tags=invoice.always_tax_exigible)
         tax_results = AccountTax._prepare_tax_lines(base_lines, invoice.company_id, tax_lines=tax_lines)

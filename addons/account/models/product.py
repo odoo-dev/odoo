@@ -474,7 +474,7 @@ class ProductProduct(models.Model):
         results = product_taxes._get_tax_details(
             price_unit=product_price_unit,
             quantity=1.0,
-            rounding_method='round_globally',
+            precision_rounding=None,
             product=self,
             product_uom=product_uom,
             document_tax_mode=self.company_id.account_price_include,

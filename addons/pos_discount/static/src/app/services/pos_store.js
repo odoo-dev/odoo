@@ -83,7 +83,6 @@ patch(PosStore.prototype, {
             )
         );
         accountTaxHelpers.add_tax_details_in_base_lines(baseLines, order.company_id);
-        accountTaxHelpers.round_base_lines_tax_details(baseLines, order.company_id);
 
         const groupingFunction = (base_line) => ({
             grouping_key: { product_id: product },
@@ -105,14 +104,15 @@ patch(PosStore.prototype, {
         );
         let lastDiscountLine = null;
         for (const baseLine of globalDiscountBaseLines) {
-            const extra_tax_data = accountTaxHelpers.export_base_line_extra_tax_data(baseLine);
-            extra_tax_data.discount_value = value;
-            extra_tax_data.discount_type = type;
+            const taxPins = accountTaxHelpers.export_base_line_tax_pins(baseLine);
+            const computationSettings = { discount_value: value, discount_type: type };
             const key = taxKey(baseLine.tax_ids);
             const existingLine = discountLinesMap[key];
 
             if (existingLine) {
-                existingLine.extra_tax_data = extra_tax_data;
+                existingLine.tax_rounding_subset = baseLine.computation_key;
+                existingLine.tax_pins = taxPins;
+                existingLine.computation_settings = computationSettings;
                 existingLine.price_unit = baseLine.price_unit;
                 existingLine.setFullProductName();
                 delete discountLinesMap[key];
@@ -124,7 +124,9 @@ patch(PosStore.prototype, {
                         qty: baseLine.quantity,
                         tax_ids: [["link", ...baseLine.tax_ids]],
                         product_tmpl_id: baseLine.product_id.product_tmpl_id,
-                        extra_tax_data: extra_tax_data,
+                        tax_rounding_subset: baseLine.computation_key,
+                        tax_pins: taxPins,
+                        computation_settings: computationSettings,
                     },
                     order,
                     { force: true },

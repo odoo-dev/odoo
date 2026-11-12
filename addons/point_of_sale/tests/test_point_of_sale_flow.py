@@ -1703,7 +1703,7 @@ class TestPointOfSaleFlow(CommonPosTest):
         self.assertEqual(session.get_cash_in_out_list()[0]['cashier_name'], self.env.user.name)
 
     def test_refund_of_a_global_discount(self):
-        """ The global discount line pins in 'extra_tax_data' base and tax amounts that cannot be
+        """ The global discount line pins in 'tax_pins' base and tax amounts that cannot be
         recomputed from its price. The UI does not refund that line, it applies the discount again
         on the refund order, where the refunded lines are negative and the discount is therefore
         positive. Those pinned amounts have to be used as they are on both orders, otherwise the
@@ -1726,13 +1726,13 @@ class TestPointOfSaleFlow(CommonPosTest):
                 quantity=quantity, currency_id=company.currency_id, rate=1.0,
             )]
             AccountTax._add_tax_details_in_base_lines(base_lines, company)
-            AccountTax._round_base_lines_tax_details(base_lines, company)
             line = AccountTax._prepare_global_discount_lines(base_lines, company, 'percent', 10.0)[0]
             return {
                 'product_id': product.id,
                 'qty': line['quantity'],
                 'price_unit': company.currency_id.round(line['price_unit']),
-                'extra_tax_data': AccountTax._export_base_line_extra_tax_data(line),
+                'tax_rounding_subset': line['computation_key'],
+                'tax_pins': AccountTax._export_base_line_tax_pins(line),
             }
 
         order, refund = (

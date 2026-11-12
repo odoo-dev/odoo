@@ -163,7 +163,7 @@ class AccountMove(models.Model):
             grouping_function=grouping_function,
             aggregate_function=aggregate_function,
         )
-        AccountTax._fix_base_lines_tax_details_on_manual_tax_amounts(base_lines, self.company_id)
+        AccountTax._pin_base_lines_tax_details(base_lines, self.company_id)
 
         to_create = []
         for base_line in base_lines:
@@ -176,7 +176,8 @@ class AccountMove(models.Model):
                 'name': description,
                 'quantity': base_line['quantity'],
                 'price_unit': base_line['price_unit'],
-                'extra_tax_data': AccountTax._export_base_line_extra_tax_data(base_line),
+                'tax_rounding_subset': base_line['computation_key'],
+                'tax_pins': AccountTax._export_base_line_tax_pins(base_line),
                 **base_line['_grouping_key'],
             }))
         return to_create

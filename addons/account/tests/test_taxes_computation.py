@@ -78,7 +78,7 @@ class TestTaxesComputation(TestTaxCommon):
                     (115.19, 0.0),
                 ),
             },
-            rounding_method='round_per_line',
+            rounding_policy='line',
         )
         self.assert_taxes_computation(
             tax_percent_8_price_included + tax_percent_0_price_included,
@@ -91,7 +91,7 @@ class TestTaxesComputation(TestTaxCommon):
                     (115.185185, 0.0),
                 ),
             },
-            rounding_method='round_globally',
+            rounding_policy='document',
         )
         self._run_js_tests()
 
@@ -109,7 +109,7 @@ class TestTaxesComputation(TestTaxCommon):
                     (4.75, 0.25),
                 ),
             },
-            rounding_method='round_per_line',
+            rounding_policy='line',
             precision_rounding=currency_dp_half,
         )
         self.assert_taxes_computation(
@@ -122,7 +122,7 @@ class TestTaxesComputation(TestTaxCommon):
                     (9.5, 0.5),
                 ),
             },
-            rounding_method='round_per_line',
+            rounding_policy='line',
             precision_rounding=currency_dp_half,
         )
         self.assert_taxes_computation(
@@ -135,7 +135,7 @@ class TestTaxesComputation(TestTaxCommon):
                     (47.6, 2.4),
                 ),
             },
-            rounding_method='round_per_line',
+            rounding_policy='line',
             precision_rounding=currency_dp_half,
         )
         self.assert_taxes_computation(
@@ -148,7 +148,7 @@ class TestTaxesComputation(TestTaxCommon):
                     (4.761905, 0.238095),
                 ),
             },
-            rounding_method='round_globally',
+            rounding_policy='document',
         )
         self.assert_taxes_computation(
             tax_percent_5_price_included,
@@ -160,7 +160,7 @@ class TestTaxesComputation(TestTaxCommon):
                     (9.52381, 0.47619),
                 ),
             },
-            rounding_method='round_globally',
+            rounding_policy='document',
         )
         self.assert_taxes_computation(
             tax_percent_5_price_included,
@@ -172,7 +172,7 @@ class TestTaxesComputation(TestTaxCommon):
                     (47.619048, 2.380952),
                 ),
             },
-            rounding_method='round_globally',
+            rounding_policy='document',
         )
         self._run_js_tests()
 
@@ -191,7 +191,7 @@ class TestTaxesComputation(TestTaxCommon):
                     (2180.09, 119.91),
                 ),
             },
-            rounding_method='round_per_line',
+            rounding_policy='line',
         )
         self.assert_taxes_computation(
             tax_percent_15_price_excluded + tax_percent_5_5_price_included,
@@ -204,7 +204,7 @@ class TestTaxesComputation(TestTaxCommon):
                     (2180.094787, 119.905213),
                 ),
             },
-            rounding_method='round_globally',
+            rounding_policy='document',
         )
         self._run_js_tests()
 
@@ -221,7 +221,7 @@ class TestTaxesComputation(TestTaxCommon):
                     (46.87, 5.63),
                 ),
             },
-            rounding_method='round_per_line',
+            rounding_policy='line',
         )
         self.assert_taxes_computation(
             tax_percent_12_price_included,
@@ -233,7 +233,7 @@ class TestTaxesComputation(TestTaxCommon):
                     (46.875, 5.625),
                 ),
             },
-            rounding_method='round_globally',
+            rounding_policy='document',
         )
         self._run_js_tests()
 
@@ -252,7 +252,7 @@ class TestTaxesComputation(TestTaxCommon):
                     (22689, 4311),
                 ),
             },
-            rounding_method='round_per_line',
+            rounding_policy='line',
             precision_rounding=currency_dp_0,
         )
         self.assert_taxes_computation(
@@ -265,7 +265,7 @@ class TestTaxesComputation(TestTaxCommon):
                     (9176, 1743),
                 ),
             },
-            rounding_method='round_per_line',
+            rounding_policy='line',
             precision_rounding=currency_dp_0,
         )
         self.assert_taxes_computation(
@@ -278,7 +278,7 @@ class TestTaxesComputation(TestTaxCommon):
                     (22689.0, 4311.0),
                 ),
             },
-            rounding_method='round_per_line',
+            rounding_policy='line',
             precision_rounding=currency_dp_0,
         )
         self.assert_taxes_computation(
@@ -291,7 +291,7 @@ class TestTaxesComputation(TestTaxCommon):
                     (9176.0, 1744.0),
                 ),
             },
-            rounding_method='round_per_line',
+            rounding_policy='line',
             precision_rounding=currency_dp_0,
         )
         self.assert_taxes_computation(
@@ -304,7 +304,7 @@ class TestTaxesComputation(TestTaxCommon):
                     (22689, 4310.91),
                 ),
             },
-            rounding_method='round_globally',
+            rounding_policy='document',
         )
         self.assert_taxes_computation(
             tax_percent_19,
@@ -316,7 +316,7 @@ class TestTaxesComputation(TestTaxCommon):
                     (9176, 1743.44),
                 ),
             },
-            rounding_method='round_globally',
+            rounding_policy='document',
         )
         self.assert_taxes_computation(
             tax_percent_19_price_included,
@@ -328,7 +328,7 @@ class TestTaxesComputation(TestTaxCommon):
                     (22689.07563, 4310.92437),
                 ),
             },
-            rounding_method='round_globally',
+            rounding_policy='document',
         )
         self.assert_taxes_computation(
             tax_percent_19_price_included,
@@ -340,7 +340,7 @@ class TestTaxesComputation(TestTaxCommon):
                     (9176.470588, 1743.529412),
                 ),
             },
-            rounding_method='round_globally',
+            rounding_policy='document',
         )
         self._run_js_tests()
 
@@ -360,7 +360,7 @@ class TestTaxesComputation(TestTaxCommon):
                     (333.333332, 66.666667),
                 ),
             },
-            rounding_method='round_per_line',
+            rounding_policy='line',
             precision_rounding=currency_dp_6,
         )
         self.assert_taxes_computation(
@@ -373,7 +373,7 @@ class TestTaxesComputation(TestTaxCommon):
                     (333.3333325, 66.6666665),
                 ),
             },
-            rounding_method='round_globally',
+            rounding_policy='document',
         )
         self._run_js_tests()
 
@@ -391,7 +391,7 @@ class TestTaxesComputation(TestTaxCommon):
                     (9.83, 2.07),
                 ),
             },
-            rounding_method='round_per_line',
+            rounding_policy='line',
         )
         self.assert_taxes_computation(
             tax_percent_21_price_included,
@@ -403,7 +403,7 @@ class TestTaxesComputation(TestTaxCommon):
                     (2.31, 0.49),
                 ),
             },
-            rounding_method='round_per_line',
+            rounding_policy='line',
         )
         self.assert_taxes_computation(
             tax_percent_21_price_included,
@@ -415,7 +415,7 @@ class TestTaxesComputation(TestTaxCommon):
                     (5.785124, 1.214876),
                 ),
             },
-            rounding_method='round_per_line',
+            rounding_policy='line',
             precision_rounding=currency_dp_6,
         )
         self.assert_taxes_computation(
@@ -428,7 +428,7 @@ class TestTaxesComputation(TestTaxCommon):
                     (9.834711, 2.065289),
                 ),
             },
-            rounding_method='round_globally',
+            rounding_policy='document',
         )
         self.assert_taxes_computation(
             tax_percent_21_price_included,
@@ -440,7 +440,7 @@ class TestTaxesComputation(TestTaxCommon):
                     (2.31405, 0.48595),
                 ),
             },
-            rounding_method='round_globally',
+            rounding_policy='document',
         )
         self.assert_taxes_computation(
             tax_percent_21_price_included,
@@ -452,7 +452,7 @@ class TestTaxesComputation(TestTaxCommon):
                     (5.785124, 1.214876),
                 ),
             },
-            rounding_method='round_globally',
+            rounding_policy='document',
         )
         self._run_js_tests()
 
@@ -567,7 +567,7 @@ class TestTaxesComputation(TestTaxCommon):
                     (100.0, 3.0),
                 ),
             },
-            rounding_method='round_globally',
+            rounding_policy='document',
         )
 
         # tax       price_incl      incl_base_amount    is_base_affected
@@ -588,7 +588,7 @@ class TestTaxesComputation(TestTaxCommon):
                     (106.0, 3.18),
                 ),
             },
-            rounding_method='round_globally',
+            rounding_policy='document',
         )
 
         # tax       price_incl      incl_base_amount    is_base_affected
@@ -609,7 +609,7 @@ class TestTaxesComputation(TestTaxCommon):
                     (106.0, 3.18),
                 ),
             },
-            rounding_method='round_globally',
+            rounding_policy='document',
             excluded_special_modes=['total_included'],
         )
 
@@ -632,7 +632,7 @@ class TestTaxesComputation(TestTaxCommon):
                     (112.36, 3.3708),
                 ),
             },
-            rounding_method='round_globally',
+            rounding_policy='document',
             excluded_special_modes=['total_included'],  # Impossible.
         )
 
@@ -654,7 +654,7 @@ class TestTaxesComputation(TestTaxCommon):
                     (112.0, 3.36),
                 ),
             },
-            rounding_method='round_globally',
+            rounding_policy='document',
         )
 
         # tax       price_incl      incl_base_amount    is_base_affected
@@ -676,7 +676,7 @@ class TestTaxesComputation(TestTaxCommon):
                     (112.0, 3.36),
                 ),
             },
-            rounding_method='round_globally',
+            rounding_policy='document',
         )
 
         # Ensure tax1 & tax2 give always the same result.
@@ -691,7 +691,7 @@ class TestTaxesComputation(TestTaxCommon):
                     (15.883929, 0.953036),
                 ),
             },
-            rounding_method='round_globally',
+            rounding_policy='document',
         )
 
         # tax       price_incl      incl_base_amount    is_base_affected
@@ -710,7 +710,7 @@ class TestTaxesComputation(TestTaxCommon):
                     (178.571429, 10.714286),
                 ),
             },
-            rounding_method='round_globally',
+            rounding_policy='document',
         )
 
         # tax       price_incl      incl_base_amount    is_base_affected
@@ -733,7 +733,7 @@ class TestTaxesComputation(TestTaxCommon):
                     (106.0, 3.18),
                 ),
             },
-            rounding_method='round_globally',
+            rounding_policy='document',
             excluded_special_modes=['total_included'],
         )
 
@@ -755,7 +755,7 @@ class TestTaxesComputation(TestTaxCommon):
                     (106.0, 3.18),
                 ),
             },
-            rounding_method='round_globally',
+            rounding_policy='document',
         )
 
         # tax       price_incl      incl_base_amount    is_base_affected
@@ -776,7 +776,7 @@ class TestTaxesComputation(TestTaxCommon):
                     (100.0, 3.0),
                 ),
             },
-            rounding_method='round_globally',
+            rounding_policy='document',
         )
         self._run_js_tests()
 
@@ -806,7 +806,7 @@ class TestTaxesComputation(TestTaxCommon):
                     (32.33, 7.200445),
                 ),
             },
-            rounding_method='round_globally',
+            rounding_policy='document',
         )
 
         (tax1 + tax2 + tax3 + tax4 + tax5).price_include_override = 'tax_included'
@@ -824,7 +824,7 @@ class TestTaxesComputation(TestTaxCommon):
                     (32.328, 7.2),
                 ),
             },
-            rounding_method='round_globally',
+            rounding_policy='document',
         )
         self._run_js_tests()
 
@@ -850,7 +850,7 @@ class TestTaxesComputation(TestTaxCommon):
                 ),
             },
             quantity=5,
-            rounding_method='round_globally',
+            rounding_policy='document',
         )
 
         # tax       price_incl      incl_base_amount
@@ -872,7 +872,7 @@ class TestTaxesComputation(TestTaxCommon):
                 ),
             },
             quantity=5,
-            rounding_method='round_globally',
+            rounding_policy='document',
         )
 
         # tax       price_incl      incl_base_amount
@@ -893,7 +893,7 @@ class TestTaxesComputation(TestTaxCommon):
                     (100.0, 2.0),
                 ),
             },
-            rounding_method='round_globally',
+            rounding_policy='document',
         )
 
         # tax       price_incl      incl_base_amount
@@ -914,7 +914,7 @@ class TestTaxesComputation(TestTaxCommon):
                     (121.0, 2.0),
                 ),
             },
-            rounding_method='round_globally',
+            rounding_policy='document',
         )
 
         # tax       price_incl      incl_base_amount
@@ -935,7 +935,7 @@ class TestTaxesComputation(TestTaxCommon):
                     (121.0, 2.0),
                 ),
             },
-            rounding_method='round_globally',
+            rounding_policy='document',
         )
 
         # tax       price_incl      incl_base_amount
@@ -956,7 +956,7 @@ class TestTaxesComputation(TestTaxCommon):
                     (121.0, 2.0),
                 ),
             },
-            rounding_method='round_globally'
+            rounding_policy='document'
         )
 
         # tax       price_incl      incl_base_amount
@@ -978,7 +978,7 @@ class TestTaxesComputation(TestTaxCommon):
                     (121.0, 2.0),
                 ),
             },
-            rounding_method='round_globally',
+            rounding_policy='document',
         )
 
         # tax       price_incl      incl_base_amount
@@ -999,7 +999,7 @@ class TestTaxesComputation(TestTaxCommon):
                     (100.0, 2.0),
                 ),
             },
-            rounding_method='round_globally',
+            rounding_policy='document',
         )
 
         # tax       price_incl      incl_base_amount
@@ -1021,7 +1021,7 @@ class TestTaxesComputation(TestTaxCommon):
                     (121.0, 2.0),
                 ),
             },
-            rounding_method='round_globally',
+            rounding_policy='document',
         )
 
         tax1.include_base_amount = False
@@ -1038,7 +1038,7 @@ class TestTaxesComputation(TestTaxCommon):
                     (20.0, 2.0),
                 ),
             },
-            rounding_method='round_globally',
+            rounding_policy='document',
             quantity=-2,
         )
 
@@ -1053,7 +1053,7 @@ class TestTaxesComputation(TestTaxCommon):
                     (-20.0, -2.0),
                 ),
             },
-            rounding_method='round_globally',
+            rounding_policy='document',
             quantity=2,
         )
 
@@ -1068,7 +1068,7 @@ class TestTaxesComputation(TestTaxCommon):
                     (0.0, -1.0),
                 ),
             },
-            rounding_method='round_globally',
+            rounding_policy='document',
             quantity=-1,
         )
 
@@ -1083,7 +1083,7 @@ class TestTaxesComputation(TestTaxCommon):
                     (0.0, 1.0),
                 ),
             },
-            rounding_method='round_globally',
+            rounding_policy='document',
             quantity=1,
         )
 

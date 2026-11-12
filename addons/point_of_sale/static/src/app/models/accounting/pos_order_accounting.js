@@ -291,16 +291,12 @@ export class PosOrderAccounting extends Base {
         // alone. Strip the key so one tax group yields one line.
         baseLines.forEach((line) => {
             line.computation_key = null;
-            if (line.extra_tax_data) {
-                line.extra_tax_data.computation_key = undefined;
-            }
             if (ignoreDiscount) {
                 line.discount = 0;
             }
         });
 
         accountTaxHelpers.add_tax_details_in_base_lines(baseLines, company);
-        accountTaxHelpers.round_base_lines_tax_details(baseLines, company);
 
         const reducedBaseLines = accountTaxHelpers.reduce_base_lines_to_target_amount(
             baseLines,
@@ -314,13 +310,10 @@ export class PosOrderAccounting extends Base {
                 }),
             }
         );
-        accountTaxHelpers.fix_base_lines_tax_details_on_manual_tax_amounts(
-            reducedBaseLines,
-            company
-        );
+        accountTaxHelpers.pin_base_lines_tax_details(reducedBaseLines, company);
 
         // The spread must precede the export: the export stamps `price_unit`,
-        // `discount` and `quantity`, and `import_base_line_extra_tax_data` drops the
+        // `discount` and `quantity`, and `import_base_line_tax_pins` drops the
         // exact per-tax amounts when they no longer match the line they are read back
         // onto. Those amounts are what makes the per-unit rounding below safe.
         return reducedBaseLines.map((baseLine) => {
@@ -330,7 +323,7 @@ export class PosOrderAccounting extends Base {
             }
             return {
                 baseLine,
-                extraTaxData: accountTaxHelpers.export_base_line_extra_tax_data(baseLine),
+                taxPins: accountTaxHelpers.export_base_line_tax_pins(baseLine),
             };
         });
     }
@@ -358,8 +351,6 @@ export class PosOrderAccounting extends Base {
                 no_discount_total_included_currency: ndData.total_included_currency,
                 no_discount_total_excluded_currency: ndData.total_excluded_currency,
                 no_discount_taxes_data: ndData.taxes_data,
-                no_discount_delta_total_excluded: ndData.delta_total_excluded,
-                no_discount_delta_total_included: ndData.delta_total_included,
             });
         }
 
@@ -389,7 +380,6 @@ export class PosOrderAccounting extends Base {
         );
 
         accountTaxHelpers.add_tax_details_in_base_lines(baseLines, company);
-        accountTaxHelpers.round_base_lines_tax_details(baseLines, company);
 
         // Cash rounding is added only if the document needs to be globaly rounded.
         // See cash_rounding and only_round_cash_method config fields.

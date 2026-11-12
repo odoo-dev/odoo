@@ -39,7 +39,9 @@ export class PosOrderLine extends models.ServerModel {
             "combo_line_ids",
             "combo_item_id",
             "refund_orderline_ids",
-            "extra_tax_data",
+            "tax_rounding_subset",
+            "tax_pins",
+            "computation_settings",
             "write_date",
         ];
     }

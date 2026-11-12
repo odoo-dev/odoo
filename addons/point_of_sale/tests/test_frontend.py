@@ -1735,7 +1735,7 @@ class TestUi(TestPointOfSaleHttpCommon):
         self.start_tour("/pos/ui?config_id=%d" % self.main_pos_config.id, 'test_auto_validate_force_done', login="pos_user")
 
     def test_pos_ui_round_globally(self):
-        self.main_pos_config.company_id.tax_calculation_rounding_method = 'round_globally'
+        self.main_pos_config.company_id.tax_rounding_policy = 'document'
         tax_16 = self.env['account.tax'].create({
             'name': 'Tax 16%',
             'amount': 16,

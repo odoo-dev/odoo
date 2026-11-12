@@ -34,7 +34,7 @@ class AccountChartTemplate(models.AbstractModel):
                 'account_sale_tax_id': 'account_tax_template_iva_venta_13',
                 'account_purchase_tax_id': 'account_tax_template_iva_compra_13',
                 # Anexos y Estructuras v4.4: TotalImpuesto is the sum of the per-line Monto values
-                'tax_calculation_rounding_method': 'round_per_line',
+                'tax_rounding_policy': 'line',
                 'account_stock_valuation_id': 'account_account_template_113101',
                 'account_production_wip_account_id': 'account_account_template_113104',
                 'account_production_wip_overhead_account_id': 'account_account_template_511010',

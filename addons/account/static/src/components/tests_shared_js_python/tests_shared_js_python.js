@@ -28,7 +28,6 @@ export class TestsSharedJsPython extends Component {
                 product: params.product,
                 product_uom: params.product_uom,
                 precision_rounding: params.precision_rounding,
-                rounding_method: params.rounding_method,
                 filter_tax_function: filter_tax_function,
             };
             const results = {
@@ -39,7 +38,7 @@ export class TestsSharedJsPython extends Component {
                     kwargs,
                 )
             };
-            if (params.rounding_method === "round_globally") {
+            if (params.precision_rounding === null) {
                 results.total_excluded_results = accountTaxHelpers.get_tax_details(
                     params.taxes,
                     results.results.total_excluded / params.quantity,
@@ -97,7 +96,6 @@ export class TestsSharedJsPython extends Component {
             );
             document.lines.push(...baseLines);
             accountTaxHelpers.add_tax_details_in_base_lines(document.lines, document.company);
-            accountTaxHelpers.round_base_lines_tax_details(document.lines, document.company);
             const taxTotals = accountTaxHelpers.get_tax_totals_summary(
                 document.lines,
                 document.currency,
@@ -117,7 +115,6 @@ export class TestsSharedJsPython extends Component {
             );
             document.lines = baseLines;
             accountTaxHelpers.add_tax_details_in_base_lines(document.lines, document.company);
-            accountTaxHelpers.round_base_lines_tax_details(document.lines, document.company);
             const taxTotals = accountTaxHelpers.get_tax_totals_summary(
                 document.lines,
                 document.currency,
@@ -148,7 +145,6 @@ export class TestsSharedJsPython extends Component {
     populateDocument(document) {
         const base_lines = document.lines.map(line => accountTaxHelpers.prepare_base_line_for_taxes_computation(null, line));
         accountTaxHelpers.add_tax_details_in_base_lines(base_lines, document.company);
-        accountTaxHelpers.round_base_lines_tax_details(base_lines, document.company);
         return {
             ...document,
             lines: base_lines,
@@ -161,11 +157,7 @@ export class TestsSharedJsPython extends Component {
             total_excluded: line.tax_details.total_excluded,
             total_included_currency: line.tax_details.total_included_currency,
             total_included: line.tax_details.total_included,
-            delta_total_excluded_currency: line.tax_details.delta_total_excluded_currency,
-            delta_total_excluded: line.tax_details.delta_total_excluded,
-            manual_total_excluded_currency: line.manual_total_excluded_currency,
-            manual_total_excluded: line.manual_total_excluded,
-            manual_tax_amounts: line.manual_tax_amounts,
+            pins: line.pins,
             taxes_data: line.tax_details.taxes_data.map(tax_data => ({
                 tax_id: tax_data.tax.id,
                 tax_amount_currency: tax_data.tax_amount_currency,

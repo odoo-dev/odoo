@@ -125,7 +125,7 @@ class PoSSaleSyncCommon:
                         'total': so_line.price_total,
                         'percentage_value': percentage,
                     } for so_line in detailed_so_lines]),
-                    'extra_tax_data': {'computation_key': 'down_payment'},
+                    'tax_rounding_subset': 'down_payment',
                 },
             })
         return self._sync_paid_pos_order(
@@ -524,7 +524,7 @@ class TestPoSSale(PoSSaleSyncCommon, TestPointOfSaleHttpCommon):
                     'total': 100,
                     'percentage_value': 10,
                 }]),
-                'extra_tax_data': {'computation_key': 'down_payment'},
+                'tax_rounding_subset': 'down_payment',
             },
         }], partner=so.partner_id)
 
@@ -607,7 +607,7 @@ class TestPoSSale(PoSSaleSyncCommon, TestPointOfSaleHttpCommon):
                     'total': 100,
                     'percentage_value': 0,
                 }]),
-                'extra_tax_data': {'computation_key': 'down_payment'},
+                'tax_rounding_subset': 'down_payment',
             },
         }], partner=partner_test)
         self.assertEqual(sale_order.amount_to_invoice, 80.0, "Downpayment amount not considered!")

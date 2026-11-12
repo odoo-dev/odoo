@@ -564,7 +564,6 @@ class AccountEdiXmlUBL20(models.AbstractModel):
             for currency_suffix in ['', '_currency']:
                 base_line_total_excluded = \
                     base_line['tax_details'][f'total_excluded{currency_suffix}'] \
-                    + base_line['tax_details'][f'delta_total_excluded{currency_suffix}'] \
                     + sum(
                         tax_details[f'tax_amount{currency_suffix}']
                         for grouping_key, tax_details in aggregated_tax_details.items()
@@ -919,7 +918,6 @@ class AccountEdiXmlUBL20(models.AbstractModel):
 
             vals[f'total_excluded{currency_suffix}'] = \
                 base_line['tax_details'][f'total_excluded{currency_suffix}'] \
-                + base_line['tax_details'][f'delta_total_excluded{currency_suffix}'] \
                 + vals[f'total_fixed_taxes{currency_suffix}']
 
     def _add_document_line_gross_subtotal_and_discount_vals(self, vals):

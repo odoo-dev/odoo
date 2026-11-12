@@ -119,9 +119,9 @@ class PurchaseOrderLine(models.Model):
     currency_id = fields.Many2one(related='order_id.currency_id', string='Currency')
     date_order = fields.Datetime(related='order_id.date_order', string='Order Deadline', readonly=True)
     date_approve = fields.Datetime(related="order_id.date_approve", string='Confirmation Date', readonly=True)
-    tax_calculation_rounding_method = fields.Selection(
-        related='company_id.tax_calculation_rounding_method',
-        string='Tax calculation rounding method', readonly=True)
+    tax_rounding_policy = fields.Selection(
+        related='company_id.tax_rounding_policy',
+        string='Tax Rounding Policy', readonly=True)
     display_type = fields.Selection([
         ('line_section', "Section"),
         ('line_subsection', "Subsection"),
@@ -154,8 +154,7 @@ class PurchaseOrderLine(models.Model):
         for line in self:
             company = line.company_id or self.env.company
             base_line = line._prepare_base_line_for_taxes_computation()
-            AccountTax._add_tax_details_in_base_line(base_line, company)
-            AccountTax._round_base_lines_tax_details([base_line], company)
+            AccountTax._add_tax_details_in_base_lines([base_line], company)
             line.price_subtotal = base_line['tax_details']['total_excluded_currency']
             line.price_total = base_line['tax_details']['total_included_currency']
             line.price_tax = line.price_total - line.price_subtotal
@@ -665,7 +664,7 @@ class PurchaseOrderLine(models.Model):
                 price_unit,
                 currency=self.order_id.currency_id,
                 quantity=qty,
-                rounding_method='round_globally',
+                rounding_policy='document',
             )['total_void']
             price_unit = price_unit / qty
         if self.uom_id.id != self.product_id.uom_id.id:

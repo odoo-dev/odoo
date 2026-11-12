@@ -2408,7 +2408,7 @@ class TestPosAccounting(AccountTestInvoicingCommon):
         """ With global rounding, the base delta of an order can be allocated to an
         untaxed line. It must be kept in the closing entry or the move is unbalanced.
         """
-        self.main_company.tax_calculation_rounding_method = 'round_globally'
+        self.main_company.tax_rounding_policy = 'document'
         tax_21_incl, tax_12_incl = (self.tax_21 + self.tax_12).copy({'price_include_override': 'tax_included'})
         product_21 = self.product_21.copy({'taxes_id': [(6, 0, tax_21_incl.ids)]})
         product_12 = self.product_12.copy({'taxes_id': [(6, 0, tax_12_incl.ids)]})

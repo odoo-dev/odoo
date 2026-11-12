@@ -38,7 +38,7 @@ class AccountChartTemplate(models.AbstractModel):
                 'receivable_account_id': 'l10n_my_220100',
                 'payable_account_id': 'l10n_my_440100',
                 'account_sale_tax_id': 'l10n_my_tax_sale_10',
-                'tax_calculation_rounding_method': 'round_per_line',
+                'tax_rounding_policy': 'line',
             },
         }
 

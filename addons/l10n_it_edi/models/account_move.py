@@ -15,6 +15,7 @@ from odoo.tools import BinaryBytes, cleanup_xml_node, float_compare, float_is_ze
 from stdnum.it import codicefiscale, iva
 
 from odoo import _, api, Command, fields, models, modules
+from odoo.addons.account.models.account_tax import TAX_REPRESENTATION_PROFILE
 from odoo.addons.base.models.res_partner_bank import sanitize_account_number
 from odoo.addons.account_edi_proxy_client.models.account_edi_proxy_user import AccountEdiProxyError
 from odoo.addons.l10n_it_edi.models.account_payment_method_line import L10N_IT_PAYMENT_METHOD_SELECTION
@@ -27,6 +28,17 @@ _logger = logging.getLogger(__name__)
 WAITING_STATES = ('being_sent', 'processing', 'forward_attempt')
 SDI_RESETTABLE_STATES = (False, 'rejected', 'rejected_by_pa_partner')
 FATTURAPA_FILENAME_RE = r"[A-Z]{2}[A-Za-z0-9]{2,28}_[A-Za-z0-9]{0,5}\.((?i:xml\.p7m|xml))"
+# FatturaPA (Specifiche tecniche 1.9): the prices and amounts of the lines have up to 8 decimals. For each rate, the tax is
+# the taxable amount times the rate within 1 cent (00421), and the taxable amount is the sum of the line amounts plus the
+# Arrotondamento within 1 euro (00422).
+FATTURAPA_TAX_REPRESENTATION_PROFILE = {
+    **TAX_REPRESENTATION_PROFILE,
+    'precision_digits': 8,
+    'identities': (
+        ('00421', 'tax_is_base_x_rate', ('abs', 0.01)),
+        ('00422', 'base_is_sum_of_lines', ('abs', 1.0)),
+    ),
+}
 
 
 # -------------------------------------------------------------------------
@@ -700,6 +712,10 @@ class AccountMove(models.Model):
 
         return [base_line, vat_line]
 
+    def _l10n_it_edi_get_tax_representation_profile(self):
+        """ The way the FatturaPA writes the taxes, see TAX_REPRESENTATION_PROFILE in account.tax. """
+        return FATTURAPA_TAX_REPRESENTATION_PROFILE
+
     def _l10n_it_edi_get_values(self, pdf_values=None, extra_attachments=None):
         def grouping_function_withholding(base_line, tax_data):
             if not tax_data:
@@ -818,6 +834,7 @@ class AccountMove(models.Model):
                 })
 
         AccountTax._round_base_lines_tax_details(base_lines, self.company_id, tax_lines=tax_lines)
+        tax_representation_violations = AccountTax._check_tax_representation(base_lines, self.company_id, self._l10n_it_edi_get_tax_representation_profile())
         base_lines_aggregated_values = AccountTax._aggregate_base_lines_tax_details(base_lines, self._l10n_it_edi_grouping_function_base_lines)
         self._l10n_it_edi_add_base_lines_xml_values(base_lines_aggregated_values, is_downpayment)
         base_lines = sorted(base_lines, key=lambda base_line: base_line['it_values']['numero_linea'])
@@ -957,6 +974,7 @@ class AccountMove(models.Model):
             'record': self,
             'base_lines': base_lines,
             'tax_lines': tax_lines,
+            'tax_representation_violations': tax_representation_violations,
             'importo_totale_documento': importo_totale_documento,
             'company': company,
             'partner': partner,

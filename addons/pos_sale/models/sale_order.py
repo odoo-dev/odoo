@@ -135,7 +135,7 @@ class SaleOrderLine(models.Model):
     @api.model
     def _load_pos_data_fields(self, config):
         return ['discount', 'display_name', 'price_total', 'price_unit', 'product_id', 'product_uom_qty', 'qty_delivered',
-            'qty_invoiced', 'qty_to_invoice', 'display_type', 'name', 'tax_ids', 'is_downpayment', 'extra_tax_data',
+            'qty_invoiced', 'qty_to_invoice', 'display_type', 'name', 'tax_ids', 'is_downpayment', 'tax_rounding_subset', 'tax_pins',
             'write_date', 'product_custom_attribute_value_ids', 'order_id', 'product_no_variant_attribute_value_ids',
         ]
 

@@ -175,10 +175,10 @@ patch(PosStore.prototype, {
                 }
 
                 if (line.is_downpayment) {
-                    newLineValues.extra_tax_data =
-                        accountTaxHelpers.reverse_quantity_base_line_extra_tax_data(
-                            line.extra_tax_data
-                        );
+                    newLineValues.tax_rounding_subset = line.tax_rounding_subset;
+                    newLineValues.tax_pins = accountTaxHelpers.reverse_quantity_base_line_tax_pins(
+                        line.tax_pins
+                    );
                 }
                 const newLine = await this.addLineToCurrentOrder(newLineValues, {}, false);
                 previousProductLine = newLine;
@@ -243,7 +243,8 @@ patch(PosStore.prototype, {
             tax_ids: soLine.tax_ids,
             partner_id: so.partner_id,
             product_id: soLine.product_id,
-            extra_tax_data: soLine.extra_tax_data,
+            tax_rounding_subset: soLine.tax_rounding_subset,
+            tax_pins: soLine.tax_pins,
         };
     },
 
@@ -299,7 +300,6 @@ patch(PosStore.prototype, {
             );
         }
         accountTaxHelpers.add_tax_details_in_base_lines(baseLines, this.company);
-        accountTaxHelpers.round_base_lines_tax_details(baseLines, this.company);
         if (isPercentage) {
             const percentage = amount / 100.0;
             amount = baseLines.length ? saleOrder.amount_unpaid : 0.0;
@@ -377,7 +377,8 @@ patch(PosStore.prototype, {
                     percentage_value: isPercentage ? percentage_value : 0,
                 })),
                 tax_ids: [["link", ...baseLine.tax_ids]],
-                extra_tax_data: accountTaxHelpers.export_base_line_extra_tax_data(baseLine),
+                tax_rounding_subset: baseLine.computation_key,
+                tax_pins: accountTaxHelpers.export_base_line_tax_pins(baseLine),
             });
         }
     },

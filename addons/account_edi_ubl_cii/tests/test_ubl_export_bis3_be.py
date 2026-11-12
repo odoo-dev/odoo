@@ -1093,11 +1093,11 @@ class TestUblExportBis3BE(TestUblBis3Common, TestUblCiiBECommon):
     def test_export_collapsed_sections_amounts(self):
         """ Test that the amounts of collapsed sections are correctly exported. """
         tax_21 = self.percent_tax(21.0)
-        for rounding_method, sections in (
-            ('round_globally', [[(10.03, tax_21)], [(10.03, tax_21)]]),
-            ('round_per_line', [[(10.03, tax_21), (10.03, tax_21)]]),
+        for rounding_policy, sections in (
+            ('document', [[(10.03, tax_21)], [(10.03, tax_21)]]),
+            ('line', [[(10.03, tax_21), (10.03, tax_21)]]),
         ):
-            self.env.company.tax_calculation_rounding_method = rounding_method
+            self.env.company.tax_rounding_policy = rounding_policy
             invoice_line_ids = []
             for index, lines in enumerate(sections):
                 invoice_line_ids.append(self._prepare_invoice_line(name=f"Section {index}", display_type='line_section', collapse_composition=True, price_unit=0.0))
@@ -1111,11 +1111,11 @@ class TestUblExportBis3BE(TestUblBis3Common, TestUblCiiBECommon):
 
     def test_invoice_tax_subtotal_exempt_amount(self):
         """ Test that the taxable amount for exempt taxes is correctly computed,
-        regardless of the tax calculation rounding method.
+        regardless of the tax rounding policy.
         """
         tax_0 = self.percent_tax(0.0)
-        for rounding_method in ('round_per_line', 'round_globally'):
-            self.env.company.tax_calculation_rounding_method = rounding_method
+        for rounding_policy in ('line', 'document'):
+            self.env.company.tax_rounding_policy = rounding_policy
             invoice = self._create_invoice(
                 partner_id=self.partner_be,
                 invoice_line_ids=[
@@ -1125,7 +1125,7 @@ class TestUblExportBis3BE(TestUblBis3Common, TestUblCiiBECommon):
                 post=True,
             )
             self._generate_invoice_ubl_file(invoice)
-            self._assert_invoice_ubl_file(invoice, f'test_invoice_tax_subtotal_exempt_amount_{rounding_method}')
+            self._assert_invoice_ubl_file(invoice, f'test_invoice_tax_subtotal_exempt_amount_{rounding_policy}')
 
     def test_invoice_tax_out_of_scope(self):
         """ [BR-O-06] A Document level allowance (BG-20) where VAT category code (BT-95)

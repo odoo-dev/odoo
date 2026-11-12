@@ -3768,14 +3768,14 @@ class TestUi(TestPointOfSaleHttpCommon):
         session.close_session_from_ui()
         report = self.env['report.point_of_sale.report_saledetails'].get_sale_details(session_ids=[session.id])
         self.assertEqual(report['discount_number'], 2)
-        self.assertEqual(report['discount_amount'], 60.38)
+        self.assertEqual(report['discount_amount'], 60.37)
 
     def test_reward_line_tax_grouping_key(self):
         """
-        This test make sure that taxes are correctly computed when using the "round_globally" rounding method and some specific prices that
+        This test make sure that taxes are correctly computed when using the "document" rounding method and some specific prices that
         can result in rounding issues.
         """
-        self.company.tax_calculation_rounding_method = 'round_globally'
+        self.company.tax_rounding_policy = 'document'
         self.env['loyalty.program'].search([]).write({'pos_ok': False})
         self.loyalty_program = self.env['loyalty.program'].create({
             'name': 'Coupon Program - Pricelist',

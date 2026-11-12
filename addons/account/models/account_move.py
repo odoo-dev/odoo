@@ -420,9 +420,9 @@ class AccountMove(models.Model):
     )
     needed_terms = fields.Json(compute='_compute_needed_terms', exportable=False)
     needed_terms_dirty = fields.Boolean(compute='_compute_needed_terms')
-    tax_calculation_rounding_method = fields.Selection(
-        related='company_id.tax_calculation_rounding_method',
-        string='Tax calculation rounding method', readonly=True)
+    tax_rounding_policy = fields.Selection(
+        related='company_id.tax_rounding_policy',
+        string='Tax Rounding Policy', readonly=True)
     show_journal = fields.Boolean(compute='_compute_show_journal')
     # === Partner fields === #
     partner_id = fields.Many2one(
@@ -1676,7 +1676,7 @@ class AccountMove(models.Model):
             'name': product_line.name,
         }
 
-        computation_key = (product_line.extra_tax_data or {}).get('computation_key', '')
+        computation_key = product_line.tax_rounding_subset or ''
         if computation_key.startswith('global_discount'):
             kwargs['special_type'] = 'global_discount'
         elif computation_key.startswith('down_payment'):
@@ -1875,20 +1875,18 @@ class AccountMove(models.Model):
             base_lines += [self._prepare_epd_base_line_for_taxes_computation(line) for line in epd_amls]
             base_lines += [self._prepare_cash_rounding_base_line_for_taxes_computation(line) for line in cash_rounding_amls]
             base_lines += [self._prepare_non_deductible_base_line_for_taxes_computation(line) for line in non_deductible_amls]
-            AccountTax._add_tax_details_in_base_lines(base_lines, self.company_id)
             tax_lines = [self._prepare_tax_line_for_taxes_computation(tax_line) for tax_line in tax_amls]
             if round_from_tax_lines == 'reapply_currency_rate':
                 for tax_line in tax_lines:
                     rate = self.invoice_currency_rate
                     if rate:
                         tax_line['balance'] = self.company_currency_id.round(tax_line['amount_currency'] / rate)
-            AccountTax._round_base_lines_tax_details(base_lines, self.company_id, tax_lines=tax_lines if round_from_tax_lines else [])
+            AccountTax._add_tax_details_in_base_lines(base_lines, self.company_id, tax_lines=tax_lines if round_from_tax_lines else [])
         else:
             # The move is not stored yet so the only thing we have is the invoice lines.
             base_lines += self._prepare_epd_base_lines_for_taxes_computation_from_base_lines(base_amls)
             base_lines += self._prepare_non_deductible_base_lines_for_taxes_computation_from_base_lines(base_amls)
             AccountTax._add_tax_details_in_base_lines(base_lines, self.company_id)
-            AccountTax._round_base_lines_tax_details(base_lines, self.company_id)
         return base_lines, tax_lines
 
     @api.depends_context('lang')
@@ -3344,7 +3342,7 @@ class AccountMove(models.Model):
         def get_base_line_tracked_fields(line):
             grouping_key = AccountTax._prepare_base_line_grouping_key(fake_base_line)
             if line.move_id.is_invoice(include_receipts=True):
-                extra_fields = ['price_unit', 'quantity', 'discount', 'deductible_percentage', 'extra_tax_data']
+                extra_fields = ['price_unit', 'quantity', 'discount', 'deductible_percentage', 'tax_rounding_subset', 'tax_pins']
             else:
                 extra_fields = ['amount_currency']
             return list(grouping_key.keys()) + extra_fields
@@ -3507,6 +3505,13 @@ class AccountMove(models.Model):
 
             for base_line, to_update in tax_results['base_lines_to_update']:
                 line = base_line['record']
+                if line.display_type == 'product':
+                    # The line shows its share of the rounding of the document, like its balance.
+                    to_update = {
+                        **to_update,
+                        'price_subtotal': base_line['tax_details']['total_excluded_currency'],
+                        'price_total': base_line['tax_details']['total_included_currency'],
+                    }
                 if is_write_needed(line, to_update):
                     grouped_update[line.currency_id.id, frozendict(to_update)].add(line.id)
 
@@ -5111,7 +5116,6 @@ class AccountMove(models.Model):
         filter_tax_values_to_apply=None,
         grouping_key_generator=None,
         round_from_tax_lines=None,
-        postfix_function=None,
     ):
         """ This method is deprecated and will be removed in the next version.
         Use the following pattern instead:
@@ -5120,8 +5124,7 @@ class AccountMove(models.Model):
         base_lines = [self._prepare_product_base_line_for_taxes_computation(x) for x in base_amls]
         tax_amls = self.line_ids.filtered('tax_repartition_line_id')
         tax_lines = [self._prepare_tax_line_for_taxes_computation(x) for x in tax_amls]
-        AccountTax._add_tax_details_in_base_lines(base_lines, self.company_id)
-        AccountTax._round_base_lines_tax_details(base_lines, self.company_id, tax_lines=tax_lines)
+        AccountTax._add_tax_details_in_base_lines(base_lines, self.company_id, tax_lines=tax_lines)
 
         def grouping_function(base_line, tax_data):
             ...
@@ -5138,10 +5141,7 @@ class AccountMove(models.Model):
         base_lines = [self._prepare_product_base_line_for_taxes_computation(x) for x in base_amls]
         tax_amls = self.line_ids.filtered('tax_repartition_line_id')
         tax_lines = self._prepare_tax_lines_for_taxes_computation(tax_amls, round_from_tax_lines)
-        AccountTax._add_tax_details_in_base_lines(base_lines, self.company_id)
-        if postfix_function:
-            postfix_function(base_lines)
-        AccountTax._round_base_lines_tax_details(base_lines, self.company_id, tax_lines=tax_lines)
+        AccountTax._add_tax_details_in_base_lines(base_lines, self.company_id, tax_lines=tax_lines)
 
         # Retro-compatibility with previous aggregator.
         results = {
@@ -5264,9 +5264,7 @@ class AccountMove(models.Model):
             {
                 **self._prepare_product_base_line_for_taxes_computation(line),
                 'is_refund': True,
-                'manual_total_excluded_currency': None,
-                'manual_total_excluded': None,
-                'manual_tax_amounts': {},
+                'pins': None,
             }
             for line in invoice_lines
         ]
@@ -5276,7 +5274,6 @@ class AccountMove(models.Model):
             base_line['price_unit'] *= remaining_part_to_consider
         AccountTax = self.env['account.tax']
         AccountTax._add_tax_details_in_base_lines(base_lines, self.company_id)
-        AccountTax._round_base_lines_tax_details(base_lines, self.company_id)
         AccountTax._add_accounting_data_in_base_lines_tax_details(base_lines, self.company_id)
 
         if self.is_inbound(include_receipts=True):
@@ -6759,7 +6756,7 @@ class AccountMove(models.Model):
                         continue
                     line_ids_commands.append(Command.update(line.id, {
                         'quantity': -line.quantity,
-                        'extra_tax_data': self.env['account.tax']._reverse_quantity_base_line_extra_tax_data(line.extra_tax_data),
+                        'tax_pins': self.env['account.tax']._reverse_quantity_base_line_tax_pins(line.tax_pins),
                     }))
                 move.write({'line_ids': line_ids_commands})
 

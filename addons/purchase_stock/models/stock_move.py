@@ -247,7 +247,7 @@ class StockMove(models.Model):
                 quantity=aml.quantity,
                 product=aml.product_id,
                 partner=aml.partner_id,
-                rounding_method="round_globally",
+                rounding_policy='document',
             )['total_void']
         return aml.company_id.currency_id.round(value / aml.currency_rate)
 

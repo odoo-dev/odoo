@@ -683,7 +683,7 @@ class TestEdiFacturaeXmls(AccountTestInvoicingCommon):
 
     def test_out_invoice_rounding(self):
         company = self.company_data['company']
-        company.tax_calculation_rounding_method = 'round_globally'
+        company.tax_rounding_policy = 'document'
         with freeze_time(self.frozen_today):
             invoice = self._create_invoice_es(
                 partner_id=self.partner_a.id,
@@ -706,7 +706,7 @@ class TestEdiFacturaeXmls(AccountTestInvoicingCommon):
 
     def test_out_invoice_rounding_2(self):
         company = self.company_data['company']
-        company.tax_calculation_rounding_method = 'round_globally'
+        company.tax_rounding_policy = 'document'
         with freeze_time(self.frozen_today):
             invoice = self._create_invoice(
                 partner_id=self.partner_a.id,

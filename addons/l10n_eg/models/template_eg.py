@@ -33,7 +33,7 @@ class AccountChartTemplate(models.AbstractModel):
                 'income_account_id': 'egy_account_500100',
                 'receivable_account_id': 'egy_account_150100',
                 'payable_account_id': 'egy_account_220100',
-                'tax_calculation_rounding_method': 'round_per_line',
+                'tax_rounding_policy': 'line',
                 'account_cash_basis_base_account_id': 'egy_account_210802',
                 'account_stock_valuation_id': 'egy_account_120100',
                 'deferred_expense_account_id': 'egy_account_131300',

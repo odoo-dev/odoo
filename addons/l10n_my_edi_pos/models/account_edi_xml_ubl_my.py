@@ -124,7 +124,6 @@ class AccountEdiXmlUBLMyInvoisMY(models.AbstractModel):
             for order in orders:
                 order_base_lines = order.lines._prepare_base_lines_for_taxes_computation()
                 AccountTax._add_tax_details_in_base_lines(order_base_lines, consolidated_invoice.company_id)
-                AccountTax._round_base_lines_tax_details(order_base_lines, consolidated_invoice.company_id)
                 base_lines += order_base_lines
 
             # Aggregate the base lines into one.
@@ -137,8 +136,6 @@ class AccountEdiXmlUBLMyInvoisMY(models.AbstractModel):
                 'total_included_currency': 0.0,
                 'raw_total_included': 0.0,
                 'total_included': 0.0,
-                'delta_total_excluded_currency': 0.0,
-                'delta_total_excluded': 0.0,
             }
             new_taxes_data_map = {}
 
@@ -159,8 +156,8 @@ class AccountEdiXmlUBLMyInvoisMY(models.AbstractModel):
                         for key in tax_data_fields:
                             new_taxes_data_map[tax][key] = sign * tax_data[key]
 
-            total_amount_discounted = new_tax_details['total_excluded'] + new_tax_details['delta_total_excluded']
-            total_amount_discounted_currency = new_tax_details['total_excluded_currency'] + new_tax_details['delta_total_excluded_currency']
+            total_amount_discounted = new_tax_details['total_excluded']
+            total_amount_discounted_currency = new_tax_details['total_excluded_currency']
             total_amount = total_amount_currency = 0.0
             for base_line in base_lines:
                 sign = -1 if base_line["is_refund"] else 1

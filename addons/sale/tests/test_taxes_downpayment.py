@@ -510,7 +510,7 @@ class TestTaxesDownPaymentSale(TestTaxCommonSale, TestTaxesDownPayment):
 
     @freeze_time("2018-01-01")
     def test_down_payment_100_first_then_0_final_invoice_round_per_line(self):
-        self.env.company.tax_calculation_rounding_method = "round_per_line"
+        self.env.company.tax_rounding_policy = "line"
         product = self.company_data["product_order_cost"]
         tax_23 = self.percent_tax(23.0)
         other_currency = self.setup_other_currency("EUR", rates=[("2017-01-01", 1.2834)])
@@ -625,7 +625,7 @@ class TestTaxesDownPaymentSale(TestTaxCommonSale, TestTaxesDownPayment):
 
     @freeze_time("2018-01-01")
     def test_down_payment_100_first_then_0_final_invoice_round_globally(self):
-        self.env.company.tax_calculation_rounding_method = "round_globally"
+        self.env.company.tax_rounding_policy = "document"
         product = self.company_data["product_order_cost"]
         tax_23 = self.percent_tax(23.0)
         other_currency = self.setup_other_currency("EUR", rates=[("2017-01-01", 1.2834)])
@@ -869,7 +869,6 @@ class TestTaxesDownPaymentSale(TestTaxCommonSale, TestTaxesDownPayment):
         ]
         AccountTax = self.env["account.tax"]
         AccountTax._add_tax_details_in_base_lines(so_base_lines, self.env.company)
-        AccountTax._round_base_lines_tax_details(so_base_lines, self.env.company)
 
         dp_lines = AccountTax._prepare_down_payment_lines(
             base_lines=so_base_lines,
@@ -940,7 +939,7 @@ class TestTaxesDownPaymentSale(TestTaxCommonSale, TestTaxesDownPayment):
     def test_down_payment_invoice_manual_removing_of_tax_affecting_subsequent_taxes(self):
         """
         Test that removing a tax from a down payment invoice correctly recomputes remaining taxes.
-        This ensures that cached manual_tax_amounts are not reused when the tax set changes,
+        This ensures that cached pins are not reused when the tax set changes,
         particularly for taxes with "Affect Base of Subsequent Taxes", and that dependent
         taxes are recomputed using the updated base instead of stale values.
         """

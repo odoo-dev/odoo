@@ -35,8 +35,8 @@ class TestTaxesGlobalDiscount(TestTaxCommon):
             'tax_amount_currency': 0.0,
             'total_amount_currency': 0.0,
         }
-        for rounding_method in ('round_per_line', 'round_globally'):
-            with self.with_tax_calculation_rounding_method(rounding_method):
+        for rounding_policy in ('line', 'document'):
+            with self.with_tax_rounding_policy(rounding_policy):
                 document = self.populate_document(document_params)
                 self.assert_global_discount(document, 'percent', 100, expected_values, soft_checking=True)
         self._run_js_tests()
@@ -63,7 +63,7 @@ class TestTaxesGlobalDiscount(TestTaxCommon):
             currency=self.foreign_currency,
             rate=5.0,
         )
-        with self.with_tax_calculation_rounding_method('round_per_line'):
+        with self.with_tax_rounding_policy('line'):
             document = self.populate_document(document_params)
             self.assert_py_tax_totals_summary(document, {
                 'same_tax_base': False,
@@ -286,7 +286,7 @@ class TestTaxesGlobalDiscount(TestTaxCommon):
                 expected_values = {'total_amount_currency': self.foreign_currency.round(36.64 * (100 - percent) / 100.0)}
                 yield "round_per_line, price_excluded", document, True, 'percent', percent, expected_values
 
-        with self.with_tax_calculation_rounding_method('round_globally'):
+        with self.with_tax_rounding_policy('document'):
             document = self.populate_document(document_params)
             self.assert_py_tax_totals_summary(document, {
                 'same_tax_base': False,
@@ -520,7 +520,7 @@ class TestTaxesGlobalDiscount(TestTaxCommon):
             currency=self.foreign_currency,
             rate=5.0,
         )
-        with self.with_tax_calculation_rounding_method('round_per_line'):
+        with self.with_tax_rounding_policy('line'):
             document = self.populate_document(document_params)
             self.assert_py_tax_totals_summary(document, {
                 'same_tax_base': False,
@@ -743,7 +743,7 @@ class TestTaxesGlobalDiscount(TestTaxCommon):
                 expected_values = {'total_amount_currency': self.foreign_currency.round(36.64 * (100 - percent) / 100.0)}
                 yield "round_per_line, price_included", document, True, 'percent', percent, expected_values
 
-        with self.with_tax_calculation_rounding_method('round_globally'):
+        with self.with_tax_rounding_policy('document'):
             document = self.populate_document(document_params)
             self.assert_py_tax_totals_summary(document, {
                 'same_tax_base': False,
@@ -992,7 +992,7 @@ class TestTaxesGlobalDiscount(TestTaxCommon):
             currency=self.foreign_currency,
             rate=3.0,
         )
-        with self.with_tax_calculation_rounding_method('round_per_line'):
+        with self.with_tax_rounding_policy('line'):
             document = self.populate_document(document_params)
             self.assert_py_tax_totals_summary(document, {
                 'same_tax_base': True,
@@ -1137,7 +1137,7 @@ class TestTaxesGlobalDiscount(TestTaxCommon):
                 expected_values = {'total_amount_currency': self.foreign_currency.round(96.0 * (100 - percent) / 100.0)}
                 yield "round_per_line, price_excluded", document, True, 'percent', percent, expected_values
 
-        with self.with_tax_calculation_rounding_method('round_globally'):
+        with self.with_tax_rounding_policy('document'):
             document = self.populate_document(document_params)
             self.assert_py_tax_totals_summary(document, {
                 'same_tax_base': True,
@@ -1292,7 +1292,7 @@ class TestTaxesGlobalDiscount(TestTaxCommon):
             currency=self.foreign_currency,
             rate=3.0,
         )
-        with self.with_tax_calculation_rounding_method('round_per_line'):
+        with self.with_tax_rounding_policy('line'):
             document = self.populate_document(document_params)
             self.assert_py_tax_totals_summary(document, {
                 'same_tax_base': False,
@@ -1437,7 +1437,7 @@ class TestTaxesGlobalDiscount(TestTaxCommon):
                 expected_values = {'total_amount_currency': self.foreign_currency.round(96.0 * (100 - percent) / 100.0)}
                 yield "round_per_line, price_included", document, True, 'percent', percent, expected_values
 
-        with self.with_tax_calculation_rounding_method('round_globally'):
+        with self.with_tax_rounding_policy('document'):
             document = self.populate_document(document_params)
             self.assert_py_tax_totals_summary(document, {
                 'same_tax_base': False,
@@ -1605,7 +1605,7 @@ class TestTaxesGlobalDiscount(TestTaxCommon):
             currency=self.foreign_currency,
             rate=0.5,
         )
-        with self.with_tax_calculation_rounding_method('round_per_line'):
+        with self.with_tax_rounding_policy('line'):
             document = self.populate_document(document_params)
             self.assert_py_tax_totals_summary(document, {
                 'same_tax_base': False,
@@ -1702,7 +1702,7 @@ class TestTaxesGlobalDiscount(TestTaxCommon):
                 expected_values = {'total_amount_currency': self.foreign_currency.round(43.06 - (40.64 * percent / 100.0))}
                 yield "round_per_line, price_excluded", document, True, 'percent', percent, expected_values
 
-        with self.with_tax_calculation_rounding_method('round_globally'):
+        with self.with_tax_rounding_policy('document'):
             document = self.populate_document(document_params)
             self.assert_py_tax_totals_summary(document, {
                 'same_tax_base': False,
@@ -1809,7 +1809,7 @@ class TestTaxesGlobalDiscount(TestTaxCommon):
             currency=self.foreign_currency,
             rate=0.5,
         )
-        with self.with_tax_calculation_rounding_method('round_per_line'):
+        with self.with_tax_rounding_policy('line'):
             document = self.populate_document(document_params)
             self.assert_py_tax_totals_summary(document, {
                 'same_tax_base': False,
@@ -1906,7 +1906,7 @@ class TestTaxesGlobalDiscount(TestTaxCommon):
                 expected_values = {'total_amount_currency': self.foreign_currency.round(43.06 - (40.64 * percent / 100.0))}
                 yield "round_per_line, price_included", document, True, 'percent', percent, expected_values
 
-        with self.with_tax_calculation_rounding_method('round_globally'):
+        with self.with_tax_rounding_policy('document'):
             document = self.populate_document(document_params)
             self.assert_py_tax_totals_summary(document, {
                 'same_tax_base': False,

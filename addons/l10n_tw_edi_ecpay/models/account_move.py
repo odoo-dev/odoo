@@ -7,6 +7,7 @@ import uuid
 from urllib.parse import urljoin
 
 from odoo import api, fields, models
+from odoo.addons.account.models.account_tax import TAX_REPRESENTATION_PROFILE
 from odoo.addons.l10n_tw_edi_ecpay.utils import call_ecpay_api, transfer_time, convert_utc_time_to_tw_time
 from odoo.exceptions import UserError
 from odoo.tools import float_round
@@ -456,6 +457,16 @@ class AccountMove(models.Model):
             else:
                 raise UserError("Error:\n" + "\n".join(errors))
 
+    def _l10n_tw_edi_get_tax_representation_profile(self):
+        """ The way ECPay writes the taxes, see TAX_REPRESENTATION_PROFILE in account.tax: amounts in TWD with 2
+        decimals, the tax amount of a B2B invoice being checked against its sales amount times the rate within 2 TWD.
+        """
+        return {
+            **TAX_REPRESENTATION_PROFILE,
+            'precision_digits': 2,
+            'identities': (('ECPay-TaxAmount', 'tax_is_base_x_rate', ('abs', 2.0)),),
+        }
+
     def _l10n_tw_edi_prepare_item_list(self, json_data, is_allowance=False):
         self.ensure_one()
         item_list = []
@@ -531,6 +542,14 @@ class AccountMove(models.Model):
                 # Only B2B reports TaxAmount/ItemTax to ECPay. Round per tax record here,
                 # like the invoice itself does, so the totals actually match it.
                 AccountTax._round_base_lines_tax_details(base_lines, self.company_id)
+
+        if self.l10n_tw_edi_is_b2b:
+            AccountTax._check_tax_representation(
+                base_lines,
+                self.company_id,
+                self._l10n_tw_edi_get_tax_representation_profile(),
+                in_foreign_currency=False,
+            )
 
         # Sale amount adjustment
         amount_on_invoice = self.amount_untaxed_signed if self.l10n_tw_edi_is_b2b and tax_type != "4" else self.amount_total_signed

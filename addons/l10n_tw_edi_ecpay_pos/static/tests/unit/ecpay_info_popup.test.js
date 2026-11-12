@@ -28,6 +28,7 @@ test("set the default customer and check the invoice button by default", async (
         country_id: countryId,
         account_fiscal_country_id: countryId,
         currency_id: twd,
+        tax_rounding_settings: { tax_grain: "tax", authority: "mixed" },
         l10n_tw_edi_ecpay_staging_mode: true,
         l10n_tw_edi_ecpay_merchant_id: "1234",
         l10n_tw_edi_ecpay_hashkey: "aaBBccDDeeFFggHH",

@@ -44,7 +44,7 @@ class TestUblCiiCommon(AccountTestInvoicingCommon):
         create_values.setdefault('terms_type', 'plain')
         company = super()._create_company(**create_values)
         company.currency_id = create_values['currency_id']  # the coa may have reset it to USD
-        company.tax_calculation_rounding_method = 'round_globally'
+        company.tax_rounding_policy = 'document'
         return company
 
     @classmethod

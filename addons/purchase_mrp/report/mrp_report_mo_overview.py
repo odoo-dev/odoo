@@ -94,5 +94,5 @@ class ReportMrpReport_Mo_Overview(models.AbstractModel):
             quantity=quantity,
             product=po_line.product_id,
             partner=po.partner_id,
-            rounding_method='round_globally',
+            rounding_policy='document',
         )['total_void']

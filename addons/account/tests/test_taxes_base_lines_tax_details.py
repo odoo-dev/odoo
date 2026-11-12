@@ -1,5 +1,6 @@
 from odoo.tests import tagged
 
+from odoo.addons.account.models.account_tax import TAX_REPRESENTATION_PROFILE
 from odoo.addons.account.tests.common import TestTaxCommon
 
 
@@ -12,7 +13,7 @@ class TestTaxesBaseLinesTaxDetails(TestTaxCommon):
     def setUpClass(cls):
         super().setUpClass()
 
-        cls.env.company.tax_calculation_rounding_method = 'round_globally'
+        cls.env.company.tax_rounding_policy = 'document'
 
     def test_dispatch_delta_on_base_lines(self):
         """ Make sure that the base line delta is dispatched evenly on base lines.
@@ -28,15 +29,11 @@ class TestTaxesBaseLinesTaxDetails(TestTaxCommon):
         ))
 
         line_1_expected_values = {
-            'total_excluded': 9.04,
-            'total_excluded_currency': 9.04,
-            'total_included': 10.94,
-            'total_included_currency': 10.94,
-            'delta_total_excluded': 0.0,
-            'delta_total_excluded_currency': 0.0,
-            'manual_total_excluded': None,
-            'manual_total_excluded_currency': None,
-            'manual_tax_amounts': None,
+            'total_excluded': 9.01,
+            'total_excluded_currency': 9.01,
+            'total_included': 10.88,
+            'total_included_currency': 10.88,
+            'pins': None,
             'taxes_data': [
                 {
                     'tax_id': tax_21.id,
@@ -52,11 +49,7 @@ class TestTaxesBaseLinesTaxDetails(TestTaxCommon):
             'total_excluded_currency': 0.94,
             'total_included': 1.14,
             'total_included_currency': 1.14,
-            'delta_total_excluded': 0.0,
-            'delta_total_excluded_currency': 0.0,
-            'manual_total_excluded': None,
-            'manual_total_excluded_currency': None,
-            'manual_tax_amounts': None,
+            'pins': None,
             'taxes_data': [
                 {
                     'tax_id': tax_21.id,
@@ -70,15 +63,13 @@ class TestTaxesBaseLinesTaxDetails(TestTaxCommon):
 
         expected_values = {
             'base_lines_tax_details': [
-                {
-                    **line_1_expected_values,
-                    'delta_total_excluded': -0.03,
-                    'delta_total_excluded_currency': -0.03,
-                },
+                line_1_expected_values,
                 {
                     **line_2_expected_values,
-                    'delta_total_excluded': -0.01,
-                    'delta_total_excluded_currency': -0.01,
+                    'total_excluded': 0.93,
+                    'total_excluded_currency': 0.93,
+                    'total_included': 1.12,
+                    'total_included_currency': 1.12,
                     'taxes_data': [
                         {
                             'tax_id': tax_21.id,
@@ -116,6 +107,43 @@ class TestTaxesBaseLinesTaxDetails(TestTaxCommon):
         self.assert_distribute_delta_amount_smoothly(2, -0.02, [0.5, 0.25, 0.25], [-0.02, 0.0, 0.0])
         self._run_js_tests()
 
+    def test_check_tax_representation(self):
+        """ The identities of a representation profile are checked with their tolerance, the failures being returned. """
+        AccountTax = self.env['account.tax']
+        tax_15 = self.percent_tax(15.0)
+        with self.with_tax_rounding_policy('line'):
+            # Each line has a tax of round(0.0225) = 0.02, so 0.20 in total for a base of 1.50, i.e. 0.23 of tax.
+            document = self.populate_document(self.init_document(
+                lines=[{'price_unit': 0.15, 'tax_ids': tax_15}] * 10,
+            ))
+        base_lines = document['lines']
+        AccountTax._add_and_round_raw_gross_total_excluded_and_discount(base_lines, self.env.company)
+
+        def failed_rules(*identities):
+            profile = {**TAX_REPRESENTATION_PROFILE, 'identities': identities}
+            return [violation['rule'] for violation in AccountTax._check_tax_representation(base_lines, self.env.company, profile)]
+
+        self.assertEqual(failed_rules(('exact', 'tax_is_base_x_rate', 'exact')), ['exact'])
+        self.assertEqual(failed_rules(('abs', 'tax_is_base_x_rate', ('abs', 0.01))), ['abs'])
+        self.assertEqual(failed_rules(('abs', 'tax_is_base_x_rate', ('abs', 0.03))), [])
+        self.assertEqual(failed_rules(('propagated', 'tax_is_base_x_rate', 'propagated')), ['propagated'])
+        self.assertEqual(failed_rules(
+            ('lines', 'line_net_is_qty_x_price', 'exact'),
+            ('sum', 'base_is_sum_of_lines', 'exact'),
+        ), [])
+
+        # A line amount moved away from the booked amounts by the format.
+        base_lines[0]['tax_details']['raw_gross_total_excluded_currency'] += 0.02
+        base_lines[0]['tax_details']['gross_total_excluded_currency'] = base_lines[0]['tax_details']['raw_gross_total_excluded_currency']
+        self.assertEqual(failed_rules(
+            ('lines', 'line_net_is_qty_x_price', ('abs', 0.01)),
+            ('sum', 'base_is_sum_of_lines', ('abs', 0.01)),
+        ), ['lines', 'sum'])
+        self.assertEqual(failed_rules(
+            ('lines', 'line_net_is_qty_x_price', ('abs', 0.02)),
+            ('sum', 'base_is_sum_of_lines', ('abs', 0.02)),
+        ), [])
+
     def test_dispatch_delta_on_net_zero_tax(self):
         """Check that the base line delta still is dispatched if net tax is zero."""
         def get_expected_values(base_values, tax):
@@ -126,11 +154,7 @@ class TestTaxesBaseLinesTaxDetails(TestTaxCommon):
             )
             return {
                 'base_lines_tax_details': [{
-                    'delta_total_excluded': 0.0,
-                    'delta_total_excluded_currency': 0.0,
-                    'manual_tax_amounts': None,
-                    'manual_total_excluded': None,
-                    'manual_total_excluded_currency': None,
+                    'pins': None,
                     'taxes_data': [{
                         'base_amount': total_excluded,
                         'base_amount_currency': total_excluded,
@@ -158,7 +182,7 @@ class TestTaxesBaseLinesTaxDetails(TestTaxCommon):
             #   (total_excluded, total_included, tax_amount),
                 (19.99, 23.99, 4.0),
                 (19.99, 23.99, 4.0),
-                (-39.98, -47.97, -8.0),
+                (-39.98, -47.98, -8.0),
             ]
             expected_values = get_expected_values(base_expected_values, tax_19_99)
             self.assert_base_lines_tax_details(document, expected_values)
@@ -178,11 +202,11 @@ class TestTaxesBaseLinesTaxDetails(TestTaxCommon):
             base_expected_values = [
             #   (total_excluded, total_included, tax_amount),
                 (2990.4, 3199.73, 209.33),
-                (128.8, 137.82000000000002, 9.02),
-                (128.8, 137.82000000000002, 9.02),
+                (128.8, 137.82, 9.02),
+                (128.8, 137.82, 9.02),
                 (834.4, 892.81, 58.41),
                 (14.0, 14.98, 0.98),
-                (-4096.4, -4383.15, -286.76),
+                (-4096.4, -4383.16, -286.76),
             ]
             expected_values = get_expected_values(base_expected_values, tax_7)
             self.assert_base_lines_tax_details(document, expected_values)

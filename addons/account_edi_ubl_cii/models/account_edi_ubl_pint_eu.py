@@ -1,12 +1,18 @@
 from odoo import _, models
 from odoo.addons.account.tools import dict_to_xml
-from odoo.addons.account_edi_ubl_cii.models.account_edi_common import EUROPEAN_ECONOMIC_AREA_COUNTRY_CODES
+from odoo.addons.account_edi_ubl_cii.models.account_edi_common import (
+    EN16931_TAX_REPRESENTATION_PROFILE,
+    EUROPEAN_ECONOMIC_AREA_COUNTRY_CODES,
+)
 
 
 class AccountEdiUBLPintEU(models.AbstractModel):
     _name = "account.edi.ubl_pint_eu"
     _inherit = ['account.edi.ubl_pint', 'account.edi.ubl_cen_en16931']
     _description = "UBL PINT-EU Layer"
+
+    def _get_tax_representation_profile(self):
+        return EN16931_TAX_REPRESENTATION_PROFILE
 
     def _ubl_add_customization_id_node(self, vals):
         super()._ubl_add_customization_id_node(vals)

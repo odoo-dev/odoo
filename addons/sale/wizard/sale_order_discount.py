@@ -91,7 +91,8 @@ class SaleOrderDiscount(models.TransientModel):
                 "technical_price_unit": 0,
                 "product_uom_qty": base_line["quantity"],
                 "tax_ids": [Command.set(base_line["tax_ids"].ids)],
-                "extra_tax_data": AccountTax._export_base_line_extra_tax_data(base_line),
+                "tax_rounding_subset": base_line["computation_key"],
+                "tax_pins": AccountTax._export_base_line_tax_pins(base_line),
                 "sequence": 999,
             })
 
@@ -145,7 +146,6 @@ class SaleOrderDiscount(models.TransientModel):
         order_lines = self._get_discountable_order_lines()
         base_lines = [line._prepare_base_line_for_taxes_computation() for line in order_lines]
         AccountTax._add_tax_details_in_base_lines(base_lines, order.company_id)
-        AccountTax._round_base_lines_tax_details(base_lines, order.company_id)
 
         def grouping_function(base_line):  # noqa: ARG001
             return {"product_id": discount_product}

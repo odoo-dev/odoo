@@ -496,7 +496,6 @@ class PosOrder(models.Model):
         self.ensure_one()
         base_lines = self.lines._prepare_base_lines_for_taxes_computation()
         self.env['account.tax']._add_tax_details_in_base_lines(base_lines, self.company_id)
-        self.env['account.tax']._round_base_lines_tax_details(base_lines, self.company_id)
 
         cash_rounding = None
         payment_methods = self.payment_ids
@@ -1323,7 +1322,7 @@ class PosOrder(models.Model):
         total = base_line['price_unit']
         tax_details = base_line['tax_details']
         if not tax_details['taxes_data']:
-            total = tax_details['total_excluded_currency'] + tax_details['delta_total_excluded_currency']
+            total = tax_details['total_excluded_currency']
 
         if self.config_id._is_quantities_set():
             quantity = base_line['_aggregated_quantity']
@@ -1336,7 +1335,8 @@ class PosOrder(models.Model):
             'quantity': quantity,
             'price_unit': price_unit,
             'display_type': 'product',
-            'extra_tax_data': self.env['account.tax']._export_base_line_extra_tax_data({
+            'tax_rounding_subset': base_line['computation_key'],
+            'tax_pins': self.env['account.tax']._export_base_line_tax_pins({
                 **base_line,
                 'quantity': quantity,
                 'price_unit': price_unit,
@@ -1361,7 +1361,7 @@ class PosOrder(models.Model):
             grouping_function=self._grouping_function,
             aggregate_function=aggregate_function,
         )
-        AccountTax._fix_base_lines_tax_details_on_manual_tax_amounts(
+        AccountTax._pin_base_lines_tax_details(
             aggregated,
             company,
         )
@@ -1424,7 +1424,8 @@ class PosOrder(models.Model):
                         'price_unit': base_line['price_unit'],
                         'account_id': base_line['account_id'].id,
                         'tax_ids': [(6, 0, base_line['tax_ids'].ids)],
-                        'extra_tax_data': self.env['account.tax']._export_base_line_extra_tax_data(base_line),
+                        'tax_rounding_subset': base_line['computation_key'],
+                        'tax_pins': self.env['account.tax']._export_base_line_tax_pins(base_line),
                         'product_id': product.id,
                         'product_uom_id': base_line['uom_id'].id,
                     },
@@ -1475,7 +1476,6 @@ class PosOrder(models.Model):
         for order in self:
             lines = order.lines._prepare_base_lines_for_taxes_computation()
             AccountTax._add_tax_details_in_base_lines(lines, company)
-            AccountTax._round_base_lines_tax_details(lines, company)
             AccountTax._add_accounting_data_in_base_lines_tax_details(
                 lines,
                 company,
@@ -1486,7 +1486,7 @@ class PosOrder(models.Model):
         if not aggregate:
             # Transform each base_line to the same format as aggregated version,
             # but without grouping/aggregation. Each line becomes a separate entry.
-            AccountTax._fix_base_lines_tax_details_on_manual_tax_amounts(
+            AccountTax._pin_base_lines_tax_details(
                 base_lines,
                 company,
             )

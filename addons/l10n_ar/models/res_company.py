@@ -27,9 +27,9 @@ class ResCompany(models.Model):
 
     @api.onchange('country_id')
     def onchange_country(self):
-        """ Argentinean companies use round_globally as tax_calculation_rounding_method """
+        """ Argentinean companies round their taxes per tax """
         for rec in self.filtered(lambda x: x.country_id.code == "AR"):
-            rec.tax_calculation_rounding_method = 'round_globally'
+            rec.tax_rounding_policy = 'document'
 
     @api.depends('l10n_ar_afip_responsibility_type_id')
     def _compute_l10n_ar_company_requires_vat(self):

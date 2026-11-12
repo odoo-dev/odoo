@@ -471,8 +471,8 @@ class SaleOrder(models.Model):
     )
     partner_credit_warning = fields.Text(compute="_compute_partner_credit_warning")
     show_ship_button = fields.Boolean(compute="_compute_show_ship_button")
-    tax_calculation_rounding_method = fields.Selection(
-        related="company_id.tax_calculation_rounding_method", depends=["company_id"]
+    tax_rounding_policy = fields.Selection(
+        related="company_id.tax_rounding_policy", depends=["company_id"]
     )
     tax_country_id = fields.Many2one(
         comodel_name="res.country",
@@ -731,7 +731,6 @@ class SaleOrder(models.Model):
             base_lines = [line._prepare_base_line_for_taxes_computation() for line in order_lines]
             base_lines += order._add_base_lines_for_early_payment_discount()
             AccountTax._add_tax_details_in_base_lines(base_lines, order.company_id)
-            AccountTax._round_base_lines_tax_details(base_lines, order.company_id)
             tax_totals = AccountTax._get_tax_totals_summary(
                 base_lines=base_lines,
                 currency=order.currency_id or order.company_id.currency_id,
@@ -970,7 +969,6 @@ class SaleOrder(models.Model):
         # Original lines
         base_lines = [line._prepare_base_line_for_taxes_computation() for line in order_lines]
         AccountTax._add_tax_details_in_base_lines(base_lines, self.company_id)
-        AccountTax._round_base_lines_tax_details(base_lines, self.company_id)
         base_lines_aggregated_values = AccountTax._aggregate_base_lines_tax_details(
             base_lines, grouping_function
         )
@@ -983,7 +981,6 @@ class SaleOrder(models.Model):
             for line in order_lines
         ]
         AccountTax._add_tax_details_in_base_lines(base_lines_undiscounted, self.company_id)
-        AccountTax._round_base_lines_tax_details(base_lines_undiscounted, self.company_id)
         base_lines_undiscounted_aggregated_values = AccountTax._aggregate_base_lines_tax_details(
             base_lines_undiscounted, grouping_function
         )
@@ -1187,7 +1184,6 @@ class SaleOrder(models.Model):
             base_lines = [line._prepare_base_line_for_taxes_computation() for line in order_lines]
             base_lines += order._add_base_lines_for_early_payment_discount()
             AccountTax._add_tax_details_in_base_lines(base_lines, order.company_id)
-            AccountTax._round_base_lines_tax_details(base_lines, order.company_id)
             order.tax_totals = AccountTax._get_tax_totals_summary(
                 base_lines=base_lines,
                 currency=order.currency_id or order.company_id.currency_id,
@@ -2090,13 +2086,13 @@ class SaleOrder(models.Model):
 
                 # When creating the final invoice, we want to express the lines representing
                 # the full order but negate the already created down payment lines.
-                # At this point, on the sale order, the down payment lines have a non-empty
-                # 'extra_tax_data' containing a price unit greater than zero and a quantity of 0.0.
+                # At this point, on the sale order, the down payment lines have non-empty
+                # 'tax_pins' valid for a price unit greater than zero and a quantity of 0.0.
                 if line.is_downpayment:
                     optional_values["quantity"] = -1.0
-                    optional_values["extra_tax_data"] = self.env[
+                    optional_values["tax_pins"] = self.env[
                         "account.tax"
-                    ]._reverse_quantity_base_line_extra_tax_data(line.extra_tax_data)
+                    ]._reverse_quantity_base_line_tax_pins(line.tax_pins)
 
                 invoice_line_vals.extend(
                     Command.create(vals)
@@ -2605,7 +2601,6 @@ class SaleOrder(models.Model):
         :return: A dictionary to create a new SO line.
         """
         self.ensure_one()
-        extra_tax_data = self.env["account.tax"]._export_base_line_extra_tax_data(base_line)
         return {
             "order_id": self.id,
             "is_downpayment": True,
@@ -2613,7 +2608,8 @@ class SaleOrder(models.Model):
             "price_unit": base_line["price_unit"],
             "tax_ids": [Command.set(base_line["tax_ids"].ids)],
             "analytic_distribution": base_line["analytic_distribution"],
-            "extra_tax_data": extra_tax_data,
+            "tax_rounding_subset": base_line["computation_key"],
+            "tax_pins": self.env["account.tax"]._export_base_line_tax_pins(base_line),
         }
 
     def _get_prepayment_required_amount(self):

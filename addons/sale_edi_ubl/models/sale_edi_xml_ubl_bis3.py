@@ -48,7 +48,6 @@ class SaleEdiXmlUbl_Bis3(models.AbstractModel):
         company = sale_order.company_id
         base_lines = vals['base_lines'] = [line._prepare_base_line_for_taxes_computation() for line in sale_order.order_line.filtered(lambda line: not line.display_type)]
         AccountTax._add_tax_details_in_base_lines(base_lines, company)
-        AccountTax._round_base_lines_tax_details(base_lines, company)
 
         # CEN-EN16931 layer.
         # [BR-27]-The Item net price (BT-146) shall NOT be negative.
@@ -67,13 +66,10 @@ class SaleEdiXmlUbl_Bis3(models.AbstractModel):
         for base_line in vals['base_lines']:
             base_line['_ubl_values'] = {}
 
-        # Global rounding of tax_details using 6 digits.
-        AccountTax._round_raw_total_excluded(vals['base_lines'], company)
-        AccountTax._round_raw_total_excluded(vals['base_lines'], company, in_foreign_currency=False)
-        AccountTax._add_and_round_raw_gross_total_excluded_and_discount(vals['base_lines'], company)
-        AccountTax._add_and_round_raw_gross_total_excluded_and_discount(vals['base_lines'], company, in_foreign_currency=False)
-        AccountTax._round_raw_gross_total_excluded_and_discount(vals['base_lines'], company)
-        AccountTax._round_raw_gross_total_excluded_and_discount(vals['base_lines'], company, in_foreign_currency=False)
+        # Global rounding of tax_details with the precision of the format.
+        vals['tax_representation_violations'] = AccountTax._represent_tax_details(
+            vals['base_lines'], company, self._get_tax_representation_profile(),
+        )
 
     def _add_sale_order_config_vals(self, vals):
         sale_order = vals['sale_order']
@@ -107,7 +103,6 @@ class SaleEdiXmlUbl_Bis3(models.AbstractModel):
 
         base_lines = [line._prepare_base_line_for_taxes_computation() for line in sale_order.order_line.filtered(lambda line: not line.display_type)]
         AccountTax._add_tax_details_in_base_lines(base_lines, sale_order.company_id)
-        AccountTax._round_base_lines_tax_details(base_lines, sale_order.company_id)
 
         vals['base_lines'] = base_lines
 

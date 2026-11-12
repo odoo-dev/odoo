@@ -441,13 +441,10 @@ class AccountEdiUBLPint(models.AbstractModel):
         for base_line in vals['base_lines']:
             base_line['_ubl_values'] = {}
 
-        # Global rounding of tax_details using 6 digits.
-        AccountTax._round_raw_total_excluded(vals['base_lines'], company)
-        AccountTax._round_raw_total_excluded(vals['base_lines'], company, in_foreign_currency=False)
-        AccountTax._add_and_round_raw_gross_total_excluded_and_discount(vals['base_lines'], company)
-        AccountTax._add_and_round_raw_gross_total_excluded_and_discount(vals['base_lines'], company, in_foreign_currency=False)
-        AccountTax._round_raw_gross_total_excluded_and_discount(vals['base_lines'], company)
-        AccountTax._round_raw_gross_total_excluded_and_discount(vals['base_lines'], company, in_foreign_currency=False)
+        # Global rounding of tax_details with the precision of the format.
+        vals['tax_representation_violations'] = AccountTax._represent_tax_details(
+            vals['base_lines'], company, self._get_tax_representation_profile(),
+        )
 
         return vals
 

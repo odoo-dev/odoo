@@ -69,7 +69,12 @@ class PosOrderLine(models.Model):
     combo_item_id = fields.Many2one('product.combo.item', string='Combo Item')
     is_edited = fields.Boolean('Edited')
     # Technical field holding custom data for the taxes computation engine.
-    extra_tax_data = fields.Json()
+    # Technical fields holding custom data for the taxes computation engine (see '_prepare_base_line_for_taxes_computation'):
+    # the subset of lines whose taxes are rounded together, and the tax amounts forced on the line.
+    tax_rounding_subset = fields.Char()
+    tax_pins = fields.Json()
+    # For a line computed from the rest of the order (global discount, service fee), what it was computed from.
+    computation_settings = fields.Json()
 
     _unique_uuid = models.Constraint('unique (uuid)', 'An order line with this uuid already exists')
 
@@ -91,7 +96,7 @@ class PosOrderLine(models.Model):
             'product_id', 'discount', 'tax_ids', 'customer_note',
             'refunded_qty', 'price_extra', 'full_product_name', 'refunded_orderline_id',
             'combo_parent_id', 'combo_line_ids', 'combo_item_id', 'refund_orderline_ids',
-            'extra_tax_data', 'write_date', 'prep_line_ids',
+            'tax_rounding_subset', 'tax_pins', 'computation_settings', 'write_date', 'prep_line_ids',
         ]
 
     @api.depends('refund_orderline_ids', 'refund_orderline_ids.order_id.state')
@@ -309,9 +314,9 @@ class PosOrderLine(models.Model):
                 account = fiscal_position.map_account(account)
 
             quantity = line.qty * (-1 if is_refund_document else 1)
-            extra_tax_data = line.extra_tax_data
-            if extra_tax_data and quantity * extra_tax_data.get('quantity', quantity) < 0:
-                extra_tax_data = self.env['account.tax']._reverse_quantity_base_line_extra_tax_data(extra_tax_data)
+            tax_pins = line.tax_pins
+            if tax_pins and quantity * tax_pins.get('valid_for', {}).get('quantity', quantity) < 0:
+                tax_pins = self.env['account.tax']._reverse_quantity_base_line_tax_pins(tax_pins)
 
             base_lines.append({
                 **record.env['account.tax']._prepare_base_line_for_taxes_computation(
@@ -327,7 +332,7 @@ class PosOrderLine(models.Model):
                     account_id=account,
                     is_refund=is_refund_document,
                     sign=-1 if is_refund_document else 1,
-                    extra_tax_data=extra_tax_data,
+                    tax_pins=tax_pins,
                 ),
                 'uom_id': line.product_uom_id,
                 'name': product_name,

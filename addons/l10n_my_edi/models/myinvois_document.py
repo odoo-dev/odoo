@@ -735,8 +735,6 @@ class MyInvoisDocument(models.Model):
                     "total_included_currency": 0.0,
                     "raw_total_included": 0.0,
                     "total_included": 0.0,
-                    "delta_total_excluded_currency": 0.0,
-                    "delta_total_excluded": 0.0,
                 }
                 new_taxes_data_map = {}
 
@@ -757,8 +755,8 @@ class MyInvoisDocument(models.Model):
                             for key in tax_data_fields:
                                 new_taxes_data_map[tax][key] = sign * tax_data[key]
 
-                total_amount_discounted = new_tax_details["total_excluded"] + new_tax_details["delta_total_excluded"]
-                total_amount_discounted_currency = new_tax_details["total_excluded_currency"] + new_tax_details["delta_total_excluded_currency"]
+                total_amount_discounted = new_tax_details["total_excluded"]
+                total_amount_discounted_currency = new_tax_details["total_excluded_currency"]
                 total_amount = total_amount_currency = 0.0
                 for base_line in base_lines:
                     sign = -1 if self._base_line_should_be_negated(base_line) else 1

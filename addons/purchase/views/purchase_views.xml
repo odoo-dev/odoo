@@ -190,7 +190,7 @@
                             <field name="id" invisible="1"/> <!-- used in invisible condition of the reminder preview widget to check the record is saved -->
                             <field name="company_id" invisible="1" readonly="state in ['cancel', 'purchase']"/> <!-- provides parent.company_id for product_id/tax_ids domains in order_line -->
                             <field name="currency_id" invisible="1" readonly="state in ['cancel', 'purchase']" groups="!base.group_multi_currency"/> <!-- keeps currency_id loaded when multi-currency group is disabled, complementing the visible field above -->
-                            <field name="tax_calculation_rounding_method" invisible="1"/> <!-- used by order_line kanban/list to control per-line vs total tax rounding display -->
+                            <field name="tax_rounding_policy" invisible="1"/> <!-- used by order_line kanban/list to control per-line vs total tax rounding display -->
                         </group>
                         <group>
                             <label for="date_order" invisible="state == 'purchase'"/>
@@ -257,7 +257,7 @@
                                         <create name="add_note_control" string="Add a note" data-hotkey="shift+n" context="{'default_display_type': 'line_note'}"/>
                                         <button name="action_add_from_catalog" string="Catalog" data-hotkey="shift+k" type="object" class="px-4 btn-link" context="{'order_id': parent.id}"/>
                                     </control>
-                                    <field name="tax_calculation_rounding_method" column_invisible="True"/> <!-- used by the kanban card to pick per-line vs total tax display -->
+                                    <field name="tax_rounding_policy" column_invisible="True"/> <!-- used by the kanban card to pick per-line vs total tax display -->
                                     <field name="display_type" column_invisible="True"/> <!-- drives required/readonly of product_id, uom_id, date_planned and section/note rendering -->
                                     <field name="company_id" column_invisible="True"/> <!-- used in product_id context/domain and tax_ids domain -->
                                     <field name="currency_id" column_invisible="True"/> <!-- currency for monetary fields in this list -->
@@ -308,7 +308,7 @@
                                     <field name="price_total" string="Amount" column_invisible="parent.document_tax_mode == 'tax_excluded'"/>
                                 </list>
                                 <form string="Purchase Order Line">
-                                        <field name="tax_calculation_rounding_method" invisible="1"/> <!-- used elsewhere to pick per-line vs total tax display -->
+                                        <field name="tax_rounding_policy" invisible="1"/> <!-- used elsewhere to pick per-line vs total tax display -->
                                         <field name="display_type" invisible="1"/> <!-- drives the invisible group and section/note labels below -->
                                         <field name="company_id" invisible="1"/> <!-- related field, dependency of price_unit/date_planned/name compute -->
                                         <group invisible="display_type">
@@ -357,7 +357,7 @@
                                 </form>
                                 <kanban class="o_kanban_mobile">
                                      <field name="display_type"/>
-                                     <field name="tax_calculation_rounding_method"/>
+                                     <field name="tax_rounding_policy"/>
                                      <control>
                                         <create name="add_product_control" string="Add product"/>
                                         <create name="add_section_control" string="Add section" context="{'default_display_type': 'line_section'}"/>
@@ -379,7 +379,7 @@
                                                         <field name="product_qty" />
                                                         <field name="uom_id" groups="uom.group_uom" class="small"/>
                                                     </span>
-                                                    <span class="fw-bold col-4" t-if="record.tax_calculation_rounding_method.raw_value === 'round_per_line'">
+                                                    <span class="fw-bold col-4" t-if="record.tax_rounding_policy.raw_value === 'line'">
                                                         Tax incl.: <field name="price_total" />
                                                     </span>
                                                 </div>

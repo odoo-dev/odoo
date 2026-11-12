@@ -16,7 +16,7 @@ class TestPosAccountingHttp(HttpCase, TestPosAccounting):
 
     def test_baseline_between_frontend_and_backend(self):
         company = self.pos_config.company_id
-        company.tax_calculation_rounding_method = 'round_globally'
+        company.tax_rounding_policy = 'document'
 
         only_categ = self.env['pos.category'].create(
             {'name': 'Only Category'},

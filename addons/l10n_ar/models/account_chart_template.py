@@ -30,7 +30,7 @@ class AccountChartTemplate(models.AbstractModel):
             company.write({
                 'l10n_ar_afip_responsibility_type_id': coa_responsibility.id,
                 'country_id': self.env['res.country'].search([('code', '=', 'AR')]).id,
-                'tax_calculation_rounding_method': 'round_globally',
+                'tax_rounding_policy': 'document',
             })
 
         res = super()._load(template_code, company, install_demo,force_create)

@@ -61,8 +61,8 @@ class ResConfigSettings(models.TransientModel):
     # Technical field to hide / show the `vat_disabled`
     vat_disabled_available = fields.Boolean(string="Not Subject to VAT Available", related='company_id.vat_disabled_available')
 
-    tax_calculation_rounding_method = fields.Selection(
-        related='company_id.tax_calculation_rounding_method', string='Tax calculation rounding method', readonly=False)
+    tax_rounding_policy = fields.Selection(
+        related='company_id.tax_rounding_policy', string='Tax Rounding Policy', readonly=False)
     account_journal_suspense_account_id = fields.Many2one(
         comodel_name='account.account',
         string='Bank Suspense',

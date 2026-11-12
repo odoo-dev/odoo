@@ -40,7 +40,7 @@ class AccountChartTemplate(models.AbstractModel):
                 'income_account_id': 'uae_account_500100',
                 'receivable_account_id': 'uae_account_150100',
                 'payable_account_id': 'uae_account_230100',
-                'tax_calculation_rounding_method': 'round_per_line',
+                'tax_rounding_policy': 'line',
                 'account_stock_valuation_id': 'uae_account_120100',
             },
         }

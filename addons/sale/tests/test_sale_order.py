@@ -414,7 +414,7 @@ class TestSaleOrder(SaleCommon):
         })
 
         # Test Round per Line (default)
-        self.env.company.sudo().tax_calculation_rounding_method = "round_per_line"
+        self.env.company.sudo().tax_rounding_policy = "line"
         sale_order = self.env["sale.order"].create({
             "partner_id": self.partner.id,
             "order_line": [
@@ -437,7 +437,7 @@ class TestSaleOrder(SaleCommon):
         self.assertEqual(sale_order.amount_total, 15.42, "")
 
         # Test Round Globally
-        self.env.company.sudo().tax_calculation_rounding_method = "round_globally"
+        self.env.company.sudo().tax_rounding_policy = "document"
         sale_order = self.env["sale.order"].create({
             "partner_id": self.partner.id,
             "order_line": [

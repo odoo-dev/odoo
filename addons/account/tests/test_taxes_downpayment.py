@@ -42,7 +42,7 @@ class TestTaxesDownPayment(TestTaxCommon):
             currency=self.foreign_currency,
             rate=5.0,
         )
-        with self.with_tax_calculation_rounding_method('round_per_line'):
+        with self.with_tax_rounding_policy('line'):
             document = self.populate_document(document_params)
             self.assert_py_tax_totals_summary(document, {
                 'same_tax_base': False,
@@ -268,7 +268,7 @@ class TestTaxesDownPayment(TestTaxCommon):
                 expected_values = {'total_amount_currency': self.foreign_currency.round(36.64 * percent / 100.0)}
                 yield "round_per_line, price_excluded", document, True, 'percent', percent, expected_values
 
-        with self.with_tax_calculation_rounding_method('round_globally'):
+        with self.with_tax_rounding_policy('document'):
             document = self.populate_document(document_params)
             self.assert_py_tax_totals_summary(document, {
                 'same_tax_base': False,
@@ -505,7 +505,7 @@ class TestTaxesDownPayment(TestTaxCommon):
             currency=self.foreign_currency,
             rate=5.0,
         )
-        with self.with_tax_calculation_rounding_method('round_per_line'):
+        with self.with_tax_rounding_policy('line'):
             document = self.populate_document(document_params)
             self.assert_py_tax_totals_summary(document, {
                 'same_tax_base': False,
@@ -731,7 +731,7 @@ class TestTaxesDownPayment(TestTaxCommon):
                 expected_values = {'total_amount_currency': self.foreign_currency.round(36.64 * percent / 100.0)}
                 yield "round_per_line, price_included", document, True, 'percent', percent, expected_values
 
-        with self.with_tax_calculation_rounding_method('round_globally'):
+        with self.with_tax_rounding_policy('document'):
             document = self.populate_document(document_params)
             self.assert_py_tax_totals_summary(document, {
                 'same_tax_base': False,
@@ -1033,7 +1033,7 @@ class TestTaxesDownPayment(TestTaxCommon):
             currency=self.foreign_currency,
             rate=3.0,
         )
-        with self.with_tax_calculation_rounding_method('round_per_line'):
+        with self.with_tax_rounding_policy('line'):
             document = self.populate_document(document_params)
             self.assert_py_tax_totals_summary(document, {
                 'same_tax_base': True,
@@ -1178,7 +1178,7 @@ class TestTaxesDownPayment(TestTaxCommon):
                 expected_values = {'total_amount_currency': self.foreign_currency.round(96.0 * percent / 100.0)}
                 yield "round_per_line, price_excluded", document, True, 'percent', percent, expected_values
 
-        with self.with_tax_calculation_rounding_method('round_globally'):
+        with self.with_tax_rounding_policy('document'):
             document = self.populate_document(document_params)
             self.assert_py_tax_totals_summary(document, {
                 'same_tax_base': True,
@@ -1333,7 +1333,7 @@ class TestTaxesDownPayment(TestTaxCommon):
             currency=self.foreign_currency,
             rate=3.0,
         )
-        with self.with_tax_calculation_rounding_method('round_per_line'):
+        with self.with_tax_rounding_policy('line'):
             document = self.populate_document(document_params)
             self.assert_py_tax_totals_summary(document, {
                 'same_tax_base': False,
@@ -1478,7 +1478,7 @@ class TestTaxesDownPayment(TestTaxCommon):
                 expected_values = {'total_amount_currency': self.foreign_currency.round(96.0 * percent / 100.0)}
                 yield "round_per_line, price_included", document, True, 'percent', percent, expected_values
 
-        with self.with_tax_calculation_rounding_method('round_globally'):
+        with self.with_tax_rounding_policy('document'):
             document = self.populate_document(document_params)
             self.assert_py_tax_totals_summary(document, {
                 'same_tax_base': False,
@@ -1646,7 +1646,7 @@ class TestTaxesDownPayment(TestTaxCommon):
             currency=self.foreign_currency,
             rate=0.5,
         )
-        with self.with_tax_calculation_rounding_method('round_per_line'):
+        with self.with_tax_rounding_policy('line'):
             document = self.populate_document(document_params)
             self.assert_py_tax_totals_summary(document, {
                 'same_tax_base': False,
@@ -1734,7 +1734,7 @@ class TestTaxesDownPayment(TestTaxCommon):
                 expected_values = {'total_amount_currency': self.foreign_currency.round(40.64 * percent / 100.0)}
                 yield "round_per_line, price_excluded", document, True, 'percent', percent, expected_values
 
-        with self.with_tax_calculation_rounding_method('round_globally'):
+        with self.with_tax_rounding_policy('document'):
             document = self.populate_document(document_params)
             self.assert_py_tax_totals_summary(document, {
                 'same_tax_base': False,
@@ -1826,7 +1826,7 @@ class TestTaxesDownPayment(TestTaxCommon):
             currency=self.foreign_currency,
             rate=0.5,
         )
-        with self.with_tax_calculation_rounding_method('round_per_line'):
+        with self.with_tax_rounding_policy('line'):
             document = self.populate_document(document_params)
             self.assert_py_tax_totals_summary(document, {
                 'same_tax_base': False,
@@ -1908,7 +1908,7 @@ class TestTaxesDownPayment(TestTaxCommon):
                 expected_values = {'total_amount_currency': self.foreign_currency.round(40.64 * percent / 100.0)}
                 yield "round_per_line, price_included", document, True, 'percent', percent, expected_values
 
-        with self.with_tax_calculation_rounding_method('round_globally'):
+        with self.with_tax_rounding_policy('document'):
             document = self.populate_document(document_params)
             self.assert_py_tax_totals_summary(document, {
                 'same_tax_base': False,
@@ -2117,16 +2117,16 @@ class TestTaxesDownPayment(TestTaxCommon):
                 'total_excluded_currency': 3.0,
                 'total_included': 3.0,
                 'total_included_currency': 3.0,
-                'delta_total_excluded': 0.0,
-                'delta_total_excluded_currency': 0.0,
-                'manual_total_excluded': 3.0,
-                'manual_total_excluded_currency': 3.0,
-                'manual_tax_amounts': {
-                    str(tax.id): {
-                        'tax_amount': 0.63,
-                        'tax_amount_currency': 0.63,
-                        'base_amount': 3.0,
-                        'base_amount_currency': 3.0,
+                'pins': {
+                    'total_excluded': 3.0,
+                    'total_excluded_currency': 3.0,
+                    'tax_amounts': {
+                        str(tax.id): {
+                            'tax_amount': 0.63,
+                            'tax_amount_currency': 0.63,
+                            'base_amount': 3.0,
+                            'base_amount_currency': 3.0,
+                        },
                     },
                 },
                 'taxes_data': [

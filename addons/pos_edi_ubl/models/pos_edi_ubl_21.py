@@ -68,7 +68,6 @@ class PosEdiXmlUBL21(models.AbstractModel):
         base_lines = pos_order.lines._prepare_base_lines_for_taxes_computation()
         AccountTax = self.env['account.tax']
         AccountTax._add_tax_details_in_base_lines(base_lines, pos_order.company_id)
-        AccountTax._round_base_lines_tax_details(base_lines, pos_order.company_id)
 
         vals['base_lines'] = base_lines
 

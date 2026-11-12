@@ -103,7 +103,6 @@ class PosOrder(models.Model):
                 sale_orders += sale_order
                 down_payment_base_lines = pos_order_lines._prepare_base_lines_for_taxes_computation()
                 AccountTax._add_tax_details_in_base_lines(down_payment_base_lines, sale_order.company_id)
-                AccountTax._round_base_lines_tax_details(down_payment_base_lines, sale_order.company_id)
 
                 sale_order_sudo = sale_order.sudo()
                 sale_order_sudo._create_down_payment_section_line_if_needed()
@@ -149,7 +148,7 @@ class PosOrder(models.Model):
 
             if pos_line.sale_order_origin_id:
                 move["name"] = pos_line.display_name
-                if move.get('extra_tax_data', {}).get('computation_key') == 'down_payment' and pos_line.down_payment_details:
+                if move.get('tax_rounding_subset') == 'down_payment' and pos_line.down_payment_details:
                     downpayment_details = ast.literal_eval(pos_line.down_payment_details)
                     if downpayment_details and downpayment_details[0].get('percentage_value'):
                         move["name"] += " of " + str(downpayment_details[0].get('percentage_value')) + "%"

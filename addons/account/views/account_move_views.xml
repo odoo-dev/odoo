@@ -1063,7 +1063,7 @@
                         <field name="country_code" invisible="1"/> <!-- related company fiscal country code, used by localization overrides of this view -->
                         <field name="statement_line_id" invisible="1"/> <!-- technical origin field for bank-statement entries (used by account_accountant) -->
                         <field name="origin_payment_id" invisible="1"/> <!-- drives the invisible on the Payment stat button (not origin_payment_id) -->
-                        <field name="tax_calculation_rounding_method" invisible="1"/> <!-- read by the tax_totals widget / account_tax.js rounding helper -->
+                        <field name="tax_rounding_policy" invisible="1"/> <!-- read by the tax_totals widget / account_tax.js rounding helper -->
                         <field name="tax_cash_basis_created_move_ids" invisible="1"/> <!-- drives the invisible on the Cash Basis Entries stat button -->
                         <field name="invoice_cash_rounding_id" invisible="1"/> <!-- read/updated by the tax_totals widget (tax_totals.js) -->
                         <field name="show_update_fpos" invisible="1"/> <!-- drives the invisible on the fiscal-position update button (not show_update_fpos) -->
@@ -1418,7 +1418,7 @@
                                         </templates>
 
                                         <!-- Others fields -->
-                                        <field name="tax_calculation_rounding_method"/>
+                                        <field name="tax_rounding_policy"/>
                                         <field name="currency_id"/>
                                         <field name="company_currency_id"/>
                                         <field name="display_type" force_save="1"/>
@@ -1429,7 +1429,7 @@
                                     <!-- Form view to cover mobile use -->
                                     <form>
                                         <sheet>
-                                            <field name="tax_calculation_rounding_method" invisible="1"/> <!-- read by the tax_totals widget / account_tax.js rounding helper -->
+                                            <field name="tax_rounding_policy" invisible="1"/> <!-- read by the tax_totals widget / account_tax.js rounding helper -->
                                             <field name="display_type" invisible="1"/> <!-- drives the section/note/description label invisibles in this mobile form -->
                                             <field name="company_id" invisible="1"/> <!-- feeds account/tax domains (company_ids, parent_of, company_id) in this mobile form -->
                                             <field name="partner_id" invisible="1"/> <!-- technical field kept for line onchange/tax context -->

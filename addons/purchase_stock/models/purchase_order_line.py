@@ -277,7 +277,7 @@ class PurchaseOrderLine(models.Model):
                 quantity=qty,
                 product=self.product_id,
                 partner=self.order_id.partner_id,
-                rounding_method="round_globally",
+                rounding_policy='document',
             )['total_void']
             price_unit = price_unit / qty
         if self.uom_id.id != self.product_id.uom_id.id:

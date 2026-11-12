@@ -229,7 +229,6 @@ export class ComboSuggestion {
         });
 
         accountTaxHelpers.add_tax_details_in_base_lines(baseLines, this.company);
-        accountTaxHelpers.round_base_lines_tax_details(baseLines, this.company);
 
         const cashRounding =
             this.config.cash_rounding && this.config.rounding_method

@@ -28,7 +28,8 @@ SaleOrderLine._records = [
         name: "Serial Tracked Product",
         tax_ids: [],
         is_downpayment: false,
-        extra_tax_data: {},
+        tax_rounding_subset: false,
+        tax_pins: {},
         write_date: "2025-07-03 17:04:14",
     },
     {
@@ -47,7 +48,8 @@ SaleOrderLine._records = [
         name: "Non Groupable Lot Product",
         tax_ids: [],
         is_downpayment: false,
-        extra_tax_data: {},
+        tax_rounding_subset: false,
+        tax_pins: {},
         write_date: "2025-07-03 17:04:14",
     },
     {
@@ -66,7 +68,8 @@ SaleOrderLine._records = [
         name: "Lot Tracked Product",
         tax_ids: [],
         is_downpayment: false,
-        extra_tax_data: {},
+        tax_rounding_subset: false,
+        tax_pins: {},
         write_date: "2025-07-03 17:04:14",
     },
     {
@@ -85,7 +88,8 @@ SaleOrderLine._records = [
         name: "Lot Tracked Product",
         tax_ids: [],
         is_downpayment: false,
-        extra_tax_data: {},
+        tax_rounding_subset: false,
+        tax_pins: {},
         write_date: "2025-07-03 17:04:14",
     },
 ];

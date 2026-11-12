@@ -389,8 +389,10 @@ class SaleOrderLine(models.Model):
         string="Invoice to be Issued", search="_search_invoice_to_be_issued", store=False
     )
 
-    # Technical field holding custom data for the taxes computation engine.
-    extra_tax_data = fields.Json()
+    # Technical fields holding custom data for the taxes computation engine (see '_prepare_base_line_for_taxes_computation'):
+    # the subset of lines whose taxes are rounded together, and the tax amounts forced on the line.
+    tax_rounding_subset = fields.Char()
+    tax_pins = fields.Json()
 
     # Technical computed fields for UX purposes (hide/make fields readonly, ...)
     product_type = fields.Selection(related="product_id.type", depends=["product_id"])
@@ -401,9 +403,9 @@ class SaleOrderLine(models.Model):
         string="Can Edit Product", compute="_compute_product_updatable"
     )
     product_uom_readonly = fields.Boolean(compute="_compute_product_uom_readonly")
-    tax_calculation_rounding_method = fields.Selection(
-        related="company_id.tax_calculation_rounding_method",
-        string="Tax calculation rounding method",
+    tax_rounding_policy = fields.Selection(
+        related="company_id.tax_rounding_policy",
+        string="Tax Rounding Policy",
         readonly=True,
     )
     company_price_include = fields.Selection(related="company_id.account_price_include")
@@ -1066,9 +1068,7 @@ class SaleOrderLine(models.Model):
 
     def _is_global_discount(self):
         self.ensure_one()
-        return self.extra_tax_data and self.extra_tax_data.get("computation_key", "").startswith(
-            "global_discount,"
-        )
+        return (self.tax_rounding_subset or "").startswith("global_discount,")
 
     @api.depends("product_uom_qty", "discount", "price_unit", "tax_ids", "document_tax_mode")
     def _compute_amount(self):
@@ -1076,8 +1076,7 @@ class SaleOrderLine(models.Model):
         for line in self:
             company = line.company_id or self.env.company
             base_line = line._prepare_base_line_for_taxes_computation()
-            AccountTax._add_tax_details_in_base_line(base_line, company)
-            AccountTax._round_base_lines_tax_details([base_line], company)
+            AccountTax._add_tax_details_in_base_lines([base_line], company)
             line.price_subtotal = base_line["tax_details"]["total_excluded_currency"]
             line.price_total = base_line["tax_details"]["total_included_currency"]
             line.price_tax = line.price_total - line.price_subtotal
@@ -2097,7 +2096,8 @@ class SaleOrderLine(models.Model):
             "tax_ids": [Command.set(self.tax_ids.ids)],
             "sale_line_ids": [Command.link(self.id)],
             "is_downpayment": self.is_downpayment,
-            "extra_tax_data": self.extra_tax_data,
+            "tax_rounding_subset": self.tax_rounding_subset,
+            "tax_pins": self.tax_pins,
             "collapse_prices": self.collapse_prices,
             "collapse_composition": self.collapse_composition,
         }

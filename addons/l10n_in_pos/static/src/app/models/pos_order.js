@@ -24,7 +24,6 @@ patch(PosOrder.prototype, {
             )
         );
         accountTaxHelpers.add_tax_details_in_base_lines(baseLines, company);
-        accountTaxHelpers.round_base_lines_tax_details(baseLines, company);
         const hsnSummary = accountTaxHelpers.l10n_in_get_hsn_summary_table(baseLines, false);
         if (hsnSummary) {
             for (const item of hsnSummary.items) {

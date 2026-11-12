@@ -22,7 +22,7 @@ class AccountMoveLine(models.Model):
                 currency=invoice.currency_id,
                 product=self.product_id,
                 partner=invoice.partner_id,
-                rounding_method='round_globally',
+                rounding_policy='document',
             )
             price_unit = price_unit['total_excluded']
             price_subtotal = self.price_subtotal

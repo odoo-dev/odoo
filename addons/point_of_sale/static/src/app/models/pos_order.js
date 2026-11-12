@@ -682,8 +682,8 @@ export class PosOrder extends PosOrderAccounting {
 
     get globalDiscountPc() {
         return {
-            value: this.discountLines?.[0]?.extra_tax_data?.discount_value || 0,
-            type: this.discountLines?.[0]?.extra_tax_data?.discount_type || "",
+            value: this.discountLines?.[0]?.computation_settings?.discount_value || 0,
+            type: this.discountLines?.[0]?.computation_settings?.discount_type || "",
         };
     }
 
@@ -1024,7 +1024,7 @@ export class PosOrder extends PosOrderAccounting {
         });
 
         // The cashier can scale and price a fixed fee. Both are stamped into
-        // extra_tax_data because the fee splits into one line per tax group, where
+        // computation_settings because the fee splits into one line per tax group, where
         // neither `qty` nor `price_unit` holds the whole fee: the edited line is the
         // one whose qty no longer matches the stamp, a priced one is still "manual".
         // A price is read as the preset's amount: a target total, taxes included.
@@ -1033,21 +1033,21 @@ export class PosOrder extends PosOrderAccounting {
         if (preset.service_fee_type === "fixed" && feeLines.length) {
             const editedLine = feeLines.find(
                 (line) =>
-                    line.extra_tax_data?.service_fee_qty != null &&
-                    (line.qty || 1) !== line.extra_tax_data.service_fee_qty
+                    line.computation_settings?.service_fee_qty != null &&
+                    (line.qty || 1) !== line.computation_settings.service_fee_qty
             );
             feeQty = (editedLine || feeLines[0]).qty || 1;
             const pricedLine = feeLines.find((line) => line.price_type === "manual");
             // A stored amount only holds for the preset it was set on.
             const stampedLine = feeLines.find(
                 (line) =>
-                    line.extra_tax_data?.service_fee_amount != null &&
-                    line.extra_tax_data.service_fee_preset_id === preset.id
+                    line.computation_settings?.service_fee_amount != null &&
+                    line.computation_settings.service_fee_preset_id === preset.id
             );
             if (pricedLine) {
                 feeAmount = pricedLine.price_unit;
             } else if (stampedLine) {
-                feeAmount = stampedLine.extra_tax_data.service_fee_amount;
+                feeAmount = stampedLine.computation_settings.service_fee_amount;
             }
         }
         const amount =
@@ -1063,18 +1063,20 @@ export class PosOrder extends PosOrderAccounting {
             ignoreDiscount: preset.service_fee_based_on === "pre_discount",
         });
 
-        for (const { baseLine, extraTaxData } of serviceFeeBaseLines) {
+        for (const { baseLine, taxPins } of serviceFeeBaseLines) {
             const key = taxKey(baseLine.tax_ids);
             // Persist the cashier's quantity and amount for the next recompute.
-            extraTaxData.service_fee_qty = feeQty;
+            const computationSettings = { service_fee_qty: feeQty };
             if (preset.service_fee_type === "fixed") {
-                extraTaxData.service_fee_amount = feeAmount;
-                extraTaxData.service_fee_preset_id = preset.id;
+                computationSettings.service_fee_amount = feeAmount;
+                computationSettings.service_fee_preset_id = preset.id;
             }
             const existingLine = serviceFeeLinesMap[key];
 
             if (existingLine) {
-                existingLine.extra_tax_data = extraTaxData;
+                existingLine.tax_rounding_subset = baseLine.computation_key;
+                existingLine.tax_pins = taxPins;
+                existingLine.computation_settings = computationSettings;
                 // Reset `price_type` first: a manual price schedules this recompute
                 // (see pos_store), so the write-back would loop.
                 existingLine.price_type = "automatic";
@@ -1099,7 +1101,9 @@ export class PosOrder extends PosOrderAccounting {
                     price_type: "automatic",
                     // course_id is only available when pos_restaurant is installed
                     course_id: this.hasCourses?.() ? this.getLastCourse() : undefined,
-                    extra_tax_data: extraTaxData,
+                    tax_rounding_subset: baseLine.computation_key,
+                    tax_pins: taxPins,
+                    computation_settings: computationSettings,
                 });
             }
         }

@@ -32,7 +32,7 @@ class AccountChartTemplate(models.AbstractModel):
                 'income_account_id': 'tr600',
                 'receivable_account_id': 'tr120',
                 'payable_account_id': 'tr320',
-                'tax_calculation_rounding_method': 'round_per_line',
+                'tax_rounding_policy': 'line',
                 'account_stock_valuation_id': 'tr150',
             },
         }

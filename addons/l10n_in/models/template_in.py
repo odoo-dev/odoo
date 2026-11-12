@@ -43,7 +43,7 @@ class AccountChartTemplate(models.AbstractModel):
                 'receivable_account_id': 'p10040',
                 'payable_account_id': 'p11211',
                 'withholding_tax_base_account_id': 'p100595',
-                'tax_calculation_rounding_method': 'round_per_line',
+                'tax_rounding_policy': 'line',
             },
         }
 
