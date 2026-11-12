@@ -106,12 +106,15 @@ class StockLocation(models.Model):
     def _compute_display_name(self):
         super()._compute_display_name()
         formatted_display_name = self.env.context.get('formatted_display_name')
+        force_actual_name = self.env.context.get('force_actual_name')
         for location in self:
-            has_parent = location.location_id and location.usage != 'view'
-            if formatted_display_name and has_parent:
-                location.display_name = f"--{location.location_id.complete_name}/--{location.name}"
-            elif has_parent:
-                location.display_name = f"{location.location_id.complete_name}/{location.name}"
+            has_parent = not force_actual_name and location.location_id and location.usage != 'view'
+            if has_parent:
+                parent_complete_name = location.location_id.complete_name.replace('/', ' / ')
+                if formatted_display_name:
+                    location.display_name = f"--{parent_complete_name} / --**{location.name}**"
+                else:
+                    location.display_name = f"{parent_complete_name} / {location.name}"
             if formatted_display_name and self.env.context.get('show_empty') and location.is_empty:
                 location.display_name += self.env._("\t--Empty--")
 

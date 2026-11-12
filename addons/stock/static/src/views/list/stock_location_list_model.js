@@ -83,9 +83,12 @@ export class StockLocationListModel extends RelationalModel {
         config.offset = config.offset || 0;
         config.limit = config.limit || this._getLocationGroupsLimit();
         config.groups = config.groups || {};
-        const { resModel, context } = config;
+        const { resModel } = config;
         const baseDomain = config.baseDomain || config.domain;
         const order = orderByToString(config.orderBy.filter((o) => o.name !== "__count"));
+
+        // Force location `display_name` to simply be the location's name, not the full path.
+        const context = { ...config.context, force_actual_name: true };
 
         // 1. the locations to display as groups, with all the data of their record
         const domain = config.baseDomain ? config.domain : this._getTopLevelDomain(config);
