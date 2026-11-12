@@ -11,6 +11,11 @@ def _get_selection_days(self):
     return [(str(i), str(i)) for i in range(1, 32)]
 
 
+def _get_possible_days(month):
+    last_day = monthrange(2020, int(month))[1] if month else 31
+    return [str(day) for day in range(1, last_day + 1)]
+
+
 class HrLeaveAccrualLevel(models.Model):
     _name = 'hr.leave.accrual.level'
     _description = "Accrual Plan Level"
@@ -115,6 +120,9 @@ class HrLeaveAccrualLevel(models.Model):
     yearly_day = fields.Selection(
         _get_selection_days, compute='_compute_yearly_day', store=True, readonly=False, default='1',
         export_string_translation=False)
+    first_month_day_options = fields.Json(compute='_compute_month_day_options', export_string_translation=False)
+    second_month_day_options = fields.Json(compute='_compute_month_day_options', export_string_translation=False)
+    yearly_day_options = fields.Json(compute='_compute_month_day_options', export_string_translation=False)
     cap_accrued_time = fields.Boolean(export_string_translation=False,
         help="When the field is checked the balance of an allocation using this accrual plan will never exceed the specified amount.")
     # Unit defined by `added_value_type`
@@ -201,6 +209,25 @@ class HrLeaveAccrualLevel(models.Model):
             if level.cap_accrued_time and level.maximum_leave <= 0:
                 raise UserError(self.env._("You cannot have a balance cap on accrued time set to 0."))
 
+    @api.constrains('frequency', 'first_month_day', 'first_month', 'second_month_day', 'second_month', 'yearly_day', 'yearly_month', 'yearly_option')
+    def _check_dates_exist(self):
+        for level in self:
+            pairs = []
+            if level.frequency == 'biyearly':
+                pairs = [
+                    (level.first_month_day, level.first_month),
+                    (level.second_month_day, level.second_month),
+                ]
+            elif level.frequency == 'yearly' and level.yearly_option == 'date':
+                pairs = [(level.yearly_day, level.yearly_month)]
+
+            for day, month in pairs:
+                if not day or not month:
+                    continue
+                last_day = monthrange(2020, int(month))[1]
+                if int(day) > last_day:
+                    raise ValidationError(self.env._("The day %(day)s does not exist in the selected month.", day=day))
+
     @api.depends('start_count', 'start_type')
     def _compute_sequence(self):
         # Not 100% accurate because of odd months/years, but good enough
@@ -246,6 +273,13 @@ class HrLeaveAccrualLevel(models.Model):
     @api.depends("yearly_month")
     def _compute_yearly_day(self):
         self._set_day("yearly_day", "yearly_month")
+
+    @api.depends("first_month", "second_month", "yearly_month")
+    def _compute_month_day_options(self):
+        for level in self:
+            level.first_month_day_options = _get_possible_days(level.first_month)
+            level.second_month_day_options = _get_possible_days(level.second_month)
+            level.yearly_day_options = _get_possible_days(level.yearly_month)
 
     @api.depends('cap_accrued_time')
     def _compute_maximum_leave(self):

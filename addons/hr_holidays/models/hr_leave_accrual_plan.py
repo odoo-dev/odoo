@@ -5,7 +5,7 @@ from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError
 from odoo.fields import Domain
 
-from odoo.addons.hr_holidays.models.hr_leave_accrual_plan_level import _get_selection_days
+from odoo.addons.hr_holidays.models.hr_leave_accrual_plan_level import _get_possible_days, _get_selection_days
 
 
 class HrLeaveAccrualPlan(models.Model):
@@ -59,8 +59,18 @@ class HrLeaveAccrualPlan(models.Model):
         ("11", "November"),
         ("12", "December")
     ], export_string_translation=False, default=lambda self: str((fields.Date.context_today(self)).month))
+    carryover_day_options = fields.Json(compute='_compute_carryover_day_options', export_string_translation=False)
     added_value_type = fields.Selection([('day', 'Days'), ('hour', 'Hours')],
         export_string_translation=False, default="day", store=True)
+
+    @api.constrains('carryover_date', 'carryover_day', 'carryover_month')
+    def _check_dates_exist(self):
+        for accrual in self:
+            if not accrual.carryover_day or not accrual.carryover_month or accrual.carryover_date != 'other':
+                continue
+            last_day = monthrange(2020, int(accrual.carryover_month))[1]
+            if int(accrual.carryover_day) > last_day:
+                raise ValidationError(self.env._("The day %(day)s does not exist in the selected month.", day=accrual.carryover_day))
 
     @api.depends('company_id')
     def _compute_allowed_work_entry_type_ids(self):
@@ -119,6 +129,11 @@ class HrLeaveAccrualPlan(models.Model):
         for plan in self:
             # 2020 is a leap year, so monthrange(2020, february) will return [2, 29]
             plan.carryover_day = str(min(monthrange(2020, int(plan.carryover_month))[1], int(plan.carryover_day)))
+
+    @api.depends("carryover_month")
+    def _compute_carryover_day_options(self):
+        for plan in self:
+            plan.carryover_day_options = _get_possible_days(plan.carryover_month)
 
     def action_open_accrual_plan_employees(self):
         self.ensure_one()
