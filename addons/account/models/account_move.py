@@ -1081,9 +1081,9 @@ class AccountMove(models.Model):
     def _compute_invoice_payment_term_id(self):
         for move in self:
             move = move.with_company(move.company_id)
-            if move.is_sale_document(include_receipts=True):
+            if move.is_sale_document():
                 move.invoice_payment_term_id = move.partner_id.property_payment_term_id or move.invoice_payment_term_id
-            elif move.is_purchase_document(include_receipts=True):
+            elif move.is_purchase_document():
                 move.invoice_payment_term_id = move.partner_id.property_supplier_payment_term_id or move.invoice_payment_term_id
             else:
                 move.invoice_payment_term_id = False
@@ -2103,7 +2103,7 @@ class AccountMove(models.Model):
             move.duplicated_ref_ids = move_to_duplicate_move.get(move._origin, self.env['account.move'])
 
     def _fetch_duplicate_reference(self, matching_states=('draft', 'posted')):
-        moves = self.filtered(lambda m: m.is_sale_document() or m.is_purchase_document())
+        moves = self.filtered(lambda m: m.is_sale_document() or m.is_purchase_document(include_receipts=True))
 
         if not moves:
             return {}
@@ -2214,7 +2214,7 @@ class AccountMove(models.Model):
                 and move.partner_id == dup.partner_id
                 and move.invoice_date == dup.invoice_date
                 and move.amount_total == dup.amount_total
-                and move.is_purchase_document()
+                and move.is_purchase_document(include_receipts=True)
                 for dup in move.duplicated_ref_ids
             )
 
@@ -3518,7 +3518,7 @@ class AccountMove(models.Model):
         def has_non_deductible_lines(move):
             return (
                 move.state == 'draft'
-                and move.is_purchase_document()
+                and move.is_purchase_document(include_receipts=True)
                 and any(move.line_ids.filtered(lambda line: line.display_type == 'product' and line.deductible_amount < 100))
             )
 
