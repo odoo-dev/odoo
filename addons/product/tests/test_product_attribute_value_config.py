@@ -821,6 +821,37 @@ class TestProductAttributeValueConfig(TestProductAttributeValueCommon):
         )
         self.assertEqual(extra_prices, copied_extra_prices)
 
+    @mute_logger('odoo.models.unlink')
+    def test_copy_extra_prices_with_archived_attribute_value(self):
+        """The extra prices are copied value by value, an archived value doesn't shift them."""
+        attribute = self.env['product.attribute'].create({
+            'name': 'Size',
+            'value_ids': [Command.create({'name': name}) for name in ('S', 'M', 'L')],
+        })
+        template = self.env['product.template'].create({
+            'name': 'Water',
+            'attribute_line_ids': [Command.create({
+                'attribute_id': attribute.id,
+                'value_ids': [Command.set(attribute.value_ids.ids)],
+            })],
+        })
+        __, ptav_m, ptav_l = template.attribute_line_ids.product_template_value_ids
+        ptav_m.price_extra = 2
+        ptav_l.price_extra = 5
+        # A variant used in a combo can't be deleted, removing its value archives it
+        self.env['product.combo'].create({
+            'name': 'Water combo',
+            'combo_item_ids': [Command.create({'product_id': template._get_variant_for_combination(ptav_m).id})],
+        })
+        template.attribute_line_ids.value_ids = [Command.unlink(ptav_m.product_attribute_value_id.id)]
+        self.assertFalse(ptav_m.ptav_active)
+
+        template_copy = template.copy()
+        copied_extra_prices = {
+            ptav.name: ptav.price_extra for ptav in template_copy.attribute_line_ids.product_template_value_ids
+        }
+        self.assertEqual(copied_extra_prices, {'S': 0, 'L': 5})
+
     def test_04_create_product_variant_non_dynamic(self):
         """The goal of this test is to make sure the _create_product_variant does
         not create variant if the type is not dynamic. It can however return a
