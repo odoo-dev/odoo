@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_stock_route_flow" model="ir.actions.client">
+        <field name="name">Route Flow</field>
+        <field name="tag">stock_route_flow</field>
+        <field name="path">route-flow</field>
+    </record>
+
+    <menuitem id="menu_stock_route_flow" name="ROUTE TEST" action="action_stock_route_flow"
+              parent="menu_warehouse_config" sequence="5"/>
+</odoo>

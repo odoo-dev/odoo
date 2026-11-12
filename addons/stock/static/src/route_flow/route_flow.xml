@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="stock.RouteFlow">
+        <div class="o_action o_route_flow d-flex flex-column h-100">
+            <!-- Header -->
+            <div class="o_route_flow_header d-flex align-items-center gap-3 px-3 py-2 border-bottom bg-view">
+                <h4 class="m-0">Route Flow</h4>
+                <div class="d-flex align-items-center gap-2">
+                    <label class="fw-bold mb-0" for="o_route_flow_wh">Warehouse</label>
+                    <select id="o_route_flow_wh" class="form-select form-select-sm w-auto"
+                            t-on-change="(ev) => this.onWarehouseChange(ev)">
+                        <t t-foreach="this.data.warehouses" t-as="wh" t-key="wh.id">
+                            <option t-att-value="wh.id" t-att-selected="wh.id === this.state.warehouseId"
+                                    t-out="wh.name"/>
+                        </t>
+                    </select>
+                </div>
+                <div class="btn-group btn-group-sm ms-3" role="group" aria-label="Zoom">
+                    <button class="btn btn-light" title="Zoom out" t-on-click="() => this.zoomBy(-0.1)"><i class="oi" data-icon="zoom_out"/></button>
+                    <button class="btn btn-light" title="Fit to screen" t-on-click="() => this.zoomFit()">
+                        <t t-out="Math.round(this.scale * 100) + '%'"/>
+                    </button>
+                    <button class="btn btn-light" title="Zoom in" t-on-click="() => this.zoomBy(0.1)"><i class="oi" data-icon="zoom_in"/></button>
+                </div>
+                <div class="ms-auto d-flex gap-2">
+                    <button t-if="this.state.routeId" class="btn btn-secondary btn-sm"
+                            t-on-click="() => this.openRoute()">
+                        <i class="oi me-1" data-icon="edit"/>Edit route
+                    </button>
+                    <button class="btn btn-primary btn-sm" t-on-click="() => this.newRule()">
+                        <i class="oi me-1" data-icon="add"/>New rule
+                    </button>
+                </div>
+            </div>
+
+            <div class="d-flex flex-grow-1 overflow-hidden">
+                <!-- Routes sidebar -->
+                <div class="o_route_flow_sidebar border-end overflow-auto bg-view">
+                    <div t-att-class="'o_route_flow_route px-3 py-2' + (!this.state.routeId ? ' active' : '')"
+                         t-on-click="() => this.selectRoute(false)">
+                        <div class="fw-bold"><i class="oi me-2" data-icon="account_tree"/>All routes</div>
+                        <div class="small text-muted">Everything that can happen in this warehouse</div>
+                    </div>
+                    <t t-foreach="this.routeList" t-as="route" t-key="route.id">
+                        <div t-att-class="'o_route_flow_route px-3 py-2' + (route.id === this.state.routeId ? ' active' : '')"
+                             t-on-click="() => this.selectRoute(route.id)">
+                            <div class="d-flex align-items-center">
+                                <span class="o_route_flow_dot me-2" t-att-style="'background:' + route.color"/>
+                                <span class="fw-bold text-truncate" t-out="route.name"/>
+                                <span class="badge rounded-pill text-bg-secondary ms-auto" t-out="route.ruleCount"
+                                      title="Rules in this warehouse"/>
+                            </div>
+                            <div class="d-flex flex-wrap gap-1 mt-1">
+                                <t t-foreach="route.appliesOn" t-as="applies" t-key="applies">
+                                    <span class="badge o_route_flow_applies" t-out="applies"/>
+                                </t>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+
+                <!-- Canvas -->
+                <div class="o_route_flow_canvas_wrapper flex-grow-1 overflow-auto" t-ref="this.wrapperRef">
+                    <t t-set="graph" t-value="this.graph"/>
+                    <div t-if="!graph.nodes.length" class="o_view_nocontent">
+                        <div class="o_nocontent_help">
+                            <p class="o_view_nocontent_empty_folder">No rules for this warehouse</p>
+                            <p>Create a rule or configure the warehouse steps (Inventory > Configuration > Warehouses).</p>
+                        </div>
+                    </div>
+                    <t t-else="">
+                    <t t-set="scale" t-value="this.scale"/>
+                    <div class="o_route_flow_canvas_sizer"
+                         t-att-style="'width:' + graph.width * scale + 'px;height:' + graph.height * scale + 'px'">
+                    <div class="o_route_flow_canvas position-relative"
+                         t-att-style="'width:' + graph.width + 'px;height:' + graph.height + 'px;transform:scale(' + scale + ');transform-origin:0 0'">
+                        <svg class="position-absolute top-0 start-0" t-att-width="graph.width" t-att-height="graph.height">
+                            <defs>
+                                <marker id="o_route_flow_arrow" viewBox="0 0 10 10" refX="9" refY="5"
+                                        markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                                    <path d="M 0 0 L 10 5 L 0 10 z" fill="context-stroke"/>
+                                </marker>
+                            </defs>
+                            <t t-foreach="graph.paths" t-as="path" t-key="path.key">
+                                <g t-att-class="'o_route_flow_edge' + (this.state.hoveredRuleId === path.ruleId ? ' hovered' : '')">
+                                    <path t-att-d="path.d1" fill="none" t-att-stroke="path.color"
+                                          t-att-stroke-dasharray="path.dash" stroke-width="2"/>
+                                    <path t-att-d="path.d2" fill="none" t-att-stroke="path.color"
+                                          t-att-stroke-dasharray="path.dash" stroke-width="2"
+                                          marker-end="url(#o_route_flow_arrow)"/>
+                                </g>
+                            </t>
+                        </svg>
+
+                        <!-- Location cards -->
+                        <t t-foreach="graph.nodes" t-as="node" t-key="node.key">
+                            <div t-att-class="'o_route_flow_node card shadow-sm position-absolute o_usage_' + (node.usage || 'none') + (node.locationId ? ' cursor-pointer' : '')"
+                                 t-att-style="'left:' + node.x + 'px;top:' + node.y + 'px;width:' + this.constants.NODE_W + 'px;height:' + this.constants.NODE_H + 'px'"
+                                 t-att-title="node.name"
+                                 t-on-click="() => this.openLocation(node.locationId)">
+                                <div class="d-flex align-items-center h-100 px-2 gap-2">
+                                    <i class="oi oi-fw fs-4" t-att-data-icon="node.icon"/>
+                                    <div class="overflow-hidden">
+                                        <div class="fw-bold text-truncate" t-out="node.name"/>
+                                        <div class="small text-muted text-truncate" t-out="node.subtitle"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+
+                        <!-- Rule cards -->
+                        <t t-foreach="graph.cards" t-as="card" t-key="card.edge.rule.id">
+                            <t t-set="rule" t-value="card.edge.rule"/>
+                            <t t-set="info" t-value="this.ruleInfo(rule)"/>
+                            <div class="o_route_flow_rule card shadow-sm position-absolute"
+                                 t-att-style="'left:' + card.x + 'px;top:' + card.y + 'px;width:' + this.constants.CARD_W + 'px;height:' + this.constants.CARD_H + 'px;border-top-color:' + info.color"
+                                 t-att-title="rule.name + ' (' + info.routeName + ')'"
+                                 t-on-click="() => this.openRule(rule.id)"
+                                 t-on-mouseenter="() => this.setHovered(rule.id)"
+                                 t-on-mouseleave="() => this.setHovered(false)">
+                                <div class="card-body p-2 d-flex flex-column gap-1">
+                                    <div class="d-flex align-items-center gap-1">
+                                        <span class="o_route_flow_action badge" t-att-style="'background:' + info.color">
+                                            <i class="oi me-1" t-att-data-icon="info.icon"/><t t-out="info.actionLabel"/>
+                                        </span>
+                                        <span t-if="info.delay" class="badge text-bg-warning ms-auto" title="Lead time (days)">
+                                            <i class="oi me-1" data-icon="schedule"/>+<t t-out="info.delay"/>d
+                                        </span>
+                                    </div>
+                                    <div class="fw-bold text-truncate" t-out="info.operation"/>
+                                    <div t-att-class="'small text-truncate ' + (info.isMto ? 'text-primary' : 'text-muted')"
+                                         t-out="info.method"/>
+                                    <div t-if="info.needIn" class="small text-truncate fst-italic"
+                                         title="The rule is triggered by a need in this location; the goods are moved to the operation type's destination">
+                                        <i class="oi me-1" data-icon="subdirectory_arrow_right"/>For needs in <t t-out="info.needIn"/>
+                                    </div>
+                                    <div class="small text-muted text-truncate">
+                                        <t t-if="!this.state.routeId"><t t-out="info.routeName"/></t>
+                                        <t t-else=""><t t-out="rule.name"/></t>
+                                        <i t-if="info.propagateCancel" class="oi ms-1" data-icon="link" title="Cancel next move"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                    </div>
+                    </div>
+                    </t>
+
+                    <!-- Legend -->
+                    <div t-if="graph.nodes.length" class="o_route_flow_legend d-flex flex-wrap gap-3 small text-muted px-3 py-2">
+                        <span><svg width="34" height="8"><line x1="0" y1="4" x2="34" y2="4" stroke="currentColor" stroke-width="2"/></svg> Pull: triggered by a need downstream</span>
+                        <span><svg width="34" height="8"><line x1="0" y1="4" x2="34" y2="4" stroke="currentColor" stroke-width="2" stroke-dasharray="8 6"/></svg> Push: triggered by goods arriving</span>
+                        <span><svg width="34" height="8"><line x1="0" y1="4" x2="34" y2="4" stroke="currentColor" stroke-width="2" stroke-dasharray="2 5"/></svg> Pull &amp; Push</span>
+                        <span><span class="text-primary">Blue text</span>: triggers another rule (MTO)</span>
+                        <span>Click a card to edit it, the flow is redrawn on save.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>
