@@ -15,6 +15,14 @@
                         </t>
                     </select>
                 </div>
+                <div class="o_route_flow_product d-flex align-items-center gap-2">
+                    <label class="fw-bold mb-0">Product</label>
+                    <RecordSelector resModel="'product.product'" resId="this.state.productId"
+                                    update="(productId) => this.onProductChange(productId)"
+                                    domain="[['type', '=', 'consu']]" placeholder="'All products'"/>
+                    <button t-if="this.state.productId" class="btn btn-link btn-sm p-0" title="All products"
+                            t-on-click="() => this.onProductChange(false)"><i class="oi" data-icon="close"/></button>
+                </div>
                 <div class="btn-group btn-group-sm ms-3" role="group" aria-label="Zoom">
                     <button class="btn btn-light" title="Zoom out" t-on-click="() => this.zoomBy(-0.1)"><i class="oi" data-icon="zoom_out"/></button>
                     <button class="btn btn-light" title="Fit to screen" t-on-click="() => this.zoomFit()">
@@ -39,7 +47,8 @@
                     <div t-att-class="'o_route_flow_route px-3 py-2' + (!this.state.routeId ? ' active' : '')"
                          t-on-click="() => this.selectRoute(false)">
                         <div class="fw-bold"><i class="oi me-2" data-icon="account_tree"/>All routes</div>
-                        <div class="small text-muted">Everything that can happen in this warehouse</div>
+                        <div t-if="this.state.productId" class="small text-muted">Path of this product: delivery, then replenishment</div>
+                        <div t-else="" class="small text-muted">Everything that can happen in this warehouse</div>
                     </div>
                     <t t-foreach="this.routeList" t-as="route" t-key="route.id">
                         <div t-att-class="'o_route_flow_route px-3 py-2' + (route.id === this.state.routeId ? ' active' : '')"
@@ -123,6 +132,8 @@
                                         <span class="o_route_flow_action badge" t-att-style="'background:' + info.color">
                                             <i class="oi me-1" t-att-data-icon="info.icon"/><t t-out="info.actionLabel"/>
                                         </span>
+                                        <span t-if="info.replenishment" class="badge text-bg-info"
+                                              title="Triggered when the stock it takes from must be refilled (e.g. by a reordering rule), not by the sale itself">Replenishment</span>
                                         <span t-if="info.delay" class="badge text-bg-warning ms-auto" title="Lead time (days)">
                                             <i class="oi me-1" data-icon="schedule"/>+<t t-out="info.delay"/>d
                                         </span>

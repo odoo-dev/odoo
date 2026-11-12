@@ -1,6 +1,7 @@
 import { Component, onMounted, onWillStart, proxy, signal, useListener, useProps } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
+import { RecordSelector } from "@web/core/record_selectors/record_selector";
 import { useService } from "@web/core/utils/hooks";
 import { standardActionServiceProps } from "@web/webclient/actions/action_plugin";
 
@@ -42,6 +43,7 @@ const ACTION_ICONS = {
 
 export class RouteFlow extends Component {
     static template = "stock.RouteFlow";
+    static components = { RecordSelector };
     props = useProps(standardActionServiceProps);
 
     setup() {
@@ -50,6 +52,7 @@ export class RouteFlow extends Component {
         this.state = proxy({
             warehouseId: false,
             routeId: false, // false = all routes of the warehouse
+            productId: false, // set = only the rules this product goes through
             version: 0, // bumped after each (re)load to trigger a render
             hoveredRuleId: false,
             zoom: false, // false = fit to screen width
@@ -64,7 +67,7 @@ export class RouteFlow extends Component {
         };
         onMounted(measure);
         useListener(window, "resize", measure);
-        this.data = { warehouses: [], routes: [], rules: [], locations: {}, labels: {} };
+        this.data = { warehouses: [], routes: [], rules: [], locations: {}, labels: {}, productFlow: null };
         this.constants = { NODE_W, NODE_H, CARD_W, CARD_H };
         onWillStart(async () => {
             await this.loadLabels();
@@ -168,6 +171,19 @@ export class RouteFlow extends Component {
         if (!this.state.warehouseId || !warehouses.some((w) => w.id === this.state.warehouseId)) {
             this.state.warehouseId = warehouses[0]?.id || false;
         }
+        await this.loadProductFlow();
+    }
+
+    /** Rules the selected product goes through, as found by the procurement (server side). */
+    async loadProductFlow() {
+        this.data.productFlow = null;
+        if (this.state.productId && this.state.warehouseId) {
+            const flow = await this.orm.call("stock.rule", "get_product_flow", [
+                this.state.productId,
+                this.state.warehouseId,
+            ]);
+            this.data.productFlow = new Map(flow.map((step) => [step.rule_id, step.role]));
+        }
         this.state.version++;
     }
 
@@ -178,6 +194,11 @@ export class RouteFlow extends Component {
     /** Rules relevant for the selected warehouse (all routes). */
     get warehouseRules() {
         this.state.version; // subscribe
+        const productFlow = this.data.productFlow;
+        if (productFlow) {
+            // May include rules of another warehouse (inter-warehouse resupply).
+            return this.data.rules.filter((rule) => productFlow.has(rule.id));
+        }
         const whId = this.state.warehouseId;
         return this.data.rules.filter((rule) => {
             if (rule.warehouse_id) {
@@ -438,6 +459,7 @@ export class RouteFlow extends Component {
             routeName: rule.route_id.display_name,
             needIn: rule.physicalDest.id !== rule.location_dest_id.id ? rule.location_dest_id.display_name : false,
             color: this.routeColor(rule.route_id.id),
+            replenishment: this.data.productFlow?.get(rule.id) === "replenishment",
         };
     }
 
@@ -448,6 +470,13 @@ export class RouteFlow extends Component {
     onWarehouseChange(ev) {
         this.state.warehouseId = parseInt(ev.target.value);
         this.state.routeId = false;
+        this.loadProductFlow();
+    }
+
+    onProductChange(productId) {
+        this.state.productId = productId || false;
+        this.state.routeId = false;
+        this.loadProductFlow();
     }
 
     selectRoute(routeId) {

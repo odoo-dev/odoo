@@ -625,6 +625,63 @@ class StockRule(models.Model):
         return result
 
     @api.model
+    def get_product_flow(self, product_id, warehouse_id):
+        """ Rules a product goes through in a warehouse, found the same way as
+        a real procurement (see `_get_rule` and `_get_push_rule`): the chain
+        pulled by a customer need, the replenishment of the locations it takes
+        from, and the push rules applied when the goods arrive.
+        Used by the route flow view.
+
+        :return: list of {'rule_id': int, 'role': 'demand'|'replenishment'|'push'}
+        """
+        product = self.env['product.product'].browse(product_id)
+        warehouse = self.env['stock.warehouse'].browse(warehouse_id)
+        move = self.env['stock.move'].new({'product_id': product.id})
+        no_route = self.env['stock.route']
+        flow = {}
+        visited = set()
+
+        def push_from(location, wh):
+            while location and location.id not in visited:
+                visited.add(location.id)
+                rule = self._get_push_rule(move, location, no_route, wh)
+                if not rule or rule.id in flow:
+                    return
+                flow[rule.id] = 'push'
+                location = rule.location_dest_id
+
+        def pull_to(location, wh, role, chained=False):
+            if not location or (location.id, wh.id) in visited:
+                return
+            visited.add((location.id, wh.id))
+            rule = self._get_rule(product, location, {'warehouse_id': wh, 'company_id': warehouse.company_id})
+            if not rule or rule.id in flow:
+                return
+            flow[rule.id] = role
+            # The goods arrive where the operation type puts them, then are pushed further.
+            arrival = rule.location_dest_id
+            if not rule.location_dest_from_rule and rule.picking_type_id.default_location_dest_id:
+                arrival = rule.picking_type_id.default_location_dest_id
+            # Like `_skip_push`: no push when the chained move takes the goods where they arrive.
+            if not (chained and (location._child_of(arrival) or arrival._child_of(location))):
+                push_from(arrival, wh)
+            if rule.action in ('buy', 'manufacture'):
+                return
+            source = rule.location_src_id
+            if rule.procure_method == 'make_to_stock':
+                # Taken from stock: what refills this stock (e.g. a reordering rule) uses the same search.
+                pull_to(source, source.warehouse_id or wh, 'replenishment')
+            else:
+                # Same warehouse as the procurement of the chained move (see `_prepare_procurement_values`).
+                source_wh = rule.warehouse_id or rule.picking_type_id.warehouse_id or wh
+                if not source.warehouse_id:
+                    source_wh = rule.route_id.supplier_wh_id or source_wh
+                pull_to(source, source_wh, role, chained=True)
+
+        pull_to(self.env.ref('stock.stock_location_customers'), warehouse, 'demand')
+        return [{'rule_id': rule_id, 'role': role} for rule_id, role in flow.items()]
+
+    @api.model
     def _check_intercomp_location(self, locations):
         if locations.filtered(lambda location: location.usage == 'transit'):
             inter_comp_location = self.env.ref('stock.stock_location_inter_company', raise_if_not_found=False)
