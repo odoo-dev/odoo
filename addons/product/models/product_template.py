@@ -881,21 +881,27 @@ class ProductTemplate(models.Model):
         return super().action_archive()
 
     def copy(self, default=None):
+        def get_ptav_key(ptav, attribute_line_ids):
+            return attribute_line_ids.index(ptav.attribute_line_id.id), ptav.product_attribute_value_id.id
+
         copied_tmpls = super().copy(default)
         for template, template_copy in zip(self, copied_tmpls, strict=True):
-            # Since we don't copy the product template attribute values, we need to match the extra
-            # prices.
-            for ptav, copied_ptav in zip(
-                template.attribute_line_ids.product_template_value_ids,
-                template_copy.attribute_line_ids.product_template_value_ids,
-            ):
-                if not ptav.price_extra:
-                    continue
-                # security check
-                if (
-                    ptav.attribute_id == copied_ptav.attribute_id
-                    and ptav.product_attribute_value_id == copied_ptav.product_attribute_value_id
-                ):
+            # Since we don't copy the product template attribute values, we need to match them, by
+            # attribute line position and value, to copy their extra prices. The archived values,
+            # not copied, are left out.
+            copy_line_ids = template_copy.attribute_line_ids.ids
+            copy_ptav_by_key = {
+                get_ptav_key(ptav, copy_line_ids): ptav
+                for ptav in template_copy.attribute_line_ids.product_template_value_ids
+            }
+            line_ids = template.attribute_line_ids.ids
+            ptav_mapping = {
+                ptav: copy_ptav_by_key[key]
+                for ptav in template.attribute_line_ids.product_template_value_ids
+                if (key := get_ptav_key(ptav, line_ids)) in copy_ptav_by_key
+            }
+            for ptav, copied_ptav in ptav_mapping.items():
+                if ptav.price_extra:
                     copied_ptav.price_extra = ptav.price_extra
 
             if template.company_id != template_copy.company_id:
