@@ -29,3 +29,43 @@ class MailCase(TransactionCase):
         )
         # if we get here SMTPServerDisconnected was not raised
         self.assertEqual(mail.state, "outgoing")
+
+    def test_mail_send_no_recipients_notification(self):
+        """Test that sending an email without recipients marks notifications as failed."""
+        message = self.env['mail.message'].create({
+            'body': '<p>Test</p>',
+            'subject': 'Test',
+        })
+        mail = self.env['mail.mail'].create({
+            'body_html': '<p>Test</p>',
+            'is_notification': True,
+            'mail_message_id': message.id,
+        })
+        notification = self.env['mail.notification'].create({
+            'failure_type': 'mail_email_missing',
+            'mail_mail_id': mail.id,
+            'mail_message_id': message.id,
+            'notification_status': 'ready',
+            'notification_type': 'email',
+        })
+
+        with (
+            mock.patch(
+                "odoo.addons.base.models.ir_mail_server.IrMail_Server._disable_send",
+                return_value=False,
+            ),
+            mock.patch(
+                "odoo.addons.base.models.ir_mail_server.IrMail_Server._connect__",
+                return_value=mock.MagicMock(),
+            ),
+        ):
+            mail.send()
+
+        self.assertRecordValues(mail, [{
+            'state': 'exception',
+            'failure_type': 'mail_email_missing',
+        }])
+        self.assertRecordValues(notification, [{
+            'notification_status': 'exception',
+            'failure_type': 'mail_email_missing',
+        }])

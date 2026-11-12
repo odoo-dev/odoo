@@ -533,7 +533,7 @@ class TestMailMail(MailCommon):
                 self.assertEqual(mail.failure_reason, self.env['ir.mail_server'].NO_VALID_RECIPIENT)
                 self.assertEqual(mail.failure_type, 'mail_email_missing', 'Mail: missing email_to')
                 self.assertEqual(mail.state, 'exception')
-                if email_to == ' ':
+                if not email_to or email_to == ' ':
                     self.assertEqual(notification.failure_reason, self.env['ir.mail_server'].NO_VALID_RECIPIENT)
                     self.assertEqual(notification.failure_type, 'mail_email_missing')
                     self.assertEqual(notification.notification_status, 'exception')
