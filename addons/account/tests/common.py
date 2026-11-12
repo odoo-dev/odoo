@@ -2151,6 +2151,48 @@ class TestTaxCommon(AccountTestInvoicingHttpCommon):
         )
 
     # -------------------------------------------------------------------------
+    # distribute_delta_amount_smoothly
+    # -------------------------------------------------------------------------
+
+    def _assert_sub_test_distribute_delta_amount_smoothly(self, results, expected_values):
+        precision_digits = expected_values['precision_digits']
+        self.assertEqual(
+            [float_round(amount, precision_digits=precision_digits) for amount in results['amounts']],
+            expected_values['amounts'],
+        )
+
+    def _create_py_sub_test_distribute_delta_amount_smoothly(self, precision_digits, delta_amount, factors, allow_negative_factors):
+        return {
+            'amounts': self.env['account.tax']._distribute_delta_amount_smoothly(
+                precision_digits,
+                delta_amount,
+                [{'factor': factor} for factor in factors],
+                allow_negative_factors=allow_negative_factors,
+            ),
+        }
+
+    def _create_js_sub_test_distribute_delta_amount_smoothly(self, precision_digits, delta_amount, factors, allow_negative_factors):
+        return {
+            'test': 'distribute_delta_amount_smoothly',
+            'precision_digits': precision_digits,
+            'delta_amount': delta_amount,
+            'factors': factors,
+            'allow_negative_factors': allow_negative_factors,
+        }
+
+    def assert_distribute_delta_amount_smoothly(self, precision_digits, delta_amount, factors, expected_amounts, allow_negative_factors=False):
+        self._create_assert_test(
+            {'precision_digits': precision_digits, 'amounts': expected_amounts},
+            self._create_py_sub_test_distribute_delta_amount_smoothly,
+            self._create_js_sub_test_distribute_delta_amount_smoothly,
+            self._assert_sub_test_distribute_delta_amount_smoothly,
+            precision_digits,
+            delta_amount,
+            factors,
+            allow_negative_factors,
+        )
+
+    # -------------------------------------------------------------------------
     # base_lines_tax_details
     # -------------------------------------------------------------------------
 

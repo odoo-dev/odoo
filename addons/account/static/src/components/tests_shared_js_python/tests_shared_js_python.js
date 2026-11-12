@@ -66,6 +66,16 @@ export class TestsSharedJsPython extends Component {
                 )
             }
         }
+        if (params.test === "distribute_delta_amount_smoothly") {
+            return {
+                amounts: accountTaxHelpers.distribute_delta_amount_smoothly(
+                    params.precision_digits,
+                    params.delta_amount,
+                    params.factors.map((factor) => ({ factor: factor })),
+                    { allow_negative_factors: params.allow_negative_factors }
+                ),
+            };
+        }
         if (params.test === "tax_totals_summary") {
             const document = this.populateDocument(params.document);
             const taxTotals = accountTaxHelpers.get_tax_totals_summary(

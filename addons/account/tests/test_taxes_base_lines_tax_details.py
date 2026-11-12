@@ -104,6 +104,18 @@ class TestTaxesBaseLinesTaxDetails(TestTaxCommon):
         self.assert_base_lines_tax_details(document, expected_values)
         self._run_js_tests()
 
+    def test_distribute_delta_amount_smoothly_ties(self):
+        """ A share falling exactly on a half unit is rounded the same way on both sides (to the even
+        integer, like the python builtin 'round'), so python and javascript spread a delta identically.
+        """
+        self.assert_distribute_delta_amount_smoothly(3, 0.03, [0.4, 0.3, 0.3], [0.012, 0.009, 0.009])
+        # 0.025 is 2.5 cents: 2 of them are spread by factor, not 3.
+        self.assert_distribute_delta_amount_smoothly(2, 0.025, [1.0], [0.02])
+        # The second and third factors each get half a cent, rounded to 0: the leftover cent goes to the biggest factor.
+        self.assert_distribute_delta_amount_smoothly(2, 0.02, [0.5, 0.25, 0.25], [0.02, 0.0, 0.0])
+        self.assert_distribute_delta_amount_smoothly(2, -0.02, [0.5, 0.25, 0.25], [-0.02, 0.0, 0.0])
+        self._run_js_tests()
+
     def test_dispatch_delta_on_net_zero_tax(self):
         """Check that the base line delta still is dispatched if net tax is zero."""
         def get_expected_values(base_values, tax):

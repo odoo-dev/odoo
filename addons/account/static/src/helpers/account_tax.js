@@ -1,6 +1,15 @@
 import { floatIsZero, roundPrecision } from "@web/core/utils/numbers";
 import { _t } from "@web/core/l10n/translation";
 
+/**
+ * Round to the closest integer, ties going to the even one: the behavior of the python builtin `round`,
+ * used when spreading a delta in account_tax.py. `Math.round` sends ties up, which gives the python and
+ * javascript sides different distributions as soon as a share falls exactly on a half unit.
+ */
+function roundHalfEven(value) {
+    return Math.abs(value % 1) === 0.5 ? 2 * Math.round(value / 2) : Math.round(value);
+}
+
 export const accountTaxHelpers = {
     // -------------------------------------------------------------------------
     // HELPERS IN BOTH PYTHON/JAVASCRIPT (account_tax.js / account_tax.py)
@@ -901,7 +910,7 @@ export const accountTaxHelpers = {
         ];
 
         for (const [sign_factor, signed_factors, delta_factor] of factor_groups) {
-            const nb_of_errors = Math.round(
+            const nb_of_errors = roundHalfEven(
                 Math.abs((delta_amount * delta_factor) / precision_rounding)
             );
             let remaining_errors = nb_of_errors;
@@ -912,7 +921,7 @@ export const accountTaxHelpers = {
                 }
 
                 const nb_of_amount_to_distribute = Math.min(
-                    Math.round(sign_factor * factor * nb_of_errors),
+                    roundHalfEven(sign_factor * factor * nb_of_errors),
                     remaining_errors
                 );
 
