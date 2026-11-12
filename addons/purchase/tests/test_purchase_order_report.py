@@ -318,3 +318,47 @@ class TestPurchaseOrderReport(AccountTestInvoicingCommon):
             aggregates=['untaxed_total:sum'],
         )
         self.assertEqual(res[0][1], 150.0)
+
+    def test_variant_specific_uom(self):
+        """ Variants are purchased in their own unit, which is the one reported, and the template
+        total is expressed in the template unit. """
+        self._enable_uom()
+        attribute = self.env['product.attribute'].create({
+            'name': 'Packaging',
+            'value_ids': [Command.create({'name': 'Single'}), Command.create({'name': 'Pack'})],
+        })
+        template = self.env['product.template'].create({
+            'name': 'Water',
+            'uom_id': self.uom_unit.id,
+            'attribute_line_ids': [Command.create({
+                'attribute_id': attribute.id,
+                'value_ids': [Command.set(attribute.value_ids.ids)],
+            })],
+        })
+        variant_unit, variant_pack = template.product_variant_ids.sorted('id')
+        variant_pack.uom_id = self.uom_pack_6
+
+        po_form = Form(self.env['purchase.order'])
+        po_form.partner_id = self.partner_a
+        with po_form.order_line.new() as line:
+            line.product_id = variant_pack
+            self.assertEqual(line.uom_id, self.uom_pack_6)
+            line.product_qty = 2
+        with po_form.order_line.new() as line:
+            line.product_id = variant_pack
+            line.uom_id = self.uom_unit
+            line.product_qty = 12
+        with po_form.order_line.new() as line:
+            line.product_id = variant_unit
+            self.assertEqual(line.uom_id, self.uom_unit)
+            line.product_qty = 3
+        po = po_form.save()
+        po.button_confirm()
+        self.env.flush_all()
+
+        reports = self.env['purchase.report'].search([('order_id', '=', po.id), ('product_id', '=', variant_pack.id)])
+        self.assertEqual(reports.uom_id, self.uom_pack_6)
+        self.assertEqual(sum(reports.mapped('qty_ordered')), 4)
+
+        self.assertEqual(variant_pack.purchased_product_qty, 4)
+        self.assertEqual(template.purchased_product_qty, 27)
