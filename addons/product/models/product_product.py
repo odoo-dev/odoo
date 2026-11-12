@@ -1492,3 +1492,7 @@ class ProductProduct(models.Model):
         if field_name == 'categ_id' and self.env.context.get('product_catalog_order_model') and 'values' in result:
             result['values'].sort(key=lambda v: v.get('display_name', ''))
         return result
+
+    def _get_quantity_in_template_uom(self, quantity):
+        self.ensure_one()
+        return self.uom_id._compute_quantity(quantity, self.product_tmpl_id.uom_id, round=False)

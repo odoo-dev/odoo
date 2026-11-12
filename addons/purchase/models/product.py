@@ -28,9 +28,11 @@ class ProductTemplate(models.Model):
             else:
                 product.purchase_method = default_purchase_method
 
+    @api.depends('uom_id', 'product_variant_ids.uom_id')
     def _compute_purchased_product_qty(self):
         for template in self.with_context(active_test=False):
-            template.purchased_product_qty = template.uom_id.round(sum(p.purchased_product_qty for p in template.product_variant_ids))
+            purchased_qties = (p._get_quantity_in_template_uom(p.purchased_product_qty) for p in template.product_variant_ids)
+            template.purchased_product_qty = template.uom_id.round(sum(purchased_qties))
 
     def _get_backend_root_menu_ids(self):
         return super()._get_backend_root_menu_ids() + [self.env.ref('purchase.menu_purchase_root').id]

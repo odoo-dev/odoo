@@ -83,9 +83,11 @@ class ProductTemplate(models.Model):
         action['context'] = {'search_default_bom_active': True}
         return action
 
+    @api.depends('uom_id', 'product_variant_ids.uom_id')
     def _compute_mrp_product_qty(self):
         for template in self:
-            template.mrp_product_qty = template.uom_id.round(sum(template.mapped('product_variant_ids').mapped('mrp_product_qty')))
+            manufactured_qties = (product._get_quantity_in_template_uom(product.mrp_product_qty) for product in template.product_variant_ids)
+            template.mrp_product_qty = template.uom_id.round(sum(manufactured_qties))
 
     def action_view_mos(self):
         action = self.env["ir.actions.actions"]._for_xml_id("mrp.mrp_production_action")

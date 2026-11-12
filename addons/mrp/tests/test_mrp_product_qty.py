@@ -47,6 +47,33 @@ class TestMrpProductQty(TestMrpCommon):
         self.assertEqual(mo.state, 'done')
         return mo
 
+    def test_mrp_product_qty_template_in_template_unit(self):
+        """ The manufactured quantity of a template sums its variants in the template unit. """
+        component = self.env['product.product'].create({'name': 'Bottle', 'type': 'consu'})
+        template = self.env['product.template'].create({
+            'name': 'Water',
+            'is_storable': True,
+            'uom_id': self.uom_unit.id,
+            'attribute_line_ids': [Command.create({
+                'attribute_id': self.size_attribute.id,
+                'value_ids': [Command.set([self.size_attribute_s.id, self.size_attribute_m.id])],
+            })],
+        })
+        variant_unit, variant_pack = template.product_variant_ids.sorted('id')
+        variant_pack.uom_id = self.uom_pack_6
+        bom_unit, bom_pack = self.env['mrp.bom'].create([{
+            'product_tmpl_id': template.id,
+            'product_id': variant.id,
+            'uom_id': variant.uom_id.id,
+            'bom_line_ids': [Command.create({'product_id': component.id, 'product_qty': 1})],
+        } for variant in (variant_unit, variant_pack)])
+
+        self._create_and_complete_mo(variant_unit, bom_unit, qty=3)
+        self._create_and_complete_mo(variant_pack, bom_pack, qty=2)
+        self.env.flush_all()
+        self.assertEqual(variant_pack.mrp_product_qty, 2)
+        self.assertEqual(template.mrp_product_qty, 15)
+
     def test_mrp_product_qty_normal_mo(self):
         """Test that mrp_product_qty correctly counts finished product
         quantity from a normal (no byproduct) manufacturing order."""
