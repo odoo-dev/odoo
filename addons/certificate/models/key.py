@@ -38,7 +38,7 @@ class CertificateKey(models.Model):
     _description = 'Cryptographic Key'
 
     name = fields.Char(string='Name', default="New key")
-    content = fields.Binary(string='Key file', required=True)
+    content = fields.Binary(string='Key file', ui_required=True)
     password = fields.Char(string='Private key password')
     pem_key = fields.Binary(
         string='Key bytes in PEM format',
