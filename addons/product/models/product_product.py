@@ -43,7 +43,7 @@ class ProductProduct(models.Model):
         help="This is the sum of the extra price of all attributes")
     # lst_price: catalog value + extra, or custom value
     lst_price = fields.Float(
-        'Sales Price',
+        'Price',
         compute='_compute_product_lst_price',
         inverse='_inverse_product_lst_price',
         min_display_digits='Product Price',
