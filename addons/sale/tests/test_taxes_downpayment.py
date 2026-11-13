@@ -868,8 +868,7 @@ class TestTaxesDownPaymentSale(TestTaxCommonSale, TestTaxesDownPayment):
             order_line._prepare_base_line_for_taxes_computation() for order_line in so.order_line
         ]
         AccountTax = self.env["account.tax"]
-        AccountTax._add_tax_details_in_base_lines(so_base_lines, self.env.company)
-        AccountTax._round_base_lines_tax_details(so_base_lines, self.env.company)
+        AccountTax._add_tax_details(so_base_lines, self.env.company)
 
         dp_lines = AccountTax._prepare_down_payment_lines(
             base_lines=so_base_lines,

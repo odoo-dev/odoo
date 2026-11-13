@@ -71,12 +71,13 @@ class AccountTax(models.Model):
     # -----------------------
 
     @api.model
-    def _add_tax_details_in_base_line(self, base_line, company, rounding_method=None):
+    def _add_tax_details(self, base_lines, company, tax_lines=None, rounding_method=None):
         """
         Withholding taxes should not affect the tax computation unless explicitly required (via a specific key in the base line).
         This requires to adapt the tax computation slightly to achieve this behavior.
         """
         # EXTENDS 'account'
-        if not base_line.get('calculate_withholding_taxes'):
-            base_line['filter_tax_function'] = lambda t: not t.is_withholding_tax
-        super()._add_tax_details_in_base_line(base_line, company, rounding_method=rounding_method)
+        for base_line in base_lines:
+            if not base_line.get('calculate_withholding_taxes'):
+                base_line['filter_tax_function'] = lambda t: not t.is_withholding_tax
+        super()._add_tax_details(base_lines, company, tax_lines=tax_lines, rounding_method=rounding_method)

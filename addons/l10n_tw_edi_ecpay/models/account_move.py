@@ -469,7 +469,7 @@ class AccountMove(models.Model):
             base_line = self._prepare_product_base_line_for_taxes_computation(line)
             if is_allowance and self.reversed_entry_id.currency_id == self.currency_id:
                 base_line['rate'] = self.reversed_entry_id.invoice_currency_rate  # replace the rate by the original invoice's rate
-            AccountTax._add_tax_details_in_base_line(base_line, self.company_id)
+            AccountTax._add_tax_details([base_line], self.company_id, rounding_method='no_round')
             base_lines.append(base_line)
 
             twd_excluded_amount = base_line['tax_details']['raw_total_excluded']
@@ -530,7 +530,7 @@ class AccountMove(models.Model):
             if self.l10n_tw_edi_is_b2b:
                 # Only B2B reports TaxAmount/ItemTax to ECPay. Round per tax record here,
                 # like the invoice itself does, so the totals actually match it.
-                AccountTax._round_base_lines_tax_details(base_lines, self.company_id)
+                AccountTax._add_tax_details(base_lines, self.company_id)
 
         # Sale amount adjustment
         amount_on_invoice = self.amount_untaxed_signed if self.l10n_tw_edi_is_b2b and tax_type != "4" else self.amount_total_signed

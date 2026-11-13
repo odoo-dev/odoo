@@ -1891,8 +1891,7 @@ class AccountEdiCommon(models.AbstractModel):
                 **base_line_kwargs,
             ))
 
-        AccountTax._add_tax_details_in_base_lines(base_lines, company)
-        AccountTax._round_base_lines_tax_details(base_lines, company)
+        AccountTax._add_tax_details(base_lines, company)
 
         # Remove lines having a zero amount.
         collected_values['base_lines'] = [

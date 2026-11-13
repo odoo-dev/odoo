@@ -1265,8 +1265,7 @@ class AccountMoveLine(models.Model):
 
             company = line.company_id or self.env.company
             base_line = line.move_id._prepare_product_base_line_for_taxes_computation(line)
-            AccountTax._add_tax_details_in_base_line(base_line, company)
-            AccountTax._round_base_lines_tax_details([base_line], company)
+            AccountTax._add_tax_details([base_line], company)
             line.price_subtotal = base_line['tax_details']['total_excluded_currency']
             line.price_total = base_line['tax_details']['total_included_currency']
 
@@ -1366,7 +1365,7 @@ class AccountMoveLine(models.Model):
         def _get_discount_before_rounding(line):
             base_line = line.move_id._prepare_product_base_line_for_taxes_computation(line)
             base_line['discount'] = 0.0
-            self.env['account.tax']._add_tax_details_in_base_line(base_line, line.company_id)
+            self.env['account.tax']._add_tax_details([base_line], line.company_id, rounding_method='no_round')
             price_subtotal = base_line['tax_details']['raw_total_excluded_currency']
             return line.move_id.direction_sign * price_subtotal * line.discount / 100
 
@@ -1495,8 +1494,7 @@ class AccountMoveLine(models.Model):
                 }
                 for line in invoice_lines
             ]
-            AccountTax._add_tax_details_in_base_lines(base_lines, company)
-            AccountTax._round_base_lines_tax_details(base_lines, company)
+            AccountTax._add_tax_details(base_lines, company)
 
             # store the invoice line record
             for base_line in base_lines:
