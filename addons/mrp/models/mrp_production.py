@@ -2966,9 +2966,9 @@ class MrpProduction(models.Model):
 
     def _get_ratio_between_mo_and_bom_quantities(self, bom):
         self.ensure_one()
-        bom_product_uom = (bom.product_id or bom.product_tmpl_id).uom_id
-        bom_qty = bom.uom_id._compute_quantity(bom.product_qty, bom_product_uom)
-        ratio = bom_qty / self.product_uom_qty
+        # Compare in the MO unit: `product_uom_qty` is rounded, which would skew the ratio
+        bom_qty = bom.uom_id._compute_quantity(bom.product_qty, self.uom_id, round=False)
+        ratio = bom_qty / self.product_qty
         return ratio
 
     def _check_sn_uniqueness(self):

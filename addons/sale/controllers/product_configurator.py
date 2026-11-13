@@ -190,6 +190,12 @@ class SaleProductConfiguratorController(Controller):
         currency = self.env["res.currency"].browse(currency_id)
         combination = self.env["product.template.attribute.value"].browse(ptav_ids)
         product = product_template._get_variant_for_combination(combination)
+        # Variants can have their own units, the selected one may not be available for this variant.
+        enforce_uom = product and (
+            not product._has_multiple_uoms() or product_uom not in product._get_available_uoms()
+        )
+        if enforce_uom:
+            product_uom = product.uom_id
 
         values = self._get_basic_product_information(
             product or product_template,
@@ -203,8 +209,8 @@ class SaleProductConfiguratorController(Controller):
         )
         # Shouldn't be sent client-side
         values.pop("pricelist_rule_id", None)
-        if product and not product._has_multiple_uoms():
-            # Enforce the default UoM if there is no other choice for this variant.
+        if enforce_uom:
+            # Enforce the default UoM if the selected one can't be used for this variant.
             values["uom"] = product.uom_id.read(["id", "display_name"])[0]
         return values
 
@@ -324,10 +330,10 @@ class SaleProductConfiguratorController(Controller):
             }
         """
         show_price = self.env.context.get("show_price", True)
+        product = product_template._get_variant_for_combination(combination)
         uom = (
             product_uom_id and self.env["uom.uom"].browse(product_uom_id)
-        ) or product_template._get_main_uom()
-        product = product_template._get_variant_for_combination(combination)
+        ) or (product or product_template)._get_main_uom()
         attribute_exclusions = product_template._get_attribute_exclusions(
             combination_ids=combination.ids
         )

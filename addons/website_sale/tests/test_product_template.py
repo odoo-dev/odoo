@@ -2,6 +2,8 @@
 
 from datetime import datetime
 
+from lxml import html
+
 from odoo.fields import Command, Date
 from odoo.tests import tagged
 
@@ -257,3 +259,100 @@ class TestWebsiteSaleProductTemplate(WebsiteSaleCommon):
                 website_sale_product_page=True
             )._get_combination_info(product_id=self.product.id, add_qty=1)
             self.assertEqual(product_page_info["price"], self.product.list_price / 2)
+
+    def test_variant_specific_uom_product_page(self):
+        """The product page of a variant uses the unit of this variant."""
+        self._enable_uom()
+        attribute = self.env["product.attribute"].create({
+            "name": "Packaging",
+            "value_ids": [Command.create({"name": "Single"}), Command.create({"name": "Pack"})],
+        })
+        template = self.env["product.template"].create({
+            "name": "Water",
+            "list_price": 10,
+            "uom_id": self.uom_unit.id,
+            "uom_ids": [Command.link(self.uom_dozen.id)],
+            "attribute_line_ids": [Command.create({
+                "attribute_id": attribute.id,
+                "value_ids": [Command.set(attribute.value_ids.ids)],
+            })],
+        })
+        variant_single, variant_pack = template.product_variant_ids.sorted("id")
+        variant_pack.uom_id = self.uom_pack_6
+        # Only sold by the single variant
+        box_of_10 = self.env["uom.uom"].create({
+            "name": "Box of 10", "relative_factor": 10, "relative_uom_id": self.uom_unit.id,
+        })
+        variant_single.extra_uom_ids = box_of_10
+
+        with self.mock_request(user=self.env.user) as request:
+            template = template.with_env(request.env)
+            variant_pack = variant_pack.with_env(request.env)
+            combination_info = template._get_combination_info(product_id=variant_pack.id)
+            # Switching from the other variant carries its selected unit over
+            carried_unit_info = template._get_combination_info(
+                product_id=variant_pack.id, uom_id=box_of_10.id,
+            )
+            unit_info = template._get_combination_info(product_id=variant_pack.id, uom_id=self.uom_unit.id)
+            dozen_info = template._get_combination_info(product_id=variant_pack.id, uom_id=self.uom_dozen.id)
+            selector = request.env["ir.ui.view"]._render_template(
+                "website_sale.product_packaging_selector",
+                values={
+                    "product": template,
+                    "product_variant": variant_pack,
+                    "combination_info": combination_info,
+                },
+            )
+        self.assertEqual(combination_info["price"], 10, "The price should be the one of a pack")
+        self.assertEqual(carried_unit_info["price"], 10, "Box of 10 isn't available for this variant")
+        self.assertAlmostEqual(unit_info["price"], 10 / 6, places=2, msg="Its template unit is available too")
+        self.assertEqual(dozen_info["price"], 20, "An available unit is still respected: a dozen is 2 packs")
+        checked_uoms = html.fromstring(str(selector)).xpath("//input[@name='uom_id' and @checked]")
+        self.assertEqual([uom.get("id") for uom in checked_uoms], [f"uom-{self.uom_pack_6.id}"])
+
+    def test_packaging_selector_selects_the_priced_unit(self):
+        """The unit selected on the product page is always the one used for the displayed price."""
+        self._enable_uom()
+        attribute = self.env["product.attribute"].create({
+            "name": "Packaging",
+            "value_ids": [Command.create({"name": "Single"}), Command.create({"name": "Pack"})],
+        })
+        template = self.env["product.template"].create({
+            "name": "Water",
+            "list_price": 12,
+            "uom_id": self.uom_unit.id,
+            "attribute_line_ids": [Command.create({
+                "attribute_id": attribute.id,
+                "value_ids": [Command.set(attribute.value_ids.ids)],
+            })],
+        })
+        variant_pack = template.product_variant_ids.sorted("id")[1]
+        variant_pack.uom_id = self.uom_pack_6
+        variant_pack.extra_uom_ids = self.uom_unit
+
+        def get_price_and_selected_uom(**kwargs):
+            with self.mock_request(user=self.env.user) as request:
+                combination_info = template.with_env(request.env)._get_combination_info(
+                    product_id=variant_pack.id, **kwargs,
+                )
+                selector = request.env["ir.ui.view"]._render_template(
+                    "website_sale.product_packaging_selector",
+                    values={
+                        "product": template.with_env(request.env),
+                        "product_variant": variant_pack.with_env(request.env),
+                        "combination_info": combination_info,
+                    },
+                )
+            checked_uoms = html.fromstring(str(selector)).xpath("//input[@name='uom_id' and @checked]")
+            return combination_info["price"], [uom.get("id") for uom in checked_uoms]
+
+        pack_id, unit_id = f"uom-{self.uom_pack_6.id}", f"uom-{self.uom_unit.id}"
+        self.assertEqual(get_price_and_selected_uom(), (12, [pack_id]), "The variant unit is the default one")
+        self.assertEqual(
+            get_price_and_selected_uom(uom_id=self.uom_unit.id), (2, [unit_id]),
+            "A unit carried over from another variant is kept when this variant also sells it",
+        )
+        self.assertEqual(
+            get_price_and_selected_uom(uom_id=self.uom_dozen.id), (12, [pack_id]),
+            "A unit carried over from another variant is replaced when this variant doesn't sell it",
+        )
