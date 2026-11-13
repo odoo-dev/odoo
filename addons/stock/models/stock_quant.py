@@ -587,7 +587,6 @@ class StockQuant(models.Model):
 
     def action_clear_inventory_quantity(self):
         self.inventory_quantity = 0
-        self.inventory_diff_quantity = 0
         self.inventory_quantity_set = False
         self.user_id = False
 

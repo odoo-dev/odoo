@@ -1101,11 +1101,14 @@ class One2many(_RelationalMulti):
             comodel_domain = self.get_comodel_domain(model).optimize_dynamic(comodel)
 
             def unlink(lines):
-                ondelete = comodel._fields[inverse].ondelete
+                inverse_field = comodel._fields[inverse]
+                ondelete = inverse_field.ondelete
                 if callable(ondelete):
                     ondelete = ondelete(lines, lines[inverse])
                 if ondelete == 'cascade':
                     to_delete.extend(lines._ids)
+                elif inverse_field.required:
+                    raise UserError(lines.env._("Cannot set %s to blank", inverse_field))
                 else:
                     lines[inverse] = False
 

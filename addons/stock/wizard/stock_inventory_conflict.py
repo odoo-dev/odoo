@@ -15,10 +15,12 @@ class StockInventoryConflict(models.TransientModel):
 
     def action_keep_counted_quantity(self):
         for quant in self.quant_ids:
+            # XXX
             quant.inventory_diff_quantity = quant.inventory_quantity - quant.quantity
         return self.quant_ids.action_apply_inventory()
 
     def action_keep_difference(self):
         for quant in self.quant_ids:
+            # XXX
             quant.inventory_quantity = quant.quantity + quant.inventory_diff_quantity
         return self.quant_ids.action_apply_inventory()

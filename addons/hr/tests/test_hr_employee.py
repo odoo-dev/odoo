@@ -127,11 +127,11 @@ class TestHrEmployee(TestHrCommon):
         self.assertEqual(self.res_users_hr_officer.tz, employee.tz)
 
         # Check False value on employee
-        with mute_logger('odoo.sql_db'), self.assertRaises(NotNullViolation):
+        with mute_logger('odoo.sql_db'), self.assertRaises(ValueError):
             employee.tz = False
 
         # Check False value on user
-        with mute_logger('odoo.sql_db'), self.assertRaises(NotNullViolation):
+        with mute_logger('odoo.sql_db'), self.assertRaises(ValueError):
             self.res_users_hr_officer.tz = False
 
     def test_employee_from_user(self):

@@ -173,7 +173,8 @@ class TestACL(TransactionCaseWithUserDemo):
         # check we can create countries
         country.create({'name': 'ok'})
 
-        country.write({'state_ids': [Command.clear(), Command.create({'country_id': country.id, 'name': '1234'})]})
+        country.sudo().state_ids.unlink()  # cannot just unlink states (or clear them)
+        country.write({'state_ids': [Command.create({'country_id': country.id, 'name': '1234'})]})
         state = country.state_ids
         state.ensure_one()
 

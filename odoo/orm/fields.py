@@ -15,7 +15,7 @@ from operator import attrgetter
 
 from psycopg2.extras import Json as PsycopgJson
 
-from odoo.exceptions import AccessError, MissingError
+from odoo.exceptions import AccessError, MissingError, ValidationError
 from odoo.tools import SQL, reset_cached_properties, sql
 from odoo.tools.constants import IN_MAX
 from odoo.tools.misc import frozendict, SENTINEL, Sentinel, unique
@@ -1723,6 +1723,8 @@ class Field[T, C]:
             return
 
         # update the cache
+        if cache_value is None and self.required and any(records._ids) and not self.compute:
+            raise ValidationError(records.env._('Cannot assign nothing to a required field %s', self))
         self._update_cache(records, cache_value, dirty=True)
 
     ############################################################################
@@ -1826,7 +1828,7 @@ class Field[T, C]:
             the update
         """
         if cache_value is None and self.required and any(records._ids) and not self.compute:
-            _logger.warning(f"Cannot assign None to a required field {self}")
+            raise ValueError(f"Cannot assign None to a required field {self}")
 
         env = records.env
         field_cache = self._get_cache(env)
