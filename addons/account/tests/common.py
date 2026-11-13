@@ -2283,6 +2283,123 @@ class TestTaxCommon(AccountTestInvoicingHttpCommon):
         self._assert_sub_test_tax_totals_summary(results, expected_values)
 
     # -------------------------------------------------------------------------
+    # tax amounts: the amounts a document books, whatever the taxes engine
+    # -------------------------------------------------------------------------
+
+    @classmethod
+    def _reverse_sign(cls, values):
+        """ The same expected amounts with the opposite sign, e.g. for a refund. """
+        return {
+            key: [cls._reverse_sign(sub_values) for sub_values in value] if key == 'taxes_data'
+            else value if key == 'tax_id'
+            else -value
+            for key, value in values.items()
+        }
+
+    def _assert_sub_test_tax_amounts(self, results, expected_values):
+        """ Compare the amounts listed in 'expected_values' only: per base line 'total_excluded[_currency]' /
+        'total_included[_currency]' and per tax 'base_amount[_currency]' / 'tax_amount[_currency]', then the totals of the
+        document.
+        """
+        def comparable(values, expected):
+            return {
+                key: round(values[key], 6) if isinstance(expected[key], float) else values[key]
+                for key in expected
+                if key != 'taxes_data'
+            }
+
+        base_lines_tax_details = results['base_lines_tax_details']
+        expected_base_lines = expected_values['base_lines']
+        self.assertEqual(len(base_lines_tax_details), len(expected_base_lines))
+        for index, (base_line, expected_base_line) in enumerate(zip(base_lines_tax_details, expected_base_lines)):
+            with self.subTest(base_line_index=index):
+                expected_taxes_data = expected_base_line.get('taxes_data', [])
+                self.assertEqual(len(base_line['taxes_data']), len(expected_taxes_data))
+                self.assertDictEqual(
+                    {
+                        **comparable(base_line, expected_base_line),
+                        'taxes_data': [
+                            comparable(tax_data, expected_tax_data)
+                            for tax_data, expected_tax_data in zip(base_line['taxes_data'], expected_taxes_data)
+                        ],
+                    },
+                    {
+                        **comparable(expected_base_line, expected_base_line),
+                        'taxes_data': [comparable(expected_tax_data, expected_tax_data) for expected_tax_data in expected_taxes_data],
+                    },
+                )
+
+        base_amount = sum(base_line['total_excluded_currency'] for base_line in base_lines_tax_details)
+        tax_amount = sum(
+            tax_data['tax_amount_currency']
+            for base_line in base_lines_tax_details
+            for tax_data in base_line['taxes_data']
+        )
+        self.assertDictEqual(
+            {
+                'base_amount': round(base_amount, 6),
+                'tax_amount': round(tax_amount, 6),
+                'total_amount': round(base_amount + tax_amount, 6),
+            },
+            {
+                'base_amount': round(expected_values['base_amount'], 6),
+                'tax_amount': round(expected_values['tax_amount'], 6),
+                'total_amount': round(expected_values['total_amount'], 6),
+            },
+        )
+
+    def assert_tax_amounts(self, document, expected_base_lines_tax_details, expected_base_amount, expected_tax_amount, expected_total_amount):
+        """ Assert the amounts the base lines of the document book, see '_assert_sub_test_tax_amounts'. """
+        self._create_assert_test(
+            {
+                'base_lines': expected_base_lines_tax_details,
+                'base_amount': expected_base_amount,
+                'tax_amount': expected_tax_amount,
+                'total_amount': expected_total_amount,
+            },
+            self._create_py_sub_test_base_lines_tax_details,
+            self._create_js_sub_test_base_lines_tax_details,
+            self._assert_sub_test_tax_amounts,
+            document,
+        )
+
+    def assert_global_discount_tax_amounts(self, document, amount_type, amount, expected_base_lines_tax_details, expected_base_amount, expected_tax_amount, expected_total_amount):
+        """ Assert the amounts booked by the base lines of the document followed by its global discount lines. """
+        self._create_assert_test(
+            {
+                'base_lines': expected_base_lines_tax_details,
+                'base_amount': expected_base_amount,
+                'tax_amount': expected_tax_amount,
+                'total_amount': expected_total_amount,
+            },
+            self._create_py_sub_test_global_discount,
+            self._create_js_sub_test_global_discount,
+            self._assert_sub_test_tax_amounts,
+            document,
+            amount_type,
+            amount,
+            False,
+        )
+
+    def assert_down_payment_tax_amounts(self, document, amount_type, amount, expected_base_lines_tax_details, expected_base_amount, expected_tax_amount, expected_total_amount):
+        """ Assert the amounts booked by the down payment lines of the document. """
+        self._create_assert_test(
+            {
+                'base_lines': expected_base_lines_tax_details,
+                'base_amount': expected_base_amount,
+                'tax_amount': expected_tax_amount,
+                'total_amount': expected_total_amount,
+            },
+            self._create_py_sub_test_down_payment,
+            self._create_js_sub_test_down_payment,
+            self._assert_sub_test_tax_amounts,
+            document,
+            amount_type,
+            amount,
+            False,
+        )
+
+    # -------------------------------------------------------------------------
     # global_discount
     # -------------------------------------------------------------------------
 
@@ -2310,7 +2427,11 @@ class TestTaxCommon(AccountTestInvoicingHttpCommon):
             company=self.env.company,
             cash_rounding=new_document['cash_rounding'],
         )
-        return {'tax_totals': tax_totals, 'soft_checking': soft_checking}
+        return {
+            'tax_totals': tax_totals,
+            'soft_checking': soft_checking,
+            'base_lines_tax_details': self._extract_base_lines_details(new_document),
+        }
 
     def _create_js_sub_test_global_discount(self, document, amount_type, amount, soft_checking):
         return {
@@ -2409,6 +2530,21 @@ class TestTaxCommon(AccountTestInvoicingHttpCommon):
     def assert_invoice_tax_totals_summary(self, invoice, expected_values, soft_checking=False):
         self._assert_tax_totals_summary(invoice.tax_totals, expected_values, soft_checking=soft_checking)
         self.assert_invoice_totals(invoice, expected_values)
+
+
+class TestTaxesRoundingCommon(TestTaxCommon):
+    """ The amounts booked with the rounding of the taxes of a company, see 'assert_tax_amounts'. """
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.env.company.tax_rounding_policy = 'document'
+        cls.currency = cls.env.company.currency_id
+        cls.foreign_currency = cls.setup_other_currency('EUR')
+        cls.tax_groups = cls.env['account.tax.group'].create([
+            {'name': str(i), 'sequence': str(i)}
+            for i in range(1, 10)
+        ])
 
 
 class TestAccountMergeCommon(AccountTestInvoicingCommon):

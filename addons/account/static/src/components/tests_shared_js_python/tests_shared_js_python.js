@@ -102,7 +102,11 @@ export class TestsSharedJsPython extends Component {
                 document.company,
                 {cash_rounding: document.cash_rounding}
             );
-            return {tax_totals: taxTotals, soft_checking: params.soft_checking};
+            return {
+                tax_totals: taxTotals,
+                soft_checking: params.soft_checking,
+                base_lines_tax_details: this.extractBaseLinesDetails(document),
+            };
         }
         if (params.test === "down_payment") {
             const document = this.populateDocument(params.document);
