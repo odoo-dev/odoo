@@ -2363,6 +2363,18 @@ class TestTaxCommon(AccountTestInvoicingHttpCommon):
             document,
         )
 
+    def assert_py_tax_amounts(self, base_lines, expected_base_lines_tax_details, expected_base_amount, expected_tax_amount, expected_total_amount):
+        """ Same as 'assert_tax_amounts' for base lines computed python-side, e.g. the ones of an invoice. """
+        self._assert_sub_test_tax_amounts(
+            {'base_lines_tax_details': self._extract_base_lines_details({'lines': base_lines})},
+            {
+                'base_lines': expected_base_lines_tax_details,
+                'base_amount': expected_base_amount,
+                'tax_amount': expected_tax_amount,
+                'total_amount': expected_total_amount,
+            },
+        )
+
     def assert_global_discount_tax_amounts(self, document, amount_type, amount, expected_base_lines_tax_details, expected_base_amount, expected_tax_amount, expected_total_amount):
         """ Assert the amounts booked by the base lines of the document followed by its global discount lines. """
         self._create_assert_test(

@@ -28,10 +28,19 @@ TYPE_TAX_USE = [
 #               'excluded' rounds the base and the tax independently,
 #               'included' rounds base + tax, then derives the base from the rounded tax,
 #               'mixed' picks 'included' or 'excluded' depending on whether the tax is price-included.
+# - spreading:  how the rounding of a group of amounts lands in the amounts, with the 'tax' grain:
+#               'difference' rounds each amount, then spreads the difference with the rounded total,
+#               'total' shares the rounded total in proportion to the unrounded amounts.
 # The javascript side never resolves a policy: it receives it through `res.company.tax_rounding_settings`.
 TAX_ROUNDING_POLICIES = {
-    'line': {'tax_grain': 'line', 'authority': 'mixed'},
-    'document': {'tax_grain': 'tax', 'authority': 'mixed'},
+    'line': {'tax_grain': 'line', 'authority': 'mixed', 'spreading': 'difference'},
+    'document': {'tax_grain': 'tax', 'authority': 'mixed', 'spreading': 'difference'},
+}
+
+# The settings the tax rules of a country impose on the 'document' policy, per fiscal country code.
+TAX_ROUNDING_COUNTRY_SETTINGS = {
+    # The certification of the invoicing software: the total with tax is the reference, shared between the lines.
+    'PT': {'authority': 'included', 'spreading': 'total'},
 }
 
 # How the taxes of a document are written into an external format (EDI, QR code, fiscal device, API). Each format declares
@@ -744,7 +753,8 @@ class AccountTax(models.Model):
     #   base lines
     #     |
     #     | _add_tax_details_in_base_lines(base_lines, company, rounding_policy, tax_lines)
-    #     |   +- _get_tax_rounding_policy                     the policy, see TAX_ROUNDING_POLICIES
+    #     |   +- _get_tax_rounding_policy                     the policy, see TAX_ROUNDING_POLICIES, and the settings
+    #     |   |                                               of the fiscal country, see TAX_ROUNDING_COUNTRY_SETTINGS
     #     |   +- _add_tax_details_in_base_line                EVALUATE each line: the 'raw_*' amounts
     #     |   |    +- _get_tax_details                        the tax formulas (rounded inside with the 'line' grain)
     #     |   |    +- _get_pins_reaching_total_included       a 'target_total_included' pin into pinned amounts
@@ -782,7 +792,8 @@ class AccountTax(models.Model):
     #          +- _represent_tax_amounts                      the unrounded tax amounts per grouping key
     #
     #   _reach_target(items, field, target, precision_digits, weights) spreads the difference between a target and the
-    #   sum of the amounts with _distribute_delta_amount_smoothly. It is used by the solver, the repartition lines
+    #   sum of the amounts with _distribute_delta_amount_smoothly; _share_rounded_total shares a rounded total instead (the
+    #   'total' spreading of a policy). They are used by the solver, the repartition lines
     #   (_add_accounting_data_to_base_line_tax_details), _split_tax_data / _split_base_line,
     #   _reduce_base_lines_to_target_amount, and by the formats within the rounding window of a currency
     #   (_reach_target_in_window).
@@ -1727,7 +1738,8 @@ class AccountTax(models.Model):
 
     @api.model
     def _get_tax_rounding_policy(self, company, rounding_policy=None):
-        """ Return the settings of a rounding policy for a company, see TAX_ROUNDING_POLICIES.
+        """ Return the settings of a rounding policy for a company, see TAX_ROUNDING_POLICIES. The 'document' policy follows
+        the tax rules of the fiscal country of the company, see TAX_ROUNDING_COUNTRY_SETTINGS.
         This is the only place resolving a policy: the javascript side receives the result through
         `res.company.tax_rounding_settings`.
 
@@ -1735,7 +1747,11 @@ class AccountTax(models.Model):
         :param rounding_policy: The key of the policy in TAX_ROUNDING_POLICIES, the company's one by default.
         :return:                A new dictionary, as a value of TAX_ROUNDING_POLICIES.
         """
-        return dict(TAX_ROUNDING_POLICIES[rounding_policy or company.tax_rounding_policy])
+        rounding_policy = rounding_policy or company.tax_rounding_policy
+        policy = dict(TAX_ROUNDING_POLICIES[rounding_policy])
+        if rounding_policy == 'document':
+            policy.update(TAX_ROUNDING_COUNTRY_SETTINGS.get(company.account_fiscal_country_id.code, {}))
+        return policy
 
     @api.model
     def _add_tax_details_in_base_line(self, base_line, company, policy=None):
@@ -1990,6 +2006,53 @@ class AccountTax(models.Model):
         return amounts_to_distribute
 
     @api.model
+    def _share_rounded_total(self, items, field, weights, precision_digits, keep=None):
+        """ Set the amounts 'field' of the items to their share of the rounded sum of 'weights', in proportion to them (the
+        'total' spreading of the rounding policies). The positive and the negative weights get the rounding of their own sum
+        first, so an item never gets an amount of the opposite sign of its weight.
+
+        [!] Mirror of the same method in account_tax.js.
+        PLZ KEEP BOTH METHODS CONSISTENT WITH EACH OTHERS.
+
+        :param items:               A list of dictionaries.
+        :param field:               The key of the amount in the items.
+        :param weights:             The unrounded amount of each item.
+        :param precision_digits:    The precision of the amounts.
+        :param keep:                An optional list of booleans telling which items keep their amount (e.g. the pinned ones).
+        """
+        total = float_round(sum(weights), precision_digits=precision_digits)
+        plus_indexes = [i for i, weight in enumerate(weights) if weight >= 0.0]
+        neg_indexes = [i for i, weight in enumerate(weights) if weight < 0.0]
+        sum_plus = sum(weights[i] for i in plus_indexes)
+        sum_neg = sum(weights[i] for i in neg_indexes)
+        if total > 0.0:
+            total_plus = float_round(sum_plus, precision_digits=precision_digits)
+            total_neg = float_round(total - total_plus, precision_digits=precision_digits)
+        elif total < 0.0:
+            total_neg = float_round(sum_neg, precision_digits=precision_digits)
+            total_plus = float_round(total - total_neg, precision_digits=precision_digits)
+        else:
+            total_plus = float_round(sum_plus, precision_digits=precision_digits)
+            total_neg = float_round(sum_neg, precision_digits=precision_digits)
+        if not plus_indexes:
+            total_neg += total_plus
+        if not neg_indexes:
+            total_plus += total_neg
+
+        shares = [0.0] * len(items)
+        for indexes, amount in ((plus_indexes, total_plus), (neg_indexes, total_neg)):
+            amounts = self._distribute_delta_amount_smoothly(
+                precision_digits=precision_digits,
+                delta_amount=amount,
+                target_factors=[{'factor': weights[i]} for i in indexes],
+            )
+            for i, share in zip(indexes, amounts):
+                shares[i] = share
+        for i, item in enumerate(items):
+            if not keep or not keep[i]:
+                item[field] = shares[i]
+
+    @api.model
     def _group_tax_data(self, base_lines, grouping_function):
         """ Group the tax data of the base lines.
 
@@ -2007,6 +2070,25 @@ class AccountTax(models.Model):
         return groups
 
     @api.model
+    def _is_tax_details_pinned(self, base_line, tax_data, field):
+        """ Whether one amount of the tax details is pinned (see '_round_and_pin_tax_details'). An amount in company currency
+        is pinned as soon as the same amount in foreign currency is.
+
+        [!] Mirror of the same method in account_tax.js.
+        PLZ KEEP BOTH METHODS CONSISTENT WITH EACH OTHERS.
+
+        :param base_line:   A base line.
+        :param tax_data:    One of the tax data of the base line, None for the amount without tax of the base line.
+        :param field:       The key of the amount, e.g. 'tax_amount_currency' or 'total_excluded'.
+        :return:            True if the amount is pinned.
+        """
+        pins = base_line['pins'] or {}
+        if tax_data:
+            pins = (pins.get('tax_amounts') or {}).get(str(tax_data['tax'].id)) or {}
+        currency_field = field if field.endswith('_currency') else f'{field}_currency'
+        return field in pins or currency_field in pins
+
+    @api.model
     def _get_tax_details_target(self, base_line, tax_data, field):
         """ The amount a rounding target counts for one amount of the tax details: the pinned amount if the amount is
         pinned, the unrounded amount otherwise. An amount in company currency is pinned as soon as the same amount in
@@ -2020,14 +2102,8 @@ class AccountTax(models.Model):
         :param field:       The key of the amount, e.g. 'tax_amount_currency' or 'total_excluded'.
         :return:            The amount.
         """
-        pins = base_line['pins'] or {}
-        if tax_data:
-            values = tax_data
-            pins = (pins.get('tax_amounts') or {}).get(str(tax_data['tax'].id)) or {}
-        else:
-            values = base_line['tax_details']
-        currency_field = field if field.endswith('_currency') else f'{field}_currency'
-        if field in pins or currency_field in pins:
+        values = tax_data or base_line['tax_details']
+        if self._is_tax_details_pinned(base_line, tax_data, field):
             return values[field]
         return values[f'raw_{field}']
 
@@ -2069,7 +2145,7 @@ class AccountTax(models.Model):
                 values[field] = company_currency.round(values[f'raw_{field}'])
 
     @api.model
-    def _reach_tax_rounding_targets(self, base_lines, company, policy):
+    def _reach_tax_rounding_targets(self, base_lines, company, policy, tax_lines=None):
         """ The targets of the taxes rounded per tax ('tax' grain of the policy): the rounded amounts add up to the rounding of
         their unrounded sum, per tax first, then for the whole document.
 
@@ -2092,8 +2168,11 @@ class AccountTax(models.Model):
         :param base_lines:  A list of base lines.
         :param company:     The company owning the base lines.
         :param policy:      The rounding policy, see '_get_tax_rounding_policy'.
+        :param tax_lines:   Optional tax lines to reach before deriving the base amounts from the tax amounts, see
+                            '_reach_tax_line_targets'.
         """
         authority = policy['authority']
+        share_total = policy['spreading'] == 'total'
         company_currency = company.currency_id
 
         # Per tax.
@@ -2105,21 +2184,78 @@ class AccountTax(models.Model):
             tax_data['price_include'],
             base_line['computation_key'],
         ))
+        def is_included(price_include):
+            return authority == 'included' or (authority == 'mixed' and price_include)
+
+        def get_batch_taxes_data(base_line, tax_data):
+            return [
+                other_tax_data
+                for other_tax_data in base_line['tax_details']['taxes_data']
+                if other_tax_data['tax'] in tax_data['batch']
+            ]
+
+        # Per tax: the tax amounts.
+        for suffix in ('_currency', ''):
+            field = f'tax_amount{suffix}'
+            for (_tax, currency, _is_refund, _is_reverse_charge, _price_include, _key), items in tax_groups.items():
+                currency = currency if suffix else company_currency
+                taxes_data = [tax_data for _base_line, tax_data in items]
+                if share_total:
+                    self._share_rounded_total(
+                        taxes_data,
+                        field,
+                        [tax_data[f'raw_{field}'] for tax_data in taxes_data],
+                        currency.decimal_places,
+                        keep=[self._is_tax_details_pinned(base_line, tax_data, field) for base_line, tax_data in items],
+                    )
+                else:
+                    target = sum(self._get_tax_details_target(base_line, tax_data, field) for base_line, tax_data in items)
+                    self._reach_target(taxes_data, field, currency.round(target), currency.decimal_places)
+
+        # The existing tax lines are part of the totals the base amounts are derived from.
+        if tax_lines:
+            self._reach_tax_line_targets(base_lines, company, tax_lines)
+
+        # Per tax: the base amounts.
         for suffix in ('_currency', ''):
             tax_field = f'tax_amount{suffix}'
-            base_field = f'base_amount{suffix}'
+            field = f'base_amount{suffix}'
             for (_tax, currency, _is_refund, _is_reverse_charge, price_include, _key), items in tax_groups.items():
                 currency = currency if suffix else company_currency
                 taxes_data = [tax_data for _base_line, tax_data in items]
-                target_tax_amount = sum(self._get_tax_details_target(base_line, tax_data, tax_field) for base_line, tax_data in items)
-                target_base_amount = sum(self._get_tax_details_target(base_line, tax_data, base_field) for base_line, tax_data in items)
-                self._reach_target(taxes_data, tax_field, currency.round(target_tax_amount), currency.decimal_places)
-                if authority == 'included' or (authority == 'mixed' and price_include):
-                    target_base_amount = (
-                        currency.round(target_base_amount + target_tax_amount)
-                        - sum(tax_data[tax_field] for tax_data in taxes_data)
+                keep = [self._is_tax_details_pinned(base_line, tax_data, field) for base_line, tax_data in items]
+                if share_total and is_included(price_include):
+                    batches_taxes_data = [get_batch_taxes_data(base_line, tax_data) for base_line, tax_data in items]
+                    self._share_rounded_total(
+                        taxes_data,
+                        field,
+                        [
+                            tax_data[f'raw_{field}'] + sum(other[f'raw_{tax_field}'] for other in batch_taxes_data)
+                            for tax_data, batch_taxes_data in zip(taxes_data, batches_taxes_data)
+                        ],
+                        currency.decimal_places,
+                        keep=keep,
                     )
-                self._reach_target(taxes_data, base_field, currency.round(target_base_amount), currency.decimal_places)
+                    for tax_data, batch_taxes_data, kept in zip(taxes_data, batches_taxes_data, keep):
+                        if not kept:
+                            tax_data[field] = currency.round(tax_data[field] - sum(other[tax_field] for other in batch_taxes_data))
+                elif share_total:
+                    self._share_rounded_total(
+                        taxes_data,
+                        field,
+                        [tax_data[f'raw_{field}'] for tax_data in taxes_data],
+                        currency.decimal_places,
+                        keep=keep,
+                    )
+                else:
+                    target_tax_amount = sum(self._get_tax_details_target(base_line, tax_data, tax_field) for base_line, tax_data in items)
+                    target = sum(self._get_tax_details_target(base_line, tax_data, field) for base_line, tax_data in items)
+                    if is_included(price_include):
+                        target = (
+                            currency.round(target + target_tax_amount)
+                            - sum(tax_data[tax_field] for tax_data in taxes_data)
+                        )
+                    self._reach_target(taxes_data, field, currency.round(target), currency.decimal_places)
 
         # Whole document.
         document_groups = defaultdict(list)
@@ -2136,6 +2272,25 @@ class AccountTax(models.Model):
                 suffix_currency = currency if suffix else company_currency
                 field = f'total_excluded{suffix}'
                 tax_field = f'tax_amount{suffix}'
+                taxes_details = [base_line['tax_details'] for base_line in group_base_lines]
+                if share_total:
+                    keep = [self._is_tax_details_pinned(base_line, None, field) for base_line in group_base_lines]
+                    weight_field = f'raw_total_included{suffix}' if is_included else f'raw_{field}'
+                    self._share_rounded_total(
+                        taxes_details,
+                        field,
+                        [tax_details[weight_field] for tax_details in taxes_details],
+                        suffix_currency.decimal_places,
+                        keep=keep,
+                    )
+                    if is_included:
+                        for tax_details, kept in zip(taxes_details, keep):
+                            if not kept:
+                                tax_details[field] = suffix_currency.round(
+                                    tax_details[field] - sum(tax_data[tax_field] for tax_data in tax_details['taxes_data'])
+                                )
+                    continue
+
                 target = sum(self._get_tax_details_target(base_line, None, field) for base_line in group_base_lines)
                 tax_amount = 0.0
                 if is_included:
@@ -2146,7 +2301,6 @@ class AccountTax(models.Model):
                 if not target:
                     continue
 
-                taxes_details = [base_line['tax_details'] for base_line in group_base_lines]
                 self._reach_target(
                     taxes_details,
                     field,
@@ -2231,8 +2385,10 @@ class AccountTax(models.Model):
         for base_line in base_lines:
             self._round_and_pin_tax_details(base_line, company)
 
+        # With the 'included' authority, the amounts without tax absorb the changes of the tax amounts set on the tax lines.
+        tax_lines_first = bool(tax_lines) and policy['tax_grain'] == 'tax' and policy['authority'] == 'included'
         if policy['tax_grain'] == 'tax':
-            self._reach_tax_rounding_targets(base_lines, company, policy)
+            self._reach_tax_rounding_targets(base_lines, company, policy, tax_lines=tax_lines if tax_lines_first else None)
 
         for base_line in base_lines:
             tax_details = base_line['tax_details']
@@ -2242,7 +2398,7 @@ class AccountTax(models.Model):
                     for tax_data in tax_details['taxes_data']
                 ))
 
-        if tax_lines:
+        if tax_lines and not tax_lines_first:
             self._reach_tax_line_targets(base_lines, company, tax_lines)
 
     @api.model

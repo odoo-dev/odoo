@@ -954,6 +954,57 @@ export const accountTaxHelpers = {
     /**
      * [!] Mirror of the same method in account_tax.py.
      * PLZ KEEP BOTH METHODS CONSISTENT WITH EACH OTHERS.
+     */
+    share_rounded_total(items, field, weights, precision_digits, { keep = null } = {}) {
+        const round = (amount) => roundPrecision(amount, Number(`1e-${precision_digits}`));
+        const sum = (values) => values.reduce((total, value) => total + value, 0.0);
+        const total = round(sum(weights));
+        const plus_indexes = weights.map((weight, i) => i).filter((i) => weights[i] >= 0.0);
+        const neg_indexes = weights.map((weight, i) => i).filter((i) => weights[i] < 0.0);
+        const sum_plus = sum(plus_indexes.map((i) => weights[i]));
+        const sum_neg = sum(neg_indexes.map((i) => weights[i]));
+        let total_plus, total_neg;
+        if (total > 0.0) {
+            total_plus = round(sum_plus);
+            total_neg = round(total - total_plus);
+        } else if (total < 0.0) {
+            total_neg = round(sum_neg);
+            total_plus = round(total - total_neg);
+        } else {
+            total_plus = round(sum_plus);
+            total_neg = round(sum_neg);
+        }
+        if (!plus_indexes.length) {
+            total_neg += total_plus;
+        }
+        if (!neg_indexes.length) {
+            total_plus += total_neg;
+        }
+
+        const shares = items.map(() => 0.0);
+        for (const [indexes, amount] of [
+            [plus_indexes, total_plus],
+            [neg_indexes, total_neg],
+        ]) {
+            const amounts = this.distribute_delta_amount_smoothly(
+                precision_digits,
+                amount,
+                indexes.map((i) => ({ factor: weights[i] }))
+            );
+            indexes.forEach((i, j) => {
+                shares[i] = amounts[j];
+            });
+        }
+        items.forEach((item, i) => {
+            if (!keep || !keep[i]) {
+                item[field] = shares[i];
+            }
+        });
+    },
+
+    /**
+     * [!] Mirror of the same method in account_tax.py.
+     * PLZ KEEP BOTH METHODS CONSISTENT WITH EACH OTHERS.
      *
      * @returns A list of { grouping_key, items } where items is a list of [base_line, tax_data].
      */
@@ -976,15 +1027,22 @@ export const accountTaxHelpers = {
      * [!] Mirror of the same method in account_tax.py.
      * PLZ KEEP BOTH METHODS CONSISTENT WITH EACH OTHERS.
      */
-    get_tax_details_target(base_line, tax_data, field) {
+    is_tax_details_pinned(base_line, tax_data, field) {
         let pins = base_line.pins || {};
-        let values = base_line.tax_details;
         if (tax_data) {
-            values = tax_data;
             pins = (pins.tax_amounts || {})[tax_data.tax.id.toString()] || {};
         }
         const currency_field = field.endsWith("_currency") ? field : `${field}_currency`;
-        if (field in pins || currency_field in pins) {
+        return field in pins || currency_field in pins;
+    },
+
+    /**
+     * [!] Mirror of the same method in account_tax.py.
+     * PLZ KEEP BOTH METHODS CONSISTENT WITH EACH OTHERS.
+     */
+    get_tax_details_target(base_line, tax_data, field) {
+        const values = tax_data || base_line.tax_details;
+        if (this.is_tax_details_pinned(base_line, tax_data, field)) {
             return values[field];
         }
         return values[`raw_${field}`];
@@ -1033,6 +1091,7 @@ export const accountTaxHelpers = {
      */
     reach_tax_rounding_targets(base_lines, company, policy) {
         const authority = policy.authority;
+        const share_total = policy.spreading === "total";
         const company_currency = company.currency_id;
         const sum = (values) => values.reduce((total, value) => total + value, 0.0);
 
@@ -1045,39 +1104,111 @@ export const accountTaxHelpers = {
             price_include: tax_data.price_include,
             computation_key: base_line.computation_key,
         }));
+        const is_included = (price_include) =>
+            authority === "included" || (authority === "mixed" && price_include);
+        const get_batch_taxes_data = (base_line, tax_data) =>
+            base_line.tax_details.taxes_data.filter((other_tax_data) =>
+                tax_data.batch.some((tax) => tax.id === other_tax_data.tax.id)
+            );
+
+        // Per tax: the tax amounts.
         for (const suffix of ["_currency", ""]) {
-            const tax_field = `tax_amount${suffix}`;
-            const base_field = `base_amount${suffix}`;
+            const field = `tax_amount${suffix}`;
             for (const { grouping_key, items } of tax_groups) {
                 const currency = suffix ? grouping_key.currency : company_currency;
                 const taxes_data = items.map(([_base_line, tax_data]) => tax_data);
-                const target_tax_amount = sum(
-                    items.map(([base_line, tax_data]) =>
-                        this.get_tax_details_target(base_line, tax_data, tax_field)
-                    )
-                );
-                let target_base_amount = sum(
-                    items.map(([base_line, tax_data]) =>
-                        this.get_tax_details_target(base_line, tax_data, base_field)
-                    )
-                );
-                this.reach_target(
-                    taxes_data,
-                    tax_field,
-                    roundPrecision(target_tax_amount, currency.rounding),
-                    currency.decimal_places
-                );
-                if (authority === "included" || (authority === "mixed" && grouping_key.price_include)) {
-                    target_base_amount =
-                        roundPrecision(target_base_amount + target_tax_amount, currency.rounding) -
-                        sum(taxes_data.map((tax_data) => tax_data[tax_field]));
+                if (share_total) {
+                    this.share_rounded_total(
+                        taxes_data,
+                        field,
+                        taxes_data.map((tax_data) => tax_data[`raw_${field}`]),
+                        currency.decimal_places,
+                        {
+                            keep: items.map(([base_line, tax_data]) =>
+                                this.is_tax_details_pinned(base_line, tax_data, field)
+                            ),
+                        }
+                    );
+                } else {
+                    const target = sum(
+                        items.map(([base_line, tax_data]) =>
+                            this.get_tax_details_target(base_line, tax_data, field)
+                        )
+                    );
+                    this.reach_target(
+                        taxes_data,
+                        field,
+                        roundPrecision(target, currency.rounding),
+                        currency.decimal_places
+                    );
                 }
-                this.reach_target(
-                    taxes_data,
-                    base_field,
-                    roundPrecision(target_base_amount, currency.rounding),
-                    currency.decimal_places
+            }
+        }
+
+        // Per tax: the base amounts.
+        for (const suffix of ["_currency", ""]) {
+            const tax_field = `tax_amount${suffix}`;
+            const field = `base_amount${suffix}`;
+            for (const { grouping_key, items } of tax_groups) {
+                const currency = suffix ? grouping_key.currency : company_currency;
+                const taxes_data = items.map(([_base_line, tax_data]) => tax_data);
+                const keep = items.map(([base_line, tax_data]) =>
+                    this.is_tax_details_pinned(base_line, tax_data, field)
                 );
+                if (share_total && is_included(grouping_key.price_include)) {
+                    const batches_taxes_data = items.map(([base_line, tax_data]) =>
+                        get_batch_taxes_data(base_line, tax_data)
+                    );
+                    this.share_rounded_total(
+                        taxes_data,
+                        field,
+                        taxes_data.map(
+                            (tax_data, i) =>
+                                tax_data[`raw_${field}`] +
+                                sum(batches_taxes_data[i].map((other) => other[`raw_${tax_field}`]))
+                        ),
+                        currency.decimal_places,
+                        { keep }
+                    );
+                    taxes_data.forEach((tax_data, i) => {
+                        if (!keep[i]) {
+                            tax_data[field] = roundPrecision(
+                                tax_data[field] - sum(batches_taxes_data[i].map((other) => other[tax_field])),
+                                currency.rounding
+                            );
+                        }
+                    });
+                } else if (share_total) {
+                    this.share_rounded_total(
+                        taxes_data,
+                        field,
+                        taxes_data.map((tax_data) => tax_data[`raw_${field}`]),
+                        currency.decimal_places,
+                        { keep }
+                    );
+                } else {
+                    const target_tax_amount = sum(
+                        items.map(([base_line, tax_data]) =>
+                            this.get_tax_details_target(base_line, tax_data, tax_field)
+                        )
+                    );
+                    let target = sum(
+                        items.map(([base_line, tax_data]) =>
+                            this.get_tax_details_target(base_line, tax_data, field)
+                        )
+                    );
+                    if (is_included(grouping_key.price_include)) {
+                        target =
+                            roundPrecision(target + target_tax_amount, currency.rounding) -
+                            sum(taxes_data.map((tax_data) => tax_data[tax_field]));
+                    }
+                    this.reach_target(
+                        taxes_data,
+                        field,
+                        roundPrecision(target, currency.rounding),
+                        currency.decimal_places
+                    );
+                }
             }
         }
 
@@ -1096,7 +1227,7 @@ export const accountTaxHelpers = {
         }
         for (const group_base_lines of Object.values(document_groups)) {
             const currency = group_base_lines[0].currency_id;
-            const is_included =
+            const is_document_included =
                 authority === "included" ||
                 (authority === "mixed" &&
                     !group_base_lines.some((base_line) =>
@@ -1111,13 +1242,42 @@ export const accountTaxHelpers = {
                 const suffix_currency = suffix ? currency : company_currency;
                 const field = `total_excluded${suffix}`;
                 const tax_field = `tax_amount${suffix}`;
+                const taxes_details = group_base_lines.map((base_line) => base_line.tax_details);
+                if (share_total) {
+                    const keep = group_base_lines.map((base_line) =>
+                        this.is_tax_details_pinned(base_line, null, field)
+                    );
+                    const weight_field = is_document_included
+                        ? `raw_total_included${suffix}`
+                        : `raw_${field}`;
+                    this.share_rounded_total(
+                        taxes_details,
+                        field,
+                        taxes_details.map((tax_details) => tax_details[weight_field]),
+                        suffix_currency.decimal_places,
+                        { keep }
+                    );
+                    if (is_document_included) {
+                        taxes_details.forEach((tax_details, i) => {
+                            if (!keep[i]) {
+                                tax_details[field] = roundPrecision(
+                                    tax_details[field] -
+                                        sum(tax_details.taxes_data.map((tax_data) => tax_data[tax_field])),
+                                    suffix_currency.rounding
+                                );
+                            }
+                        });
+                    }
+                    continue;
+                }
+
                 let target = sum(
                     group_base_lines.map((base_line) =>
                         this.get_tax_details_target(base_line, null, field)
                     )
                 );
                 let tax_amount = 0.0;
-                if (is_included) {
+                if (is_document_included) {
                     for (const base_line of group_base_lines) {
                         for (const tax_data of base_line.tax_details.taxes_data) {
                             target += this.get_tax_details_target(base_line, tax_data, tax_field);
@@ -1129,14 +1289,13 @@ export const accountTaxHelpers = {
                     continue;
                 }
 
-                const taxes_details = group_base_lines.map((base_line) => base_line.tax_details);
                 this.reach_target(
                     taxes_details,
                     field,
                     roundPrecision(target, suffix_currency.rounding) - tax_amount,
                     suffix_currency.decimal_places,
                     {
-                        weights: is_included
+                        weights: is_document_included
                             ? taxes_details.map((tax_details) => tax_details[`raw_total_included${suffix}`])
                             : null,
                     }
