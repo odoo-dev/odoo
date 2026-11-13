@@ -587,8 +587,7 @@ class L10n_Es_Edi_TbaiDocument(models.Model):
                 'is_refund': base_line['is_refund'],
             }
 
-        base_lines_aggregated_values = AccountTax._aggregate_base_lines_tax_details(base_lines, tax_details_info_grouping_function)
-        values_per_grouping_key = AccountTax._aggregate_base_lines_aggregated_values(base_lines_aggregated_values)
+        values_per_grouping_key = AccountTax._aggregate_tax_details(base_lines, tax_details_info_grouping_function)
 
         tax_details_info = self._build_tax_details_info(values_per_grouping_key.values())
         invoice_info = {
@@ -611,8 +610,7 @@ class L10n_Es_Edi_TbaiDocument(models.Model):
         def totals_grouping_function(base_line, tax_data):
             return True if tax_data else None
 
-        base_lines_aggregated_values = AccountTax._aggregate_base_lines_tax_details(base_lines, totals_grouping_function)
-        values_per_grouping_key = AccountTax._aggregate_base_lines_aggregated_values(base_lines_aggregated_values)
+        values_per_grouping_key = AccountTax._aggregate_tax_details(base_lines, totals_grouping_function)
 
         for values in values_per_grouping_key.values():
             total_amount += values['base_amount']
@@ -646,8 +644,7 @@ class L10n_Es_Edi_TbaiDocument(models.Model):
                 'is_refund': base_line['is_refund'],
             }
 
-        base_lines_aggregated_values = AccountTax._aggregate_base_lines_tax_details(base_lines, tax_details_info_grouping_function)
-        values_per_grouping_key = AccountTax._aggregate_base_lines_aggregated_values(base_lines_aggregated_values)
+        values_per_grouping_key = AccountTax._aggregate_tax_details(base_lines, tax_details_info_grouping_function)
 
         invoice_info = {}
         for scope, target_key in (('service', 'PrestacionServicios'), ('consu', 'Entrega')):
@@ -676,8 +673,7 @@ class L10n_Es_Edi_TbaiDocument(models.Model):
         def totals_grouping_function(base_line, tax_data):
             return True if tax_data else None
 
-        base_lines_aggregated_values = AccountTax._aggregate_base_lines_tax_details(base_lines, totals_grouping_function)
-        values_per_grouping_key = AccountTax._aggregate_base_lines_aggregated_values(base_lines_aggregated_values)
+        values_per_grouping_key = AccountTax._aggregate_tax_details(base_lines, totals_grouping_function)
 
         for values in values_per_grouping_key.values():
             total_amount += values['base_amount']

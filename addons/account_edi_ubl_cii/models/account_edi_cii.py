@@ -236,8 +236,7 @@ class AccountEdiCii(models.AbstractModel):
                 return
             return tax_grouping_key['is_withholding']
 
-        base_lines_aggregated_values = AccountTax._aggregate_base_lines_tax_details(base_lines, grouping_function)
-        values_per_grouping_key = AccountTax._aggregate_base_lines_aggregated_values(base_lines_aggregated_values)
+        values_per_grouping_key = AccountTax._aggregate_tax_details(base_lines, grouping_function)
         vals['tax_withholding_amount'] = 0.0
         for grouping_key, values in values_per_grouping_key.items():
             if not grouping_key:
@@ -347,8 +346,8 @@ class AccountEdiCii(models.AbstractModel):
 
     def _cii_get_line_applicable_trade_tax_nodes(self, vals, base_line):
         tax_nodes = []
-        aggregated_values = self.env['account.tax']._aggregate_base_line_tax_details(
-            base_line=base_line,
+        aggregated_values = self.env['account.tax']._aggregate_tax_details(
+            base_lines=[base_line],
             grouping_function=lambda base_line, tax_data: self._cii_get_default_applicable_trade_tax_grouping_key(
                 base_line=base_line,
                 tax_data=tax_data,
@@ -688,7 +687,7 @@ class AccountEdiCii(models.AbstractModel):
     def _cii_get_applicable_trade_tax_nodes(self, vals):
         tax_nodes = []
         currency = vals['currency_id']
-        base_lines_aggregated_tax_details = self.env['account.tax']._aggregate_base_lines_tax_details(
+        aggregated_tax_details = self.env['account.tax']._aggregate_tax_details(
             base_lines=vals['base_lines'],
             grouping_function=lambda base_line, tax_data: self._cii_get_default_applicable_trade_tax_grouping_key(
                 base_line=base_line,
@@ -697,7 +696,6 @@ class AccountEdiCii(models.AbstractModel):
                 currency=currency,
             )
         )
-        aggregated_tax_details = self.env['account.tax']._aggregate_base_lines_aggregated_values(base_lines_aggregated_tax_details)
         vals['tax_details'] = {}
         for grouping_key, values in aggregated_tax_details.items():
             if not grouping_key:

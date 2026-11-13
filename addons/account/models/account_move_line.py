@@ -1507,8 +1507,7 @@ class AccountMoveLine(models.Model):
             base_lines = AccountTax._dispatch_taxes_into_new_base_lines(base_lines, company, dispatch_exclude_function)
 
             # Compute the total untaxed amount.
-            base_lines_aggregated_values = AccountTax._aggregate_base_lines_tax_details(base_lines, grouping_function)
-            values_per_grouping_key = AccountTax._aggregate_base_lines_aggregated_values(base_lines_aggregated_values)
+            values_per_grouping_key = AccountTax._aggregate_tax_details(base_lines, grouping_function)
             for grouping_key, values in values_per_grouping_key.items():
                 if not grouping_key:
                     continue

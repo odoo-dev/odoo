@@ -287,8 +287,7 @@ class AccountEdiXmlUBL21JO(models.AbstractModel):
 
         tax_inclusive_amount = tax_exclusive_amount - allowance_total_amount
 
-        base_lines_aggregated_tax_details = self.env['account.tax']._aggregate_base_lines_tax_details(vals['base_lines'], vals['total_grouping_function'])
-        aggregated_tax_details = self.env['account.tax']._aggregate_base_lines_aggregated_values(base_lines_aggregated_tax_details)
+        aggregated_tax_details = self.env['account.tax']._aggregate_tax_details(vals['base_lines'], vals['total_grouping_function'])
         for grouping_key, tax_details in aggregated_tax_details.items():
             if grouping_key:
                 tax_inclusive_amount += tax_details['tax_amount_currency']
@@ -418,7 +417,7 @@ class AccountEdiXmlUBL21JO(models.AbstractModel):
         if base_line['record'].move_id.company_id.l10n_jo_edi_taxpayer_type == 'income':
             return
 
-        aggregated_tax_details = self.env['account.tax']._aggregate_base_line_tax_details(base_line, vals['tax_grouping_function'])
+        aggregated_tax_details = self.env['account.tax']._aggregate_tax_details([base_line], vals['tax_grouping_function'])
 
         total_tax_amount_percent = sum(
             values['tax_amount_currency']

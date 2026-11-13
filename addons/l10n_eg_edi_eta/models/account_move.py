@@ -462,18 +462,16 @@ class AccountMove(models.Model):
         tax_lines = [self._prepare_tax_line_for_taxes_computation(aml) for aml in tax_amls]
         AccountTax._add_tax_details_in_base_lines(base_lines, self.company_id, tax_lines=tax_lines)
 
-        base_lines_aggregated_values = AccountTax._aggregate_base_lines_tax_details(base_lines, grouping_function_base_line)
-        invoice_line_data, totals = self._l10n_eg_eta_prepare_invoice_lines_data(base_lines_aggregated_values)
+        invoice_line_data, totals = self._l10n_eg_eta_prepare_invoice_lines_data([
+            (base_line, AccountTax._aggregate_tax_details([base_line], grouping_function_base_line))
+            for base_line in base_lines
+        ])
 
-        base_lines_aggregated_values_total_amount = AccountTax._aggregate_base_lines_tax_details(
+        values_per_grouping_key_total_amount = AccountTax._aggregate_tax_details(
             base_lines, grouping_function_total_amount,
         )
-        values_per_grouping_key_total_amount = AccountTax._aggregate_base_lines_aggregated_values(
-            base_lines_aggregated_values_total_amount,
-        )
 
-        base_lines_aggregated_values = AccountTax._aggregate_base_lines_tax_details(base_lines, grouping_function_global)
-        values_per_grouping_key = AccountTax._aggregate_base_lines_aggregated_values(base_lines_aggregated_values)
+        values_per_grouping_key = AccountTax._aggregate_tax_details(base_lines, grouping_function_global)
 
         date_string = self.invoice_date.strftime('%Y-%m-%dT%H:%M:%SZ')
         eta_invoice = {

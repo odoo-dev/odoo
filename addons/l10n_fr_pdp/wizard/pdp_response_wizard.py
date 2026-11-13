@@ -168,8 +168,7 @@ class PdpResponseWizard(models.TransientModel):
 
         # Tax details
         AccountTax = self.env['account.tax']
-        base_lines_aggregated_values_for_tax_details = AccountTax._aggregate_base_lines_tax_details(base_lines, tax_details_grouping_function)
-        return AccountTax._aggregate_base_lines_aggregated_values(base_lines_aggregated_values_for_tax_details)
+        return AccountTax._aggregate_tax_details(base_lines, tax_details_grouping_function)
 
     @api.model
     def _get_early_payment_discount_tax_details(self, base_lines):
@@ -185,8 +184,7 @@ class PdpResponseWizard(models.TransientModel):
 
         # Tax details
         AccountTax = self.env['account.tax']
-        base_lines_aggregated_values_for_tax_details = AccountTax._aggregate_base_lines_tax_details(base_lines, tax_details_grouping_function)
-        return AccountTax._aggregate_base_lines_aggregated_values(base_lines_aggregated_values_for_tax_details)
+        return AccountTax._aggregate_tax_details(base_lines, tax_details_grouping_function)
 
     @api.model
     def _get_payments_data_fully_paid(self, move):

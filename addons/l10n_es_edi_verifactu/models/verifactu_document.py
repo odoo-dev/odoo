@@ -280,20 +280,22 @@ class L10nEsEdiVerifactuDocument(models.Model):
         AccountTax._add_tax_details_in_base_lines(base_lines, company, tax_lines=tax_lines)
 
         # Totals
-        base_lines_aggregated_values_for_totals = AccountTax._aggregate_base_lines_tax_details(base_lines, total_grouping_function)
-        totals = AccountTax._aggregate_base_lines_aggregated_values(base_lines_aggregated_values_for_totals)[True]
+        totals = AccountTax._aggregate_tax_details(base_lines, total_grouping_function)[True]
 
         # Tax details
-        base_lines_aggregated_values_for_tax_details = AccountTax._aggregate_base_lines_tax_details(base_lines, tax_details_grouping_function)
-        tax_details = AccountTax._aggregate_base_lines_aggregated_values(base_lines_aggregated_values_for_tax_details)
+        tax_details = AccountTax._aggregate_tax_details(base_lines, tax_details_grouping_function)
 
         return {
             'base_amount': totals['base_amount'],
             'tax_amount': totals['tax_amount'],
             'tax_details': {key: tax_detail for key, tax_detail in tax_details.items() if key},
             'tax_details_per_record': {
-                frozendict(base_line): {key: tax_detail for key, tax_detail in tax_details.items() if key}
-                for base_line, tax_details in base_lines_aggregated_values_for_tax_details
+                frozendict(base_line): {
+                    key: tax_detail
+                    for key, tax_detail in AccountTax._aggregate_tax_details([base_line], tax_details_grouping_function).items()
+                    if key
+                }
+                for base_line in base_lines
             },
         }
 

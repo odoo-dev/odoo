@@ -5129,8 +5129,7 @@ class AccountMove(models.Model):
         def grouping_function(base_line, tax_data):
             ...
 
-        base_lines_aggregated_values = self._aggregate_base_lines_tax_details(base_lines, grouping_function)
-        values_per_grouping_key = self._aggregate_base_lines_aggregated_values(base_lines_aggregated_values)
+        values_per_grouping_key = self._aggregate_tax_details(base_lines, grouping_function)
         """
         self.ensure_one()
         AccountTax = self.env['account.tax']
@@ -5163,17 +5162,16 @@ class AccountMove(models.Model):
                 return not filter_tax_values_to_apply or filter_tax_values_to_apply(base_line, tax_data)
 
         # Report the total amounts.
-        base_lines_aggregated_values = AccountTax._aggregate_base_lines_tax_details(base_lines, total_grouping_function)
-        for base_line, aggregated_values in base_lines_aggregated_values:
+        for base_line in base_lines:
             record = base_line['record']
             base_line_results = results['tax_details_per_record'][record]
             base_line_results['base_line'] = base_line
-            for grouping_key, values in aggregated_values.items():
+            for grouping_key, values in AccountTax._aggregate_tax_details([base_line], total_grouping_function).items():
                 if grouping_key:
                     for key in ('base_amount', 'base_amount_currency', 'tax_amount', 'tax_amount_currency'):
                         base_line_results[key] += values[key]
 
-        values_per_grouping_key = AccountTax._aggregate_base_lines_aggregated_values(base_lines_aggregated_values)
+        values_per_grouping_key = AccountTax._aggregate_tax_details(base_lines, total_grouping_function)
         for grouping_key, values in values_per_grouping_key.items():
             if grouping_key:
                 for key in ('base_amount', 'base_amount_currency', 'tax_amount', 'tax_amount_currency'):
@@ -5189,19 +5187,18 @@ class AccountMove(models.Model):
                 return grouping_key
             return tax_data['tax']
 
-        base_lines_aggregated_values = AccountTax._aggregate_base_lines_tax_details(base_lines, tax_details_grouping_function)
-        for base_line, aggregated_values in base_lines_aggregated_values:
+        for base_line in base_lines:
             record = base_line['record']
             base_line_results = results['tax_details_per_record'][record]
             base_line_results['tax_details'] = tax_details = {}
-            for grouping_key, values in aggregated_values.items():
+            for grouping_key, values in AccountTax._aggregate_tax_details([base_line], tax_details_grouping_function).items():
                 if not grouping_key:
                     continue
                 if isinstance(grouping_key, Mapping):
                     values.update(grouping_key)
                 tax_details[grouping_key] = values
 
-        values_per_grouping_key = AccountTax._aggregate_base_lines_aggregated_values(base_lines_aggregated_values)
+        values_per_grouping_key = AccountTax._aggregate_tax_details(base_lines, tax_details_grouping_function)
         results['tax_details'] = tax_details = {}
         for grouping_key, values in values_per_grouping_key.items():
             if not grouping_key:

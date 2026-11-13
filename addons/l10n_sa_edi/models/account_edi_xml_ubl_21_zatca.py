@@ -133,11 +133,10 @@ class AccountEdiXmlUbl_21Zatca(models.AbstractModel):
         AccountTax = self.env['account.tax']
         for prepayment_move_base_lines in vals['prepayment_moves_base_lines'].values():
             # Compute prepayment moves' totals
-            prepayment_moves_base_lines_aggregated_tax_details = AccountTax._aggregate_base_lines_tax_details(
+            prepayment_moves_total_aggregated_tax_details = AccountTax._aggregate_tax_details(
                 prepayment_move_base_lines,
                 vals['total_grouping_function'],
             )
-            prepayment_moves_total_aggregated_tax_details = AccountTax._aggregate_base_lines_aggregated_values(prepayment_moves_base_lines_aggregated_tax_details)
             for grouping_key, values in prepayment_moves_total_aggregated_tax_details.items():
                 if grouping_key:
                     prepaid_amount += values['base_amount_currency'] + values['tax_amount_currency']
@@ -204,11 +203,10 @@ class AccountEdiXmlUbl_21Zatca(models.AbstractModel):
         prepayment_move = vals['prepayment_move']
 
         AccountTax = self.env['account.tax']
-        prepayment_moves_base_lines_aggregated_tax_details = AccountTax._aggregate_base_lines_tax_details(
+        aggregated_tax_details = AccountTax._aggregate_tax_details(
             vals['prepayment_move_base_lines'],
             vals['tax_grouping_function'],
         )
-        aggregated_tax_details = AccountTax._aggregate_base_lines_aggregated_values(prepayment_moves_base_lines_aggregated_tax_details)
 
         prepayment_move_issue_date = fields.Datetime.context_timestamp(
             self.with_context(tz='Asia/Riyadh'),

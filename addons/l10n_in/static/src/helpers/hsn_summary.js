@@ -59,8 +59,7 @@ patch(accountTaxHelpers, {
             } : null;
         }
 
-        const base_lines_aggregated_values = this.aggregate_base_lines_tax_details(base_lines, grouping_function);
-        const values_per_grouping_key = this.aggregate_base_lines_aggregated_values(base_lines_aggregated_values);
+        const values_per_grouping_key = this.aggregate_tax_details(base_lines, grouping_function);
         for (const values of Object.values(values_per_grouping_key)) {
             const grouping_key = values.grouping_key;
             if (!grouping_key || !grouping_key.l10n_in_hsn_code || !grouping_key.l10n_in_gst_tax_type) {

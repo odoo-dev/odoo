@@ -1989,8 +1989,7 @@ class AccountEdiCommon(models.AbstractModel):
             return tax_data and tax_to_taxes.get(tax_data['tax'])
 
         base_lines, tax_lines = invoice._get_rounded_base_and_tax_lines()
-        base_lines_aggregated_values = AccountTax._aggregate_base_lines_tax_details(base_lines, grouping_function)
-        values_per_grouping_key = AccountTax._aggregate_base_lines_aggregated_values(base_lines_aggregated_values)
+        values_per_grouping_key = AccountTax._aggregate_tax_details(base_lines, grouping_function)
         for taxes, values in values_per_grouping_key.items():
             if not taxes:
                 continue

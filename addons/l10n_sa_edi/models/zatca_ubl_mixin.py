@@ -174,7 +174,7 @@ class ZatcaUblMixin(models.AbstractModel):
 
     def _add_document_line_tax_total_nodes(self, line_node, vals):
         base_line = vals['base_line']
-        aggregated_tax_details = self.env['account.tax']._aggregate_base_line_tax_details(base_line, vals['tax_grouping_function'])
+        aggregated_tax_details = self.env['account.tax']._aggregate_tax_details([base_line], vals['tax_grouping_function'])
 
         total_tax_amount = sum(
             values['tax_amount_currency']
@@ -210,7 +210,7 @@ class ZatcaUblMixin(models.AbstractModel):
 
     def _add_document_line_tax_category_nodes(self, line_node, vals):
         base_line = vals['base_line']
-        aggregated_tax_details = self.env['account.tax']._aggregate_base_line_tax_details(base_line, vals['tax_grouping_function'])
+        aggregated_tax_details = self.env['account.tax']._aggregate_tax_details([base_line], vals['tax_grouping_function'])
 
         line_node['cac:Item']['cac:ClassifiedTaxCategory'] = [
             self._get_tax_category_node({**vals, 'grouping_key': grouping_key})
@@ -261,7 +261,7 @@ class ZatcaUblMixin(models.AbstractModel):
         a document level allowance, and we do not include any other charges or allowances.
         """
         base_line = vals['base_line']
-        aggregated_tax_details = self.env['account.tax']._aggregate_base_line_tax_details(base_line, vals['tax_grouping_function'])
+        aggregated_tax_details = self.env['account.tax']._aggregate_tax_details([base_line], vals['tax_grouping_function'])
 
         base_amount_currency = base_line['tax_details']['total_excluded_currency']
         if base_line['special_type'] == 'early_payment':

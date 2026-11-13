@@ -344,19 +344,12 @@ class AccountMove(models.Model):
             return {'tribute_09_non_profit': arg_tax_data['tax'].tax_group_id.l10n_ar_tribute_afip_code == '09' and
                                              arg_tax_data['tax'].tax_group_id != profits_tax_group}
 
-        have_vat_afip_code_base_lines_aggregated_values = self.env['account.tax']._aggregate_base_lines_tax_details(base_lines, tax_grouping_by_have_vat_afip_code)
-        have_vat_afip_not_012_base_lines_aggregated_values = self.env['account.tax']._aggregate_base_lines_tax_details(base_lines, tax_grouping_by_have_vat_afip_not_012)
-        vat_afip_code_base_lines_aggregated_values = self.env['account.tax']._aggregate_base_lines_tax_details(base_lines, tax_grouping_by_vat_afip_code)
-        tribute_afip_code_base_lines_aggregated_values = self.env['account.tax']._aggregate_base_lines_tax_details(base_lines, tax_grouping_by_tribute_afip_code)
-        in_profits_group_base_lines_aggregated_values = self.env['account.tax']._aggregate_base_lines_tax_details(base_lines, tax_grouping_by_in_profits_group)
-        tribute_09_non_profit_base_lines_aggregated_values = self.env['account.tax']._aggregate_base_lines_tax_details(base_lines, tax_grouping_by_tribute_09_non_profit)
-
-        have_vat_afip_code_aggregated_tax_details = self.env['account.tax']._aggregate_base_lines_aggregated_values(have_vat_afip_code_base_lines_aggregated_values)
-        have_vat_afip_not_012_aggregated_tax_details = self.env['account.tax']._aggregate_base_lines_aggregated_values(have_vat_afip_not_012_base_lines_aggregated_values)
-        vat_afip_code_aggregated_tax_details = self.env['account.tax']._aggregate_base_lines_aggregated_values(vat_afip_code_base_lines_aggregated_values)
-        tribute_afip_code_aggregated_tax_details = self.env['account.tax']._aggregate_base_lines_aggregated_values(tribute_afip_code_base_lines_aggregated_values)
-        in_profits_group_aggregated_tax_details = self.env['account.tax']._aggregate_base_lines_aggregated_values(in_profits_group_base_lines_aggregated_values)
-        tribute_09_non_profit_aggregated_tax_details = self.env['account.tax']._aggregate_base_lines_aggregated_values(tribute_09_non_profit_base_lines_aggregated_values)
+        have_vat_afip_code_aggregated_tax_details = self.env['account.tax']._aggregate_tax_details(base_lines, tax_grouping_by_have_vat_afip_code)
+        have_vat_afip_not_012_aggregated_tax_details = self.env['account.tax']._aggregate_tax_details(base_lines, tax_grouping_by_have_vat_afip_not_012)
+        vat_afip_code_aggregated_tax_details = self.env['account.tax']._aggregate_tax_details(base_lines, tax_grouping_by_vat_afip_code)
+        tribute_afip_code_aggregated_tax_details = self.env['account.tax']._aggregate_tax_details(base_lines, tax_grouping_by_tribute_afip_code)
+        in_profits_group_aggregated_tax_details = self.env['account.tax']._aggregate_tax_details(base_lines, tax_grouping_by_in_profits_group)
+        tribute_09_non_profit_aggregated_tax_details = self.env['account.tax']._aggregate_tax_details(base_lines, tax_grouping_by_tribute_09_non_profit)
 
         res = {
             'vat_amount': 0,
@@ -431,8 +424,7 @@ class AccountMove(models.Model):
 
         res = []
         base_lines = base_lines or self._get_rounded_base_and_tax_lines()[0]
-        vat_afip_code_base_lines_aggregated_values = self.env['account.tax']._aggregate_base_lines_tax_details(base_lines, tax_grouping_by_vat_afip_code)
-        vat_afip_code_aggregated_tax_details = self.env['account.tax']._aggregate_base_lines_aggregated_values(vat_afip_code_base_lines_aggregated_values)
+        vat_afip_code_aggregated_tax_details = self.env['account.tax']._aggregate_tax_details(base_lines, tax_grouping_by_vat_afip_code)
         amount_sign = 1
 
         if self.is_refund() and self.l10n_latam_document_type_id.code in self._get_l10n_ar_codes_used_for_inv_and_ref():
@@ -535,8 +527,7 @@ class AccountMove(models.Model):
             }
 
         AccountTax = self.env['account.tax']
-        base_lines_aggregated_values = AccountTax._aggregate_base_lines_tax_details(base_lines, grouping_function)
-        values_per_grouping_key = AccountTax._aggregate_base_lines_aggregated_values(base_lines_aggregated_values)
+        values_per_grouping_key = AccountTax._aggregate_tax_details(base_lines, grouping_function)
         results = []
         for grouping_key, values in values_per_grouping_key.items():
             if (

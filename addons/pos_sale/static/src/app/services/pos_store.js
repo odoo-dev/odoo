@@ -308,12 +308,10 @@ patch(PosStore.prototype, {
                 this.company,
                 (baseLine, taxData) => !accountTaxHelpers.can_be_discounted(taxData.tax)
             );
-            const baseLinesAggregatedValues = accountTaxHelpers.aggregate_base_lines_tax_details(
+            const valuesPerGroupingKey = accountTaxHelpers.aggregate_tax_details(
                 fixedBaseLines,
                 (baseLine, taxData) => true
             );
-            const valuesPerGroupingKey =
-                accountTaxHelpers.aggregate_base_lines_aggregated_values(baseLinesAggregatedValues);
             const fixedBaseLinesTotal = Object.values(valuesPerGroupingKey).map(
                 (v) => v.base_amount_currency + v.tax_amount_currency
             );

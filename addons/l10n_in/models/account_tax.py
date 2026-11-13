@@ -105,8 +105,7 @@ class AccountTax(models.Model):
                 'l10n_in_gst_tax_type': tax_data['tax'].l10n_in_gst_tax_type,
             } if tax_data else None
 
-        base_lines_aggregated_values = self._aggregate_base_lines_tax_details(base_lines, grouping_function)
-        values_per_grouping_key = self._aggregate_base_lines_aggregated_values(base_lines_aggregated_values)
+        values_per_grouping_key = self._aggregate_tax_details(base_lines, grouping_function)
         for grouping_key, values in values_per_grouping_key.items():
             if (
                 not grouping_key

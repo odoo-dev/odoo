@@ -490,8 +490,7 @@ class AccountWithholdingLine(models.AbstractModel):
                 'currency_id': base_line_data['currency_id'].id,
             }
 
-        base_lines_aggregated_values = AccountTax._aggregate_base_lines_tax_details(new_base_lines, grouping_function)
-        values_per_grouping_key = AccountTax._aggregate_base_lines_aggregated_values(base_lines_aggregated_values)
+        values_per_grouping_key = AccountTax._aggregate_tax_details(new_base_lines, grouping_function)
         withholding_line_commands = []
         for grouping_key, values in values_per_grouping_key.items():
             if not grouping_key or grouping_key['skip']:

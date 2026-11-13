@@ -467,11 +467,8 @@ class SaleOrder(models.Model):
                 ),
             }
 
-        base_lines_aggregated_values = AccountTax._aggregate_base_lines_tax_details(
+        values_per_grouping_key = AccountTax._aggregate_tax_details(
             base_lines, grouping_function
-        )
-        values_per_grouping_key = AccountTax._aggregate_base_lines_aggregated_values(
-            base_lines_aggregated_values
         )
         for grouping_key, values in values_per_grouping_key.items():
             if grouping_key and grouping_key["skip"]:

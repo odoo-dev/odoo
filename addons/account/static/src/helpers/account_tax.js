@@ -1206,12 +1206,9 @@ export const accountTaxHelpers = {
         // Global tax values.
         const global_grouping_function = (base_line, tax_data) => tax_data !== null;
 
-        let base_lines_aggregated_values = this.aggregate_base_lines_tax_details(
+        let values_per_grouping_key = this.aggregate_tax_details(
             base_lines,
             global_grouping_function
-        );
-        let values_per_grouping_key = this.aggregate_base_lines_aggregated_values(
-            base_lines_aggregated_values
         );
 
         for (const values of Object.values(values_per_grouping_key)) {
@@ -1235,12 +1232,9 @@ export const accountTaxHelpers = {
             return tax_data.tax.tax_group_id;
         };
 
-        base_lines_aggregated_values = this.aggregate_base_lines_tax_details(
+        values_per_grouping_key = this.aggregate_tax_details(
             base_lines,
             tax_group_grouping_function
-        );
-        values_per_grouping_key = this.aggregate_base_lines_aggregated_values(
-            base_lines_aggregated_values
         );
 
         const sorted_total_per_tax_group = Object.values(values_per_grouping_key)
@@ -1478,180 +1472,88 @@ export const accountTaxHelpers = {
      * [!] Mirror of the same method in account_tax.py.
      * PLZ KEEP BOTH METHODS CONSISTENT WITH EACH OTHERS.
      */
-    aggregate_base_line_tax_details(base_line, grouping_function) {
-        const values_per_grouping_key = {};
-        const tax_details = base_line.tax_details;
-        const taxes_data = tax_details.taxes_data;
-        const pins = base_line.pins || {};
-        const pinned_tax_amounts = pins.tax_amounts || {};
-        const tax_amount_to_propagate = {}
-
-        // If there are no taxes, we pass an empty object to the grouping function.
-        for (const tax_data of taxes_data.length !== 0 ? taxes_data : [null]) {
-            const current_pinned_tax_amounts =
-                (tax_data && pinned_tax_amounts[tax_data.tax.id.toString()]) || {};
-
-            let raw_grouping_key = grouping_function(base_line, tax_data);
-            let grouping_key = this.stringify_grouping_key(raw_grouping_key);
-
-            // Base amount.
-            if (!(grouping_key in values_per_grouping_key)) {
-                const values = {
-                    grouping_key: raw_grouping_key,
-                    taxes_data: [],
-                };
-                values_per_grouping_key[grouping_key] = values;
-
+    aggregate_tax_details(base_lines, grouping_function) {
+        const amount_fields = [];
+        for (const prefix of ["", "raw_"]) {
+            for (const field of ["base_amount", "tax_amount", "total_excluded"]) {
                 for (const suffix of ["_currency", ""]) {
-                    const excluded_rounded_field = `total_excluded${suffix}`;
-                    const excluded_raw_field = `raw_${excluded_rounded_field}`;
-                    const excluded_target_field = `target_${excluded_rounded_field}`;
+                    amount_fields.push(`${prefix}${field}${suffix}`);
+                }
+            }
+        }
+        const values_per_grouping_key = {};
+        for (const base_line of base_lines) {
+            const tax_details = base_line.tax_details;
+            const tax_amount_to_propagate = {};
 
-                    let excluded_rounded_amount = tax_details[excluded_rounded_field];
-                    let excluded_raw_amount = tax_details[excluded_raw_field];
-                    if (tax_data && tax_data.tax.id in tax_amount_to_propagate) {
-                        excluded_rounded_amount += tax_amount_to_propagate[tax_data.tax.id][excluded_rounded_field]
-                        excluded_raw_amount += tax_amount_to_propagate[tax_data.tax.id][excluded_raw_field]
-                    }
+            // The amounts of the base line per grouping key, added to the ones of the document afterwards.
+            const line_values_per_grouping_key = {};
+            for (const tax_data of tax_details.taxes_data.length ? tax_details.taxes_data : [null]) {
+                const raw_grouping_key = grouping_function(base_line, tax_data);
+                const grouping_key = this.stringify_grouping_key(raw_grouping_key);
 
-                    values[excluded_rounded_field] = excluded_rounded_amount;
-                    values[excluded_raw_field] = excluded_raw_amount;
-
-                    let excluded_target_amount;
-                    if (excluded_rounded_field in pins) {
-                        excluded_target_amount = pins[excluded_rounded_field];
-                    } else if (suffix === "" && "total_excluded_currency" in pins) {
-                        excluded_target_amount = excluded_rounded_amount;
-                    } else {
-                        excluded_target_amount = excluded_raw_amount;
-                    }
-                    values[excluded_target_field] = excluded_target_amount;
-
-                    const tax_base_rounded_field = `base_amount${suffix}`;
-                    const tax_base_raw_field = `raw_${tax_base_rounded_field}`;
-                    const tax_base_target_field = `target_${tax_base_rounded_field}`;
-
-                    if (tax_data) {
-                        values[tax_base_rounded_field] = tax_data[tax_base_rounded_field];
-                        values[tax_base_raw_field] = tax_data[tax_base_raw_field];
-
-                        if (tax_base_rounded_field in current_pinned_tax_amounts) {
-                            values[tax_base_target_field] =
-                                current_pinned_tax_amounts[tax_base_rounded_field];
-                        } else if (
-                            suffix === "" &&
-                            "base_amount_currency" in current_pinned_tax_amounts
-                        ) {
-                            values[tax_base_target_field] = tax_data[tax_base_rounded_field];
-                        } else {
-                            values[tax_base_target_field] = tax_data[tax_base_raw_field];
+                let line_values = line_values_per_grouping_key[grouping_key];
+                if (!line_values) {
+                    line_values = line_values_per_grouping_key[grouping_key] = {
+                        grouping_key: raw_grouping_key,
+                        taxes_data: [],
+                    };
+                    for (const prefix of ["", "raw_"]) {
+                        for (const suffix of ["_currency", ""]) {
+                            let total_excluded = tax_details[`${prefix}total_excluded${suffix}`];
+                            if (tax_data) {
+                                total_excluded +=
+                                    tax_amount_to_propagate[tax_data.tax.id]?.[
+                                        `${prefix}total_excluded${suffix}`
+                                    ] || 0.0;
+                            }
+                            line_values[`${prefix}total_excluded${suffix}`] = total_excluded;
+                            line_values[`${prefix}base_amount${suffix}`] = tax_data
+                                ? tax_data[`${prefix}base_amount${suffix}`]
+                                : total_excluded;
+                            line_values[`${prefix}tax_amount${suffix}`] = 0.0;
                         }
-                    } else {
-                        values[tax_base_rounded_field] = excluded_rounded_amount;
-                        values[tax_base_raw_field] = excluded_raw_amount;
-                        values[tax_base_target_field] = excluded_target_amount;
                     }
+                }
 
-                    const tax_rounded_field = `tax_amount${suffix}`;
-                    const tax_raw_field = `raw_${tax_rounded_field}`;
-                    const tax_target_field = `target_${tax_rounded_field}`;
-
-                    values[tax_rounded_field] = 0.0;
-                    values[tax_raw_field] = 0.0;
-                    values[tax_target_field] = 0.0;
+                if (tax_data) {
+                    for (const tax of tax_data.taxes) {
+                        const amounts = (tax_amount_to_propagate[tax.id] ||= {});
+                        for (const prefix of ["", "raw_"]) {
+                            for (const suffix of ["_currency", ""]) {
+                                const field = `${prefix}total_excluded${suffix}`;
+                                amounts[field] =
+                                    (amounts[field] || 0.0) + tax_data[`${prefix}tax_amount${suffix}`];
+                            }
+                        }
+                    }
+                    for (const prefix of ["", "raw_"]) {
+                        for (const suffix of ["_currency", ""]) {
+                            line_values[`${prefix}tax_amount${suffix}`] +=
+                                tax_data[`${prefix}tax_amount${suffix}`];
+                        }
+                    }
+                    line_values.taxes_data.push(tax_data);
                 }
             }
 
-            // Tax amount.
-            if (tax_data) {
-                // Compute the amount that should be propagated by tax
-                for (const tax of tax_data['taxes']) {
-                    const tax_id = tax.id
-                    if (tax_id in tax_amount_to_propagate) {
-                        tax_amount_to_propagate[tax_id]['raw_total_excluded'] += tax_data['raw_tax_amount']
-                        tax_amount_to_propagate[tax_id]['raw_total_excluded_currency'] += tax_data['raw_tax_amount_currency']
-                        tax_amount_to_propagate[tax_id]['total_excluded'] += tax_data['tax_amount']
-                        tax_amount_to_propagate[tax_id]['total_excluded_currency'] += tax_data['tax_amount_currency']
-                    } else {
-                        tax_amount_to_propagate[tax_id] = {}
-                        tax_amount_to_propagate[tax_id]['raw_total_excluded'] = tax_data['raw_tax_amount']
-                        tax_amount_to_propagate[tax_id]['raw_total_excluded_currency'] = tax_data['raw_tax_amount_currency']
-                        tax_amount_to_propagate[tax_id]['total_excluded'] = tax_data['tax_amount']
-                        tax_amount_to_propagate[tax_id]['total_excluded_currency'] = tax_data['tax_amount_currency']
-                    }
-                }
-                const reverse_charge_sign = tax_data.is_reverse_charge ? -1 : 1;
-                const values = values_per_grouping_key[grouping_key];
-                for (const suffix of ["_currency", ""]) {
-                    const tax_rounded_field = `tax_amount${suffix}`;
-                    const tax_raw_field = `raw_${tax_rounded_field}`;
-                    const tax_target_field = `target_${tax_rounded_field}`;
-
-                    values[tax_rounded_field] += tax_data[tax_rounded_field];
-                    values[tax_raw_field] += tax_data[tax_raw_field];
-
-                    if (tax_rounded_field in current_pinned_tax_amounts) {
-                        values[tax_target_field] +=
-                            reverse_charge_sign * current_pinned_tax_amounts[tax_rounded_field];
-                    } else if (
-                        suffix === "" &&
-                        "tax_amount_currency" in current_pinned_tax_amounts
-                    ) {
-                        values[tax_target_field] = tax_data[tax_rounded_field];
-                    } else {
-                        values[tax_target_field] += tax_data[tax_raw_field];
-                    }
-                }
-                values.taxes_data.push(tax_data);
-            }
-        }
-        return values_per_grouping_key;
-    },
-
-    /**
-     * [!] Mirror of the same method in account_tax.py.
-     * PLZ KEEP BOTH METHODS CONSISTENT WITH EACH OTHERS.
-     */
-    aggregate_base_lines_tax_details(base_lines, grouping_function) {
-        return base_lines.map((base_line) => [
-            base_line,
-            this.aggregate_base_line_tax_details(base_line, grouping_function),
-        ]);
-    },
-
-    /**
-     * [!] Mirror of the same method in account_tax.py.
-     * PLZ KEEP BOTH METHODS CONSISTENT WITH EACH OTHERS.
-     */
-    aggregate_base_lines_aggregated_values(base_lines_aggregated_values) {
-        const default_float_fields = new Set();
-        for (const prefix of ["", "raw_", "target_"]) {
-            for (const suffix of ["_currency", ""]) {
-                for (const field of ["base_amount", "tax_amount", "total_excluded"]) {
-                    default_float_fields.add(`${prefix}${field}${suffix}`);
-                }
-            }
-        }
-
-        const values_per_grouping_key = {};
-        for (const [base_line, aggregated_values] of base_lines_aggregated_values) {
-            for (const [raw_grouping_key, values] of Object.entries(aggregated_values)) {
-                const grouping_key = values.grouping_key;
-
-                if (!(raw_grouping_key in values_per_grouping_key)) {
-                    const initial_values = (values_per_grouping_key[raw_grouping_key] = {
+            for (const [grouping_key, line_values] of Object.entries(line_values_per_grouping_key)) {
+                let values = values_per_grouping_key[grouping_key];
+                if (!values) {
+                    values = values_per_grouping_key[grouping_key] = {
+                        grouping_key: line_values.grouping_key,
+                        taxes_data: [],
                         base_line_x_taxes_data: [],
-                        grouping_key: grouping_key,
-                    });
-                    default_float_fields.forEach((field) => {
-                        initial_values[field] = 0.0;
-                    });
+                    };
+                    for (const field of amount_fields) {
+                        values[field] = 0.0;
+                    }
                 }
-                const agg_values = values_per_grouping_key[raw_grouping_key];
-                default_float_fields.forEach((field) => {
-                    agg_values[field] += values[field];
-                });
-                agg_values.base_line_x_taxes_data.push([base_line, values.taxes_data]);
+                for (const field of amount_fields) {
+                    values[field] += line_values[field];
+                }
+                values.taxes_data.push(...line_values.taxes_data);
+                values.base_line_x_taxes_data.push([base_line, line_values.taxes_data]);
             }
         }
         return values_per_grouping_key;

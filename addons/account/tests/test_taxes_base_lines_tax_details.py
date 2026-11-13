@@ -241,9 +241,9 @@ class TestTaxesBaseLinesTaxDetails(TestTaxCommon):
         self.assertEqual(tax_details['raw_gross_price_unit'], 100)
         self.assertEqual(tax_details['raw_discount_amount'], 20)
 
-    def test_include_base_amount_in_aggregate_base_line_tax_details(self):
+    def test_include_base_amount_in_aggregate_tax_details(self):
         """ Test that the tax amount from a tax that is affecting the base of subsequent taxes
-        is correctly propagated in '_aggregate_base_line_tax_details'
+        is correctly propagated in '_aggregate_tax_details'
         """
         AccountTax = self.env['account.tax']
         tax_20 = AccountTax.create({
@@ -271,7 +271,7 @@ class TestTaxesBaseLinesTaxDetails(TestTaxCommon):
                 'amount': tax_data['tax'].amount,
             }
 
-        aggregated_data = AccountTax._aggregate_base_line_tax_details(document['lines'][0], tax_grouping_function)
+        aggregated_data = AccountTax._aggregate_tax_details([document['lines'][0]], tax_grouping_function)
         expected_values = [{
             'grouping_key': {'amount': 20.0},
             'taxes_data': [{
@@ -299,12 +299,6 @@ class TestTaxesBaseLinesTaxDetails(TestTaxCommon):
             'raw_tax_amount_currency': 1600.0,
             'raw_total_excluded': 8000.0,
             'raw_total_excluded_currency': 8000.0,
-            'target_base_amount': 8000.0,
-            'target_base_amount_currency': 8000.0,
-            'target_tax_amount': 1600.0,
-            'target_tax_amount_currency': 1600.0,
-            'target_total_excluded': 8000.0,
-            'target_total_excluded_currency': 8000.0,
             'tax_amount': 1600.0,
             'tax_amount_currency': 1600.0,
             'total_excluded': 8000.0,
@@ -336,16 +330,10 @@ class TestTaxesBaseLinesTaxDetails(TestTaxCommon):
             'raw_tax_amount_currency': 1728.0,
             'raw_total_excluded': 9600.0,
             'raw_total_excluded_currency': 9600.0,
-            'target_base_amount': 9600.0,
-            'target_base_amount_currency': 9600.0,
-            'target_tax_amount': 1728.0,
-            'target_tax_amount_currency': 1728.0,
-            'target_total_excluded': 9600.0,
-            'target_total_excluded_currency': 9600.0,
             'tax_amount': 1728.0,
             'tax_amount_currency': 1728.0,
             'total_excluded': 9600.0,
             'total_excluded_currency': 9600.0,
         }]
         for i, data in enumerate(aggregated_data.values()):
-            self.assertDictEqual(expected_values[i], data)
+            self.assertDictEqual(expected_values[i], {key: value for key, value in data.items() if key != 'base_line_x_taxes_data'})

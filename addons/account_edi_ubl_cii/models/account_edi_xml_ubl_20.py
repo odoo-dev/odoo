@@ -559,7 +559,7 @@ class AccountEdiXmlUBL20(models.AbstractModel):
                 vals[f'{key}{currency_suffix}'] = 0.0
 
         for base_line in vals['base_lines']:
-            aggregated_tax_details = self.env['account.tax']._aggregate_base_line_tax_details(base_line, fixed_total_grouping_function)
+            aggregated_tax_details = self.env['account.tax']._aggregate_tax_details([base_line], fixed_total_grouping_function)
 
             for currency_suffix in ['', '_currency']:
                 base_line_total_excluded = \
@@ -588,8 +588,7 @@ class AccountEdiXmlUBL20(models.AbstractModel):
                 return None
             return vals['total_grouping_function'](base_line, tax_data)
 
-        base_lines_aggregated_tax_details = self.env['account.tax']._aggregate_base_lines_tax_details(vals['base_lines'], non_fixed_total_grouping_function)
-        aggregated_tax_details = self.env['account.tax']._aggregate_base_lines_aggregated_values(base_lines_aggregated_tax_details)
+        aggregated_tax_details = self.env['account.tax']._aggregate_tax_details(vals['base_lines'], non_fixed_total_grouping_function)
         for currency_suffix in ['', '_currency']:
             vals[f'total_tax_amount{currency_suffix}'] = sum(
                     tax_details[f'tax_amount{currency_suffix}']
@@ -704,16 +703,14 @@ class AccountEdiXmlUBL20(models.AbstractModel):
 
     def _add_document_tax_total_nodes(self, document_node, vals):
         """ Generic helper to fill the TaxTotal and WithholdingTaxTotal nodes for a document. """
-        base_lines_aggregated_tax_details = self.env['account.tax']._aggregate_base_lines_tax_details(vals['base_lines'], vals['tax_grouping_function'])
-        aggregated_tax_details = self.env['account.tax']._aggregate_base_lines_aggregated_values(base_lines_aggregated_tax_details)
+        aggregated_tax_details = self.env['account.tax']._aggregate_tax_details(vals['base_lines'], vals['tax_grouping_function'])
         document_node['cac:TaxTotal'] = self._get_tax_total_node({**vals, 'aggregated_tax_details': aggregated_tax_details, 'role': 'document'})
         document_node['cac:WithholdingTaxTotal'] = None
 
     def _add_tax_total_node_in_company_currency(self, document_node, vals):
         """ Generic helper to add a TaxTotal section in the company currency. """
         company_currency = vals['invoice'].company_id.currency_id
-        base_lines_aggregated_tax_details = self.env['account.tax']._aggregate_base_lines_tax_details(vals['base_lines'], vals['tax_grouping_function'])
-        aggregated_tax_details = self.env['account.tax']._aggregate_base_lines_aggregated_values(base_lines_aggregated_tax_details)
+        aggregated_tax_details = self.env['account.tax']._aggregate_tax_details(vals['base_lines'], vals['tax_grouping_function'])
         tax_total_node_in_company_currency = self._get_tax_total_node({
             **vals,
             'aggregated_tax_details': aggregated_tax_details,
@@ -874,7 +871,7 @@ class AccountEdiXmlUBL20(models.AbstractModel):
         """ Generic helper to generate a document-level AllowanceCharge node given a base_line. """
         base_line = vals['base_line']
         currency_suffix = vals['currency_suffix']
-        aggregated_tax_details = self.env['account.tax']._aggregate_base_line_tax_details(base_line, vals['tax_grouping_function'])
+        aggregated_tax_details = self.env['account.tax']._aggregate_tax_details([base_line], vals['tax_grouping_function'])
         base_amount = base_line['tax_details'][f'total_excluded{currency_suffix}']
         return {
             'cbc:ChargeIndicator': {'_text': 'false' if base_amount < 0.0 else 'true'},
@@ -907,7 +904,7 @@ class AccountEdiXmlUBL20(models.AbstractModel):
             if vals['fixed_taxes_as_allowance_charges'] and tax_data and tax_data['tax'].amount_type == 'fixed':
                 return vals['total_grouping_function'](base_line, tax_data)
 
-        aggregated_tax_details = self.env['account.tax']._aggregate_base_line_tax_details(base_line, fixed_total_grouping_function)
+        aggregated_tax_details = self.env['account.tax']._aggregate_tax_details([base_line], fixed_total_grouping_function)
 
         for currency_suffix in ['', '_currency']:
             vals[f'total_fixed_taxes{currency_suffix}'] = sum(
@@ -1060,7 +1057,7 @@ class AccountEdiXmlUBL20(models.AbstractModel):
 
     def _add_document_line_tax_category_nodes(self, line_node, vals):
         base_line = vals['base_line']
-        aggregated_tax_details = self.env['account.tax']._aggregate_base_line_tax_details(base_line, vals['tax_grouping_function'])
+        aggregated_tax_details = self.env['account.tax']._aggregate_tax_details([base_line], vals['tax_grouping_function'])
         line_node.setdefault('cac:Item', {})['cac:ClassifiedTaxCategory'] = [
             self._get_tax_category_node({**vals, 'grouping_key': grouping_key})
             for grouping_key in aggregated_tax_details
@@ -1069,7 +1066,7 @@ class AccountEdiXmlUBL20(models.AbstractModel):
 
     def _add_document_line_tax_total_nodes(self, line_node, vals):
         base_line = vals['base_line']
-        aggregated_tax_details = self.env['account.tax']._aggregate_base_line_tax_details(base_line, vals['tax_grouping_function'])
+        aggregated_tax_details = self.env['account.tax']._aggregate_tax_details([base_line], vals['tax_grouping_function'])
         line_node['cac:TaxTotal'] = self._get_tax_total_node({**vals, 'aggregated_tax_details': aggregated_tax_details, 'role': 'line'})
 
     def _add_document_line_price_nodes(self, line_node, vals):

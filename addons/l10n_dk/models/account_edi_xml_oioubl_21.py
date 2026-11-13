@@ -299,7 +299,7 @@ class AccountEdiXmlOIOUBL21(models.AbstractModel):
         if not (charge_node := super()._get_line_discount_allowance_charge_node(vals)):
             return None
 
-        aggregated_tax_details = self.env['account.tax']._aggregate_base_line_tax_details(vals['base_line'], vals['tax_grouping_function'])
+        aggregated_tax_details = self.env['account.tax']._aggregate_tax_details([vals['base_line']], vals['tax_grouping_function'])
         return {
             **charge_node,
             'cac:TaxCategory': [

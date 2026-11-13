@@ -475,8 +475,8 @@ class AccountMove(models.Model):
         def grouping_function_per_tax(base_line, tax_data):
             return tax_data['tax'] if tax_data else None
 
-        base_lines_aggregated_values = AccountTax._aggregate_base_lines_tax_details(base_lines, grouping_function_per_tax)
-        for base_line, aggregated_values in base_lines_aggregated_values:
+        for base_line in base_lines:
+            aggregated_values = AccountTax._aggregate_tax_details([base_line], grouping_function_per_tax)
             invoice_line_values = self._l10n_es_edi_facturae_prepare_inv_line(base_line, aggregated_values)
             invoice_values['TotalGrossAmount'] += invoice_line_values['GrossAmount']
             invoice_values['Items'].append(invoice_line_values)
@@ -490,8 +490,7 @@ class AccountMove(models.Model):
                 'tax_amount_type': tax_data['tax'].amount_type,
             }
 
-        base_lines_aggregated_values = AccountTax._aggregate_base_lines_tax_details(base_lines, grouping_function_per_base_line_tax)
-        values_per_grouping_key = AccountTax._aggregate_base_lines_aggregated_values(base_lines_aggregated_values)
+        values_per_grouping_key = AccountTax._aggregate_tax_details(base_lines, grouping_function_per_base_line_tax)
         for grouping_key, values in values_per_grouping_key.items():
             if not grouping_key:
                 continue

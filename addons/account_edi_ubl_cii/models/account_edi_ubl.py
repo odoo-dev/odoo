@@ -558,8 +558,8 @@ class AccountEdiUBL(models.AbstractModel):
         suffix = '_currency' if in_foreign_currency else ''
 
         classified_tax_category_nodes = item_node['cac:ClassifiedTaxCategory'] = []
-        aggregated_values = AccountTax._aggregate_base_line_tax_details(
-            base_line=base_line,
+        aggregated_values = AccountTax._aggregate_tax_details(
+            base_lines=[base_line],
             grouping_function=lambda base_line, tax_data: self._ubl_default_base_line_item_classified_tax_category_grouping_key(
                 base_line=base_line,
                 tax_data=tax_data,
@@ -1374,7 +1374,7 @@ class AccountEdiUBL(models.AbstractModel):
         currency = vals['currency'] if in_foreign_currency else vals['company_currency']
 
         allowance_charge_nodes = vals['document_node']['cac:AllowanceCharge']
-        base_lines_aggregated_values = AccountTax._aggregate_base_lines_tax_details(
+        values_per_grouping_key = AccountTax._aggregate_tax_details(
             base_lines=vals['base_lines'],
             grouping_function=lambda base_line, tax_data: self._ubl_default_allowance_charge_early_payment_grouping_key(
                 base_line=base_line,
@@ -1383,7 +1383,6 @@ class AccountEdiUBL(models.AbstractModel):
                 currency=currency,
             ),
         )
-        values_per_grouping_key = AccountTax._aggregate_base_lines_aggregated_values(base_lines_aggregated_values)
         for grouping_key, values in values_per_grouping_key.items():
             if not grouping_key:
                 continue
@@ -1407,7 +1406,7 @@ class AccountEdiUBL(models.AbstractModel):
         currency = vals['currency'] if in_foreign_currency else vals['company_currency']
 
         allowance_charge_nodes = vals['document_node']['cac:AllowanceCharge']
-        base_lines_aggregated_values = AccountTax._aggregate_base_lines_tax_details(
+        values_per_grouping_key = AccountTax._aggregate_tax_details(
             base_lines=vals['base_lines'],
             grouping_function=lambda base_line, tax_data: self._ubl_default_allowance_charge_global_discount_grouping_key(
                 base_line=base_line,
@@ -1416,7 +1415,6 @@ class AccountEdiUBL(models.AbstractModel):
                 currency=currency,
             ),
         )
-        values_per_grouping_key = AccountTax._aggregate_base_lines_aggregated_values(base_lines_aggregated_values)
         for grouping_key, values in values_per_grouping_key.items():
             if not grouping_key:
                 continue
@@ -1579,11 +1577,10 @@ class AccountEdiUBL(models.AbstractModel):
 
             # tax_totals / withholding_tax_totals
 
-            base_lines_aggregated_values = AccountTax._aggregate_base_lines_tax_details(
+            values_per_grouping_key = AccountTax._aggregate_tax_details(
                 base_lines=new_base_lines,
                 grouping_function=lambda base_line, tax_data: base_line['_tax_totals_keys'][(tax_data or {}).get('tax'), sub_currency]['tax_total_key']
             )
-            values_per_grouping_key = AccountTax._aggregate_base_lines_aggregated_values(base_lines_aggregated_values)
             for grouping_key, values in values_per_grouping_key.items():
                 if not grouping_key:
                     continue
@@ -1603,7 +1600,7 @@ class AccountEdiUBL(models.AbstractModel):
 
             # tax_subtotals
 
-            base_lines_aggregated_values = AccountTax._aggregate_base_lines_tax_details(
+            values_per_grouping_key = AccountTax._aggregate_tax_details(
                 base_lines=new_base_lines,
                 grouping_function=lambda base_line, tax_data: {
                     k: v
@@ -1611,7 +1608,6 @@ class AccountEdiUBL(models.AbstractModel):
                     if k in ('tax_total_key', 'tax_subtotal_key')
                 },
             )
-            values_per_grouping_key = AccountTax._aggregate_base_lines_aggregated_values(base_lines_aggregated_values)
             for grouping_key, values in values_per_grouping_key.items():
                 if not grouping_key:
                     continue
@@ -1637,11 +1633,10 @@ class AccountEdiUBL(models.AbstractModel):
 
             # tax_categories
 
-            base_lines_aggregated_values = AccountTax._aggregate_base_lines_tax_details(
+            values_per_grouping_key = AccountTax._aggregate_tax_details(
                 base_lines=new_base_lines,
                 grouping_function=lambda base_line, tax_data: base_line['_tax_totals_keys'][(tax_data or {}).get('tax'), sub_currency],
             )
-            values_per_grouping_key = AccountTax._aggregate_base_lines_aggregated_values(base_lines_aggregated_values)
             for grouping_key, values in values_per_grouping_key.items():
                 if not grouping_key:
                     continue
@@ -1819,11 +1814,10 @@ class AccountEdiUBL(models.AbstractModel):
         node = vals['legal_monetary_total_node']
         tax_inclusive_amount = node['cbc:TaxInclusiveAmount']['_text']
 
-        base_lines_aggregated_values = AccountTax._aggregate_base_lines_tax_details(
+        values_per_grouping_key = AccountTax._aggregate_tax_details(
             base_lines=base_lines,
             grouping_function=lambda base_line, tax_data: True,
         )
-        values_per_grouping_key = AccountTax._aggregate_base_lines_aggregated_values(base_lines_aggregated_values)
         expected_tax_inclusive_amount = sum(
              values['total_excluded_currency'] + values['tax_amount_currency']
              for values in values_per_grouping_key.values()

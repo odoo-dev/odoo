@@ -969,11 +969,8 @@ class SaleOrder(models.Model):
         # Original lines
         base_lines = [line._prepare_base_line_for_taxes_computation() for line in order_lines]
         AccountTax._add_tax_details_in_base_lines(base_lines, self.company_id)
-        base_lines_aggregated_values = AccountTax._aggregate_base_lines_tax_details(
+        values_per_grouping_key = AccountTax._aggregate_tax_details(
             base_lines, grouping_function
-        )
-        values_per_grouping_key = AccountTax._aggregate_base_lines_aggregated_values(
-            base_lines_aggregated_values
         )
         # Lines without discount, except if negative (=surcharge)
         base_lines_undiscounted = [
@@ -981,11 +978,8 @@ class SaleOrder(models.Model):
             for line in order_lines
         ]
         AccountTax._add_tax_details_in_base_lines(base_lines_undiscounted, self.company_id)
-        base_lines_undiscounted_aggregated_values = AccountTax._aggregate_base_lines_tax_details(
+        values_undiscounted_per_grouping_key = AccountTax._aggregate_tax_details(
             base_lines_undiscounted, grouping_function
-        )
-        values_undiscounted_per_grouping_key = AccountTax._aggregate_base_lines_aggregated_values(
-            base_lines_undiscounted_aggregated_values
         )
 
         # Computation of totals

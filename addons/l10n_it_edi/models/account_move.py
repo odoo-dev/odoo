@@ -591,7 +591,7 @@ class AccountMove(models.Model):
                 'ritenuta': None,
             })
 
-    def _l10n_it_edi_get_tax_lines_xml_values(self, base_lines_aggregated_values, values_per_grouping_key):
+    def _l10n_it_edi_get_tax_lines_xml_values(self, values_per_grouping_key):
         self.ensure_one()
         tax_lines = []
         for values in values_per_grouping_key.values():
@@ -599,10 +599,7 @@ class AccountMove(models.Model):
             if not grouping_key or grouping_key['skip']:
                 continue
 
-            rounding = values['base_amount']
-            for _base_line, aggregated_values in base_lines_aggregated_values:
-                if grouping_key in aggregated_values:
-                    rounding -= aggregated_values[grouping_key]['raw_base_amount']
+            rounding = values['base_amount'] - values['raw_base_amount']
             if float_is_zero(rounding, precision_digits=8):
                 rounding = None
 
@@ -835,18 +832,21 @@ class AccountMove(models.Model):
 
         AccountTax._round_base_lines_tax_details(base_lines, self.company_id, tax_lines=tax_lines)
         tax_representation_violations = AccountTax._check_tax_representation(base_lines, self.company_id, self._l10n_it_edi_get_tax_representation_profile())
-        base_lines_aggregated_values = AccountTax._aggregate_base_lines_tax_details(base_lines, self._l10n_it_edi_grouping_function_base_lines)
-        self._l10n_it_edi_add_base_lines_xml_values(base_lines_aggregated_values, is_downpayment)
+        self._l10n_it_edi_add_base_lines_xml_values(
+            [
+                (base_line, AccountTax._aggregate_tax_details([base_line], self._l10n_it_edi_grouping_function_base_lines))
+                for base_line in base_lines
+            ],
+            is_downpayment,
+        )
         base_lines = sorted(base_lines, key=lambda base_line: base_line['it_values']['numero_linea'])
 
         # Tax lines.
-        base_lines_aggregated_values = AccountTax._aggregate_base_lines_tax_details(base_lines, self._l10n_it_edi_grouping_function_tax_lines)
-        values_per_grouping_key = AccountTax._aggregate_base_lines_aggregated_values(base_lines_aggregated_values)
-        tax_lines = self._l10n_it_edi_get_tax_lines_xml_values(base_lines_aggregated_values, values_per_grouping_key)
+        values_per_grouping_key = AccountTax._aggregate_tax_details(base_lines, self._l10n_it_edi_grouping_function_tax_lines)
+        tax_lines = self._l10n_it_edi_get_tax_lines_xml_values(values_per_grouping_key)
 
         # Total of the document.
-        base_lines_aggregated_values = AccountTax._aggregate_base_lines_tax_details(base_lines, self._l10n_it_edi_grouping_function_total)
-        values_per_grouping_key = AccountTax._aggregate_base_lines_aggregated_values(base_lines_aggregated_values)
+        values_per_grouping_key = AccountTax._aggregate_tax_details(base_lines, self._l10n_it_edi_grouping_function_total)
         importo_totale_documento = 0.0
         for values in values_per_grouping_key.values():
             grouping_key = values['grouping_key']
@@ -890,8 +890,7 @@ class AccountMove(models.Model):
 
         # Withholding tax amounts.
 
-        base_lines_aggregated_values = AccountTax._aggregate_base_lines_tax_details(base_lines, grouping_function_withholding)
-        values_per_grouping_key = AccountTax._aggregate_base_lines_aggregated_values(base_lines_aggregated_values)
+        values_per_grouping_key = AccountTax._aggregate_tax_details(base_lines, grouping_function_withholding)
         withholding_values = []
         for values in values_per_grouping_key.values():
             grouping_key = values['grouping_key']
@@ -906,8 +905,7 @@ class AccountMove(models.Model):
             })
 
         # Pension fund.
-        base_lines_aggregated_values = AccountTax._aggregate_base_lines_tax_details(base_lines, grouping_function_pension_funds)
-        values_per_grouping_key = AccountTax._aggregate_base_lines_aggregated_values(base_lines_aggregated_values)
+        values_per_grouping_key = AccountTax._aggregate_tax_details(base_lines, grouping_function_pension_funds)
         pension_fund_values = []
         for values in values_per_grouping_key.values():
             grouping_key = values['grouping_key']

@@ -57,8 +57,7 @@ class AccountEdiUBLPint(models.AbstractModel):
                 return
             return tax_grouping_key['is_withholding']
 
-        base_lines_aggregated_values = AccountTax._aggregate_base_lines_tax_details(base_lines, grouping_function)
-        values_per_grouping_key = AccountTax._aggregate_base_lines_aggregated_values(base_lines_aggregated_values)
+        values_per_grouping_key = AccountTax._aggregate_tax_details(base_lines, grouping_function)
         ubl_values = vals['_ubl_values']
         ubl_values['tax_withholding_amount'] = 0.0
         for grouping_key, values in values_per_grouping_key.items():
