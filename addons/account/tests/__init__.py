@@ -45,6 +45,7 @@ from . import test_taxes_rounding_per_line
 from . import test_taxes_rounding_l10n_pt
 from . import test_taxes_rounding_l10n_ar
 from . import test_taxes_rounding_l10n_be
+from . import test_taxes_rounding_l10n_br
 from . import test_invoice_taxes
 from . import test_account_move_send
 from . import test_account_move_qr_code
