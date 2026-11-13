@@ -46,7 +46,7 @@ class TestSMSPost(SMSCommon, TestSMSRecipients, CronMixinCase):
         self.assertSMSNotification([{'partner': self.partner_1}, {'number': self.random_numbers_san[0]}, {'number': self.random_numbers_san[1]}], self._test_body, messages)
 
     def test_message_sms_internals_sms_numbers_duplicate(self):
-        """ _message_sms ( which uses _notify_thread_by_sms) allows for specifying additional number to send sms to
+        """ _message_sms ( which uses _notify_thread_by_sms_batch) allows for specifying additional number to send sms to
             This test checks for situation where this additional number is the same as partner telephone number.
             In that case sms shall NOT be sent twice."""
         with self.with_user('employee'), self.mockSMSGateway():

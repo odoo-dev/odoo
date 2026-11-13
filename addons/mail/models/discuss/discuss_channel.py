@@ -1267,11 +1267,18 @@ class DiscussChannel(models.Model):
     # MAILING
     # ------------------------------------------------------------
 
-    def _notify_get_recipients(self, message, **kwargs):
+    def _notify_get_recipients_batch(self, messages, **kwargs):
         # Override recipients computation as channel is not a standard
         # mail.thread document. Indeed there are no followers on a channel.
         # Instead of followers it has members that should be notified.
+        channel_by_id = dict(zip(self.ids, self))
+        return {
+            message.id: channel_by_id[message.res_id]._notify_get_channel_recipients(message)
+            for message in messages
+        }
 
+    def _notify_get_channel_recipients(self, message):
+        self.ensure_one()
         # notify only user input (comment, whatsapp messages or incoming / outgoing emails)
         message_type = message.message_type
         if (
@@ -1406,23 +1413,28 @@ class DiscussChannel(models.Model):
     def _get_notify_valid_parameters(self):
         return super()._get_notify_valid_parameters() | {"silent"}
 
-    def _notify_thread(self, message, **kwargs):
-        # link message to channel
-        rdata = super()._notify_thread(message, **kwargs)
-        payload = {"id": self.id}
-        if temporary_id := self.env.context.get("temporary_id"):
-            payload["temporary_id"] = temporary_id
-        if kwargs.get("silent"):
-            payload["silent"] = True
-        store = Store(
-            self,
-            notification_type="discuss.channel/new_message",
-            notification_payload=payload,
-        ).add(message, "_store_message_fields")
-        if message.channel_id.parent_channel_id:
-            store.add(message.channel_id, ["message_count"])
-        self._bus_send_attachment_ownership(message)
-        return rdata
+    def _notify_thread_batch(self, messages, **kwargs):
+        # channels are notified one message at a time, each message being linked to its channel
+        recipients_by_msg = {}
+        channel_by_id = dict(zip(self.ids, self))
+        for message in messages:
+            channel = channel_by_id[message.res_id]
+            recipients_by_msg |= super(DiscussChannel, channel)._notify_thread_batch(message, **kwargs)
+            # link message to channel
+            payload = {"id": channel.id}
+            if temporary_id := self.env.context.get("temporary_id"):
+                payload["temporary_id"] = temporary_id
+            if kwargs.get("silent"):
+                payload["silent"] = True
+            store = Store(
+                channel,
+                notification_type="discuss.channel/new_message",
+                notification_payload=payload,
+            ).add(message, "_store_message_fields")
+            if message.channel_id.parent_channel_id:
+                store.add(message.channel_id, ["message_count"])
+            channel._bus_send_attachment_ownership(message)
+        return recipients_by_msg
 
     def _bus_send_attachment_ownership(self, message):
         if not message.attachment_ids:
@@ -1462,11 +1474,18 @@ class DiscussChannel(models.Model):
         payload['options']['data']['action'] = 'mail.action_discuss'
         return payload
 
-    def _notify_thread_by_web_push(self, message, recipients_data, **kwargs):
+    def _notify_thread_by_web_push_batch(self, messages, recipients_by_msg, **kwargs):
         # only notify "web_push" recipients in discuss channels.
         # exclude "inbox" recipients in discuss channels as inbox and web push can be mutually exclusive.
         # the user can turn off the web push but receive notifs via inbox if they want to.
-        super()._notify_thread_by_web_push(message, [r for r in recipients_data if r["notif"] == "web_push"], **kwargs)
+        super()._notify_thread_by_web_push_batch(
+            messages,
+            {
+                message_id: [r for r in recipients_data if r["notif"] == "web_push"]
+                for message_id, recipients_data in recipients_by_msg.items()
+            },
+            **kwargs,
+        )
 
     def _message_receive_bounce(self, email, partner):
         # Override bounce management to unsubscribe bouncing addresses
