@@ -90,6 +90,7 @@
                         - <span t-out="display_date" t-options="{'widget': 'datetime', 'time_only': 'true', 'format': 'short', 'tz_name': record.date_tz}"/>
                         (<span t-out="record.date_tz.replace('_', ' ')"/>)
                     </span>
+                    <div class="d-flex justify-content-center" t-if="events_event_location_active" t-field="record.address_id" t-options="{'widget': 'contact', 'fields': ['city'], 'no_marker': 'true'}"/>
                 </time>
             </div>
         </a>
