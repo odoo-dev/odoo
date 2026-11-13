@@ -12,8 +12,9 @@ export class ValueHistoryPlugin extends Plugin {
     static shared = ["setValue"];
 
     resources = {
-        history_operations: {
+        history_fields: {
             id: "formValue",
+            isAutomatic: true,
             apply: ({ nodeId, after }) => {
                 this.dependencies.domReferenceMap.getNodeById(nodeId).value = after;
             },
@@ -25,7 +26,7 @@ export class ValueHistoryPlugin extends Plugin {
 
     setValue(el, value) {
         const oldValue = el.value;
-        this.dependencies.history.applyOperation("formValue", {
+        this.dependencies.history.apply("formValue", {
             nodeId: this.dependencies.domReferenceMap.register(el),
             before: oldValue,
             after: value,

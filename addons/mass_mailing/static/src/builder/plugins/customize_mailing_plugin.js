@@ -27,8 +27,9 @@ export class CustomizeMailingPlugin extends Plugin {
     static shared = ["getVariableValue", "setVariable"];
 
     resources = {
-        history_operations: {
+        history_fields: {
             id: "mailingVariable",
+            isAutomatic: true,
             apply: ({ variable, after }) => this.setVariable(variable, after),
             revert: ({ variable, before }) => this.setVariable(variable, before),
         },
@@ -251,7 +252,7 @@ export class CustomizeMailingVariable extends BuilderAction {
     }
     apply({ params, value }) {
         const oldValue = this.getValue(...arguments);
-        this.dependencies.history.applyOperation("mailingVariable", {
+        this.dependencies.history.apply("mailingVariable", {
             variable: params.variable,
             before: oldValue,
             after: value,
@@ -260,7 +261,7 @@ export class CustomizeMailingVariable extends BuilderAction {
     clean({ params }) {
         const value = params.clean ?? "";
         const oldValue = this.getValue(...arguments);
-        this.dependencies.history.applyOperation("mailingVariable", {
+        this.dependencies.history.apply("mailingVariable", {
             variable: params.variable,
             before: oldValue,
             after: value,

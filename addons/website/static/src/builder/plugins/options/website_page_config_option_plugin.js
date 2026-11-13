@@ -26,8 +26,9 @@ export class WebsitePageConfigOptionPlugin extends Plugin {
     ];
     /** @type {import("plugins").WebsiteResources} */
     resources = {
-        history_operations: {
+        history_fields: {
             id: "pageVisibility",
+            isAutomatic: true,
             apply: ({ target, after }) => this.applyHistoryVisibility(target, after),
             revert: ({ target, before }) => this.applyHistoryVisibility(target, before),
         },
@@ -287,7 +288,7 @@ export class SetWebsiteHeaderVisibilityAction extends BaseWebsitePageConfigActio
     static id = "setWebsiteHeaderVisibility";
     apply({ editingElement, value: headerPositionValue, isPreviewing }) {
         const lastValue = this.websitePageConfig.getVisibilityItem("header");
-        this.history.applyOperation("pageVisibility", {
+        this.history.apply("pageVisibility", {
             target: "header",
             before: lastValue,
             after: headerPositionValue,
@@ -306,7 +307,7 @@ export class SetWebsiteBreadcrumbVisibilityAction extends BaseWebsitePageConfigA
     }
     apply({ value, isPreviewing }) {
         const lastValue = this.websitePageConfig.getVisibilityItem("breadcrumb");
-        this.history.applyOperation("pageVisibility", {
+        this.history.apply("pageVisibility", {
             target: "breadcrumb",
             before: lastValue,
             after: value,

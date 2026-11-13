@@ -25,8 +25,9 @@ export class PopupOptionPlugin extends Plugin {
 
     /** @type {import("plugins").WebsiteResources} */
     resources = {
-        history_operations: {
+        history_fields: {
             id: "popupVisibility",
+            isAutomatic: true,
             apply: ({ nodeId, value }) =>
                 this.dependencies.visibility.toggleTargetVisibility(
                     this.dependencies.domReferenceMap.getNodeById(nodeId),
@@ -79,7 +80,7 @@ export class PopupOptionPlugin extends Plugin {
     onSnippetDropped({ snippetEl }) {
         if (snippetEl.matches(".s_popup")) {
             this.assignUniqueID(snippetEl);
-            this.dependencies.history.applyOperation("popupVisibility", {
+            this.dependencies.history.apply("popupVisibility", {
                 nodeId: this.dependencies.domReferenceMap.register(snippetEl),
                 value: true,
             });
@@ -136,7 +137,7 @@ export class PopupOptionPlugin extends Plugin {
     }
 
     onWillRemove(el) {
-        this.dependencies.history.applyOperation("popupVisibility", {
+        this.dependencies.history.apply("popupVisibility", {
             nodeId: this.dependencies.domReferenceMap.register(el),
             value: false,
         });

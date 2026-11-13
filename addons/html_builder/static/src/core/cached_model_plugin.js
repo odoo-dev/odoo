@@ -15,8 +15,9 @@ export class CachedModelPlugin extends Plugin {
     static dependencies = ["history"];
     /** @type {import("plugins").BuilderResources} */
     resources = {
-        history_operations: {
+        history_fields: {
             id: "cachedModel",
+            isAutomatic: true,
             apply: ({ model, recordId, field, after }) => {
                 this.useModelEdit({ model, recordId }).values[field].current = after;
             },

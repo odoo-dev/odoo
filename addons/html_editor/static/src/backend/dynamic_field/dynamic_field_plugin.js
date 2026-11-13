@@ -25,8 +25,9 @@ export class DynamicFieldPlugin extends Plugin {
 
     /** @type {import("plugins").EditorResources} */
     resources = {
-        history_operations: {
+        history_fields: {
             id: "dynamicFieldLabel",
+            isAutomatic: true,
             apply: ({ nodeId }) =>
                 this.applyEditedField(this.dependencies.domReferenceMap.getNodeById(nodeId)),
             revert: ({ nodeId, previousText }) => {
@@ -181,7 +182,7 @@ export class DynamicFieldPlugin extends Plugin {
                     if (label !== initialLabel) {
                         target.setAttribute("data-oe-demo", label);
                         const prevText = target.textContent;
-                        this.dependencies.history.applyOperation("dynamicFieldLabel", {
+                        this.dependencies.history.apply("dynamicFieldLabel", {
                             nodeId: this.dependencies.domReferenceMap.register(target),
                             previousText: prevText,
                         });

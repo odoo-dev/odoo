@@ -21,8 +21,9 @@ export class VisibilityOptionPlugin extends Plugin {
     static dependencies = ["visibility", "websiteBridge", "domReferenceMap"];
     /** @type {import("plugins").WebsiteResources} */
     resources = {
-        history_operations: {
+        history_fields: {
             id: "deviceVisibility",
+            isAutomatic: true,
             apply: ({ nodeId, removeOnApply }) => {
                 if (removeOnApply) {
                     this.dependencies.domReferenceMap
@@ -213,7 +214,7 @@ export class ToggleDeviceVisibilityAction extends BuilderAction {
         const isMobile = this.services.website.context.isMobile;
         const show = visibility !== (isMobile ? "no_mobile" : "no_desktop");
         this.dependencies.visibility.onOptionVisibilityUpdate(editingElement, show);
-        this.dependencies.history.applyOperation("deviceVisibility", {
+        this.dependencies.history.apply("deviceVisibility", {
             nodeId: this.dependencies.domReferenceMap.register(editingElement),
             removeOnApply: false,
         });
@@ -230,7 +231,7 @@ export class ToggleDeviceVisibilityAction extends BuilderAction {
         const style = getComputedStyle(editingElement);
         const display = style["display"];
         editingElement.classList.remove(`d-md-${display}`, `d-lg-${display}`);
-        this.dependencies.history.applyOperation("deviceVisibility", {
+        this.dependencies.history.apply("deviceVisibility", {
             nodeId: this.dependencies.domReferenceMap.register(editingElement),
             removeOnApply: true,
         });

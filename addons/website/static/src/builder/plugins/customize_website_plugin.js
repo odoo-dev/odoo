@@ -74,14 +74,16 @@ export class CustomizeWebsitePlugin extends Plugin {
 
     /** @type {import("plugins").WebsiteResources} */
     resources = {
-        history_operations: [
+        history_fields: [
             {
                 id: "websiteCustomValue",
+                isAutomatic: true,
                 apply: (data) => this.replayCustomValue(data, data.after),
                 revert: (data) => this.replayCustomValue(data, data.before),
             },
             {
                 id: "bodyBackground",
+                isAutomatic: true,
                 apply: ({ after }) =>
                     this.dependencies.builderActions
                         .getAction("toggleBodyBgImage")
@@ -93,11 +95,13 @@ export class CustomizeWebsitePlugin extends Plugin {
             },
             {
                 id: "bodyBackgroundPosition",
+                isAutomatic: true,
                 apply: ({ nodeId, after }) => this.replayBackgroundPosition(nodeId, after),
                 revert: ({ nodeId, before }) => this.replayBackgroundPosition(nodeId, before),
             },
             {
                 id: "viewsOnSave",
+                isAutomatic: true,
                 apply: ({ after }) => this.restoreViewsOnSave(after),
                 revert: ({ before }) => this.restoreViewsOnSave(before),
             },
@@ -392,7 +396,7 @@ export class CustomizeWebsitePlugin extends Plugin {
                 before: action.getValue(arg),
                 after: arg.value,
             };
-            await this.dependencies.history.applyOperation("websiteCustomValue", data);
+            await this.dependencies.history.apply("websiteCustomValue", data);
         };
     }
 
@@ -495,7 +499,7 @@ export class CustomizeWebsitePlugin extends Plugin {
             }
         }
         const after = { enable: [...viewsToEnable], disable: [...viewsToDisable] };
-        this.dependencies.history.applyOperation("viewsOnSave", { before, after });
+        this.dependencies.history.apply("viewsOnSave", { before, after });
     }
 
     /**
@@ -637,7 +641,7 @@ export class ToggleBodyBgImageAction extends BuilderAction {
         };
     }
     async applyConfig(oldConfig, newConfig) {
-        await this.dependencies.history.applyOperation("bodyBackground", {
+        await this.dependencies.history.apply("bodyBackground", {
             before: oldConfig,
             after: newConfig,
         });
@@ -726,7 +730,7 @@ export class BodyBgPositionOverlayAction extends BuilderAction {
                 this.dependencies.customizeWebsite.getWebsiteVariableValue(
                     "body-image-background-position"
                 ) || "";
-            await this.dependencies.history.applyOperation("bodyBackgroundPosition", {
+            await this.dependencies.history.apply("bodyBackgroundPosition", {
                 nodeId: this.dependencies.domReferenceMap.register(editingElement),
                 before: currentPosition,
                 after: bgPosition,
