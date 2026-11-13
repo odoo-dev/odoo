@@ -102,7 +102,7 @@
                                 </div>
                             </setting>
                             <setting id="tax_fiscal_country_234" string="Fiscal Country" company_dependent="1" help="Domestic country of your accounting">
-                                <field name="account_fiscal_country_id" options="{'no_create': True, 'no_open': True}"/>
+                                <field name="account_fiscal_country_id" options="{'no_create': True, 'no_open': True}" readonly="not is_root_company"/>
                             </setting>
                         </block>
                         <block title="Currencies" name="main_currency_setting_container">

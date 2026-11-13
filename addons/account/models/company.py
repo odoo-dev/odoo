@@ -206,6 +206,7 @@ class ResCompany(models.Model):
         compute='compute_account_tax_fiscal_country',
         store=True,
         readonly=False,
+        recursive=True,
         help="The country to use the tax reports from for this company")
     account_fiscal_country_group_codes = fields.Json(compute="_compute_account_fiscal_country_group_codes")
 
@@ -383,10 +384,12 @@ class ResCompany(models.Model):
         for company in self:
             company.multi_vat_foreign_country_ids = self.env['res.country'].browse(company_to_foreign_vat_country.get(company.id))
 
-    @api.depends('country_id')
+    @api.depends('country_id', 'parent_id.account_fiscal_country_id')
     def compute_account_tax_fiscal_country(self):
         for record in self:
-            if not record.account_fiscal_country_id:
+            if record.parent_id:
+                record.account_fiscal_country_id = record.parent_id.account_fiscal_country_id
+            elif not record.account_fiscal_country_id:
                 record.account_fiscal_country_id = record.country_id
 
     @api.depends('account_fiscal_country_id')
