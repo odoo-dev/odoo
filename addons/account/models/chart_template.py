@@ -510,6 +510,9 @@ class AccountChartTemplate(models.AbstractModel):
         e.g. the account codes' width must be standardized to the code_digits applied.
         The fiscal country code must be put in place before taxes are generated.
         """
+        if company.parent_id:
+            # Branches follow the fiscal country of their parent, not the one of the template
+            data.get('res.company', {}).get(company.id, {}).pop('account_fiscal_country_id', None)
         if 'account_fiscal_country_id' in data.get('res.company', {}).get(company.id, {}):
             fiscal_country = self.ref(data['res.company'][company.id]['account_fiscal_country_id'])
         else:
