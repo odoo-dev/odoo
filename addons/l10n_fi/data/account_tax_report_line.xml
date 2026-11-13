@@ -56,7 +56,7 @@
                             </record>
                         </field>
                     </record>
-                    <record id="tax_report_sale_13_5_and_14" model="account.report.line">
+                    <record id="tax_report_sales_13_5_and_14" model="account.report.line">
                         <field name="name">13.5% tax + 14% tax</field>
                         <field name="name@fi">13.5 %:n vero + 14 %:n vero</field>
                         <field name="code">sale_13_5_and_14</field>
