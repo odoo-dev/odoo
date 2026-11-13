@@ -351,10 +351,7 @@ class AccountMove(models.Model):
             'GrossAmount': float_round(tax_details['raw_total_excluded_currency'], precision_digits=8),
         }
 
-        if line.discount == 100.0:
-            raw_total_cost = line.price_unit * line.quantity
-        else:
-            raw_total_cost = tax_details['raw_total_excluded_currency'] / (1 - (line.discount / 100.0))
+        raw_total_cost = self.env['account.tax']._get_gross_total_without_tax(base_line, self.company_id)
         xml_values['TotalCost'] = float_round(raw_total_cost, precision_digits=8)
 
         if line.quantity:

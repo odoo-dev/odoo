@@ -788,16 +788,10 @@ class AccountMove(models.Model):
         downpayment_lines = []
         for base_line in base_lines:
             tax_details = base_line['tax_details']
-            discount = base_line['discount']
             price_unit = base_line['price_unit']
             quantity = base_line['quantity']
             price_subtotal = base_line['price_subtotal'] = tax_details['raw_total_excluded_currency']
-
-            if discount == 100.0:
-                gross_price_subtotal_before_discount = price_unit * quantity
-            else:
-                gross_price_subtotal_before_discount = price_subtotal / (1 - discount / 100.0)
-
+            gross_price_subtotal_before_discount = AccountTax._get_gross_total_without_tax(base_line, self.company_id)
             base_line['gross_price_subtotal'] = gross_price_subtotal_before_discount
             base_line['discount_amount_before_dispatching'] = gross_price_subtotal_before_discount - price_subtotal
 
