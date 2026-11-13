@@ -43,6 +43,8 @@ TYPE_TAX_USE = [
 #               from the rounded ones in company currency (the price-included amounts without tax follow them).
 #               With the 'line' grain, the amounts in company currency are always converted from the rounded amounts in
 #               foreign currency, unless 'foreign'.
+# - raw_precision: None, or the number of decimals the unrounded amounts of each line are rounded to, with the 'tax'
+#               grain.
 # The javascript side never resolves a policy: it receives it through `res.company.tax_rounding_settings`.
 TAX_ROUNDING_POLICIES = {
     'line': {
@@ -51,6 +53,7 @@ TAX_ROUNDING_POLICIES = {
         'spreading': 'difference',
         'tax_basis': 'raw',
         'converted_currency': None,
+        'raw_precision': None,
     },
     'document': {
         'tax_grain': 'tax',
@@ -58,6 +61,7 @@ TAX_ROUNDING_POLICIES = {
         'spreading': 'difference',
         'tax_basis': 'raw',
         'converted_currency': None,
+        'raw_precision': None,
     },
 }
 
@@ -74,6 +78,7 @@ TAX_ROUNDING_COUNTRY_SETTINGS = {
     'BR': TAX_ROUNDING_ON_ROUNDED_BASES,
     'IN': TAX_ROUNDING_ON_ROUNDED_BASES,
     'KE': {'tax_grain': 'line', 'converted_currency': 'foreign'},
+    'IT': {'authority': 'excluded', 'spreading': 'total', 'converted_currency': 'foreign', 'raw_precision': 8},
 }
 
 # How the taxes of a document are written into an external format (EDI, QR code, fiscal device, API). Each format declares
@@ -789,8 +794,9 @@ class AccountTax(models.Model):
     #     |   +- _get_tax_rounding_policy                     the policy, see TAX_ROUNDING_POLICIES, and the settings
     #     |   |                                               of the fiscal country, see TAX_ROUNDING_COUNTRY_SETTINGS
     #     |   +- _add_tax_details_in_base_line                EVALUATE each line: the 'raw_*' amounts
-    #     |   |    +- _get_tax_details                        the tax formulas (rounded inside with the 'line' grain),
-    #     |   |                                               and the taxes included in each base ('base_dependencies')
+    #     |   |    +- _get_tax_details                        the tax formulas (rounded inside with the 'line' grain or
+    #     |   |                                               the 'raw_precision'), and the taxes included in each base
+    #     |   |                                               ('base_dependencies')
     #     |   |    +- _get_pins_reaching_total_included       a 'target_total_included' pin into pinned amounts
     #     |   +- _round_base_lines_tax_details                SOLVE: the rounded amounts, targets applied in order
     #     |        +- _round_and_pin_tax_details              1. each amount rounded on its own, then the pins
@@ -1824,12 +1830,26 @@ class AccountTax(models.Model):
         :param policy:      The rounding policy, see '_get_tax_rounding_policy'. The company's one by default.
         """
         policy = policy or self._get_tax_rounding_policy(company)
-        round_per_line = policy['tax_grain'] == 'line'
+        if policy['tax_grain'] == 'line':
+            precision_rounding = base_line['currency_id'].rounding
+            company_precision_rounding = company.currency_id.rounding
+        elif policy['raw_precision']:
+            precision_rounding = company_precision_rounding = 10 ** -policy['raw_precision']
+        else:
+            precision_rounding = company_precision_rounding = None
+        rate = base_line['rate']
+
+        def to_company_currency(amount):
+            amount = amount / rate if rate else 0.0
+            if company_precision_rounding:
+                amount = float_round(amount, precision_rounding=company_precision_rounding)
+            return amount
+
         price_unit_after_discount = base_line['price_unit'] * (1 - (base_line['discount'] / 100.0))
         taxes_computation = base_line['tax_ids']._get_tax_details(
             price_unit=price_unit_after_discount,
             quantity=base_line['quantity'],
-            precision_rounding=base_line['currency_id'].rounding if round_per_line else None,
+            precision_rounding=precision_rounding,
             product=base_line['product_id'],
             product_uom=base_line['product_uom_id'],
             special_mode=base_line['special_mode'],
@@ -1847,29 +1867,20 @@ class AccountTax(models.Model):
                 else:
                     taxes_computation['total_included'] -= tax_data['tax_amount']
 
-        rate = base_line['rate']
         tax_details = base_line['tax_details'] = {
             'raw_total_excluded_currency': taxes_computation['total_excluded'],
-            'raw_total_excluded': taxes_computation['total_excluded'] / rate if rate else 0.0,
+            'raw_total_excluded': to_company_currency(taxes_computation['total_excluded']),
             'raw_total_included_currency': taxes_computation['total_included'],
-            'raw_total_included': taxes_computation['total_included'] / rate if rate else 0.0,
+            'raw_total_included': to_company_currency(taxes_computation['total_included']),
             'taxes_data': [],
         }
-        if round_per_line:
-            tax_details['raw_total_excluded'] = company.currency_id.round(tax_details['raw_total_excluded'])
-            tax_details['raw_total_included'] = company.currency_id.round(tax_details['raw_total_included'])
         for tax_data in taxes_computation['taxes_data']:
-            tax_amount = tax_data['tax_amount'] / rate if rate else 0.0
-            base_amount = tax_data['base_amount'] / rate if rate else 0.0
-            if round_per_line:
-                tax_amount = company.currency_id.round(tax_amount)
-                base_amount = company.currency_id.round(base_amount)
             tax_details['taxes_data'].append({
                 **tax_data,
                 'raw_tax_amount_currency': tax_data['tax_amount'],
-                'raw_tax_amount': tax_amount,
+                'raw_tax_amount': to_company_currency(tax_data['tax_amount']),
                 'raw_base_amount_currency': tax_data['base_amount'],
-                'raw_base_amount': base_amount,
+                'raw_base_amount': to_company_currency(tax_data['base_amount']),
             })
 
         pins = base_line['pins']

@@ -722,16 +722,30 @@ export const accountTaxHelpers = {
      */
     add_tax_details_in_base_line(base_line, company, { policy = null } = {}) {
         policy = policy || company.tax_rounding_settings;
-        const round_per_line = policy.tax_grain === "line";
+        let precision_rounding = null;
+        let company_precision_rounding = null;
+        if (policy.tax_grain === "line") {
+            precision_rounding = base_line.currency_id.rounding;
+            company_precision_rounding = company.currency_id.rounding;
+        } else if (policy.raw_precision) {
+            precision_rounding = company_precision_rounding = 10 ** -policy.raw_precision;
+        }
+        const rate = base_line.rate;
+        const to_company_currency = (amount) => {
+            amount = rate ? amount / rate : 0.0;
+            if (company_precision_rounding) {
+                amount = roundPrecision(amount, company_precision_rounding);
+            }
+            return amount;
+        };
+
         const price_unit_after_discount = base_line.price_unit * (1 - base_line.discount / 100.0);
-        const currency_pd = base_line.currency_id.rounding;
-        const company_currency_pd = company.currency_id.rounding;
         const taxes_computation = this.get_tax_details(
             base_line.tax_ids,
             price_unit_after_discount,
             base_line.quantity,
             {
-                precision_rounding: round_per_line ? currency_pd : null,
+                precision_rounding: precision_rounding,
                 product: base_line.product_id,
                 product_uom: base_line.product_uom_id,
                 special_mode: base_line.special_mode,
@@ -740,41 +754,20 @@ export const accountTaxHelpers = {
             }
         );
 
-        const rate = base_line.rate;
         const tax_details = (base_line.tax_details = {
             raw_total_excluded_currency: taxes_computation.total_excluded,
-            raw_total_excluded: rate ? taxes_computation.total_excluded / rate : 0.0,
+            raw_total_excluded: to_company_currency(taxes_computation.total_excluded),
             raw_total_included_currency: taxes_computation.total_included,
-            raw_total_included: rate ? taxes_computation.total_included / rate : 0.0,
+            raw_total_included: to_company_currency(taxes_computation.total_included),
             taxes_data: [],
         });
-
-        if (round_per_line) {
-            tax_details.raw_total_excluded = roundPrecision(
-                tax_details.raw_total_excluded,
-                company_currency_pd
-            );
-            tax_details.raw_total_included = roundPrecision(
-                tax_details.raw_total_included,
-                company_currency_pd
-            );
-        }
-
         for (const tax_data of taxes_computation.taxes_data) {
-            let tax_amount = rate ? tax_data.tax_amount / rate : 0.0;
-            let base_amount = rate ? tax_data.base_amount / rate : 0.0;
-
-            if (round_per_line) {
-                tax_amount = roundPrecision(tax_amount, company_currency_pd);
-                base_amount = roundPrecision(base_amount, company_currency_pd);
-            }
-
             tax_details.taxes_data.push({
                 ...tax_data,
                 raw_tax_amount_currency: tax_data.tax_amount,
-                raw_tax_amount: tax_amount,
+                raw_tax_amount: to_company_currency(tax_data.tax_amount),
                 raw_base_amount_currency: tax_data.base_amount,
-                raw_base_amount: base_amount,
+                raw_base_amount: to_company_currency(tax_data.base_amount),
             });
         }
 
