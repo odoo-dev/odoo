@@ -369,6 +369,25 @@ class TestQwebProcessAtt(TransactionCase):
             self._test_att('/en/b', {'href': 'http://test.cdn/b'})
             self._test_att('/fr/b', {'href': '/fr/b'})
 
+    def test_process_att_srcset(self):
+        with MockRequest(self.env, website=self.website) as request:
+            self._test_att(
+                request.env, '/a 750w, /b 1080w, /c 1280w',
+                {'srcset': 'http://test.cdn/a 750w, http://test.cdn/b 1080w, /c 1280w', 'loading': 'lazy'},
+                tag='img', attribute='srcset',
+            )
+            self._test_att(
+                request.env, '/a',
+                {'imagesrcset': 'http://test.cdn/a'},
+                tag='link', attribute='imagesrcset',
+            )
+            data_url = 'data:image/png;base64,AAAA'
+            self._test_att(
+                request.env, data_url,
+                {'srcset': data_url, 'loading': 'lazy'},
+                tag='img', attribute='srcset',
+            )
+
     def test_process_att_no_route(self):
         with MockRequest(self.env, website=self.website, context={'lang': 'fr_FR'}, routing=False):
             # default on multilang=True if route is not /{module}/static/

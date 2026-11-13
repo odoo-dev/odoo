@@ -27,6 +27,11 @@ class IrQweb(models.AbstractModel):
         'img': 'src',
     }
 
+    SRCSET_ATTRS = {
+        'img': 'srcset',
+        'link': 'imagesrcset',
+    }
+
     def _compile_root(self, element, compile_context):
         # Removes the attributes used by the "/website/snippet/filter_templates"
         # controller and used only to be filtered without using irQweb rendering
@@ -162,6 +167,14 @@ class IrQweb(models.AbstractModel):
                 atts[name] = website.get_cdn_url(atts[name])
             if data_name in atts and atts[data_name] not in (False, None, ()):
                 atts[data_name] = website.get_cdn_url(atts[data_name])
+        srcset_name = self.SRCSET_ATTRS.get(tagName)
+        if atts.get(srcset_name):
+            atts = OrderedDict(atts)
+            candidates = []
+            for candidate in re.split(r',\s+', str(atts[srcset_name]).strip()):
+                url, *descriptors = candidate.split()
+                candidates.append(' '.join([website.get_cdn_url(url), *descriptors]))
+            atts[srcset_name] = ', '.join(candidates)
         atts = self._adapt_style_background_image(atts, website.get_cdn_url)
 
         return atts
