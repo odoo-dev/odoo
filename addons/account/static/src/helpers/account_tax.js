@@ -790,7 +790,6 @@ export const accountTaxHelpers = {
             };
         }
     },
-
     /**
      * [!] Mirror of the same method in account_tax.py.
      * PLZ KEEP BOTH METHODS CONSISTENT WITH EACH OTHERS.
@@ -1084,7 +1083,14 @@ export const accountTaxHelpers = {
         const authority = policy.authority;
         const share_total = policy.spreading === "total";
         const rounded_basis = policy.tax_basis === "rounded";
-        const converted_suffix = policy.converted_currency === "company" ? "" : null;
+        const converted_currency = policy.converted_currency;
+        // The amounts converted from the other currency: all the amounts in company currency ('company'), or the tax amounts
+        // in foreign currency ('foreign'), computed after the other currency.
+        const converted_suffix = converted_currency === "company" ? "" : null;
+        const converted_tax_suffix =
+            { company: "", foreign: "_currency" }[converted_currency] ?? null;
+        const tax_suffixes =
+            converted_currency === "foreign" ? ["", "_currency"] : ["_currency", ""];
         const company_currency = company.currency_id;
         const sum = (values) => values.reduce((total, value) => total + value, 0.0);
 
@@ -1119,7 +1125,7 @@ export const accountTaxHelpers = {
         const settled_amounts = new Map();
         const get_settled = (values, field) => settled_amounts.get(values)[field];
         const settle = (items_values, field) => {
-            if (!rounded_basis && converted_suffix === null) {
+            if (!rounded_basis && !converted_currency) {
                 return;
             }
             const weights = items_values.map((values) => get_raw(values, field));
@@ -1134,9 +1140,17 @@ export const accountTaxHelpers = {
                     : values[field];
             });
         };
-        const convert = (base_line, values, field, settled_amount) => {
+        const convert = (base_line, values, field) => {
             const rate = base_line.rate;
-            set_raw(values, field, rate ? settled_amount / rate : 0.0);
+            if (field.endsWith("_currency")) {
+                set_raw(values, field, get_settled(values, field.slice(0, -9)) * rate);
+            } else {
+                set_raw(
+                    values,
+                    field,
+                    rate ? get_settled(values, `${field}_currency`) / rate : 0.0
+                );
+            }
         };
 
         // Per tax.
@@ -1240,20 +1254,15 @@ export const accountTaxHelpers = {
             ["percent", "division"].includes(tax_data.tax.amount_type);
 
         // Per tax: the tax amounts.
-        for (const suffix of ["_currency", ""]) {
+        for (const suffix of tax_suffixes) {
             const field = `tax_amount${suffix}`;
             const base_field = `base_amount${suffix}`;
             for (const { grouping_key, items } of sorted_tax_groups) {
                 const currency = suffix ? grouping_key.currency : company_currency;
                 const taxes_data = items.map(([_base_line, tax_data]) => tax_data);
-                if (suffix === converted_suffix) {
+                if (suffix === converted_tax_suffix) {
                     for (const [base_line, tax_data] of items) {
-                        convert(
-                            base_line,
-                            tax_data,
-                            field,
-                            get_settled(tax_data, `${field}_currency`)
-                        );
+                        convert(base_line, tax_data, field);
                     }
                 } else if (rounded_basis && grouping_key.price_include) {
                     // A price-included tax is computed on the amount with tax, including the settled amounts of the others.
@@ -1316,7 +1325,7 @@ export const accountTaxHelpers = {
                         currency.decimal_places
                     );
                 }
-                if (suffix !== converted_suffix) {
+                if (suffix !== converted_tax_suffix) {
                     settle(taxes_data, field);
                 }
             }
@@ -1335,12 +1344,7 @@ export const accountTaxHelpers = {
                 );
                 if (suffix === converted_suffix) {
                     for (const [base_line, tax_data] of items) {
-                        convert(
-                            base_line,
-                            tax_data,
-                            field,
-                            get_settled(tax_data, `${field}_currency`)
-                        );
+                        convert(base_line, tax_data, field);
                     }
                     if (rounded_basis) {
                         taxes_data.forEach((tax_data, i) => {
@@ -1375,6 +1379,21 @@ export const accountTaxHelpers = {
                     });
                     settle(taxes_data, field);
                     continue;
+                } else if (suffix === converted_tax_suffix && price_include) {
+                    // The price-included bases follow the converted tax amounts.
+                    for (const [base_line, tax_data] of items) {
+                        set_raw(
+                            tax_data,
+                            field,
+                            tax_data[`raw_${field}`] +
+                                sum(
+                                    get_batch_taxes_data(base_line, tax_data).map(
+                                        (other) =>
+                                            other[`raw_${tax_field}`] - get_raw(other, tax_field)
+                                    )
+                                )
+                        );
+                    }
                 }
 
                 if (share_total && is_included(price_include)) {
@@ -1480,11 +1499,25 @@ export const accountTaxHelpers = {
                     group_base_lines.forEach((base_line, i) => {
                         const tax_details = taxes_details[i];
                         const taxes_data = tax_details.taxes_data;
-                        const settled_amount = taxes_data.length
-                            ? get_settled(taxes_data[0], `base_amount${suffix}_currency`)
+                        if (!settled_amounts.has(tax_details)) {
+                            settled_amounts.set(tax_details, {});
+                        }
+                        settled_amounts.get(tax_details)[`${field}_currency`] = taxes_data.length
+                            ? get_settled(taxes_data[0], "base_amount_currency")
                             : tax_details[`${field}_currency`];
-                        convert(base_line, tax_details, field, settled_amount);
+                        convert(base_line, tax_details, field);
                     });
+                } else if (suffix === converted_tax_suffix) {
+                    // The amount without tax of the line follows the base of its first tax.
+                    for (const tax_details of taxes_details) {
+                        if (tax_details.taxes_data.length) {
+                            set_raw(
+                                tax_details,
+                                field,
+                                get_raw(tax_details.taxes_data[0], `base_amount${suffix}`)
+                            );
+                        }
+                    }
                 }
                 if (rounded_basis) {
                     // The amount without tax of the line: the base of its first tax.
@@ -1574,6 +1607,50 @@ export const accountTaxHelpers = {
      * [!] Mirror of the same method in account_tax.py.
      * PLZ KEEP BOTH METHODS CONSISTENT WITH EACH OTHERS.
      */
+    convert_line_tax_amounts(base_lines) {
+        for (const base_line of base_lines) {
+            const currency = base_line.currency_id;
+            const tax_details = base_line.tax_details;
+            const taxes_data = tax_details.taxes_data;
+            for (const tax_data of taxes_data) {
+                if (!this.is_tax_details_pinned(base_line, tax_data, "tax_amount_currency")) {
+                    tax_data.tax_amount_currency = roundPrecision(
+                        tax_data.tax_amount * base_line.rate,
+                        currency.rounding
+                    );
+                }
+            }
+            for (const tax_data of taxes_data) {
+                if (
+                    tax_data.price_include &&
+                    !this.is_tax_details_pinned(base_line, tax_data, "base_amount_currency")
+                ) {
+                    let base_amount_currency = tax_data.raw_base_amount_currency;
+                    for (const other_tax_data of taxes_data) {
+                        if (tax_data.batch.some((tax) => tax.id === other_tax_data.tax.id)) {
+                            base_amount_currency +=
+                                other_tax_data.raw_tax_amount_currency -
+                                other_tax_data.tax_amount_currency;
+                        }
+                    }
+                    tax_data.base_amount_currency = roundPrecision(
+                        base_amount_currency,
+                        currency.rounding
+                    );
+                }
+            }
+            if (
+                taxes_data.length &&
+                !this.is_tax_details_pinned(base_line, null, "total_excluded_currency")
+            ) {
+                tax_details.total_excluded_currency = taxes_data[0].base_amount_currency;
+            }
+        }
+    },
+    /**
+     * [!] Mirror of the same method in account_tax.py.
+     * PLZ KEEP BOTH METHODS CONSISTENT WITH EACH OTHERS.
+     */
     round_base_lines_tax_details(base_lines, company, { policy = null } = {}) {
         policy = policy || company.tax_rounding_settings;
         for (const base_line of base_lines) {
@@ -1582,6 +1659,8 @@ export const accountTaxHelpers = {
 
         if (policy.tax_grain === "tax") {
             this.reach_tax_rounding_targets(base_lines, company, policy);
+        } else if (policy.converted_currency === "foreign") {
+            this.convert_line_tax_amounts(base_lines);
         }
 
         for (const base_line of base_lines) {

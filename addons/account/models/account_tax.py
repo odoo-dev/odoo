@@ -38,7 +38,11 @@ TYPE_TAX_USE = [
 #               and a tax proportional to its base is its rate applied to the sum of its rounded bases (EN 16931).
 #               With the 'line' grain, the taxes are always computed on the rounded amounts of their line.
 # - converted_currency: None to round the amounts in each currency from their own unrounded amounts,
-#               'company' to convert the amounts in company currency from the rounded amounts in foreign currency.
+#               'company' to convert the amounts in company currency from the rounded amounts in foreign currency,
+#               'foreign' to compute the taxes in company currency, the tax amounts in foreign currency being converted
+#               from the rounded ones in company currency (the price-included amounts without tax follow them).
+#               With the 'line' grain, the amounts in company currency are always converted from the rounded amounts in
+#               foreign currency, unless 'foreign'.
 # The javascript side never resolves a policy: it receives it through `res.company.tax_rounding_settings`.
 TAX_ROUNDING_POLICIES = {
     'line': {
@@ -69,6 +73,7 @@ TAX_ROUNDING_COUNTRY_SETTINGS = {
     'BE': TAX_ROUNDING_ON_ROUNDED_BASES,
     'BR': TAX_ROUNDING_ON_ROUNDED_BASES,
     'IN': TAX_ROUNDING_ON_ROUNDED_BASES,
+    'KE': {'tax_grain': 'line', 'converted_currency': 'foreign'},
 }
 
 # How the taxes of a document are written into an external format (EDI, QR code, fiscal device, API). Each format declares
@@ -793,6 +798,7 @@ class AccountTax(models.Model):
     #     |        |                                          'rounded' tax basis, the taxes in the order of their
     #     |        |                                          dependencies, on the rounded bases of the lines; then
     #     |        |                                          the converted currency from the other one
+    #     |        +- _convert_line_tax_amounts               2. 'line' grain, 'foreign' converted currency
     #     |        +- _reach_tax_line_targets [py]            3. the existing tax lines
     #     v
     #   base lines with their 'tax_details' (unrounded and rounded amounts, per line and per tax data)
@@ -2201,7 +2207,12 @@ class AccountTax(models.Model):
         authority = policy['authority']
         share_total = policy['spreading'] == 'total'
         rounded_basis = policy['tax_basis'] == 'rounded'
-        converted_suffix = '' if policy['converted_currency'] == 'company' else None
+        converted_currency = policy['converted_currency']
+        # The amounts converted from the other currency: all the amounts in company currency ('company'), or the tax amounts
+        # in foreign currency ('foreign'), computed after the other currency.
+        converted_suffix = '' if converted_currency == 'company' else None
+        converted_tax_suffix = {'company': '', 'foreign': '_currency'}.get(converted_currency)
+        tax_suffixes = ('', '_currency') if converted_currency == 'foreign' else ('_currency', '')
         company_currency = company.currency_id
 
         def is_included(price_include):
@@ -2229,7 +2240,7 @@ class AccountTax(models.Model):
         settled_amounts = {}
 
         def settle(items_values, field):
-            if not rounded_basis and converted_suffix is None:
+            if not rounded_basis and not converted_currency:
                 return
             weights = [get_raw(values, field) for values in items_values]
             total_weight = sum(weights)
@@ -2237,9 +2248,12 @@ class AccountTax(models.Model):
             for values, weight in zip(items_values, weights):
                 settled_amounts[id(values), field] = weight * total / total_weight if total_weight else values[field]
 
-        def convert(base_line, values, field, settled_amount):
+        def convert(base_line, values, field):
             rate = base_line['rate']
-            raw_amounts[id(values), field] = settled_amount / rate if rate else 0.0
+            if field.endswith('_currency'):
+                raw_amounts[id(values), field] = settled_amounts[id(values), field[:-9]] * rate
+            else:
+                raw_amounts[id(values), field] = settled_amounts[id(values), f'{field}_currency'] / rate if rate else 0.0
 
         # Per tax.
         tax_groups = self._group_tax_data(base_lines, lambda base_line, tax_data: (
@@ -2310,16 +2324,16 @@ class AccountTax(models.Model):
             return tax_data['tax'].amount_type in ('percent', 'division')
 
         # Per tax: the tax amounts.
-        for suffix in ('_currency', ''):
+        for suffix in tax_suffixes:
             field = f'tax_amount{suffix}'
             base_field = f'base_amount{suffix}'
             for grouping_key in group_keys:
                 items = tax_groups[grouping_key]
                 currency = grouping_key[1] if suffix else company_currency
                 taxes_data = [tax_data for _base_line, tax_data in items]
-                if suffix == converted_suffix:
+                if suffix == converted_tax_suffix:
                     for base_line, tax_data in items:
-                        convert(base_line, tax_data, field, settled_amounts[id(tax_data), f'{field}_currency'])
+                        convert(base_line, tax_data, field)
                 elif rounded_basis and grouping_key[4]:
                     # A price-included tax is computed on the amount with tax, including the settled amounts of the others.
                     for base_line, tax_data in items:
@@ -2353,7 +2367,7 @@ class AccountTax(models.Model):
                 else:
                     target = sum(get_target(base_line, tax_data, field) for base_line, tax_data in items)
                     self._reach_target(taxes_data, field, currency.round(target), currency.decimal_places)
-                if suffix != converted_suffix:
+                if suffix != converted_tax_suffix:
                     settle(taxes_data, field)
 
         # The existing tax lines are part of the totals the base amounts are derived from.
@@ -2372,7 +2386,7 @@ class AccountTax(models.Model):
                 keep = [self._is_tax_details_pinned(base_line, tax_data, field) for base_line, tax_data in items]
                 if suffix == converted_suffix:
                     for base_line, tax_data in items:
-                        convert(base_line, tax_data, field, settled_amounts[id(tax_data), f'{field}_currency'])
+                        convert(base_line, tax_data, field)
                     if rounded_basis:
                         for tax_data, kept in zip(taxes_data, keep):
                             if not kept:
@@ -2393,6 +2407,13 @@ class AccountTax(models.Model):
                         )
                     settle(taxes_data, field)
                     continue
+                elif suffix == converted_tax_suffix and price_include:
+                    # The price-included bases follow the converted tax amounts.
+                    for base_line, tax_data in items:
+                        raw_amounts[id(tax_data), field] = tax_data[f'raw_{field}'] + sum(
+                            other[f'raw_{tax_field}'] - get_raw(other, tax_field)
+                            for other in get_batch_taxes_data(base_line, tax_data)
+                        )
 
                 if share_total and is_included(price_include):
                     batches_taxes_data = [get_batch_taxes_data(base_line, tax_data) for base_line, tax_data in items]
@@ -2449,11 +2470,16 @@ class AccountTax(models.Model):
                 if suffix == converted_suffix:
                     for base_line, tax_details in zip(group_base_lines, taxes_details):
                         taxes_data = tax_details['taxes_data']
-                        if taxes_data:
-                            settled_amount = settled_amounts[id(taxes_data[0]), f'base_amount{suffix}_currency']
-                        else:
-                            settled_amount = tax_details[f'{field}_currency']
-                        convert(base_line, tax_details, field, settled_amount)
+                        settled_amounts[id(tax_details), f'{field}_currency'] = (
+                            settled_amounts[id(taxes_data[0]), 'base_amount_currency'] if taxes_data
+                            else tax_details[f'{field}_currency']
+                        )
+                        convert(base_line, tax_details, field)
+                elif suffix == converted_tax_suffix:
+                    # The amount without tax of the line follows the base of its first tax.
+                    for tax_details in taxes_details:
+                        if tax_details['taxes_data']:
+                            raw_amounts[id(tax_details), field] = get_raw(tax_details['taxes_data'][0], f'base_amount{suffix}')
                 if rounded_basis:
                     # The amount without tax of the line: the base of its first tax.
                     for tax_details, kept in zip(taxes_details, keep):
@@ -2502,6 +2528,36 @@ class AccountTax(models.Model):
                 )
                 for tax_details in taxes_details:
                     tax_details[field] = suffix_currency.round(tax_details[field])
+
+    @api.model
+    def _convert_line_tax_amounts(self, base_lines):
+        """ With the 'line' grain, the tax amounts in foreign currency converted from the rounded ones in company currency
+        ('foreign' converted currency of the policy), the price-included amounts without tax following them.
+
+        Suppose a line of 100.0335 having a tax of 16% at a rate of 3: the tax is round(100.03 * 0.16) = 16.0 in foreign
+        currency, so round(16.0 / 3) = 5.33 in company currency. Converted back, the tax in foreign currency is 15.99.
+
+        [!] Mirror of the same method in account_tax.js.
+        PLZ KEEP BOTH METHODS CONSISTENT WITH EACH OTHERS.
+
+        :param base_lines:  A list of base lines.
+        """
+        for base_line in base_lines:
+            currency = base_line['currency_id']
+            tax_details = base_line['tax_details']
+            taxes_data = tax_details['taxes_data']
+            for tax_data in taxes_data:
+                if not self._is_tax_details_pinned(base_line, tax_data, 'tax_amount_currency'):
+                    tax_data['tax_amount_currency'] = currency.round(tax_data['tax_amount'] * base_line['rate'])
+            for tax_data in taxes_data:
+                if tax_data['price_include'] and not self._is_tax_details_pinned(base_line, tax_data, 'base_amount_currency'):
+                    tax_data['base_amount_currency'] = currency.round(tax_data['raw_base_amount_currency'] + sum(
+                        other_tax_data['raw_tax_amount_currency'] - other_tax_data['tax_amount_currency']
+                        for other_tax_data in taxes_data
+                        if other_tax_data['tax'] in tax_data['batch']
+                    ))
+            if taxes_data and not self._is_tax_details_pinned(base_line, None, 'total_excluded_currency'):
+                tax_details['total_excluded_currency'] = taxes_data[0]['base_amount_currency']
 
     @api.model
     def _reach_tax_line_targets(self, base_lines, company, tax_lines):
@@ -2581,6 +2637,8 @@ class AccountTax(models.Model):
         tax_lines_first = bool(tax_lines) and policy['tax_grain'] == 'tax' and policy['authority'] == 'included'
         if policy['tax_grain'] == 'tax':
             self._reach_tax_rounding_targets(base_lines, company, policy, tax_lines=tax_lines if tax_lines_first else None)
+        elif policy['converted_currency'] == 'foreign':
+            self._convert_line_tax_amounts(base_lines)
 
         for base_line in base_lines:
             tax_details = base_line['tax_details']
