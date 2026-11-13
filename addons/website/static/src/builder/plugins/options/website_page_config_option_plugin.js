@@ -28,7 +28,6 @@ export class WebsitePageConfigOptionPlugin extends Plugin {
     resources = {
         history_fields: {
             id: "pageVisibility",
-            isAutomatic: true,
             apply: ({ target, after }) => this.applyHistoryVisibility(target, after),
             revert: ({ target, before }) => this.applyHistoryVisibility(target, before),
         },

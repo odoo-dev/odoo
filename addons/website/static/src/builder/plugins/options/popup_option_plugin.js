@@ -27,7 +27,6 @@ export class PopupOptionPlugin extends Plugin {
     resources = {
         history_fields: {
             id: "popupVisibility",
-            isAutomatic: true,
             apply: ({ nodeId, value }) =>
                 this.dependencies.visibility.toggleTargetVisibility(
                     this.dependencies.domReferenceMap.getNodeById(nodeId),

@@ -135,10 +135,13 @@ export class DomObserverPlugin extends Plugin {
         history_fields: withSequence(0, {
             id: "mutations",
             collect: (mutations, { relatedCommit }) => this.processPendingData(!!relatedCommit),
-            apply: (mutations, { ensureNewMutations }) =>
-                this.applyMutations(mutations, { ensureNewMutations }),
-            revert: (mutations, { ensureNewMutations }) =>
-                this.revertMutations(mutations, { ensureNewMutations }),
+            // The mutations are applied and reverted together. The observer
+            // records them, including those of a replay, so they are never
+            // staged by the history.
+            replay: (mutations, { reverse }, { ensureNewMutations }) =>
+                reverse
+                    ? this.revertMutations(mutations, { ensureNewMutations })
+                    : this.applyMutations(mutations, { ensureNewMutations }),
             discard: (mutations = []) => this.discardPendingMutations(mutations),
         }),
 
@@ -225,15 +228,6 @@ export class DomObserverPlugin extends Plugin {
             this.stagePendingMutations();
             return data;
         }),
-
-        // Predicates
-        // ----------
-
-        has_history_commit_changes_predicates: (commit) => {
-            if (commit.data.mutations?.length) {
-                return true;
-            }
-        },
     };
 
     setup() {

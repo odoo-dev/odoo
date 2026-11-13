@@ -27,7 +27,6 @@ export class DynamicFieldPlugin extends Plugin {
     resources = {
         history_fields: {
             id: "dynamicFieldLabel",
-            isAutomatic: true,
             apply: ({ nodeId }) =>
                 this.applyEditedField(this.dependencies.domReferenceMap.getNodeById(nodeId)),
             revert: ({ nodeId, previousText }) => {

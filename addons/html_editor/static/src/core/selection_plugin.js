@@ -250,12 +250,13 @@ export class SelectionPlugin extends Plugin {
         user_commands: { id: "selectAll", run: this.selectAll.bind(this) },
         shortcuts: [{ hotkey: "control+a", commandId: "selectAll" }],
         history_fields: [
-            { id: "activeElementId" },
-            { id: "selection" },
+            { id: "activeElementId", isMetadata: true },
+            { id: "selection", isMetadata: true },
             // Execute this late to ensure the state of the DOM doesn't change and
             // invalidate the selection after setting it here.
             withSequence(100, {
                 id: "selectionAfter",
+                isMetadata: true,
                 collect: () => this.serializeEditableSelection(),
             }),
         ],

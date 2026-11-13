@@ -31,7 +31,7 @@ export class CollaborationPlugin extends Plugin {
     static dependencies = ["history", "domObserver", "selection", "sanitize"];
     /** @type {import("plugins").EditorResources} */
     resources = {
-        history_fields: { id: "peerId", collect: () => this.peerId },
+        history_fields: { id: "peerId", isMetadata: true, collect: () => this.peerId },
 
         /** Handlers */
         on_will_reset_history_handlers: this.onWillResetHistory.bind(this),

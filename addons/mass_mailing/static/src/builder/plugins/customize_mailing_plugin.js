@@ -29,7 +29,6 @@ export class CustomizeMailingPlugin extends Plugin {
     resources = {
         history_fields: {
             id: "mailingVariable",
-            isAutomatic: true,
             apply: ({ variable, after }) => this.setVariable(variable, after),
             revert: ({ variable, before }) => this.setVariable(variable, before),
         },

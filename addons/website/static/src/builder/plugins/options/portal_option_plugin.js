@@ -12,13 +12,11 @@ export class PortalOptionPlugin extends Plugin {
         history_fields: [
             {
                 id: "portalCards",
-                isAutomatic: true,
                 apply: ({ after }) => this.setPortalCards(after),
                 revert: ({ before }) => this.setPortalCards(before),
             },
             {
                 id: "portalGap",
-                isAutomatic: true,
                 apply: ({ after }) =>
                     this.document.documentElement.style.setProperty("--portal-card-gap", after),
                 revert: ({ before }) =>

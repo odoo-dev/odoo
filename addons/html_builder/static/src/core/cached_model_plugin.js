@@ -17,7 +17,6 @@ export class CachedModelPlugin extends Plugin {
     resources = {
         history_fields: {
             id: "cachedModel",
-            isAutomatic: true,
             apply: ({ model, recordId, field, after }) => {
                 this.useModelEdit({ model, recordId }).values[field].current = after;
             },

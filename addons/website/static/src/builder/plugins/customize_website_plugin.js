@@ -77,13 +77,11 @@ export class CustomizeWebsitePlugin extends Plugin {
         history_fields: [
             {
                 id: "websiteCustomValue",
-                isAutomatic: true,
                 apply: (data) => this.replayCustomValue(data, data.after),
                 revert: (data) => this.replayCustomValue(data, data.before),
             },
             {
                 id: "bodyBackground",
-                isAutomatic: true,
                 apply: ({ after }) =>
                     this.dependencies.builderActions
                         .getAction("toggleBodyBgImage")
@@ -95,13 +93,11 @@ export class CustomizeWebsitePlugin extends Plugin {
             },
             {
                 id: "bodyBackgroundPosition",
-                isAutomatic: true,
                 apply: ({ nodeId, after }) => this.replayBackgroundPosition(nodeId, after),
                 revert: ({ nodeId, before }) => this.replayBackgroundPosition(nodeId, before),
             },
             {
                 id: "viewsOnSave",
-                isAutomatic: true,
                 apply: ({ after }) => this.restoreViewsOnSave(after),
                 revert: ({ before }) => this.restoreViewsOnSave(before),
             },

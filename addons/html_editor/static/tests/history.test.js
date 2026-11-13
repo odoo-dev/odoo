@@ -809,12 +809,19 @@ describe("history fields", () => {
 
     test("staged values are collected into the next commit", async () => {
         const { editor, el } = await setupEditor(`<p>[]x</p>`, {
-            config: { resources: { history_fields: [{ id: "label" }, { id: "unstaged" }] } },
+            config: {
+                resources: {
+                    history_fields: [
+                        { id: "label", isMetadata: true },
+                        { id: "unstaged", isMetadata: true },
+                    ],
+                },
+            },
         });
         const history = editor.shared.history;
         history.stage("label", "first");
         expect(history.getStaged("label")).toBe("first");
-        // Fields are not changes on their own, so the draft is kept.
+        // Metadata is not a change, so the draft is kept.
         expect(history.commit()).toBe(false);
         expect(history.getStaged("label")).toBe("first");
 
@@ -831,6 +838,7 @@ describe("history fields", () => {
                 resources: {
                     history_fields: {
                         id: "label",
+                        isMetadata: true,
                         collect: (label, { relatedCommit }) =>
                             relatedCommit ? `reverts ${relatedCommit.data.label}` : label,
                     },
@@ -845,27 +853,67 @@ describe("history fields", () => {
         expect(history.getCommits().at(-1).data.label).toBe("reverts edit");
     });
 
-    test("discarding changes only clears fields with a discard hook", async () => {
+    test("discarding changes reverts them and keeps metadata", async () => {
         const { editor } = await setupEditor(`<p>[]x</p>`, {
             config: {
                 resources: {
                     history_fields: [
-                        { id: "metadata" },
-                        { id: "changes", discard: (value) => expect.step(["discard", value]) },
+                        { id: "metadata", isMetadata: true },
+                        {
+                            id: "changes",
+                            apply: (label) => expect.step("apply " + label),
+                            revert: (label) => expect.step("revert " + label),
+                        },
                     ],
                 },
             },
         });
         const history = editor.shared.history;
         history.stage("metadata", "kept");
-        history.stage("changes", "pending");
+        history.apply("changes", "pending");
+        expect.verifySteps(["apply pending"]);
         history.stash();
-        expect.verifySteps([["discard", "pending"]]);
+        expect.verifySteps(["revert pending"]);
         expect(history.getStaged("metadata")).toBe("kept");
         expect(history.getStaged("changes")).toBe(undefined);
     });
 
-    test("replayed fields can stage the values of the commit they record", async () => {
+    test("hooks replace the default behaviors of a field", async () => {
+        const { editor } = await setupEditor(`<p>[]x</p>`, {
+            config: {
+                resources: {
+                    history_fields: {
+                        id: "batch",
+                        replay: (batch, { reverse, stage }, { ensureNewMutations }) =>
+                            expect.step([
+                                reverse ? "revert" : "apply",
+                                batch,
+                                stage,
+                                ensureNewMutations,
+                            ]),
+                        discard: (batch) => expect.step(["discard", batch]),
+                    },
+                },
+            },
+        });
+        const history = editor.shared.history;
+        history.stage("batch", ["a", "b"]);
+        history.stash();
+        expect.verifySteps([["discard", ["a", "b"]]]);
+        history.unstash();
+        expect.verifySteps([["apply", ["a", "b"], true, false]]);
+
+        // The field is a change, which its own replay records, if at all.
+        history.stage("batch", ["a", "b"]);
+        expect(history.commit()).not.toBe(false);
+        history.undo();
+        expect.verifySteps([
+            ["discard", undefined],
+            ["revert", ["a", "b"], true, true],
+        ]);
+    });
+
+    test("replayed metadata can stage the values of the commit it records", async () => {
         let history;
         const ids = ["firstTarget", "secondTarget"];
         const { editor, el } = await setupEditor(`<p>[]x</p>`, {
@@ -873,10 +921,9 @@ describe("history fields", () => {
                 resources: {
                     history_fields: ids.map((id, index) => ({
                         id,
-                        apply: (target, { ensureNewMutations }) =>
-                            ensureNewMutations && history.stage(id, target),
-                        revert: (target, { ensureNewMutations }) =>
-                            ensureNewMutations && history.stage(ids[1 - index], target),
+                        isMetadata: true,
+                        replay: (target, { reverse, stage }) =>
+                            stage && history.stage(reverse ? ids[1 - index] : id, target),
                     })),
                 },
             },
@@ -898,41 +945,35 @@ describe("history fields", () => {
     });
 
     test("restoring a savepoint brings the draft back", async () => {
-        let history;
         const { editor } = await setupEditor(`<p>[]x</p>`, {
             config: {
                 resources: {
                     history_fields: [
-                        { id: "bookmark" },
-                        { id: "later" },
+                        { id: "bookmark", isMetadata: true },
+                        { id: "later", isMetadata: true },
                         {
                             id: "changes",
-                            apply: (value, { ensureNewMutations }) => {
-                                expect.step(["apply", value, ensureNewMutations]);
-                                history.stage("changes", value);
-                            },
-                            discard: (value) => expect.step(["discard", value]),
+                            apply: (label) => expect.step("apply " + label),
+                            revert: (label) => expect.step("revert " + label),
                         },
                     ],
                 },
             },
         });
-        history = editor.shared.history;
+        const history = editor.shared.history;
         history.stage("bookmark", "saved");
-        history.stage("changes", "saved");
+        history.apply("changes", "saved");
         const restore = history.makeSavePoint();
         history.stage("bookmark", "changed");
         history.stage("later", "staged after the savepoint");
-        history.stage("changes", "changed");
+        history.apply("changes", "changed");
+        expect.verifySteps(["apply saved", "apply changed"]);
 
         restore();
         // Pending changes are discarded, then applied again up to the savepoint.
-        expect.verifySteps([
-            ["discard", "changed"],
-            ["apply", "saved", true],
-        ]);
-        expect(history.getStaged("changes")).toBe("saved");
-        // Other fields are staged back.
+        expect.verifySteps(["revert changed", "revert saved", "apply saved"]);
+        expect(history.getStaged("changes")).toEqual([{ data: "saved", reversed: false }]);
+        // Metadata is staged back.
         expect(history.getStaged("bookmark")).toBe("saved");
         expect(history.getStaged("later")).toBe(undefined);
     });
@@ -942,6 +983,7 @@ describe("history fields", () => {
             config: {
                 resources: {
                     history_fields: sequencedFields((id) => ({
+                        isMetadata: true,
                         collect: () => expect.step(id),
                     })),
                 },
@@ -958,21 +1000,27 @@ describe("history fields", () => {
                 resources: {
                     history_fields: sequencedFields((id) => ({
                         apply: () => expect.step("apply " + id),
-                        discard: () => expect.step("discard " + id),
+                        revert: () => expect.step("revert " + id),
                     })),
                 },
             },
         });
         const history = editor.shared.history;
-        for (const name of Object.keys(sequences)) {
-            history.stage(name, name);
+        for (const id of Object.keys(sequences)) {
+            history.apply(id, {});
         }
+        expect.verifySteps([
+            "apply late",
+            "apply firstDefault",
+            "apply early",
+            "apply secondDefault",
+        ]);
         history.stash();
         expect.verifySteps([
-            "discard early",
-            "discard firstDefault",
-            "discard secondDefault",
-            "discard late",
+            "revert early",
+            "revert firstDefault",
+            "revert secondDefault",
+            "revert late",
         ]);
         history.unstash();
         expect.verifySteps([
@@ -983,14 +1031,14 @@ describe("history fields", () => {
         ]);
     });
 
-    test("unknown fields and operations of non-automatic fields are rejected", async () => {
+    test("unknown fields and operations on metadata are rejected", async () => {
         const { editor } = await setupEditor(`<p>[]x</p>`, {
-            config: { resources: { history_fields: { id: "label" } } },
+            config: { resources: { history_fields: { id: "label", isMetadata: true } } },
         });
         const history = editor.shared.history;
         expect(() => history.stage("unknown", 1)).toThrow("Unknown history field: unknown");
         expect(() => history.apply("unknown", {})).toThrow("Unknown history field: unknown");
-        expect(() => history.apply("label", {})).toThrow("History field is not automatic: label");
+        expect(() => history.apply("label", {})).toThrow("History field is metadata: label");
     });
 
     describe("custom operations", () => {
@@ -1003,7 +1051,6 @@ describe("history fields", () => {
                 resources: {
                     history_fields: {
                         id: "testValue",
-                        isAutomatic: true,
                         apply: ({ after, label }) => {
                             expect.step(label ? "apply " + label : "apply");
                             value = after;
@@ -1243,7 +1290,6 @@ describe("history fields", () => {
                     resources: {
                         history_fields: ["first", "second"].map((id) => ({
                             id,
-                            isAutomatic: true,
                             apply: ({ label }) => expect.step("apply " + label),
                             revert: ({ label }) => expect.step("revert " + label),
                         })),
@@ -1273,7 +1319,6 @@ describe("history fields", () => {
                     resources: {
                         history_fields: {
                             id: "version",
-                            isAutomatic: true,
                             apply: ({ after }) => {
                                 expect(paragraph.dataset.version).toBe(after);
                                 value = after;

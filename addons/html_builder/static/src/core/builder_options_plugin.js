@@ -185,29 +185,27 @@ export class BuilderOptionsPlugin extends Plugin {
         history_fields: [
             {
                 id: "currentTarget",
+                isMetadata: true,
                 collect: (targetId = null) => targetId,
-                apply: (targetId, { ensureNewMutations }) => {
-                    if (ensureNewMutations) {
-                        this.dependencies.history.stage("currentTarget", targetId);
-                    }
-                },
-                revert: (targetId, { ensureNewMutations }) => {
-                    if (ensureNewMutations) {
-                        this.dependencies.history.stage("nextTarget", targetId);
+                replay: (targetId, { reverse, stage }) => {
+                    if (stage) {
+                        this.dependencies.history.stage(
+                            reverse ? "nextTarget" : "currentTarget",
+                            targetId
+                        );
                     }
                 },
             },
             {
                 id: "nextTarget",
+                isMetadata: true,
                 collect: (targetId = null) => targetId,
-                apply: (targetId, { ensureNewMutations }) => {
-                    if (ensureNewMutations) {
-                        this.dependencies.history.stage("nextTarget", targetId);
-                    }
-                },
-                revert: (targetId, { ensureNewMutations }) => {
-                    if (ensureNewMutations) {
-                        this.dependencies.history.stage("currentTarget", targetId);
+                replay: (targetId, { reverse, stage }) => {
+                    if (stage) {
+                        this.dependencies.history.stage(
+                            reverse ? "currentTarget" : "nextTarget",
+                            targetId
+                        );
                     }
                 },
             },

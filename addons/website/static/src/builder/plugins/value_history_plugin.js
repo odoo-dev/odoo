@@ -14,7 +14,6 @@ export class ValueHistoryPlugin extends Plugin {
     resources = {
         history_fields: {
             id: "formValue",
-            isAutomatic: true,
             apply: ({ nodeId, after }) => {
                 this.dependencies.domReferenceMap.getNodeById(nodeId).value = after;
             },

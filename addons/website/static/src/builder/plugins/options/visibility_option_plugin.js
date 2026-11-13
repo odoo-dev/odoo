@@ -23,7 +23,6 @@ export class VisibilityOptionPlugin extends Plugin {
     resources = {
         history_fields: {
             id: "deviceVisibility",
-            isAutomatic: true,
             apply: ({ nodeId, removeOnApply }) => {
                 if (removeOnApply) {
                     this.dependencies.domReferenceMap
