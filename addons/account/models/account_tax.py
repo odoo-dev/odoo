@@ -66,6 +66,7 @@ TAX_ROUNDING_COUNTRY_SETTINGS = {
     # The certification of the invoicing software: the total with tax is the reference, shared between the lines.
     'PT': {'authority': 'included', 'spreading': 'total'},
     'AR': TAX_ROUNDING_ON_ROUNDED_BASES,
+    'BE': TAX_ROUNDING_ON_ROUNDED_BASES,
 }
 
 # How the taxes of a document are written into an external format (EDI, QR code, fiscal device, API). Each format declares
