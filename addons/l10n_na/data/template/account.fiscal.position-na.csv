@@ -1,0 +1,3 @@
+"id","name","auto_apply","sequence","country_id"
+"na_fp_domestic","Namibia","1","10","base.na"
+"na_fp_foreign","Export/Foreign","1","20",""

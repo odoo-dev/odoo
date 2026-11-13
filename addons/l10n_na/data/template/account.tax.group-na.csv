@@ -1,0 +1,4 @@
+"id","name","country_id"
+"tax_group_0","VAT 0%","base.na"
+"tax_group_15","VAT 15%","base.na"
+"tax_group_exempt","Exempt","base.na"

@@ -1,0 +1,344 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo auto_sequence="1">
+    <record id="tax_report" model="account.report">
+        <field name="name">Tax Report</field>
+        <field name="root_report_id" ref="account.generic_tax_report"/>
+        <field name="country_id" ref="base.na"/>
+        <field name="allow_foreign_vat" eval="True"/>
+        <field name="availability_condition">country</field>
+        <field name="column_ids">
+            <record id="tax_report_exempt" model="account.report.column">
+                <field name="name">Exempt</field>
+                <field name="expression_label">exempt</field>
+            </record>
+            <record id="tax_report_zero_rated" model="account.report.column">
+                <field name="name">Zero-rated</field>
+                <field name="expression_label">zero_rated</field>
+            </record>
+            <record id="tax_report_15_percent" model="account.report.column">
+                <field name="name">15%</field>
+                <field name="expression_label">percent_15</field>
+            </record>
+            <record id="tax_report_total_tax" model="account.report.column">
+                <field name="name">Total Tax</field>
+                <field name="expression_label">total_tax</field>
+            </record>
+        </field>
+        <field name="line_ids">
+            <record id="vat_payable" model="account.report.line">
+                <field name="name">VAT Payable</field>
+                <field name="hierarchy_level">0</field>
+                <field name="children_ids">
+                    <record id="total_output_tax_due_summary" model="account.report.line">
+                        <field name="name">[5] TOTAL OUTPUT TAX DUE</field>
+                        <field name="code">total_output_tax_due_summary</field>
+                        <field name="expression_ids">
+                            <record id="total_output_tax_summary_expression" model="account.report.expression">
+                                <field name="label">total_tax</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">total_output_tax_due.total_tax</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="total_input_tax_claimed_summary" model="account.report.line">
+                        <field name="name">[6] LESS INPUT TAX CLAIMED</field>
+                        <field name="code">total_input_tax_claimed_summary</field>
+                        <field name="expression_ids">
+                            <record id="total_input_tax_summary_expression" model="account.report.expression">
+                                <field name="label">total_tax</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">total_input_tax_claimed.total_tax</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="total_nett_tax_due_summary" model="account.report.line">
+                        <field name="name">[7] AMOUNT DUE/REPAYABLE</field>
+                        <field name="code">total_nett_tax_due_summary</field>
+                        <field name="expression_ids">
+                            <record id="total_nett_tax_summary_expression" model="account.report.expression">
+                                <field name="label">total_tax</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">total_output_tax_due_summary.total_tax - total_input_tax_claimed_summary.total_tax</field>
+                            </record>
+                        </field>
+                    </record>
+                </field>
+            </record>
+
+            <record id="output_tax" model="account.report.line">
+                <field name="name">VAT DECLARED (Outputs)</field>
+                <field name="hierarchy_level">0</field>
+                <field name="children_ids">
+                    <record id="tax_trade" model="account.report.line">
+                        <field name="name">[8] Trading: Sales/fees, etc.</field>
+                        <field name="code">tax_trade</field>
+                        <field name="expression_ids">
+                            <record id="tax_trade_exempt_expression" model="account.report.expression">
+                                <field name="label">exempt</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">-[8] Exempt</field>
+                            </record>
+                            <record id="tax_trade_zero_rated_expression" model="account.report.expression">
+                                <field name="label">zero_rated</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">-[8] Zero-rated</field>
+                            </record>
+                            <record id="tax_trade_15_percent_expression" model="account.report.expression">
+                                <field name="label">percent_15</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">-[8] 15%</field>
+                            </record>
+                            <record id="tax_trade_total_tax_expression" model="account.report.expression">
+                                <field name="label">total_tax</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">-[8] VAT</field>
+                            </record>
+                        </field>
+                    </record>
+
+                    <record id="tax_capital_goods_sold" model="account.report.line">
+                        <field name="name">[9] Capital goods sold</field>
+                        <field name="code">capital_goods_sold</field>
+                        <field name="expression_ids">
+                            <record id="tax_capital_goods_sold_exempt_expression" model="account.report.expression">
+                                <field name="label">exempt</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">-[9] Exempt</field>
+                            </record>
+                            <record id="tax_capital_goods_sold_zero_rated_expression" model="account.report.expression">
+                                <field name="label">zero_rated</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">-[9] Zero-rated</field>
+                            </record>
+                            <record id="tax_capital_goods_sold_15_percent_expression" model="account.report.expression">
+                                <field name="label">percent_15</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">-[9] 15%</field>
+                            </record>
+                            <record id="tax_capital_goods_sold_total_tax_expression" model="account.report.expression">
+                                <field name="label">total_tax</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">-[9] VAT</field>
+                            </record>
+                        </field>
+                    </record>
+
+                    <record id="tax_output_adjustments" model="account.report.line">
+                        <field name="name">[10] Output Adjustments</field>
+                        <field name="code">output_adjustments</field>
+                        <field name="expression_ids">
+                            <record id="tax_output_adjustments_exempt_expression" model="account.report.expression">
+                                <field name="label">exempt</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">-[10] Exempt</field>
+                            </record>
+                            <record id="tax_output_adjustments_zero_rated_expression" model="account.report.expression">
+                                <field name="label">zero_rated</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">-[10] Zero-rated</field>
+                            </record>
+                            <record id="tax_output_adjustments_15_percent_expression" model="account.report.expression">
+                                <field name="label">percent_15</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">-[10] 15%</field>
+                            </record>
+                            <record id="tax_output_adjustments_total_tax_expression" model="account.report.expression">
+                                <field name="label">total_tax</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">-[10] VAT</field>
+                            </record>
+                        </field>
+                    </record>
+
+                    <record id="total_output_tax_due" model="account.report.line">
+                        <field name="name">[11] Totals / [12] Total output tax</field>
+                        <field name="code">total_output_tax_due</field>
+                        <field name="expression_ids">
+                            <record id="total_output_tax_due_exempt_expression" model="account.report.expression">
+                                <field name="label">exempt</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">tax_trade.exempt + capital_goods_sold.exempt + output_adjustments.exempt</field>
+                            </record>
+                            <record id="total_output_tax_due_zero_rated_expression" model="account.report.expression">
+                                <field name="label">zero_rated</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">tax_trade.zero_rated + capital_goods_sold.zero_rated + output_adjustments.zero_rated</field>
+                            </record>
+                            <record id="total_output_tax_due_15_percent_expression" model="account.report.expression">
+                                <field name="label">percent_15</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">tax_trade.percent_15 + capital_goods_sold.percent_15 + output_adjustments.percent_15</field>
+                            </record>
+                            <record id="total_output_tax_due_total_tax_expression" model="account.report.expression">
+                                <field name="label">total_tax</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">tax_trade.total_tax + capital_goods_sold.total_tax + output_adjustments.total_tax</field>
+                            </record>
+                        </field>
+                    </record>
+                </field>
+            </record>
+
+            <record id="input_tax" model="account.report.line">
+                <field name="name">VAT CLAIMED (Inputs)</field>
+                <field name="hierarchy_level">0</field>
+                <field name="children_ids">
+                    <record id="tax_local_purchases" model="account.report.line">
+                        <field name="name">[13] Local Purchases</field>
+                        <field name="code">local_purchases</field>
+                        <field name="expression_ids">
+                            <record id="tax_local_purchases_exempt_expression" model="account.report.expression">
+                                <field name="label">exempt</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">[13] Exempt</field>
+                            </record>
+                            <record id="tax_local_purchases_zero_rated_expression" model="account.report.expression">
+                                <field name="label">zero_rated</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">[13] Zero-rated</field>
+                            </record>
+                            <record id="tax_local_purchases_15_percent_expression" model="account.report.expression">
+                                <field name="label">percent_15</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">[13] 15%</field>
+                            </record>
+                            <record id="tax_local_purchases_total_tax_expression" model="account.report.expression">
+                                <field name="label">total_tax</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">[13] VAT</field>
+                            </record>
+                        </field>
+                    </record>
+
+                    <record id="tax_capital_goods_purchased_locally" model="account.report.line">
+                        <field name="name">[14] Capital goods purchased locally</field>
+                        <field name="code">capital_goods_purchased_locally</field>
+                        <field name="expression_ids">
+                            <record id="tax_capital_goods_purchased_locally_exempt_expression" model="account.report.expression">
+                                <field name="label">exempt</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">[14] Exempt</field>
+                            </record>
+                            <record id="tax_capital_goods_purchased_locally_zero_rated_expression" model="account.report.expression">
+                                <field name="label">zero_rated</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">[14] Zero-rated</field>
+                            </record>
+                            <record id="tax_capital_goods_purchased_locally_15_percent_expression" model="account.report.expression">
+                                <field name="label">percent_15</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">[14] 15%</field>
+                            </record>
+                            <record id="tax_capital_goods_purchased_locally_total_tax_expression" model="account.report.expression">
+                                <field name="label">total_tax</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">[14] VAT</field>
+                            </record>
+                        </field>
+                    </record>
+
+                    <record id="tax_imported_purchases" model="account.report.line">
+                        <field name="name">[15] Imported purchases</field>
+                        <field name="code">imported_purchases</field>
+                        <field name="expression_ids">
+                            <record id="tax_imported_purchases_exempt_expression" model="account.report.expression">
+                                <field name="label">exempt</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">[15] Exempt</field>
+                            </record>
+                            <record id="tax_imported_purchases_15_percent_expression" model="account.report.expression">
+                                <field name="label">percent_15</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">[15] 15%</field>
+                            </record>
+                            <record id="tax_imported_purchases_total_tax_expression" model="account.report.expression">
+                                <field name="label">total_tax</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">[15] VAT</field>
+                            </record>
+                        </field>
+                    </record>
+
+                    <record id="tax_imported_capital_goods" model="account.report.line">
+                        <field name="name">[16] Imported capital goods</field>
+                        <field name="code">imported_capital_goods</field>
+                        <field name="expression_ids">
+                            <record id="tax_imported_capital_goods_exempt_expression" model="account.report.expression">
+                                <field name="label">exempt</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">[16] Exempt</field>
+                            </record>
+                            <record id="tax_imported_capital_goods_15_percent_expression" model="account.report.expression">
+                                <field name="label">percent_15</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">[16] 15%</field>
+                            </record>
+                            <record id="tax_imported_capital_goods_total_tax_expression" model="account.report.expression">
+                                <field name="label">total_tax</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">[16] VAT</field>
+                            </record>
+                        </field>
+                    </record>
+
+                     <record id="tax_input_adjustments" model="account.report.line">
+                        <field name="name">[17] Input adjustments</field>
+                        <field name="code">input_adjustments</field>
+                        <field name="expression_ids">
+                            <record id="tax_input_adjustments_exempt_expression" model="account.report.expression">
+                                <field name="label">exempt</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">[17] Exempt</field>
+                            </record>
+                            <record id="tax_input_adjustments_zero_rated_expression" model="account.report.expression">
+                                <field name="label">zero_rated</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">[17] Zero-rated</field>
+                            </record>
+                            <record id="tax_input_adjustments_15_percent_expression" model="account.report.expression">
+                                <field name="label">percent_15</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">[17] 15%</field>
+                            </record>
+                            <record id="tax_input_adjustments_total_tax_expression" model="account.report.expression">
+                                <field name="label">total_tax</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">[17] VAT</field>
+                            </record>
+                        </field>
+                    </record>
+
+                    <record id="total_input_tax_claimed" model="account.report.line">
+                        <field name="name">[18] Totals / [19] Total input tax</field>
+                        <field name="code">total_input_tax_claimed</field>
+                        <field name="expression_ids">
+                            <record id="total_input_tax_claimed_exempt_expression" model="account.report.expression">
+                                <field name="label">exempt</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">(local_purchases.exempt + capital_goods_purchased_locally.exempt + imported_purchases.exempt + imported_capital_goods.exempt
+                                    + input_adjustments.exempt)</field>
+                            </record>
+                            <record id="total_input_tax_claimed_zero_rated_expression" model="account.report.expression">
+                                <field name="label">zero_rated</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">local_purchases.zero_rated + capital_goods_purchased_locally.zero_rated + input_adjustments.zero_rated</field>
+                            </record>
+                            <record id="total_input_tax_claimed_15_percent_expression" model="account.report.expression">
+                                <field name="label">percent_15</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">(local_purchases.percent_15 + capital_goods_purchased_locally.percent_15 + imported_purchases.percent_15
+                                    + imported_capital_goods.percent_15 + input_adjustments.percent_15)</field>
+                            </record>
+                            <record id="total_input_tax_claimed_total_tax_expression" model="account.report.expression">
+                                <field name="label">total_tax</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">(local_purchases.total_tax + capital_goods_purchased_locally.total_tax + imported_purchases.total_tax
+                                    + imported_capital_goods.total_tax + input_adjustments.total_tax)</field>
+                            </record>
+                        </field>
+                    </record>
+                </field>
+            </record>
+        </field>
+    </record>
+</odoo>
