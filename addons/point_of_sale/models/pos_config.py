@@ -357,7 +357,7 @@ class PosConfig(models.Model):
         taxes = self.env['account.tax'].search(self.env['account.tax']._load_pos_data_domain({'pos.config': config}))
         product_fields = taxes._eval_taxes_computation_prepare_product_fields()
         record['_product_default_values'] = \
-            self.env['account.tax']._eval_taxes_computation_prepare_product_default_values(product_fields)
+            self.env['account.tax']._eval_taxes_computation_prepare_default_values('product.product', product_fields)
 
         if not record['use_pricelist']:
             record['pricelist_id'] = False

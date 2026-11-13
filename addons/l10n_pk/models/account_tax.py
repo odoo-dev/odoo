@@ -10,12 +10,12 @@ class AccountTax(models.Model):
     )
 
     @api.model
-    def _eval_taxes_computation_prepare_product_values(self, default_product_values, product=None):
+    def _eval_taxes_computation_prepare_values(self, default_values, record=None):
         # Some callers (e.g. product.template._construct_tax_string) pass a product.template
         # instead of the documented product.product record. Fall back to its variant so
         # variant-only fields referenced in custom tax formulas (e.g. lst_price) still resolve.
-        if product and product._name == 'product.template':
-            variant_only_fields = set(default_product_values) - set(product._fields)
+        if record and record._name == 'product.template':
+            variant_only_fields = set(default_values) - set(record._fields)
             if variant_only_fields:
-                product = product.product_variant_id or product
-        return super()._eval_taxes_computation_prepare_product_values(default_product_values, product=product)
+                record = record.product_variant_id or record
+        return super()._eval_taxes_computation_prepare_values(default_values, record=record)
