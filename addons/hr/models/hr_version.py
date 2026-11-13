@@ -108,6 +108,12 @@ class HrVersion(models.Model):
     spouse_complete_name = fields.Char(string="Spouse Legal Name", groups="hr.group_hr_user", tracking=1)
     spouse_birthdate = fields.Date(string="Spouse Birthdate", groups="hr.group_hr_user", tracking=1)
     children = fields.Integer(string='Dependent Children', groups="hr.group_hr_user", tracking=1)
+    certificate = fields.Selection(
+        selection="_get_certificate_selection",
+        string="Certificate Level",
+        groups="hr.group_hr_user",
+        tracking=1,
+    )
 
     # Work Information
     department_id = fields.Many2one('hr.department', check_company=True, tracking=1, index=True)
@@ -516,6 +522,16 @@ class HrVersion(models.Model):
         period_end = date_to or date.max
         contract_end = self.date_end or date.max
         return period_start <= contract_end and self.date_start <= period_end
+
+    @api.model
+    def _get_certificate_selection(self):
+        return [
+            ('graduate', self.env._('Graduate')),
+            ('bachelor', self.env._('Bachelor')),
+            ('master', self.env._('Master')),
+            ('doctor', self.env._('Doctor')),
+            ('other', self.env._('Other')),
+        ]
 
     def _get_reference_calendar(self, date=None):
         """Return the reference calendar (full-time equivalent) of the version's working schedule.
