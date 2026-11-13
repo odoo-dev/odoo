@@ -117,11 +117,11 @@ class TestTaxesBaseLinesTaxDetails(TestTaxCommon):
                 lines=[{'price_unit': 0.15, 'tax_ids': tax_15}] * 10,
             ))
         base_lines = document['lines']
-        AccountTax._add_and_round_raw_gross_total_excluded_and_discount(base_lines, self.env.company)
+        AccountTax._represent_tax_details(base_lines, self.env.company, {**TAX_REPRESENTATION_PROFILE, 'gross_amounts': 'raw'})
 
         def failed_rules(*identities):
             profile = {**TAX_REPRESENTATION_PROFILE, 'identities': identities}
-            return [violation['rule'] for violation in AccountTax._check_tax_representation(base_lines, self.env.company, profile)]
+            return [violation['rule'] for violation in AccountTax._represent_tax_details(base_lines, self.env.company, profile)]
 
         self.assertEqual(failed_rules(('exact', 'tax_is_base_x_rate', 'exact')), ['exact'])
         self.assertEqual(failed_rules(('abs', 'tax_is_base_x_rate', ('abs', 0.01))), ['abs'])
@@ -227,12 +227,12 @@ class TestTaxesBaseLinesTaxDetails(TestTaxCommon):
 
         base_lines = AccountTax._dispatch_global_discount_lines(base_lines, company)
         AccountTax._squash_global_discount_lines(base_lines, company)
-        AccountTax._add_and_round_raw_gross_total_excluded_and_discount(
-            base_lines, company, account_discount_base_lines=True,
-        )
-        AccountTax._add_and_round_raw_gross_total_excluded_and_discount(
-            base_lines, company, in_foreign_currency=False, account_discount_base_lines=True,
-        )
+        AccountTax._represent_tax_details(base_lines, company, {
+            **TAX_REPRESENTATION_PROFILE,
+            'currencies': ('foreign', 'company'),
+            'gross_amounts': 'raw',
+            'dispatched_global_discounts': True,
+        })
 
         self.assertEqual(len(base_lines), 1)
         tax_details = base_lines[0]['tax_details']

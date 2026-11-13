@@ -148,11 +148,19 @@ SUPPORTED_FILE_TYPES = {
 # -------------------------------------------------------------------------
 # TAX REPRESENTATION PROFILES (see TAX_REPRESENTATION_PROFILE in account.tax)
 # -------------------------------------------------------------------------
+# UBL writes the net and gross amounts of the lines in both currencies.
+UBL_TAX_REPRESENTATION_PROFILE = {
+    **TAX_REPRESENTATION_PROFILE,
+    'currencies': ('foreign', 'company'),
+    'net_amounts': True,
+    'gross_amounts': 'rounded',
+}
+
 # The checks of EN 16931 on the tax amounts:
 # - PEPPOL-EN16931-R120: the net amount of a line is its quantity times its net price, plus its charges, minus its allowances.
 # - BR-CO-17: the tax amount of a VAT category is its taxable amount times its rate, within 1 unit of the currency.
 EN16931_TAX_REPRESENTATION_PROFILE = {
-    **TAX_REPRESENTATION_PROFILE,
+    **UBL_TAX_REPRESENTATION_PROFILE,
     'identities': (
         ('PEPPOL-EN16931-R120', 'line_net_is_qty_x_price', ('abs', 0.01)),
         ('BR-CO-17', 'tax_is_base_x_rate', ('abs', 1.0)),
@@ -233,7 +241,7 @@ class AccountEdiCommon(models.AbstractModel):
 
     def _get_tax_representation_profile(self):
         """ The way this format writes the taxes, see TAX_REPRESENTATION_PROFILE in account.tax. """
-        return TAX_REPRESENTATION_PROFILE
+        return UBL_TAX_REPRESENTATION_PROFILE
 
     def _find_value(self, xpaths, tree, nsmap=False):
         """ Iteratively queries the tree using the xpaths and returns a result as soon as one is found """

@@ -831,7 +831,7 @@ class AccountMove(models.Model):
                 })
 
         AccountTax._round_base_lines_tax_details(base_lines, self.company_id, tax_lines=tax_lines)
-        tax_representation_violations = AccountTax._check_tax_representation(base_lines, self.company_id, self._l10n_it_edi_get_tax_representation_profile())
+        tax_representation_violations = AccountTax._represent_tax_details(base_lines, self.company_id, self._l10n_it_edi_get_tax_representation_profile())
         self._l10n_it_edi_add_base_lines_xml_values(
             [
                 (base_line, AccountTax._aggregate_tax_details([base_line], self._l10n_it_edi_grouping_function_base_lines))

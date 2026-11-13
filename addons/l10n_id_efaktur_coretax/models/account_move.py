@@ -2,6 +2,7 @@
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError, RedirectWarning
+from odoo.addons.account.models.account_tax import TAX_REPRESENTATION_PROFILE
 
 COUNTRY_CODE_MAP = {
     "BD": "BGD", "BE": "BEL", "BF": "BFA", "BG": "BGR", "BA": "BIH", "BB": "BRB", "WF": "WLF", "BL": "BLM", "BM": "BMU",
@@ -32,6 +33,15 @@ COUNTRY_CODE_MAP = {
     "AE": "ARE", "AD": "AND", "AG": "ATG", "AF": "AFG", "AI": "AIA", "VI": "VIR", "IS": "ISL", "IR": "IRN", "AM": "ARM",
     "AL": "ALB", "AO": "AGO", "AQ": "ATA", "AS": "ASM", "AR": "ARG", "AU": "AUS", "AT": "AUT", "AW": "ABW", "IN": "IND",
     "AX": "ALA", "AZ": "AZE", "IE": "IRL", "ID": "IDN", "UA": "UKR", "QA": "QAT", "MZ": "MOZ"
+}
+
+# Coretax writes the gross amounts and the discounts of the lines, rounded, in company currency, the global discounts
+# being spread on the lines.
+CORETAX_TAX_REPRESENTATION_PROFILE = {
+    **TAX_REPRESENTATION_PROFILE,
+    'currencies': ('company',),
+    'gross_amounts': 'rounded',
+    'dispatched_global_discounts': True,
 }
 
 TAX_TRANSACTION_CODE = [
@@ -433,8 +443,7 @@ class AccountMove(models.Model):
 
         base_lines = self.env['account.tax']._dispatch_global_discount_lines(base_lines, self.company_id)
         self.env['account.tax']._squash_global_discount_lines(base_lines, self.company_id)
-        self.env['account.tax']._add_and_round_raw_gross_total_excluded_and_discount(base_lines, self.company_id, in_foreign_currency=False, account_discount_base_lines=True)
-        self.env['account.tax']._round_raw_gross_total_excluded_and_discount(base_lines, self.company_id, in_foreign_currency=False)
+        self.env['account.tax']._represent_tax_details(base_lines, self.company_id, CORETAX_TAX_REPRESENTATION_PROFILE)
 
         remaining_negative_base_lines = [
             base_line for base_line in base_lines

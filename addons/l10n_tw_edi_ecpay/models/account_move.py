@@ -463,6 +463,7 @@ class AccountMove(models.Model):
         """
         return {
             **TAX_REPRESENTATION_PROFILE,
+            'currencies': ('company',),
             'precision_digits': 2,
             'identities': (('ECPay-TaxAmount', 'tax_is_base_x_rate', ('abs', 2.0)),),
         }
@@ -544,12 +545,7 @@ class AccountMove(models.Model):
                 AccountTax._round_base_lines_tax_details(base_lines, self.company_id)
 
         if self.l10n_tw_edi_is_b2b:
-            AccountTax._check_tax_representation(
-                base_lines,
-                self.company_id,
-                self._l10n_tw_edi_get_tax_representation_profile(),
-                in_foreign_currency=False,
-            )
+            AccountTax._represent_tax_details(base_lines, self.company_id, self._l10n_tw_edi_get_tax_representation_profile())
 
         # Sale amount adjustment
         amount_on_invoice = self.amount_untaxed_signed if self.l10n_tw_edi_is_b2b and tax_type != "4" else self.amount_total_signed

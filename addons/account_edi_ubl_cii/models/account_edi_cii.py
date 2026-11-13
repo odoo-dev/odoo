@@ -22,7 +22,8 @@ class AccountEdiCii(models.AbstractModel):
     _description = "Base helpers for CII"
 
     def _get_tax_representation_profile(self):
-        return EN16931_TAX_REPRESENTATION_PROFILE
+        # CII writes the amounts in the currency of the document only.
+        return {**EN16931_TAX_REPRESENTATION_PROFILE, 'currencies': ('foreign',)}
 
     # -------------------------------------------------------------------------
     # NEW EXPORT : helpers
@@ -62,7 +63,7 @@ class AccountEdiCii(models.AbstractModel):
 
         AccountTax = self.env['account.tax']
         vals['tax_representation_violations'] = AccountTax._represent_tax_details(
-            vals['base_lines'], invoice.company_id, self._get_tax_representation_profile(), in_company_currency=False,
+            vals['base_lines'], invoice.company_id, self._get_tax_representation_profile(),
         )
 
     def _cii_add_values_delivery_date(self, vals, delivery_date):
