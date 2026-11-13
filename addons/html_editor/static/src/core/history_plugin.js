@@ -186,7 +186,7 @@ export class HistoryPlugin extends Plugin {
         // Operations can depend on attributes restored by the DOM observer.
         // Replay them after DOM mutations.
         history_fields: withSequence(20, {
-            name: "operations",
+            id: "operations",
             apply: (operations, { ensureNewMutations }) =>
                 this.replayOperations(operations, { ensureNewMutations }),
             revert: (operations, { ensureNewMutations }) =>
@@ -207,10 +207,10 @@ export class HistoryPlugin extends Plugin {
         this.stagedData = {};
         this.fields = new Map();
         for (const field of this.getResource("history_fields")) {
-            if (this.fields.has(field.name)) {
-                throw new Error(`Duplicate history field: ${field.name}`);
+            if (this.fields.has(field.id)) {
+                throw new Error(`Duplicate history field: ${field.id}`);
             }
-            this.fields.set(field.name, field);
+            this.fields.set(field.id, field);
         }
         this.operations = new Map();
         for (const operation of this.getResource("history_operations")) {
@@ -321,36 +321,36 @@ export class HistoryPlugin extends Plugin {
      * Stage the value of a field in the draft, to be collected into the next
      * commit. Staged values are immutable: replace them, don't mutate them.
      *
-     * @param {string} name The registered field.
+     * @param {string} id The registered field.
      * @param {any} value
      */
-    stage(name, value) {
-        this.getField(name);
-        this.stagedData[name] = value;
+    stage(id, value) {
+        this.getField(id);
+        this.stagedData[id] = value;
     }
 
     /**
      * Return the value of a field in the draft.
      *
-     * @param {string} name The registered field.
+     * @param {string} id The registered field.
      * @returns {any} The staged value, undefined if none.
      */
-    getStaged(name) {
-        this.getField(name);
-        return this.stagedData[name];
+    getStaged(id) {
+        this.getField(id);
+        return this.stagedData[id];
     }
 
     /**
      * Look up a registered history field.
      *
-     * @param {string} name
+     * @param {string} id
      * @returns {HistoryField}
      * @throws {Error} If the field is not registered.
      */
-    getField(name) {
-        const field = this.fields.get(name);
+    getField(id) {
+        const field = this.fields.get(id);
         if (!field) {
-            throw new Error(`Unknown history field: ${name}`);
+            throw new Error(`Unknown history field: ${id}`);
         }
         return field;
     }
@@ -362,10 +362,10 @@ export class HistoryPlugin extends Plugin {
      * @returns {void}
      */
     discardStagedChanges() {
-        for (const { name, discard } of this.fields.values()) {
+        for (const { id, discard } of this.fields.values()) {
             if (discard) {
-                const stagedValue = this.stagedData[name];
-                delete this.stagedData[name];
+                const stagedValue = this.stagedData[id];
+                delete this.stagedData[id];
                 discard(stagedValue);
             }
         }
@@ -380,11 +380,11 @@ export class HistoryPlugin extends Plugin {
      * @returns {void}
      */
     restoreStagedData(stagedData) {
-        for (const { name, apply, discard } of this.fields.values()) {
+        for (const { id, apply, discard } of this.fields.values()) {
             if (!discard) {
-                this.stagedData[name] = stagedData[name];
-            } else if (name in stagedData) {
-                apply?.(stagedData[name], { ensureNewMutations: true });
+                this.stagedData[id] = stagedData[id];
+            } else if (id in stagedData) {
+                apply?.(stagedData[id], { ensureNewMutations: true });
             }
         }
     }
@@ -481,13 +481,13 @@ export class HistoryPlugin extends Plugin {
         data.commitTimestamp ??= Date.now();
         data.authorTimestamp ??= this.authorTimestamp;
         data.previousCommitId = this.commits?.at(-1)?.id;
-        for (const { name, collect } of this.fields.values()) {
-            const stagedValue = this.stagedData[name];
+        for (const { id, collect } of this.fields.values()) {
+            const stagedValue = this.stagedData[id];
             const value = collect
                 ? collect(stagedValue, { relatedCommit: data.relatedCommit })
                 : stagedValue;
             if (value !== undefined) {
-                data[name] = value;
+                data[id] = value;
             }
         }
         return this.processThrough("pending_history_commit_data_processors", data);
@@ -562,9 +562,9 @@ export class HistoryPlugin extends Plugin {
      * @param { boolean } [params.restoreSelection = false]
      */
     applyCommit(commit, { ensureNewMutations = false, restoreSelection = false } = {}) {
-        for (const { name, apply } of this.fields.values()) {
-            if (apply && name in commit.data) {
-                apply(commit.data[name], { ensureNewMutations });
+        for (const { id, apply } of this.fields.values()) {
+            if (apply && id in commit.data) {
+                apply(commit.data[id], { ensureNewMutations });
             }
         }
         this.trigger("on_apply_history_commit_handlers", commit, {
@@ -584,9 +584,9 @@ export class HistoryPlugin extends Plugin {
      * @param { boolean } [params.restoreFocus = true]
      */
     revertCommit(commit, { ensureNewMutations = false, restoreFocus = true } = {}) {
-        for (const { name, revert } of this.fields.values()) {
-            if (revert && name in commit.data) {
-                revert(commit.data[name], { ensureNewMutations });
+        for (const { id, revert } of this.fields.values()) {
+            if (revert && id in commit.data) {
+                revert(commit.data[id], { ensureNewMutations });
             }
         }
         this.trigger("on_revert_history_commit_handlers", commit, {

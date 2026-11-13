@@ -801,15 +801,15 @@ describe("destroy", () => {
 describe("history fields", () => {
     const sequences = { late: 30, firstDefault: undefined, early: 0, secondDefault: 10 };
     function sequencedFields(getHooks) {
-        return Object.entries(sequences).map(([name, sequence]) => {
-            const field = { name, ...getHooks(name) };
+        return Object.entries(sequences).map(([id, sequence]) => {
+            const field = { id, ...getHooks(id) };
             return sequence === undefined ? field : withSequence(sequence, field);
         });
     }
 
     test("staged values are collected into the next commit", async () => {
         const { editor, el } = await setupEditor(`<p>[]x</p>`, {
-            config: { resources: { history_fields: [{ name: "label" }, { name: "unstaged" }] } },
+            config: { resources: { history_fields: [{ id: "label" }, { name: "unstaged" }] } },
         });
         const history = editor.shared.history;
         history.stage("label", "first");
@@ -830,7 +830,7 @@ describe("history fields", () => {
             config: {
                 resources: {
                     history_fields: {
-                        name: "label",
+                        id: "label",
                         collect: (label, { relatedCommit }) =>
                             relatedCommit ? `reverts ${relatedCommit.data.label}` : label,
                     },
@@ -850,8 +850,8 @@ describe("history fields", () => {
             config: {
                 resources: {
                     history_fields: [
-                        { name: "metadata" },
-                        { name: "changes", discard: (value) => expect.step(["discard", value]) },
+                        { id: "metadata" },
+                        { id: "changes", discard: (value) => expect.step(["discard", value]) },
                     ],
                 },
             },
@@ -867,16 +867,16 @@ describe("history fields", () => {
 
     test("replayed fields can stage the values of the commit they record", async () => {
         let history;
-        const names = ["firstTarget", "secondTarget"];
+        const ids = ["firstTarget", "secondTarget"];
         const { editor, el } = await setupEditor(`<p>[]x</p>`, {
             config: {
                 resources: {
-                    history_fields: names.map((name, index) => ({
-                        name,
+                    history_fields: ids.map((id, index) => ({
+                        id,
                         apply: (target, { ensureNewMutations }) =>
-                            ensureNewMutations && history.stage(name, target),
+                            ensureNewMutations && history.stage(id, target),
                         revert: (target, { ensureNewMutations }) =>
-                            ensureNewMutations && history.stage(names[1 - index], target),
+                            ensureNewMutations && history.stage(ids[1 - index], target),
                     })),
                 },
             },
@@ -903,10 +903,10 @@ describe("history fields", () => {
             config: {
                 resources: {
                     history_fields: [
-                        { name: "bookmark" },
-                        { name: "later" },
+                        { id: "bookmark" },
+                        { id: "later" },
                         {
-                            name: "changes",
+                            id: "changes",
                             apply: (value, { ensureNewMutations }) => {
                                 expect.step(["apply", value, ensureNewMutations]);
                                 history.stage("changes", value);
@@ -941,8 +941,8 @@ describe("history fields", () => {
         const { editor } = await setupEditor(`<p>[]x</p>`, {
             config: {
                 resources: {
-                    history_fields: sequencedFields((name) => ({
-                        collect: () => expect.step(name),
+                    history_fields: sequencedFields((id) => ({
+                        collect: () => expect.step(id),
                     })),
                 },
             },
@@ -956,9 +956,9 @@ describe("history fields", () => {
         const { editor } = await setupEditor(`<p>[]x</p>`, {
             config: {
                 resources: {
-                    history_fields: sequencedFields((name) => ({
-                        apply: () => expect.step("apply " + name),
-                        discard: () => expect.step("discard " + name),
+                    history_fields: sequencedFields((id) => ({
+                        apply: () => expect.step("apply " + id),
+                        discard: () => expect.step("discard " + id),
                     })),
                 },
             },

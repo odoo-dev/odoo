@@ -184,7 +184,7 @@ export class BuilderOptionsPlugin extends Plugin {
         // when it is reverted. Always collect them, so that both are replayed.
         history_fields: [
             {
-                name: "currentTarget",
+                id: "currentTarget",
                 collect: (targetId = null) => targetId,
                 apply: (targetId, { ensureNewMutations }) => {
                     if (ensureNewMutations) {
@@ -198,7 +198,7 @@ export class BuilderOptionsPlugin extends Plugin {
                 },
             },
             {
-                name: "nextTarget",
+                id: "nextTarget",
                 collect: (targetId = null) => targetId,
                 apply: (targetId, { ensureNewMutations }) => {
                     if (ensureNewMutations) {

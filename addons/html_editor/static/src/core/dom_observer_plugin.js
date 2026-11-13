@@ -133,7 +133,7 @@ export class DomObserverPlugin extends Plugin {
     /** @type {import("plugins").EditorResources} */
     resources = {
         history_fields: withSequence(0, {
-            name: "mutations",
+            id: "mutations",
             collect: (mutations, { relatedCommit }) => this.processPendingData(!!relatedCommit),
             apply: (mutations, { ensureNewMutations }) =>
                 this.applyMutations(mutations, { ensureNewMutations }),
