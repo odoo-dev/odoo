@@ -68,8 +68,7 @@
 <template id="dynamic_filter_template_event_event_picture" name="Picture Layout" priority="5">
     <div t-foreach="records" t-as="data" class="s_events_event w-100" data-extra-classes="g-3" data-column-classes="col-12 col-sm-6 col-lg-4">
         <t t-set="record" t-value="data['_record']._set_tz_context()"/>
-        <t t-set="slots" t-value="record.event_slot_ids._filter_open_slots() if record.is_multi_slots else False"/>
-        <t t-set="display_date" t-value="min(slots.mapped('start_datetime')) if slots else record.date_begin"/>
+        <t t-set="display_date" t-value="record._get_website_display_date()"/>
         <a class="s_events_event_cover position-relative d-flex align-items-center rounded overflow-hidden text-decoration-none ratio ratio-1x1"
            t-att-href="data['call_to_action_url']">
             <t t-call="website.record_cover">
@@ -100,8 +99,7 @@
 <template id="dynamic_filter_template_event_event_card" name="Card Layout" priority="10">
     <t t-foreach="records" t-as="data" data-extra-classes="g-3" data-column-classes="col-12 col-sm-6 col-lg-4 col-xxl-3">
         <t t-set="record" t-value="data['_record']._set_tz_context()"/>
-        <t t-set="slots" t-value="record.event_slot_ids._filter_open_slots() if record.is_multi_slots else False"/>
-        <t t-set="display_date" t-value="min(slots.mapped('start_datetime')) if slots else record.date_begin"/>
+        <t t-set="display_date" t-value="record._get_website_display_date()"/>
         <a t-att-href="data['call_to_action_url']" class="s_events_event card h-100 text-decoration-none">
             <div class="s_events_event_cover">
                 <t t-call="website.record_cover">
@@ -141,8 +139,7 @@
     <t t-if="len(records)" class="s_events_event" data-column-classes="col-lg-12" data-content-classes="o_cc o_cc5 bg-transparent">
         <t t-set="data" t-value="records[0]"/>
         <t t-set="record" t-value="data['_record']"/>
-        <t t-set="slots" t-value="record.event_slot_ids._filter_open_slots() if record.is_multi_slots else False"/>
-        <t t-set="display_date" t-value="min(slots.mapped('start_datetime')) if slots else record.date_begin"/>
+        <t t-set="display_date" t-value="record._get_website_display_date()"/>
         <t t-set="bg" t-value="record._get_background()"/>
         <div t-if="is_sample" class="position-absolute bottom-0 end-0 px-4 py-2 text-bg-info rounded-pill">Sample</div>
         <div class="w-100 rounded" t-att-style="'background-image: ' + bg + '; background-size: cover; background-position: center;'">
@@ -184,8 +181,7 @@
     <t t-if="len(records)" class="s_events_event" data-column-classes="col-lg-12" data-content-classes="o_cc o_cc5 bg-transparent">
         <t t-set="data" t-value="records[0]"/>
         <t t-set="record" t-value="data['_record']"/>
-        <t t-set="slots" t-value="record.event_slot_ids._filter_open_slots() if record.is_multi_slots else False"/>
-        <t t-set="display_date" t-value="min(slots.mapped('start_datetime')) if slots else record.date_begin"/>
+        <t t-set="display_date" t-value="record._get_website_display_date()"/>
         <t t-set="bg" t-value="record._get_background()"/>
         <div t-if="is_sample" class="position-absolute bottom-0 end-0 px-4 py-2 text-bg-info rounded-pill">Sample</div>
         <div class="w-100 rounded" t-att-style="'background-image: ' + bg + '; background-size: cover; background-position: center;'">
@@ -219,8 +215,7 @@
     <t t-if="len(records)" class="s_events_event" data-column-classes="col-lg-12" data-content-classes="o_cc o_cc5 bg-transparent">
         <t t-set="data" t-value="records[0]"/>
         <t t-set="record" t-value="data['_record']"/>
-        <t t-set="slots" t-value="record.event_slot_ids._filter_open_slots() if record.is_multi_slots else False"/>
-        <t t-set="display_date" t-value="min(slots.mapped('start_datetime')) if slots else record.date_begin"/>
+        <t t-set="display_date" t-value="record._get_website_display_date()"/>
         <t t-set="bg" t-value="record._get_background()"/>
         <div t-if="is_sample" class="position-absolute bottom-0 end-0 px-4 py-2 text-bg-info rounded-pill">Sample</div>
         <div class="w-100 rounded" t-att-style="'background-image: ' + bg + '; background-size: cover; background-position: center;'">
@@ -257,8 +252,7 @@
     <t t-if="len(records)" class="s_events_event" data-column-classes="col-lg-12 text-center">
         <t t-set="data" t-value="records[0]"/>
         <t t-set="record" t-value="data['_record']"/>
-        <t t-set="slots" t-value="record.event_slot_ids._filter_open_slots() if record.is_multi_slots else False"/>
-        <t t-set="display_date" t-value="min(slots.mapped('start_datetime')) if slots else record.date_begin"/>
+        <t t-set="display_date" t-value="record._get_website_display_date()"/>
         <div t-if="is_sample" class="position-absolute bottom-0 end-0 px-4 py-2 text-bg-info rounded-pill">Sample</div>
         <div class="text-center">
             <a t-att-href="data['call_to_action_url']" t-att-title="'Read ' + data['name']">
@@ -285,8 +279,7 @@
     <t t-if="len(records)" class="s_events_event" data-column-classes="col-lg-12">
         <t t-set="data" t-value="records[0]"/>
         <t t-set="record" t-value="data['_record']"/>
-        <t t-set="slots" t-value="record.event_slot_ids._filter_open_slots() if record.is_multi_slots else False"/>
-        <t t-set="display_date" t-value="min(slots.mapped('start_datetime')) if slots else record.date_begin"/>
+        <t t-set="display_date" t-value="record._get_website_display_date()"/>
         <div t-if="is_sample" class="position-absolute bottom-0 end-0 px-4 py-2 text-bg-info rounded-pill">Sample</div>
         <div class="s_dynamic_snippet_content_position row">
             <div class="col-12 col-lg-6 d-flex d-lg-block flex-column align-content-center align-items-start order-2 order-lg-1">

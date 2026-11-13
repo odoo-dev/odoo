@@ -502,6 +502,17 @@ class EventEvent(models.Model):
             iCal_url += '?' + werkzeug.urls.url_encode({'slot_id': slot.id})
         return {'google_url': google_url, 'iCal_url': iCal_url}
 
+    def _get_website_display_date(self):
+        """ Date to display on website snippets: the start of the next open slot
+        for multi-slots events, the event start date otherwise (or when no slot
+        is open anymore). """
+        self.ensure_one()
+        if self.is_multi_slots:
+            open_slots = self.event_slot_ids._filter_open_slots()
+            if open_slots:
+                return min(open_slots.mapped('start_datetime'))
+        return self.date_begin
+
     def _default_website_meta(self):
         res = super()._default_website_meta()
         event_cover_properties = json.loads(self.cover_properties)

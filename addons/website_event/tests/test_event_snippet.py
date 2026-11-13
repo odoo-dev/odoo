@@ -59,6 +59,14 @@ class TestEventSnippet(EventCase):
                 self.slot_open | self.slot_open_later,
             )
 
+    def test_get_website_display_date(self):
+        """ Next open slot start for multi-slots events, start date otherwise or when no slot is open. """
+        with freeze_time(self.reference_now):
+            self.assertEqual(self.multi_slots_event._get_website_display_date(), self.slot_open.start_datetime)
+            self.assertEqual(self.regular_event._get_website_display_date(), self.regular_event.date_begin)
+        with freeze_time(datetime(2020, 7, 10, 10, 0, 0)):
+            self.assertEqual(self.multi_slots_event._get_website_display_date(), self.multi_slots_event.date_begin)
+
     def test_snippet_displays_next_open_slot(self):
         """ Multi-slots events display their next open slot date, regular events their start date. """
         with freeze_time(self.reference_now):
