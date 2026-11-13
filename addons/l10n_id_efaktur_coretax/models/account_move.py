@@ -437,12 +437,14 @@ class AccountMove(models.Model):
         ]
         # Coretax rejects any negative amount, so every negative line is treated as a global
         # discount, not only the ones coming from the Global Discount feature.
-        for base_line in base_lines:
-            if not base_line['special_type'] and base_line['record']._l10n_id_coretax_is_negative_line():
-                base_line['special_type'] = 'global_discount'
-
-        base_lines = self.env['account.tax']._dispatch_global_discount_lines(base_lines, self.company_id)
-        self.env['account.tax']._squash_global_discount_lines(base_lines, self.company_id)
+        base_lines = self.env['account.tax']._dispatch_negative_base_lines(
+            base_lines,
+            self.company_id,
+            is_discount_function=lambda base_line: (
+                not base_line['special_type'] and base_line['record']._l10n_id_coretax_is_negative_line()
+            ),
+            return_of_merchandise=False,
+        )
         self.env['account.tax']._represent_tax_details(base_lines, self.company_id, CORETAX_TAX_REPRESENTATION_PROFILE)
 
         remaining_negative_base_lines = [

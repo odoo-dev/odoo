@@ -769,8 +769,9 @@ class AccountTax(models.Model):
     #     |    |                                              scale, _add_tax_details_in_base_lines, then each tax and
     #     |    |                                              the total reach their part
     #     |    |    3. _pin_base_lines_tax_details
-    #     |    +- _dispatch_global_discount_lines / _dispatch_return_of_merchandise_lines [py]: the negative lines
-    #     |    |    split over the others (_split_base_line [py]), then _squash_*_lines: _merge_tax_details + pins
+    #     |    +- _dispatch_negative_base_lines [py]          the negative lines spread over the others, for the
+    #     |    |    formats refusing them: _dispatch_return_of_merchandise_lines, _dispatch_global_discount_lines
+    #     |    |    (_split_base_line [py]), each followed by its _squash_*_lines (_merge_tax_details + pins)
     #     |    +- _turn_removed_taxes_into_new_base_lines [py]: the extracted taxes merged into lines of their own
     #     |
     #     +- FORMATS [py] (EDI, fiscal devices, APIs), declared by a profile, see TAX_REPRESENTATION_PROFILE
@@ -3913,6 +3914,39 @@ class AccountTax(models.Model):
             base_lines=[base_line for base_line in base_lines if base_line['return_of_merchandise_base_lines']],
             company=company,
         )
+
+    @api.model
+    def _dispatch_negative_base_lines(self, base_lines, company, is_discount_function=None, return_of_merchandise=True):
+        """ Spread the negative base lines over the others, for the formats refusing negative lines:
+        1. the base lines for which 'is_discount_function' returns True become global discounts,
+        2. with 'return_of_merchandise', a negative base line matching a positive one reduces its quantity (see
+           '_dispatch_return_of_merchandise_lines'),
+        3. the global discounts are spread over the base lines having the same taxes (see '_dispatch_global_discount_lines').
+        What can't be spread stays negative in the returned base lines.
+
+        [!] Only added python-side.
+
+        :param base_lines:              A list of base lines generated using the '_prepare_base_line_for_taxes_computation' method.
+        :param company:                 The company owning the base lines.
+        :param is_discount_function:    An optional function taking a base line and telling whether it is a global discount.
+                                        By default, the negative base lines without special type.
+        :param return_of_merchandise:   Whether the negative base lines reduce the quantity of the matching ones first.
+        :return:                        The new base lines.
+        """
+        for base_line in base_lines:
+            if is_discount_function:
+                is_discount = is_discount_function(base_line)
+            else:
+                is_discount = base_line['tax_details']['raw_total_excluded_currency'] < 0.0 and not base_line['special_type']
+            if is_discount:
+                base_line['special_type'] = 'global_discount'
+
+        if return_of_merchandise:
+            base_lines = self._dispatch_return_of_merchandise_lines(base_lines, company)
+            self._squash_return_of_merchandise_lines(base_lines, company)
+        base_lines = self._dispatch_global_discount_lines(base_lines, company)
+        self._squash_global_discount_lines(base_lines, company)
+        return base_lines
 
     # -------------------------------------------------------------------------
     # EDI HELPERS
