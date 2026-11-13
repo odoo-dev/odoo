@@ -68,6 +68,7 @@ TAX_ROUNDING_COUNTRY_SETTINGS = {
     'AR': TAX_ROUNDING_ON_ROUNDED_BASES,
     'BE': TAX_ROUNDING_ON_ROUNDED_BASES,
     'BR': TAX_ROUNDING_ON_ROUNDED_BASES,
+    'IN': TAX_ROUNDING_ON_ROUNDED_BASES,
 }
 
 # How the taxes of a document are written into an external format (EDI, QR code, fiscal device, API). Each format declares
