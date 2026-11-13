@@ -1718,53 +1718,6 @@ export const accountTaxHelpers = {
      * [!] Mirror of the same method in account_tax.py.
      * PLZ KEEP BOTH METHODS CONSISTENT WITH EACH OTHERS.
      */
-    split_base_line(base_line, company, target_factors, { populate_function = null } = {}) {
-        const tax_details = base_line.tax_details;
-        const factors = this.normalize_target_factors(target_factors).plus_factors;
-        const split_taxes_data = tax_details.taxes_data.map((tax_data) =>
-            this.split_tax_data(base_line, tax_data, company, target_factors)
-        );
-
-        const new_tax_details_list = target_factors.map(() => null);
-        for (const [index, factor] of factors) {
-            new_tax_details_list[index] = {
-                raw_total_excluded_currency: factor * tax_details.raw_total_excluded_currency,
-                raw_total_excluded: factor * tax_details.raw_total_excluded,
-                raw_total_included_currency: factor * tax_details.raw_total_included_currency,
-                raw_total_included: factor * tax_details.raw_total_included,
-                total_excluded_currency: 0.0,
-                total_excluded: 0.0,
-                taxes_data: split_taxes_data.map((new_taxes_data) => new_taxes_data[index]),
-            };
-        }
-        for (const [suffix, currency] of [
-            ["_currency", base_line.currency_id],
-            ["", company.currency_id],
-        ]) {
-            const field = `total_excluded${suffix}`;
-            this.reach_target(new_tax_details_list, field, tax_details[field], currency.decimal_places);
-        }
-
-        const new_base_lines = target_factors.map(() => null);
-        for (const [index, factor] of factors) {
-            const new_tax_details = new_tax_details_list[index];
-            this.set_tax_details_total_included(new_tax_details, { prefixes: [""] });
-            const kwargs = {
-                price_unit: factor * base_line.price_unit,
-                tax_details: new_tax_details,
-            };
-            if (populate_function) {
-                populate_function(base_line, target_factors[index], kwargs);
-            }
-            new_base_lines[index] = this.prepare_base_line_for_taxes_computation(base_line, kwargs);
-        }
-        return new_base_lines;
-    },
-
-    /**
-     * [!] Mirror of the same method in account_tax.py.
-     * PLZ KEEP BOTH METHODS CONSISTENT WITH EACH OTHERS.
-     */
     reduce_base_lines_with_grouping_function(
         base_lines,
         { grouping_function = null, aggregate_function = null, computation_key = null } = {}
@@ -2188,27 +2141,6 @@ export const accountTaxHelpers = {
             }
             new_base_lines[0].removed_taxes_data_base_lines = new_base_lines.slice(1);
             return new_base_lines[0];
-        });
-    },
-
-    /**
-     * [!] Mirror of the same method in account_tax.py.
-     * PLZ KEEP BOTH METHODS CONSISTENT WITH EACH OTHERS.
-     */
-    turn_removed_taxes_into_new_base_lines(
-        base_lines,
-        company,
-        { grouping_function = null, aggregate_function = null } = {}
-    ) {
-        let extra_base_lines = [];
-        for (const base_line of base_lines) {
-            extra_base_lines = extra_base_lines.concat(
-                base_line.removed_taxes_data_base_lines || []
-            );
-        }
-        return this.reduce_base_lines_with_grouping_function(extra_base_lines, {
-            grouping_function: grouping_function,
-            aggregate_function: aggregate_function,
         });
     },
 };

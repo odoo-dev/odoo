@@ -770,7 +770,7 @@ class AccountTax(models.Model):
     #     |    |                                              the total reach their part
     #     |    |    3. _pin_base_lines_tax_details
     #     |    +- _dispatch_global_discount_lines / _dispatch_return_of_merchandise_lines [py]: the negative lines
-    #     |    |    split over the others (_split_base_line), then _squash_*_lines: _merge_tax_details + pins
+    #     |    |    split over the others (_split_base_line [py]), then _squash_*_lines: _merge_tax_details + pins
     #     |    +- _turn_removed_taxes_into_new_base_lines [py]: the extracted taxes merged into lines of their own
     #     |
     #     +- FORMATS [py] (EDI, fiscal devices, APIs), declared by a profile, see TAX_REPRESENTATION_PROFILE
@@ -3190,8 +3190,7 @@ class AccountTax(models.Model):
         """ Split a base lines into multiple ones. When computing taxes, the results should be
         exactly the same with a single base_line or after the split.
 
-        [!] Mirror of the same method in account_tax.js.
-        PLZ KEEP BOTH METHODS CONSISTENT WITH EACH OTHERS.
+        [!] Only added python-side.
 
         :param base_line:           A base line.
         :param company:             The company owning the base line.
