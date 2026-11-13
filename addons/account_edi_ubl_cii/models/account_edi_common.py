@@ -2010,8 +2010,7 @@ class AccountEdiCommon(models.AbstractModel):
                 allow_negative_factors=True,
             )
 
-        AccountTax._add_accounting_data_in_base_lines_tax_details(base_lines, invoice.company_id, include_caba_tags=invoice.always_tax_exigible)
-        tax_results = AccountTax._prepare_tax_lines(base_lines, invoice.company_id, tax_lines=tax_lines)
+        tax_results = AccountTax._prepare_tax_lines(base_lines, invoice.company_id, tax_lines=tax_lines, include_caba_tags=invoice.always_tax_exigible)
 
         line_ids_commands = []
         for tax_line_vals, grouping_key, to_update in tax_results['tax_lines_to_update']:

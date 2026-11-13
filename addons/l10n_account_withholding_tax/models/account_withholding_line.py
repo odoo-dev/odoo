@@ -373,7 +373,6 @@ class AccountWithholdingLine(models.AbstractModel):
 
             base_lines.append(line._prepare_base_line_for_taxes_computation())
         AccountTax._add_tax_details_in_base_lines(base_lines, company)
-        AccountTax._add_accounting_data_in_base_lines_tax_details(base_lines, company)
         tax_results = AccountTax._prepare_tax_lines(base_lines, company)
 
         # Add the tax lines.

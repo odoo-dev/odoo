@@ -1896,8 +1896,7 @@ class HrExpense(models.Model):
         )
         base_lines = [base_line]
         AccountTax._add_tax_details_in_base_lines(base_lines, self.company_id)
-        AccountTax._add_accounting_data_in_base_lines_tax_details(base_lines, self.company_id, include_caba_tags=self.payment_mode == 'company_account')
-        tax_results = AccountTax._prepare_tax_lines(base_lines, self.company_id)
+        tax_results = AccountTax._prepare_tax_lines(base_lines, self.company_id, include_caba_tags=self.payment_mode == 'company_account')
 
         # Base line.
         move_lines = []

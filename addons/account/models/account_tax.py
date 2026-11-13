@@ -758,7 +758,8 @@ class AccountTax(models.Model):
     #     +- VIEWS (read only)
     #     |    +- _aggregate_tax_details                      the amounts per grouping key, of one line or of all
     #     |    +- _get_tax_totals_summary                     the totals of the document (tax totals widget)
-    #     |    +- _add_accounting_data_in_base_lines_tax_details, then _prepare_tax_lines [py]: the journal items
+    #     |    +- _prepare_tax_lines [py]                     the journal items, after the accounting data of the tax
+    #     |    |                                              details (_add_accounting_data_in_base_lines_tax_details)
     #     |    +- _export_base_line_tax_pins                  the pins to store back into 'tax_pins'
     #     |
     #     +- LINES BUILT FROM OTHER LINES (amounts derived from the source lines, then frozen as pins)
@@ -2866,21 +2867,18 @@ class AccountTax(models.Model):
     # -------------------------------------------------------------------------
 
     @api.model
-    def _prepare_tax_lines(self, base_lines, company, tax_lines=None):
+    def _prepare_tax_lines(self, base_lines, company, tax_lines=None, include_caba_tags=False):
         """ Prepare the tax journal items for the base lines.
 
         After calling '_add_tax_details_in_base_lines', the rounded tax details is there on base lines.
-        After calling '_add_accounting_data_in_base_lines_tax_details', each tax_data in the tax details
-        contains all accounting informations about the repartition lines.
-
-        When calling this method, all 'tax_reps_data' in each 'tax_data' will be aggregated all together
-        and rounded. The total tax amount will not change whatever the number of involved accounting
+        This method first adds the accounting informations about the repartition lines to each tax_data in the tax details
+        (see '_add_accounting_data_in_base_lines_tax_details'), then all 'tax_reps_data' in each 'tax_data' are
+        aggregated all together and rounded. The total tax amount will not change whatever the number of involved accounting
         grouping keys.
         The 'sign' value in base lines is very important for this method because that key decide the sign
         of the 'amount_currency'/'balance' of the base lines/tax lines to be updated/created.
 
-        Don't forget to call '_add_tax_details_in_base_lines' and '_add_accounting_data_in_base_lines_tax_details'
-        before calling this method.
+        Don't forget to call '_add_tax_details_in_base_lines' before calling this method.
 
         [!] Only added python-side.
 
@@ -2889,6 +2887,7 @@ class AccountTax(models.Model):
         :param tax_lines:           A optional list of base lines generated using the '_prepare_tax_line_for_taxes_computation'
                                     method. If specified, this method will indicate which tax lines must be deleted or updated instead
                                     of creating again all tax lines everytime.
+        :param include_caba_tags:   Indicate if the cash basis tags need to be taken into account.
         :return: The base amounts for base lines and the full diff about tax lines as a dictionary containing:
             tax_lines_to_add:       A list of values to be passed to account.move.line's create function.
             tax_lines_to_delete:    The list of tax lines to be removed.
@@ -2901,6 +2900,7 @@ class AccountTax(models.Model):
                 base_line               is the base line to be updated.
                 amounts                 is a dictionary containing the new values for 'tax_tag_ids', 'amount_currency', 'balance'.
         """
+        self._add_accounting_data_in_base_lines_tax_details(base_lines, company, include_caba_tags=include_caba_tags)
         tax_lines_mapping = defaultdict(lambda: {
             'tax_base_amount': 0.0,
             'amount_currency': 0.0,

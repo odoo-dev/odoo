@@ -1418,8 +1418,7 @@ class AccountMove(models.Model):
                         untaxed_amount = untaxed_amount_currency
                         sign = invoice.direction_sign
                         base_lines, _tax_lines = invoice._get_rounded_base_and_tax_lines(round_from_tax_lines=False)
-                        AccountTax._add_accounting_data_in_base_lines_tax_details(base_lines, invoice.company_id, include_caba_tags=invoice.always_tax_exigible)
-                        tax_results = AccountTax._prepare_tax_lines(base_lines, invoice.company_id)
+                        tax_results = AccountTax._prepare_tax_lines(base_lines, invoice.company_id, include_caba_tags=invoice.always_tax_exigible)
                         for _base_line, to_update in tax_results['base_lines_to_update']:
                             untaxed_amount_currency += sign * to_update['amount_currency']
                             untaxed_amount += sign * to_update['balance']
@@ -3454,8 +3453,7 @@ class AccountMove(models.Model):
                 continue
 
             base_lines_values, tax_lines_values = move._get_rounded_base_and_tax_lines(round_from_tax_lines=round_from_tax_lines)
-            AccountTax._add_accounting_data_in_base_lines_tax_details(base_lines_values, move.company_id, include_caba_tags=move.always_tax_exigible)
-            tax_results = AccountTax._prepare_tax_lines(base_lines_values, move.company_id, tax_lines=tax_lines_values)
+            tax_results = AccountTax._prepare_tax_lines(base_lines_values, move.company_id, tax_lines=tax_lines_values, include_caba_tags=move.always_tax_exigible)
 
             non_deductible_tax_line = move.line_ids.filtered(lambda line: line.display_type == 'non_deductible_tax')
             non_deductible_lines_values = [
