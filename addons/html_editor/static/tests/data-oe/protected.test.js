@@ -430,14 +430,14 @@ test("removing a protected node and then removing its protected parent should be
     );
     const domObserverPlugin = plugins.get("domObserver");
     expect(editor.shared.history.getCommits().length).toBe(1);
-    expect(domObserverPlugin.dependencies.history.getStagedData("mutations")).toEqual([]);
+    expect(domObserverPlugin.getStagedMutations()).toEqual([]);
     const a = el.querySelector(".a");
     const b = el.querySelector(".b");
     b.remove();
     a.remove();
     editor.shared.history.commit();
     expect(editor.shared.history.getCommits().length).toBe(1);
-    expect(domObserverPlugin.dependencies.history.getStagedData("mutations")).toEqual([]);
+    expect(domObserverPlugin.getStagedMutations()).toEqual([]);
     expect(getContent(el)).toBe(
         `<p data-selection-placeholder=""><br></p><div data-oe-protected="true" contenteditable="false"></div><p data-selection-placeholder=""><br></p>`
     );
@@ -457,7 +457,7 @@ test("removing a protected ancestor, then a protected descendant, then its prote
     );
     const domObserverPlugin = plugins.get("domObserver");
     expect(editor.shared.history.getCommits().length).toBe(1);
-    expect(domObserverPlugin.dependencies.history.getStagedData("mutations")).toEqual([]);
+    expect(domObserverPlugin.getStagedMutations()).toEqual([]);
     const a = el.querySelector(".a");
     const b = el.querySelector(".b");
     const c = el.querySelector(".c");
@@ -466,7 +466,7 @@ test("removing a protected ancestor, then a protected descendant, then its prote
     b.remove();
     editor.shared.history.commit();
     expect(editor.shared.history.getCommits().length).toBe(1);
-    expect(domObserverPlugin.dependencies.history.getStagedData("mutations")).toEqual([]);
+    expect(domObserverPlugin.getStagedMutations()).toEqual([]);
     expect(getContent(el)).toBe(
         `<p data-selection-placeholder=""><br></p><div data-oe-protected="true" contenteditable="false"></div><p data-selection-placeholder=""><br></p>`
     );
@@ -485,7 +485,7 @@ test("moving a protected node at an unprotected location, only remove should be 
     );
     const domObserverPlugin = plugins.get("domObserver");
     expect(editor.shared.history.getCommits().length).toBe(1);
-    expect(domObserverPlugin.dependencies.history.getStagedData("mutations")).toEqual([]);
+    expect(domObserverPlugin.getStagedMutations()).toEqual([]);
     const a = el.querySelector(".a");
     const b = el.querySelector(".b");
     b.append(a);
@@ -525,7 +525,7 @@ test("moving an unprotected node at a protected location, only add should be ign
     );
     const domObserverPlugin = plugins.get("domObserver");
     expect(editor.shared.history.getCommits().length).toBe(1);
-    expect(domObserverPlugin.dependencies.history.getStagedData("mutations")).toEqual([]);
+    expect(domObserverPlugin.getStagedMutations()).toEqual([]);
     const a = el.querySelector(".a");
     const b = el.querySelector(".b");
     b.append(a);
@@ -682,14 +682,14 @@ test("protected plugin is robust against other plugins which can filter mutation
     );
     const domObserverPlugin = plugins.get("domObserver");
     expect(editor.shared.history.getCommits().length).toBe(1);
-    expect(domObserverPlugin.dependencies.history.getStagedData("mutations")).toEqual([]);
+    expect(domObserverPlugin.getStagedMutations()).toEqual([]);
     const a = el.querySelector(".a");
     const b = el.querySelector(".b");
     a.remove();
     b.remove();
     editor.shared.history.commit();
     expect(editor.shared.history.getCommits().length).toBe(1);
-    expect(domObserverPlugin.dependencies.history.getStagedData("mutations")).toEqual([]);
+    expect(domObserverPlugin.getStagedMutations()).toEqual([]);
     expect(getContent(el)).toBe(
         `<p data-selection-placeholder=""><br></p><div data-oe-protected="true" contenteditable="false"></div><p data-selection-placeholder=""><br></p>`
     );

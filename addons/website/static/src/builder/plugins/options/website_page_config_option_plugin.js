@@ -26,8 +26,8 @@ export class WebsitePageConfigOptionPlugin extends Plugin {
     ];
     /** @type {import("plugins").WebsiteResources} */
     resources = {
-        history_fields: {
-            name: "pageVisibility",
+        history_operations: {
+            id: "pageVisibility",
             apply: ({ target, after }) => this.applyHistoryVisibility(target, after),
             revert: ({ target, before }) => this.applyHistoryVisibility(target, before),
         },
@@ -204,8 +204,6 @@ export class BaseWebsitePageConfigAction extends BuilderAction {
         this.websitePageConfig = this.dependencies.websitePageConfigOptionPlugin;
         this.visibility = this.dependencies.visibility;
         this.history = this.dependencies.history;
-        this.headerVisibilityHandlers = this.getVisibilityHandlers("header");
-        this.breadcrumbVisibilityHandlers = this.getVisibilityHandlers("breadcrumb");
     }
 
     getVisibilityHandlers(type) {
@@ -289,8 +287,7 @@ export class SetWebsiteHeaderVisibilityAction extends BaseWebsitePageConfigActio
     static id = "setWebsiteHeaderVisibility";
     apply({ editingElement, value: headerPositionValue, isPreviewing }) {
         const lastValue = this.websitePageConfig.getVisibilityItem("header");
-        this.headerVisibilityHandlers[headerPositionValue]();
-        this.history.stage("pageVisibility", {
+        this.history.applyOperation("pageVisibility", {
             target: "header",
             before: lastValue,
             after: headerPositionValue,
@@ -309,8 +306,7 @@ export class SetWebsiteBreadcrumbVisibilityAction extends BaseWebsitePageConfigA
     }
     apply({ value, isPreviewing }) {
         const lastValue = this.websitePageConfig.getVisibilityItem("breadcrumb");
-        this.breadcrumbVisibilityHandlers[value]();
-        this.history.stage("pageVisibility", {
+        this.history.applyOperation("pageVisibility", {
             target: "breadcrumb",
             before: lastValue,
             after: value,

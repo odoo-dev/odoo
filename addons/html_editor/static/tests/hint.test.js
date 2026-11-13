@@ -162,7 +162,7 @@ test("should not lose track of temporary hints on split block", async () => {
         `)
     );
     // Changing the selection should not generate mutations for the next commit.
-    expect(plugins.get("history").getStagedData("mutations").length).toBe(0);
+    expect(plugins.get("domObserver").getStagedMutations().length).toBe(0);
 });
 
 test("hint should only Be display for focused empty block element", async () => {

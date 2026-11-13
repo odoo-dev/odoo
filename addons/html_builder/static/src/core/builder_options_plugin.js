@@ -147,13 +147,6 @@ export class BuilderOptionsPlugin extends Plugin {
     ];
     /** @type {import("plugins").BuilderResources} */
     resources = {
-        // Target selection is metadata for the next edit, not an edit to discard.
-        on_will_invalidate_pending_changes_handlers: (data) => {
-            this.dependencies.history.stage("currentTarget", {
-                targetId: data.currentTarget ?? null,
-            });
-            this.dependencies.history.stage("nextTarget", { targetId: data.nextTarget ?? null });
-        },
         on_committed_to_history_handlers: this.onHistoryCommitted.bind(this),
         on_history_commit_undone_handlers: this.restoreContainers.bind(this),
         on_history_commit_redone_handlers: this.restoreContainers.bind(this),
@@ -187,19 +180,36 @@ export class BuilderOptionsPlugin extends Plugin {
             }
             return buttons;
         },
+        // Commits recorded from a replayed commit keep its targets, swapped
+        // when it is reverted. Always collect them, so that both are replayed.
         history_fields: [
             {
                 name: "currentTarget",
-                stage: (data = null, { targetId = data } = {}) => targetId,
-                apply: (targetId) => this.dependencies.history.stage("currentTarget", { targetId }),
-                revert: (targetId) => this.dependencies.history.stage("nextTarget", { targetId }),
+                collect: (targetId = null) => targetId,
+                apply: (targetId, { ensureNewMutations }) => {
+                    if (ensureNewMutations) {
+                        this.dependencies.history.stage("currentTarget", targetId);
+                    }
+                },
+                revert: (targetId, { ensureNewMutations }) => {
+                    if (ensureNewMutations) {
+                        this.dependencies.history.stage("nextTarget", targetId);
+                    }
+                },
             },
             {
                 name: "nextTarget",
-                stage: (data = null, { targetId = data } = {}) => targetId,
-                apply: (targetId) => this.dependencies.history.stage("nextTarget", { targetId }),
-                revert: (targetId) =>
-                    this.dependencies.history.stage("currentTarget", { targetId }),
+                collect: (targetId = null) => targetId,
+                apply: (targetId, { ensureNewMutations }) => {
+                    if (ensureNewMutations) {
+                        this.dependencies.history.stage("nextTarget", targetId);
+                    }
+                },
+                revert: (targetId, { ensureNewMutations }) => {
+                    if (ensureNewMutations) {
+                        this.dependencies.history.stage("currentTarget", targetId);
+                    }
+                },
             },
         ],
     };
@@ -309,11 +319,10 @@ export class BuilderOptionsPlugin extends Plugin {
             const connectedContainers = this.lastContainers.filter((c) => c.element.isConnected);
             this.target = connectedContainers.at(-1)?.element;
         }
-        this.dependencies.history.stage("currentTarget", {
-            targetId:
-                (this.target && this.dependencies.domReferenceMap.register(this.target, false)) ??
-                null,
-        });
+        this.dependencies.history.stage(
+            "currentTarget",
+            (this.target && this.dependencies.domReferenceMap.register(this.target, false)) ?? null
+        );
 
         const newContainers = this.computeContainers(this.target);
         if (newContainers.length === 0 && this.lastContainers.length === 0) {
@@ -352,7 +361,7 @@ export class BuilderOptionsPlugin extends Plugin {
 
     deactivateContainers() {
         this.target = null;
-        this.dependencies.history.stage("currentTarget", { targetId: false });
+        this.dependencies.history.stage("currentTarget", false);
         this.lastContainers = [];
         this.trigger("on_current_options_containers_changed_handlers", this.lastContainers);
     }
@@ -544,10 +553,10 @@ export class BuilderOptionsPlugin extends Plugin {
             }
         }
         // Store the next target to activate in the current step.
-        this.dependencies.history.stage("nextTarget", {
-            targetId:
-                (targetEl && this.dependencies.domReferenceMap.register(targetEl, false)) ?? null,
-        });
+        this.dependencies.history.stage(
+            "nextTarget",
+            (targetEl && this.dependencies.domReferenceMap.register(targetEl, false)) ?? null
+        );
     }
 
     onHistoryCommitted(commit) {

@@ -250,65 +250,16 @@ export class SelectionPlugin extends Plugin {
         user_commands: { id: "selectAll", run: this.selectAll.bind(this) },
         shortcuts: [{ hotkey: "control+a", commandId: "selectAll" }],
         history_fields: [
-            {
-                name: "activeElementId",
-                sequence: 100,
-                stage: (data = null, { action, value } = {}) => {
-                    // Restore a serialized value, including null to clear it.
-                    if (action === "restore") {
-                        return value;
-                    }
-                    // Commit collection keeps the focus captured before the edit.
-                    if (action !== "capture") {
-                        return data;
-                    }
-                    // Capture live focus for the next edit or preview.
-                    // Focus on an ancestor such as body represents the editable;
-                    // focus on an external control preserves the saved editor focus.
-                    let activeElement = this.document.activeElement;
-                    if (activeElement.contains(this.editable)) {
-                        activeElement = this.editable;
-                    }
-                    return this.editable.contains(activeElement)
-                        ? this.dependencies.domReferenceMap.register(activeElement)
-                        : data;
-                },
-            },
-            {
-                name: "selection",
-                sequence: 100,
-                stage: (data = {}, { action, value } = {}) => {
-                    if (action === "capture") {
-                        return this.serializeEditableSelection();
-                    }
-                    // Copy explicit snapshots so the caller cannot alter the draft later.
-                    if (action === "restore") {
-                        return structuredClone(value);
-                    }
-                    // Commit collection keeps the selection from before the edit.
-                    return data;
-                },
-            },
-            {
+            { name: "activeElementId" },
+            { name: "selection" },
+            // Execute this late to ensure the state of the DOM doesn't change and
+            // invalidate the selection after setting it here.
+            withSequence(100, {
                 name: "selectionAfter",
-                sequence: 100,
-                // Execute this late to ensure the state of the DOM doesn't change and
-                // invalidate the selection after setting it here.
-                stage: (data, { action, value } = {}) =>
-                    // Unlike the baseline, the after-selection follows the current DOM:
-                    // sample it at commit time, or restore an explicit saved snapshot.
-                    action === "restore" ? value : this.serializeEditableSelection(),
-            },
+                collect: () => this.serializeEditableSelection(),
+            }),
         ],
 
-        // Selection is the baseline for the next edit, not an edit to discard.
-        on_will_invalidate_pending_changes_handlers: (data) => {
-            for (const name of ["activeElementId", "selection", "selectionAfter"]) {
-                if (name in data) {
-                    this.dependencies.history.stage(name, { action: "restore", value: data[name] });
-                }
-            }
-        },
         on_committed_to_history_handlers: () => {
             this.stageSelection();
         },
@@ -333,10 +284,7 @@ export class SelectionPlugin extends Plugin {
                     this.setSerializedSelection(commit.data.selection);
                 }
                 if ("selectionAfter" in commit.data) {
-                    this.dependencies.history.stage("selection", {
-                        action: "restore",
-                        value: commit.data.selectionAfter,
-                    });
+                    this.dependencies.history.stage("selection", commit.data.selectionAfter);
                 }
             }
         ),
@@ -350,7 +298,7 @@ export class SelectionPlugin extends Plugin {
             // removed, so restore it from a serialized snapshot.
             const serializedSelection =
                 savePoint.data.lastRevertedChanges?.selection ?? savePoint.data.serializedSelection;
-            if (serializedSelection && !savePoint.data.mutations.length) {
+            if (serializedSelection && !savePoint.data.stagedData.mutations?.length) {
                 savePoint.data.selection.setCursor((cursor) => {
                     cursor.anchor.node = this.dependencies.domReferenceMap.getNodeById(
                         serializedSelection.anchorNodeId
@@ -1492,7 +1440,7 @@ export class SelectionPlugin extends Plugin {
      */
     stageSelection() {
         this.stageFocus();
-        this.dependencies.history.stage("selection", { action: "capture" });
+        this.dependencies.history.stage("selection", this.serializeEditableSelection());
     }
 
     /**
@@ -1501,7 +1449,16 @@ export class SelectionPlugin extends Plugin {
      * @returns {void}
      */
     stageFocus() {
-        this.dependencies.history.stage("activeElementId", { action: "capture" });
+        let activeElement = this.document.activeElement;
+        if (activeElement.contains(this.editable)) {
+            activeElement = this.editable;
+        }
+        if (this.editable.contains(activeElement)) {
+            this.dependencies.history.stage(
+                "activeElementId",
+                this.dependencies.domReferenceMap.register(activeElement)
+            );
+        }
     }
 
     /**

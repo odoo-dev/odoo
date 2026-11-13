@@ -9,14 +9,14 @@ export class PortalOptionPlugin extends Plugin {
     static shared = ["getPortalCards", "loadPortalCards", "updatePortalCards"];
     /** @type {import("plugins").WebsiteResources} */
     resources = {
-        history_fields: [
+        history_operations: [
             {
-                name: "portalCards",
+                id: "portalCards",
                 apply: ({ after }) => this.setPortalCards(after),
                 revert: ({ before }) => this.setPortalCards(before),
             },
             {
-                name: "portalGap",
+                id: "portalGap",
                 apply: ({ after }) =>
                     this.document.documentElement.style.setProperty("--portal-card-gap", after),
                 revert: ({ before }) =>
@@ -63,8 +63,7 @@ export class PortalOptionPlugin extends Plugin {
     async updatePortalCards(entries) {
         const before = { entries: this.portalCards, hasPendingChanges: this.hasPendingChanges };
         const after = { entries, hasPendingChanges: true };
-        this.setPortalCards(after);
-        this.dependencies.history.stage("portalCards", { before, after });
+        this.dependencies.history.applyOperation("portalCards", { before, after });
     }
 
     /**
@@ -141,12 +140,10 @@ export class SetPortalCardGapAction extends BuilderAction {
 
     apply({ value }) {
         const previousValue = this.getValue();
-        this.setGap(value);
-        this.dependencies.history.stage("portalGap", { before: previousValue, after: value });
-    }
-
-    setGap(value) {
-        this.document.documentElement.style.setProperty("--portal-card-gap", value);
+        this.dependencies.history.applyOperation("portalGap", {
+            before: previousValue,
+            after: value,
+        });
     }
 }
 

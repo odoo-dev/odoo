@@ -74,14 +74,14 @@ export class CustomizeWebsitePlugin extends Plugin {
 
     /** @type {import("plugins").WebsiteResources} */
     resources = {
-        history_fields: [
+        history_operations: [
             {
-                name: "websiteCustomValue",
+                id: "websiteCustomValue",
                 apply: (data) => this.replayCustomValue(data, data.after),
                 revert: (data) => this.replayCustomValue(data, data.before),
             },
             {
-                name: "bodyBackground",
+                id: "bodyBackground",
                 apply: ({ after }) =>
                     this.dependencies.builderActions
                         .getAction("toggleBodyBgImage")
@@ -92,12 +92,12 @@ export class CustomizeWebsitePlugin extends Plugin {
                         .applyConfigWithLoader(before),
             },
             {
-                name: "bodyBackgroundPosition",
+                id: "bodyBackgroundPosition",
                 apply: ({ nodeId, after }) => this.replayBackgroundPosition(nodeId, after),
                 revert: ({ nodeId, before }) => this.replayBackgroundPosition(nodeId, before),
             },
             {
-                name: "viewsOnSave",
+                id: "viewsOnSave",
                 apply: ({ after }) => this.restoreViewsOnSave(after),
                 revert: ({ before }) => this.restoreViewsOnSave(before),
             },
@@ -392,8 +392,7 @@ export class CustomizeWebsitePlugin extends Plugin {
                 before: action.getValue(arg),
                 after: arg.value,
             };
-            await this.replayCustomValue(data, data.after);
-            this.dependencies.history.stage("websiteCustomValue", data);
+            await this.dependencies.history.applyOperation("websiteCustomValue", data);
         };
     }
 
@@ -482,18 +481,21 @@ export class CustomizeWebsitePlugin extends Plugin {
     }
     setViewsOnSave(views, to_enable) {
         const before = this.getViewsOnSave();
+        const viewsToEnable = new Set(before.enable);
+        const viewsToDisable = new Set(before.disable);
         for (let view of views) {
             const toEnable = view.startsWith("!") ? !to_enable : to_enable;
             view = view.startsWith("!") ? view.substring(1) : view;
             if (toEnable) {
-                this.viewsToEnableOnSave.add(view);
-                this.viewsToDisableOnSave.delete(view);
+                viewsToEnable.add(view);
+                viewsToDisable.delete(view);
             } else {
-                this.viewsToDisableOnSave.add(view);
-                this.viewsToEnableOnSave.delete(view);
+                viewsToDisable.add(view);
+                viewsToEnable.delete(view);
             }
         }
-        this.dependencies.history.stage("viewsOnSave", { before, after: this.getViewsOnSave() });
+        const after = { enable: [...viewsToEnable], disable: [...viewsToDisable] };
+        this.dependencies.history.applyOperation("viewsOnSave", { before, after });
     }
 
     /**
@@ -635,8 +637,10 @@ export class ToggleBodyBgImageAction extends BuilderAction {
         };
     }
     async applyConfig(oldConfig, newConfig) {
-        await this.applyConfigWithLoader(newConfig);
-        this.dependencies.history.stage("bodyBackground", { before: oldConfig, after: newConfig });
+        await this.dependencies.history.applyOperation("bodyBackground", {
+            before: oldConfig,
+            after: newConfig,
+        });
     }
     async apply({ editingElement: el } = {}) {
         await this.dependencies.media.openMediaDialog(
@@ -699,12 +703,6 @@ export class BodyBgPositionOverlayAction extends BuilderAction {
             // variables.
             editingElement.style.backgroundPosition = "";
         };
-        const setBackgroundPosition = async (value) => {
-            await this.dependencies.customizeWebsite.customizeWebsiteVariables({
-                "body-image-background-position": value,
-            });
-            clearInlinePosition();
-        };
         const bgPosition = await new Promise((resolve) => {
             const removeOverlay = this.services.overlay.add(ImagePositionOverlay, {
                 targetEl: editingElement,
@@ -728,8 +726,7 @@ export class BodyBgPositionOverlayAction extends BuilderAction {
                 this.dependencies.customizeWebsite.getWebsiteVariableValue(
                     "body-image-background-position"
                 ) || "";
-            await setBackgroundPosition(bgPosition);
-            this.dependencies.history.stage("bodyBackgroundPosition", {
+            await this.dependencies.history.applyOperation("bodyBackgroundPosition", {
                 nodeId: this.dependencies.domReferenceMap.register(editingElement),
                 before: currentPosition,
                 after: bgPosition,

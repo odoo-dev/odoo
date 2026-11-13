@@ -20,7 +20,8 @@ import { _t } from "@web/core/l10n/translation";
  * @property { HistoryPlugin['canUndo'] } canUndo
  * @property { HistoryPlugin['canRedo'] } canRedo
  * @property { HistoryPlugin['stage'] } stage
- * @property { HistoryPlugin['getStagedData'] } getStagedData
+ * @property { HistoryPlugin['getStaged'] } getStaged
+ * @property { HistoryPlugin['applyOperation'] } applyOperation
  * @property { HistoryPlugin['getCommits'] } getCommits
  * @property { HistoryPlugin['reset'] } reset
  * @property { HistoryPlugin['createSnapshotCommit'] } createSnapshotCommit
@@ -31,34 +32,44 @@ import { _t } from "@web/core/l10n/translation";
  * @property { HistoryPlugin['makeSavePoint'] } makeSavePoint
  */
 /**
- * Handlers stay in the registry; commits contain only their serializable data.
- * Without a custom stage handler, stage(name, data) records an edit that already
- * happened. History calls apply/revert with each operation's data and records
- * inverses for undo/redo.
+ * A field is a named entry of the commit data. Its value is staged in the
+ * history draft, then collected into the next commit, after which the draft is
+ * cleared. Staged values are immutable: replace them, don't mutate them.
  *
- * A custom stage(stagedData, data) receives only its field's current value and
- * a data object, and returns its replacement. The current value is undefined
- * before first staging.
- * Its apply/revert handlers receive the collected value directly. These fields
- * handle their own change detection and pending-change invalidation when needed;
- * their presence alone does not count as a change.
- * The data object is forwarded unchanged to default and custom stage handlers.
- * Plugins define its properties for explicit staging. When collecting a commit,
- * history passes { hasRelatedCommit } so mutation processing can distinguish
- * reversals from new edits. Other fields can ignore that property.
- * The field's sequence orders both collection and replay; equal sequences
- * retain their declaration order. Selection and DOM mutations keep their
- * specialized replay and change detection in ordinary resources.
+ * - `collect` returns the field's value for the commit being created, from
+ *   its staged value (used as is by default). Undefined values are left out
+ *   of the commit.
+ * - `apply` and `revert` replay the field's value when its commit is applied or
+ *   reverted. `ensureNewMutations` is true when what they replay must end up
+ *   in the draft, to be collected into a new commit (undo, redo, savepoint
+ *   restoration).
+ * - `discard` makes the field's draft pending changes: discarding them (stash,
+ *   undo, redo, savepoint restoration) calls it, then clears the field. Other
+ *   fields keep their draft.
+ *
+ * Fields are collected, applied, reverted and discarded in resource order.
  *
  * @template [T=any]
  * @typedef {Object} HistoryField
  * @property {string} name
- * @property {number} [sequence=10]
- * @property {(stagedData: T | undefined, data: Record<string, any>) => T} [stage]
- * @property {(data: T, options: Record<string, any>) => any} [apply]
- * @property {(data: T, options: Record<string, any>) => any} [revert]
+ * @property {(stagedValue: T | undefined, context: { relatedCommit?: HistoryCommit }) => T} [collect]
+ * @property {(value: T, options: { ensureNewMutations: boolean }) => void} [apply]
+ * @property {(value: T, options: { ensureNewMutations: boolean }) => void} [revert]
+ * @property {(stagedValue: T | undefined) => void} [discard]
  */
 /** @typedef {HistoryField[]} history_fields */
+/**
+ * An operation is a change made with `applyOperation`, which applies it and
+ * stages it with its data. The history then replays it from that data: `apply`
+ * to redo it, `revert` to undo it. Its data must therefore be serializable.
+ *
+ * @template [T=any]
+ * @typedef {Object} HistoryOperation
+ * @property {string} id
+ * @property {(data: T) => any} apply
+ * @property {(data: T) => any} revert
+ */
+/** @typedef {HistoryOperation[]} history_operations */
 
 /**
  * @typedef { ((commit: HistoryCommit, options: { ensureNewMutations: boolean, restoreSelection: boolean }) => void)[] } on_apply_history_commit_handlers
@@ -73,7 +84,6 @@ import { _t } from "@web/core/l10n/translation";
  * @typedef { ((newCommit: HistoryCommit) => void)[] } on_remote_history_commit_applied_handlers
  * @typedef { ((commit: HistoryCommit, options: { ensureNewMutations: boolean, restoreFocus: boolean }) => void)[] } on_revert_history_commit_handlers
  * @typedef { ((savePoint: HistoryCommit<"savePoint">) => void)[] } on_savepoint_restored_handlers
- * @typedef { ((stagedData: HistoryCommitData) => void)[] } on_will_invalidate_pending_changes_handlers
  * @typedef { (() => void)[] } on_will_preview_handlers
  * @typedef { (() => void)[] } on_will_rebase_history_handlers
  * @typedef { (() => void)[] } on_will_reset_history_handlers
@@ -108,7 +118,8 @@ export class HistoryPlugin extends Plugin {
         "canUndo",
         "canRedo",
         "stage",
-        "getStagedData",
+        "getStaged",
+        "applyOperation",
         "getCommits",
         "reset",
         "createSnapshotCommit",
@@ -170,54 +181,44 @@ export class HistoryPlugin extends Plugin {
             this.stagedData = {};
         }),
 
-        // Staging
+        // Operations
 
-        save_point_history_commit_data_processors: (data) => ({
-            ...data,
-            ...this.getStagedFieldData(),
-        }),
         // Operations can depend on attributes restored by the DOM observer.
-        // Replay them after DOM mutations, before selection restoration (100).
-        on_apply_history_commit_handlers: withSequence(20, (commit, options) =>
-            this.replayFields(commit.data, options)
-        ),
-        on_revert_history_commit_handlers: withSequence(20, (commit, options) =>
-            this.replayFields(commit.data, { ...options, reverse: true })
-        ),
-        on_will_invalidate_pending_changes_handlers: withSequence(20, (data) =>
-            this.replayFields(data, { reverse: true }, this.operationFields)
-        ),
-        on_savepoint_restored_handlers: withSequence(20, (savePoint) => {
-            // Restore the saved pending edits without recording another copy.
-            const result = this.replayFields(savePoint.data);
-            this.restoreStagedFields(savePoint.data);
-            return result;
+        // Replay them after DOM mutations.
+        history_fields: withSequence(20, {
+            name: "operations",
+            apply: (operations, { ensureNewMutations }) =>
+                this.replayOperations(operations, { ensureNewMutations }),
+            revert: (operations, { ensureNewMutations }) =>
+                this.replayOperations(operations, { reverse: true, ensureNewMutations }),
+            discard: (operations = []) => this.replayOperations(operations, { reverse: true }),
         }),
-        on_pending_changes_unstashed_handlers: (commit) => this.restoreStagedFields(commit.data),
+        on_pending_changes_unstashed_handlers: (stashedCommit) => {
+            if (stashedCommit.data.operations) {
+                // Applying the stash did not record its operations.
+                this.stage("operations", stashedCommit.data.operations);
+            }
+        },
         has_history_commit_changes_predicates: (commit) =>
-            this.operationFields.some(({ name }) => commit.data[name]?.length) ? true : undefined,
+            commit.data.operations?.length ? true : undefined,
     };
 
     setup() {
         this.stagedData = {};
         this.fields = new Map();
-        // Collection and replay share this field order. Equal sequences retain
-        // their declaration order.
-        const fields = this.getResource("history_fields").toSorted(
-            (a, b) => (a.sequence ?? 10) - (b.sequence ?? 10)
-        );
-        for (const field of fields) {
+        for (const field of this.getResource("history_fields")) {
             if (this.fields.has(field.name)) {
                 throw new Error(`Duplicate history field: ${field.name}`);
             }
-            this.fields.set(field.name, { ...field });
+            this.fields.set(field.name, field);
         }
-        this.replayableFields = [...this.fields.values()].filter(
-            (field) => field.apply || field.revert
-        );
-        // Only default-staged operations have automatic change detection and
-        // inverses to replay when discarding pending edits.
-        this.operationFields = this.replayableFields.filter((field) => !field.stage);
+        this.operations = new Map();
+        for (const operation of this.getResource("history_operations")) {
+            if (this.operations.has(operation.id)) {
+                throw new Error(`Duplicate history operation: ${operation.id}`);
+            }
+            this.operations.set(operation.id, operation);
+        }
         this.resetAuthorTimestamp();
         this._onKeyupResetContenteditableNodes = [];
         this.addDomListener(this.document, "beforeinput", this.onDocumentBeforeInput.bind(this));
@@ -288,7 +289,6 @@ export class HistoryPlugin extends Plugin {
 
     /**
      * Gather all staged changes and add them to the stash for later use. Then
-     * trigger `on_will_invalidate_pending_changes_handlers` to allow plugins to
      * discard those changes.
      */
     stash() {
@@ -318,43 +318,26 @@ export class HistoryPlugin extends Plugin {
     }
 
     /**
-     * Contribute a field's pending changes to the shared draft.
+     * Stage the value of a field in the draft, to be collected into the next
+     * commit. Staged values are immutable: replace them, don't mutate them.
      *
      * @param {string} name The registered field.
-     * @param {Record<string, any>} [data={}] Data forwarded unchanged after the
-     *        field's staged value. The default handler records it as an operation.
-     * @returns {any} The value returned by the handler and stored in the draft.
+     * @param {any} value
      */
-    stage(name, data = {}) {
-        const field = this.getField(name);
-        const stage =
-            field.stage ??
-            ((stagedData = [], data) => {
-                const copy = structuredClone(data);
-                if (field.apply || field.revert) {
-                    stagedData.push({ data: copy, reversed: false });
-                    return stagedData;
-                }
-                return copy;
-            });
-        const stagedData = stage.call(field, this.stagedData[name], data);
-        this.stagedData[name] = stagedData;
-        return stagedData;
+    stage(name, value) {
+        this.getField(name);
+        this.stagedData[name] = value;
     }
 
     /**
-     * Return an independent snapshot without collecting additional changes.
-     * Modifying it does not affect the draft; changes must go through stage.
+     * Return the value of a field in the draft.
      *
-     * @param {string} [name] The field to read; omit to copy the whole draft.
-     * @returns {any} The copied data, or an empty array for an unstaged field.
+     * @param {string} name The registered field.
+     * @returns {any} The staged value, undefined if none.
      */
-    getStagedData(name) {
-        if (name === undefined) {
-            return structuredClone(this.stagedData);
-        }
+    getStaged(name) {
         this.getField(name);
-        return name in this.stagedData ? structuredClone(this.stagedData[name]) : [];
+        return this.stagedData[name];
     }
 
     /**
@@ -373,90 +356,100 @@ export class HistoryPlugin extends Plugin {
     }
 
     /**
-     * Clear the draft and notify plugins to discard their pending changes.
+     * Discard the pending changes of the draft: fields with a `discard` hook
+     * revert them and are cleared. Other fields keep their draft.
      *
      * @returns {void}
      */
     discardStagedChanges() {
-        const data = this.stagedData;
-        this.stagedData = {};
-        this.trigger("on_will_invalidate_pending_changes_handlers", data);
+        for (const { name, discard } of this.fields.values()) {
+            if (discard) {
+                const stagedValue = this.stagedData[name];
+                delete this.stagedData[name];
+                discard(stagedValue);
+            }
+        }
     }
 
     /**
-     * Collect and copy staged data for fields with replay handlers.
+     * Bring the draft back to the given copy, after its pending changes were
+     * discarded: apply them again so that they are staged anew, and stage the
+     * other fields back.
      *
-     * @returns {Record<string, any>}
-     */
-    getStagedFieldData() {
-        return Object.fromEntries(
-            this.replayableFields.map(({ name, stage }) => {
-                if (stage) {
-                    this.stage(name);
-                }
-                return [name, this.getStagedData(name)];
-            })
-        );
-    }
-
-    /**
-     * Restore collected field data without running its stage handlers again.
-     *
-     * @param {Record<string, any>} data Commit or savepoint data.
+     * @param {Record<string, any>} stagedData
      * @returns {void}
      */
-    restoreStagedFields(data) {
-        for (const { name } of this.replayableFields) {
-            if (name in data) {
-                // This data was already collected; do not run stage again.
-                this.stagedData[name] = structuredClone(data[name]);
+    restoreStagedData(stagedData) {
+        for (const { name, apply, discard } of this.fields.values()) {
+            if (!discard) {
+                this.stagedData[name] = stagedData[name];
+            } else if (name in stagedData) {
+                apply?.(stagedData[name], { ensureNewMutations: true });
             }
         }
     }
 
     /**
-     * Replay field data through its registered apply/revert handlers.
-     * Additional options are forwarded to those handlers.
+     * Apply an operation and stage it, to be replayed with the commit it ends
+     * up in: applied again on redo, reverted on undo.
      *
-     * @param {Record<string, any>} data Collected fields, possibly with metadata.
-     * @param {Record<string, any>} [options={}]
-     * @param {boolean} [options.reverse=false] Invert each field's operations in reverse order.
-     * @param {boolean} [options.ensureNewMutations=false] Record the replayed edits
-     *        so the resulting undo/redo commit can itself be reversed.
-     * @param {HistoryField[]} [fields=this.replayableFields] Fields to replay.
-     * @returns {Promise<any[]>} The handler results, after asynchronous work completes.
+     * @param {string} id The registered operation.
+     * @param {any} data Serializable data passed to the operation's handlers.
+     * @returns {any} The value returned by the operation's `apply` handler.
      */
-    replayFields(
-        data,
-        { reverse = false, ensureNewMutations = false, ...options } = {},
-        fields = this.replayableFields
-    ) {
-        const results = [];
-        for (const field of fields) {
-            if (field.stage) {
-                if (field.name in data) {
-                    const handler = reverse ? field.revert : field.apply;
-                    results.push(handler?.(data[field.name], { ...options, ensureNewMutations }));
-                }
-                continue;
-            }
-            const operations = data[field.name] ?? [];
-            // Reverting a batch must undo its last edit first.
-            for (const entry of reverse ? operations.toReversed() : operations) {
-                const reversed = reverse ? !entry.reversed : entry.reversed;
-                const handler = reversed ? field.revert : field.apply;
-                results.push(handler?.(entry.data, options));
-                if (ensureNewMutations) {
-                    // Redo reverts the undo commit. Record what we just replayed,
-                    // including its direction, so that commit can be reversed.
-                    (this.stagedData[field.name] ??= []).push({
-                        data: structuredClone(entry.data),
-                        reversed,
-                    });
-                }
-            }
+    applyOperation(id, data) {
+        const operation = this.getOperation(id);
+        data = structuredClone(data);
+        this.stageOperation({ id, data, reversed: false });
+        return operation.apply(data);
+    }
+
+    /**
+     * Look up a registered history operation.
+     *
+     * @param {string} id
+     * @returns {HistoryOperation}
+     * @throws {Error} If the operation is not registered.
+     */
+    getOperation(id) {
+        const operation = this.operations.get(id);
+        if (!operation) {
+            throw new Error(`Unknown history operation: ${id}`);
         }
-        return Promise.all(results);
+        return operation;
+    }
+
+    /**
+     * Add an operation after the staged ones.
+     *
+     * @param {{ id: string, data: any, reversed: boolean }} operation
+     * @returns {void}
+     */
+    stageOperation(operation) {
+        this.stage("operations", [...(this.stagedData.operations ?? []), operation]);
+    }
+
+    /**
+     * Replay operations through their registered apply/revert handlers.
+     *
+     * @param {{ id: string, data: any, reversed: boolean }[]} operations
+     * @param {Object} [options={}]
+     * @param {boolean} [options.reverse=false] Revert the operations, last first.
+     * @param {boolean} [options.ensureNewMutations=false] Stage the replayed
+     *        operations.
+     * @returns {void}
+     */
+    replayOperations(operations, { reverse = false, ensureNewMutations = false } = {}) {
+        for (const { id, data, reversed } of reverse ? operations.toReversed() : operations) {
+            const isReversed = reverse ? !reversed : reversed;
+            if (ensureNewMutations) {
+                // Redo reverts the undo commit. Record what we replay,
+                // including its direction, so that commit can be reversed.
+                this.stageOperation({ id, data, reversed: isReversed });
+            }
+            const operation = this.getOperation(id);
+            (isReversed ? operation.revert : operation.apply)(data);
+        }
     }
 
     /**
@@ -473,9 +466,10 @@ export class HistoryPlugin extends Plugin {
     // ====================
 
     /**
-     * Return a complete `HistoryCommitData` object made of any pending data
-     * in plugins that subscribe to `pending_history_commit_data_processors`, as
-     * well as metadata provided by this plugin.
+     * Return a complete `HistoryCommitData` object made of the collected
+     * fields, any pending data in plugins that subscribe to
+     * `pending_history_commit_data_processors`, as well as metadata provided by
+     * this plugin.
      *
      * @template { WritableHistoryCommitType } [T="standard"]
      * @param { HistoryCommitData<T> } [data = {}]
@@ -487,13 +481,14 @@ export class HistoryPlugin extends Plugin {
         data.commitTimestamp ??= Date.now();
         data.authorTimestamp ??= this.authorTimestamp;
         data.previousCommitId = this.commits?.at(-1)?.id;
-        for (const { name, stage } of this.fields.values()) {
-            // Default staging only records explicit operations.
-            if (stage) {
-                this.stage(name, { hasRelatedCommit: !!data.relatedCommit });
+        for (const { name, collect } of this.fields.values()) {
+            const stagedValue = this.stagedData[name];
+            const value = collect
+                ? collect(stagedValue, { relatedCommit: data.relatedCommit })
+                : stagedValue;
+            if (value !== undefined) {
+                data[name] = value;
             }
-            // Commits must not share mutable data with the current draft.
-            data[name] = this.getStagedData(name);
         }
         return this.processThrough("pending_history_commit_data_processors", data);
     }
@@ -557,8 +552,9 @@ export class HistoryPlugin extends Plugin {
     // ===========================
 
     /**
-     * Delegate the application of the changes in the given commit to the
-     * plugins that subscribe to `on_apply_history_commit_handlers`.
+     * Apply the fields of the given commit, then delegate the application of
+     * its other changes to the plugins that subscribe to
+     * `on_apply_history_commit_handlers`.
      *
      * @param { HistoryCommit } commit
      * @param { Object } [params = {}]
@@ -566,6 +562,11 @@ export class HistoryPlugin extends Plugin {
      * @param { boolean } [params.restoreSelection = false]
      */
     applyCommit(commit, { ensureNewMutations = false, restoreSelection = false } = {}) {
+        for (const { name, apply } of this.fields.values()) {
+            if (apply && name in commit.data) {
+                apply(commit.data[name], { ensureNewMutations });
+            }
+        }
         this.trigger("on_apply_history_commit_handlers", commit, {
             ensureNewMutations,
             restoreSelection,
@@ -573,8 +574,9 @@ export class HistoryPlugin extends Plugin {
     }
 
     /**
-     * Delegate the reversal of the changes in the given commit to the plugins
-     * that subscribe to `on_revert_history_commit_handlers`.
+     * Revert the fields of the given commit, then delegate the reversal of its
+     * other changes to the plugins that subscribe to
+     * `on_revert_history_commit_handlers`.
      *
      * @param { HistoryCommit } commit
      * @param { Object } [params = {}]
@@ -582,6 +584,11 @@ export class HistoryPlugin extends Plugin {
      * @param { boolean } [params.restoreFocus = true]
      */
     revertCommit(commit, { ensureNewMutations = false, restoreFocus = true } = {}) {
+        for (const { name, revert } of this.fields.values()) {
+            if (revert && name in commit.data) {
+                revert(commit.data[name], { ensureNewMutations });
+            }
+        }
         this.trigger("on_revert_history_commit_handlers", commit, {
             ensureNewMutations,
             restoreFocus,
@@ -798,6 +805,8 @@ export class HistoryPlugin extends Plugin {
                 hasBeenRestored: false,
             }),
         });
+        // Processors can stage pending changes: copy the draft after them.
+        savePoint.data.stagedData = { ...this.stagedData };
         return () => {
             if (savePoint.data.hasBeenRestored) {
                 return;
@@ -845,6 +854,7 @@ export class HistoryPlugin extends Plugin {
                 });
                 this.appendCommit(restoreCommit);
             }
+            this.restoreStagedData(savePoint.data.stagedData);
             savePoint.data.hasBeenRestored = true;
             this.trigger("on_savepoint_restored_handlers", savePoint);
         };
@@ -1034,6 +1044,7 @@ export class HistoryPlugin extends Plugin {
  *     ? {
  *         hasBeenRestored: boolean,
  *         lastRevertedChanges?: HistoryCommitData<WritableHistoryCommitType>,
+ *         stagedData: Record<string, any>,
  *       }
  *     : {}
  * ) } HistoryCommitData<T>

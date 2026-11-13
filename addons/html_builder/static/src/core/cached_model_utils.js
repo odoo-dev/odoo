@@ -24,8 +24,7 @@ export class ModelEdit {
     set(field, value) {
         const previous = this.values[field].current;
         value = JSON.stringify(value);
-        this.values[field].current = value;
-        this.history.stage("cachedModel", {
+        this.history.applyOperation("cachedModel", {
             model: this.model,
             recordId: this.recordId,
             field,

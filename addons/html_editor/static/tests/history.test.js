@@ -18,6 +18,7 @@ import {
 import { execCommand } from "./_helpers/userCommands";
 import { nodeToTree } from "@html_editor/core/dom_reference_map_plugin";
 import { HISTORY_COMMIT_TYPES } from "@html_editor/core/history_plugin";
+import { withSequence } from "@html_editor/utils/resource";
 import { NATIVE_MUTATION_TYPES } from "../src/core/dom_observer_plugin";
 
 describe("reset", () => {
@@ -58,7 +59,7 @@ describe("reset", () => {
         expect(el.firstChild.getAttribute("data-test-normalize")).toBe("1");
         expect(historyPlugin.commits.length).toBe(1);
         const domObserverPlugin = plugins.get("domObserver");
-        expect(domObserverPlugin.dependencies.history.getStagedData("mutations").length).toBe(0);
+        expect(domObserverPlugin.getStagedMutations().length).toBe(0);
     });
 
     test.tags("desktop");
@@ -73,12 +74,12 @@ describe("reset", () => {
             `<p o-we-hint-text='Type "/" for commands' class="o-we-hint">[]</p>`
         );
         const domObserverPlugin = plugins.get("domObserver");
-        expect(domObserverPlugin.dependencies.history.getStagedData("mutations").length).toBe(0);
+        expect(domObserverPlugin.getStagedMutations().length).toBe(0);
 
         await click(".odoo-editor-editable p");
         await animationFrame();
         await expectElementCount(".o-we-tablepicker", 0);
-        expect(domObserverPlugin.dependencies.history.getStagedData("mutations").length).toBe(0);
+        expect(domObserverPlugin.getStagedMutations().length).toBe(0);
     });
 });
 
@@ -318,7 +319,7 @@ describe("selection", () => {
         const domReferenceMapPlugin = plugins.get("domReferenceMap");
         const nodeId = domReferenceMapPlugin.getNodeId(pElement.firstChild);
         const selectionPlugin = plugins.get("selection");
-        expect(selectionPlugin.dependencies.history.getStagedData("selection")).toEqual({
+        expect(selectionPlugin.dependencies.history.getStaged("selection")).toEqual({
             anchorNodeId: nodeId,
             anchorOffset: 0,
             focusNodeId: nodeId,
@@ -419,9 +420,7 @@ describe("system classes and attributes", () => {
         p.className = "";
         p.className = "y";
         domObserverPlugin.stagePendingMutations();
-        domObserverPlugin.revertMutations(
-            domObserverPlugin.dependencies.history.getStagedData("mutations")
-        );
+        domObserverPlugin.revertMutations(domObserverPlugin.getStagedMutations());
 
         expect(getContent(el)).toBe(`<p class="y">a</p>`);
     });
@@ -598,8 +597,7 @@ describe("makePreviewableOperation", () => {
             div.appendChild(newElem);
         });
         let numberOfCommits = history.commits.length;
-        const numberOfCurrentMutations =
-            domObserver.dependencies.history.getStagedData("mutations").length;
+        const numberOfCurrentMutations = domObserver.getStagedMutations().length;
         previewableAddParagraph.preview("first");
         // commit added by the preview
         numberOfCommits += 1;
@@ -620,9 +618,7 @@ describe("makePreviewableOperation", () => {
         expect("#first").toHaveCount(0);
         expect("#second").toHaveCount(0);
         expect(history.commits.length).toBe(numberOfCommits);
-        expect(domObserver.dependencies.history.getStagedData("mutations").length).toBe(
-            numberOfCurrentMutations
-        );
+        expect(domObserver.getStagedMutations().length).toBe(numberOfCurrentMutations);
     });
 
     test("makePreviewableOperation correctly commit operation", async () => {
@@ -803,259 +799,150 @@ describe("destroy", () => {
 });
 
 describe("history fields", () => {
-    const sequencedFields = [
-        { name: "late", sequence: 30 },
-        { name: "firstDefault" },
-        { name: "early", sequence: 0 },
-        { name: "secondDefault", sequence: 10 },
-    ];
+    const sequences = { late: 30, firstDefault: undefined, early: 0, secondDefault: 10 };
+    function sequencedFields(getHooks) {
+        return Object.entries(sequences).map(([name, sequence]) => {
+            const field = { name, ...getHooks(name) };
+            return sequence === undefined ? field : withSequence(sequence, field);
+        });
+    }
 
-    test("plain descriptors replay serializable data without extra bookkeeping", async () => {
-        let value = 0;
-        const { editor } = await setupEditor(`<p>[]</p>`, {
+    test("staged values are collected into the next commit", async () => {
+        const { editor, el } = await setupEditor(`<p>[]x</p>`, {
+            config: { resources: { history_fields: [{ name: "label" }, { name: "unstaged" }] } },
+        });
+        const history = editor.shared.history;
+        history.stage("label", "first");
+        expect(history.getStaged("label")).toBe("first");
+        // Fields are not changes on their own, so the draft is kept.
+        expect(history.commit()).toBe(false);
+        expect(history.getStaged("label")).toBe("first");
+
+        el.querySelector("p").dataset.test = "1";
+        const commit = history.commit();
+        expect(commit.data.label).toBe("first");
+        expect("unstaged" in commit.data).toBe(false);
+        expect(history.getStaged("label")).toBe(undefined);
+    });
+
+    test("collect returns a field's value for each created commit", async () => {
+        const { editor, el } = await setupEditor(`<p>[]x</p>`, {
             config: {
                 resources: {
                     history_fields: {
-                        name: "counter",
-                        apply: ({ after }) => {
-                            value = after;
-                        },
-                        revert: ({ before }) => {
-                            value = before;
-                        },
+                        name: "label",
+                        collect: (label, { relatedCommit }) =>
+                            relatedCommit ? `reverts ${relatedCommit.data.label}` : label,
                     },
                 },
             },
         });
         const history = editor.shared.history;
-        value = 3;
-        history.stage("counter", { before: 0, after: 3 });
-        const data = history.commit().data.counter;
-        expect(JSON.parse(JSON.stringify(data))).toEqual(data);
+        history.stage("label", "edit");
+        el.querySelector("p").dataset.test = "1";
+        expect(history.commit().data.label).toBe("edit");
         history.undo();
-        expect(value).toBe(0);
-        history.redo();
-        expect(value).toBe(3);
+        expect(history.getCommits().at(-1).data.label).toBe("reverts edit");
     });
 
-    test("operations replay after DOM attributes have been restored", async () => {
-        let paragraph;
-        let value = "before";
-        const { editor, el } = await setupEditor(`<p data-version="before">[]x</p>`, {
-            config: {
-                resources: {
-                    history_fields: {
-                        name: "version",
-                        apply: ({ after }) => {
-                            expect(paragraph.dataset.version).toBe(after);
-                            value = after;
-                        },
-                        revert: ({ before }) => {
-                            expect(paragraph.dataset.version).toBe(before);
-                            value = before;
-                        },
-                    },
-                },
-            },
-        });
-        paragraph = el.querySelector("p");
-        const history = editor.shared.history;
-        paragraph.dataset.version = "after";
-        value = "after";
-        history.stage("version", { before: "before", after: "after" });
-        history.commit();
-        history.undo();
-        expect(value).toBe("before");
-        history.redo();
-        expect(value).toBe("after");
-    });
-
-    test("stage callbacks receive and replace only their own value", async () => {
+    test("discarding changes only clears fields with a discard hook", async () => {
         const { editor } = await setupEditor(`<p>[]x</p>`, {
             config: {
                 resources: {
                     history_fields: [
-                        {
-                            name: "counter",
-                            stage: (data = 0, { increase = 0 } = {}) => data + increase,
-                        },
-                        { name: "otherValue" },
+                        { name: "metadata" },
+                        { name: "changes", discard: (value) => expect.step(["discard", value]) },
                     ],
                 },
             },
         });
         const history = editor.shared.history;
-        history.stage("otherValue", { label: "unchanged" });
-        expect(history.stage("counter", { increase: 2 })).toBe(2);
-        expect(history.stage("counter", { increase: 3 })).toBe(5);
-        history.commit();
-        expect(history.getStagedData("counter")).toBe(5);
-        expect(history.getStagedData("otherValue")).toEqual({ label: "unchanged" });
+        history.stage("metadata", "kept");
+        history.stage("changes", "pending");
+        history.stash();
+        expect.verifySteps([["discard", "pending"]]);
+        expect(history.getStaged("metadata")).toBe("kept");
+        expect(history.getStaged("changes")).toBe(undefined);
     });
 
-    test("staging forwards plugin data unchanged without refreshing unrelated fields", async () => {
-        const request = { action: "set", value: false, extra: "plugin-data" };
-        const { editor } = await setupEditor(`<p>[]x</p>`, {
+    test("replayed fields can stage the values of the commit they record", async () => {
+        let history;
+        const names = ["firstTarget", "secondTarget"];
+        const { editor, el } = await setupEditor(`<p>[]x</p>`, {
             config: {
                 resources: {
-                    history_fields: [
-                        {
-                            name: "custom",
-                            stage: (stagedData = null, data) => {
-                                if (!data.action) {
-                                    expect.step(["collect", data]);
-                                    return stagedData;
-                                }
-                                expect(data).toBe(request);
-                                expect(data.extra).toBe("plugin-data");
-                                expect.step("explicit");
-                                return data.value;
-                            },
-                        },
-                        { name: "recorded", apply() {}, revert() {} },
-                    ],
-                },
-            },
-        });
-        const history = editor.shared.history;
-        expect.verifySteps([]);
-        expect(history.stage("custom", request)).toBe(false);
-        const data = { data: "part of the operation", hasRelatedCommit: true, value: 1 };
-        expect(history.stage("recorded", data)).toEqual([{ data, reversed: false }]);
-        expect(history.commit()).not.toBe(false);
-        expect.verifySteps(["explicit", ["collect", { hasRelatedCommit: false }]]);
-        expect(history.getStagedData("custom")).toEqual([]);
-
-        history.undo();
-        expect.verifySteps([["collect", { hasRelatedCommit: true }]]);
-
-        history.reset();
-        expect.verifySteps([]);
-    });
-
-    test("custom-staged fields replay their own data without creating history entries", async () => {
-        const values = {
-            target: "node-id",
-            flag: false,
-            count: 0,
-            entries: [{ label: "entry" }],
-            empty: null,
-        };
-        const { editor } = await setupEditor(`<p>[]x</p>`, {
-            config: {
-                resources: {
-                    history_fields: Object.keys(values).map((name) => ({
+                    history_fields: names.map((name, index) => ({
                         name,
-                        stage: (data = null, { value = data } = {}) => value,
-                        apply: (data, options) =>
-                            expect.step([name, data, options.ensureNewMutations]),
-                        revert: () => expect.step("unexpected pending revert"),
+                        apply: (target, { ensureNewMutations }) =>
+                            ensureNewMutations && history.stage(name, target),
+                        revert: (target, { ensureNewMutations }) =>
+                            ensureNewMutations && history.stage(names[1 - index], target),
                     })),
                 },
             },
         });
-        const history = editor.shared.history;
-        for (const [name, value] of Object.entries(values)) {
-            history.stage(name, { value });
-        }
-        expect(history.commit()).toBe(false);
-        expect(history.canUndo()).toBe(false);
-        history.stash();
-        expect.verifySteps([]);
-        history.unstash();
-        expect.verifySteps(Object.entries(values).map(([name, value]) => [name, value, false]));
-        for (const [name, value] of Object.entries(values)) {
-            expect(history.getStagedData(name)).toEqual(value);
-        }
+        history = editor.shared.history;
+        history.stage("firstTarget", "node-id");
+        history.stage("secondTarget", false);
+        el.querySelector("p").dataset.test = "1";
+        history.commit();
+
+        history.undo();
+        let data = history.getCommits().at(-1).data;
+        expect(data.firstTarget).toBe(false);
+        expect(data.secondTarget).toBe("node-id");
+        history.redo();
+        data = history.getCommits().at(-1).data;
+        expect(data.firstTarget).toBe("node-id");
+        expect(data.secondTarget).toBe(false);
     });
 
-    test("field callbacks can stage inverse metadata alongside recorded operations", async () => {
+    test("restoring a savepoint brings the draft back", async () => {
         let history;
-        let value = 0;
-        const names = ["firstTarget", "secondTarget"];
         const { editor } = await setupEditor(`<p>[]x</p>`, {
             config: {
                 resources: {
                     history_fields: [
-                        ...names.map((name, index) => ({
-                            name,
-                            stage: (data = null, { target = data } = {}) => target,
-                            apply: (target) => history.stage(name, { target }),
-                            revert: (target) => history.stage(names[1 - index], { target }),
-                        })),
+                        { name: "bookmark" },
+                        { name: "later" },
                         {
-                            name: "counter",
-                            apply: ({ after }) => {
-                                value = after;
+                            name: "changes",
+                            apply: (value, { ensureNewMutations }) => {
+                                expect.step(["apply", value, ensureNewMutations]);
+                                history.stage("changes", value);
                             },
-                            revert: ({ before }) => {
-                                value = before;
-                            },
+                            discard: (value) => expect.step(["discard", value]),
                         },
                     ],
                 },
             },
         });
         history = editor.shared.history;
-        history.stage("firstTarget", { target: "node-id" });
-        history.stage("secondTarget", { target: false });
-        value = 1;
-        history.stage("counter", { before: 0, after: 1 });
-        history.commit();
-
-        history.undo();
-        expect(value).toBe(0);
-        let data = history.getCommits().at(-1).data;
-        expect(data.firstTarget).toBe(false);
-        expect(data.secondTarget).toBe("node-id");
-        history.redo();
-        expect(value).toBe(1);
-        data = history.getCommits().at(-1).data;
-        expect(data.firstTarget).toBe("node-id");
-        expect(data.secondTarget).toBe(false);
-    });
-
-    test("savepoints collect field defaults and restore independent copies", async () => {
-        let value;
-        const { editor } = await setupEditor(`<p>[]x</p>`, {
-            config: {
-                resources: {
-                    history_fields: {
-                        name: "bookmark",
-                        stage: (data = null, { bookmark = data } = {}) => bookmark,
-                        apply: (data) => {
-                            value = data;
-                        },
-                    },
-                },
-            },
-        });
-        const history = editor.shared.history;
-        const restoreEmpty = history.makeSavePoint();
-        history.stage("bookmark", { bookmark: false });
-        restoreEmpty();
-        expect(value).toBe(null);
-        expect(history.getStagedData("bookmark")).toBe(null);
-
-        const bookmark = { node: { label: "saved" } };
-        history.stage("bookmark", { bookmark });
+        history.stage("bookmark", "saved");
+        history.stage("changes", "saved");
         const restore = history.makeSavePoint();
-        bookmark.node.label = "changed";
+        history.stage("bookmark", "changed");
+        history.stage("later", "staged after the savepoint");
+        history.stage("changes", "changed");
+
         restore();
-        expect(value).toEqual({ node: { label: "saved" } });
-        expect(history.getStagedData("bookmark")).toEqual({ node: { label: "saved" } });
+        // Pending changes are discarded, then applied again up to the savepoint.
+        expect.verifySteps([
+            ["discard", "changed"],
+            ["apply", "saved", true],
+        ]);
+        expect(history.getStaged("changes")).toBe("saved");
+        // Other fields are staged back.
+        expect(history.getStaged("bookmark")).toBe("saved");
+        expect(history.getStaged("later")).toBe(undefined);
     });
 
-    test("field sequence orders collection and preserves declaration order for ties", async () => {
+    test("fields are collected in resource order", async () => {
         const { editor } = await setupEditor(`<p>[]x</p>`, {
             config: {
                 resources: {
-                    history_fields: sequencedFields.map((field) => ({
-                        ...field,
-                        stage: () => {
-                            expect.step(field.name);
-                            return field.name;
-                        },
+                    history_fields: sequencedFields((name) => ({
+                        collect: () => expect.step(name),
                     })),
                 },
             },
@@ -1065,28 +952,27 @@ describe("history fields", () => {
         expect.verifySteps(["early", "firstDefault", "secondDefault", "late"]);
     });
 
-    test("field sequence orders apply and revert", async () => {
+    test("fields are discarded and replayed in resource order", async () => {
         const { editor } = await setupEditor(`<p>[]x</p>`, {
             config: {
                 resources: {
-                    history_fields: sequencedFields.map((field) => ({
-                        ...field,
-                        apply: () => expect.step("apply " + field.name),
-                        revert: () => expect.step("revert " + field.name),
+                    history_fields: sequencedFields((name) => ({
+                        apply: () => expect.step("apply " + name),
+                        discard: () => expect.step("discard " + name),
                     })),
                 },
             },
         });
         const history = editor.shared.history;
-        for (const { name } of sequencedFields) {
-            history.stage(name, {});
+        for (const name of Object.keys(sequences)) {
+            history.stage(name, name);
         }
         history.stash();
         expect.verifySteps([
-            "revert early",
-            "revert firstDefault",
-            "revert secondDefault",
-            "revert late",
+            "discard early",
+            "discard firstDefault",
+            "discard secondDefault",
+            "discard late",
         ]);
         history.unstash();
         expect.verifySteps([
@@ -1096,23 +982,31 @@ describe("history fields", () => {
             "apply late",
         ]);
     });
+
+    test("unknown fields and operations are rejected", async () => {
+        const { editor } = await setupEditor(`<p>[]x</p>`);
+        const history = editor.shared.history;
+        expect(() => history.stage("unknown", 1)).toThrow("Unknown history field: unknown");
+        expect(() => history.applyOperation("unknown", {})).toThrow(
+            "Unknown history operation: unknown"
+        );
+    });
 });
 
 describe("custom operations", () => {
     function valueHistory() {
         let value = 0;
-        const apply = ({ after, label }) => {
-            expect.step(label ? "apply " + label : "apply");
-            value = after;
-        };
         return {
             get value() {
                 return value;
             },
             resources: {
-                history_fields: {
-                    name: "testValue",
-                    apply,
+                history_operations: {
+                    id: "testValue",
+                    apply: ({ after, label }) => {
+                        expect.step(label ? "apply " + label : "apply");
+                        value = after;
+                    },
                     revert: ({ before, label }) => {
                         expect.step(label ? "revert " + label : "revert");
                         value = before;
@@ -1120,10 +1014,7 @@ describe("custom operations", () => {
                 },
             },
             set(editor, after, label = "") {
-                const data = { before: value, after, label };
-                apply(data);
-                editor.shared.history.stage("testValue", data);
-                return data;
+                editor.shared.history.applyOperation("testValue", { before: value, after, label });
             },
         };
     }
@@ -1327,44 +1218,76 @@ describe("custom operations", () => {
         redo(editor);
         expect.verifySteps(["apply"]);
     });
-    test("staging records data without applying it", async () => {
+    test("operations stage a serializable copy of their data", async () => {
         const values = valueHistory();
         const { editor } = await setupEditor(`<p>[]</p>`, {
             config: { resources: values.resources },
         });
         const data = { before: 0, after: 1, label: "" };
-        editor.shared.history.stage("testValue", data);
-        expect(values.value).toBe(0);
-        expect.verifySteps([]);
+        editor.shared.history.applyOperation("testValue", data);
+        expect.verifySteps(["apply"]);
         data.after = 99;
-        expect(editor.shared.history.getStagedData("testValue")[0].data.after).toBe(1);
         const commit = editor.shared.history.commit();
-        expect(JSON.parse(JSON.stringify(commit.data.testValue))).toEqual(commit.data.testValue);
-        expect(editor.shared.history.getStagedData("testValue")).toEqual([]);
+        expect(commit.data.operations).toEqual([
+            { id: "testValue", data: { before: 0, after: 1, label: "" }, reversed: false },
+        ]);
+        expect(JSON.parse(JSON.stringify(commit.data.operations))).toEqual(commit.data.operations);
     });
 
-    test("modifying staged-data snapshots does not change pending operations", async () => {
-        const values = valueHistory();
+    test("operations of different types are undone in reverse order", async () => {
         const { editor } = await setupEditor(`<p>[]</p>`, {
-            config: { resources: values.resources },
+            config: {
+                resources: {
+                    history_operations: ["first", "second"].map((id) => ({
+                        id,
+                        apply: () => expect.step("apply " + id),
+                        revert: () => expect.step("revert " + id),
+                    })),
+                },
+            },
         });
         const history = editor.shared.history;
-        values.set(editor, 1);
-        expect.verifySteps(["apply"]);
+        history.applyOperation("second", {});
+        history.applyOperation("first", {});
+        history.applyOperation("second", {});
+        expect.verifySteps(["apply second", "apply first", "apply second"]);
+        history.commit();
 
-        const operations = history.getStagedData("testValue");
-        operations[0].data.after = 99;
-        operations.push(operations[0]);
-        const draft = history.getStagedData();
-        draft.testValue[0].data.before = -1;
-        delete draft.testValue;
+        undo(editor);
+        expect.verifySteps(["revert second", "revert first", "revert second"]);
+        redo(editor);
+        expect.verifySteps(["apply second", "apply first", "apply second"]);
+    });
 
+    test("operations replay after DOM attributes have been restored", async () => {
+        let paragraph;
+        let value = "before";
+        const { editor, el } = await setupEditor(`<p data-version="before">[]x</p>`, {
+            config: {
+                resources: {
+                    history_operations: {
+                        id: "version",
+                        apply: ({ after }) => {
+                            expect(paragraph.dataset.version).toBe(after);
+                            value = after;
+                        },
+                        revert: ({ before }) => {
+                            expect(paragraph.dataset.version).toBe(before);
+                            value = before;
+                        },
+                    },
+                },
+            },
+        });
+        paragraph = el.querySelector("p");
+        const history = editor.shared.history;
+        paragraph.dataset.version = "after";
+        history.applyOperation("version", { before: "before", after: "after" });
         history.commit();
         history.undo();
-        expect(values.value).toBe(0);
+        expect(value).toBe("before");
         history.redo();
-        expect(values.value).toBe(1);
-        expect.verifySteps(["revert", "apply"]);
+        expect(value).toBe("after");
     });
 
     test("replay serializable operations after resetting from commits", async () => {
@@ -1721,7 +1644,7 @@ describe("serialization", () => {
         await microTick();
 
         const domObserverPlugin = plugins.get("domObserver");
-        const mutations = domObserverPlugin.dependencies.history.getStagedData("mutations");
+        const mutations = domObserverPlugin.getStagedMutations();
         const domReferenceMapPlugin = plugins.get("domReferenceMap");
         const idToNode = (id) => domReferenceMapPlugin.getNodeById(id);
 
@@ -1765,7 +1688,7 @@ describe("serialization", () => {
 
         const domObserverPlugin = plugins.get("domObserver");
         const domReferenceMapPlugin = plugins.get("domReferenceMap");
-        const mutations = domObserverPlugin.dependencies.history.getStagedData("mutations");
+        const mutations = domObserverPlugin.getStagedMutations();
         const idToNode = (id) => domReferenceMapPlugin.getNodeById(id);
 
         expect(mutations.length).toBe(5);

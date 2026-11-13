@@ -85,7 +85,7 @@ test("should flag mutations from normalization", async () => {
         callback();
         domObserverPlugin.flush();
         expectedM.push(...newMutations);
-        const mutations = domObserverPlugin.dependencies.history.getStagedData("mutations");
+        const mutations = domObserverPlugin.getStagedMutations();
         const received = mutations.map(({ type, isAutomatic = false }) => ({ type, isAutomatic }));
         const expected = expectedM.map(({ type, isAutomatic = false }) => ({ type, isAutomatic }));
         expect(received).toEqual(expected);
