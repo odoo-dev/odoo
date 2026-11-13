@@ -181,12 +181,11 @@ export class BuilderOptionsPlugin extends Plugin {
             return buttons;
         },
         // Commits recorded from a replayed commit keep its targets, swapped
-        // when it is reverted. Always collect them, so that both are replayed.
+        // when it is reverted.
         history_fields: [
             {
                 id: "currentTarget",
                 isMetadata: true,
-                collect: (targetId = null) => targetId,
                 replay: (targetId, { reverse, stage }) => {
                     if (stage) {
                         this.dependencies.history.stage(
@@ -199,7 +198,6 @@ export class BuilderOptionsPlugin extends Plugin {
             {
                 id: "nextTarget",
                 isMetadata: true,
-                collect: (targetId = null) => targetId,
                 replay: (targetId, { reverse, stage }) => {
                     if (stage) {
                         this.dependencies.history.stage(

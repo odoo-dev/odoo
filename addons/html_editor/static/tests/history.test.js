@@ -832,23 +832,28 @@ describe("history fields", () => {
         expect(history.getStaged("label")).toBe(undefined);
     });
 
-    test("collect returns a field's value for each created commit", async () => {
+    test("processors prepare the draft before the fields are collected", async () => {
+        let history;
         const { editor, el } = await setupEditor(`<p>[]x</p>`, {
             config: {
                 resources: {
-                    history_fields: {
-                        id: "label",
-                        isMetadata: true,
-                        collect: (label, { relatedCommit }) =>
-                            relatedCommit ? `reverts ${relatedCommit.data.label}` : label,
+                    history_fields: { id: "label", isMetadata: true },
+                    pending_history_commit_data_processors: (data) => {
+                        const { relatedCommit } = data;
+                        history.stage(
+                            "label",
+                            relatedCommit ? `reverts ${relatedCommit.data.label}` : "edit"
+                        );
+                        return { ...data, isProcessed: true };
                     },
                 },
             },
         });
-        const history = editor.shared.history;
-        history.stage("label", "edit");
+        history = editor.shared.history;
         el.querySelector("p").dataset.test = "1";
-        expect(history.commit().data.label).toBe("edit");
+        const commit = history.commit();
+        expect(commit.data.label).toBe("edit");
+        expect(commit.data.isProcessed).toBe(true);
         history.undo();
         expect(history.getCommits().at(-1).data.label).toBe("reverts edit");
     });
@@ -930,18 +935,20 @@ describe("history fields", () => {
         });
         history = editor.shared.history;
         history.stage("firstTarget", "node-id");
-        history.stage("secondTarget", false);
         el.querySelector("p").dataset.test = "1";
         history.commit();
+        // Staged after the commit: replaying the commit's absent second target
+        // must replace it.
+        history.stage("firstTarget", "stale");
 
         history.undo();
         let data = history.getCommits().at(-1).data;
-        expect(data.firstTarget).toBe(false);
+        expect("firstTarget" in data).toBe(false);
         expect(data.secondTarget).toBe("node-id");
         history.redo();
         data = history.getCommits().at(-1).data;
         expect(data.firstTarget).toBe("node-id");
-        expect(data.secondTarget).toBe(false);
+        expect("secondTarget" in data).toBe(false);
     });
 
     test("restoring a savepoint brings the draft back", async () => {
@@ -976,22 +983,6 @@ describe("history fields", () => {
         // Metadata is staged back.
         expect(history.getStaged("bookmark")).toBe("saved");
         expect(history.getStaged("later")).toBe(undefined);
-    });
-
-    test("fields are collected in resource order", async () => {
-        const { editor } = await setupEditor(`<p>[]x</p>`, {
-            config: {
-                resources: {
-                    history_fields: sequencedFields((id) => ({
-                        isMetadata: true,
-                        collect: () => expect.step(id),
-                    })),
-                },
-            },
-        });
-        expect.verifySteps([]);
-        editor.shared.history.commit();
-        expect.verifySteps(["early", "firstDefault", "secondDefault", "late"]);
     });
 
     test("fields are discarded and replayed in resource order", async () => {

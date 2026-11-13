@@ -134,11 +134,10 @@ export class DomObserverPlugin extends Plugin {
     resources = {
         history_fields: withSequence(0, {
             id: "mutations",
-            collect: (mutations, { relatedCommit }) => this.processPendingData(!!relatedCommit),
             // The mutations are applied and reverted together. The observer
             // records them, including those of a replay, so they are never
             // staged by the history.
-            replay: (mutations, { reverse }, { ensureNewMutations }) =>
+            replay: (mutations = [], { reverse }, { ensureNewMutations }) =>
                 reverse
                     ? this.revertMutations(mutations, { ensureNewMutations })
                     : this.applyMutations(mutations, { ensureNewMutations }),
@@ -223,6 +222,10 @@ export class DomObserverPlugin extends Plugin {
                 }));
             return data;
         },
+        pending_history_commit_data_processors: withSequence(0, (data) => {
+            this.processPendingData(!!data.relatedCommit);
+            return data;
+        }),
         save_point_history_commit_data_processors: withSequence(0, (data) => {
             // Make sure the savepoint includes the pending mutations.
             this.stagePendingMutations();
@@ -399,7 +402,7 @@ export class DomObserverPlugin extends Plugin {
      *
      * @param {boolean} [hasRelatedCommit=false] Whether the changes relate to an
      *        existing commit rather than a new edit.
-     * @returns {SerializedMutation[]} The mutations remaining in the current draft.
+     * @returns {void}
      */
     processPendingData(hasRelatedCommit = false) {
         // Stage the observer's current changes.
@@ -427,9 +430,6 @@ export class DomObserverPlugin extends Plugin {
                 this.triggerContentUpdated();
             }
         }
-        // Flushing and normalization can stage recursively or even commit.
-        // Return the current list, rather than restoring an older draft's list.
-        return this.getStagedMutations();
     }
 
     /**

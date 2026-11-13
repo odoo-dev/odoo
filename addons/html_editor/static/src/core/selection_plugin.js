@@ -252,13 +252,6 @@ export class SelectionPlugin extends Plugin {
         history_fields: [
             { id: "activeElementId", isMetadata: true },
             { id: "selection", isMetadata: true },
-            // Execute this late to ensure the state of the DOM doesn't change and
-            // invalidate the selection after setting it here.
-            withSequence(100, {
-                id: "selectionAfter",
-                isMetadata: true,
-                collect: () => this.serializeEditableSelection(),
-            }),
         ],
 
         on_committed_to_history_handlers: () => {
@@ -332,6 +325,12 @@ export class SelectionPlugin extends Plugin {
             },
             selectionAfter: null,
         }),
+        // Execute this late to ensure the state of the DOM doesn't change and
+        // invalidate the selection after setting it here.
+        pending_history_commit_data_processors: withSequence(100, (data) => ({
+            ...data,
+            selectionAfter: this.serializeEditableSelection(),
+        })),
     };
 
     setup() {
