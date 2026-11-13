@@ -1,0 +1,83 @@
+.o_portal_cards {
+    gap: 1.25rem;
+}
+
+@media (min-width: 992px) {
+    .o_portal_cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 1200px) {
+    .o_portal_cards {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    /* Four cards or fewer: two columns */
+    .o_portal_cards:not(:has(> :nth-child(5 of .o_portal_index_card:not(.d-none)))) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+.o_portal_index_card > a {
+    transition: box-shadow .15s ease-in-out, border-color .15s ease-in-out;
+}
+
+.o_portal_index_card > a:not(.alert):hover {
+    box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .08);
+}
+
+@media (min-width: 992px) {
+    /* Top corner, centred on the icon */
+    .o_portal_badge {
+        position: absolute;
+        top: calc(var(--o-bs-spacer-3) + 3rem / 2);
+        inset-inline-end: var(--o-bs-spacer-3);
+        transform: translateY(-50%);
+    }
+
+    /* Without the icon, on the name row, in place of the arrow */
+    a:not(:has(> .o_portal_icon:not(.d-none))) > .o_portal_badge {
+        top: calc(var(--o-bs-spacer-3) + .6rem);
+    }
+
+    a:not(:has(> .o_portal_icon:not(.d-none))):has(> .o_portal_badge:not(.d-none)) .o_portal_arrow {
+        visibility: hidden;
+    }
+}
+
+.o_portal_icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    /* currentColor is the theme primary, set by .text-primary; opaque so it shows on any card colour */
+    background-color: color-mix(in srgb, currentColor 10%, var(--body-bg, #fff));
+}
+
+.o_portal_index_card .o_portal_icon {
+    width: 3rem;
+    height: 3rem;
+}
+
+.o_portal_count {
+    --badge-bg: color-mix(in srgb, currentColor 8%, transparent);
+    --badge-border-color: transparent;
+}
+
+/* Space under the alerts, only when one is shown */
+.o_portal_category:has(> .o_portal_index_card:not(.d-none)) + .o_portal_cards {
+    margin-top: 1rem;
+}
+
+.o_portal_category .alert {
+    background-color: color-mix(in srgb, currentColor 5%, transparent);
+    border-color: color-mix(in srgb, currentColor 25%, transparent);
+}
+
+.o_portal_category .alert:hover {
+    border-color: color-mix(in srgb, currentColor 50%, transparent);
+}
+
+/* Lets the widget's gap-2 space the address lines */
+.o_portal_my_details .o_portal_address > div {
+    display: grid;
+}

@@ -70,7 +70,7 @@
                 <div class="col-lg-6 offset-lg-3 mt-4">
                     <div id="o_mailing_subscription_form">
                         <form action="/mailing/list/update" method="POST">
-                            <h1 class="o_page_header">Mailing Subscriptions</h1>
+                            <h1 class="o_page_header h3 mb-4">Mailing Subscriptions</h1>
 
                             <div id="o_mailing_subscription_form_blocklisted"
                                  t-att-class="'' if is_blocklisted else 'd-none'">
@@ -149,7 +149,7 @@
                                 </p>
                             </div>
                             <div id="o_mailing_subscription_blocklist"
-                                 class="d-flex align-items-center mb-4 pt-3">
+                                 class="d-flex align-items-center mb-4 pt-4">
                                 <button type="submit" id="button_form_send"
                                         t-att-disabled="'disabled' if is_blocklisted else None"
                                         t-att-class="'btn btn-primary ' + ('' if lists_optin or lists_optout or lists_public else 'd-none')">
