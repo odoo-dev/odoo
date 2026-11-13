@@ -1,0 +1,7 @@
+"id","sequence","name","auto_apply","country_id","name@pt","account_ids/account_src_id","account_ids/account_dest_id"
+"fiscal_position_domestic","10","Domestic (Angola)","1","base.ao","Nacional (Angola)","",""
+"fiscal_position_foreign","20","Foreign (export / import)","1","","Estrangeiro (exportação / importação)","account_31_1_2_1","account_31_1_2_2"
+"","","","","","","account_32_1_2_1","account_32_1_2_2"
+"fiscal_position_no_vat_supplier","30","Supplier without VAT (simplified or exclusion regime)","0","","Fornecedor sem IVA (regime simplificado ou de exclusão)","",""
+"fiscal_position_cativo_100","40","Customer withholds 100% of the VAT (State and its bodies, local authorities, oil investing companies)","0","","IVA cativo a 100% pelo cliente (Estado e seus organismos, autarquias locais, sociedades investidoras petrolíferas)","",""
+"fiscal_position_cativo_50","50","Customer withholds 50% of the VAT (BNA, commercial banks, insurers and reinsurers, telecom operators)","0","","IVA cativo a 50% pelo cliente (BNA, bancos comerciais, seguradoras e resseguradoras, operadoras de telecomunicações)","",""

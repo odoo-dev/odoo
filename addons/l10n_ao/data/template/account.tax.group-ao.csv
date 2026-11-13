@@ -1,0 +1,7 @@
+"id","name","country_id","name@pt"
+"tax_group_iva_0","VAT 0%","base.ao","IVA 0%"
+"tax_group_iva_1","VAT 1%","base.ao","IVA 1%"
+"tax_group_iva_5","VAT 5%","base.ao","IVA 5%"
+"tax_group_iva_7","VAT 7%","base.ao","IVA 7%"
+"tax_group_iva_14","VAT 14%","base.ao","IVA 14%"
+"tax_group_iva_cativo","Withheld VAT","base.ao","IVA cativo"

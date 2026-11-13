@@ -1,0 +1,307 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# * l10n_ao
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server master\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-12 15:42+0000\n"
+"PO-Revision-Date: 2026-11-12 15:42+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: pt\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. module: l10n_ao
+#: model:account.report.line,name:l10n_ao.l10n_ao_tax_report_q09_1
+msgid "1. Supplies of goods and services on which VAT was charged"
+msgstr "1. Transmissões de bens e prestações de serviços em que liquidou imposto"
+
+#. module: l10n_ao
+#: model:account.report.line,name:l10n_ao.l10n_ao_tax_report_q09_4
+msgid "4. Operations on which the VAT was withheld by the customer (art. 21 CIVA)"
+msgstr "4. Operações em que o IVA foi cativo pelo cliente (art. 21.º do CIVA)"
+
+#. module: l10n_ao
+#: model:account.report.line,name:l10n_ao.l10n_ao_tax_report_q09_5
+msgid "5. Supplies of goods and services on which no VAT was charged"
+msgstr "5. Transmissões de bens e prestações de serviços em que não liquidou imposto"
+
+#. module: l10n_ao
+#: model:account.report.line,name:l10n_ao.l10n_ao_tax_report_q09_6
+msgid "7. Acquisitions of goods and services by the taxpayer"
+msgstr "7. Aquisição de bens e prestações de serviços efectuadas pelo sujeito passivo"
+
+#. module: l10n_ao
+#: model:account.report.line,name:l10n_ao.l10n_ao_tax_report_q09_7
+msgid "8. Deductible VAT on imports of goods by the taxpayer"
+msgstr "8. Imposto dedutível nas importações de bens efectuadas pelo sujeito passivo"
+
+#. module: l10n_ao
+#: model:account.report.line,name:l10n_ao.l10n_ao_tax_report_q09_8
+msgid "9. Adjustments of withheld VAT"
+msgstr "9. Regularizações do imposto cativo"
+
+#. module: l10n_ao
+#: model:account.report.line,name:l10n_ao.l10n_ao_tax_report_q09_9
+msgid "10. Monthly or annual adjustments made by the taxpayer"
+msgstr "10. Regularizações mensais ou anuais efectuadas pelo sujeito passivo"
+
+#. module: l10n_ao
+#: model:ir.module.module,shortdesc:base.module_l10n_ao
+msgid "Angola - Accounting"
+msgstr "Angola - Contabilidade"
+
+#. module: l10n_ao
+#: model:account.report.line,name:l10n_ao.l10n_ao_tax_report_q09_result
+msgid "Assessment of the period"
+msgstr "Apuramento do período"
+
+#. module: l10n_ao
+#: model:account.report.column,name:l10n_ao.l10n_ao_tax_report_balance
+msgid "Balance"
+msgstr "Saldo"
+
+#. module: l10n_ao
+#: model:account.report.line,name:l10n_ao.l10n_ao_tax_report_c1
+msgid "Field 1 - Taxable base (14%)"
+msgstr "Campo 1 - Base tributável (14%)"
+
+#. module: l10n_ao
+#: model:account.report.line,name:l10n_ao.l10n_ao_tax_report_c1_1
+msgid "Field 1.1 - Taxable base - Cabinda province reduced rate"
+msgstr "Campo 1.1 - Base tributável - taxa reduzida da Província de Cabinda"
+
+#. module: l10n_ao
+#: model:account.report.line,name:l10n_ao.l10n_ao_tax_report_c1_2
+msgid "Field 1.2 - Taxable base - reduced rate of 5%"
+msgstr "Campo 1.2 - Base tributável - taxa reduzida de 5%"
+
+#. module: l10n_ao
+#: model:account.report.line,name:l10n_ao.l10n_ao_tax_report_c1_3
+msgid "Field 1.3 - Taxable base - reduced rate of 7%"
+msgstr "Campo 1.3 - Base tributável - taxa reduzida de 7%"
+
+#. module: l10n_ao
+#: model:account.report.line,name:l10n_ao.l10n_ao_tax_report_c10
+msgid "Field 10 - Exempt with right of deduction"
+msgstr "Campo 10 - Isentas com direito à dedução"
+
+#. module: l10n_ao
+#: model:account.report.line,name:l10n_ao.l10n_ao_tax_report_c11
+msgid "Field 11 - Exempt without right of deduction (art. 12 CIVA, excluding paragraph a))"
+msgstr "Campo 11 - Isentas sem direito à dedução (art. 12.º, excluindo a alínea a), do CIVA)"
+
+#. module: l10n_ao
+#: model:account.report.line,name:l10n_ao.l10n_ao_tax_report_c12
+msgid "Field 12 - Not taxed (art. 10 CIVA)"
+msgstr "Campo 12 - Não tributadas (art. 10.º do CIVA)"
+
+#. module: l10n_ao
+#: model:account.report.line,name:l10n_ao.l10n_ao_tax_report_c13
+msgid "Field 13 - Taxable base"
+msgstr "Campo 13 - Base tributável"
+
+#. module: l10n_ao
+#: model:account.report.line,name:l10n_ao.l10n_ao_tax_report_c14
+msgid "Field 14 - VAT deductible, in favour of the taxpayer"
+msgstr "Campo 14 - Imposto dedutível, a favor do sujeito passivo"
+
+#. module: l10n_ao
+#: model:account.report.line,name:l10n_ao.l10n_ao_tax_report_c15
+msgid "Field 15 - VAT self-assessed, in favour of the State"
+msgstr "Campo 15 - Imposto autoliquidado, a favor do Estado"
+
+#. module: l10n_ao
+#: model:account.report.line,name:l10n_ao.l10n_ao_tax_report_c16
+msgid "Field 16 - Fixed assets and investments - taxable base"
+msgstr "Campo 16 - Meios fixos e investimentos - base tributável"
+
+#. module: l10n_ao
+#: model:account.report.line,name:l10n_ao.l10n_ao_tax_report_c17
+msgid "Field 17 - Fixed assets and investments - deductible VAT"
+msgstr "Campo 17 - Meios fixos e investimentos - imposto dedutível"
+
+#. module: l10n_ao
+#: model:account.report.line,name:l10n_ao.l10n_ao_tax_report_c18
+msgid "Field 18 - Inventories - taxable base"
+msgstr "Campo 18 - Existências/Inventários - base tributável"
+
+#. module: l10n_ao
+#: model:account.report.line,name:l10n_ao.l10n_ao_tax_report_c19
+msgid "Field 19 - Inventories - deductible VAT"
+msgstr "Campo 19 - Existências/Inventários - imposto dedutível"
+
+#. module: l10n_ao
+#: model:account.report.line,name:l10n_ao.l10n_ao_tax_report_c2
+msgid "Field 2 - VAT charged (14%)"
+msgstr "Campo 2 - Imposto liquidado (14%)"
+
+#. module: l10n_ao
+#: model:account.report.line,name:l10n_ao.l10n_ao_tax_report_c2_1
+msgid "Field 2.1 - VAT charged - Cabinda province reduced rate"
+msgstr "Campo 2.1 - Imposto liquidado - taxa reduzida da Província de Cabinda"
+
+#. module: l10n_ao
+#: model:account.report.line,name:l10n_ao.l10n_ao_tax_report_c2_2
+msgid "Field 2.2 - VAT charged - reduced rate of 5%"
+msgstr "Campo 2.2 - Imposto liquidado - taxa reduzida de 5%"
+
+#. module: l10n_ao
+#: model:account.report.line,name:l10n_ao.l10n_ao_tax_report_c2_3
+msgid "Field 2.3 - VAT charged - reduced rate of 7%"
+msgstr "Campo 2.3 - Imposto liquidado - taxa reduzida de 7%"
+
+#. module: l10n_ao
+#: model:account.report.line,name:l10n_ao.l10n_ao_tax_report_c20
+msgid "Field 20 - Other consumer goods - taxable base"
+msgstr "Campo 20 - Outros bens de consumo - base tributável"
+
+#. module: l10n_ao
+#: model:account.report.line,name:l10n_ao.l10n_ao_tax_report_c21
+msgid "Field 21 - Other consumer goods - deductible VAT"
+msgstr "Campo 21 - Outros bens de consumo - imposto dedutível"
+
+#. module: l10n_ao
+#: model:account.report.line,name:l10n_ao.l10n_ao_tax_report_c22
+msgid "Field 22 - Services - taxable base"
+msgstr "Campo 22 - Serviços - base tributável"
+
+#. module: l10n_ao
+#: model:account.report.line,name:l10n_ao.l10n_ao_tax_report_c23
+msgid "Field 23 - Services - deductible VAT"
+msgstr "Campo 23 - Serviços - imposto dedutível"
+
+#. module: l10n_ao
+#: model:account.report.line,name:l10n_ao.l10n_ao_tax_report_c24
+msgid "Field 24 - Taxable base"
+msgstr "Campo 24 - Base tributável"
+
+#. module: l10n_ao
+#: model:account.report.line,name:l10n_ao.l10n_ao_tax_report_c25
+msgid "Field 25 - Deductible VAT"
+msgstr "Campo 25 - Imposto dedutível"
+
+#. module: l10n_ao
+#: model:account.report.line,name:l10n_ao.l10n_ao_tax_report_c26
+msgid "Field 26 - In favour of the taxpayer"
+msgstr "Campo 26 - A favor do sujeito passivo"
+
+#. module: l10n_ao
+#: model:account.report.line,name:l10n_ao.l10n_ao_tax_report_c27
+msgid "Field 27 - In favour of the State"
+msgstr "Campo 27 - A favor do Estado"
+
+#. module: l10n_ao
+#: model:account.report.line,name:l10n_ao.l10n_ao_tax_report_c28
+msgid "Field 28 - In favour of the taxpayer"
+msgstr "Campo 28 - A favor do sujeito passivo"
+
+#. module: l10n_ao
+#: model:account.report.line,name:l10n_ao.l10n_ao_tax_report_c29
+msgid "Field 29 - In favour of the State"
+msgstr "Campo 29 - A favor do Estado"
+
+#. module: l10n_ao
+#: model:account.report.line,name:l10n_ao.l10n_ao_tax_report_c31
+msgid "Field 31 - Total taxable base"
+msgstr "Campo 31 - Soma das bases tributáveis"
+
+#. module: l10n_ao
+#: model:account.report.line,name:l10n_ao.l10n_ao_tax_report_c32
+msgid "Field 32 - Total VAT in favour of the taxpayer"
+msgstr "Campo 32 - Soma do imposto a favor do sujeito passivo"
+
+#. module: l10n_ao
+#: model:account.report.line,name:l10n_ao.l10n_ao_tax_report_c33
+msgid "Field 33 - Total VAT in favour of the State"
+msgstr "Campo 33 - Soma do imposto a favor do Estado"
+
+#. module: l10n_ao
+#: model:account.report.line,name:l10n_ao.l10n_ao_tax_report_c34
+msgid "Field 34 - VAT credit of the period (32 - 33)"
+msgstr "Campo 34 - Crédito de imposto do período (32 - 33)"
+
+#. module: l10n_ao
+#: model:account.report.line,name:l10n_ao.l10n_ao_tax_report_c35
+msgid "Field 35 - VAT due for the period (33 - 32)"
+msgstr "Campo 35 - Imposto a entregar do período (33 - 32)"
+
+#. module: l10n_ao
+#: model:account.report.line,name:l10n_ao.l10n_ao_tax_report_c36
+msgid "Field 36 - Credit carried forward from previous periods"
+msgstr "Campo 36 - Excesso a reportar de períodos anteriores"
+
+#. module: l10n_ao
+#: model:account.report.line,name:l10n_ao.l10n_ao_tax_report_c37
+msgid "Field 37 - VAT payable (35 - 36)"
+msgstr "Campo 37 - Imposto a pagar (35 - 36)"
+
+#. module: l10n_ao
+#: model:account.report.line,name:l10n_ao.l10n_ao_tax_report_c38
+msgid "Field 38 - VAT credit (34 + 36, less the part of 36 used in field 37)"
+msgstr "Campo 38 - Crédito do imposto (34 + 36, deduzida a parte do 36 utilizada no campo 37)"
+
+#. module: l10n_ao
+#: model:account.report.line,name:l10n_ao.l10n_ao_tax_report_c39
+msgid "Field 39 - Credit carried forward to the next period (38 - 40)"
+msgstr "Campo 39 - Reporte para o período seguinte (38 - 40)"
+
+#. module: l10n_ao
+#: model:account.report.line,name:l10n_ao.l10n_ao_tax_report_c40
+msgid "Field 40 - Refund requested"
+msgstr "Campo 40 - Pedido de reembolso"
+
+#. module: l10n_ao
+#: model:account.report.line,name:l10n_ao.l10n_ao_tax_report_c45
+msgid "Field 45 - Operations intended for export"
+msgstr "Campo 45 - Operações destinadas à exportação"
+
+#. module: l10n_ao
+#: model:account.report.line,name:l10n_ao.l10n_ao_tax_report_c8
+msgid "Field 8 - Taxable base"
+msgstr "Campo 8 - Base tributável"
+
+#. module: l10n_ao
+#: model:account.report.line,name:l10n_ao.l10n_ao_tax_report_c9
+msgid "Field 9 - VAT withheld, in favour of the taxpayer"
+msgstr "Campo 9 - Imposto cativo, a favor do sujeito passivo"
+
+#. module: l10n_ao
+#: model:account.report.line,name:l10n_ao.l10n_ao_tax_report_q09_rc
+msgid "6. Acquisitions of services from a supplier without seat, permanent establishment or domicile in Angola, VAT assessed by the declarant (art. 29 CIVA)"
+msgstr "6. Aquisição de serviços fornecidos por um prestador que não tenha sede, estabelecimento estável ou domicílio em Angola, cujo imposto foi liquidado pelo declarante (art. 29.º do CIVA)"
+
+#. module: l10n_ao
+#: model:account.report.line,name:l10n_ao.l10n_ao_tax_report_q09
+msgid "Table 09 - Assessment of the tax for the period"
+msgstr "Quadro 09 - Apuramento do imposto referente ao período a que respeita a declaração"
+
+#. module: l10n_ao
+#: model:account.report.line,name:l10n_ao.l10n_ao_tax_report_q10
+msgid "Table 10 - VAT payable to the State"
+msgstr "Quadro 10 - Imposto a pagar ao Estado"
+
+#. module: l10n_ao
+#: model:account.report.line,name:l10n_ao.l10n_ao_tax_report_q11
+msgid "Table 11 - VAT recoverable"
+msgstr "Quadro 11 - Imposto a recuperar"
+
+#. module: l10n_ao
+#: model:account.report.line,name:l10n_ao.l10n_ao_tax_report_q12
+msgid "Table 12 - Breakdown of Table 09"
+msgstr "Quadro 12 - Desenvolvimento do Quadro 09"
+
+#. module: l10n_ao
+#: model:account.report.line,name:l10n_ao.l10n_ao_tax_report_q09_totals
+msgid "Totals"
+msgstr "Somas"
+
+#. module: l10n_ao
+#: model:account.report,name:l10n_ao.l10n_ao_tax_report
+msgid "VAT Return (Modelo 7)"
+msgstr "Declaração Periódica do IVA (Modelo 7)"
