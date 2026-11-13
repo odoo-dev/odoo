@@ -2484,6 +2484,29 @@ describe("history", () => {
     });
 });
 
+describe.tags("mobile");
+describe("indentation", () => {
+    test("toolbar should have indentation buttons after alignment on mobile", async () => {
+        const { el } = await setupEditor("<p>[test]</p>");
+        await expectElementCount(".o-we-toolbar", 1);
+        await expandToolbar();
+        expect(".btn[name='indent'] .oi[data-icon='format_indent_increase']").toHaveCount(1);
+        expect(".btn[name='outdent'] .oi[data-icon='format_indent_decrease']").toHaveCount(1);
+        const groupNames = queryAll(".o-we-toolbar .btn-group").map((group) =>
+            group.getAttribute("name")
+        );
+        expect(groupNames.indexOf("indentationMobile")).toBe(groupNames.indexOf("layout") + 1);
+
+        click(".btn[name='indent']");
+        await animationFrame();
+        expect(el.querySelector("p").firstChild).toHaveClass("oe-tabs");
+
+        click(".btn[name='outdent']");
+        await animationFrame();
+        expect(el.querySelector("p .oe-tabs")).toBe(null);
+    });
+});
+
 test("toolbar update should be run only once", async () => {
     let counter = 0;
     patchWithCleanup(ToolbarPlugin.prototype, {
