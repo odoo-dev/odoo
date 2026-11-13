@@ -13,10 +13,26 @@ const DUMMY_CONTENT_ATTRS = ["data-oe-demo", "data-oe-expression-readable"];
 
 export class DynamicFieldPlugin extends Plugin {
     static id = "dynamicField";
-    static dependencies = ["selection", "history", "overlay", "dom", "toolbar", QWebPlugin.id];
+    static dependencies = [
+        "selection",
+        "history",
+        "overlay",
+        "dom",
+        "toolbar",
+        "domReferenceMap",
+        QWebPlugin.id,
+    ];
 
     /** @type {import("plugins").EditorResources} */
     resources = {
+        history_fields: {
+            name: "dynamicFieldLabel",
+            apply: ({ nodeId }) =>
+                this.applyEditedField(this.dependencies.domReferenceMap.getNodeById(nodeId)),
+            revert: ({ nodeId, previousText }) => {
+                this.dependencies.domReferenceMap.getNodeById(nodeId).textContent = previousText;
+            },
+        },
         toolbar_groups: withSequence(9, { id: "dynamic_field" }),
         toolbar_items: [
             {
@@ -165,13 +181,10 @@ export class DynamicFieldPlugin extends Plugin {
                     if (label !== initialLabel) {
                         target.setAttribute("data-oe-demo", label);
                         const prevText = target.textContent;
-                        this.dependencies.history.stageCustomOperation({
-                            apply: () => {
-                                target.textContent = "";
-                                this.normalizeQwebPlaceholders(target);
-                                this.trigger("on_dynamic_field_edit_applied_handlers", target);
-                            },
-                            revert: () => (target.textContent = prevText),
+                        this.applyEditedField(target);
+                        this.dependencies.history.stage("dynamicFieldLabel", {
+                            nodeId: this.dependencies.domReferenceMap.register(target),
+                            previousText: prevText,
                         });
                     }
 
@@ -181,6 +194,18 @@ export class DynamicFieldPlugin extends Plugin {
                 },
             },
         });
+    }
+
+    /**
+     * Rebuild the edited field's placeholder and notify its consumers.
+     *
+     * @param {HTMLElement} target
+     * @returns {void}
+     */
+    applyEditedField(target) {
+        target.textContent = "";
+        this.normalizeQwebPlaceholders(target);
+        this.trigger("on_dynamic_field_edit_applied_handlers", target);
     }
 
     async insertField() {

@@ -15,6 +15,15 @@ export class CachedModelPlugin extends Plugin {
     static dependencies = ["history"];
     /** @type {import("plugins").BuilderResources} */
     resources = {
+        history_fields: {
+            name: "cachedModel",
+            apply: ({ model, recordId, field, after }) => {
+                this.useModelEdit({ model, recordId }).values[field].current = after;
+            },
+            revert: ({ model, recordId, field, before }) => {
+                this.useModelEdit({ model, recordId }).values[field].current = before;
+            },
+        },
         on_ready_to_save_document_handlers: this.savePendingRecords.bind(this),
     };
     setup() {

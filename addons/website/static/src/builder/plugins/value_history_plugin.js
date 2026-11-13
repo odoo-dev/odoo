@@ -8,14 +8,28 @@ import { registry } from "@web/core/registry";
 
 export class ValueHistoryPlugin extends Plugin {
     static id = "valueHistory";
-    static dependencies = ["history"];
+    static dependencies = ["history", "domReferenceMap"];
     static shared = ["setValue"];
+
+    resources = {
+        history_fields: {
+            name: "formValue",
+            apply: ({ nodeId, after }) => {
+                this.dependencies.domReferenceMap.getNodeById(nodeId).value = after;
+            },
+            revert: ({ nodeId, before }) => {
+                this.dependencies.domReferenceMap.getNodeById(nodeId).value = before;
+            },
+        },
+    };
 
     setValue(el, value) {
         const oldValue = el.value;
-        this.dependencies.history.stageCustomOperation({
-            apply: () => (el.value = value),
-            revert: () => (el.value = oldValue),
+        el.value = value;
+        this.dependencies.history.stage("formValue", {
+            nodeId: this.dependencies.domReferenceMap.register(el),
+            before: oldValue,
+            after: value,
         });
     }
 }

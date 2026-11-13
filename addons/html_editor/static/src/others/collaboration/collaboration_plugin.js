@@ -31,7 +31,10 @@ export class CollaborationPlugin extends Plugin {
     static dependencies = ["history", "domObserver", "selection", "sanitize"];
     /** @type {import("plugins").EditorResources} */
     resources = {
-        history_commit_data_properties: ["peerId"],
+        history_fields: {
+            name: "peerId",
+            stage: () => this.peerId,
+        },
 
         /** Handlers */
         on_will_reset_history_handlers: this.onWillResetHistory.bind(this),
@@ -40,7 +43,6 @@ export class CollaborationPlugin extends Plugin {
         /** Overrides */
         set_attribute_overrides: this.setAttribute.bind(this),
 
-        pending_history_commit_data_processors: (data) => ({ ...data, peerId: this.peerId }),
         is_history_commit_reversible_predicates: (commit) => {
             if (commit.data.peerId !== this.peerId) {
                 return false;

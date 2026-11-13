@@ -15,10 +15,29 @@ registry.category("website-options").add(PopupOption.id, PopupOption);
 
 export class PopupOptionPlugin extends Plugin {
     static id = "PopupOption";
-    static dependencies = ["anchor", "visibility", "popupVisibilityPlugin", "history"];
+    static dependencies = [
+        "anchor",
+        "visibility",
+        "popupVisibilityPlugin",
+        "history",
+        "domReferenceMap",
+    ];
 
     /** @type {import("plugins").WebsiteResources} */
     resources = {
+        history_fields: {
+            name: "popupVisibility",
+            apply: ({ nodeId, value }) =>
+                this.dependencies.visibility.toggleTargetVisibility(
+                    this.dependencies.domReferenceMap.getNodeById(nodeId),
+                    value
+                ),
+            revert: ({ nodeId, value }) =>
+                this.dependencies.visibility.toggleTargetVisibility(
+                    this.dependencies.domReferenceMap.getNodeById(nodeId),
+                    !value
+                ),
+        },
         dropzone_selectors: {
             selector: ".s_popup",
             exclude: "#website_cookies_bar",
@@ -60,9 +79,10 @@ export class PopupOptionPlugin extends Plugin {
     onSnippetDropped({ snippetEl }) {
         if (snippetEl.matches(".s_popup")) {
             this.assignUniqueID(snippetEl);
-            this.dependencies.history.stageCustomOperation({
-                apply: () => this.dependencies.visibility.toggleTargetVisibility(snippetEl, true),
-                revert: () => this.dependencies.visibility.toggleTargetVisibility(snippetEl, false),
+            this.dependencies.visibility.toggleTargetVisibility(snippetEl, true);
+            this.dependencies.history.stage("popupVisibility", {
+                nodeId: this.dependencies.domReferenceMap.register(snippetEl),
+                value: true,
             });
         }
     }
@@ -117,9 +137,10 @@ export class PopupOptionPlugin extends Plugin {
     }
 
     onWillRemove(el) {
-        this.dependencies.history.stageCustomOperation({
-            apply: () => this.dependencies.visibility.toggleTargetVisibility(el, false),
-            revert: () => this.dependencies.visibility.toggleTargetVisibility(el, true),
+        this.dependencies.visibility.toggleTargetVisibility(el, false);
+        this.dependencies.history.stage("popupVisibility", {
+            nodeId: this.dependencies.domReferenceMap.register(el),
+            value: false,
         });
     }
 

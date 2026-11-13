@@ -26,7 +26,7 @@ test("Undo/Redo correctly restores the stored container target", async () => {
         selector: ".test-options-target",
         template: xml`<BuilderButton action="'customAction'">Test</BuilderButton>`,
     });
-    await setupHTMLBuilder(`
+    const { getEditor } = await setupHTMLBuilder(`
         <div data-name="Target 1" class="test-options-target target1">
             Homepage
         </div>
@@ -39,6 +39,8 @@ test("Undo/Redo correctly restores the stored container target", async () => {
     await contains(":iframe .target1").click();
     expect(".o_hb_options_container").toHaveAttribute("data-container-title", "Target 1");
     await contains("[data-action-id='customAction']").click();
+    const commitData = getEditor().shared.history.getCommits().at(-1).data;
+    expect(structuredClone(commitData)).toEqual(commitData);
     await contains(":iframe .target2").click();
     expect(".o_hb_options_container").toHaveAttribute("data-container-title", "Target 2");
 
@@ -46,6 +48,71 @@ test("Undo/Redo correctly restores the stored container target", async () => {
     expect(".o_hb_options_container").toHaveAttribute("data-container-title", "Target 1");
     await contains(".o_hb_snippets_top_actions [data-icon='redo']").click();
     expect(".o_hb_options_container").toHaveCount(0);
+});
+
+test("Changing container targets does not create history entries", async () => {
+    addBuilderOption({
+        selector: ".test-options-target",
+        template: xml`<div>Test</div>`,
+    });
+    const { getEditor } = await setupHTMLBuilder(`
+        <div data-name="Target" class="test-options-target">Homepage</div>
+    `);
+    const { history, builderOptions } = getEditor().shared;
+
+    await contains(":iframe .test-options-target").click();
+    expect(history.commit()).toBe(false);
+    builderOptions.setNextTarget(false);
+    expect(history.commit()).toBe(false);
+    expect(history.canUndo()).toBe(false);
+});
+
+test("Restoring a savepoint clears a later pending target deactivation", async () => {
+    addBuilderOption({
+        selector: ".test-options-target",
+        template: xml`<div>Test</div>`,
+    });
+    const { getEditor } = await setupHTMLBuilder(`
+        <div data-name="Target" class="test-options-target">Homepage</div>
+    `);
+    const { history, builderOptions } = getEditor().shared;
+
+    await contains(":iframe .test-options-target").click();
+    const restore = history.makeSavePoint();
+    builderOptions.setNextTarget(false);
+    restore();
+
+    builderOptions.getTarget().classList.add("test");
+    history.commit();
+    expect(".o_hb_options_container").toHaveAttribute("data-container-title", "Target");
+    history.undo();
+    expect(".o_hb_options_container").toHaveAttribute("data-container-title", "Target");
+});
+
+test("Undo/Redo restores a newly created container target", async () => {
+    addBuilderOption({
+        selector: ".test-options-target",
+        template: xml`<div>Test</div>`,
+    });
+    const { getEditor } = await setupHTMLBuilder(`
+        <div data-name="Target" class="test-options-target"><p>Homepage</p></div>
+    `);
+    const { history, builderOptions, clone } = getEditor().shared;
+
+    await contains(":iframe .test-options-target").click();
+    const originalTarget = builderOptions.getTarget();
+    const clonedTarget = await clone.cloneElement(originalTarget);
+    history.commit();
+    expect(builderOptions.getTarget()).toBe(clonedTarget);
+
+    history.undo();
+    expect(":iframe .test-options-target").toHaveCount(1);
+    expect(builderOptions.getTarget()).toBe(originalTarget);
+    history.redo();
+    expect(":iframe .test-options-target").toHaveCount(2);
+    expect(builderOptions.getTarget()).not.toBe(originalTarget);
+    expect(builderOptions.getTarget().isConnected).toBe(true);
+    expect(builderOptions.getTarget().innerHTML).toBe("<p>Homepage</p>");
 });
 
 test("Undo/Redo multiple actions always restores the action container target", async () => {
