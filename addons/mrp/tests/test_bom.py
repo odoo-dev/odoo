@@ -3023,6 +3023,86 @@ class TestBoM(TestMrpCommon):
                 bom_line.product_id = self.product_5
             bom_form.save()
 
+    def test_variant_uom_update_boms(self):
+        """ Changing the unit of a product relabels its BoMs. The BoMs shared by all the variants
+        only follow once all the variants use the new unit. """
+        component = self.env['product.product'].create({'name': 'Bottle', 'is_storable': True})
+        product = self.env['product.product'].create({'name': 'Water', 'is_storable': True})
+        bom = self.env['mrp.bom'].create({
+            'product_tmpl_id': product.product_tmpl_id.id,
+            'bom_line_ids': [Command.create({'product_id': component.id, 'product_qty': 1})],
+        })
+        product.product_tmpl_id.uom_id = self.uom_dozen
+        self.assertEqual(product.uom_id, self.uom_dozen)
+        self.assertEqual(bom.uom_id, self.uom_dozen)
+
+        template = self.env['product.template'].create({
+            'name': 'Juice',
+            'attribute_line_ids': [Command.create({
+                'attribute_id': self.size_attribute.id,
+                'value_ids': [Command.set([self.size_attribute_s.id, self.size_attribute_m.id])],
+            })],
+        })
+        variant_s, variant_m = template.product_variant_ids.sorted('id')
+        template_bom, variant_m_bom = self.env['mrp.bom'].create([{
+            'product_tmpl_id': template.id,
+            'bom_line_ids': [Command.create({'product_id': component.id, 'product_qty': 1})],
+        }, {
+            'product_tmpl_id': template.id,
+            'product_id': variant_m.id,
+            'bom_line_ids': [Command.create({'product_id': component.id, 'product_qty': 6})],
+        }])
+        variant_m.uom_id = self.uom_pack_6
+        self.assertEqual(variant_m_bom.uom_id, self.uom_pack_6)
+        self.assertEqual(template_bom.uom_id, self.uom_unit, "Variant S still uses the BoM unit")
+        variant_s.uom_id = self.uom_pack_6
+        self.assertEqual(template_bom.uom_id, self.uom_pack_6, "All the variants use the new unit")
+
+    def test_kit_quantity_in_the_product_unit(self):
+        """ The available quantity of a kit is expressed in the product unit, not in the BoM one. """
+        component = self.env['product.product'].create({'name': 'Bottle', 'is_storable': True})
+        kit = self.env['product.product'].create({
+            'name': 'Pack of water',
+            'is_storable': True,
+            'uom_id': self.uom_pack_6.id,
+        })
+        self.env['mrp.bom'].create({
+            'product_tmpl_id': kit.product_tmpl_id.id,
+            'type': 'phantom',
+            'uom_id': self.uom_unit.id,
+            'bom_line_ids': [Command.create({'product_id': component.id, 'product_qty': 2})],
+        })
+        self.env['stock.quant']._update_available_quantity(component, self.stock_location, 12)
+        self.assertEqual(kit.qty_available, 1, "12 bottles make 6 units, which is 1 pack")
+
+    def test_bom_onchange_follows_the_variant_unit(self):
+        template = self.env['product.template'].create({
+            'name': 'Juice',
+            'uom_id': self.uom_unit.id,
+            'attribute_line_ids': [Command.create({
+                'attribute_id': self.size_attribute.id,
+                'value_ids': [Command.set([self.size_attribute_s.id, self.size_attribute_m.id])],
+            })],
+        })
+        variant_pack = template.product_variant_ids.sorted('id')[1]
+        variant_pack.uom_id = self.uom_pack_6
+
+        bom = self.env['mrp.bom'].new({
+            'product_tmpl_id': template.id,
+            'product_id': variant_pack.id,
+            'uom_id': self.uom_unit.id,
+        })
+        bom._onchange_product_id()
+        self.assertEqual(bom.uom_id, self.uom_pack_6)
+
+        bom = self.env['mrp.bom'].new({
+            'product_tmpl_id': template.id,
+            'product_id': variant_pack.id,
+            'uom_id': self.uom_dozen.id,
+        })
+        bom._onchange_product_id()
+        self.assertEqual(bom.uom_id, self.uom_dozen, "A unit chosen by the user should be kept")
+
 
 class TestTourBoM(HttpCase):
     @classmethod

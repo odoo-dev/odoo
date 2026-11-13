@@ -135,6 +135,9 @@ class MrpBom(models.Model):
                     'message': _("Changing the product or variant will permanently reset all previously encoded variant-related data."),
                 }
             }
+            # Follow the variant unit, unless another unit than the template one was chosen
+            if self.uom_id == self.product_tmpl_id.uom_id:
+                self.uom_id = self.product_id.uom_id
             self.bom_line_ids.bom_product_template_attribute_value_ids = False
             self.operation_ids.bom_product_template_attribute_value_ids = False
             self.byproduct_ids.bom_product_template_attribute_value_ids = False
@@ -246,12 +249,12 @@ class MrpBom(models.Model):
                     'message': _("Changing the product or variant will permanently reset all previously encoded variant-related data."),
                 }
             }
+            if self.product_id.product_tmpl_id != self.product_tmpl_id:
+                self.product_id = False
             default_uom_id = self.env.context.get('default_uom_id')
             # Avoids updating the BoM's UoM in case a specific UoM was passed through as a default value.
             if self.uom_id.id != default_uom_id:
-                self.uom_id = self.product_tmpl_id.uom_id.id
-            if self.product_id.product_tmpl_id != self.product_tmpl_id:
-                self.product_id = False
+                self.uom_id = (self.product_id or self.product_tmpl_id).uom_id.id
             self.bom_line_ids.bom_product_template_attribute_value_ids = False
             self.operation_ids.bom_product_template_attribute_value_ids = False
             self.byproduct_ids.bom_product_template_attribute_value_ids = False
@@ -342,7 +345,7 @@ class MrpBom(models.Model):
     def _compute_display_name(self):
         for bom in self:
             display_name = f"{bom.code + ': ' if bom.code else ''}{bom.product_tmpl_id.display_name}"
-            if self.env.context.get('display_bom_uom_qty') and (bom.product_qty > 1 or bom.uom_id != bom.product_tmpl_id.uom_id):
+            if self.env.context.get('display_bom_uom_qty') and (bom.product_qty > 1 or bom.uom_id != (bom.product_id or bom.product_tmpl_id).uom_id):
                 display_name += f" ({bom.product_qty} {bom.uom_id.name})"
             bom.display_name = _('%(display_name)s', display_name=display_name)
 

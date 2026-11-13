@@ -427,3 +427,51 @@ class TestProductConfiguratorData(HttpCaseWithUserDemo, ProductVariantsCommon, S
         self.assertIn("Color", attribute_names)
         # Count occurrences of 'Size' - should be 2 since we have two lines with the same attribute
         self.assertEqual(attribute_names.count("Size"), 2)
+
+    def test_update_combination_enforces_the_variant_unit(self):
+        """A selected unit that isn't available for the new variant must be replaced by its own unit."""
+        self._enable_uom()
+        template = self.env["product.template"].create({
+            "name": "Water",
+            "list_price": 10,
+            "uom_id": self.uom_unit.id,
+            "uom_ids": [Command.link(self.uom_dozen.id)],
+            "attribute_line_ids": [Command.create({
+                "attribute_id": self.size_attribute.id,
+                "value_ids": [Command.set([self.size_attribute_s.id, self.size_attribute_m.id])],
+            })],
+        })
+        variant_single, variant_pack = template.product_variant_ids.sorted("id")
+        variant_pack.uom_id = self.uom_pack_6
+        # Only sold by the single variant
+        box_of_10 = self.env["uom.uom"].create({
+            "name": "Box of 10", "relative_factor": 10, "relative_uom_id": self.uom_unit.id,
+        })
+        variant_single.extra_uom_ids = box_of_10
+        self.env.flush_all()
+
+        def update_combination(uom):
+            return self.url_open(
+                url=template.get_base_url() + "/sale/product_configurator/update_combination",
+                json={"params": {
+                    "product_template_id": template.id,
+                    "ptav_ids": variant_pack.product_template_attribute_value_ids.ids,
+                    "so_date": str(self.env.cr.now()),
+                    "quantity": 1.0,
+                    "currency_id": self.env.company.currency_id.id,
+                    "product_uom_id": uom.id,
+                }},
+            ).json()["result"]
+
+        self.authenticate('test_user', 'test_user')
+        result = update_combination(box_of_10)
+        self.assertEqual(result["uom"]["id"], self.uom_pack_6.id)
+        self.assertEqual(result["price"], 10, "The price should be the one of a pack")
+
+        result = update_combination(self.uom_unit)
+        self.assertNotIn("uom", result, "The template unit is available for the variant")
+        self.assertAlmostEqual(result["price"], 10 / 6, places=2)
+
+        result = update_combination(self.uom_dozen)
+        self.assertNotIn("uom", result, "This unit is available for the variant")
+        self.assertEqual(result["price"], 20, "A dozen is 2 packs")

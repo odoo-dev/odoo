@@ -403,7 +403,8 @@ class TestMrpValuationStandard(TestBomPriceCommon):
             products & self.table_head,
             [{
                 'standard_price': 468.75,
-                'qty_available': 1,
+                # The BoM makes a dozen: 100 bolts at 60 per dozen = 1.66 dozen, so 19 units
+                'qty_available': 19,
                 'total_value': 0,
                 'avg_cost': 0,
             }],

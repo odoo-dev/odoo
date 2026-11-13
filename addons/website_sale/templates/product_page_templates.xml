@@ -458,14 +458,14 @@
                         data-bs-toggle="buttons"
                     >
                         <t t-set="product_uoms" t-value="product_variant._get_available_uoms()"/>
-                        <t t-set="main_uom" t-value="product._get_main_uom()"/>
+                        <t t-set="selected_uom_id" t-value="combination_info.get('uom_id') or product_variant._get_main_uom().id"/>
                         <t t-foreach="product_uoms" t-as="uom">
-                            <t t-set="is_main_uom" t-value="uom.id == main_uom.id"/>
-                            <li t-attf-class="o_packaging_button o_variant_pills border btn m-0 cursor-pointer #{'active border-primary text-primary-emphasis bg-primary-subtle' if is_main_uom else ''}">
+                            <t t-set="is_selected_uom" t-value="uom.id == selected_uom_id"/>
+                            <li t-attf-class="o_packaging_button o_variant_pills border btn m-0 cursor-pointer #{'active border-primary text-primary-emphasis bg-primary-subtle' if is_selected_uom else ''}">
                                 <input
                                     class="position-absolute opacity-0 cursor-pointer"
                                     type="radio"
-                                    t-att-checked="is_main_uom"
+                                    t-att-checked="is_selected_uom"
                                     name="uom_id"
                                     t-att-value="uom.id"
                                     t-attf-id="uom-{{uom.id}}"

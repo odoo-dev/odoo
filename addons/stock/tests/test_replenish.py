@@ -71,6 +71,32 @@ class TestStockReplenish(TestStockCommon):
             wizard.route_id = route_delay
             self.assertEqual(fields.Datetime.from_string('2023-01-07 00:00:00'), wizard._values['date_planned'])
 
+    def test_replenish_uses_the_variant_unit(self):
+        template = self.env['product.template'].create({
+            'name': 'Water',
+            'is_storable': True,
+            'uom_id': self.uom_unit.id,
+            'attribute_line_ids': [Command.create({
+                'attribute_id': self.size_attribute.id,
+                'value_ids': [Command.set([self.size_attribute_s.id, self.size_attribute_m.id])],
+            })],
+        })
+        variant_unit, variant_pack = template.product_variant_ids.sorted('id')
+        variant_pack.uom_id = self.uom_pack_6
+
+        Replenish = self.env['product.replenish'].with_context(default_product_id=variant_pack.id)
+        self.assertEqual(Replenish.default_get(['product_id', 'uom_id'])['uom_id'], self.uom_pack_6.id)
+
+        wizard = self.env['product.replenish'].new({
+            'product_tmpl_id': template.id,
+            'product_id': variant_pack.id,
+            'uom_id': self.uom_pack_6.id,
+            'warehouse_id': self.warehouse_1.id,
+        })
+        wizard.product_id = variant_unit
+        wizard._onchange_product_id()
+        self.assertEqual(wizard.uom_id, self.uom_unit, "Pack of 6 isn't available for the other variant")
+
     def test_replenish_no_routes(self):
         product = self.env['product.template'].create({
         'name': 'Brand new product',

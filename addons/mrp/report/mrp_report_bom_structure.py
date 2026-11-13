@@ -474,8 +474,9 @@ class ReportMrpReport_Bom_Structure(models.AbstractModel):
         company = bom.company_id or self.env.company
         operations_planning = {}
         if bom_report_line['availability_state'] in ['unavailable', 'estimated'] and bom.operation_ids:
-            qty_requested = bom.uom_id._compute_quantity(qty, bom.product_tmpl_id.uom_id)
-            qty_to_produce = bom.product_tmpl_id.uom_id._compute_quantity(max(0, qty_requested - (product.virtual_available if level > 1 else 0)), bom.uom_id)
+            product_uom = (product or bom.product_tmpl_id).uom_id
+            qty_requested = bom.uom_id._compute_quantity(qty, product_uom, round=False)
+            qty_to_produce = product_uom._compute_quantity(max(0, qty_requested - (product.virtual_available if level > 1 else 0)), bom.uom_id)
             if not (product or bom.product_tmpl_id).uom_id.is_zero(qty_to_produce):
                 max_component_delay = 0
                 for component in bom_report_line['components']:
