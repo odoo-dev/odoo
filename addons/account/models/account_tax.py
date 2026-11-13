@@ -79,6 +79,7 @@ TAX_ROUNDING_COUNTRY_SETTINGS = {
     'IN': TAX_ROUNDING_ON_ROUNDED_BASES,
     'KE': {'tax_grain': 'line', 'converted_currency': 'foreign'},
     'IT': {'authority': 'excluded', 'spreading': 'total', 'converted_currency': 'foreign', 'raw_precision': 8},
+    'MX': {'authority': 'excluded', 'spreading': 'total', 'converted_currency': 'company', 'raw_precision': 6},
 }
 
 # How the taxes of a document are written into an external format (EDI, QR code, fiscal device, API). Each format declares
