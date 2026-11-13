@@ -770,7 +770,7 @@ class AccountMove(models.Model):
                 base_line['price_unit'] *= -1
 
         AccountTax = self.env['account.tax']
-        AccountTax._add_tax_details_in_base_lines(base_lines, self.company_id)
+        AccountTax._add_tax_details(base_lines, self.company_id, tax_lines=tax_lines)
 
         downpayment_lines = []
         for base_line in base_lines:
@@ -817,7 +817,6 @@ class AccountMove(models.Model):
                     'price_unit': -price_unit,
                 })
 
-        AccountTax._round_base_lines_tax_details(base_lines, self.company_id, tax_lines=tax_lines)
         base_lines_aggregated_values = AccountTax._aggregate_base_lines_tax_details(base_lines, self._l10n_it_edi_grouping_function_base_lines)
         self._l10n_it_edi_add_base_lines_xml_values(base_lines_aggregated_values, is_downpayment)
         base_lines = sorted(base_lines, key=lambda base_line: base_line['it_values']['numero_linea'])

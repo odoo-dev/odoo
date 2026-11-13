@@ -192,10 +192,10 @@ class TestTaxesBaseLinesTaxDetails(TestTaxCommon):
         base_lines = AccountTax._dispatch_global_discount_lines(base_lines, company)
         AccountTax._squash_global_discount_lines(base_lines, company)
         AccountTax._add_and_round_raw_gross_total_excluded_and_discount(
-            base_lines, company, account_discount_base_lines=True,
+            base_lines, company,
         )
         AccountTax._add_and_round_raw_gross_total_excluded_and_discount(
-            base_lines, company, in_foreign_currency=False, account_discount_base_lines=True,
+            base_lines, company, in_foreign_currency=False,
         )
 
         self.assertEqual(len(base_lines), 1)

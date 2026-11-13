@@ -315,6 +315,7 @@ class TestUblCiiBECommon(TestUblCiiCommon):
             'country_id': cls.env.ref('base.be').id,
             'bank_ids': [Command.create({'account_number': 'BE15001559627230', 'allow_out_payment': True})],
         })
+        cls.change_company_country(company, company.country_id)  # Needed for the COA to not set US here
         return company
 
     @classmethod
@@ -340,6 +341,7 @@ class TestUblCiiFRCommon(TestUblCiiCommon):
             'routing_scheme': '9957',
             'routing_endpoint': 'FR23334175221',
         })
+        cls.change_company_country(company, company.country_id)  # Needed for the COA to not set US here
         return company
 
     @classmethod
@@ -362,6 +364,7 @@ class TestUblCiiNOCommon(TestUblCiiCommon):
             'vat': 'NO179728982MVA',
             'country_id': cls.env.ref('base.no').id,
         })
+        cls.change_company_country(company, company.country_id)  # Needed for the COA to not set US here
         return company
 
 

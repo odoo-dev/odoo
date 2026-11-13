@@ -12,6 +12,7 @@ from odoo.fields import Domain
 from odoo.tools import float_compare, float_is_zero, float_repr, html2plaintext
 from odoo.tools.float_utils import float_round
 from odoo.tools.misc import formatLang, html_escape
+from odoo.addons.account.models.account_tax__taxes_helpers import sum_and_distribute_amounts_to
 from odoo.tools.translate import _lt
 from odoo.tools.xml_utils import find_xml_value
 
@@ -1891,8 +1892,7 @@ class AccountEdiCommon(models.AbstractModel):
                 **base_line_kwargs,
             ))
 
-        AccountTax._add_tax_details_in_base_lines(base_lines, company)
-        AccountTax._round_base_lines_tax_details(base_lines, company)
+        AccountTax._add_tax_details(base_lines, company)
 
         # Remove lines having a zero amount.
         collected_values['base_lines'] = [
@@ -1981,7 +1981,7 @@ class AccountEdiCommon(models.AbstractModel):
                 for _base_line, taxes_data in values['base_line_x_taxes_data']
                 for tax_data in taxes_data
             )
-            target_factors = [
+            factors = [
                 {
                     'factor': tax_data['raw_tax_amount_currency'],
                     'tax_data': tax_data,
@@ -1989,15 +1989,13 @@ class AccountEdiCommon(models.AbstractModel):
                 for _base_line, taxes_data in values['base_line_x_taxes_data']
                 for tax_data in taxes_data
             ]
-            amounts_to_distribute = AccountTax._distribute_delta_amount_smoothly(
-                precision_digits=currency.decimal_places,
-                delta_amount=delta_tax_amount_currency,
-                target_factors=target_factors,
-                allow_negative_factors=True,
+            result_factors = sum_and_distribute_amounts_to(
+                amounts=[delta_tax_amount_currency],
+                factors=factors,
+                rounding=currency.rounding,
             )
-            for target_factor, amount_to_distribute in zip(target_factors, amounts_to_distribute):
-                tax_data = target_factor['tax_data']
-                tax_data['tax_amount_currency'] += amount_to_distribute
+            for factor in result_factors:
+                factor['tax_data']['tax_amount_currency'] += factor['amount']
 
         AccountTax._add_accounting_data_in_base_lines_tax_details(base_lines, invoice.company_id, include_caba_tags=invoice.always_tax_exigible)
         tax_results = AccountTax._prepare_tax_lines(base_lines, invoice.company_id, tax_lines=tax_lines)

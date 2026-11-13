@@ -618,16 +618,6 @@ class TestAccountTax(AccountTestInvoicingCommon, MailCase):
         search_method_ignored = get_search_method(0.125, 'REC 0.12 (Kopie)', amount_type='percent')
         self.assertIsNone(search_method_ignored)
 
-    def test_distribute_delta_amount_smoothly_empty_target_factors(self):
-        """ Empty 'target_factors' must not crash, e.g. a reverse-charge tax
-        with no positive-factor repartition line. """
-        result = self.env['account.tax']._distribute_delta_amount_smoothly(
-            precision_digits=2,
-            delta_amount=0.03,
-            target_factors=[],
-        )
-        self.assertEqual(result, [])
-
     def test_quick_create_purchase_tax(self):
         """ Test that quick-creating a tax preserves the default purchase type. """
         tax_id, _ = self.env['account.tax'].with_context(
