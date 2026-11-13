@@ -347,7 +347,7 @@ def setup_model_classes(env: Environment):
             field: (field.write_sequence, i)
             for i, field in enumerate(model_cls._fields.values())
         }
-        model_cls(env, (), ())._post_model_setup__()
+        model_cls(env)._post_model_setup__()
 
 
 def _prepare_setup(model_cls: type[BaseModel]):
@@ -544,7 +544,7 @@ def _setup_fields(model_cls: type[BaseModel], env: Environment):
     """ Setup the fields, except for recomputation triggers. """
     bad_fields = []
     many2one_company_dependents = model_cls.pool.many2one_company_dependents
-    model = model_cls(env, (), ())
+    model = model_cls(env)
     for name, field in model_cls._fields.items():
         try:
             field.setup(model)

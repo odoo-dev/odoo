@@ -1,4 +1,5 @@
 from odoo import Command
+from odoo.orm.utils import Prefetch  # noqa: orm-import
 from odoo.tests import tagged
 from odoo.tools import mute_logger
 from odoo.tools.constants import BIG_RECORDSET_SIZE, IN_MAX
@@ -8,7 +9,7 @@ from odoo.addons.base.tests.common import SavepointCaseWithUserDemo
 
 
 @tagged('at_install', '-post_install')
-class TestPrefecth(TestOrmPartnerCommon, SavepointCaseWithUserDemo):
+class TestPrefetch(TestOrmPartnerCommon, SavepointCaseWithUserDemo):
     _test_user_groups = None  # FIXME list needed groups
 
     @classmethod
@@ -23,7 +24,7 @@ class TestPrefecth(TestOrmPartnerCommon, SavepointCaseWithUserDemo):
 
         prefetch_ids = partners._prefetch_ids
         self.assertTrue(prefetch_ids)
-        self.assertIsInstance(prefetch_ids, tuple)
+        self.assertIsInstance(prefetch_ids, Prefetch)
 
         # The recordset operations below use different prefetch sets
         partners_subset = partners.browse(partners.ids[:5])
@@ -31,13 +32,13 @@ class TestPrefecth(TestOrmPartnerCommon, SavepointCaseWithUserDemo):
         self.assertNotEqual(prefetch_ids, partners_subset._prefetch_ids)
 
         # The recordset operations below share the prefetch set
-        self.assertEqual(prefetch_ids, partners.browse(partners.ids)._prefetch_ids)
-        self.assertEqual(prefetch_ids, partners.with_user(self.user_demo)._prefetch_ids)
-        self.assertEqual(prefetch_ids, partners.with_context(active_test=False)._prefetch_ids)
-        self.assertEqual(prefetch_ids, partners_subset.with_prefetch(prefetch_ids)._prefetch_ids)
-        self.assertEqual(set(prefetch_ids), set(partners.filtered('country_id')._prefetch_ids))
-        self.assertEqual(prefetch_ids, partners[0]._prefetch_ids)
-        self.assertEqual(set(prefetch_ids), set(partners[:5]._prefetch_ids))
+        self.assertEqual(list(prefetch_ids), list(partners.browse(partners.ids)._prefetch_ids))
+        self.assertIs(prefetch_ids, partners.with_user(self.user_demo)._prefetch_ids)
+        self.assertIs(prefetch_ids, partners.with_context(active_test=False)._prefetch_ids)
+        self.assertIs(prefetch_ids, partners_subset.with_prefetch(prefetch_ids)._prefetch_ids)
+        self.assertIs(prefetch_ids, partners.filtered('country_id')._prefetch_ids)
+        self.assertIs(prefetch_ids, partners[0]._prefetch_ids)
+        self.assertIs(prefetch_ids, partners[:5]._prefetch_ids)
 
     @mute_logger('odoo.models')
     def test_prefetch_model_relational_fields(self):
@@ -59,12 +60,12 @@ class TestPrefecth(TestOrmPartnerCommon, SavepointCaseWithUserDemo):
         self.assertEqual(type(partners).user_ids.type, 'one2many')
         self.assertEqual(type(partners).category_id.type, 'many2many')
 
-        # Iteration and relational fields should use the same prefetch set
+        # Iteration and relational fields should use the same prefetch object
         for partner in partners:
-            self.assertEqual(partner._prefetch_ids, partners._prefetch_ids)
-            self.assertEqual(set(partner.country_id._prefetch_ids), set(partners.country_id._prefetch_ids))
-            self.assertEqual(set(partner.user_ids._prefetch_ids), set(partners.user_ids._prefetch_ids))
-            self.assertEqual(set(partner.category_id._prefetch_ids), set(partners.category_id._prefetch_ids))
+            self.assertIs(partner._prefetch_ids, partners._prefetch_ids)
+            self.assertIs(partner.country_id._prefetch_ids, partners.country_id._prefetch_ids)
+            self.assertIs(partner.user_ids._prefetch_ids, partners.user_ids._prefetch_ids)
+            self.assertIs(partner.category_id._prefetch_ids, partners.category_id._prefetch_ids)
 
     @mute_logger('odoo.models')
     def test_prefetch_model_operations(self):
@@ -126,8 +127,12 @@ class TestPrefecth(TestOrmPartnerCommon, SavepointCaseWithUserDemo):
             main_size = RECORDS * CHILDREN  # total number of children
             self.assertEqual(len(list(children._prefetch_ids)), main_size)
 
-            # union with all children
-            children |= children.parent_id.child_ids
+            # union with all children (with the same prefetch object)
+            children |= partners.child_ids
+            self.assertEqual(len(list(children._prefetch_ids)), main_size)
+
+            # union with all children (with another prefetch object)
+            children |= partners.with_prefetch().child_ids
             main_size *= 2  # because PrefetchUnion has both prefetch
             self.assertEqual(len(list(children._prefetch_ids)), main_size)
 

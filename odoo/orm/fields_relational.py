@@ -18,7 +18,7 @@ from .fields_reference import Many2oneReference
 from .identifiers import NewId
 from .models import BaseModel
 from .query import FieldSQL, Query, TableSQL
-from .utils import COLLECTION_TYPES, Prefetch, SQL_OPERATORS, check_pg_name
+from .utils import COLLECTION_TYPES, SQL_OPERATORS, check_pg_name
 
 if typing.TYPE_CHECKING:
     from collections.abc import Callable
@@ -365,13 +365,13 @@ class Many2one(_Relational['IdType']):
     def convert_to_record(self, value, record):
         # use registry to avoid creating a recordset for the model
         ids = () if value is None else (value,)
-        prefetch_ids = Prefetch.relational(self, record)
+        prefetch_ids = record._prefetch_ids.relate(self, record.env)
         return record.pool[self.comodel_name](record.env, ids, prefetch_ids)
 
     def convert_to_record_multi(self, values: Iterable[IdType], records: BaseModel) -> BaseModel:
         # return the ids as a recordset without duplicates
         ids = tuple(unique(id_ for id_ in values if id_ is not None))
-        prefetch_ids = Prefetch.relational(self, records, ids)
+        prefetch_ids = records._prefetch_ids.relate(self, records.env)
         return records.pool[self.comodel_name](records.env, ids, prefetch_ids)
 
     def convert_to_read(self, value, record, use_display_name=True) -> IdType | tuple[IdType, str] | typing.Literal[False]:
@@ -729,9 +729,9 @@ class _RelationalMulti(_Relational[tuple['IdType', ...]]):
 
     def convert_to_record(self, value, record):
         # use registry to avoid creating a recordset for the model
-        prefetch_ids = Prefetch.relational(self, record, value)
         env = record.env
         Comodel = env.registry[self.comodel_name]
+        prefetch_ids = record._prefetch_ids.relate(self, record.env)
         corecords = Comodel(env, value, prefetch_ids)
         if not env.su and corecords and not self.bypass_search_access:
             # For performance, this slightly modified version of

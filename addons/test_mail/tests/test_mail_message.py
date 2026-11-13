@@ -315,29 +315,29 @@ class TestMessageValues(MailCommon):
         records_by_model_name = messages._records_by_model_name()
         test_simple_records = records_by_model_name["mail.test.simple"]
         self.assertEqual(test_simple_records, record1 + record2)
-        self.assertEqual(test_simple_records._prefetch_ids, tuple((record1 + record2).ids))
+        self.assertEqual(list(test_simple_records._prefetch_ids), (record1 + record2).ids)
         test_no_thread_records = records_by_model_name["mail.test.nothread"]
         self.assertEqual(test_no_thread_records, record3)
-        self.assertEqual(test_no_thread_records._prefetch_ids, tuple(record3.ids))
+        self.assertEqual(list(test_no_thread_records._prefetch_ids), record3.ids)
         record_by_message = messages._record_by_message()
         m0_records = record_by_message[messages[0]]
         self.assertEqual(m0_records, record1)
-        self.assertEqual(m0_records._prefetch_ids, tuple((record1 + record2).ids))
+        self.assertEqual(list(m0_records._prefetch_ids), (record1 + record2).ids)
         m1_records = record_by_message[messages[1]]
         self.assertEqual(m1_records, record2)
-        self.assertEqual(m1_records._prefetch_ids, tuple((record1 + record2).ids))
+        self.assertEqual(list(m1_records._prefetch_ids), (record1 + record2).ids)
         m2_records = record_by_message[messages[2]]
         self.assertEqual(m2_records, record3)
-        self.assertEqual(m2_records._prefetch_ids, tuple(record3.ids))
+        self.assertEqual(list(m2_records._prefetch_ids), record3.ids)
         # methods called on individual message from a batch: prefetch from batch is kept
         records_by_model_name = messages[0]._records_by_model_name()
         test_simple_records = records_by_model_name["mail.test.simple"]
         self.assertEqual(test_simple_records, record1)
-        self.assertEqual(test_simple_records._prefetch_ids, tuple((record1 + record2).ids))
+        self.assertEqual(list(test_simple_records._prefetch_ids), (record1 + record2).ids)
         record_by_message = messages[0]._record_by_message()
         m0_records = record_by_message[messages[0]]
         self.assertEqual(m0_records, record1)
-        self.assertEqual(m0_records._prefetch_ids, tuple((record1 + record2).ids))
+        self.assertEqual(list(m0_records._prefetch_ids), (record1 + record2).ids)
 
     def test_mail_message_values_body_base64_image(self):
         msg = self.env['mail.message'].with_user(self.user_employee).create({

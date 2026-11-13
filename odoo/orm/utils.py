@@ -2,14 +2,13 @@ from __future__ import annotations
 
 import functools
 import re
-from collections.abc import Reversible
+from collections.abc import Iterable
 from collections.abc import Set as AbstractSet
 
 import dateutil.relativedelta
 
 from odoo.exceptions import ValidationError
-from odoo.tools import SQL, unique
-from odoo.tools.misc import freehash
+from odoo.tools import SQL
 
 regex_alphanumeric = re.compile(r'^[a-z0-9_]+$', re.IGNORECASE)
 regex_object_name = re.compile(r'^[a-z0-9_.]+$')
@@ -124,135 +123,105 @@ def expand_ids(id0, ids):
 
 
 #
-# The value of records._prefetch_ids must be iterable and reversible
+# The value of records._prefetch_ids must be iterable.
 #
 
-class PrefetchRelational(Reversible):  # noqa: PLW1641
-    """ A prefetch object for the values of a relational field. """
-    __slots__ = ('_fallback', '_field', '_records')
-
-    def __init__(self, field, records, fallback=()):
-        self._fallback = fallback
-        self._field = field
-        self._records = records
-
-    def __eq__(self, other):
-        return (
-            isinstance(other, PrefetchRelational)
-            and self._field is other._field
-            and self._records._prefetch_ids == other._records._prefetch_ids
-        )
-
-    def __hash__(self):
-        return hash(self._field) ^ freehash(self._records._prefetch_ids)
-
-    def __iter__(self):
-        field_cache = self._field._get_cache(self._records.env)
-        if not field_cache:
-            yield from self._fallback
-            return
-        if self._field.type == 'many2one':
-            for id_ in self._records._prefetch_ids:
-                if (coid := field_cache.get(id_)) is not None:
-                    yield coid
-        else:
-            for id_ in unique(self._records._prefetch_ids):
-                if (coids := field_cache.get(id_)):
-                    yield from coids
-
-    def __reversed__(self):
-        field_cache = self._field._get_cache(self._records.env)
-        if not field_cache:
-            yield from self._fallback
-            return
-        if self._field.type == 'many2one':
-            for id_ in reversed(self._records._prefetch_ids):
-                if (coid := field_cache.get(id_)) is not None:
-                    yield coid
-        else:
-            for id_ in unique(reversed(self._records._prefetch_ids)):
-                if (coids := field_cache.get(id_)):
-                    yield from coids
-
-
-class OriginIds(Reversible):  # noqa: PLW1641
-    """ A reversible iterable returning the origin ids of a collection of ``ids``.
-        Actual ids are returned as is, and ids without origin are not returned.
-    """
-    __slots__ = ['ids']
-
-    def __init__(self, ids):
-        self.ids = ids
-
-    def __eq__(self, other):
-        return isinstance(other, OriginIds) and self.ids == other.ids
-
-    def __hash__(self):
-        return freehash(self.ids) ^ 1
-
-    def __iter__(self):
-        for id_ in self.ids:
-            if id_ := id_ or id_.origin:
-                yield id_
-
-    def __reversed__(self):
-        for id_ in reversed(self.ids):
-            if id_ := id_ or id_.origin:
-                yield id_
-
-
-class PrefetchUnion(Reversible):
-    """ A prefetch object for the concatenation/union of recordsets. """
-    __slots__ = ('_prefetches',)
-
-    def __init__(self, *prefetches: Reversible):
-        self._prefetches = prefetches
-
-    def __iter__(self):
-        for it in self._prefetches:
-            yield from it
-
-    def __reversed__(self):
-        for it in reversed(self._prefetches):
-            yield from reversed(it)
-
-
 class Prefetch:
-    relational = PrefetchRelational
-    origin = OriginIds
+    """ Class for prefetch objects, which are iterables of record ids. The base
+    class is an explicit collection of ids, but subclasses provide objects for
+    origin ids, mappings of ids by some relational field, and unions.
+    """
+    __slots__ = ('_arg', '_tree')
+
+    def __init__(self, arg: Iterable = ()):
+        # base implementation: self._arg is a tuple of ids
+        self._arg = tuple(arg)
+        self._tree = {}
+
+    def __iter__(self):
+        return iter(self._arg)
+
+    def origin(self) -> Prefetch:
+        """ Return a prefetch object for the origin ids of ``self``. """
+        if result := self._tree.get('origin'):
+            return result
+        result = self._tree['origin'] = PrefetchOrigin(self)
+        return result
+
+    def relate(self, field, env) -> Prefetch:
+        """ Return a prefetch object for the values of a relational field on
+        ``self`` (via the field's cache).
+        """
+        if result := self._tree.get(field):
+            return result
+        result = self._tree[field] = PrefetchRelational(self, field, env)
+        return result
 
     @staticmethod
-    def union(*prefetches: Reversible) -> Reversible:
-        """ A prefetch object for the concatenation/union of recordsets. """
+    def union(prefetches: Iterable[Prefetch]) -> Prefetch:
+        """ Return a prefetch object representing the union of a collection of
+        prefetch objects.
+        """
         if not prefetches:
-            return ()
-        ps = {
-            Prefetch.__AlwaysHash(p): p
-            for prefetch in prefetches
-            for p in (prefetch._prefetches if isinstance(prefetch, PrefetchUnion) else (prefetch,))
+            return Prefetch()
+        # flattening of unions and quick deduplication
+        byid = {
+            id(q): q
+            for p in prefetches
+            for q in (p._arg if isinstance(p, PrefetchUnion) else (p,))
         }
-        if len(ps) == 1:
-            return next(iter(ps.values()))
-        return PrefetchUnion(*ps.values())
+        if len(byid) == 1:
+            return next(iter(byid.values()))
+        return PrefetchUnion(byid.values())
 
-    class __AlwaysHash:
-        __slots__ = ('obj',)
 
-        def __new__(cls, obj):
-            try:
-                hash(obj)
-                return obj
-            except TypeError:  # unhashable
-                pass
-            r = object.__new__(cls)
-            r.obj = obj
-            return r
+class PrefetchOrigin(Prefetch):
+    __slots__ = ()
 
-        def __eq__(self, value):
-            return isinstance(value, self.__class__) and self.obj == value.obj
+    def __init__(self, prefetch: Prefetch):
+        # self._arg is a Prefetch object
+        self._arg = prefetch
+        self._tree = {}
 
-        def __hash__(self):
-            return id(self.obj)
+    def __iter__(self):
+        for id_ in self._arg:
+            if oid := id_ or id_.origin:
+                yield oid
+
+
+class PrefetchRelational(Prefetch):
+    __slots__ = ('_env', '_field')
+
+    def __init__(self, prefetch: Prefetch, field, env):
+        # self._arg is a Prefetch object
+        self._arg = prefetch
+        self._tree = {}
+        self._field = field
+        self._env = env
+
+    def __iter__(self):
+        field_cache = self._field._get_cache(self._env)
+        if self._field.type == 'many2one':
+            for id_ in self._arg:
+                if (coid := field_cache.get(id_)) is not None:
+                    yield coid
+        else:
+            for id_ in self._arg:
+                for coid in field_cache.get(id_, ()):
+                    yield coid
+
+
+class PrefetchUnion(Prefetch):
+    __slots__ = ()
+
+    def __init__(self, prefetches: Iterable[Prefetch]):
+        # self._arg is a collection of Prefetch objects
+        self._arg = tuple(prefetches)
+        self._tree = {}
+
+    def __iter__(self):
+        for prefetch in self._arg:
+            yield from prefetch
 
 
 @functools.total_ordering

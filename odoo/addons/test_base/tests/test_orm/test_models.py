@@ -6,7 +6,7 @@ from odoo import Command, models
 from odoo.exceptions import AccessError, LockError
 from odoo.fields import Domain
 from odoo.tests.common import TransactionCase, tagged
-from odoo.tools import SQL, lazy, mute_logger, unique
+from odoo.tools import SQL, lazy, mute_logger
 from odoo.tools.version_tag_reset import assign_version_tag
 
 from .common import TestOrmPartnerCommon
@@ -529,47 +529,26 @@ class TestRecordset(TestOrmPartnerCommon, TransactionCase):
         self.assertEqual(last, partners[-1])
 
         # Check prefetching
-        prefetch_ids = partners.ids
-        reversed_ids = [partner.id for partner in reversed(partners)]
-
-        self.assertEqual(list(first._prefetch_ids), prefetch_ids)
-        self.assertEqual(list(last._prefetch_ids), reversed_ids)
-
-        self.assertEqual(list(reversed(first._prefetch_ids)), reversed_ids)
-        self.assertEqual(list(reversed(last._prefetch_ids)), prefetch_ids)
+        prefetch_ids = partners._prefetch_ids
+        self.assertEqual(list(prefetch_ids), partners.ids)
+        self.assertIs(first._prefetch_ids, prefetch_ids)
+        self.assertIs(last._prefetch_ids, prefetch_ids)
 
         # Check prefetching across many2one field
         self.assertTrue(partners.state_id.ids)
 
-        prefetch_ids = list(unique(partners.state_id.ids))
-
-        reversed_ids = list(unique(
-            partner.state_id.id
-            for partner in reversed(partners)
-            if partner.state_id
-        ))
-
-        self.assertEqual(list(unique(first.state_id._prefetch_ids)), prefetch_ids)
-        self.assertEqual(list(unique(last.state_id._prefetch_ids)), reversed_ids)
-
-        self.assertEqual(list(unique(reversed(first.state_id._prefetch_ids))), reversed_ids)
-        self.assertEqual(list(unique(reversed(last.state_id._prefetch_ids))), prefetch_ids)
+        prefetch_ids = partners.state_id._prefetch_ids
+        self.assertEqual(list(prefetch_ids), partners.state_id.ids)
+        self.assertIs(first.state_id._prefetch_ids, prefetch_ids)
+        self.assertIs(last.state_id._prefetch_ids, prefetch_ids)
 
         # Check prefetching across x2many field
         self.assertTrue(partners.child_ids.ids)
 
-        prefetch_ids = partners.child_ids.ids
-        reversed_ids = [
-            child.id
-            for partner in reversed(partners)
-            for child in partner.child_ids
-        ]
-
-        self.assertEqual(list(first.child_ids._prefetch_ids), prefetch_ids)
-        self.assertEqual(list(last.child_ids._prefetch_ids), reversed_ids)
-
-        self.assertEqual(list(reversed(first.child_ids._prefetch_ids)), reversed_ids)
-        self.assertEqual(list(reversed(last.child_ids._prefetch_ids)), prefetch_ids)
+        prefetch_ids = partners.child_ids._prefetch_ids
+        self.assertEqual(list(prefetch_ids), partners.child_ids.ids)
+        self.assertIs(first.child_ids._prefetch_ids, prefetch_ids)
+        self.assertIs(last.child_ids._prefetch_ids, prefetch_ids)
 
     @mute_logger('odoo.models')
     def test_ensure_one(self):

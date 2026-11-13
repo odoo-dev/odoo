@@ -586,7 +586,7 @@ class Registry(Mapping[str, type["BaseModel"]]):
                 continue
             if model_cls in models_field_depends_done:
                 continue
-            model = model_cls(env, (), ())
+            model = model_cls(env)
             for field in model._fields.values():
                 depends, depends_context = field.get_depends(model)
                 self.field_depends[field] = tuple(depends)

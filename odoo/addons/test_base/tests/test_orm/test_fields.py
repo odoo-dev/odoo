@@ -2130,7 +2130,7 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
 
         # unpack to keep the prefetch on each recordset
         existing, deleted = records
-        self.assertEqual(existing._prefetch_ids, records._ids)
+        self.assertEqual(tuple(existing._prefetch_ids), records._ids)
 
         # this invalidates the caches but the prefetching remains the same
         deleted.unlink()

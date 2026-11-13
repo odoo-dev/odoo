@@ -3212,5 +3212,5 @@ def render(template_name: str | int, values: dict, load: Callable[[str], tuple[e
             env.context.update(self.context if context is None else context)
             return env
 
-    renderer = MockIrQWeb(MockEnv(), tuple(), tuple())
+    renderer = MockIrQWeb(MockEnv())
     return renderer._render(template_name, values, load=load, minimal_qcontext=True, **options)

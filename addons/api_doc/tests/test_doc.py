@@ -298,7 +298,7 @@ class TestDoc(HttpCaseWithUserDemo):
             '_register': False,
             '__module__': 'odoo.addons.api_doc',
         })
-        FakeModel = FakeCls(self.env, (), ())
+        FakeModel = FakeCls(self.env)
         assert is_public_method(FakeModel, 'one_arg')
 
         for method_name in (

@@ -50,7 +50,7 @@ from odoo.tools import (
 )
 from odoo.tools.constants import BIG_RECORDSET_SIZE
 from odoo.tools.lru import LRU
-from odoo.tools.misc import ReversedIterable, exception_to_unicode, unquote
+from odoo.tools.misc import exception_to_unicode, unquote
 from odoo.tools.safe_eval import _UNSAFE_ATTRIBUTES, safe_checker, safe_eval
 from odoo.tools.translate import _, LazyTranslate
 
@@ -65,13 +65,13 @@ from .fields_textual import Char, StoredTranslations
 from .identifiers import NewId
 from .query import Query, TableSQL
 from .utils import (
-    OriginIds, Prefetch, ReversibleComparator, check_object_name, parse_field_expr,
+    Prefetch, ReversibleComparator, check_object_name, parse_field_expr,
     COLLECTION_TYPES, SQL_OPERATORS,
     SUPERUSER_ID,
 )
 
 if typing.TYPE_CHECKING:
-    from collections.abc import Collection, Iterator, Reversible, Sequence
+    from collections.abc import Collection, Iterator, Sequence
     from types import MappingProxyType
     from typing import Self
     from .table_objects import TableObject
@@ -2321,7 +2321,7 @@ class BaseModel(metaclass=MetaModel):
                 return model._read_group_postprocess_groupby(groupby_seq, raw_values)
 
             Model = self.pool[field.comodel_name] if field.relational else self.pool[self._name]
-            prefetch_ids = tuple(raw_value for raw_value in raw_values if raw_value)
+            prefetch_ids = Prefetch(raw_value for raw_value in raw_values if raw_value)
 
             def recordset(value):
                 return Model(self.env, (value,), prefetch_ids) if value else empty_value
@@ -2347,7 +2347,7 @@ class BaseModel(metaclass=MetaModel):
         if func == 'recordset':
             field = self._fields[fname]
             Model = self.pool[field.comodel_name] if field.relational else self.pool[self._name]
-            prefetch_ids = tuple(unique(
+            prefetch_ids = Prefetch(unique(
                 id_
                 for array_values in raw_values if array_values
                 for id_ in array_values if id_
@@ -5517,7 +5517,7 @@ class BaseModel(metaclass=MetaModel):
     #  - the global cache is only an index to "resolve" a record 'id'.
     #
 
-    def __init__(self, env: Environment, ids: tuple[IdType, ...], prefetch_ids: Reversible[IdType]):
+    def __init__(self, env: Environment, ids: tuple[IdType, ...] = (), prefetch_ids: Prefetch | None = None):
         """ Create a recordset instance.
 
         :param env: an environment
@@ -5526,7 +5526,8 @@ class BaseModel(metaclass=MetaModel):
         """
         self.env = env
         self._ids = ids
-        self._prefetch_ids = prefetch_ids
+        assert isinstance(prefetch_ids, Prefetch | None)  # TO REMOVE
+        self._prefetch_ids = Prefetch(ids) if prefetch_ids is None else prefetch_ids
 
     @api.private
     def browse(self, ids: int | typing.Iterable[IdType] = ()) -> Self:
@@ -5545,7 +5546,7 @@ class BaseModel(metaclass=MetaModel):
         else:
             ids = tuple(ids)
             assert all(ids) or all(isinstance(x, NewId) or x for x in ids), "Invalid falsy real id"
-        return self.__class__(self.env, ids, ids)
+        return self.__class__(self.env, ids)
 
     #
     # Internal properties, for manipulating the instance's implementation
@@ -5556,7 +5557,7 @@ class BaseModel(metaclass=MetaModel):
         """ Return the list of actual record ids corresponding to ``self``. """
         if all(self._ids):
             return list(self._ids)  # already real records
-        return list(OriginIds(self._ids))
+        return [oid for id_ in self._ids if (oid := id_ or id_.origin)]
 
     #
     # Conversion methods
@@ -5688,12 +5689,12 @@ class BaseModel(metaclass=MetaModel):
 
     @typing.final
     @api.private
-    def with_prefetch(self, prefetch_ids: Reversible[IdType] | None = None) -> Self:
+    def with_prefetch(self, prefetch_ids: Iterable[IdType] | None = None) -> Self:
         """ Return a new version of this recordset that uses the given prefetch ids,
         or ``self``'s ids if not given.
         """
-        if prefetch_ids is None:
-            prefetch_ids = self._ids
+        if not isinstance(prefetch_ids, Prefetch | None):
+            prefetch_ids = Prefetch(prefetch_ids)
         return self.__class__(self.env, self._ids, prefetch_ids)
 
     @typing.final
@@ -6193,8 +6194,8 @@ class BaseModel(metaclass=MetaModel):
         """ Return the actual records corresponding to ``self``. """
         if all(self._ids):
             return self  # already real records
-        ids = tuple(OriginIds(self._ids))
-        prefetch_ids = OriginIds(self._prefetch_ids)
+        ids = tuple(oid for id_ in self._ids if (oid := id_ or id_.origin))
+        prefetch_ids = self._prefetch_ids.origin()
         return self.__class__(self.env, ids, prefetch_ids)
 
     #
@@ -6236,7 +6237,7 @@ class BaseModel(metaclass=MetaModel):
             return
         cls = self.__class__
         env = self.env
-        prefetch_ids = ReversedIterable(self._prefetch_ids)
+        prefetch_ids = self._prefetch_ids
         for id_ in reversed(ids):
             yield cls(env, (id_,), prefetch_ids)
 
@@ -6266,7 +6267,8 @@ class BaseModel(metaclass=MetaModel):
                 raise TypeError(f"inconsistent models in: {self} + {other}")
             if other:
                 ids = self._ids + other._ids
-                return self.__class__(self.env, ids, Prefetch.union(self._prefetch_ids, other._prefetch_ids))
+                prefetch_ids = Prefetch.union((self._prefetch_ids, other._prefetch_ids))
+                return self.__class__(self.env, ids, prefetch_ids)
         except AttributeError:
             raise TypeError(f"unsupported operand types in: {self} + {other!r}")
         return self
@@ -6297,7 +6299,7 @@ class BaseModel(metaclass=MetaModel):
         if len(prefetch_ids_list) == 1:
             prefetch_ids = prefetch_ids_list[0]
         else:
-            prefetch_ids = Prefetch.union(*prefetch_ids_list)
+            prefetch_ids = Prefetch.union(prefetch_ids_list)
         return self.__class__(self.env, ids, prefetch_ids)
 
     def __sub__(self, other) -> Self:
@@ -6335,7 +6337,8 @@ class BaseModel(metaclass=MetaModel):
                 raise TypeError(f"inconsistent models in: {self} | {other}")
             if other:
                 ids = tuple(dict.fromkeys(self._ids + other._ids))
-                return self.__class__(self.env, ids, Prefetch.union(self._prefetch_ids, other._prefetch_ids))
+                prefetch_ids = Prefetch.union((self._prefetch_ids, other._prefetch_ids))
+                return self.__class__(self.env, ids, prefetch_ids)
         except AttributeError:
             raise TypeError(f"unsupported operand types in: {self} | {other!r}")
         return self
@@ -6366,7 +6369,7 @@ class BaseModel(metaclass=MetaModel):
         if len(prefetch_ids_list) == 1:
             prefetch_ids = prefetch_ids_list[0]
         else:
-            prefetch_ids = Prefetch.union(*prefetch_ids_list)
+            prefetch_ids = Prefetch.union(prefetch_ids_list)
         return self.__class__(self.env, ids, prefetch_ids)
 
     def __eq__(self, other):
