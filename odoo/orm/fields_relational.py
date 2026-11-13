@@ -993,6 +993,7 @@ class One2many(_RelationalMulti):
             if isinstance(invf, (Many2one, Many2oneReference)):
                 # setting one2many fields only invalidates many2one inverses;
                 inverses.add(self, invf)
+                assert hasattr(invf, 'ondelete'), "Missing ondelete"
             else:
                 self._setup_warning(f"inverse field {invf} is not a many2one or many2one_reference")
             inverses.add(invf, self)
@@ -1096,7 +1097,15 @@ class One2many(_RelationalMulti):
             comodel_domain = self.get_comodel_domain(model).optimize_dynamic(comodel)
 
             def unlink(lines):
-                if getattr(comodel._fields[inverse], 'ondelete', False) == 'cascade':
+                if not lines:
+                    return
+                inverse_field = comodel._fields[inverse]
+                ondelete = inverse_field.ondelete
+                if callable(ondelete):  # many2one_reference may be dynamic
+                    inverse_value = lines[inverse]
+                    assert isinstance(inverse_value, int)
+                    ondelete = ondelete(lines, model.browse(inverse_value))
+                if ondelete == 'cascade':
                     to_delete.extend(lines._ids)
                 else:
                     lines[inverse] = False
