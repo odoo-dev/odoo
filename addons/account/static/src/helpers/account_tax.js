@@ -165,6 +165,7 @@ export const accountTaxHelpers = {
                 taxes_data[other_tax.id].extra_base_for_tax += sign * tax_amount;
             }
             taxes_data[other_tax.id].extra_base_for_base += sign * tax_amount;
+            taxes_data[other_tax.id].base_dependencies.push([tax.id, sign]);
         }
 
         if (this.is_price_included(tax, { document_tax_mode })) {
@@ -339,6 +340,7 @@ export const accountTaxHelpers = {
                 document_tax_mode: document_tax_mode,
                 extra_base_for_tax: 0.0,
                 extra_base_for_base: 0.0,
+                base_dependencies: [],
             };
         }
 
@@ -483,6 +485,7 @@ export const accountTaxHelpers = {
                         price_include: tax_data.price_include,
                         original_price_include: tax_data.original_price_include,
                         base_amount: tax_data.base,
+                        base_dependencies: tax_data.base_dependencies,
                         is_reverse_charge: tax_data.is_reverse_charge || false,
                     }
                 )
@@ -1040,18 +1043,6 @@ export const accountTaxHelpers = {
      * [!] Mirror of the same method in account_tax.py.
      * PLZ KEEP BOTH METHODS CONSISTENT WITH EACH OTHERS.
      */
-    get_tax_details_target(base_line, tax_data, field) {
-        const values = tax_data || base_line.tax_details;
-        if (this.is_tax_details_pinned(base_line, tax_data, field)) {
-            return values[field];
-        }
-        return values[`raw_${field}`];
-    },
-
-    /**
-     * [!] Mirror of the same method in account_tax.py.
-     * PLZ KEEP BOTH METHODS CONSISTENT WITH EACH OTHERS.
-     */
     round_and_pin_tax_details(base_line, company) {
         const currency = base_line.currency_id;
         const company_currency = company.currency_id;
@@ -1092,8 +1083,61 @@ export const accountTaxHelpers = {
     reach_tax_rounding_targets(base_lines, company, policy) {
         const authority = policy.authority;
         const share_total = policy.spreading === "total";
+        const rounded_basis = policy.tax_basis === "rounded";
+        const converted_suffix = policy.converted_currency === "company" ? "" : null;
         const company_currency = company.currency_id;
         const sum = (values) => values.reduce((total, value) => total + value, 0.0);
+
+        const is_included = (price_include) =>
+            authority === "included" || (authority === "mixed" && price_include);
+        const get_batch_taxes_data = (base_line, tax_data) =>
+            base_line.tax_details.taxes_data.filter((other_tax_data) =>
+                tax_data.batch.some((tax) => tax.id === other_tax_data.tax.id)
+            );
+
+        // The unrounded amounts of the targets: the 'raw_*' ones, unless replaced by the ones computed on the rounded bases
+        // or converted from the other currency.
+        const raw_amounts = new Map();
+        const get_raw = (values, field) => {
+            const amounts = raw_amounts.get(values);
+            return amounts && field in amounts ? amounts[field] : values[`raw_${field}`];
+        };
+        const set_raw = (values, field, amount) => {
+            if (!raw_amounts.has(values)) {
+                raw_amounts.set(values, {});
+            }
+            raw_amounts.get(values)[field] = amount;
+        };
+        const get_target = (base_line, tax_data, field) => {
+            const values = tax_data || base_line.tax_details;
+            return this.is_tax_details_pinned(base_line, tax_data, field)
+                ? values[field]
+                : get_raw(values, field);
+        };
+
+        // The rounded amount of a group distributed in proportion to the unrounded amounts of the group.
+        const settled_amounts = new Map();
+        const get_settled = (values, field) => settled_amounts.get(values)[field];
+        const settle = (items_values, field) => {
+            if (!rounded_basis && converted_suffix === null) {
+                return;
+            }
+            const weights = items_values.map((values) => get_raw(values, field));
+            const total_weight = sum(weights);
+            const total = sum(items_values.map((values) => values[field]));
+            items_values.forEach((values, i) => {
+                if (!settled_amounts.has(values)) {
+                    settled_amounts.set(values, {});
+                }
+                settled_amounts.get(values)[field] = total_weight
+                    ? (weights[i] * total) / total_weight
+                    : values[field];
+            });
+        };
+        const convert = (base_line, values, field, settled_amount) => {
+            const rate = base_line.rate;
+            set_raw(values, field, rate ? settled_amount / rate : 0.0);
+        };
 
         // Per tax.
         const tax_groups = this.group_tax_data(base_lines, (base_line, tax_data) => ({
@@ -1104,24 +1148,156 @@ export const accountTaxHelpers = {
             price_include: tax_data.price_include,
             computation_key: base_line.computation_key,
         }));
-        const is_included = (price_include) =>
-            authority === "included" || (authority === "mixed" && price_include);
-        const get_batch_taxes_data = (base_line, tax_data) =>
-            base_line.tax_details.taxes_data.filter((other_tax_data) =>
-                tax_data.batch.some((tax) => tax.id === other_tax_data.tax.id)
+
+        // With the 'rounded' tax basis: the amounts of the other taxes in the base of each tax, and the groups in the order
+        // of these dependencies.
+        const dependencies = new Map();
+        let sorted_tax_groups = tax_groups;
+        if (rounded_basis) {
+            for (const base_line of base_lines) {
+                const taxes_data = base_line.tax_details.taxes_data;
+                const main_taxes_data = {};
+                for (const tax_data of taxes_data) {
+                    if (!tax_data.is_reverse_charge) {
+                        main_taxes_data[tax_data.tax.id] = tax_data;
+                    }
+                }
+                for (const tax_data of taxes_data) {
+                    dependencies.set(
+                        tax_data,
+                        (tax_data.base_dependencies || [])
+                            .filter(([tax_id, _sign]) => tax_id in main_taxes_data)
+                            .map(([tax_id, sign]) => [main_taxes_data[tax_id], sign])
+                    );
+                }
+            }
+            const group_per_tax_data = new Map();
+            for (const group of tax_groups) {
+                for (const item of group.items) {
+                    group_per_tax_data.set(item[1], group);
+                }
+            }
+            sorted_tax_groups = [];
+            let remaining_groups = tax_groups;
+            while (remaining_groups.length) {
+                let ready_groups = remaining_groups.filter((group) =>
+                    group.items.every(([_base_line, tax_data]) =>
+                        dependencies
+                            .get(tax_data)
+                            .every(([dependency, _sign]) =>
+                                sorted_tax_groups.includes(group_per_tax_data.get(dependency))
+                            )
+                    )
+                );
+                if (!ready_groups.length) {
+                    ready_groups = remaining_groups.slice(0, 1);
+                }
+                sorted_tax_groups.push(...ready_groups);
+                remaining_groups = remaining_groups.filter(
+                    (group) => !ready_groups.includes(group)
+                );
+            }
+        }
+
+        // With the 'rounded' tax basis, the amount without tax of the line the base of the tax data starts from, plus the
+        // amounts of the other taxes included in it ('raw_' prefix: unrounded, 'settled_': settled, '': rounded).
+        // The price-included taxes exclude each other from their bases: a tax not settled yet counts unrounded.
+        const get_line_base = (base_line, tax_data, suffix, currency, field_prefix) => {
+            const tax_field = `tax_amount${suffix}`;
+            const tax_dependencies = dependencies.get(tax_data);
+            let raw_line_base =
+                tax_data[`raw_base_amount${suffix}`] -
+                sum(
+                    tax_dependencies.map(
+                        ([dependency, sign]) => sign * dependency[`raw_${tax_field}`]
+                    )
+                );
+            if (tax_data.price_include) {
+                raw_line_base += sum(
+                    get_batch_taxes_data(base_line, tax_data).map(
+                        (other) => other[`raw_${tax_field}`]
+                    )
+                );
+            }
+            const line_base = field_prefix
+                ? raw_line_base
+                : roundPrecision(raw_line_base, currency.rounding);
+            return (
+                line_base +
+                sum(
+                    tax_dependencies.map(
+                        ([dependency, sign]) =>
+                            sign *
+                            (field_prefix === "settled_"
+                                ? settled_amounts.get(dependency)?.[tax_field] ??
+                                  dependency[`raw_${tax_field}`]
+                                : dependency[`${field_prefix}${tax_field}`])
+                    )
+                )
             );
+        };
+        const is_rate_tax = (tax_data) =>
+            ["percent", "division"].includes(tax_data.tax.amount_type);
 
         // Per tax: the tax amounts.
         for (const suffix of ["_currency", ""]) {
             const field = `tax_amount${suffix}`;
-            for (const { grouping_key, items } of tax_groups) {
+            const base_field = `base_amount${suffix}`;
+            for (const { grouping_key, items } of sorted_tax_groups) {
                 const currency = suffix ? grouping_key.currency : company_currency;
                 const taxes_data = items.map(([_base_line, tax_data]) => tax_data);
+                if (suffix === converted_suffix) {
+                    for (const [base_line, tax_data] of items) {
+                        convert(
+                            base_line,
+                            tax_data,
+                            field,
+                            get_settled(tax_data, `${field}_currency`)
+                        );
+                    }
+                } else if (rounded_basis && grouping_key.price_include) {
+                    // A price-included tax is computed on the amount with tax, including the settled amounts of the others.
+                    for (const [base_line, tax_data] of items) {
+                        const raw_base = get_line_base(
+                            base_line,
+                            tax_data,
+                            suffix,
+                            currency,
+                            "raw_"
+                        );
+                        if (is_rate_tax(tax_data) && raw_base) {
+                            const factor =
+                                get_line_base(base_line, tax_data, suffix, currency, "settled_") /
+                                raw_base;
+                            set_raw(tax_data, field, tax_data[`raw_${field}`] * factor);
+                        }
+                    }
+                } else if (rounded_basis) {
+                    // A price-excluded tax is computed on the rounded bases, distributed in proportion to the unrounded ones.
+                    const bases = items.map(([base_line, tax_data]) =>
+                        this.is_tax_details_pinned(base_line, tax_data, base_field)
+                            ? tax_data[base_field]
+                            : get_line_base(base_line, tax_data, suffix, currency, "")
+                    );
+                    const raw_bases = items.map(([base_line, tax_data]) =>
+                        get_line_base(base_line, tax_data, suffix, currency, "settled_")
+                    );
+                    const total_raw_base = sum(raw_bases);
+                    const base_factor = total_raw_base ? sum(bases) / total_raw_base : 1.0;
+                    taxes_data.forEach((tax_data, i) => {
+                        if (is_rate_tax(tax_data) && tax_data[`raw_${base_field}`]) {
+                            const factor =
+                                (raw_bases[i] * base_factor) / tax_data[`raw_${base_field}`];
+                            set_raw(tax_data, field, tax_data[`raw_${field}`] * factor);
+                        }
+                    });
+                }
+
                 if (share_total) {
                     this.share_rounded_total(
                         taxes_data,
                         field,
-                        taxes_data.map((tax_data) => tax_data[`raw_${field}`]),
+                        taxes_data.map((tax_data) => get_raw(tax_data, field)),
                         currency.decimal_places,
                         {
                             keep: items.map(([base_line, tax_data]) =>
@@ -1131,9 +1307,7 @@ export const accountTaxHelpers = {
                     );
                 } else {
                     const target = sum(
-                        items.map(([base_line, tax_data]) =>
-                            this.get_tax_details_target(base_line, tax_data, field)
-                        )
+                        items.map(([base_line, tax_data]) => get_target(base_line, tax_data, field))
                     );
                     this.reach_target(
                         taxes_data,
@@ -1142,6 +1316,9 @@ export const accountTaxHelpers = {
                         currency.decimal_places
                     );
                 }
+                if (suffix !== converted_suffix) {
+                    settle(taxes_data, field);
+                }
             }
         }
 
@@ -1149,13 +1326,58 @@ export const accountTaxHelpers = {
         for (const suffix of ["_currency", ""]) {
             const tax_field = `tax_amount${suffix}`;
             const field = `base_amount${suffix}`;
-            for (const { grouping_key, items } of tax_groups) {
+            for (const { grouping_key, items } of sorted_tax_groups) {
+                const price_include = grouping_key.price_include;
                 const currency = suffix ? grouping_key.currency : company_currency;
                 const taxes_data = items.map(([_base_line, tax_data]) => tax_data);
                 const keep = items.map(([base_line, tax_data]) =>
                     this.is_tax_details_pinned(base_line, tax_data, field)
                 );
-                if (share_total && is_included(grouping_key.price_include)) {
+                if (suffix === converted_suffix) {
+                    for (const [base_line, tax_data] of items) {
+                        convert(
+                            base_line,
+                            tax_data,
+                            field,
+                            get_settled(tax_data, `${field}_currency`)
+                        );
+                    }
+                    if (rounded_basis) {
+                        taxes_data.forEach((tax_data, i) => {
+                            if (!keep[i]) {
+                                tax_data[field] = roundPrecision(
+                                    get_raw(tax_data, field),
+                                    currency.rounding
+                                );
+                            }
+                        });
+                        continue;
+                    }
+                } else if (rounded_basis) {
+                    // The base of the line: its rounded amount without tax plus the rounded amounts of the other taxes.
+                    items.forEach(([base_line, tax_data], i) => {
+                        const batch_taxes_data = price_include
+                            ? get_batch_taxes_data(base_line, tax_data)
+                            : [];
+                        if (!keep[i]) {
+                            tax_data[field] = roundPrecision(
+                                get_line_base(base_line, tax_data, suffix, currency, "") -
+                                    sum(batch_taxes_data.map((other) => other[tax_field])),
+                                currency.rounding
+                            );
+                        }
+                        set_raw(
+                            tax_data,
+                            field,
+                            get_line_base(base_line, tax_data, suffix, currency, "settled_") -
+                                sum(batch_taxes_data.map((other) => get_settled(other, tax_field)))
+                        );
+                    });
+                    settle(taxes_data, field);
+                    continue;
+                }
+
+                if (share_total && is_included(price_include)) {
                     const batches_taxes_data = items.map(([base_line, tax_data]) =>
                         get_batch_taxes_data(base_line, tax_data)
                     );
@@ -1164,8 +1386,8 @@ export const accountTaxHelpers = {
                         field,
                         taxes_data.map(
                             (tax_data, i) =>
-                                tax_data[`raw_${field}`] +
-                                sum(batches_taxes_data[i].map((other) => other[`raw_${tax_field}`]))
+                                get_raw(tax_data, field) +
+                                sum(batches_taxes_data[i].map((other) => get_raw(other, tax_field)))
                         ),
                         currency.decimal_places,
                         { keep }
@@ -1173,7 +1395,8 @@ export const accountTaxHelpers = {
                     taxes_data.forEach((tax_data, i) => {
                         if (!keep[i]) {
                             tax_data[field] = roundPrecision(
-                                tax_data[field] - sum(batches_taxes_data[i].map((other) => other[tax_field])),
+                                tax_data[field] -
+                                    sum(batches_taxes_data[i].map((other) => other[tax_field])),
                                 currency.rounding
                             );
                         }
@@ -1182,22 +1405,20 @@ export const accountTaxHelpers = {
                     this.share_rounded_total(
                         taxes_data,
                         field,
-                        taxes_data.map((tax_data) => tax_data[`raw_${field}`]),
+                        taxes_data.map((tax_data) => get_raw(tax_data, field)),
                         currency.decimal_places,
                         { keep }
                     );
                 } else {
                     const target_tax_amount = sum(
                         items.map(([base_line, tax_data]) =>
-                            this.get_tax_details_target(base_line, tax_data, tax_field)
+                            get_target(base_line, tax_data, tax_field)
                         )
                     );
                     let target = sum(
-                        items.map(([base_line, tax_data]) =>
-                            this.get_tax_details_target(base_line, tax_data, field)
-                        )
+                        items.map(([base_line, tax_data]) => get_target(base_line, tax_data, field))
                     );
-                    if (is_included(grouping_key.price_include)) {
+                    if (is_included(price_include)) {
                         target =
                             roundPrecision(target + target_tax_amount, currency.rounding) -
                             sum(taxes_data.map((tax_data) => tax_data[tax_field]));
@@ -1208,6 +1429,9 @@ export const accountTaxHelpers = {
                         roundPrecision(target, currency.rounding),
                         currency.decimal_places
                     );
+                }
+                if (suffix !== converted_suffix) {
+                    settle(taxes_data, field);
                 }
             }
         }
@@ -1234,8 +1458,14 @@ export const accountTaxHelpers = {
                         base_line.tax_details.taxes_data.some(
                             (tax_data) =>
                                 !tax_data.price_include &&
-                                (!floatIsZero(tax_data.tax_amount_currency, currency.decimal_places) ||
-                                    !floatIsZero(tax_data.tax_amount, company_currency.decimal_places))
+                                (!floatIsZero(
+                                    tax_data.tax_amount_currency,
+                                    currency.decimal_places
+                                ) ||
+                                    !floatIsZero(
+                                        tax_data.tax_amount,
+                                        company_currency.decimal_places
+                                    ))
                         )
                     ));
             for (const suffix of ["_currency", ""]) {
@@ -1243,17 +1473,44 @@ export const accountTaxHelpers = {
                 const field = `total_excluded${suffix}`;
                 const tax_field = `tax_amount${suffix}`;
                 const taxes_details = group_base_lines.map((base_line) => base_line.tax_details);
+                const keep = group_base_lines.map((base_line) =>
+                    this.is_tax_details_pinned(base_line, null, field)
+                );
+                if (suffix === converted_suffix) {
+                    group_base_lines.forEach((base_line, i) => {
+                        const tax_details = taxes_details[i];
+                        const taxes_data = tax_details.taxes_data;
+                        const settled_amount = taxes_data.length
+                            ? get_settled(taxes_data[0], `base_amount${suffix}_currency`)
+                            : tax_details[`${field}_currency`];
+                        convert(base_line, tax_details, field, settled_amount);
+                    });
+                }
+                if (rounded_basis) {
+                    // The amount without tax of the line: the base of its first tax.
+                    taxes_details.forEach((tax_details, i) => {
+                        if (keep[i]) {
+                            return;
+                        }
+                        const taxes_data = tax_details.taxes_data;
+                        if (suffix !== converted_suffix && taxes_data.length) {
+                            tax_details[field] = taxes_data[0][`base_amount${suffix}`];
+                        } else {
+                            tax_details[field] = roundPrecision(
+                                get_raw(tax_details, field),
+                                suffix_currency.rounding
+                            );
+                        }
+                    });
+                    continue;
+                }
+
                 if (share_total) {
-                    const keep = group_base_lines.map((base_line) =>
-                        this.is_tax_details_pinned(base_line, null, field)
-                    );
-                    const weight_field = is_document_included
-                        ? `raw_total_included${suffix}`
-                        : `raw_${field}`;
+                    const weight_field = is_document_included ? `total_included${suffix}` : field;
                     this.share_rounded_total(
                         taxes_details,
                         field,
-                        taxes_details.map((tax_details) => tax_details[weight_field]),
+                        taxes_details.map((tax_details) => get_raw(tax_details, weight_field)),
                         suffix_currency.decimal_places,
                         { keep }
                     );
@@ -1262,7 +1519,11 @@ export const accountTaxHelpers = {
                             if (!keep[i]) {
                                 tax_details[field] = roundPrecision(
                                     tax_details[field] -
-                                        sum(tax_details.taxes_data.map((tax_data) => tax_data[tax_field])),
+                                        sum(
+                                            tax_details.taxes_data.map(
+                                                (tax_data) => tax_data[tax_field]
+                                            )
+                                        ),
                                     suffix_currency.rounding
                                 );
                             }
@@ -1272,15 +1533,13 @@ export const accountTaxHelpers = {
                 }
 
                 let target = sum(
-                    group_base_lines.map((base_line) =>
-                        this.get_tax_details_target(base_line, null, field)
-                    )
+                    group_base_lines.map((base_line) => get_target(base_line, null, field))
                 );
                 let tax_amount = 0.0;
                 if (is_document_included) {
                     for (const base_line of group_base_lines) {
                         for (const tax_data of base_line.tax_details.taxes_data) {
-                            target += this.get_tax_details_target(base_line, tax_data, tax_field);
+                            target += get_target(base_line, tax_data, tax_field);
                             tax_amount += tax_data[tax_field];
                         }
                     }
@@ -1296,17 +1555,21 @@ export const accountTaxHelpers = {
                     suffix_currency.decimal_places,
                     {
                         weights: is_document_included
-                            ? taxes_details.map((tax_details) => tax_details[`raw_total_included${suffix}`])
+                            ? taxes_details.map((tax_details) =>
+                                  get_raw(tax_details, `total_included${suffix}`)
+                              )
                             : null,
                     }
                 );
                 for (const tax_details of taxes_details) {
-                    tax_details[field] = roundPrecision(tax_details[field], suffix_currency.rounding);
+                    tax_details[field] = roundPrecision(
+                        tax_details[field],
+                        suffix_currency.rounding
+                    );
                 }
             }
         }
     },
-
     /**
      * [!] Mirror of the same method in account_tax.py.
      * PLZ KEEP BOTH METHODS CONSISTENT WITH EACH OTHERS.
@@ -2072,13 +2335,15 @@ export const accountTaxHelpers = {
             return key_1[1] - key_2[1];
         });
 
-        // Each tax reaches its part.
+        // Each tax reaches its part. With the 'rounded' tax basis, the bases are the rounded amounts of the lines plus the
+        // other taxes: they follow the tax amounts instead (see TAX_ROUNDING_POLICIES).
+        const rounded_basis = company.tax_rounding_settings.tax_basis === "rounded";
         for (const [tax_id, { amounts: new_tax_totals }] of Object.entries(new_totals_per_tax)) {
             const taxes_data = sorted_base_lines.flatMap((base_line) =>
                 base_line.tax_details.taxes_data.filter((tax_data) => tax_data.tax.id.toString() === tax_id)
             );
             for (const [suffix, suffix_currency] of columns) {
-                for (const prefix of ["tax", "base"]) {
+                for (const prefix of rounded_basis ? ["tax"] : ["tax", "base"]) {
                     if (!new_tax_totals[`${prefix}_amount_currency`]) {
                         continue;
                     }
@@ -2099,6 +2364,21 @@ export const accountTaxHelpers = {
                     );
                 }
             }
+        }
+        if (rounded_basis) {
+            for (const base_line of new_base_lines) {
+                const tax_amounts = {};
+                for (const tax_data of base_line.tax_details.taxes_data) {
+                    if (!tax_data.is_reverse_charge) {
+                        tax_amounts[tax_data.tax.id.toString()] = {
+                            tax_amount_currency: tax_data.tax_amount_currency,
+                            tax_amount: tax_data.tax_amount,
+                        };
+                    }
+                }
+                base_line.pins = { tax_amounts };
+            }
+            this.round_base_lines_tax_details(new_base_lines, company);
         }
 
         // The base lines reach the part of the total.
@@ -2259,9 +2539,24 @@ export const accountTaxHelpers = {
                     })
                 )
                 .reduce((sum, tax_data) => sum + tax_data.raw_tax_amount_currency, 0.0);
+        // The price of the line without the tax doesn't include the amounts moved to the other line anymore.
+        let moved_price_included_amount = second_price_unit;
+        if (
+            !this.is_price_included(tax_data_to_remove.tax, {
+                document_tax_mode: base_line.document_tax_mode,
+            })
+        ) {
+            moved_price_included_amount -= second_tax_details.raw_total_excluded_currency;
+        }
+        let first_price_unit = base_line.price_unit;
+        const price_factor = base_line.quantity * (1 - base_line.discount / 100.0);
+        if (moved_price_included_amount && price_factor) {
+            first_price_unit -= moved_price_included_amount / price_factor;
+        }
         return [
             this.prepare_base_line_for_taxes_computation(base_line, {
                 tax_ids: first_tax_details.taxes_data.map((tax_data) => tax_data.tax),
+                price_unit: first_price_unit,
                 tax_details: first_tax_details,
             }),
             this.prepare_base_line_for_taxes_computation(base_line, {

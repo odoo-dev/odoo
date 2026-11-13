@@ -277,6 +277,7 @@ class TestTaxesBaseLinesTaxDetails(TestTaxCommon):
             'taxes_data': [{
                 'base_amount': 8000.0,
                 'base_amount_currency': 8000.0,
+                'base_dependencies': [],
                 'batch': tax_20,
                 'group': AccountTax,
                 'is_reverse_charge': False,
@@ -308,6 +309,7 @@ class TestTaxesBaseLinesTaxDetails(TestTaxCommon):
             'taxes_data': [{
                 'base_amount': 9600.0,
                 'base_amount_currency': 9600.0,
+                'base_dependencies': [(tax_20.id, 1)],
                 'group': AccountTax,
                 'is_reverse_charge': False,
                 'original_price_include': False,
