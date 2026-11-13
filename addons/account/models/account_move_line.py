@@ -13,6 +13,7 @@ from odoo.models import Query
 from odoo.tools import SQL, OrderedSet, float_compare, frozendict, groupby
 
 from odoo.addons.account.models.account_move import MAX_HASH_VERSION
+from odoo.addons.account.models.account_tax__taxes_helpers import sum_and_distribute_amounts_to
 from odoo.addons.web.controllers.utils import clean_action
 
 _logger = logging.getLogger(__name__)
@@ -1265,8 +1266,7 @@ class AccountMoveLine(models.Model):
 
             company = line.company_id or self.env.company
             base_line = line.move_id._prepare_product_base_line_for_taxes_computation(line)
-            AccountTax._add_tax_details_in_base_line(base_line, company)
-            AccountTax._round_base_lines_tax_details([base_line], company)
+            AccountTax._add_tax_details([base_line], company)
             line.price_subtotal = base_line['tax_details']['total_excluded_currency']
             line.price_total = base_line['tax_details']['total_included_currency']
 
@@ -1366,7 +1366,7 @@ class AccountMoveLine(models.Model):
         def _get_discount_before_rounding(line):
             base_line = line.move_id._prepare_product_base_line_for_taxes_computation(line)
             base_line['discount'] = 0.0
-            self.env['account.tax']._add_tax_details_in_base_line(base_line, line.company_id)
+            self.env['account.tax']._add_tax_details([base_line], line.company_id, rounding_method='no_round')
             price_subtotal = base_line['tax_details']['raw_total_excluded_currency']
             return line.move_id.direction_sign * price_subtotal * line.discount / 100
 
@@ -1495,8 +1495,7 @@ class AccountMoveLine(models.Model):
                 }
                 for line in invoice_lines
             ]
-            AccountTax._add_tax_details_in_base_lines(base_lines, company)
-            AccountTax._round_base_lines_tax_details(base_lines, company)
+            AccountTax._add_tax_details(base_lines, company)
 
             # store the invoice line record
             for base_line in base_lines:
@@ -1548,34 +1547,34 @@ class AccountMoveLine(models.Model):
                         },
                     }
 
-                target_factors = [
+                factors = [
                     {
                         'factor': base_line['tax_details']['raw_total_excluded_currency'],
                         'base_line': base_line,
                     }
                     for base_line in aggregated_base_lines
                 ]
-                amounts_to_distribute = AccountTax._distribute_delta_amount_smoothly(
-                    precision_digits=currency.decimal_places,
-                    delta_amount=epd_amount_currency,
-                    target_factors=target_factors,
+                result_factors = sum_and_distribute_amounts_to(
+                    amounts=[epd_amount_currency],
+                    factors=factors,
+                    rounding=currency.rounding,
                 )
-                for target_factor, amount_to_distribute in zip(target_factors, amounts_to_distribute):
-                    invoice_line = target_factor['base_line']['_invoice_line']
+                for factor in result_factors:
+                    invoice_line = factor['base_line']['_invoice_line']
                     epd_needed = result_per_invoice_line[invoice_line._origin or invoice_line]
-                    epd_needed[grouping_key_line]['amount_currency'] -= amount_to_distribute
-                    epd_needed[grouping_key_counterpart]['amount_currency'] += amount_to_distribute
+                    epd_needed[grouping_key_line]['amount_currency'] -= factor['amount']
+                    epd_needed[grouping_key_counterpart]['amount_currency'] += factor['amount']
 
-                amounts_to_distribute = AccountTax._distribute_delta_amount_smoothly(
-                    precision_digits=company.currency_id.decimal_places,
-                    delta_amount=epd_balance,
-                    target_factors=target_factors,
+                result_factors = sum_and_distribute_amounts_to(
+                    amounts=[epd_balance],
+                    factors=factors,
+                    rounding=company.currency_id.rounding,
                 )
-                for target_factor, amount_to_distribute in zip(target_factors, amounts_to_distribute):
-                    invoice_line = target_factor['base_line']['_invoice_line']
+                for factor in result_factors:
+                    invoice_line = factor['base_line']['_invoice_line']
                     epd_needed = result_per_invoice_line[invoice_line._origin or invoice_line]
-                    epd_needed[grouping_key_line]['balance'] -= amount_to_distribute
-                    epd_needed[grouping_key_counterpart]['balance'] += amount_to_distribute
+                    epd_needed[grouping_key_line]['balance'] -= factor['amount']
+                    epd_needed[grouping_key_counterpart]['balance'] += factor['amount']
 
         for invoice_line in candidate_invoice_lines:
             epd_needed = result_per_invoice_line[invoice_line._origin or invoice_line]

@@ -1,5 +1,4 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-from unittest import SkipTest
 from lxml import etree
 from odoo import Command
 from odoo.exceptions import UserError
@@ -759,16 +758,14 @@ class TestItEdiExport(TestItEdi):
         }])
 
     def test_export_XML_oss_tax(self):
+        self.ensure_installed('l10n_eu_oss')
         be_partner = self.env['res.partner'].create({
             'name': 'Alessi',
             'vat': 'BE0477472701',
             'country_id': self.env.ref('base.be').id,
             'is_company': True,
         })
-        oss_tag = self.env.ref('l10n_eu_oss.tag_oss', raise_if_not_found=False)
-        if not oss_tag:
-            raise SkipTest("l10n_eu_oss Module not installed")
-
+        oss_tag = self.env.ref('l10n_eu_oss.tag_oss')
         oss_tax = self.env['account.tax'].create({
             'name': 'OSS Tax',
             'type_tax_use': 'sale',

@@ -316,12 +316,6 @@ class AccountEdiUBL(models.AbstractModel):
 
         new_base_lines = AccountTax._dispatch_taxes_into_new_base_lines(base_lines, company, exclude_function)
 
-        # fixed tax are not affected by discount, so the removed_tax_data_base_lines should get their discount remove
-        # to have the total equal to the fixed tax
-        for new_base_line in new_base_lines:
-            for removed_taxes_data_base_line in new_base_line['removed_taxes_data_base_lines']:
-                removed_taxes_data_base_line['discount'] = 0
-
         def aggregate_function(target_base_line, base_line):
             target_base_line.setdefault('_aggregated_quantity', 0.0)
             target_base_line['_aggregated_quantity'] += base_line['quantity']
@@ -668,13 +662,27 @@ class AccountEdiUBL(models.AbstractModel):
         }
 
     def _ubl_add_line_allowance_charge_nodes_for_discount(self, vals, in_foreign_currency=True):
+        company = vals['company']
         line_node = vals['line_node']
         base_line = vals['line_vals']['base_line']
         currency = base_line['currency_id'] if in_foreign_currency else vals['company_currency']
         suffix = '_currency' if in_foreign_currency else ''
         tax_details = base_line['tax_details']
 
-        raw_discount_amount = tax_details[f'discount_amount{suffix}']
+        # Add to stay consistent with '_ubl_add_line_extension_amount_node' to avoid
+        # a PayableRoundingAmount to pop out.
+        gross_total_excluded = self.env['account.tax']._get_gross_total_without_tax(
+            base_line=base_line,
+            company=company,
+            in_foreign_currency=in_foreign_currency,
+            precision_digits=currency.decimal_places,
+        )
+
+        raw_discount_amount = (
+            gross_total_excluded
+            - tax_details[f'total_excluded{suffix}']
+            - tax_details[f'delta_total_excluded{suffix}']
+        )
         if currency.is_zero(raw_discount_amount):
             return
 
@@ -684,7 +692,7 @@ class AccountEdiUBL(models.AbstractModel):
             'percent': base_line['discount'],
             'is_charge': raw_discount_amount < 0.0,
             'amount': raw_discount_amount,
-            'base_amount': tax_details[f'gross_total_excluded{suffix}'],
+            'base_amount': gross_total_excluded,
         }))
 
     def _ubl_add_line_allowance_charge_nodes_for_recycling_contribution_taxes(self, vals, in_foreign_currency=True):
@@ -727,13 +735,17 @@ class AccountEdiUBL(models.AbstractModel):
         vals['line_node']['cac:AllowanceCharge'] = []
 
     def _ubl_add_line_extension_amount_node(self, vals, in_foreign_currency=True):
+        company = vals['company']
         line_node = vals['line_node']
         base_line = vals['line_vals']['base_line']
         currency = base_line['currency_id'] if in_foreign_currency else vals['company_currency']
-        suffix = '_currency' if in_foreign_currency else ''
-        tax_details = base_line['tax_details']
 
-        gross_total_excluded = currency.round(tax_details[f'raw_gross_total_excluded{suffix}'])
+        gross_total_excluded = self.env['account.tax']._get_gross_total_without_tax(
+            base_line=base_line,
+            company=company,
+            in_foreign_currency=in_foreign_currency,
+            precision_digits=currency.decimal_places,
+        )
         for allowance_charge_node in line_node['cac:AllowanceCharge']:
             sign = 1 if allowance_charge_node['cbc:ChargeIndicator']['_text'] == 'true' else -1
             gross_total_excluded += sign * allowance_charge_node['cbc:Amount']['_text']
@@ -2071,6 +2083,7 @@ class AccountEdiUBL(models.AbstractModel):
 
                 reduced_lines = AccountTax._reduce_base_lines_with_grouping_function(
                     section_bls,
+                    invoice.company_id,
                     grouping_function=self._ubl_get_collapsed_base_line_grouping_key,
                 )
 

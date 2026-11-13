@@ -20,7 +20,7 @@ class TestAccountMoveInInvoiceOnchanges(AccountTestInvoicingCommon):
         super().setUpClass()
 
         cls.other_currency = cls.setup_other_currency('EUR')
-
+        cls.tax_armageddon = cls.setup_armageddon_tax('complex_tax', cls.company_data)
         cls.invoice = cls.init_invoice('in_invoice', products=cls.product_a + cls.product_b)
 
         cls.product_line_vals_1 = {
@@ -663,7 +663,7 @@ class TestAccountMoveInInvoiceOnchanges(AccountTestInvoicingCommon):
     def test_in_invoice_line_onchange_taxes_1(self):
         move_form = Form(self.invoice)
         with move_form.invoice_line_ids.edit(0) as line_form:
-            line_form.price_unit = 960
+            line_form.price_unit = 800
             line_form.tax_ids.add(self.tax_armageddon)
         move_form.save()
 
@@ -673,7 +673,7 @@ class TestAccountMoveInInvoiceOnchanges(AccountTestInvoicingCommon):
         self.assertInvoiceValues(self.invoice, [
             {
                 **self.product_line_vals_1,
-                'price_unit': 960.0,
+                'price_unit': 800.0,
                 'price_subtotal': 800.0,
                 'price_total': 1176.0,
                 'tax_ids': (self.tax_purchase_a + self.tax_armageddon).ids,

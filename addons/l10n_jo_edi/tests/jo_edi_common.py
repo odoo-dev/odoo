@@ -35,6 +35,8 @@ class JoEdiCommon(AccountTestInvoicingCommon):
                     'sequence': 0,
                 })
 
+        # The 10% sale tax is archived by default in the Jordanian chart of accounts.
+        cls.env['account.chart.template'].with_company(cls.company_data['company']).ref('jo_standard_sale_10').active = True
         cls.jo_general_tax_10 = _get_general_tax(10)
         cls.jo_special_tax_10 = _create_special_tax(10)
         cls.jo_special_tax_5 = _create_special_tax(5)

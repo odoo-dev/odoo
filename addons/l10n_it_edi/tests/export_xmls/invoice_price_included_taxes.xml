@@ -73,16 +73,16 @@
                 <NumeroLinea>1</NumeroLinea>
                 <Descrizione>something price included</Descrizione>
                 <Quantita>1.00</Quantita>
-                <PrezzoUnitario>656.06557377</PrezzoUnitario>
-                <PrezzoTotale>656.06557377</PrezzoTotale>
+                <PrezzoUnitario>656.06500000</PrezzoUnitario>
+                <PrezzoTotale>656.06500000</PrezzoTotale>
                 <AliquotaIVA>22.00</AliquotaIVA>
             </DettaglioLinee>
             <DettaglioLinee>
                 <NumeroLinea>2</NumeroLinea>
                 <Descrizione>something else price included</Descrizione>
                 <Quantita>1.00</Quantita>
-                <PrezzoUnitario>656.06557377</PrezzoUnitario>
-                <PrezzoTotale>656.06557377</PrezzoTotale>
+                <PrezzoUnitario>656.06500000</PrezzoUnitario>
+                <PrezzoTotale>656.06500000</PrezzoTotale>
                 <AliquotaIVA>22.00</AliquotaIVA>
             </DettaglioLinee>
             <DettaglioLinee>
@@ -95,7 +95,6 @@
             </DettaglioLinee>
             <DatiRiepilogo>
                 <AliquotaIVA>22.00</AliquotaIVA>
-                <Arrotondamento>-0.00114754</Arrotondamento>
                 <ImponibileImporto>2112.53</ImponibileImporto>
                 <Imposta>464.76</Imposta>
                 <EsigibilitaIVA>I</EsigibilitaIVA>

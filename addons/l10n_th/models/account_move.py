@@ -99,8 +99,7 @@ class AccountMove(models.Model):
             AccountTax._prepare_base_line_for_taxes_computation(line, filter_tax_function=lambda t: not t.is_withholding_tax)
             for line in lines
         ]
-        AccountTax._add_tax_details_in_base_lines(base_lines, self.company_id)
-        AccountTax._round_base_lines_tax_details(base_lines, self.company_id)
+        AccountTax._add_tax_details(base_lines, self.company_id)
         return base_lines
 
     def _get_th_tax_invoice_totals(self, base_lines, tax_exigibility):
