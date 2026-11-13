@@ -56,17 +56,6 @@
                     </record>
                 </field>
             </record>
-            <record id="tax_report_gh_vat_line_gh_02" model="account.report.line">
-                <field name="name">2. Zero-rated sales</field>
-                <field name="code">GH_02</field>
-                <field name="expression_ids">
-                    <record id="tax_report_gh_vat_gh_02_base" model="account.report.expression">
-                        <field name="label">base</field>
-                        <field name="engine">tax_tags</field>
-                        <field name="formula">-Zero Rated Sales Base</field>
-                    </record>
-                </field>
-            </record>
             <record id="tax_report_gh_vat_line_gh_03" model="account.report.line">
                 <field name="name">3. Export sales (zero-rated)</field>
                 <field name="code">GH_03</field>
@@ -75,17 +64,6 @@
                         <field name="label">base</field>
                         <field name="engine">tax_tags</field>
                         <field name="formula">-Export Sales Base</field>
-                    </record>
-                </field>
-            </record>
-            <record id="tax_report_gh_vat_line_gh_04" model="account.report.line">
-                <field name="name">4. Free zone sales (zero-rated)</field>
-                <field name="code">GH_04</field>
-                <field name="expression_ids">
-                    <record id="tax_report_gh_vat_gh_04_base" model="account.report.expression">
-                        <field name="label">base</field>
-                        <field name="engine">tax_tags</field>
-                        <field name="formula">-Free Zone Sales Base</field>
                     </record>
                 </field>
             </record>
@@ -107,7 +85,7 @@
                     <record id="tax_report_gh_vat_gh_06_base" model="account.report.expression">
                         <field name="label">base</field>
                         <field name="engine">aggregation</field>
-                        <field name="formula">GH_01.base + GH_02.base + GH_03.base + GH_04.base + GH_05.base</field>
+                        <field name="formula">GH_01.base + GH_03.base + GH_05.base</field>
                     </record>
                     <record id="tax_report_gh_vat_gh_06_vat" model="account.report.expression">
                         <field name="label">vat</field>
@@ -261,17 +239,6 @@
                     </record>
                 </field>
             </record>
-            <record id="tax_report_gh_vat_line_gh_15" model="account.report.line">
-                <field name="name">15. Exempt purchases</field>
-                <field name="code">GH_15</field>
-                <field name="expression_ids">
-                    <record id="tax_report_gh_vat_gh_15_base" model="account.report.expression">
-                        <field name="label">base</field>
-                        <field name="engine">tax_tags</field>
-                        <field name="formula">Exempt Purchases Base</field>
-                    </record>
-                </field>
-            </record>
             <record id="tax_report_gh_vat_line_gh_16" model="account.report.line">
                 <field name="name">16. Total purchases</field>
                 <field name="code">GH_16</field>
@@ -279,7 +246,7 @@
                     <record id="tax_report_gh_vat_gh_16_base" model="account.report.expression">
                         <field name="label">base</field>
                         <field name="engine">aggregation</field>
-                        <field name="formula">GH_11.base + GH_12.base + GH_13.base + GH_14.base + GH_15.base</field>
+                        <field name="formula">GH_11.base + GH_12.base + GH_13.base + GH_14.base</field>
                     </record>
                 </field>
             </record>
