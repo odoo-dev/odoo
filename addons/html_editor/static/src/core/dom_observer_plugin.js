@@ -123,7 +123,7 @@ export const EDITOR_MUTATION_TYPES = /** @type {const} */ ({
 
 export class DomObserverPlugin extends Plugin {
     static id = "domObserver";
-    static dependencies = ["dom", "domReferenceMap", "history"];
+    static dependencies = ["dom", "domReferenceMap"];
     static shared = [
         "ignore",
         "hasStagedMutations",
@@ -132,26 +132,15 @@ export class DomObserverPlugin extends Plugin {
     ];
     /** @type {import("plugins").EditorResources} */
     resources = {
-        history_fields: withSequence(0, {
-            id: "mutations",
-            // The mutations are applied and reverted together. The observer
-            // records them, including those of a replay, so they are never
-            // staged by the history.
-            replay: (mutations = [], { reverse }, { ensureNewMutations }) =>
-                reverse
-                    ? this.revertMutations(mutations, { ensureNewMutations })
-                    : this.applyMutations(mutations, { ensureNewMutations }),
-            discard: (mutations = []) => this.discardPendingMutations(mutations),
-        }),
-
         // Handlers
         // --------
 
         // Start / Refresh
         on_editor_started_handlers: withSequence(9, this.observe.bind(this)),
         on_will_reset_history_handlers: this.reset.bind(this),
-        on_committed_to_history_handlers: (commit) => {
-            this.triggerContentUpdated(commit.data.mutations || []);
+        on_committed_to_history_handlers: () => {
+            this.triggerContentUpdated();
+            this.clearStage();
         },
         on_will_normalize_handlers: () => {
             this.flush();
@@ -180,6 +169,19 @@ export class DomObserverPlugin extends Plugin {
             this.dependencies.dom.normalize(root);
         },
 
+        // Apply / Revert
+        on_apply_history_commit_handlers: (commit, { ensureNewMutations = false } = {}) => {
+            if (commit.data.mutations) {
+                this.applyMutations(commit.data.mutations, { ensureNewMutations });
+            }
+        },
+        on_revert_history_commit_handlers: (commit, { ensureNewMutations = false } = {}) => {
+            if (commit.data.mutations) {
+                this.revertMutations(commit.data.mutations, { ensureNewMutations });
+            }
+        },
+        on_will_invalidate_pending_changes_handlers: () => this.discardPendingMutations(),
+
         // Preview
         on_history_commit_restored_handlers: () => {
             // Process and stage mutations so that the attribute comparison for
@@ -191,16 +193,16 @@ export class DomObserverPlugin extends Plugin {
         on_irreversible_history_commit_applied_handlers: () => {
             this.flush();
         },
-        on_savepoint_restored_handlers: withSequence(0, () => {
-            // The history applied the draft mutations again: stage them to
-            // recover the same mutations state as before.
+        on_savepoint_restored_handlers: withSequence(0, (savePoint) => {
+            // Apply draft mutations to recover the same mutations state as before.
+            this.applyMutations(savePoint.data.mutations, { ensureNewMutations: true });
             this.stagePendingMutations();
             this.triggerContentUpdated();
         }),
         on_pending_changes_unstashed_handlers: (stashedCommit) => {
             if (stashedCommit.data.mutations && !this.isObserving) {
                 // Make sure the unstashed mutations are recorded.
-                this.stageMutations(stashedCommit.data.mutations);
+                this.stage(stashedCommit.data.mutations);
             }
         },
         on_prepare_drag_handlers: this.disableHasStagedMutationsWarning.bind(this),
@@ -208,6 +210,9 @@ export class DomObserverPlugin extends Plugin {
         // Processors
         // ----------
 
+        pending_history_commit_data_processors: withSequence(0, (data) =>
+            this.processPendingData(data)
+        ),
         snapshot_history_commit_data_processors: (data) => {
             data.mutations = childNodes(this.editable)
                 .filter((node) => this.dependencies.domReferenceMap.hasNode(node))
@@ -222,15 +227,19 @@ export class DomObserverPlugin extends Plugin {
                 }));
             return data;
         },
-        pending_history_commit_data_processors: withSequence(0, (data) => {
-            this.processPendingData(!!data.relatedCommit);
-            return data;
-        }),
-        save_point_history_commit_data_processors: withSequence(0, (data) => {
-            // Make sure the savepoint includes the pending mutations.
+        save_point_history_commit_data_processors: (data) => {
             this.stagePendingMutations();
-            return data;
-        }),
+            return { ...data, mutations: [...this.mutations] };
+        },
+
+        // Predicates
+        // ----------
+
+        has_history_commit_changes_predicates: (commit) => {
+            if (commit.data.mutations?.length) {
+                return true;
+            }
+        },
     };
 
     setup() {
@@ -249,6 +258,7 @@ export class DomObserverPlugin extends Plugin {
      * Reset the staged mutations and the `oldValue` manager.
      */
     reset() {
+        this.clearStage();
         if (this.oldValueManager) {
             this.oldValueManager.reset();
         } else {
@@ -334,27 +344,21 @@ export class DomObserverPlugin extends Plugin {
     // =======
 
     /**
-     * Return the mutations in the shared history draft.
+     * Stage the given serialized mutation(s).
      *
-     * @returns {SerializedMutation[]}
+     * @param { SerializedMutation | SerializedMutation[] } mutations
      */
-    getStagedMutations() {
-        return this.dependencies.history.getStaged("mutations") ?? [];
+    stage(mutations) {
+        mutations = Array.isArray(mutations) ? mutations : [mutations];
+        this.mutations.push(...mutations);
     }
 
     /**
-     * Add the given serialized mutations to the shared history draft.
-     *
-     * @param {SerializedMutation[]} mutations
-     * @returns {void}
+     * Clears the stage of all mutations.
      */
-    stageMutations(mutations) {
-        if (mutations.length) {
-            this.dependencies.history.stage("mutations", [
-                ...this.getStagedMutations(),
-                ...mutations,
-            ]);
-        }
+    clearStage() {
+        /** @type { SerializedMutation[] } */
+        this.mutations = [];
     }
 
     /**
@@ -393,36 +397,37 @@ export class DomObserverPlugin extends Plugin {
     flush(mutations = this.observer.takeRecords()) {
         const processedMutations = this.processNativeMutations(mutations);
         const serializedMutations = this.serializeEditorMutations(processedMutations);
-        this.stageMutations(serializedMutations);
+        this.stage(serializedMutations);
         return serializedMutations;
     }
 
     /**
-     * Process pending mutations and normalization, staging the resulting changes.
+     * Process and stage all pending mutations then include all staged mutations
+     * into the provided `data` object before returning it.
      *
-     * @param {boolean} [hasRelatedCommit=false] Whether the changes relate to an
-     *        existing commit rather than a new edit.
-     * @returns {void}
+     * @typedef { import("./history_plugin").HistoryCommitData } HistoryCommitData
+     * @param { HistoryCommitData } data
+     * @returns { HistoryCommitData & { mutations: SerializedMutation[] } }
      */
-    processPendingData(hasRelatedCommit = false) {
+    processPendingData(data) {
+        const hasRelatedCommit = !!data.relatedCommit;
         // Stage the observer's current changes.
         if (hasRelatedCommit) {
             this.flush();
         } else {
             this.stagePendingMutations();
         }
-        const currentMutationsCount = this.getStagedMutations().length;
+        const currentMutationsCount = this.mutations.length;
         if (currentMutationsCount) {
             // Normalize the mutated nodes. Note: this can cause other commits
             // to be written.
-            const commitRoot =
-                this.getMutationsCommonAncestor(this.getStagedMutations()) || this.editable;
+            const commitRoot = this.getMutationsCommonAncestor(this.mutations) || this.editable;
             this.dependencies.dom.normalize(commitRoot);
             if (!hasRelatedCommit) {
                 this.trigger("on_pending_mutations_normalized_handlers");
             }
             this.flush();
-            if (currentMutationsCount === this.getStagedMutations().length) {
+            if (currentMutationsCount === this.mutations.length) {
                 // If there was no added staged mutation during the
                 // normalization commit, force the trigger of a content_updated
                 // to allow i.e. the hint plugin to react to non-observed
@@ -430,21 +435,17 @@ export class DomObserverPlugin extends Plugin {
                 this.triggerContentUpdated();
             }
         }
+        return { ...data, mutations: [...this.mutations] };
     }
 
     /**
      * Process and revert all pending mutations.
-     *
-     * @param {SerializedMutation[]} mutations Mutations already staged before
-     *        the observer's remaining native records are processed.
-     * @returns {void}
      */
-    discardPendingMutations(mutations) {
-        const pending = this.serializeEditorMutations(
-            this.processNativeMutations(this.observer.takeRecords())
-        );
-        this.revertMutations([...mutations, ...pending]);
+    discardPendingMutations() {
+        this.flush();
+        this.revertMutations([...this.mutations]);
         this.observer.takeRecords();
+        this.clearStage();
     }
 
     /**
@@ -470,7 +471,7 @@ export class DomObserverPlugin extends Plugin {
         if (this.ignoreHasStagedMutations) {
             return false;
         }
-        return !!this.getStagedMutations().find((m) =>
+        return !!this.mutations.find((m) =>
             [
                 EDITOR_MUTATION_TYPES.CHARACTER_DATA,
                 EDITOR_MUTATION_TYPES.ADD,
@@ -1177,15 +1178,12 @@ export class DomObserverPlugin extends Plugin {
     /**
      * Trigger `on_content_updated_handlers` if there are staged mutations and
      * their targets have a common ancestor.
-     *
-     * @param {SerializedMutation[]} [mutations=this.getStagedMutations()]
-     * @returns {void}
      */
-    triggerContentUpdated(mutations = this.getStagedMutations()) {
+    triggerContentUpdated() {
         // @todo @phoenix remove this?
         // @todo @phoenix this includes previous mutations that were already
         // stored in the current commit. Ideally, it should only include the new ones.
-        const root = mutations.length && this.getMutationsCommonAncestor(mutations);
+        const root = this.mutations.length && this.getMutationsCommonAncestor(this.mutations);
         if (root) {
             this.trigger("on_content_updated_handlers", root);
         }

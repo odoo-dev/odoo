@@ -59,7 +59,7 @@ describe("reset", () => {
         expect(el.firstChild.getAttribute("data-test-normalize")).toBe("1");
         expect(historyPlugin.commits.length).toBe(1);
         const domObserverPlugin = plugins.get("domObserver");
-        expect(domObserverPlugin.getStagedMutations().length).toBe(0);
+        expect(domObserverPlugin.mutations.length).toBe(0);
     });
 
     test.tags("desktop");
@@ -74,12 +74,12 @@ describe("reset", () => {
             `<p o-we-hint-text='Type "/" for commands' class="o-we-hint">[]</p>`
         );
         const domObserverPlugin = plugins.get("domObserver");
-        expect(domObserverPlugin.getStagedMutations().length).toBe(0);
+        expect(domObserverPlugin.mutations.length).toBe(0);
 
         await click(".odoo-editor-editable p");
         await animationFrame();
         await expectElementCount(".o-we-tablepicker", 0);
-        expect(domObserverPlugin.getStagedMutations().length).toBe(0);
+        expect(domObserverPlugin.mutations.length).toBe(0);
     });
 });
 
@@ -420,7 +420,7 @@ describe("system classes and attributes", () => {
         p.className = "";
         p.className = "y";
         domObserverPlugin.stagePendingMutations();
-        domObserverPlugin.revertMutations(domObserverPlugin.getStagedMutations());
+        domObserverPlugin.revertMutations(domObserverPlugin.mutations);
 
         expect(getContent(el)).toBe(`<p class="y">a</p>`);
     });
@@ -597,7 +597,7 @@ describe("makePreviewableOperation", () => {
             div.appendChild(newElem);
         });
         let numberOfCommits = history.commits.length;
-        const numberOfCurrentMutations = domObserver.getStagedMutations().length;
+        const numberOfCurrentMutations = domObserver.mutations.length;
         previewableAddParagraph.preview("first");
         // commit added by the preview
         numberOfCommits += 1;
@@ -618,7 +618,7 @@ describe("makePreviewableOperation", () => {
         expect("#first").toHaveCount(0);
         expect("#second").toHaveCount(0);
         expect(history.commits.length).toBe(numberOfCommits);
-        expect(domObserver.getStagedMutations().length).toBe(numberOfCurrentMutations);
+        expect(domObserver.mutations.length).toBe(numberOfCurrentMutations);
     });
 
     test("makePreviewableOperation correctly commit operation", async () => {
@@ -798,12 +798,12 @@ describe("destroy", () => {
     });
 });
 
-describe("history fields", () => {
+describe("history properties", () => {
     const sequences = { late: 30, firstDefault: undefined, early: 0, secondDefault: 10 };
-    function sequencedFields(getHooks) {
+    function sequencedProperties(getHandlers) {
         return Object.entries(sequences).map(([id, sequence]) => {
-            const field = { id, ...getHooks(id) };
-            return sequence === undefined ? field : withSequence(sequence, field);
+            const property = { id, ...getHandlers(id) };
+            return sequence === undefined ? property : withSequence(sequence, property);
         });
     }
 
@@ -811,10 +811,7 @@ describe("history fields", () => {
         const { editor, el } = await setupEditor(`<p>[]x</p>`, {
             config: {
                 resources: {
-                    history_fields: [
-                        { id: "label", isMetadata: true },
-                        { id: "unstaged", isMetadata: true },
-                    ],
+                    history_metadata_properties: [{ id: "label" }, { id: "unstaged" }],
                 },
             },
         });
@@ -832,12 +829,12 @@ describe("history fields", () => {
         expect(history.getStaged("label")).toBe(undefined);
     });
 
-    test("processors prepare the draft before the fields are collected", async () => {
+    test("processors prepare the draft before the properties are collected", async () => {
         let history;
         const { editor, el } = await setupEditor(`<p>[]x</p>`, {
             config: {
                 resources: {
-                    history_fields: { id: "label", isMetadata: true },
+                    history_metadata_properties: { id: "label" },
                     pending_history_commit_data_processors: (data) => {
                         const { relatedCommit } = data;
                         history.stage(
@@ -862,14 +859,12 @@ describe("history fields", () => {
         const { editor } = await setupEditor(`<p>[]x</p>`, {
             config: {
                 resources: {
-                    history_fields: [
-                        { id: "metadata", isMetadata: true },
-                        {
-                            id: "changes",
-                            apply: (label) => expect.step("apply " + label),
-                            revert: (label) => expect.step("revert " + label),
-                        },
-                    ],
+                    history_metadata_properties: { id: "metadata" },
+                    history_data_properties: {
+                        id: "changes",
+                        apply: (label) => expect.step("apply " + label),
+                        revert: (label) => expect.step("revert " + label),
+                    },
                 },
             },
         });
@@ -883,52 +878,18 @@ describe("history fields", () => {
         expect(history.getStaged("changes")).toBe(undefined);
     });
 
-    test("hooks replace the default behaviors of a field", async () => {
-        const { editor } = await setupEditor(`<p>[]x</p>`, {
-            config: {
-                resources: {
-                    history_fields: {
-                        id: "batch",
-                        replay: (batch, { reverse, stage }, { ensureNewMutations }) =>
-                            expect.step([
-                                reverse ? "revert" : "apply",
-                                batch,
-                                stage,
-                                ensureNewMutations,
-                            ]),
-                        discard: (batch) => expect.step(["discard", batch]),
-                    },
-                },
-            },
-        });
-        const history = editor.shared.history;
-        history.stage("batch", ["a", "b"]);
-        history.stash();
-        expect.verifySteps([["discard", ["a", "b"]]]);
-        history.unstash();
-        expect.verifySteps([["apply", ["a", "b"], true, false]]);
-
-        // The field is a change, which its own replay records, if at all.
-        history.stage("batch", ["a", "b"]);
-        expect(history.commit()).not.toBe(false);
-        history.undo();
-        expect.verifySteps([
-            ["discard", undefined],
-            ["revert", ["a", "b"], true, true],
-        ]);
-    });
-
     test("replayed metadata can stage the values of the commit it records", async () => {
         let history;
         const ids = ["firstTarget", "secondTarget"];
         const { editor, el } = await setupEditor(`<p>[]x</p>`, {
             config: {
                 resources: {
-                    history_fields: ids.map((id, index) => ({
+                    history_metadata_properties: ids.map((id, index) => ({
                         id,
-                        isMetadata: true,
-                        replay: (target, { reverse, stage }) =>
-                            stage && history.stage(reverse ? ids[1 - index] : id, target),
+                        apply: (target, { ensureNewMutations }) =>
+                            ensureNewMutations && history.stage(id, target),
+                        revert: (target, { ensureNewMutations }) =>
+                            ensureNewMutations && history.stage(ids[1 - index], target),
                     })),
                 },
             },
@@ -955,15 +916,12 @@ describe("history fields", () => {
         const { editor } = await setupEditor(`<p>[]x</p>`, {
             config: {
                 resources: {
-                    history_fields: [
-                        { id: "bookmark", isMetadata: true },
-                        { id: "later", isMetadata: true },
-                        {
-                            id: "changes",
-                            apply: (label) => expect.step("apply " + label),
-                            revert: (label) => expect.step("revert " + label),
-                        },
-                    ],
+                    history_metadata_properties: [{ id: "bookmark" }, { id: "later" }],
+                    history_data_properties: {
+                        id: "changes",
+                        apply: (label) => expect.step("apply " + label),
+                        revert: (label) => expect.step("revert " + label),
+                    },
                 },
             },
         });
@@ -979,17 +937,17 @@ describe("history fields", () => {
         restore();
         // Pending changes are discarded, then applied again up to the savepoint.
         expect.verifySteps(["revert changed", "revert saved", "apply saved"]);
-        expect(history.getStaged("changes")).toEqual([{ data: "saved", reversed: false }]);
+        expect(history.getStaged("changes")).toEqual([{ data: "saved", isReversed: false }]);
         // Metadata is staged back.
         expect(history.getStaged("bookmark")).toBe("saved");
         expect(history.getStaged("later")).toBe(undefined);
     });
 
-    test("fields are discarded and replayed in resource order", async () => {
+    test("data properties are discarded and replayed in resource order", async () => {
         const { editor } = await setupEditor(`<p>[]x</p>`, {
             config: {
                 resources: {
-                    history_fields: sequencedFields((id) => ({
+                    history_data_properties: sequencedProperties((id) => ({
                         apply: () => expect.step("apply " + id),
                         revert: () => expect.step("revert " + id),
                     })),
@@ -1022,14 +980,16 @@ describe("history fields", () => {
         ]);
     });
 
-    test("unknown fields and operations on metadata are rejected", async () => {
+    test("unknown properties are rejected", async () => {
         const { editor } = await setupEditor(`<p>[]x</p>`, {
-            config: { resources: { history_fields: { id: "label", isMetadata: true } } },
+            config: { resources: { history_metadata_properties: { id: "label" } } },
         });
         const history = editor.shared.history;
-        expect(() => history.stage("unknown", 1)).toThrow("Unknown history field: unknown");
-        expect(() => history.apply("unknown", {})).toThrow("Unknown history field: unknown");
-        expect(() => history.apply("label", {})).toThrow("History field is metadata: label");
+        expect(() => history.stage("unknown", 1)).toThrow("Unknown history property: unknown");
+        expect(() => history.apply("unknown", {})).toThrow(
+            "Unknown history data property: unknown"
+        );
+        expect(() => history.apply("label", {})).toThrow("Unknown history data property: label");
     });
 
     describe("custom operations", () => {
@@ -1040,7 +1000,7 @@ describe("history fields", () => {
                     return value;
                 },
                 resources: {
-                    history_fields: {
+                    history_data_properties: {
                         id: "testValue",
                         apply: ({ after, label }) => {
                             expect.step(label ? "apply " + label : "apply");
@@ -1268,7 +1228,7 @@ describe("history fields", () => {
             data.after = 99;
             const commit = editor.shared.history.commit();
             expect(commit.data.testValue).toEqual([
-                { data: { before: 0, after: 1, label: "" }, reversed: false },
+                { data: { before: 0, after: 1, label: "" }, isReversed: false },
             ]);
             expect(JSON.parse(JSON.stringify(commit.data.testValue))).toEqual(
                 commit.data.testValue
@@ -1279,7 +1239,7 @@ describe("history fields", () => {
             const { editor } = await setupEditor(`<p>[]</p>`, {
                 config: {
                     resources: {
-                        history_fields: ["first", "second"].map((id) => ({
+                        history_data_properties: ["first", "second"].map((id) => ({
                             id,
                             apply: ({ label }) => expect.step("apply " + label),
                             revert: ({ label }) => expect.step("revert " + label),
@@ -1308,7 +1268,7 @@ describe("history fields", () => {
             const { editor, el } = await setupEditor(`<p data-version="before">[]x</p>`, {
                 config: {
                     resources: {
-                        history_fields: {
+                        history_data_properties: {
                             id: "version",
                             apply: ({ after }) => {
                                 expect(paragraph.dataset.version).toBe(after);
@@ -1688,7 +1648,7 @@ describe("serialization", () => {
         await microTick();
 
         const domObserverPlugin = plugins.get("domObserver");
-        const mutations = domObserverPlugin.getStagedMutations();
+        const mutations = domObserverPlugin.mutations;
         const domReferenceMapPlugin = plugins.get("domReferenceMap");
         const idToNode = (id) => domReferenceMapPlugin.getNodeById(id);
 
@@ -1732,7 +1692,7 @@ describe("serialization", () => {
 
         const domObserverPlugin = plugins.get("domObserver");
         const domReferenceMapPlugin = plugins.get("domReferenceMap");
-        const mutations = domObserverPlugin.getStagedMutations();
+        const mutations = domObserverPlugin.mutations;
         const idToNode = (id) => domReferenceMapPlugin.getNodeById(id);
 
         expect(mutations.length).toBe(5);

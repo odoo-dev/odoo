@@ -9,7 +9,7 @@ export class PortalOptionPlugin extends Plugin {
     static shared = ["getPortalCards", "loadPortalCards", "updatePortalCards"];
     /** @type {import("plugins").WebsiteResources} */
     resources = {
-        history_fields: [
+        history_data_properties: [
             {
                 id: "portalCards",
                 apply: ({ after }) => this.setPortalCards(after),

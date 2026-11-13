@@ -74,7 +74,7 @@ export class CustomizeWebsitePlugin extends Plugin {
 
     /** @type {import("plugins").WebsiteResources} */
     resources = {
-        history_fields: [
+        history_data_properties: [
             {
                 id: "websiteCustomValue",
                 apply: (data) => this.replayCustomValue(data, data.after),

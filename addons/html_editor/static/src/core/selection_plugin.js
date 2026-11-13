@@ -249,10 +249,7 @@ export class SelectionPlugin extends Plugin {
     resources = {
         user_commands: { id: "selectAll", run: this.selectAll.bind(this) },
         shortcuts: [{ hotkey: "control+a", commandId: "selectAll" }],
-        history_fields: [
-            { id: "activeElementId", isMetadata: true },
-            { id: "selection", isMetadata: true },
-        ],
+        history_metadata_properties: [{ id: "activeElementId" }, { id: "selection" }],
 
         on_committed_to_history_handlers: () => {
             this.stageSelection();
@@ -292,7 +289,7 @@ export class SelectionPlugin extends Plugin {
             // removed, so restore it from a serialized snapshot.
             const serializedSelection =
                 savePoint.data.lastRevertedChanges?.selection ?? savePoint.data.serializedSelection;
-            if (serializedSelection && !savePoint.data.stagedData.mutations?.length) {
+            if (serializedSelection && !savePoint.data.mutations.length) {
                 savePoint.data.selection.setCursor((cursor) => {
                     cursor.anchor.node = this.dependencies.domReferenceMap.getNodeById(
                         serializedSelection.anchorNodeId

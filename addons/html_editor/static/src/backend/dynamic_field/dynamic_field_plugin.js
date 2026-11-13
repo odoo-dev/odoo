@@ -25,7 +25,7 @@ export class DynamicFieldPlugin extends Plugin {
 
     /** @type {import("plugins").EditorResources} */
     resources = {
-        history_fields: {
+        history_data_properties: {
             id: "dynamicFieldLabel",
             apply: ({ nodeId }) =>
                 this.applyEditedField(this.dependencies.domReferenceMap.getNodeById(nodeId)),

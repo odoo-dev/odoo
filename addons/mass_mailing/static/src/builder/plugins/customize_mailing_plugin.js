@@ -27,7 +27,7 @@ export class CustomizeMailingPlugin extends Plugin {
     static shared = ["getVariableValue", "setVariable"];
 
     resources = {
-        history_fields: {
+        history_data_properties: {
             id: "mailingVariable",
             apply: ({ variable, after }) => this.setVariable(variable, after),
             revert: ({ variable, before }) => this.setVariable(variable, before),

@@ -12,7 +12,7 @@ export class ValueHistoryPlugin extends Plugin {
     static shared = ["setValue"];
 
     resources = {
-        history_fields: {
+        history_data_properties: {
             id: "formValue",
             apply: ({ nodeId, after }) => {
                 this.dependencies.domReferenceMap.getNodeById(nodeId).value = after;

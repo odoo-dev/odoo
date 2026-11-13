@@ -21,7 +21,7 @@ export class VisibilityOptionPlugin extends Plugin {
     static dependencies = ["visibility", "websiteBridge", "domReferenceMap"];
     /** @type {import("plugins").WebsiteResources} */
     resources = {
-        history_fields: {
+        history_data_properties: {
             id: "deviceVisibility",
             apply: ({ nodeId, removeOnApply }) => {
                 if (removeOnApply) {

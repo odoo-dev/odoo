@@ -25,7 +25,7 @@ export class PopupOptionPlugin extends Plugin {
 
     /** @type {import("plugins").WebsiteResources} */
     resources = {
-        history_fields: {
+        history_data_properties: {
             id: "popupVisibility",
             apply: ({ nodeId, value }) =>
                 this.dependencies.visibility.toggleTargetVisibility(

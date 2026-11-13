@@ -182,28 +182,30 @@ export class BuilderOptionsPlugin extends Plugin {
         },
         // Commits recorded from a replayed commit keep its targets, swapped
         // when it is reverted.
-        history_fields: [
+        history_metadata_properties: [
             {
                 id: "currentTarget",
-                isMetadata: true,
-                replay: (targetId, { reverse, stage }) => {
-                    if (stage) {
-                        this.dependencies.history.stage(
-                            reverse ? "nextTarget" : "currentTarget",
-                            targetId
-                        );
+                apply: (targetId, { ensureNewMutations }) => {
+                    if (ensureNewMutations) {
+                        this.dependencies.history.stage("currentTarget", targetId);
+                    }
+                },
+                revert: (targetId, { ensureNewMutations }) => {
+                    if (ensureNewMutations) {
+                        this.dependencies.history.stage("nextTarget", targetId);
                     }
                 },
             },
             {
                 id: "nextTarget",
-                isMetadata: true,
-                replay: (targetId, { reverse, stage }) => {
-                    if (stage) {
-                        this.dependencies.history.stage(
-                            reverse ? "currentTarget" : "nextTarget",
-                            targetId
-                        );
+                apply: (targetId, { ensureNewMutations }) => {
+                    if (ensureNewMutations) {
+                        this.dependencies.history.stage("nextTarget", targetId);
+                    }
+                },
+                revert: (targetId, { ensureNewMutations }) => {
+                    if (ensureNewMutations) {
+                        this.dependencies.history.stage("currentTarget", targetId);
                     }
                 },
             },
