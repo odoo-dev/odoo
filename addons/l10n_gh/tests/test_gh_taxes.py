@@ -47,21 +47,32 @@ class TestGhTaxes(AccountTestInvoicingCommon):
     def test_company_defaults(self):
         self.assertEqual(self.company.chart_template, 'gh')
         self.assertEqual(self.company.account_fiscal_country_id.code, 'GH')
+        self.assertEqual(self.company.account_sale_tax_id.name, '20%')
         self.assertEqual(self.company.account_sale_tax_id.amount_type, 'group')
+        self.assertEqual(self.company.account_purchase_tax_id.name, '20%')
         self.assertEqual(self.company.account_purchase_tax_id.amount_type, 'group')
+        self.assertEqual(self.company.income_account_id.code, '411100')
+        self.assertEqual(self.company.expense_account_id.code, '511100')
         for account in self.env['account.account'].search([('code', '=like', '1%')], limit=20):
             self.assertEqual(len(account.code), 6)
+
+    def test_chart_default_taxes(self):
+        account = self.env['account.account'].search([('company_ids', '=', self.company.id), ('code', '=', '612200')])
+        self.assertEqual(account.tax_ids.name, '20%')
+        account = self.env['account.account'].search([('company_ids', '=', self.company.id), ('code', '=', '411100')])
+        self.assertEqual(account.tax_ids.name, '20%')
+        self.assertEqual(account.tax_ids.type_tax_use, 'sale')
 
     def test_standard_sale_no_cascade(self):
         """VAT 15%, NHIL 2.5% and GETFund 2.5% are all computed on the same 1000 taxable value."""
         move = self._move('out_invoice', self.partner_gh)
-        self.assertEqual(move.fiscal_position_id.name, 'Domestic (Ghana)')
+        self.assertEqual(move.fiscal_position_id.name, 'Domestic')
         self.assertEqual(move.amount_untaxed, 1000.0)
         self.assertEqual(move.amount_total, 1200.0)
         self.assertEqual(self._tax_lines(move), {
-            'Sales VAT 15%': ('221100', -150.0, ['Output VAT']),
-            'Sales NHIL 2.5%': ('221200', -25.0, ['Output NHIL']),
-            'Sales GETFund Levy 2.5%': ('221300', -25.0, ['Output GETFund Levy']),
+            '15% VAT (S)': ('221100', -150.0, ['Output VAT']),
+            '2.5% NHIL (S)': ('221200', -25.0, ['Output NHIL']),
+            '2.5% GETFund (S)': ('221300', -25.0, ['Output GETFund Levy']),
         })
         base_line = move.line_ids.filtered(lambda l: l.display_type == 'product')
         self.assertEqual(base_line.tax_tag_ids.mapped('name'), ['Standard Rated Sales Base'])
@@ -89,31 +100,45 @@ class TestGhTaxes(AccountTestInvoicingCommon):
         self.assertAlmostEqual(res['total_excluded'], 1000.0)
         self.assertEqual(sorted(t['tax_amount'] for t in res['taxes_data']), [25.0, 25.0, 150.0])
 
-    def test_zero_rated_export_and_free_zone(self):
+    def test_zero_rated_export(self):
         export = self._move('out_invoice', self.partner_ng)
-        self.assertEqual(export.fiscal_position_id.name, 'International (Exports and Imports)')
-        self.assertEqual(export.invoice_line_ids.tax_ids.name, 'Sales Export 0%')
+        self.assertEqual(export.fiscal_position_id.name, 'Foreign')
+        self.assertEqual(export.invoice_line_ids.tax_ids.name, '0% EX')
         self.assertEqual(export.amount_total, 1000.0)
         self.assertEqual(export.invoice_line_ids.tax_tag_ids.mapped('name'), ['Export Sales Base'])
 
-        free_zone = self._move('out_invoice', self.partner_gh, fp=self._fp('Free Zone Enterprise'))
-        free_zone.invoice_line_ids._compute_tax_ids()
-        self.assertEqual(free_zone.invoice_line_ids.tax_ids.name, 'Sales Free Zone 0%')
-        self.assertEqual(free_zone.amount_total, 1000.0)
+    def test_exempt_sale(self):
+        move = self._move('out_invoice', self.partner_gh, taxes=self._tax('0% E'))
+        self.assertEqual(move.amount_total, 1000.0)
+        self.assertEqual(move.invoice_line_ids.tax_tag_ids.mapped('name'), ['Exempt Sales Base'])
+
+    def test_vat_withholding_agent(self):
+        """The 7% VAT withheld by the customer does not change the amount due until payment."""
+        move = self._move('out_invoice', self.partner_gh, fp=self._fp('VAT Withholding Agent'))
+        move.invoice_line_ids._compute_tax_ids()
+        self.assertEqual(move.invoice_line_ids.tax_ids.name, '20% VAT WTH')
+        self.assertEqual(move.amount_total, 1200.0)
+        vat_wth = self._tax('7% VAT WTH')
+        self.assertEqual(vat_wth.amount, -7.0)
+        self.assertTrue(vat_wth.is_withholding_tax)
 
     def test_import_of_goods(self):
         bill = self._move('in_invoice', self.partner_ng)
-        self.assertEqual(bill.invoice_line_ids.tax_ids.name, 'Import of Goods 20% (VAT 15% + NHIL 2.5% + GETFund 2.5%)')
-        self.assertEqual(bill.amount_total, 1200.0)
-        self.assertEqual(self._tax_lines(bill), {
-            'Import VAT 15%': ('124100', 150.0, ['Import VAT']),
-            'Import NHIL 2.5%': ('124200', 25.0, ['Import NHIL']),
-            'Import GETFund Levy 2.5%': ('124300', 25.0, ['Import GETFund Levy']),
+        # Import VAT is paid at customs on a separate bill: the foreign supplier's bill is 0%.
+        self.assertEqual(bill.invoice_line_ids.tax_ids.name, '0% EX')
+        customs = self._move('in_invoice', self.partner_gh, taxes=self._tax('20% IMP'))
+        self.assertEqual(customs.amount_total, 1200.0)
+        self.assertEqual(self._tax_lines(customs), {
+            '15% VAT (IMP)': ('124100', 150.0, ['Import VAT']),
+            '2.5% NHIL (IMP)': ('124200', 25.0, ['Import NHIL']),
+            '2.5% GETFund (IMP)': ('124300', 25.0, ['Import GETFund Levy']),
         })
 
     def test_reverse_charge_nets_to_zero(self):
-        bill = self._move('in_invoice', self.partner_ng, fp=self._fp('Imported Services (Reverse Charge)'))
-        bill.invoice_line_ids._compute_tax_ids()
+        # Services from a foreign supplier: the reverse charge tax is selected manually and kept by the Foreign position.
+        bill = self._move('in_invoice', self.partner_ng, taxes=self._tax('20% RC'))
+        self.assertEqual(bill.fiscal_position_id.name, 'Foreign')
+        self.assertEqual(bill.invoice_line_ids.tax_ids.name, '20% RC')
         self.assertEqual(bill.amount_total, 1000.0)  # the supplier is paid the base only
         tax_lines = bill.line_ids.filtered('tax_line_id')
         self.assertEqual(len(tax_lines), 6)
@@ -127,28 +152,23 @@ class TestGhTaxes(AccountTestInvoicingCommon):
         })
 
     def test_withholding_rates(self):
-        """Rates from the GRA withholding tax page; base is the amount excluding VAT/NHIL."""
+        """Rates from the GRA withholding tax page; withholding applies on payment only."""
         expected = {
-            'WHT Resident - Supply of Goods 3%': -3.0,
-            'WHT Resident - Supply of Works 5%': -5.0,
-            'WHT Resident - Supply of Services 7.5%': -7.5,
-            'WHT Resident - Rent on Residential Property 8%': -8.0,
-            'WHT Resident - Rent on Non-residential Property 15%': -15.0,
-            'WHT Non-resident - Management and Technical Service Fees 20%': -20.0,
-            'WHT Non-resident - Goods, Works or Any Services 20%': -20.0,
-            'WHT Non-resident - Royalties, Natural Resource Payments and Rents 15%': -15.0,
-            'WHT Non-resident - Telecommunication and Transportation Income 15%': -15.0,
-            'WHT Non-resident - Petroleum Subcontractors 15%': -15.0,
-            'WHT Non-resident - General Insurance Premiums 5%': -5.0,
-            'WHT Credit - Sale of Goods 3%': -3.0,
-            'WHT Credit - Sale of Works 5%': -5.0,
-            'WHT Credit - Sale of Services 7.5%': -7.5,
+            ('3% WTH G', 'purchase'): (-3.0, '221500'),
+            ('5% WTH W', 'purchase'): (-5.0, '221500'),
+            ('7.5% WTH S', 'purchase'): (-7.5, '221500'),
+            ('20% WTH NR', 'purchase'): (-20.0, '221600'),
+            ('3% WTH G', 'sale'): (-3.0, '124500'),
+            ('5% WTH W', 'sale'): (-5.0, '124500'),
+            ('7.5% WTH S', 'sale'): (-7.5, '124500'),
         }
-        for name, rate in expected.items():
-            self.assertEqual(self._tax(name).amount, rate, name)
-        self.assertFalse(any(self._tax(n).active for n in expected if n.startswith('WHT Credit')))
+        for (name, use), (rate, account) in expected.items():
+            tax = self.env['account.tax'].search([
+                ('company_id', '=', self.company.id), ('name', '=', name), ('type_tax_use', '=', use)])
+            self.assertEqual(tax.amount, rate, name)
+            self.assertTrue(tax.is_withholding_tax, name)
+            self.assertEqual(tax.invoice_repartition_line_ids.filtered(lambda l: l.repartition_type == 'tax').account_id.code, account)
 
-        bill = self._move('in_invoice', self.partner_gh, price=10000.0, extra_taxes=self._tax('WHT Resident - Supply of Goods 3%'))
-        self.assertEqual(bill.amount_total, 11700.0)  # 10000 + 20% - 3% WHT on 10000
-        wht_line = bill.line_ids.filtered(lambda l: l.account_id.code == '221500')
-        self.assertEqual(wht_line.balance, -300.0)
+        bill = self._move('in_invoice', self.partner_gh, price=10000.0, extra_taxes=self.env['account.tax'].search([
+            ('company_id', '=', self.company.id), ('name', '=', '3% WTH G'), ('type_tax_use', '=', 'purchase')]))
+        self.assertEqual(bill.amount_total, 12000.0)  # the 3% withholding is only applied when paying

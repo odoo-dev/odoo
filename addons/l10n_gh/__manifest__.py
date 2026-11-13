@@ -18,12 +18,15 @@ Contents
       tax control accounts (VAT, NHIL, GETFund Levy, withholding tax, corporate income tax, PAYE, SSNIT),
       inventory and stock interim accounts, loans, equity (Stated Capital, Income Surplus),
       income, cost of sales, operating expenses, depreciation, finance costs and income tax expense.
-    - Taxes: VAT 15%, NHIL 2.5% and GETFund Levy 2.5% charged on the same taxable value (20% group
-      taxes, with each levy on its own line and tax group), zero-rated, export, free zone and exempt
-      supplies, imports of goods, reverse charge on imported services, and withholding taxes.
+    - Taxes: 20% standard group (VAT 15% + NHIL 2.5% + GETFund Levy 2.5% charged on the same taxable
+      value, each levy on its own line and tax group) for sales, purchases, imports of goods (20% IMP)
+      and reverse charge on imported services (20% RC); 0% EX (export / foreign goods), 0% E (exempt),
+      0% purchases; withholding taxes applied on payment (3% goods, 5% works, 7.5% services, 20%
+      non-resident, 7% VAT withholding by appointed agents) for sales and purchases.
     - Reports: VAT Return (Taxable Value / VAT / NHIL / GETFund Levy, with credit carry-over)
       and Withholding Tax Report.
-    - Fiscal positions: Domestic (Ghana), International, Free Zone Enterprise, Imported Services.
+    - Fiscal positions: Domestic, Foreign, VAT Withholding Agent.
+    - Fixed assets: default depreciation models, depreciation and expense accounts.
 
 Legal basis
 -----------
@@ -44,6 +47,7 @@ Tourism Levy, Growth and Sustainability Levy calculation and VAT withholding by 
     """,
     'depends': [
         'account',
+        'l10n_account_withholding_tax',
     ],
     'auto_install': ['account'],
     'data': [

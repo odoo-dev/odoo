@@ -37,6 +37,9 @@ class AccountChartTemplate(models.AbstractModel):
                 'account_sale_tax_id': 'gh_st',
                 'account_purchase_tax_id': 'gh_pt',
                 'account_stock_valuation_id': 'gh121000',
+                'deferred_expense_account_id': 'gh123100',
+                'deferred_revenue_account_id': 'gh211400',
+                'downpayment_account_id': 'gh211500',
             },
         }
 
@@ -47,4 +50,29 @@ class AccountChartTemplate(models.AbstractModel):
                 'account_stock_expense_id': 'gh511100',
                 'account_stock_variation_id': 'gh511200',
             },
+            'gh111200': {'asset_depreciation_account_id': 'gh112200', 'asset_expense_account_id': 'gh641100'},
+            'gh111300': {'asset_depreciation_account_id': 'gh112300', 'asset_expense_account_id': 'gh641200'},
+            'gh111400': {'asset_depreciation_account_id': 'gh112400', 'asset_expense_account_id': 'gh641300'},
+            'gh111500': {'asset_depreciation_account_id': 'gh112500', 'asset_expense_account_id': 'gh641400'},
+            'gh111600': {'asset_depreciation_account_id': 'gh112600', 'asset_expense_account_id': 'gh641500'},
+            'gh111800': {'asset_depreciation_account_id': 'gh112800', 'asset_expense_account_id': 'gh641600'},
+            'gh113100': {'asset_depreciation_account_id': 'gh113900', 'asset_expense_account_id': 'gh642100'},
+            'gh113200': {'asset_depreciation_account_id': 'gh113900', 'asset_expense_account_id': 'gh642100'},
         }
+
+    def _post_load_data(self, template_code, company, template_data):
+        super()._post_load_data(template_code, company, template_data)
+        if template_code == 'gh' and 'account.depreciation.model' in self.env:
+            # Depreciation models post to the Miscellaneous Operations journal by default.
+            # Models shared by all companies are not written by the template, so set the journal here.
+            journal = self.env['account.journal'].search([
+                *self.env['account.journal']._check_company_domain(company),
+                ('type', '=', 'general'),
+                ('code', '=', 'MISC'),
+            ], limit=1)
+            models = self.env['account.account'].search([
+                ('company_ids', '=', company.id),
+                ('depreciation_model_id', '!=', False),
+            ]).depreciation_model_id
+            for model in models:
+                model.with_company(company).journal_id = journal

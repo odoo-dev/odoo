@@ -74,38 +74,6 @@
                     </record>
                 </field>
             </record>
-            <record id="tax_report_gh_wht_line_r_rent_res" model="account.report.line">
-                <field name="name">Rent on Residential Property 8%</field>
-                <field name="code">GH_WHT_04</field>
-                <field name="expression_ids">
-                    <record id="tax_report_gh_wht_r_rent_res_base" model="account.report.expression">
-                        <field name="label">base</field>
-                        <field name="engine">tax_tags</field>
-                        <field name="formula">WHT Resident - Rent on Residential Property Base</field>
-                    </record>
-                    <record id="tax_report_gh_wht_r_rent_res_tax" model="account.report.expression">
-                        <field name="label">tax</field>
-                        <field name="engine">tax_tags</field>
-                        <field name="formula">-WHT Resident - Rent on Residential Property Tax</field>
-                    </record>
-                </field>
-            </record>
-            <record id="tax_report_gh_wht_line_r_rent_nonres" model="account.report.line">
-                <field name="name">Rent on Non-residential Property 15%</field>
-                <field name="code">GH_WHT_05</field>
-                <field name="expression_ids">
-                    <record id="tax_report_gh_wht_r_rent_nonres_base" model="account.report.expression">
-                        <field name="label">base</field>
-                        <field name="engine">tax_tags</field>
-                        <field name="formula">WHT Resident - Rent on Non-residential Property Base</field>
-                    </record>
-                    <record id="tax_report_gh_wht_r_rent_nonres_tax" model="account.report.expression">
-                        <field name="label">tax</field>
-                        <field name="engine">tax_tags</field>
-                        <field name="formula">-WHT Resident - Rent on Non-residential Property Tax</field>
-                    </record>
-                </field>
-            </record>
             <record id="tax_report_gh_wht_total_res" model="account.report.line">
                 <field name="name">Total - resident payees</field>
                 <field name="code">GH_WHT_06</field>
@@ -113,12 +81,12 @@
                     <record id="tax_report_gh_wht_total_res_base" model="account.report.expression">
                         <field name="label">base</field>
                         <field name="engine">aggregation</field>
-                        <field name="formula">GH_WHT_01.base + GH_WHT_02.base + GH_WHT_03.base + GH_WHT_04.base + GH_WHT_05.base</field>
+                        <field name="formula">GH_WHT_01.base + GH_WHT_02.base + GH_WHT_03.base</field>
                     </record>
                     <record id="tax_report_gh_wht_total_res_tax" model="account.report.expression">
                         <field name="label">tax</field>
                         <field name="engine">aggregation</field>
-                        <field name="formula">GH_WHT_01.tax + GH_WHT_02.tax + GH_WHT_03.tax + GH_WHT_04.tax + GH_WHT_05.tax</field>
+                        <field name="formula">GH_WHT_01.tax + GH_WHT_02.tax + GH_WHT_03.tax</field>
                     </record>
                 </field>
             </record>
@@ -126,24 +94,8 @@
                 <field name="name">Non-resident payees</field>
                 <field name="hierarchy_level">1</field>
             </record>
-            <record id="tax_report_gh_wht_line_n_mgmt" model="account.report.line">
-                <field name="name">Management and Technical Service Fees 20%</field>
-                <field name="code">GH_WHT_07</field>
-                <field name="expression_ids">
-                    <record id="tax_report_gh_wht_n_mgmt_base" model="account.report.expression">
-                        <field name="label">base</field>
-                        <field name="engine">tax_tags</field>
-                        <field name="formula">WHT Non-resident - Management and Technical Service Fees Base</field>
-                    </record>
-                    <record id="tax_report_gh_wht_n_mgmt_tax" model="account.report.expression">
-                        <field name="label">tax</field>
-                        <field name="engine">tax_tags</field>
-                        <field name="formula">-WHT Non-resident - Management and Technical Service Fees Tax</field>
-                    </record>
-                </field>
-            </record>
             <record id="tax_report_gh_wht_line_n_gws" model="account.report.line">
-                <field name="name">Goods, Works or Any Services 20%</field>
+                <field name="name">Goods, Works or Any Services (incl. Management and Technical Fees) 20%</field>
                 <field name="code">GH_WHT_08</field>
                 <field name="expression_ids">
                     <record id="tax_report_gh_wht_n_gws_base" model="account.report.expression">
@@ -158,70 +110,6 @@
                     </record>
                 </field>
             </record>
-            <record id="tax_report_gh_wht_line_n_roy" model="account.report.line">
-                <field name="name">Royalties, Natural Resource Payments and Rents 15%</field>
-                <field name="code">GH_WHT_09</field>
-                <field name="expression_ids">
-                    <record id="tax_report_gh_wht_n_roy_base" model="account.report.expression">
-                        <field name="label">base</field>
-                        <field name="engine">tax_tags</field>
-                        <field name="formula">WHT Non-resident - Royalties, Natural Resource Payments and Rents Base</field>
-                    </record>
-                    <record id="tax_report_gh_wht_n_roy_tax" model="account.report.expression">
-                        <field name="label">tax</field>
-                        <field name="engine">tax_tags</field>
-                        <field name="formula">-WHT Non-resident - Royalties, Natural Resource Payments and Rents Tax</field>
-                    </record>
-                </field>
-            </record>
-            <record id="tax_report_gh_wht_line_n_tel" model="account.report.line">
-                <field name="name">Telecommunication and Transportation Income 15%</field>
-                <field name="code">GH_WHT_10</field>
-                <field name="expression_ids">
-                    <record id="tax_report_gh_wht_n_tel_base" model="account.report.expression">
-                        <field name="label">base</field>
-                        <field name="engine">tax_tags</field>
-                        <field name="formula">WHT Non-resident - Telecommunication and Transportation Income Base</field>
-                    </record>
-                    <record id="tax_report_gh_wht_n_tel_tax" model="account.report.expression">
-                        <field name="label">tax</field>
-                        <field name="engine">tax_tags</field>
-                        <field name="formula">-WHT Non-resident - Telecommunication and Transportation Income Tax</field>
-                    </record>
-                </field>
-            </record>
-            <record id="tax_report_gh_wht_line_n_pet" model="account.report.line">
-                <field name="name">Petroleum Subcontractors 15%</field>
-                <field name="code">GH_WHT_11</field>
-                <field name="expression_ids">
-                    <record id="tax_report_gh_wht_n_pet_base" model="account.report.expression">
-                        <field name="label">base</field>
-                        <field name="engine">tax_tags</field>
-                        <field name="formula">WHT Non-resident - Petroleum Subcontractors Base</field>
-                    </record>
-                    <record id="tax_report_gh_wht_n_pet_tax" model="account.report.expression">
-                        <field name="label">tax</field>
-                        <field name="engine">tax_tags</field>
-                        <field name="formula">-WHT Non-resident - Petroleum Subcontractors Tax</field>
-                    </record>
-                </field>
-            </record>
-            <record id="tax_report_gh_wht_line_n_ins" model="account.report.line">
-                <field name="name">General Insurance Premiums 5%</field>
-                <field name="code">GH_WHT_12</field>
-                <field name="expression_ids">
-                    <record id="tax_report_gh_wht_n_ins_base" model="account.report.expression">
-                        <field name="label">base</field>
-                        <field name="engine">tax_tags</field>
-                        <field name="formula">WHT Non-resident - General Insurance Premiums Base</field>
-                    </record>
-                    <record id="tax_report_gh_wht_n_ins_tax" model="account.report.expression">
-                        <field name="label">tax</field>
-                        <field name="engine">tax_tags</field>
-                        <field name="formula">-WHT Non-resident - General Insurance Premiums Tax</field>
-                    </record>
-                </field>
-            </record>
             <record id="tax_report_gh_wht_total_non" model="account.report.line">
                 <field name="name">Total - non-resident payees</field>
                 <field name="code">GH_WHT_13</field>
@@ -229,12 +117,12 @@
                     <record id="tax_report_gh_wht_total_non_base" model="account.report.expression">
                         <field name="label">base</field>
                         <field name="engine">aggregation</field>
-                        <field name="formula">GH_WHT_07.base + GH_WHT_08.base + GH_WHT_09.base + GH_WHT_10.base + GH_WHT_11.base + GH_WHT_12.base</field>
+                        <field name="formula">GH_WHT_08.base</field>
                     </record>
                     <record id="tax_report_gh_wht_total_non_tax" model="account.report.expression">
                         <field name="label">tax</field>
                         <field name="engine">aggregation</field>
-                        <field name="formula">GH_WHT_07.tax + GH_WHT_08.tax + GH_WHT_09.tax + GH_WHT_10.tax + GH_WHT_11.tax + GH_WHT_12.tax</field>
+                        <field name="formula">GH_WHT_08.tax</field>
                     </record>
                 </field>
             </record>
