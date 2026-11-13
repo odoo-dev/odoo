@@ -180,6 +180,15 @@ export class OrderSummary extends Component {
             return;
         }
 
+        if (selectedLine?.isRefundLocked && key !== "Backspace") {
+            this.numberBuffer.reset();
+            this.dialog.add(AlertDialog, {
+                title: _t("%s update not allowed", this.pos.numpadMode),
+                body: _t("You can not change the %s of the refund order.", this.pos.numpadMode),
+            });
+            return;
+        }
+
         if (selectedLine?.isServiceFeeLine() && order.preset_id?.service_fee_type !== "fixed") {
             this.numberBuffer.reset();
             if (key === "Backspace") {
