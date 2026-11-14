@@ -28,11 +28,7 @@ class TestDeliveryCost(DeliveryCommon):
         cls.env.company.country_id = cls.env.ref("base.us").id
 
         cls.product.weight = 1.0
-        cls.product_delivery_normal = cls._prepare_carrier_product(
-            name="Normal Delivery Charges", list_price=10.0
-        )
         cls.normal_delivery = cls._prepare_carrier(
-            product=cls.product_delivery_normal,
             name="Normal Delivery Charges",
             delivery_type="fixed",
             fixed_price=10.0,
@@ -84,9 +80,7 @@ class TestDeliveryCost(DeliveryCommon):
 
         # I check sales order after added delivery cost
 
-        line = self.sale_normal_delivery_charges.order_line.filtered_domain([
-            ("product_id", "=", self.normal_delivery.product_id.id)
-        ])
+        line = self.sale_normal_delivery_charges.order_line.filtered("is_delivery")
         self.assertEqual(len(line), 1, "Delivery cost is not Added")
 
         zin = (
@@ -137,9 +131,7 @@ class TestDeliveryCost(DeliveryCommon):
         choose_delivery_carrier.button_confirm()
 
         # I check sales order after adding delivery cost
-        line = self.delivery_sale_order_cost.order_line.filtered_domain([
-            ("product_id", "=", self.free_delivery.product_id.id)
-        ])
+        line = self.delivery_sale_order_cost.order_line.filtered("is_delivery")
 
         self.assertEqual(len(line), 1, "Delivery cost is not Added")
         self.assertEqual(
@@ -151,24 +143,20 @@ class TestDeliveryCost(DeliveryCommon):
         # I set default delivery policy
         self.env["res.config.settings"].sudo().create({}).execute()
 
-    def test_01_delivery_cost_from_pricelist(self):
-        """This test aims to validate the use of a pricelist to compute the delivery cost in the
-        case the associated product of the delivery method is defined in the pricelist."""
-        # Create pricelist with a custom price for the standard delivery method
+    def test_01_delivery_cost_with_pricelist(self):
+        """The fixed price of a delivery method doesn't depend on the pricelist rules: it is only
+        converted to the currency of the pricelist."""
         my_pricelist = self.env["product.pricelist"].create({
             "name": "shipping_cost_change",
             "item_ids": [
                 Command.create({
-                    "compute_price": "fixed",
-                    "fixed_price": 5,
-                    "applied_on": "0_product_variant",
-                    "product_id": self.normal_delivery.product_id.id,
+                    "compute_price": "discount",
+                    "price_discount": 50,
+                    "applied_on": "3_global",
                 })
             ],
         })
-
-        # Create sales order with Normal Delivery Charges
-        sale_pricelist_based_delivery_charges = self.env["sale.order"].create({
+        sale_order = self.env["sale.order"].create({
             "partner_id": self.partner.id,
             "pricelist_id": my_pricelist.id,
             "order_line": [
@@ -180,46 +168,38 @@ class TestDeliveryCost(DeliveryCommon):
             ],
         })
 
-        # Add of delivery cost in Sales order
         delivery_wizard = Form(
             self.env["choose.delivery.carrier"].with_context({
-                "default_order_id": sale_pricelist_based_delivery_charges.id,
+                "default_order_id": sale_order.id,
                 "default_carrier_id": self.normal_delivery.id,
             })
         )
         self.assertEqual(
             delivery_wizard.delivery_price,
-            5.0,
-            "Delivery cost does not correspond to 5.0 in wizard",
+            10.0,
+            "Delivery cost does not correspond to 10.0 in wizard",
         )
         delivery_wizard.save().button_confirm()
 
-        line = sale_pricelist_based_delivery_charges.order_line.filtered_domain([
-            ("product_id", "=", self.normal_delivery.product_id.id)
-        ])
+        line = sale_order.order_line.filtered("is_delivery")
         self.assertEqual(len(line), 1, "Delivery cost hasn't been added to SO")
-        self.assertEqual(line.price_subtotal, 5.0, "Delivery cost does not correspond to 5.0")
+        self.assertFalse(line.product_id, "Delivery lines have no product")
+        self.assertEqual(line.price_subtotal, 10.0, "Delivery cost does not correspond to 10.0")
 
     def test_02_delivery_cost_from_different_currency(self):
-        """This test aims to validate the use of a pricelist using a different currency to compute
-        the delivery cost in the case the associated product of the delivery method is defined in
-        the pricelist."""
-        # Create pricelist with a custom price for the standard delivery method
+        """The fixed price of a delivery method is converted to the currency of the pricelist."""
+        eur = self.env.ref("base.EUR")
+        eur.sudo().active = True
+        self.env["res.currency.rate"].sudo().create({
+            "rate": 2.0,
+            "currency_id": eur.id,
+            "company_id": self.env.company.id,
+        })
         my_pricelist = self.env["product.pricelist"].create({
             "name": "shipping_cost_change",
-            "item_ids": [
-                Command.create({
-                    "compute_price": "fixed",
-                    "fixed_price": 5,
-                    "applied_on": "0_product_variant",
-                    "product_id": self.normal_delivery.product_id.id,
-                })
-            ],
-            "currency_id": self.env.ref("base.EUR").id,
+            "currency_id": eur.id,
         })
-
-        # Create sales order with Normal Delivery Charges
-        sale_pricelist_based_delivery_charges = self.env["sale.order"].create({
+        sale_order = self.env["sale.order"].create({
             "partner_id": self.partner.id,
             "pricelist_id": my_pricelist.id,
             "order_line": [
@@ -230,26 +210,23 @@ class TestDeliveryCost(DeliveryCommon):
                 })
             ],
         })
+        expected_price = self.normal_delivery.currency_id._convert(
+            10.0, eur, sale_order.company_id, sale_order.date_order
+        )
+        self.assertNotEqual(expected_price, 10.0)
 
-        # Add of delivery cost in Sales order
         delivery_wizard = Form(
             self.env["choose.delivery.carrier"].with_context({
-                "default_order_id": sale_pricelist_based_delivery_charges.id,
+                "default_order_id": sale_order.id,
                 "default_carrier_id": self.normal_delivery.id,
             })
         )
-        self.assertEqual(
-            delivery_wizard.delivery_price,
-            5.0,
-            "Delivery cost does not correspond to 5.0 in wizard",
-        )
+        self.assertAlmostEqual(delivery_wizard.delivery_price, expected_price)
         delivery_wizard.save().button_confirm()
 
-        line = sale_pricelist_based_delivery_charges.order_line.filtered_domain([
-            ("product_id", "=", self.normal_delivery.product_id.id)
-        ])
+        line = sale_order.order_line.filtered("is_delivery")
         self.assertEqual(len(line), 1, "Delivery cost hasn't been added to SO")
-        self.assertEqual(line.price_subtotal, 5.0, "Delivery cost does not correspond to 5.0")
+        self.assertAlmostEqual(line.price_subtotal, expected_price)
 
     def test_01_taxes_on_delivery_cost(self):
         # Creating taxes and fiscal position
@@ -278,8 +255,8 @@ class TestDeliveryCost(DeliveryCommon):
         ])
         tax_price_exclude.original_tax_ids = tax_price_include
 
-        # Setting tax on delivery product
-        self.normal_delivery.product_id.taxes_id = tax_price_include
+        # Setting tax on delivery method
+        self.normal_delivery.tax_ids = tax_price_include
 
         # Create sales order
         # Required to see `pricelist_id` in the view
@@ -287,19 +264,13 @@ class TestDeliveryCost(DeliveryCommon):
         order_form = Form(self.env["sale.order"])
         order_form.partner_id = self.partner
         order_form.fiscal_position_id = fiscal_position
-
-        # Try adding delivery product as a normal product
         with order_form.order_line.new() as line:
-            line.product_id = self.normal_delivery.product_id
+            line.product_id = self.product
             line.product_uom_qty = 1.0
         sale_order = order_form.save()
 
-        self.assertRecordValues(
-            sale_order.order_line, [{"price_subtotal": 9.09, "price_total": 10.45}]
-        )
-
-        # Now trying to add the delivery line using the delivery wizard, the results should be the
-        # same as before
+        # The price of the delivery method includes a 10% tax, mapped by the fiscal position on a
+        # 15% tax excluded from the price.
         delivery_wizard = Form(
             self.env["choose.delivery.carrier"].with_context(
                 default_order_id=sale_order.id, default_carrier_id=self.normal_delivery.id
@@ -308,12 +279,14 @@ class TestDeliveryCost(DeliveryCommon):
         choose_delivery_carrier = delivery_wizard.save()
         choose_delivery_carrier.button_confirm()
 
-        line = sale_order.order_line.filtered_domain([
-            ("product_id", "=", self.normal_delivery.product_id.id),
-            ("is_delivery", "=", True),
-        ])
+        line = sale_order.order_line.filtered("is_delivery")
 
-        self.assertRecordValues(line, [{"price_subtotal": 9.09, "price_total": 10.45}])
+        self.assertRecordValues(line, [{
+            "product_id": False,
+            "tax_ids": tax_price_exclude.ids,
+            "price_subtotal": 9.09,
+            "price_total": 10.45,
+        }])
 
     def test_estimated_weight(self):
         """
@@ -415,7 +388,6 @@ class TestDeliveryCost(DeliveryCommon):
         delivery = self.env["delivery.carrier"].create({
             "name": "Delivery Charges",
             "delivery_type": "base_on_rule",
-            "product_id": self.product_delivery_normal.id,
             "price_rule_ids": [
                 Command.create({
                     "variable": "price",
@@ -464,17 +436,12 @@ class TestDeliveryCost(DeliveryCommon):
             "tax_group_id": tax_groups[1].id,
             "company_id": branch.id,
         })
-        # create delivery product with taxes from both branch and parent company
-        delivery_product = self.env["product.product"].create({
-            "name": "Delivery Product",
-            "taxes_id": [Command.set((tax_a + tax_b).ids)],
-        })
-        # create delivery
+        # create delivery with taxes from both branch and parent company
         delivery = self.env["delivery.carrier"].create({
             "name": "Delivery Charges",
             "delivery_type": "fixed",
-            "product_id": delivery_product.id,
             "company_id": branch.id,
+            "tax_ids": [Command.set((tax_a + tax_b).ids)],
         })
         # create a SO from Branch
         sale_order = self.env["sale.order"].create({
@@ -493,11 +460,11 @@ class TestDeliveryCost(DeliveryCommon):
 
         # delivery line should have taxes from the branch company
         self.assertRecordValues(
-            delivery_line, [{"product_id": delivery_product.id, "tax_ids": tax_b.ids}]
+            delivery_line, [{"product_id": False, "tax_ids": tax_b.ids}]
         )
 
-        # update delivery product by setting only the tax from parent company
-        delivery_product.write({"taxes_id": [Command.set((tax_a).ids)]})
+        # update delivery by setting only the tax from parent company
+        delivery.write({"tax_ids": [Command.set(tax_a.ids)]})
         # update delivery
         wizard = self.env["choose.delivery.carrier"].create({
             "order_id": sale_order.id,
@@ -510,7 +477,7 @@ class TestDeliveryCost(DeliveryCommon):
         # delivery line should have taxes from the parent company as there is no tax from the branch
         # company
         self.assertRecordValues(
-            delivery_line, [{"product_id": delivery_product.id, "tax_ids": tax_a.ids}]
+            delivery_line, [{"product_id": False, "tax_ids": tax_a.ids}]
         )
 
     def test_update_weight_in_shipping_when_change_quantity(self):
@@ -522,7 +489,6 @@ class TestDeliveryCost(DeliveryCommon):
         delivery = self.env["delivery.carrier"].create({
             "name": "Delivery Charges",
             "delivery_type": "base_on_rule",
-            "product_id": product_test.id,
             "price_rule_ids": [
                 Command.create({
                     "variable": "weight",
@@ -575,18 +541,6 @@ class TestDeliveryCost(DeliveryCommon):
             })
 
         # Company less delivery method
-        product_delivery_rule = (
-            self
-            .env["product.product"]
-            .with_company(nook_inc)
-            .create({
-                "name": "rule delivery charges",
-                "type": "service",
-                "list_price": 10.0,
-                "categ_id": self.env.ref("delivery.product_category_deliveries").id,
-            })
-        )
-
         delivery = (
             self
             .env["delivery.carrier"]
@@ -594,7 +548,7 @@ class TestDeliveryCost(DeliveryCommon):
             .create({
                 "name": "Rule Delivery",
                 "delivery_type": "base_on_rule",
-                "product_id": product_delivery_rule.id,
+                "company_id": False,
                 "price_rule_ids": [
                     Command.create({
                         "variable": "price",
@@ -639,7 +593,8 @@ class TestDeliveryCost(DeliveryCommon):
 
         # check delivery price was properly converted
         delivery_sol = so.order_line[-1]
-        self.assertEqual(delivery_sol.product_id, delivery.product_id)
+        self.assertTrue(delivery_sol.is_delivery)
+        self.assertFalse(delivery_sol.product_id)
         self.assertEqual(delivery_sol.price_subtotal, 12.5)
 
     def test_base_on_rule_cost_for_combo_product(self):
@@ -650,7 +605,6 @@ class TestDeliveryCost(DeliveryCommon):
         delivery = self.env["delivery.carrier"].create({
             "name": "Delivery Charges",
             "delivery_type": "base_on_rule",
-            "product_id": self.product_delivery_normal.id,
             "price_rule_ids": [
                 Command.create({
                     "variable": "quantity",

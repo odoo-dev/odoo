@@ -14,11 +14,7 @@ class DeliveryCarrier(models.Model):
     _name = "delivery.carrier"
     _inherit = ["delivery.carrier", "website.published.multi.mixin"]
 
-    website_description = fields.Text(
-        string="Description for Online Quotations",
-        related="product_id.description_sale",
-        readonly=False,
-    )
+    website_description = fields.Text(string="Description for Online Quotations", translate=True)
     delivery_estimate_mode = fields.Selection(
         string="Estimated Delivery",
         help="Display an estimated date to your customer. With 'User Choice', the customer picks a"
@@ -64,6 +60,12 @@ class DeliveryCarrier(models.Model):
                 "delivery_calendar_id": None,
             })
         return super().write(vals)
+
+    def _get_delivery_line_name(self):
+        name = super()._get_delivery_line_name()
+        if self.website_description:
+            name = "%s: %s" % (name, self.website_description)
+        return name
 
     def _get_delivery_estimate_supported_types(self):
         """Return the delivery types on which an estimated delivery date can be configured.

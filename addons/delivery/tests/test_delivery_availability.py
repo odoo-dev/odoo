@@ -24,7 +24,7 @@ class TestDeliveryAvailability(DeliveryCommon):
             {"name": "Exclude"},
         ])
 
-        cls.non_restricted_carrier = cls._prepare_carrier(cls.carrier.product_id)
+        cls.non_restricted_carrier = cls._prepare_carrier()
 
         cls.product_line = cls.sale_order.order_line.filtered(
             lambda sol: sol.product_id == cls.product
@@ -235,7 +235,7 @@ class TestDeliveryAvailability(DeliveryCommon):
     def test_dont_set_default_carrier_when_partner_delivery_method_is_not_available(self):
         """The default carrier is not set as property_delivery_carrier_id is not in
         available_carriers."""
-        restricted_carrier = self._prepare_carrier(self.carrier.product_id, max_weight=0.1)
+        restricted_carrier = self._prepare_carrier(max_weight=0.1)
         self.product.weight = 1.0
         self.sale_order.partner_shipping_id.property_delivery_carrier_id = restricted_carrier
         delivery_wizard = self.sale_order.action_open_delivery_wizard()
@@ -259,7 +259,7 @@ class TestDeliveryAvailability(DeliveryCommon):
 
     def test_reset_allow_cash_on_delivery_on_carrier_type_change(self):
         delivery_method = self._prepare_carrier(
-            self._prepare_carrier_product(), delivery_type="fixed", allow_cash_on_delivery=True
+            delivery_type="fixed", allow_cash_on_delivery=True
         )
         delivery_method.delivery_type = "base_on_rule"
         self.assertFalse(delivery_method.allow_cash_on_delivery)

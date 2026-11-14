@@ -10,6 +10,8 @@ from odoo.exceptions import UserError
 from odoo.modules.registry import Registry
 from odoo.tools.safe_eval import expr_eval
 
+from odoo.addons.account.models.product import ACCOUNT_DOMAIN
+
 
 class DeliveryCarrier(models.Model):
     _name = "delivery.carrier"
@@ -60,21 +62,42 @@ class DeliveryCarrier(models.Model):
     debug_logging = fields.Boolean(
         string="Debug logging", help="Log requests in order to ease debugging"
     )
-    company_id = fields.Many2one(
-        comodel_name="res.company", related="product_id.company_id", store=True, readonly=False
-    )
-    product_id = fields.Many2one(
-        string="Delivery Product",
-        comodel_name="product.product",
-        ondelete="restrict",
-        required=True,
-    )
+    company_id = fields.Many2one(comodel_name="res.company", index=True)
     tracking_url = fields.Char(
         string="Tracking Link",
         help="This option adds a link for the customer in the portal to track their package easily."
         " Use <shipmenttrackingnumber> as a placeholder in your URL.",
     )
-    currency_id = fields.Many2one(related="product_id.currency_id")
+    currency_id = fields.Many2one(comodel_name="res.currency", compute="_compute_currency_id")
+
+    income_account_id = fields.Many2one(
+        string="Income Account",
+        help="Account used on invoices for the shipping costs. Leave empty to use the default"
+        " income account of the company.",
+        comodel_name="account.account",
+        company_dependent=True,
+        ondelete="restrict",
+        domain=ACCOUNT_DOMAIN,
+    )
+    expense_account_id = fields.Many2one(
+        string="Expense Account",
+        help="Account used for the shipping expenses. Leave empty to use the default expense"
+        " account of the company.",
+        comodel_name="account.account",
+        company_dependent=True,
+        ondelete="restrict",
+        domain=ACCOUNT_DOMAIN,
+    )
+    tax_ids = fields.Many2many(
+        string="Taxes",
+        help="Taxes applied on the shipping costs.",
+        comodel_name="account.tax",
+        relation="delivery_carrier_account_tax_rel",
+        column1="carrier_id",
+        column2="tax_id",
+        domain=[("type_tax_use", "=", "sale")],
+        default=lambda self: self._default_tax_ids(),
+    )
 
     invoice_policy = fields.Selection(
         string="Invoicing Policy",
@@ -204,6 +227,19 @@ class DeliveryCarrier(models.Model):
                         name=carrier.name,
                     )
                 )
+
+    def _default_tax_ids(self):
+        return (
+            self.env.companies.account_sale_tax_id
+            or self.env.companies.root_id.sudo().account_sale_tax_id
+        )
+
+    @api.depends("company_id")
+    def _compute_currency_id(self):
+        # Prices of a carrier are expressed in the currency used by `_get_conversion_currencies`.
+        main_company = self.env["res.company"]._get_main_company()
+        for carrier in self:
+            carrier.currency_id = (carrier.company_id or main_company).currency_id
 
     @api.depends("delivery_type")
     def _compute_support_test_environment(self):
@@ -431,14 +467,10 @@ class DeliveryCarrier(models.Model):
             res = getattr(self, shipment_method_name)(order)
             # apply fiscal position
             company = self.company_id or order.company_id or self.env.company
-            res["price"] = self.product_id._get_tax_included_unit_price(
-                company,
-                company.currency_id,
-                order.date_order,
-                "sale",
+            res["price"] = self.env["product.product"]._get_tax_included_unit_price_from_price(
+                res["price"],
+                self.tax_ids._filter_taxes_by_company(company),
                 fiscal_position=order.fiscal_position_id,
-                product_price_unit=res["price"],
-                product_currency=company.currency_id,
             )
             # apply margin on computed price
             res["price"] = order.currency_id.round(self._apply_margins(res["price"], order))
@@ -499,21 +531,7 @@ class DeliveryCarrier(models.Model):
     # Fixed price shipping, aka a very simple provider #
     # ------------------------------------------------ #
 
-    fixed_price = fields.Float(
-        string="Fixed Price",
-        compute="_compute_fixed_price",
-        inverse="_set_product_fixed_price",
-        store=True,
-    )
-
-    @api.depends("product_id.list_price", "product_id.product_tmpl_id.list_price")
-    def _compute_fixed_price(self):
-        for carrier in self:
-            carrier.fixed_price = carrier.product_id.list_price
-
-    def _set_product_fixed_price(self):
-        for carrier in self:
-            carrier.product_id.list_price = carrier.fixed_price
+    fixed_price = fields.Float(string="Fixed Price")
 
     def fixed_rate_shipment(self, order):
         carrier = self._match_address(order.partner_shipping_id)
@@ -526,7 +544,7 @@ class DeliveryCarrier(models.Model):
                 ),
                 "warning_message": False,
             }
-        price = order.pricelist_id._get_product_price(self.product_id, 1.0)
+        price = self._compute_currency(order, self.fixed_price, "company_to_pricelist")
         return {"success": True, "price": price, "error_message": False, "warning_message": False}
 
     # ----------------------------------- #
@@ -574,6 +592,33 @@ class DeliveryCarrier(models.Model):
             return company_currency, pricelist_currency
         if conversion == "pricelist_to_company":
             return pricelist_currency, company_currency
+
+    def _get_delivery_accounts(self, company):
+        """Return the income and expense accounts to use for this carrier in `company`.
+
+        The accounts set on the carrier take precedence over the default accounts of the
+        company accounting settings.
+
+        :param company: record of res.company
+        :return: a dict with the keys `income` and `expense`, holding account.account records
+        :rtype: dict
+        """
+        self.ensure_one()
+        carrier = self.with_company(company)
+        company = company.sudo()
+        return {
+            "income": carrier.income_account_id or company.income_account_id,
+            "expense": carrier.expense_account_id or company.expense_account_id,
+        }
+
+    def _get_delivery_line_name(self):
+        """Return the description of the sale order line holding the shipping costs.
+
+        :return: the description, in the language of the context
+        :rtype: str
+        """
+        self.ensure_one()
+        return self.name
 
     def _compute_currency(self, order, price, conversion):
         from_currency, to_currency = self._get_conversion_currencies(order, conversion)

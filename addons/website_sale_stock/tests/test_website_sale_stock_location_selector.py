@@ -18,9 +18,7 @@ class TestLocationSelectorController(WebsiteSaleCommon):
         super().setUpClass()
 
         cls.LocationSelectorController = LocationSelector()
-        cls.backend_dm = cls._prepare_carrier(
-            cls._prepare_carrier_product(list_price=0.0), name="Backend Delivery"
-        )
+        cls.backend_dm = cls._prepare_carrier(fixed_price=0.0, name="Backend Delivery")
         cls.salesman = cls.env["res.users"].create({
             "name": "Test Salesman",
             "login": "test_salesman_pickup_locations",

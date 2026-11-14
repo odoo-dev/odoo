@@ -64,6 +64,34 @@ class SaleOrderLine(models.Model):
         undeletable_lines = super()._check_line_unlink()
         return undeletable_lines.filtered(lambda line: not line.is_delivery)
 
+    def _compute_invoice_policy(self):
+        # Shipping costs are not delivered as such: always invoice them on ordered quantities.
+        delivery_lines = self.filtered(lambda line: line.is_delivery and not line.product_id)
+        super(SaleOrderLine, self - delivery_lines)._compute_invoice_policy()
+        delivery_lines.invoice_policy = "order"
+
+    def _search_invoice_policy(self, operator, value):
+        if operator != "in":
+            return NotImplemented
+        delivery_domain = Domain("is_delivery", "=", True) & Domain("product_id", "=", False)
+        return (super()._search_invoice_policy(operator, value) & ~delivery_domain) | (
+            delivery_domain if "order" in value else Domain.FALSE
+        )
+
+    def _prepare_invoice_line(self, **optional_values):
+        res = super()._prepare_invoice_line(**optional_values)
+        if (
+            self.is_delivery
+            and not self.product_id
+            and self.order_id.carrier_id
+            and "account_id" not in optional_values
+        ):
+            order = self.order_id
+            account = order.carrier_id._get_delivery_accounts(order.company_id)["income"]
+            if account:
+                res["account_id"] = order.fiscal_position_id.map_account(account).id
+        return res
+
     def _compute_pricelist_item_id(self):
         delivery_lines = self.filtered("is_delivery")
         super(SaleOrderLine, self - delivery_lines)._compute_pricelist_item_id()
