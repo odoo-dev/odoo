@@ -69,6 +69,9 @@
             <xpath expr="//field[@name='invoice_line_ids']/list//column[@name='product_and_description']" position="after">
                 <field name="l10n_in_hsn_code" optional="hide" column_invisible="parent.country_code != 'IN'"/>
             </xpath>
+            <xpath expr="//field[@name='invoice_line_ids']/list//field[@name='tax_ids']" position="attributes">
+                <attribute name="widget">l10n_in_tcs_tax_tags</attribute>
+            </xpath>
             <xpath expr="//field[@name='line_ids']/list//field[@name='name']" position="after">
                 <field name="l10n_in_hsn_code" optional="hide" column_invisible="parent.country_code != 'IN'"/>
             </xpath>

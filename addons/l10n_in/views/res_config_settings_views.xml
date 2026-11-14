@@ -32,7 +32,7 @@
                             <field name="module_l10n_in_boe"/>
                         </setting>
                         <setting name="l10n_in_tcs"
-                                 help="Enable this to activate the Tax Collected at Source (TCS) feature."
+                                 help="Enable Tax Collected at Source (TCS). Adding or removing a TCS tax on an invoice line lets you apply the same change to the other invoice lines."
                                  company_dependent="1"
                                  string="TCS"
                                  documentation="/applications/finance/fiscal_localizations/india.html">
