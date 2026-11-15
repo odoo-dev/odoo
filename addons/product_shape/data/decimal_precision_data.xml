@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="decimal_shape_dimension" model="decimal.precision">
+        <field name="name">Shape Dimension</field>
+        <field name="digits">2</field>
+    </record>
+</odoo>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_production_lot_form" model="ir.ui.view">
+        <field name="name">stock.lot.form.inherit.product.shape</field>
+        <field name="model">stock.lot</field>
+        <field name="inherit_id" ref="stock.view_production_lot_form"/>
+        <field name="arch" type="xml">
+            <group name="main_group" position="inside">
+                <group string="Size" name="shape_size" invisible="not shape_type">
+                    <field name="shape_type" invisible="1"/> <!-- hides the size of lots of products without a shape -->
+                    <field name="shape_height" invisible="shape_type in ('square', 'round', 'hexagonal', 'octagonal')"/>
+                    <field name="shape_length" invisible="shape_type == 'ring'"/>
+                    <field name="shape_width"/>
+                    <field name="shape_inner_diameter" invisible="shape_type != 'ring'"/>
+                    <field name="shape_dimension_uom_id"/>
+                    <field name="shape_pcs"/>
+                    <field name="shape_weight"/>
+                </group>
+            </group>
+        </field>
+    </record>
+
+    <record id="view_production_lot_tree" model="ir.ui.view">
+        <field name="name">stock.lot.list.inherit.product.shape</field>
+        <field name="model">stock.lot</field>
+        <field name="inherit_id" ref="stock.view_production_lot_tree"/>
+        <field name="arch" type="xml">
+            <field name="product_qty" position="after">
+                <field name="shape_pcs" optional="show"/>
+                <field name="shape_weight" optional="hide"/>
+            </field>
+        </field>
+    </record>
+</odoo>
