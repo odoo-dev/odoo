@@ -295,6 +295,43 @@ class TestLotValuation(TestStockValuationCommon):
         self.assertEqual(lot4.product_qty, 1)
         self.assertEqual(lot4.total_value, 7)
 
+    def test_inventory_adjustment_new_lot_avco_product_value(self):
+        """ Applying a physical inventory on a new lot of an AVCO lot valuated product
+        updates the product cost incrementally; the result must match the value of its lots. """
+        self._make_in_move(self.product, 10, 5, lot_ids=[self.lot1])
+        self._make_in_move(self.product, 10, 9, lot_ids=[self.lot2])
+        self.assertEqual(self.product.standard_price, 7)
+        self.assertEqual(self.product.total_value, 140)
+
+        lot4 = self.env['stock.lot'].create({
+            'name': 'lot4',
+            'product_id': self.product.id,
+            'standard_price': 18,
+        })
+        self.env['stock.quant'].create({
+            'location_id': self.stock_location.id,
+            'product_id': self.product.id,
+            'lot_id': lot4.id,
+            'inventory_quantity': 2,
+        }).action_apply_inventory()
+
+        # new lot is valued at its own cost
+        self.assertEqual(lot4.product_qty, 2)
+        self.assertEqual(lot4.standard_price, 18)
+        self.assertEqual(lot4.total_value, 36)
+        # existing lots are untouched
+        self.assertEqual(self.lot1.total_value, 50)
+        self.assertEqual(self.lot2.total_value, 90)
+        # product: (10 * 5 + 10 * 9 + 2 * 18) / 22 = 8
+        self.assertEqual(self.product.qty_available, 22)
+        self.assertEqual(self.product.standard_price, 8)
+        self.assertEqual(self.product.total_value, 176)
+        self.assertEqual(self.product.avg_cost, 8)
+        self.assertEqual(
+            self.product.total_value,
+            sum((self.lot1 | self.lot2 | lot4).mapped('total_value')),
+        )
+
     def test_lot_qty_in_nested_internal_location(self):
         """Lot/product valuation should include nested valued internal locations."""
         shelf1 = self.env['stock.location'].create({

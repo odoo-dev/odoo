@@ -636,7 +636,11 @@ class ProductProduct(models.Model):
         """
         products_by_cost_method = defaultdict(set)
         for product in self:
-            if product.lot_valuated and product.cost_method != 'standard':
+            # The cost of an AVCO lot valuated product is the average of its lots: adding the value
+            # of the incoming moves to the current total gives the same result as summing every lot again.
+            if product.lot_valuated and product.cost_method != 'standard' and not (
+                product.cost_method == 'average' and extra_quantity is not None and product in (extra_value or {})
+            ):
                 product.sudo().with_context(
                     disable_auto_revaluation=True
                 ).standard_price = product.with_context(allowed_company_ids=self.env.company.ids).avg_cost
