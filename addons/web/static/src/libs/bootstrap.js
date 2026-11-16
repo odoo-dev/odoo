@@ -8,25 +8,33 @@ import { compensateScrollbar, getScrollingElement } from "@web/core/utils/scroll
 /**
  * `_queueCallback`/`executeAfterTransition` waits for a CSS transition on an
  * element before running a callback, with a `setTimeout` fallback in case
- * the transition event never fires. That timeout is not cancelled if the
- * element gets removed/replaced in the meantime (e.g. a template re-render
- * discarding it), so the callback can still fire later against an element
- * that is no longer part of the page - and, transitively, against whatever
- * component instance owned it, which may by then be disposed. Skip it in
- * that case: there is nothing left on screen for it to act on.
+ * the transition event never fires. That timeout is not cancelled when the
+ * component is disposed in the meantime (e.g. a template re-render discarding
+ * its element), so the callback can still fire later against the disposed
+ * instance, whose properties have been nulled, and crash. Skip it in that
+ * case only: a component still alive must run it, even if its element has
+ * been removed, e.g. so that a Modal or an Offcanvas releases the body.
  */
-const bsExecuteAfterTransition = window.Index.executeAfterTransition;
-window.Index.executeAfterTransition = function (callback, transitionElement, waitForTransition) {
-    return bsExecuteAfterTransition(
-        () => {
-            if (transitionElement.isConnected) {
-                callback();
-            }
-        },
-        transitionElement,
-        waitForTransition
-    );
-};
+if (window.BaseComponent) {
+    window.BaseComponent.prototype._queueCallback = function (
+        callback,
+        element,
+        isAnimated = true
+    ) {
+        window.Index.executeAfterTransition(() => this._element && callback(), element, isAnimated);
+    };
+}
+if (window.Backdrop) {
+    // Disposing a Modal/Offcanvas disposes its Backdrop, whose pending `show`
+    // callback would otherwise run against the disposed component.
+    window.Backdrop.prototype._emulateAnimation = function (callback) {
+        window.Index.executeAfterTransition(
+            () => this._isAppended && callback(),
+            this._getElement(),
+            this._config.isAnimated
+        );
+    };
+}
 
 if (window.Tooltip) {
     /**
