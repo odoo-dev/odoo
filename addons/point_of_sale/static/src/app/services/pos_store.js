@@ -262,31 +262,44 @@ export class PosStore extends WithLazyGetterTrap {
         if (!searchProductWord?.length) {
             return;
         }
-        this.searchProductDBState = this.searchProductDBState || {};
-        if (searchProductWord !== this.searchProductDBState.query) {
+
+        if (searchProductWord !== this.searchProductDBState?.query) {
             this.searchProductDBState = {
                 query: searchProductWord,
             };
         }
-        const { query = "", previousQuery = "" } = this.searchProductDBState;
-        const { offset = 0 } = this.searchProductDBState;
+
+        const searchProductDBState = this.searchProductDBState;
+        const { query = "", previousQuery = "", offset = 0 } = searchProductDBState;
+
         this.setSelectedCategory(0);
+
         const domain = this.searchProductsFromDBDomain(query);
         const { limit_categories, iface_available_categ_ids } = this.config;
+
         if (limit_categories && iface_available_categ_ids.length > 0) {
             const categIds = iface_available_categ_ids.map((categ) => categ.id);
             domain.push(["pos_categ_ids", "in", categIds]);
         }
+
         const loadResult = await this.loadNewProducts(domain, offset, 30);
+
+        // Ignore outdated search results if the state has changed.
+        if (this.searchProductDBState !== searchProductDBState) {
+            return;
+        }
+
         const result = loadResult["product.product"];
+
+        if (previousQuery === query) {
+            searchProductDBState.offset += result.length;
+        } else {
+            searchProductDBState.previousQuery = query;
+            searchProductDBState.offset = result.length;
+        }
+
         if (result.length === 0) {
             this.notification.add(_t('No other products found for "%s".', query), 3000);
-        }
-        if (previousQuery === query) {
-            this.searchProductDBState.offset += result.length;
-        } else {
-            this.searchProductDBState.previousQuery = query;
-            this.searchProductDBState.offset = result.length;
         }
     }
 
