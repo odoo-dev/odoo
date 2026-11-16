@@ -101,7 +101,11 @@
     }
 }
 
+html {
+    height: 100%;
+}
+
 .o_hr_attendance_kiosk_body {
-    height: 100vh;
+    height: 100%;
     overflow: hidden;
 }
