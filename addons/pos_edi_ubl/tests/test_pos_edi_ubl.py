@@ -17,10 +17,6 @@ class TestPosEdiUbl(TestPoSCommon):
     def _export(self, order):
         xml, errors = self.env['pos.edi.xml.ubl_21']._export_pos_order(order)
         self.assertFalse(errors)
-        import os  # TMPDUMP
-        if os.environ.get('UBL_DUMP_DIR'):  # TMPDUMP
-            with open(os.path.join(os.environ['UBL_DUMP_DIR'], f"pos_{order.id}.xml"), 'wb') as f:  # TMPDUMP
-                f.write(xml)  # TMPDUMP
         return etree.fromstring(xml)
 
     def test_export_pos_order_and_refund(self):

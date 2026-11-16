@@ -224,7 +224,7 @@ class AccountMove(models.Model):
         # We generate the XML content
         xml_content = self._l10n_sa_generate_zatca_template()
         # Once the required values are generated, we hash the invoice, then use it to generate a Signature
-        invoice_hash_hex = self.env['account.edi.xml.ubl_21.zatca']._l10n_sa_generate_invoice_xml_hash(xml_content).decode()
+        invoice_hash_hex = self.env['account.edi.xml.ubl_zatca']._l10n_sa_generate_invoice_xml_hash(xml_content).decode()
         self.l10n_sa_invoice_signature = self.env['l10n_sa_edi.document']._l10n_sa_get_digital_signature(self.journal_id.company_id,
                                                                                    invoice_hash_hex).decode()
         return xml_content
@@ -249,12 +249,12 @@ class AccountMove(models.Model):
         Seller Vat Number (BT-31), Date (BT-2), Time (KSA-25), Invoice Number (BT-1)
         """
         if self._is_l10n_sa_eligibile_invoice():
-            return self.with_context(l10n_sa_file_format=False).env['account.edi.xml.ubl_21.zatca']._export_invoice_filename(self)
+            return self.with_context(l10n_sa_file_format=False).env['account.edi.xml.ubl_zatca']._export_invoice_filename(self)
         return super()._get_report_base_filename()
 
     def _get_invoice_report_filename(self, extension='pdf', report=None):
         if self._is_l10n_sa_eligibile_invoice():
-            return self.with_context(l10n_sa_file_format=extension).env['account.edi.xml.ubl_21.zatca']._export_invoice_filename(self)
+            return self.with_context(l10n_sa_file_format=extension).env['account.edi.xml.ubl_zatca']._export_invoice_filename(self)
         return super()._get_invoice_report_filename(extension, report)
 
     def _prepare_tax_lines_for_taxes_computation(self, tax_amls, round_from_tax_lines):
@@ -268,7 +268,10 @@ class AccountMove(models.Model):
 
     def _get_l10n_sa_totals(self):
         self.ensure_one()
-        invoice_node = self.env['account.edi.xml.ubl_21.zatca']._get_invoice_node({'invoice': self})
+        edi_builder = self.env['account.edi.xml.ubl_zatca']
+        vals = edi_builder._init_invoice_export_values(self)
+        edi_builder._export_document(vals)
+        invoice_node = vals['document_node']
         return {
             'total_amount': invoice_node['cac:LegalMonetaryTotal']['cbc:TaxInclusiveAmount']['_text'],
             'total_tax': invoice_node['cac:TaxTotal'][-1]['cbc:TaxAmount']['_text'],
@@ -302,7 +305,7 @@ class AccountMove(models.Model):
     def _l10n_sa_generate_zatca_template(self):
         """Render the ZATCA UBL file"""
         self.ensure_one()
-        xml_content, errors = self.env['account.edi.xml.ubl_21.zatca']._export_invoice(self)
+        xml_content, errors = self.env['account.edi.xml.ubl_zatca']._export_invoice(self)
         if errors:
             raise ValidationError(self.env._("Could not generate Invoice UBL content: %s", ", \n".join(errors)))
 

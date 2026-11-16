@@ -66,12 +66,6 @@ class TestUBLRS(TestUBLCommon):
             **invoice_kwargs,
         )
 
-    def _dump(self, name, xml):
-        import os  # TMPDUMP
-        if os.environ.get('UBL_DUMP_DIR'):  # TMPDUMP
-            with open(os.path.join(os.environ['UBL_DUMP_DIR'], f"rs_{name}.xml"), 'wb') as f:  # TMPDUMP
-                f.write(xml)  # TMPDUMP
-
     def _read_xml_test_file(self, file_name):
         with misc.file_open(f'{self.test_module}/tests/test_files/{file_name}.xml', 'rb') as file:
             xml_file = file.read()
@@ -80,7 +74,6 @@ class TestUBLRS(TestUBLCommon):
     def test_export_invoice(self):
         invoice = self._create_invoice_rs("out_invoice")
         invoice_xml, _ = self.env['account.edi.xml.ubl.rs']._export_invoice(invoice)
-        self._dump('invoice', invoice_xml)  # TMPDUMP
         expected_xml = self._read_xml_test_file('export_invoice')
         self.assertXmlTreeEqual(
             self.get_xml_tree_from_string(invoice_xml),
@@ -90,7 +83,6 @@ class TestUBLRS(TestUBLCommon):
     def test_export_credit_note(self):
         refund = self._create_invoice_rs("out_refund")
         refund_xml, _ = self.env['account.edi.xml.ubl.rs']._export_invoice(refund)
-        self._dump('credit_note', refund_xml)  # TMPDUMP
         expected_xml = self._read_xml_test_file('export_credit_note')
         self.assertXmlTreeEqual(
             self.get_xml_tree_from_string(refund_xml),

@@ -74,14 +74,6 @@ class AccountEdiXmlPint_My(models.AbstractModel):
             return 'urn:peppol:pint:billing-1@my-1'
         return None
 
-    def _ubl_add_line_allowance_charge_nodes(self, vals):
-        # EXTENDS account.edi.ubl
-        # Invoice line allowances (ibg-27) and charges (ibg-28).
-        super()._ubl_add_line_allowance_charge_nodes(vals)
-        self._ubl_add_line_allowance_charge_nodes_for_discount(vals)
-        self._ubl_add_line_allowance_charge_nodes_for_recycling_contribution_taxes(vals)
-        self._ubl_add_line_allowance_charge_nodes_for_excise_taxes(vals)
-
     def _ubl_add_tax_totals_nodes(self, vals):
         # EXTENDS account.edi.ubl
         super()._ubl_add_tax_totals_nodes(vals)

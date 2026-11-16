@@ -119,13 +119,6 @@ class TestUBLDKOIOUBL21(TestUBLCommon, TestAccountMoveSendCommon):
             self._send_patched(invoice)
         return invoice
 
-    def _assert_invoice_attachment(self, xml_file, xpaths, expected_file_path):
-        import os  # TMPDUMP
-        if os.environ.get('UBL_DUMP_DIR'):  # TMPDUMP
-            with open(os.path.join(os.environ['UBL_DUMP_DIR'], f"dk_{self._testMethodName}.xml"), 'wb') as f:  # TMPDUMP
-                f.write(xml_file.content)  # TMPDUMP
-        return super()._assert_invoice_attachment(xml_file, xpaths, expected_file_path)  # TMPDUMP
-
     @classmethod
     def _send_patched(cls, invoice):
 

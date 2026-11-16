@@ -1,6 +1,6 @@
-from . import zatca_ubl_mixin  # Needs to be imported before account_edi_xml_ubl_21_zatca since it's inherited
+from . import zatca_ubl_mixin  # Needs to be imported before account_edi_xml_ubl_zatca since it is inherited
 from . import account_chart_template
-from . import account_edi_xml_ubl_21_zatca
+from . import account_edi_xml_ubl_zatca
 from . import account_journal
 from . import account_move
 from . import account_move_send

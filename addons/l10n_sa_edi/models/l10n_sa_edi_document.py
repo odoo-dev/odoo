@@ -150,7 +150,7 @@ class L10nSaEdiDocument(models.Model):
         _set_content("//*[local-name()='SignedSignatureProperties']//*[local-name()='DigestValue']", public_key_hashing)
 
         prehash_content = etree.tostring(root)
-        invoice_hash = self.env['account.edi.xml.ubl_21.zatca']._l10n_sa_generate_invoice_xml_hash(prehash_content, 'digest')
+        invoice_hash = self.env['account.edi.xml.ubl_zatca']._l10n_sa_generate_invoice_xml_hash(prehash_content, 'digest')
 
         _set_content("//*[local-name()='SignatureValue']", signature)
         _set_content("//*[local-name()='X509Certificate']", der_cert.decode())
@@ -326,7 +326,7 @@ class L10nSaEdiDocument(models.Model):
         return self._l10n_sa_submit_einvoice(signed_xml, PCSID_data), signed_xml.decode()
 
     def _l10n_sa_generate_attachment(self, content, is_rejected=False):
-        name = self.env['account.edi.xml.ubl_21.zatca']._export_invoice_filename(self.resource)
+        name = self.env['account.edi.xml.ubl_zatca']._export_invoice_filename(self.resource)
         description = False
         if is_rejected:
             name = name[:-4] + '-rejected.xml'
@@ -343,7 +343,7 @@ class L10nSaEdiDocument(models.Model):
 
     def _l10n_sa_handle_submission_error(self, response_data, xml_content, notify):
         self.ensure_one()
-        ubl_edi = self.env['account.edi.xml.ubl_21.zatca']
+        ubl_edi = self.env['account.edi.xml.ubl_zatca']
         attachment = False
 
         # Timeout / Network Exception --> State = 'unknown'
@@ -428,7 +428,7 @@ class L10nSaEdiDocument(models.Model):
 
         if not is_unknown_retry:
             self.journal_id.sudo().l10n_sa_latest_submission_hash = (
-                self.env['account.edi.xml.ubl_21.zatca']._l10n_sa_generate_invoice_xml_hash(
+                self.env['account.edi.xml.ubl_zatca']._l10n_sa_generate_invoice_xml_hash(
                     cleared_xml.encode(),
                 )
             )
@@ -499,7 +499,7 @@ class L10nSaEdiDocument(models.Model):
 
         qr_code_str = b''
         root = etree.fromstring(unsigned_xml)
-        edi_format = self.env['account.edi.xml.ubl_21.zatca']
+        edi_format = self.env['account.edi.xml.ubl_zatca']
 
         # Indent XML content to avoid indentation mismatches
         etree.indent(root, space='    ')

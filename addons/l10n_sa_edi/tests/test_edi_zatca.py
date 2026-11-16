@@ -433,7 +433,7 @@ class TestEdiZatca(TestSaEdiCommon):
         xml_root = etree.fromstring(xml_content)
         xml_company_name = xml_root.xpath(
             "//cac:AccountingSupplierParty/cac:Party/cac:PartyName/cbc:Name",
-            namespaces=self.env['account.edi.xml.ubl_21.zatca']._l10n_sa_get_namespaces()
+            namespaces=self.env['account.edi.xml.ubl_zatca']._l10n_sa_get_namespaces()
         )[0].text.strip()
 
         # Fetch company name from QR code
@@ -475,7 +475,7 @@ class TestEdiZatca(TestSaEdiCommon):
         # Get PriceAmount from XML
         price_amount_nodes = xml_root.xpath(
             "//cac:InvoiceLine/cac:Price/cbc:PriceAmount",
-            namespaces=self.env['account.edi.xml.ubl_21.zatca']._l10n_sa_get_namespaces()
+            namespaces=self.env['account.edi.xml.ubl_zatca']._l10n_sa_get_namespaces()
         )
         self.assertTrue(price_amount_nodes, "PriceAmount node not found in XML")
         price_amount_str = price_amount_nodes[0].text
@@ -505,7 +505,7 @@ class TestEdiZatca(TestSaEdiCommon):
         invoice.action_post()
         xml_content = invoice._l10n_sa_generate_zatca_template()
         xml_root = etree.fromstring(xml_content)
-        namespaces = self.env['account.edi.xml.ubl_21.zatca']._l10n_sa_get_namespaces()
+        namespaces = self.env['account.edi.xml.ubl_zatca']._l10n_sa_get_namespaces()
 
         for line in xml_root.xpath('//cac:InvoiceLine', namespaces=namespaces):
             line_ext = float(line.xpath('cbc:LineExtensionAmount/text()', namespaces=namespaces)[0])
@@ -677,7 +677,7 @@ class TestEdiZatca(TestSaEdiCommon):
         xml_root = etree.fromstring(xml_content)
         payable_amount = xml_root.xpath(
             "//cbc:PayableAmount",
-            namespaces=self.env['account.edi.xml.ubl_21.zatca']._l10n_sa_get_namespaces()
+            namespaces=self.env['account.edi.xml.ubl_zatca']._l10n_sa_get_namespaces()
         )[0].text.strip()
         self.assertEqual(payable_amount, '115.00')
 
@@ -727,7 +727,7 @@ class TestEdiZatca(TestSaEdiCommon):
         final = final_wizard._create_invoices(sale_order)
         final.action_post()
 
-        EdiHandler = self.env['account.edi.xml.ubl_21.zatca']
+        EdiHandler = self.env['account.edi.xml.ubl_zatca']
 
         # Generate EDI document and verify tax amount and payable amount
         xml_content = final._l10n_sa_generate_zatca_template()
@@ -868,5 +868,5 @@ class TestEdiZatca(TestSaEdiCommon):
             'origin_import_file_type': False,
         }
         unwrapped_xml = self.env['account.move']._unwrap_attachment(to_unwrap)[0]
-        self.assertEqual(unwrapped_xml['import_file_type'], 'account.edi.xml.ubl_21')
+        self.assertEqual(unwrapped_xml['import_file_type'], 'account.edi.ubl')
         self.assertEqual(unwrapped_xml['name'], invoice.l10n_sa_edi_document_id.name)

@@ -55,22 +55,6 @@ class AccountEdiCenEn16931(models.AbstractModel):
         # The cash rounding is reported as the Rounding amount (BT-114).
         return False
 
-    def _get_business_term_max_lengths(self):
-        # EXTENDS account.edi.common
-        # The French CIUS (BR-FR-MAP-17/18/19) caps the length of these business terms. As those caps are harmless for
-        # every other receiver, and avoid rejections of documents transmitted to France, they are applied to every
-        # EN 16931 document.
-        return {
-            **super()._get_business_term_max_lengths(),
-            'BT-22': 1024,  # Invoice note
-            'BT-35': 255,  # Address line 1 (BT-35, BT-50, BT-75, ...)
-            'BT-36': 255,  # Seller address line 2
-            'BT-37': 255,  # Seller city
-            'BT-38': 10,  # Seller post code
-            'BT-39': 255,  # Seller country subdivision
-            'BT-153': 255,  # Item name
-        }
-
     def _should_export_party_tax_scheme(self, vals):
         # EXTENDS account.edi.common
         # [BR-O-02]/[BR-O-03]/[BR-O-04] An invoice with the VAT category "Not subject to VAT" (O) shall not contain the

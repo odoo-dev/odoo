@@ -439,6 +439,25 @@ class TestExportPintAe(TestUblCiiCommon):
         self.assertIsNone(tree.find('{*}BillingReference'))
         self.assertEqual(tree.findtext('{*}DiscrepancyResponse/{*}ResponseCode'), 'VD')
 
+    def test_export_line_discount(self):
+        """ A line discount is an invoice line allowance (ibg-27): the line net amount (ibt-131) is discounted. """
+        invoice = self._create_invoice(
+            move_type='out_invoice',
+            partner_id=self.partner_ae,
+            invoice_line_ids=[self._prepare_invoice_line(product_id=self.product_a, price_unit=1000.0, discount=10.0, tax_ids=self.tax_sale_a)],
+            name='INV/2025/00001',
+            post=True,
+        )
+        xml_content, errors = self.env['account.edi.xml.pint_ae']._export_invoice(invoice)
+        self.assertFalse(errors)
+        tree = etree.fromstring(xml_content)
+        line = tree.find('{*}InvoiceLine')
+        self.assertEqual(line.findtext('{*}LineExtensionAmount'), '900.00')
+        self.assertEqual(line.findtext('{*}AllowanceCharge/{*}ChargeIndicator'), 'false')
+        self.assertEqual(line.findtext('{*}AllowanceCharge/{*}Amount'), '100.00')
+        self.assertEqual(tree.findtext('{*}LegalMonetaryTotal/{*}LineExtensionAmount'), '900.00')
+        self.assertEqual(tree.findtext('{*}LegalMonetaryTotal/{*}PayableAmount'), f'{invoice.amount_total:.2f}')
+
     def test_export_line_without_product(self):
         invoice = self._create_invoice(
             move_type='out_invoice',

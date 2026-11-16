@@ -1999,14 +1999,19 @@ class AccountEdiCommon(models.AbstractModel):
     def _import_prepare_missing_customer_create_values(self, collected_values):
         customer_values = collected_values['customer_values']
         partner_create_values = {}
-        for key in ('phone', 'name', 'email', 'street', 'street2', 'zip', 'city', 'routing_scheme', 'routing_endpoint'):
+        for key in ('phone', 'name', 'email', 'street', 'street2', 'zip', 'city'):
             if value := customer_values.get(key):
                 partner_create_values[key] = value
 
         if valid_identifiers := self._import_get_valid_additional_identifiers(customer_values):
             partner_create_values['additional_identifiers'] = valid_identifiers
 
-        if (scheme := customer_values.get('routing_scheme')) and (endpoint := customer_values.get('routing_endpoint')):
+        if (
+            (scheme := customer_values.get('routing_scheme'))
+            and (endpoint := customer_values.get('routing_endpoint'))
+            # e.g. 'GLN' (PEPPOL BIS 2 schemes) is not an EAS code.
+            and scheme in dict(self.env['res.partner']._fields['routing_scheme'].selection)
+        ):
             result = self.env['res.partner']._validate_identifier_by_scheme(scheme, endpoint)
             if result['valid']:
                 partner_create_values['routing_scheme'] = scheme

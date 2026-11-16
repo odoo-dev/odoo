@@ -1,6 +1,5 @@
-from odoo import _, models
-from odoo.tools import formatLang, html2plaintext
-from odoo.tools.misc import NON_BREAKING_SPACE
+from odoo import models
+from odoo.tools import html2plaintext
 from odoo.addons.account_edi_cii.models.account_edi_common import FloatFmt
 
 
@@ -44,40 +43,18 @@ class AccountEdiUBLPint(models.AbstractModel):
         elif self._is_document(vals, 'self_credit_note'):
             vals['document_node']['cbc:CreditNoteTypeCode']['_text'] = 261
 
+    def _ubl_report_withholding_taxes_as_prepaid_amount(self, vals):
+        # EXTENDS account.edi.ubl
+        # WithholdingTaxTotal is not part of the PINT syntax: the withheld amount is reported as a PrepaidAmount.
+        return True
+
     def _ubl_add_notes_nodes_all_invoices(self, vals):
         invoice = vals['invoice']
         notes = []
 
-        # WithholdingTaxTotal is not allowed.
-        # Instead, withholding tax amounts are reported as a PrepaidAmount.
-        AccountTax = self.env['account.tax']
-        base_lines = vals['base_lines']
-        currency = vals['currency']
-
-        def grouping_function(base_line, tax_data):
-            if not tax_data:
-                return
-            tax_grouping_key = self._get_tax_category_grouping_key(base_line, tax_data, vals, currency)
-            if not tax_grouping_key:
-                return
-            return tax_grouping_key['is_withholding']
-
-        base_lines_aggregated_values = AccountTax._aggregate_base_lines_tax_details(base_lines, grouping_function)
-        values_per_grouping_key = AccountTax._aggregate_base_lines_aggregated_values(base_lines_aggregated_values)
-        ubl_values = vals['_ubl_values']
-        ubl_values['tax_withholding_amount'] = 0.0
-        for grouping_key, values in values_per_grouping_key.items():
-            if not grouping_key:
-                continue
-
-            tax_amount = values['tax_amount_currency']
-            ubl_values['tax_withholding_amount'] -= tax_amount
-
-        if not currency.is_zero(ubl_values['tax_withholding_amount']):
-            notes.append(_(
-                "The prepaid amount of %s corresponds to the withholding tax applied.",
-                formatLang(self.env, ubl_values['tax_withholding_amount'], currency_obj=currency).replace(NON_BREAKING_SPACE, ''),
-            ))
+        # The explanation of the PrepaidAmount coming from the withholding taxes.
+        if withholding_note := self._ubl_get_tax_withholding_note(vals):
+            notes.append(withholding_note)
 
         terms_and_condition = html2plaintext(invoice.narration) if invoice.narration else None
         if terms_and_condition:
@@ -186,23 +163,24 @@ class AccountEdiUBLPint(models.AbstractModel):
         nodes = vals['party_node']['cac:PartyIdentification']
         partner = vals['party_vals']['partner']
         commercial_partner = partner.commercial_partner_id
-        country_code = commercial_partner.country_code
 
-        if country_code == 'BE' and (be_en := commercial_partner._get_additional_identifier('BE_EN')):
-            nodes.append({
-                'cbc:ID': {
-                    '_text': be_en,
-                    'schemeID': '0208',
-                },
-            })
+        self._ubl_add_party_identification_nodes_national(vals)
 
-        if not nodes and commercial_partner.ref and country_code != 'DK':  # DK-R-013
+        if not nodes and commercial_partner.ref and self._ubl_use_partner_ref_as_party_identification(vals):
             nodes.append({
                 'cbc:ID': {
                     '_text': commercial_partner.ref,
                     'schemeID': None,
                 },
             })
+
+    def _ubl_add_party_identification_nodes_national(self, vals):
+        """ Hook to add the party identifiers required by a jurisdiction (before falling back on the partner's ref). """
+        return
+
+    def _ubl_use_partner_ref_as_party_identification(self, vals):
+        """ Whether the internal reference of the partner is reported as party identifier when there is no other one. """
+        return True
 
     def _ubl_add_party_tax_scheme_nodes(self, vals):
         super()._ubl_add_party_tax_scheme_nodes(vals)
@@ -225,32 +203,6 @@ class AccountEdiUBLPint(models.AbstractModel):
     def _ubl_add_party_legal_entity_nodes(self, vals):
         super()._ubl_add_party_legal_entity_nodes(vals)
         self._ubl_add_party_legal_entity_nodes_iso_6523_icd(vals)
-
-    def _ubl_add_accounting_supplier_party_tax_scheme_nodes(self, vals):
-        super()._ubl_add_accounting_supplier_party_tax_scheme_nodes(vals)
-        nodes = vals['party_node']['cac:PartyTaxScheme']
-        partner = vals['party_vals']['partner']
-        commercial_partner = partner.commercial_partner_id
-        country_code = commercial_partner.country_code
-
-        if country_code == 'NO':
-            # [NO-R-002] For Norwegian suppliers, most invoice issuers are required to append
-            # "Foretaksregisteret" to their invoice.
-            nodes.append({
-                'cbc:CompanyID': {'_text': "Foretaksregisteret"},
-                'cac:TaxScheme': {
-                    'cbc:ID': {'_text': "TAX"},
-                },
-            })
-        elif country_code == 'SE':
-            # [SE-R-005] For Swedish suppliers, when using Seller tax registration identifier,
-            # 'Godkänd för F-skatt' must be stated
-            nodes.append({
-                'cbc:CompanyID': {'_text': "GODKÄND FÖR F-SKATT"},
-                'cac:TaxScheme': {
-                    'cbc:ID': {'_text': "TAX"},
-                },
-            })
 
     def _ubl_add_delivery_party_endpoint_id_node(self, vals):
         pass
@@ -276,6 +228,16 @@ class AccountEdiUBLPint(models.AbstractModel):
             node['cbc:ID']['schemeID'] = None
             node['cac:FinancialInstitution'] = None
         return node
+
+    def _ubl_add_line_allowance_charge_nodes(self, vals):
+        # EXTENDS account.edi.ubl
+        # Invoice line allowances (ibg-27) and charges (ibg-28): the line discount, the recycling contributions and
+        # the excises (not part of the tax breakdown). Without them, the line net amount (ibt-131) of a discounted line
+        # would be its gross amount.
+        super()._ubl_add_line_allowance_charge_nodes(vals)
+        self._ubl_add_line_allowance_charge_nodes_for_discount(vals)
+        self._ubl_add_line_allowance_charge_nodes_for_recycling_contribution_taxes(vals)
+        self._ubl_add_line_allowance_charge_nodes_for_excise_taxes(vals)
 
     def _ubl_get_tax_subtotal_node(self, vals, tax_subtotal):
         # This override is a fix for the taxes engine.
@@ -336,11 +298,6 @@ class AccountEdiUBLPint(models.AbstractModel):
     def _ubl_tax_totals_node_grouping_key(self, base_line, tax_data, vals, currency):
         tax_total_keys = super()._ubl_tax_totals_node_grouping_key(base_line, tax_data, vals, currency)
 
-        # WithholdingTaxTotal is not allowed.
-        # Instead, withholding tax amounts are reported as a PrepaidAmount.
-        if tax_total_keys['tax_total_key'] and tax_total_keys['tax_total_key']['is_withholding']:
-            tax_total_keys['tax_total_key'] = None
-
         # In case of multi-currencies, there will be 2 TaxTotals but the one expressed in
         # foreign currency must not have any TaxSubtotal.
         company_currency = vals['company'].currency_id
@@ -352,46 +309,6 @@ class AccountEdiUBLPint(models.AbstractModel):
             tax_total_keys['tax_subtotal_key'] = None
 
         return tax_total_keys
-
-    def _ubl_add_legal_monetary_total_payable_rounding_amount_node(self, vals):
-        super()._ubl_add_legal_monetary_total_payable_rounding_amount_node(vals)
-        currency = vals['currency']
-        node = vals['legal_monetary_total_node']
-
-        if self._is_document(vals, 'invoice', 'credit_note', 'self_invoice', 'self_credit_note'):
-            tax_withholding_amount = vals['_ubl_values']['tax_withholding_amount']
-
-            # WithholdingTaxTotal is not allowed.
-            # Instead, withholding tax amounts are reported as a PrepaidAmount.
-            # Since the UBL layer is putting the difference between TaxInclusiveAmount and the total
-            # amount of the base_lines in PayableRoundingAmount, the withholding tax amount ends there.
-            # Let's remove them since they are accounted in PrepaidAmount.
-            if tax_withholding_amount:
-                payable_rounding_amount_node = node['cbc:PayableRoundingAmount']
-                payable_rounding_amount = (payable_rounding_amount_node['_text'] or 0.0) + tax_withholding_amount
-                if currency.is_zero(payable_rounding_amount):
-                    payable_rounding_amount_node['_text'] = None
-                    payable_rounding_amount_node['currencyID'] = None
-                else:
-                    payable_rounding_amount_node['_text'] = FloatFmt(payable_rounding_amount, min_dp=currency.decimal_places)
-                    payable_rounding_amount_node['currencyID'] = currency.name
-
-    def _ubl_add_legal_monetary_total_prepaid_payable_amount_node(self, vals, in_foreign_currency=True):
-        super()._ubl_add_legal_monetary_total_prepaid_payable_amount_node(vals, in_foreign_currency=in_foreign_currency)
-        currency = vals['currency'] if in_foreign_currency else vals['company_currency']
-        node = vals['legal_monetary_total_node']
-
-        if self._is_document(vals, 'invoice', 'credit_note', 'self_invoice', 'self_credit_note'):
-            node['cbc:PrepaidAmount']['_text'] = FloatFmt(
-                node['cbc:PrepaidAmount']['_text']
-                # WithholdingTaxTotal is not allowed.
-                # Instead, withholding tax amounts are reported as a PrepaidAmount.
-                # Suppose an invoice of 1000 with a tax 21% +100 -100.
-                # The super will compute a PrepaidAmount or 0.0 and a PayableAmount or 1000.
-                # This extension is there to increase PrepaidAmount to 210 and PayableAmount to 1210.
-                + vals['_ubl_values']['tax_withholding_amount'],
-                min_dp=currency.decimal_places,
-            )
 
     def _ubl_prepare_base_lines(self, vals):
         # EXTENDS account.edi.ubl
@@ -593,15 +510,3 @@ class AccountEdiUBLPint(models.AbstractModel):
             return invoice._reason_cannot_decode_has_invoice_lines()
         return self._ubl_import_invoice(invoice, file_data, new=new)
 
-    def _import_prepare_missing_customer_create_values(self, collected_values):
-        partner_create_values = super()._import_prepare_missing_customer_create_values(collected_values)
-
-        customer_values = collected_values['customer_values']
-        if (
-                (routing_scheme := customer_values.get('routing_scheme'))
-                and (routing_endpoint := customer_values.get('routing_endpoint'))
-        ):
-            partner_create_values['routing_scheme'] = routing_scheme
-            partner_create_values['routing_endpoint'] = routing_endpoint
-
-        return partner_create_values

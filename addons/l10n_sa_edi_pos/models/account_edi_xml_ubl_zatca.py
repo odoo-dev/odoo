@@ -2,7 +2,7 @@ from odoo import models
 
 
 class AccountEdiXmlUBL21Zatca(models.AbstractModel):
-    _inherit = "account.edi.xml.ubl_21.zatca"
+    _inherit = "account.edi.xml.ubl_zatca"
 
     def _l10n_sa_get_payment_means_code(self, invoice):
         """

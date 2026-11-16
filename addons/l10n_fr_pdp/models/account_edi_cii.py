@@ -7,6 +7,20 @@ from odoo.addons.account_edi_cii.models.account_edi_cii import DEFAULT_CII_DATE_
 class L10nFRAccountEdiCii(models.AbstractModel):
     _inherit = "account.edi.cii"
 
+    def _get_business_term_max_lengths(self):
+        # EXTENDS account.edi.common
+        # [BR-FR-MAP-17/18/19] The French CIUS caps the length of some business terms.
+        return {
+            **super()._get_business_term_max_lengths(),
+            'BT-22': 1024,  # Invoice note
+            'BT-35': 255,  # Address line 1 (BT-35, BT-50, BT-75, ...)
+            'BT-36': 255,  # Address line 2
+            'BT-37': 255,  # City
+            'BT-38': 10,  # Post code
+            'BT-39': 255,  # Country subdivision
+            'BT-153': 255,  # Item name
+        }
+
     def _cii_add_exchanged_document_context_node(self, vals):
         node = vals['document_node'].setdefault('rsm:ExchangedDocumentContext', {})
         if vals['company']._get_peppol_proxy_type() == 'pdp':

@@ -8,6 +8,7 @@ from odoo import Command, _, api, fields, models
 from odoo.fields import Domain
 from odoo.tools import formatLang, frozendict, html2plaintext, html_escape, unique
 from odoo.tools.float_utils import float_compare
+from odoo.tools.misc import NON_BREAKING_SPACE
 from odoo.tools.partner_identifiers import get_tin_metadata_of_country
 
 from odoo.addons.account.tools import dict_to_xml
@@ -97,6 +98,48 @@ class AccountEdiUBL(models.AbstractModel):
     def _ubl_prepare_base_lines(self, vals):
         """ Hook to alter vals['base_lines'] before rounding them (e.g. to split some taxes into new lines). """
         return
+
+    def _ubl_report_withholding_taxes_as_prepaid_amount(self, vals):
+        """ Whether the withholding taxes are reported as a prepaid amount (cbc:PrepaidAmount, explained in the
+        document note) instead of a cac:WithholdingTaxTotal, for the formats not supporting the latter (EN 16931, PINT).
+        """
+        return False
+
+    def _ubl_get_tax_withholding_amount(self, vals):
+        """ The amount withheld by the withholding taxes of the document (positive), in the document currency. """
+        ubl_values = vals['_ubl_values']
+        if 'tax_withholding_amount' not in ubl_values:
+            AccountTax = self.env['account.tax']
+            currency = vals['currency']
+
+            def grouping_function(base_line, tax_data):
+                if not tax_data:
+                    return None
+                tax_grouping_key = self._get_tax_category_grouping_key(base_line, tax_data, vals, currency)
+                if not tax_grouping_key:
+                    return None
+                return tax_grouping_key['is_withholding']
+
+            base_lines_aggregated_values = AccountTax._aggregate_base_lines_tax_details(vals['base_lines'], grouping_function)
+            values_per_grouping_key = AccountTax._aggregate_base_lines_aggregated_values(base_lines_aggregated_values)
+            ubl_values['tax_withholding_amount'] = 0.0
+            for grouping_key, values in values_per_grouping_key.items():
+                if grouping_key:
+                    ubl_values['tax_withholding_amount'] -= values['tax_amount_currency']
+        return ubl_values['tax_withholding_amount']
+
+    def _ubl_get_tax_withholding_note(self, vals):
+        """ The note explaining the prepaid amount coming from the withholding taxes, if reported this way. """
+        if not self._ubl_report_withholding_taxes_as_prepaid_amount(vals):
+            return None
+        currency = vals['currency']
+        tax_withholding_amount = self._ubl_get_tax_withholding_amount(vals)
+        if currency.is_zero(tax_withholding_amount):
+            return None
+        return _(
+            "The prepaid amount of %s corresponds to the withholding tax applied.",
+            formatLang(self.env, tax_withholding_amount, currency_obj=currency).replace(NON_BREAKING_SPACE, ''),
+        )
 
     def _get_customization_id(self, process_type='billing'):
         """ The specification identifier (BT-24, cbc:CustomizationID) of the documents produced by this format.
@@ -481,7 +524,7 @@ class AccountEdiUBL(models.AbstractModel):
     def _ubl_add_line_period_nodes(self, vals):
         nodes = vals['line_node']['cac:InvoicePeriod'] = []
 
-        if self._is_document(vals, 'invoice', 'credit_note', 'self_invoice', 'self_credit_note'):
+        if self._is_document(vals, 'invoice', 'credit_note', 'debit_note', 'self_invoice', 'self_credit_note'):
             base_line = vals['line_vals']['base_line']
             if base_line.get('deferred_start_date') or base_line.get('deferred_end_date'):
                 nodes.append({
@@ -766,7 +809,7 @@ class AccountEdiUBL(models.AbstractModel):
             node['cac:DeliveryLocation']['cbc:ID']['schemeID'] = '0088'
             node['cac:DeliveryLocation']['cbc:ID']['_text'] = delivery_partner.global_location_number
 
-        if self._is_document(vals, 'invoice', 'credit_note', 'self_invoice', 'self_credit_note'):
+        if self._is_document(vals, 'invoice', 'credit_note', 'debit_note', 'self_invoice', 'self_credit_note'):
             invoice = vals['invoice']
             if invoice.delivery_date:
                 node['cbc:ActualDeliveryDate']['_text'] = invoice.delivery_date
@@ -863,7 +906,7 @@ class AccountEdiUBL(models.AbstractModel):
     def _ubl_add_id_node(self, vals):
         vals['document_node']['cbc:ID'] = {'_text': None}
 
-        if self._is_document(vals, 'invoice', 'credit_note', 'self_invoice', 'self_credit_note'):
+        if self._is_document(vals, 'invoice', 'credit_note', 'debit_note', 'self_invoice', 'self_credit_note'):
             vals['document_node']['cbc:ID']['_text'] = vals['invoice'].name
 
     def _ubl_add_copy_indicator_node(self, vals):
@@ -873,13 +916,13 @@ class AccountEdiUBL(models.AbstractModel):
         issue_date_node = vals['document_node']['cbc:IssueDate'] = {'_text': None}
         vals['document_node']['cbc:IssueTime'] = {'_text': None}
 
-        if self._is_document(vals, 'invoice', 'credit_note', 'self_invoice', 'self_credit_note'):
+        if self._is_document(vals, 'invoice', 'credit_note', 'debit_note', 'self_invoice', 'self_credit_note'):
             issue_date_node['_text'] = vals['invoice'].invoice_date
 
     def _ubl_add_due_date_node(self, vals):
         due_date_node = vals['document_node']['cbc:DueDate'] = {'_text': None}
 
-        if self._is_document(vals, 'invoice', 'credit_note', 'self_invoice', 'self_credit_note'):
+        if self._is_document(vals, 'invoice', 'credit_note', 'debit_note', 'self_invoice', 'self_credit_note'):
             due_date_node['_text'] = vals['invoice'].invoice_date_due
 
     def _ubl_add_invoice_type_code_node(self, vals):
@@ -926,7 +969,7 @@ class AccountEdiUBL(models.AbstractModel):
             },
         }
 
-        if self._is_document(vals, 'invoice', 'credit_note', 'self_invoice', 'self_credit_note'):
+        if self._is_document(vals, 'invoice', 'credit_note', 'debit_note', 'self_invoice', 'self_credit_note'):
             invoice = vals['invoice']
 
             # Purchase order reference
@@ -1036,7 +1079,7 @@ class AccountEdiUBL(models.AbstractModel):
     def _ubl_add_payment_means_nodes(self, vals):
         vals['document_node']['cac:PaymentMeans'] = []
 
-        if self._is_document(vals, 'invoice', 'credit_note', 'self_invoice', 'self_credit_note'):
+        if self._is_document(vals, 'invoice', 'credit_note', 'debit_note', 'self_invoice', 'self_credit_note'):
             self._ubl_add_payment_means_nodes_all_invoices(vals)
 
     def _ubl_get_payment_terms_node_from_payment_term(self, vals, payment_term):
@@ -1051,7 +1094,7 @@ class AccountEdiUBL(models.AbstractModel):
     def _ubl_add_payment_terms_nodes(self, vals):
         nodes = vals['document_node']['cac:PaymentTerms'] = []
 
-        if self._is_document(vals, 'invoice', 'credit_note', 'self_invoice', 'self_credit_note'):
+        if self._is_document(vals, 'invoice', 'credit_note', 'debit_note', 'self_invoice', 'self_credit_note'):
             invoice = vals['invoice']
             if payment_terms_node := self._ubl_get_payment_terms_node_from_payment_term(vals, invoice.invoice_payment_term_id):
                 nodes.append(payment_terms_node)
@@ -1185,7 +1228,7 @@ class AccountEdiUBL(models.AbstractModel):
     def _ubl_add_allowance_charge_nodes(self, vals):
         vals['document_node']['cac:AllowanceCharge'] = []
 
-        if self._is_document(vals, 'invoice', 'credit_note', 'self_invoice', 'self_credit_note'):
+        if self._is_document(vals, 'invoice', 'credit_note', 'debit_note', 'self_invoice', 'self_credit_note'):
             if not self._should_export_early_payment_discount_as_line(vals):
                 self._ubl_add_allowance_charge_nodes_early_payment_discount(vals)
             if not self._should_export_global_discount_as_line(vals):
@@ -1285,6 +1328,13 @@ class AccountEdiUBL(models.AbstractModel):
                 'currency': currency,
             }
         else:
+            tax_total_key = None
+        if (
+            tax_total_key
+            and tax_total_key['is_withholding']
+            and self._ubl_report_withholding_taxes_as_prepaid_amount(vals)
+        ):
+            # No cac:WithholdingTaxTotal: the withheld amount is part of the cbc:PrepaidAmount.
             tax_total_key = None
         return {
             'tax_category_key': tax_category_key,
@@ -1520,7 +1570,7 @@ class AccountEdiUBL(models.AbstractModel):
             'currencyID': currency.name,
         }
 
-        if self._is_document(vals, 'invoice', 'credit_note', 'self_invoice', 'self_credit_note'):
+        if self._is_document(vals, 'invoice', 'credit_note', 'debit_note', 'self_invoice', 'self_credit_note'):
             invoice = vals['invoice']
 
             if in_foreign_currency:
@@ -1539,7 +1589,7 @@ class AccountEdiUBL(models.AbstractModel):
                 min_dp=currency.decimal_places,
             )
 
-        if self._is_document(vals, 'invoice', 'credit_note', 'self_invoice', 'self_credit_note'):
+        if self._is_document(vals, 'invoice', 'credit_note', 'debit_note', 'self_invoice', 'self_credit_note'):
             invoice = vals['invoice']
 
             if in_foreign_currency:
@@ -1555,6 +1605,18 @@ class AccountEdiUBL(models.AbstractModel):
             )
             node['cbc:PrepaidAmount']['_text'] = FloatFmt(
                 amount_total - amount_residual,
+                min_dp=currency.decimal_places,
+            )
+
+        if (
+            self._is_document(vals, 'invoice', 'credit_note', 'self_invoice', 'self_credit_note')
+            and self._ubl_report_withholding_taxes_as_prepaid_amount(vals)
+        ):
+            # The withheld amount is reported as already paid.
+            # Suppose an invoice of 1000 with a tax 21% +100 -100: PrepaidAmount is increased from 0 to 210 and
+            # PayableAmount is 1210 (TaxInclusiveAmount of 1210 since the withholding tax isn't part of it).
+            node['cbc:PrepaidAmount']['_text'] = FloatFmt(
+                node['cbc:PrepaidAmount']['_text'] + self._ubl_get_tax_withholding_amount(vals),
                 min_dp=currency.decimal_places,
             )
 
@@ -1576,6 +1638,12 @@ class AccountEdiUBL(models.AbstractModel):
         )
 
         payable_rounding_amount = expected_tax_inclusive_amount - tax_inclusive_amount
+        if (
+            self._is_document(vals, 'invoice', 'credit_note', 'self_invoice', 'self_credit_note')
+            and self._ubl_report_withholding_taxes_as_prepaid_amount(vals)
+        ):
+            # The withholding taxes, not part of TaxInclusiveAmount, are reported in PrepaidAmount, not here.
+            payable_rounding_amount += self._ubl_get_tax_withholding_amount(vals)
         if currency.is_zero(payable_rounding_amount):
             node['cbc:PayableRoundingAmount'] = {
                 '_text': None,
@@ -2136,7 +2204,7 @@ class AccountEdiUBL(models.AbstractModel):
         # so that importing the UBL document does not result in any information loss.
         # If a matching product is found, the product name part will be removed.
         # See _import_ubl_invoice_retrieve_products.
-        if name and description and (description == name or description.startswith(f"{name}\n")):
+        if name and description and description.startswith(f"{name}\n"):
             # The description already repeats the item name (e.g. the line label of an Odoo invoice).
             name_to_write = description
         else:

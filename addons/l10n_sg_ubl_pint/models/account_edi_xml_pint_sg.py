@@ -93,14 +93,6 @@ class AccountEdiXmlPint_Sg(models.AbstractModel):
                 for code, amount in amounts_in_accounting_currency
             ]
 
-    def _ubl_add_line_allowance_charge_nodes(self, vals):
-        # EXTENDS account.edi.ubl
-        # Invoice line allowances (ibg-27) and charges (ibg-28).
-        super()._ubl_add_line_allowance_charge_nodes(vals)
-        self._ubl_add_line_allowance_charge_nodes_for_discount(vals)
-        self._ubl_add_line_allowance_charge_nodes_for_recycling_contribution_taxes(vals)
-        self._ubl_add_line_allowance_charge_nodes_for_excise_taxes(vals)
-
     # -------------------------------------------------------------------------
     # EXPORT: Constraints
     # -------------------------------------------------------------------------

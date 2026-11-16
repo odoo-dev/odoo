@@ -297,7 +297,7 @@ class AccountJournal(models.Model):
         CCSID_data = json.loads(self_sudo.l10n_sa_compliance_csid_json)
         compliance_files = self._l10n_sa_get_compliance_files()
         for fname, fval in compliance_files.items():
-            invoice_hash_hex = self.env['account.edi.xml.ubl_21.zatca']._l10n_sa_generate_invoice_xml_hash(
+            invoice_hash_hex = self.env['account.edi.xml.ubl_zatca']._l10n_sa_generate_invoice_xml_hash(
                 fval).decode()
             digital_signature = self.env['l10n_sa_edi.document']._l10n_sa_get_digital_signature(self.company_id, invoice_hash_hex).decode()
             prepared_xml = self._l10n_sa_prepare_compliance_xml(fname, fval, self_sudo.l10n_sa_compliance_csid_certificate_id, digital_signature)
@@ -349,7 +349,7 @@ class AccountJournal(models.Model):
         ubl_extensions = etree.fromstring(self.env['ir.qweb']._render('l10n_sa_edi.export_sa_zatca_ubl_extensions'))
         root = etree.fromstring(xml_content.encode())
         root.insert(0, ubl_extensions)
-        ns_map = self.env['account.edi.xml.ubl_21.zatca']._l10n_sa_get_namespaces()
+        ns_map = self.env['account.edi.xml.ubl_zatca']._l10n_sa_get_namespaces()
 
         def _get_node(xpath_str):
             return root.xpath(xpath_str, namespaces=ns_map)[0]

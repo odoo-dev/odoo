@@ -79,14 +79,6 @@ class AccountEdiXmlPint_Anz(models.AbstractModel):
 
         return grouping_key
 
-    def _ubl_add_line_allowance_charge_nodes(self, vals):
-        # EXTENDS account.edi.ubl
-        # Invoice line allowances (ibg-27) and charges (ibg-28).
-        super()._ubl_add_line_allowance_charge_nodes(vals)
-        self._ubl_add_line_allowance_charge_nodes_for_discount(vals)
-        self._ubl_add_line_allowance_charge_nodes_for_recycling_contribution_taxes(vals)
-        self._ubl_add_line_allowance_charge_nodes_for_excise_taxes(vals)
-
     def _ubl_add_party_legal_entity_nodes(self, vals):
         # EXTENDS account.edi.ubl_pint
         super()._ubl_add_party_legal_entity_nodes(vals)
@@ -94,7 +86,18 @@ class AccountEdiXmlPint_Anz(models.AbstractModel):
         commercial_partner = partner.commercial_partner_id
 
         if commercial_partner.country_code in ('AU', 'NZ'):
-            if commercial_partner.has_vat:
+            # Seller/Buyer legal registration identifier (ibt-030/ibt-047): the ABN (0151) in Australia, the NZBN
+            # (0088, a GLN [ibr-068]) in New Zealand. The NZ GST number is not a NZBN.
+            nzbn = commercial_partner.country_code == 'NZ' and commercial_partner._get_additional_identifier('NZ_EN')
+            if nzbn:
+                vals['party_node']['cac:PartyLegalEntity'] = [{
+                    'cbc:RegistrationName': {'_text': commercial_partner.name},
+                    'cbc:CompanyID': {
+                        '_text': nzbn,
+                        'schemeID': '0088',
+                    },
+                }]
+            elif commercial_partner.has_vat:
                 vals['party_node']['cac:PartyLegalEntity'] = [{
                     'cbc:RegistrationName': {'_text': commercial_partner.name},
                     'cbc:CompanyID': {

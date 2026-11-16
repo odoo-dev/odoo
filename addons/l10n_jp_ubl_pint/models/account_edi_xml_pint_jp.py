@@ -73,14 +73,6 @@ class AccountEdiXmlPint_Jp(models.AbstractModel):
         # taxes are kept as such: skip the generic PINT behavior.
         return self.env['account.edi.ubl']._ubl_tax_totals_node_grouping_key(base_line, tax_data, vals, currency)
 
-    def _ubl_add_line_allowance_charge_nodes(self, vals):
-        # EXTENDS account.edi.ubl
-        # Invoice line allowances (ibg-27) and charges (ibg-28).
-        super()._ubl_add_line_allowance_charge_nodes(vals)
-        self._ubl_add_line_allowance_charge_nodes_for_discount(vals)
-        self._ubl_add_line_allowance_charge_nodes_for_recycling_contribution_taxes(vals)
-        self._ubl_add_line_allowance_charge_nodes_for_excise_taxes(vals)
-
     def _ubl_add_invoice_period_nodes(self, vals):
         # EXTENDS account.edi.ubl
         super()._ubl_add_invoice_period_nodes(vals)

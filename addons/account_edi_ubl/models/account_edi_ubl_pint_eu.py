@@ -1,18 +1,18 @@
 from odoo import _, models
 from odoo.addons.account.tools import dict_to_xml
-from odoo.addons.base.models.res_country import EUROPEAN_ECONOMIC_AREA_COUNTRY_CODES
 
 
 class AccountEdiUBLPintEU(models.AbstractModel):
     """ Peppol International (PINT) specialization for the European Union, aligned on the European norm EN 16931.
 
-    It holds the rules shared by the European Peppol formats (PINT EU, Peppol BIS Billing 3.0 and its national CIUS),
-    including the national rules of the Peppol BIS (NL-R-*, DK-R-*, ...).
+    It is PINT ('account.edi.ubl_pint') in the EN 16931 UBL syntax binding ('account.edi.ubl_cen_en16931', which holds
+    the EN 16931 rules) and holds the Peppol rules shared by the European Peppol formats (PINT EU, Peppol BIS Billing
+    3.0 and its national CIUS), including the national rules of the Peppol BIS (NL-R-*, DK-R-*, ...).
 
     * Specification: https://docs.peppol.eu/poac/eu/pint-eu/
     """
     _name = "account.edi.ubl_pint_eu"
-    _inherit = ['account.edi.cen_en16931', 'account.edi.ubl_pint']
+    _inherit = ['account.edi.ubl_cen_en16931', 'account.edi.ubl_pint']
     _description = "UBL PINT EU"
 
     def _get_customization_id(self, process_type='billing'):
@@ -23,68 +23,67 @@ class AccountEdiUBLPintEU(models.AbstractModel):
             return 'urn:peppol:pint:selfbilling-1@eu-1'
         return super()._get_customization_id(process_type=process_type)
 
-    def _ubl_get_delivery_node_from_delivery_address(self, vals):
-        # Intracom delivery inside European area.
-        node = super()._ubl_get_delivery_node_from_delivery_address(vals)
+    def _ubl_add_party_identification_nodes_national(self, vals):
+        # EXTENDS account.edi.ubl_pint
+        super()._ubl_add_party_identification_nodes_national(vals)
+        commercial_partner = vals['party_vals']['partner'].commercial_partner_id
+        # [PEPPOL-COMMON-R043] Belgian enterprise number.
+        if commercial_partner.country_code == 'BE' and (be_en := commercial_partner._get_additional_identifier('BE_EN')):
+            vals['party_node']['cac:PartyIdentification'].append({
+                'cbc:ID': {
+                    '_text': be_en,
+                    'schemeID': '0208',
+                },
+            })
 
-        if self._is_document(vals, 'invoice', 'self_invoice', 'credit_note', 'self_credit_note'):
-            invoice = vals['invoice']
-            customer = vals['customer']
-            supplier = vals['supplier']
-            if (
-                customer.country_id.code in EUROPEAN_ECONOMIC_AREA_COUNTRY_CODES
-                and supplier.country_id.code in EUROPEAN_ECONOMIC_AREA_COUNTRY_CODES
-                and supplier.country_id != customer.country_id
-            ):
-                node['cbc:ActualDeliveryDate']['_text'] = invoice.invoice_date
+    def _ubl_use_partner_ref_as_party_identification(self, vals):
+        # EXTENDS account.edi.ubl_pint
+        # [DK-R-013] For Danish suppliers, a party identifier without scheme is not allowed.
+        if vals['party_vals']['partner'].commercial_partner_id.country_code == 'DK':
+            return False
+        return super()._ubl_use_partner_ref_as_party_identification(vals)
 
-        return node
+    def _ubl_add_accounting_supplier_party_tax_scheme_nodes(self, vals):
+        super()._ubl_add_accounting_supplier_party_tax_scheme_nodes(vals)
+        nodes = vals['party_node']['cac:PartyTaxScheme']
+        partner = vals['party_vals']['partner']
+        commercial_partner = partner.commercial_partner_id
+        country_code = commercial_partner.country_code
 
-    def _ubl_add_line_allowance_charge_nodes(self, vals):
-        super()._ubl_add_line_allowance_charge_nodes(vals)
-
-        # Discount.
-        self._ubl_add_line_allowance_charge_nodes_for_discount(vals)
-
-        # Recycling contribution taxes.
-        self._ubl_add_line_allowance_charge_nodes_for_recycling_contribution_taxes(vals)
-
-        # Excise taxes.
-        self._ubl_add_line_allowance_charge_nodes_for_excise_taxes(vals)
+        if country_code == 'NO':
+            # [NO-R-002] For Norwegian suppliers, most invoice issuers are required to append
+            # "Foretaksregisteret" to their invoice.
+            nodes.append({
+                'cbc:CompanyID': {'_text': "Foretaksregisteret"},
+                'cac:TaxScheme': {
+                    'cbc:ID': {'_text': "TAX"},
+                },
+            })
+        elif country_code == 'SE':
+            # [SE-R-005] For Swedish suppliers, when using Seller tax registration identifier,
+            # 'Godkänd för F-skatt' must be stated
+            nodes.append({
+                'cbc:CompanyID': {'_text': "GODKÄND FÖR F-SKATT"},
+                'cac:TaxScheme': {
+                    'cbc:ID': {'_text': "TAX"},
+                },
+            })
 
     def _ubl_add_payment_means_nodes(self, vals):
         super()._ubl_add_payment_means_nodes(vals)
 
         if self._is_document(vals, 'invoice', 'self_invoice', 'credit_note', 'self_credit_note'):
             nodes = vals['document_node']['cac:PaymentMeans']
-            invoice = vals['invoice']
             customer = vals['customer'].commercial_partner_id
 
             # [DK] In Denmark payment code 30 is not allowed. Hardcode to 1 ("unknown")
             # as we cannot deduce this information from the invoice.
+            # The SEPA direct debit (59, see account.edi.ubl_cen_en16931) is kept.
             if customer.country_code == 'DK':
                 for node in nodes:
-                    node['cbc:PaymentMeansCode']['_text'] = 1
-                    node['cbc:PaymentMeansCode']['name'] = 'unknown'
-
-            # Set up SEPA Direct Debit payment means and mandate node if a usable mandate exists
-
-            if (
-                self.module_installed('account_sepa_direct_debit')
-                and (sdd_mandate := invoice._get_usable_mandate(mandate_type='sepa'))
-                and sdd_mandate.partner_bank_id.account_number
-                and sdd_mandate.company_id.sdd_creditor_identifier
-            ):
-                # If the group "DIRECT DEBIT" (BG-19) is delivered, the element "Debited account identifier" (BT-91) shall be provided.
-                # If the group "DIRECT DEBIT" (BG-19) is delivered, the element "Bank assigned creditor identifier" (BT-90) shall be provided
-                vals['document_node']['cac:AccountingSupplierParty']['cac:Party']['cac:PartyIdentification'].append({
-                    'cbc:ID': {'_text': sdd_mandate.company_id.sdd_creditor_identifier, 'schemeID': 'SEPA'},
-                })
-                for node in nodes:
-                    node['cbc:PaymentMeansCode']['_text'] = 59
-                    node['cbc:PaymentMeansCode']['name'] = 'sepa direct debit'
-                    node['cac:PaymentMandate'] = self._ubl_get_payment_means_payment_mandate_node_from_mandate(vals, sdd_mandate)
-                    node['cac:PayeeFinancialAccount'] = None
+                    if node['cbc:PaymentMeansCode']['_text'] != 59:
+                        node['cbc:PaymentMeansCode']['_text'] = 1
+                        node['cbc:PaymentMeansCode']['name'] = 'unknown'
 
     def _ubl_add_billing_reference_nodes(self, vals):
         super()._ubl_add_billing_reference_nodes(vals)
@@ -111,31 +110,6 @@ class AccountEdiUBLPintEU(models.AbstractModel):
         nsmap = document_node['_nsmap']
 
         if self._is_document(vals, 'invoice', 'credit_note', 'self_invoice', 'self_credit_note'):
-            invoice = vals['invoice']
-
-            # [BR-IC-11]-In an Invoice with a VAT breakdown (BG-23) where the VAT category code (BT-118) is
-            # "Intra-community supply" the Actual delivery date (BT-72) or the Invoicing period (BG-14)
-            # shall not be blank.
-            if (
-                self._is_intracommunity_supply(vals)
-                and dict_to_xml((document_node['cac:Delivery'] or {}).get('cbc:ActualDeliveryDate'), nsmap=nsmap, tag='cbc:ActualDeliveryDate') is None
-                and dict_to_xml(document_node['cac:InvoicePeriod'], nsmap=nsmap, tag='cac:InvoicePeriod') is None
-            ):
-                constraints['cen_en16931_delivery_date_invoicing_period'] = _("For intracommunity supply, the actual delivery date or the invoicing period should be included.")
-
-            # [BR-61]-If the Payment means type code (BT-81) means SEPA credit transfer, Local credit transfer or
-            # Non-SEPA international credit transfer, the Payment account identifier (BT-84) shall be present.
-            for node in document_node['cac:PaymentMeans']:
-                if node['cbc:PaymentMeansCode']['_text'] in (30, 58):
-                    constraints['cen_en16931_payment_account_identifier'] = self._check_required_fields(invoice, 'partner_bank_id')
-
-            # [BR-57]-Each Deliver to address (BG-15) shall contain a Deliver to country code (BT-80).
-            if (
-                document_node['cac:Delivery']
-                and dict_to_xml(document_node['cac:Delivery']['cac:DeliveryLocation']['cac:Address']['cac:Country']['cbc:IdentificationCode'], nsmap=nsmap, tag='cbc:IdentificationCode') is None
-            ):
-                constraints['cen_en16931_delivery_address'] = self._check_required_fields(invoice.partner_shipping_id, 'country_id')
-
             if self.env.context.get('from_peppol'):
                 # [PEPPOL-EN16931-R010] Buyer electronic address MUST be provided.
                 if not document_node['cac:AccountingCustomerParty']['cac:Party']['cbc:EndpointID']['_text']:

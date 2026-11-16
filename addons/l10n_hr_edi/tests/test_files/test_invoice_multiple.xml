@@ -135,6 +135,7 @@
     </cac:Party>
   </cac:AccountingCustomerParty>
   <cac:Delivery>
+    <cbc:ActualDeliveryDate>2025-01-01</cbc:ActualDeliveryDate>
     <cac:DeliveryLocation>
       <cac:Address>
         <cbc:StreetName>Croatian Street 2</cbc:StreetName>

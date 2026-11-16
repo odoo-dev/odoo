@@ -307,6 +307,16 @@ class PurchaseEdiXmlUbl_Bis3(models.AbstractModel):
             'tax_percentage': './{*}TaxCategory/{*}Percent',
         }
 
+    def _get_tax_nodes(self, tree):
+        tax_nodes = tree.findall('.//{*}Item/{*}ClassifiedTaxCategory/{*}Percent')
+        if not tax_nodes:
+            for elem in tree.findall('.//{*}TaxTotal'):
+                percentage_nodes = elem.findall('.//{*}TaxSubtotal/{*}TaxCategory/{*}Percent')
+                if not percentage_nodes:
+                    percentage_nodes = elem.findall('.//{*}TaxSubtotal/{*}Percent')
+                tax_nodes += percentage_nodes
+        return tax_nodes
+
     def _get_invoice_line_xpaths(self, document_type=False, qty_factor=1):
         # EXTENDS account.edi.common
         return {
