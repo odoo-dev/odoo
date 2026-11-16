@@ -7,9 +7,7 @@ import {
     Resource,
     t,
     untrack,
-    usePlugin,
 } from "@odoo/owl";
-import { registry } from "../registry";
 import { services } from "@web/core/services";
 
 const OverlayOptionsSchema = t.object({
@@ -67,17 +65,3 @@ export class OverlayPlugin extends Plugin {
 }
 
 services.add(OverlayPlugin);
-
-/**
- * -----------------------------------------------------------------------------
- * @todo owl3 migration
- * temporary - to remove when all use of the overlay service are removed
- * -----------------------------------------------------------------------------
- */
-export const overlayService = {
-    start() {
-        return usePlugin(OverlayPlugin);
-    },
-};
-
-registry.category("services").add("overlay", overlayService);

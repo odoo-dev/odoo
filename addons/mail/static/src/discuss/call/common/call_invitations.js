@@ -1,7 +1,8 @@
 import { CallInvitation } from "@mail/discuss/call/common/call_invitation";
 
-import { Component } from "@odoo/owl";
+import { Component, usePlugin } from "@odoo/owl";
 
+import { OverlayPlugin } from "@web/core/overlay/overlay_plugin";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 
@@ -17,15 +18,16 @@ export class CallInvitations extends Component {
 }
 
 export const callInvitationsService = {
-    dependencies: ["discuss.rtc", "mail.store", "overlay"],
+    dependencies: ["discuss.rtc", "mail.store"],
     start(env, services) {
+        const overlay = usePlugin(OverlayPlugin);
         /** @type {import("models").Store} */
         const store = services["mail.store"];
         store.onChange(
             () => [store.ringingChannels.length > 0],
             (hasRingingChannels) => {
                 if (hasRingingChannels) {
-                    return services.overlay.add(CallInvitations, {});
+                    return overlay.add(CallInvitations, {});
                 }
             }
         );

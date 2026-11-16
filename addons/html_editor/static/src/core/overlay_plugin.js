@@ -1,4 +1,5 @@
-import { markRaw, EventBus } from "@odoo/owl";
+import { markRaw, EventBus, usePlugin } from "@odoo/owl";
+import { OverlayPlugin as WebOverlayPlugin } from "@web/core/overlay/overlay_plugin";
 import { Plugin } from "../plugin";
 import { getSelection } from "../utils/selection";
 import { EditorOverlay } from "./overlay";
@@ -20,6 +21,7 @@ export class OverlayPlugin extends Plugin {
     overlays = [];
 
     setup() {
+        this.overlayService = usePlugin(WebOverlayPlugin);
         this.targetRectProviders = this.getResource("overlay_selection_target_rect_providers");
     }
 
@@ -86,7 +88,7 @@ export class Overlay {
                     rect,
                 };
             }
-            this._remove = this.plugin.services.overlay.add(
+            this._remove = this.plugin.overlayService.add(
                 EditorOverlay,
                 markRaw({
                     ...this.editorOverlayProps,

@@ -6,6 +6,7 @@
 import { App, effect, proxy } from "@odoo/owl";
 import { browser } from "@web/core/browser/browser";
 import { rpcBus } from "@web/core/network/rpc";
+import { registry } from "@web/core/registry";
 import { ClickbotOverlay } from "@web/webclient/clickbot/clickbot_overlay";
 
 export const SUCCESS_SIGNAL = "clickbot test succeeded";
@@ -869,7 +870,8 @@ export class ClickbotLauncher {
     }
 
     open() {
-        this.removeOverlay = this.env.services.overlay.add(ClickbotOverlay, { state: this });
+        const overlay = { Component: ClickbotOverlay, props: { state: this } };
+        registry.category("main_components").add("ClickbotOverlay", overlay, { force: true });
         if (this.state.phase !== "launcher") {
             this.start();
         }
@@ -877,6 +879,6 @@ export class ClickbotLauncher {
 
     close() {
         this.clickbot?.stop();
-        this.removeOverlay?.();
+        registry.category("main_components").remove("ClickbotOverlay");
     }
 }

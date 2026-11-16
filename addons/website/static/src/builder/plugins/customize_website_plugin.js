@@ -3,6 +3,7 @@ import {
     setBuilderCSSVariables,
     getBgImageURLFromEl,
 } from "@html_builder/utils/utils_css";
+import { usePlugin } from "@odoo/owl";
 import { Plugin } from "@html_editor/plugin";
 import { getCSSVariableValue, getHtmlStyle } from "@html_editor/utils/formatting";
 import { parseHTML } from "@html_editor/utils/html";
@@ -18,6 +19,7 @@ import { renderToElement } from "@web/core/utils/render";
 import { CompositeAction } from "@html_builder/core/composite_action_plugin";
 import { ImagePositionOverlay } from "@html_builder/plugins/image/image_position_overlay";
 import { loadImage } from "@html_editor/utils/image_processing";
+import { OverlayPlugin } from "@web/core/overlay/overlay_plugin";
 
 /**
  * @typedef { Object } CustomizeWebsiteShared
@@ -605,6 +607,7 @@ export class BodyBgPositionOverlayAction extends BuilderAction {
         "customizeWebsite",
     ];
     setup() {
+        this.overlay = usePlugin(OverlayPlugin);
         this.withLoadingEffect = false;
         this.canTimeout = false;
     }
@@ -622,7 +625,7 @@ export class BodyBgPositionOverlayAction extends BuilderAction {
             clearInlinePosition();
         };
         const bgPosition = await new Promise((resolve) => {
-            const removeOverlay = this.services.overlay.add(ImagePositionOverlay, {
+            const removeOverlay = this.overlay.add(ImagePositionOverlay, {
                 targetEl: editingElement,
                 close: (position) => {
                     removeOverlay();

@@ -1,7 +1,9 @@
+import { usePlugin } from "@odoo/owl";
 import { BuilderAction } from "@html_builder/core/builder_action";
 import { ClassAction } from "@html_builder/core/core_builder_action_plugin";
 import { Plugin } from "@html_editor/plugin";
 import { _t } from "@web/core/l10n/translation";
+import { OverlayPlugin } from "@web/core/overlay/overlay_plugin";
 import { registry } from "@web/core/registry";
 import { ImagePositionOverlay } from "@html_builder/plugins/image/image_position_overlay";
 import { onceAllImagesLoaded } from "@website/utils/images";
@@ -135,6 +137,7 @@ export class CoverImagePositionOverlayAction extends BuilderAction {
     static id = "coverImagePositionOverlay";
     static dependencies = ["overlayButtons", "history", "cardImageOption"];
     setup() {
+        this.overlay = usePlugin(OverlayPlugin);
         this.withLoadingEffect = false;
     }
     async load({ editingElement }) {
@@ -142,7 +145,7 @@ export class CoverImagePositionOverlayAction extends BuilderAction {
         await onceAllImagesLoaded(imageEl);
         this.dependencies.overlayButtons.hideOverlayButtonsUi();
         return new Promise((resolve) => {
-            const removeOverlay = this.services.overlay.add(
+            const removeOverlay = this.overlay.add(
                 ImagePositionOverlay,
                 {
                     targetEl: imageEl,

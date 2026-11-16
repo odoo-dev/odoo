@@ -12,7 +12,6 @@ declare module "services" {
     import { httpService } from "@web/core/network/http_service";
     import { notificationService } from "@web/core/notifications/notification_plugin";
     import { offlineService } from "@web/core/offline/offline_plugin";
-    import { overlayService } from "@web/core/overlay/overlay_plugin";
     import { popoverService } from "@web/core/popover/popover_plugin";
     import { tooltipService } from "@web/core/tooltip/tooltip_plugin";
     import { uiService } from "@web/core/ui/ui_plugin";
@@ -46,7 +45,6 @@ declare module "services" {
         name: typeof nameService;
         notification: typeof notificationService;
         offline: typeof offlineService;
-        overlay: typeof overlayService;
         popover: typeof popoverService;
         profiling: typeof profilingService;
         share_target: typeof shareTargetService;

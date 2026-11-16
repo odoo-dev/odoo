@@ -1,5 +1,7 @@
+import { usePlugin } from "@odoo/owl";
 import { getBgImageURLFromEl } from "@html_builder/utils/utils_css";
 import { Plugin } from "@html_editor/plugin";
+import { OverlayPlugin } from "@web/core/overlay/overlay_plugin";
 import { registry } from "@web/core/registry";
 import { ImagePositionOverlay } from "@html_builder/plugins/image/image_position_overlay";
 import { BuilderAction } from "@html_builder/core/builder_action";
@@ -118,6 +120,7 @@ export class BackgroundPositionOverlayAction extends BuilderAction {
     static id = "backgroundPositionOverlay";
     static dependencies = ["overlayButtons", "history", "backgroundPositionOption"];
     setup() {
+        this.overlay = usePlugin(OverlayPlugin);
         this.withLoadingEffect = false;
     }
     async load({ editingElement }) {
@@ -134,7 +137,7 @@ export class BackgroundPositionOverlayAction extends BuilderAction {
         }
         this.dependencies.overlayButtons.hideOverlayButtonsUi();
         return new Promise((resolve) => {
-            const removeOverlay = this.services.overlay.add(
+            const removeOverlay = this.overlay.add(
                 ImagePositionOverlay,
                 {
                     targetEl,

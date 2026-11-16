@@ -1,4 +1,5 @@
-import { onWillDestroy } from "@odoo/owl";
+import { onWillDestroy, usePlugin } from "@odoo/owl";
+import { OverlayPlugin } from "@web/core/overlay/overlay_plugin";
 import { registry } from "@web/core/registry";
 import { useService } from "../utils/hooks";
 import { FileViewer } from "./file_viewer";
@@ -6,12 +7,8 @@ import { FileViewer } from "./file_viewer";
 /** @typedef {import("@web/core/file_viewer/file_viewer").File} File */
 
 const fileViewerService = {
-    dependencies: ["overlay"],
-    /**
-     * @param {import("@web/env").OdooEnv} _env
-     * @param {import("services").Services} services
-     */
-    start(_env, { overlay }) {
+    start() {
+        const overlay = usePlugin(OverlayPlugin);
         /**
          * @param {import("@odoo/owl").Signal<HTMLElement | null>} [ref]
          */

@@ -19,7 +19,6 @@ import {
 } from "@web/../tests/web_test_helpers";
 
 import { MainComponentsContainer } from "@web/core/main_components_container";
-import { useService } from "@web/core/utils/hooks";
 import { OverlayPlugin } from "@web/core/overlay/overlay_plugin";
 
 test("simple case", async () => {
@@ -167,7 +166,7 @@ test("allow scope as option", async () => {
         setup() {
             providePlugins([MyPlugin], { a: "foo", b: "bar" });
             const scope = useScope();
-            useService("overlay").add(Overlay, {}, { scope });
+            usePlugin(OverlayPlugin).add(Overlay, {}, { scope });
         }
     }
 
