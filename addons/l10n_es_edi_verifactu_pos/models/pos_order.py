@@ -200,7 +200,7 @@ class PosOrder(models.Model):
             # NOTE: invoice with negative amounts possible (when no `refunded_order` specified)
             'verifactu_move_type': 'correction_incremental' if refunded_order else 'invoice',
             'sign': -1 if refunded_order else 1,
-            'name': self.l10n_es_edi_verifactu_get_invoice_name(),
+            'name': self.name,
             'partner': self.partner_id.commercial_partner_id,
             'refund_reason': self.l10n_es_edi_verifactu_refund_reason,
             'refunded_document': refunded_document,
