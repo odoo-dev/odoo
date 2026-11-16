@@ -213,6 +213,29 @@ class TestMailMessageAccess(MessageAccessCommon):
                             **final_vals,
                         )
 
+        self.record_internal.message_subscribe(self.user_employee.partner_id.ids)
+        for records, should_crash in [
+            (self.record_internal + record_admin_fol, False),
+            (self.record_internal + self.record_admin, True),
+        ]:
+            with self.subTest(records=records):
+                vals_list = [
+                    {
+                        "body": "Test",
+                        "message_type": "comment",
+                        "model": record._name,
+                        "reply_to": "avoid.catchall@my.test.com",
+                        "res_id": record.id,
+                        "subtype_id": self.env.ref("mail.mt_comment").id,
+                    }
+                    for record in records
+                ]
+                if should_crash:
+                    with self.assertRaises(AccessError):
+                        self.env["mail.message"].with_user(self.user_employee).create(vals_list)
+                else:
+                    self.env["mail.message"].with_user(self.user_employee).create(vals_list)
+
     def test_access_create_customized(self):
         """ Test '_get_mail_message_access' support """
         record = self.env['mail.test.access.custo'].with_user(self.user_employee).create({'name': 'Open'})

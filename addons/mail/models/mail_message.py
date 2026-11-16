@@ -584,7 +584,7 @@ class Message(models.Model):
                 followers = self.env['mail.followers'].sudo().search_fetch(domain, ['res_id'])
                 for follower in followers:
                     for mid in docid_msgids[follower.res_id]:
-                        messages_to_check.pop(mid)
+                        messages_to_check.pop(mid, None)
 
             if not messages_to_check:
                 return forbidden
