@@ -1,34 +1,56 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import models, _
+from odoo.tools import float_is_zero
 
 
 class AccountEdiXmlPint_My(models.AbstractModel):
-    _name = 'account.edi.xml.pint_my'
-    _inherit = ["account.edi.xml.ubl_bis3"]
-    _description = "Malaysian implementation of Peppol International (PINT) model for Billing"
-    """
+    """ Malaysian implementation of Peppol International (PINT) model for Billing (PINT MY).
+
+    PINT MY is a specialization of the Peppol International model (PINT), not a CIUS of the European norm EN 16931
+    nor of Peppol BIS Billing 3.0 (its CustomizationID is 'urn:peppol:pint:billing-1@my-1'): it inherits the generic
+    PINT layer ('account.edi.ubl_pint') and only adds the PINT MY rules (SST/TTx categories, ...).
+
     * PINT Official documentation: https://docs.peppol.eu/poac/pint/pint/
-    * PINT MY Official documentation: https://docs.peppol.eu/poac/my/pint-my
+    * PINT MY Official documentation: https://docs.peppol.eu/poac/my/pint-my/
     """
+    _name = 'account.edi.xml.pint_my'
+    _inherit = ["account.edi.ubl_pint"]
+    _description = "Malaysian implementation of Peppol International (PINT) model for Billing"
 
     def _export_invoice_filename(self, invoice):
-        # EXTENDS account_edi_ubl_cii
+        # EXTENDS account_edi_ubl
         return f"{invoice.name.replace('/', '_')}_pint_my.xml"
+
+    def _export_get_document_type(self, invoice):
+        # EXTENDS account.edi.common
+        # PINT MY only knows invoices and credit notes: a debit note is an invoice.
+        document_type = super()._export_get_document_type(invoice)
+        if document_type == 'debit_note':
+            return 'invoice'
+        return document_type
+
+    def _init_invoice_export_values(self, invoice):
+        # EXTENDS account.edi.ubl
+        vals = super()._init_invoice_export_values(invoice)
+        # [ibr-027] The Item net price (ibt-146) MUST NOT be negative.
+        self._turn_price_unit_positive(vals)
+        return vals
 
     # -------------------------------------------------------------------------
     # EXPORT: Templates
     # -------------------------------------------------------------------------
 
-    def _ubl_default_tax_category_grouping_key(self, base_line, tax_data, vals, currency):
-        # EXTENDS account.edi.xml.ubl_bis3
+    def _get_tax_category_grouping_key(self, base_line, tax_data, vals, currency):
+        # EXTENDS account.edi.common
 
+        # The cash rounding is reported as the Rounding amount (ibt-114), not as a tax breakdown.
         # In malaysia, tax on good is paid at the manufacturer level. It is thus common to invoice without taxes,
         # unless invoicing for a service.
-        if not tax_data:
+        if not tax_data or self._is_cash_rounding_base_line(base_line):
             return
 
-        grouping_key = super()._ubl_default_tax_category_grouping_key(base_line, tax_data, vals, currency)
+        grouping_key = super()._get_tax_category_grouping_key(base_line, tax_data, vals, currency)
         if not grouping_key:
             return
 
@@ -47,24 +69,34 @@ class AccountEdiXmlPint_My(models.AbstractModel):
         return grouping_key
 
     def _get_customization_id(self, process_type='billing'):
+        # EXTENDS account.edi.ubl_pint
         if process_type == 'billing':
             return 'urn:peppol:pint:billing-1@my-1'
+        return None
+
+    def _ubl_add_line_allowance_charge_nodes(self, vals):
+        # EXTENDS account.edi.ubl
+        # Invoice line allowances (ibg-27) and charges (ibg-28).
+        super()._ubl_add_line_allowance_charge_nodes(vals)
+        self._ubl_add_line_allowance_charge_nodes_for_discount(vals)
+        self._ubl_add_line_allowance_charge_nodes_for_recycling_contribution_taxes(vals)
+        self._ubl_add_line_allowance_charge_nodes_for_excise_taxes(vals)
 
     def _ubl_add_tax_totals_nodes(self, vals):
-        # EXTENDS account.edi.xml.ubl_bis3
+        # EXTENDS account.edi.ubl
         super()._ubl_add_tax_totals_nodes(vals)
         nodes = vals['document_node']['cac:TaxTotal']
 
         if not nodes:
             tax_total_node = self._ubl_get_tax_total_node(vals, {
-                'currency': vals['currency_id'],
+                'currency': vals['currency'],
                 'amount': 0.0,
                 'subtotals': {},
             })
             nodes.append(tax_total_node)
 
     def _ubl_add_party_tax_scheme_nodes(self, vals):
-        # EXTENDS account.edi.ubl_bis3
+        # EXTENDS account.edi.ubl_pint
         super()._ubl_add_party_tax_scheme_nodes(vals)
         partner = vals['party_vals']['partner']
         commercial_partner = partner.commercial_partner_id
@@ -78,7 +110,7 @@ class AccountEdiXmlPint_My(models.AbstractModel):
             }]
 
     def _ubl_add_accounting_supplier_party_tax_scheme_nodes(self, vals):
-        # EXTENDS account.edi.ubl_bis3
+        # EXTENDS account.edi.ubl_pint
         super()._ubl_add_accounting_supplier_party_tax_scheme_nodes(vals)
         nodes = vals['party_node']['cac:PartyTaxScheme']
         partner = vals['party_vals']['partner']
@@ -92,29 +124,22 @@ class AccountEdiXmlPint_My(models.AbstractModel):
                 },
             })
 
-    def _ubl_add_customization_id_node(self, vals):
-        # EXTENDS account.edi.xml.ubl_bis3
-        super()._ubl_add_customization_id_node(vals)
-        vals['document_node']['cbc:CustomizationID']['_text'] = 'urn:peppol:pint:billing-1@my-1'
-
-    def _ubl_add_profile_id_node(self, vals):
-        # EXTENDS account.edi.xml.ubl_bis3
-        super()._ubl_add_profile_id_node(vals)
-        vals['document_node']['cbc:ProfileID']['_text'] = 'urn:peppol:bis:billing'
-
     # -------------------------------------------------------------------------
     # EXPORT: Constraints
     # -------------------------------------------------------------------------
 
-    def _export_invoice_constraints(self, invoice, vals):
-        # EXTENDS account_edi_ubl_cii
-        constraints = super()._export_invoice_constraints(invoice, vals)
+    def _export_document_constraints(self, vals):
+        # EXTENDS account.edi.ubl_pint
+        constraints = super()._export_document_constraints(vals)
 
-        # A tax category "Outside of tax cope" can only have an amount of 0.
+        # A tax category "Outside of tax scope" can only have an amount of 0.
         for tax_total_node in vals['document_node']['cac:TaxTotal']:
             for tax_subtotal_node in tax_total_node['cac:TaxSubtotal']:
                 for tax_category_node in tax_subtotal_node['cac:TaxCategory']:
-                    if tax_category_node['cbc:ID'] == 'O' and tax_subtotal_node['cbc:Percent'] != 0:
+                    if (
+                        tax_category_node['cbc:ID']['_text'] == 'O'
+                        and not float_is_zero(tax_subtotal_node['cbc:TaxAmount']['_text'], precision_digits=2)
+                    ):
                         constraints['peppol_my_sst_registration'] = _(
                             "If your business is registered for SST, please provide your registration number in your company details.\n"
                             "Otherwise, you are not allowed to charge sales or services taxes in the e-Invoice."
@@ -124,7 +149,6 @@ class AccountEdiXmlPint_My(models.AbstractModel):
         # In malaysia, tax on good is paid at the manufacturer level. It is thus common to invoice without taxes,
         # unless invoicing for a service.
         constraints.pop('tax_on_line', '')
-        constraints.pop('cen_en16931_tax_line', '')
 
         return constraints
 
@@ -133,7 +157,7 @@ class AccountEdiXmlPint_My(models.AbstractModel):
     # -------------------------------------------------------------------------
 
     def _import_ubl_invoice_add_customer_values(self, collected_values):
-        # EXTENDS account.edi.xml.ubl_bis3; Prioritize PartyLegalEntity when inferring the supplier tax identifier.
+        # EXTENDS account.edi.ubl; Prioritize PartyLegalEntity when inferring the supplier tax identifier.
         super()._import_ubl_invoice_add_customer_values(collected_values)
         odoo_document_type = collected_values['odoo_document_type']
         party_tag = "AccountingCustomerParty" if odoo_document_type == 'sale' else "AccountingSupplierParty"

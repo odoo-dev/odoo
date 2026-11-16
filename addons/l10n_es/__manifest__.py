@@ -24,7 +24,7 @@ Spanish charts of accounts (PGCE 2008).
 """,
     'depends': [
         'account',
-        'account_edi_ubl_cii',
+        'account_edi_ubl',
     ],
     'auto_install': ['account'],
     'data': [

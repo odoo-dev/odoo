@@ -1,8 +1,9 @@
 from lxml import etree
 
 from odoo import Command
-from odoo.addons.account_edi_ubl_cii.tests.common import TestUblBis3Common, TestUblCiiFRCommon
-from odoo.addons.account_edi_ubl_cii.models.account_edi_xml_ubl_bis3 import CHORUS_PRO_SIRET
+from odoo.addons.account_edi_cii.tests.common import TestUblCiiFRCommon
+from odoo.addons.account_edi_ubl.tests.common import TestUblBis3Common
+from odoo.addons.account_edi_ubl.models.account_edi_xml_ubl_bis3 import CHORUS_PRO_SIRET
 from odoo.addons.l10n_fr_facturx_chorus_pro.tests.common import TestUblCiiCommonChorusPro
 from odoo.exceptions import UserError
 from odoo.tests import tagged

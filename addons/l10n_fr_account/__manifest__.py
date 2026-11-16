@@ -30,7 +30,7 @@ configuration of their taxes and fiscal positions manually.
 """,
     'depends': [
         'account',
-        'account_edi_ubl_cii',
+        'account_edi_ubl',
         'l10n_fr',
     ],
     'auto_install': ['account'],

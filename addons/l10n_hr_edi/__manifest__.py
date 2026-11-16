@@ -6,7 +6,7 @@ e-invoicing for Croatia
     """,
     'depends': [
         'l10n_hr',
-        'account_edi_ubl_cii',
+        'account_edi_ubl',
     ],
     'data': [
         'data/cron.xml',

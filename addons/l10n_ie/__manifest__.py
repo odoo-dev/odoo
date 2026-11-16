@@ -11,7 +11,7 @@ This is the base module to manage the accounting chart for Republic of Ireland i
     "author": "Odoo S.A.",
     "depends": [
         "account",
-        "account_edi_ubl_cii",
+        "account_edi_cii",
     ],
     'auto_install': ['account'],
     "data": [

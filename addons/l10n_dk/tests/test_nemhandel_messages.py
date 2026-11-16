@@ -265,7 +265,7 @@ class TestNemhandelMessage(TestAccountMoveSendCommon):
         """When in multi/async mode, the generation of XML can fail silently (without raising).
         This needs to be reflected as an error and put the move in Nemhandel Error state.
         """
-        def mocked_export_invoice_constraints(self, invoice, vals):
+        def mocked_export_document_constraints(self, vals):
             return {'test_error_key': 'test_error_description'}
 
         self.valid_partner.invoice_edi_format = 'oioubl_21'
@@ -276,8 +276,8 @@ class TestNemhandelMessage(TestAccountMoveSendCommon):
         with mock_nemhandel_lookup_success(['0184:12345666']):
             wizard = self.create_send_and_print(move_1 + move_2)
         with patch(
-            'odoo.addons.account_edi_ubl_cii.models.account_edi_xml_ubl_20.AccountEdiXmlUBL20._export_invoice_constraints',
-            mocked_export_invoice_constraints
+            'odoo.addons.l10n_dk.models.account_edi_xml_oioubl_21.AccountEdiXmlOIOUBL21._export_document_constraints',
+            mocked_export_document_constraints
         ), self.enter_registry_test_mode(), _mock_send(['0184:12345666']):
             wizard.action_send_and_print()
             self.env.ref('account.ir_cron_account_move_send').method_direct_trigger()

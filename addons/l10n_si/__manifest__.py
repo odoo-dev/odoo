@@ -11,7 +11,7 @@ Chart of accounts and taxes for Slovenia.
     """,
     'depends': [
         'account',
-        'account_edi_ubl_cii',
+        'account_edi_ubl',
     ],
     'auto_install': ['account'],
     'data': [

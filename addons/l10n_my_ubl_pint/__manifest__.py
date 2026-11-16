@@ -7,7 +7,7 @@
     'description': """
     The UBL PINT e-invoicing format for Malaysia is based on the Peppol International (PINT) model for Billing.
     """,
-    'depends': ['account_edi_ubl_cii'],
+    'depends': ['account_edi_ubl'],
     'data': [
         'views/report_invoice.xml',
         'views/res_company_view.xml',

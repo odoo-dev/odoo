@@ -25,7 +25,7 @@ class ResPartner(models.Model):
         return super()._get_edi_builder(invoice_edi_format)
 
     def _get_ubl_cii_formats_info(self):
-        # EXTENDS 'account_edi_ubl_cii'
+        # EXTENDS 'account_edi_cii'
         formats_info = super()._get_ubl_cii_formats_info()
         formats_info['ciusro'] = {'countries': ['RO']}
         return formats_info

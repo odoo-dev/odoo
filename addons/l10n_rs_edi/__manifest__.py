@@ -8,7 +8,7 @@ eFaktura E-invoice implementation for Serbia
     'summary': "E-Invoice implementation for Serbia",
     'countries': ['rs'],
     'depends': [
-        'account_edi_ubl_cii',
+        'account_edi_ubl',
         'l10n_rs',
     ],
     'data': [

@@ -3,7 +3,7 @@ from os.path import join as opj
 from unittest.mock import patch
 
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
-from odoo.addons.account_edi_ubl_cii.tests.common import TestUblCiiCommon
+from odoo.addons.account_edi_cii.tests.common import TestUblCiiCommon
 from odoo import fields
 from odoo.tools import misc
 

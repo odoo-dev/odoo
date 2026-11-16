@@ -37,6 +37,9 @@
       <ram:AssociatedDocumentLineDocument>
         <ram:LineID>1</ram:LineID>
       </ram:AssociatedDocumentLineDocument>
+      <ram:SpecifiedTradeProduct>
+          <ram:Name>Goods</ram:Name>
+      </ram:SpecifiedTradeProduct>
       <ram:SpecifiedLineTradeAgreement>
         <ram:GrossPriceProductTradePrice>
             <ram:ChargeAmount>100.00</ram:ChargeAmount>
@@ -64,6 +67,9 @@
       <ram:AssociatedDocumentLineDocument>
         <ram:LineID>2</ram:LineID>
       </ram:AssociatedDocumentLineDocument>
+      <ram:SpecifiedTradeProduct>
+          <ram:Name>Services</ram:Name>
+      </ram:SpecifiedTradeProduct>
       <ram:SpecifiedLineTradeAgreement>
         <ram:GrossPriceProductTradePrice>
             <ram:ChargeAmount>100.00</ram:ChargeAmount>

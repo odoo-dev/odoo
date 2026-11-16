@@ -7,7 +7,7 @@ E-invoice implementation for Romania
     """,
     'summary': "E-Invoice implementation for Romania",
     'depends': [
-        'account_edi_ubl_cii',
+        'account_edi_ubl',
         'l10n_ro',
     ],
     'data': [

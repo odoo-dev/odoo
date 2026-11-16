@@ -2,7 +2,7 @@
     'name': "Testing the Import/Export invoices with UBL/CII",
     'category': 'Accounting/Accounting',
     'description': """
-This module tests the module 'account_edi_ubl_cii', it is separated since dependencies to some
+This module tests the module 'account_edi_ubl', it is separated since dependencies to some
 localizations were required. Its name begins with 'l10n' to not overload runbot.
 
 The test files are separated by sources, they were taken from:
@@ -16,7 +16,7 @@ We also test that generating xml from Odoo with given parameters gives exactly t
 valid ones.
     """,
     'depends': [
-        'account_edi_ubl_cii',
+        'account_edi_ubl',
         'l10n_fr_account',
         'l10n_be',
         'l10n_de',

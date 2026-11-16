@@ -4,6 +4,16 @@ from odoo import models
 
 
 class AccountEdiXmlUblGr(models.AbstractModel):
+    """ Greek B2G e-invoicing (KED / Central Electronic Invoicing Registry) over Peppol.
+
+    The Greek documents use the Peppol BIS Billing 3.0 CustomizationID
+    ('urn:cen.eu:en16931:2017#compliant#urn:fdc:peppol.eu:2017:poacc:billing:3.0') and the Greek requirements are the
+    Greek national rules (GR-R-*/GR-S-*) of Peppol BIS Billing 3.0 (PEPPOL-EN16931-UBL.sch), plus the B2G
+    requirements of the KED (contracting authority, M.AR.K, budget/project/contract references, CPV codes).
+    Hence the format is a Peppol BIS 3 one.
+
+    * Peppol BIS Billing 3.0 national rules (Greece): https://docs.peppol.eu/poacc/billing/3.0/bis/#national_rules
+    """
     _name = 'account.edi.xml.ubl_gr'
     _inherit = 'account.edi.xml.ubl_bis3'
     _description = "CIUS GR"
@@ -27,101 +37,117 @@ class AccountEdiXmlUblGr(models.AbstractModel):
         serial_number = invoice_name[-1]
         return f"{company_vat}|{issue_date}|{installation_sn}|{invoice_type}|{series}|{serial_number}"
 
-    def _add_invoice_header_nodes(self, document_node, vals):
-        super()._add_invoice_header_nodes(document_node, vals)
-        invoice = vals['invoice']
-        document_node.update({
+    # -------------------------------------------------------------------------
+    # Header Nodes
+    # -------------------------------------------------------------------------
+
+    def _ubl_add_id_node(self, vals):
+        # EXTENDS account.edi.xml.ubl_bis3
+        super()._ubl_add_id_node(vals)
+        if self._is_document(vals, 'invoice', 'credit_note'):
             # BT-1: Invoice number with format: "VAT|Issue date|Installation sn.|Invoice Type|Series|eINV Issue sn."
-            'cbc:ID': {'_text': self._format_greek_invoice_number(invoice)},
-        })
+            vals['document_node']['cbc:ID']['_text'] = self._format_greek_invoice_number(vals['invoice'])
+
+    def _ubl_add_buyer_reference_node(self, vals):
+        # EXTENDS account.edi.xml.ubl_bis3
+        super()._ubl_add_buyer_reference_node(vals)
         # BT-10: Buyer reference - Contracting authority name
-        buyer = invoice.partner_id.commercial_partner_id
+        buyer = vals['customer'].commercial_partner_id
         if buyer.l10n_gr_edi_contracting_authority_name:
-            document_node['cbc:BuyerReference'] = {'_text': buyer.l10n_gr_edi_contracting_authority_name}
+            vals['document_node']['cbc:BuyerReference']['_text'] = buyer.l10n_gr_edi_contracting_authority_name
 
-    # -------------------------------------------------------------------------
-    # EXPORT VALUES
-    # -------------------------------------------------------------------------
-
-    def _get_invoice_node(self, vals):
-        document_node = super()._get_invoice_node(vals)
-        invoice = vals['invoice']
-        additional_document_references = document_node.setdefault('cac:AdditionalDocumentReference', [])
-        if not isinstance(additional_document_references, list):
-            additional_document_references = [additional_document_references]
-            document_node['cac:AdditionalDocumentReference'] = additional_document_references
-        additional_document_references.append({
-            'cbc:ID': {'_text': str(invoice.l10n_gr_edi_mark)},
-            'cbc:DocumentDescription': {'_text': '##M.AR.K##'},
-        })
-
-        if vals['document_type'] != 'credit_note':
-            # BT-11: ProjectReference
-            document_node['cac:ProjectReference'] = {
-                'cbc:ID': {'_text': f"{invoice.l10n_gr_edi_budget_type}|{invoice.l10n_gr_edi_project_reference}"}
-            }
-            # BT-12: ContractDocumentReference
-            document_node['cac:ContractDocumentReference'] = {
-                'cbc:ID': {'_text': invoice.l10n_gr_edi_contract_reference}
-            }
-        # BT-25 Billing reference (preceding invoice number) for credit notes
-        elif vals['document_type'] == 'credit_note':
-            reversed_entry = invoice.reversed_entry_id
-            document_node['cac:BillingReference'] = {
+    def _ubl_add_billing_reference_nodes(self, vals):
+        # EXTENDS account.edi.xml.ubl_bis3
+        super()._ubl_add_billing_reference_nodes(vals)
+        if self._is_document(vals, 'credit_note'):
+            # BT-25 Billing reference (preceding invoice number) for credit notes
+            reversed_entry = vals['invoice'].reversed_entry_id
+            vals['document_node']['cac:BillingReference'] = [{
                 'cac:InvoiceDocumentReference': {
                     'cbc:ID': {'_text': self._format_greek_invoice_number(reversed_entry) if reversed_entry else ''},
-                }
-            }
-        return document_node
+                },
+            }]
+
+    def _fill_document_values_invoice(self, vals):
+        # EXTENDS account.edi.xml.ubl_bis3
+        super()._fill_document_values_invoice(vals)
+        invoice = vals['invoice']
+        self._gr_add_mark_document_reference_node(vals)
+        # BT-11: ProjectReference
+        vals['document_node']['cac:ProjectReference'] = {
+            'cbc:ID': {'_text': f"{invoice.l10n_gr_edi_budget_type}|{invoice.l10n_gr_edi_project_reference}"},
+        }
+        # BT-12: ContractDocumentReference
+        vals['document_node']['cac:ContractDocumentReference'] = {
+            'cbc:ID': {'_text': invoice.l10n_gr_edi_contract_reference},
+        }
+
+    def _fill_document_values_credit_note(self, vals):
+        # EXTENDS account.edi.xml.ubl_bis3
+        super()._fill_document_values_credit_note(vals)
+        self._gr_add_mark_document_reference_node(vals)
+
+    def _gr_add_mark_document_reference_node(self, vals):
+        """ GR-R-004: the M.AR.K (myDATA registration number) as an AdditionalDocumentReference (BG-24). """
+        document_node = vals['document_node']
+        nodes = document_node.get('cac:AdditionalDocumentReference') or []
+        if not isinstance(nodes, list):
+            nodes = [nodes]
+        nodes.append({
+            'cbc:ID': {'_text': str(vals['invoice'].l10n_gr_edi_mark)},
+            'cbc:DocumentDescription': {'_text': '##M.AR.K##'},
+        })
+        document_node['cac:AdditionalDocumentReference'] = nodes
 
     # -------------------------------------------------------------------------
     # Party Nodes (Supplier & Customer)
     # -------------------------------------------------------------------------
 
     def _ubl_add_party_endpoint_id_node(self, vals):
+        # EXTENDS account.edi.xml.ubl_bis3
         super()._ubl_add_party_endpoint_id_node(vals)
-        party_node = vals['party_node']
-        endpoint_node = party_node.get('cbc:EndpointID')
+        endpoint_node = vals['party_node'].get('cbc:EndpointID')
         if endpoint_node and endpoint_node.get('schemeID') == '9933':
             endpoint_node['_text'] = vat.compact(endpoint_node.get('_text') or '')
 
     def _ubl_add_party_identification_nodes(self, vals):
+        # EXTENDS account.edi.xml.ubl_bis3
         super()._ubl_add_party_identification_nodes(vals)
         partner = vals['party_vals']['partner']
         buyer = vals['customer'].commercial_partner_id
         # BT-46: Contracting authority code (HT code for Greek contracting authorities)
         if partner.id == vals['customer'].id and buyer.l10n_gr_edi_contracting_authority_code:
-            nodes = vals['party_node'].setdefault('cac:PartyIdentification', [])
-            nodes.append({
-                'cbc:ID': {'_text': buyer.l10n_gr_edi_contracting_authority_code}
+            vals['party_node']['cac:PartyIdentification'].append({
+                'cbc:ID': {'_text': buyer.l10n_gr_edi_contracting_authority_code},
             })
 
     # -------------------------------------------------------------------------
     # Line Item Nodes
     # -------------------------------------------------------------------------
 
-    def _add_invoice_line_item_nodes(self, line_node, vals):
-        super()._add_invoice_line_item_nodes(line_node, vals)
-        line = vals['base_line']['record']
+    def _ubl_add_line_item_commodity_classification_nodes(self, vals):
+        # EXTENDS account.edi.xml.ubl_bis3
+        nodes = super()._ubl_add_line_item_commodity_classification_nodes(vals)
+        line = vals['line_vals']['base_line']['record']
         # BT-158 CPV (Common Procurement Vocabulary) code
-        if not line or not line.l10n_gr_edi_cpv_code:
-            return
-        item = line_node.setdefault('cac:Item', {})
-        commodity_node = item.setdefault('cac:CommodityClassification', [])
-        commodity_node.append({
-            'cbc:ItemClassificationCode': {
-                '_text': line.l10n_gr_edi_cpv_code,
-                'listID': 'STI'
-            }
-        })
+        if isinstance(line, models.Model) and line._name == 'account.move.line' and line.l10n_gr_edi_cpv_code:
+            nodes.append({
+                'cbc:ItemClassificationCode': {
+                    '_text': line.l10n_gr_edi_cpv_code,
+                    'listID': 'STI',
+                },
+            })
+        return nodes
 
     # -------------------------------------------------------------------------
     # CONSTRAINTS
     # -------------------------------------------------------------------------
 
-    def _export_invoice_constraints(self, invoice, vals):
-        constraints = super()._export_invoice_constraints(invoice, vals) or {}
-        constraints.update(self._validate_greek_business_rules(invoice))
+    def _export_document_constraints(self, vals):
+        # EXTENDS account.edi.xml.ubl_bis3
+        constraints = super()._export_document_constraints(vals)
+        if self._is_document(vals, 'invoice', 'credit_note'):
+            constraints.update(self._validate_greek_business_rules(vals['invoice']))
         return constraints
 
     def _validate_greek_business_rules(self, invoice):

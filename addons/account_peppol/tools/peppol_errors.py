@@ -27,7 +27,7 @@ ERROR_MESSAGES = MappingProxyType({
         "Missing Invoiced Item VAT category code. Action Required: Install the module account_edi_ubl_cii_tax_extension."
     ),
     'PEPPOL-EN16931-R010': _lt(
-        "The Peppol endpoint is missing in the XML file. Action Required: Update the account and account_edi_ubl_cii modules to resolve this."
+        "The Peppol endpoint is missing in the XML file. Action Required: Update the account and account_edi_ubl modules to resolve this."
     ),
     'PEPPOL-EN16931-P0107': _lt(
         "The Tax Category must be 'AE' when using Exemption Reason code 'VATEX-EU-AE'. "

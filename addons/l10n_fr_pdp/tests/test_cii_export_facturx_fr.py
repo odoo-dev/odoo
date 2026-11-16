@@ -89,10 +89,12 @@ class TestL10nFrPdpXmlCii(TestL10nFrPdpCommon):
                 self._prepare_invoice_line(
                     price_unit=100.0,
                     tax_ids=tax_goods,
+                    name="Goods",
                 ),
                 self._prepare_invoice_line(
                     price_unit=100.0,
                     tax_ids=tax_services,
+                    name="Services",
                 ),
             ],
             partner_bank_id=self.recipient_bank,

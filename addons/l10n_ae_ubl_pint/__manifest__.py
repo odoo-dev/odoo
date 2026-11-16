@@ -6,7 +6,7 @@
     The UBL PINT e-invoicing format for UAE is based on the Peppol International (PINT) model for Billing.
     It also registers the PINT AE document types on the Peppol network.
     """,
-    'depends': ['account_edi_ubl_cii', 'account_peppol', 'l10n_ae'],
+    'depends': ['account_edi_ubl', 'account_peppol', 'l10n_ae'],
     'data': [
         'security/ir.access.csv',
         'data/l10n_ae_transaction_type_data.xml',

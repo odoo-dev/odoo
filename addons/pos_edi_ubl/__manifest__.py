@@ -9,6 +9,6 @@
 This module provides helpers for exporting POS orders in various UBL 2.1 formats.
 
 """,
-    'depends': ['point_of_sale', 'account_edi_ubl_cii'],
+    'depends': ['point_of_sale', 'account_edi_ubl'],
     'license': 'LGPL-3',
 }

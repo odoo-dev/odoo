@@ -9,7 +9,7 @@
     'version': '1.1',
     'depends': [
         'account',
-        'account_edi_ubl_cii',
+        'account_edi_cii',
     ],
     'auto_install': ['account'],
     'description': """

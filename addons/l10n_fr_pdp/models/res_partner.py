@@ -99,7 +99,7 @@ class ResPartner(models.Model):
         return super()._validate_identifier(key, value, validation)
 
     def _get_preferred_routing_identifier_vals(self, force_recompute=False):
-        # EXTENDS 'account_edi_ubl_cii'
+        # EXTENDS 'account_edi_cii'
         # If FR_CTC is not already there, we suggest the SIREN (even if the SIRET is filled in).
         # "Everyone" will probably have registered the SIREN on annuaire. (Even if they have a SIRET.)
         self.ensure_one()
@@ -155,13 +155,13 @@ class ResPartner(models.Model):
             return self._import_retrieve_customer_from_additional_identifiers({'additional_identifiers': {'FR_SIRET': siret}})
 
     def _get_edi_builder(self, invoice_edi_format):
-        # EXTENDS 'account_edi_ubl_cii'
+        # EXTENDS 'account_edi_cii'
         if invoice_edi_format == 'ubl_21_fr':
             return self.env['account.edi.xml.ubl_21_fr']
         return super()._get_edi_builder(invoice_edi_format)
 
     def _get_ubl_cii_formats_info(self):
-        # EXTENDS 'account_edi_ubl_cii'
+        # EXTENDS 'account_edi_cii'
         formats_info = super()._get_ubl_cii_formats_info()
         formats_info['ubl_21_fr'] = {'countries': ['FR'], 'on_peppol': self.env.company._get_peppol_proxy_type() == 'pdp', 'sequence': 300, 'embed_attachments': True}
         return formats_info

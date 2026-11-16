@@ -38,7 +38,7 @@ Wizards provided by this module:
     'author': 'Noviat, Odoo S.A.',
     'depends': [
         'account',
-        'account_edi_ubl_cii',
+        'account_edi_ubl',
     ],
     'auto_install': ['account'],
     'data': [

@@ -23,7 +23,7 @@ The generation of the QR-bill is automatic if you meet the previous criteria. Th
     'category': 'Accounting/Localizations/Account Charts',
     'depends': [
         'account',
-        'account_edi_ubl_cii',
+        'account_edi_ubl',
         'l10n_din5008',
     ],
     'auto_install': ['account'],

@@ -19,7 +19,7 @@ Also provides Nemhandel registration and invoice sending throught the Odoo Acces
     'depends': [
         'account',
         'account_edi_proxy_client',
-        'account_edi_ubl_cii',
+        'account_edi_ubl',
     ],
     'auto_install': ['account'],
     'data': [

@@ -13,7 +13,7 @@ from odoo.tests.common import MockHTTPClient
 from odoo.tools.misc import file_open
 
 from odoo.addons.account.tests.test_account_move_send import TestAccountMoveSendCommon
-from odoo.addons.account_edi_ubl_cii.tests.common import TestUblCiiCommon
+from odoo.addons.account_edi_cii.tests.common import TestUblCiiCommon
 
 
 ID_CLIENT = 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'

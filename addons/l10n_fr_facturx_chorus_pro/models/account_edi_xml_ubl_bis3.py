@@ -9,8 +9,11 @@ class AccountEdiXmlUbl_Bis3(models.AbstractModel):
     Chorus Pro documentation: https://communaute.chorus-pro.gouv.fr/wp-content/uploads/2017/07/Specifications_Externes_Annexe_EDI_V4.22.pdf
     """
 
-    def _export_invoice_constraints(self, invoice, vals):
-        constraints = super()._export_invoice_constraints(invoice, vals)
+    def _export_document_constraints(self, vals):
+        # EXTENDS account.edi.xml.ubl_bis3
+        constraints = super()._export_document_constraints(vals)
+        if not self._is_document(vals, 'invoice', 'credit_note', 'self_invoice', 'self_credit_note'):
+            return constraints
         customer, supplier = vals['customer'].commercial_partner_id, vals['supplier']
         if self._is_customer_behind_chorus_pro(customer):
             if not customer._get_additional_identifier('FR_SIRET'):
@@ -22,22 +25,25 @@ class AccountEdiXmlUbl_Bis3(models.AbstractModel):
                 constraints['chorus_supplier_not_fr'] = _("The VAT is mandatory for non-french suppliers when invoicing through Chorus Pro.")
         return constraints
 
-    def _add_invoice_header_nodes(self, document_node, vals):
-        super()._add_invoice_header_nodes(document_node, vals)
-
-        customer = vals['customer'].commercial_partner_id
-        if not self._is_customer_behind_chorus_pro(customer):
+    def _ubl_add_buyer_reference_node(self, vals):
+        # EXTENDS account.edi.xml.ubl_bis3
+        super()._ubl_add_buyer_reference_node(vals)
+        if not self._is_document(vals, 'invoice', 'credit_note', 'self_invoice', 'self_credit_note'):
             return
-
         invoice = vals['invoice']
-
-        if invoice.buyer_reference:
+        if self._is_customer_behind_chorus_pro(vals['customer'].commercial_partner_id) and invoice.buyer_reference:
             # Pagero doc states that the 'Service Code' should be in the BuyerReference node
-            document_node['cbc:BuyerReference'] = {'_text': invoice.buyer_reference}
+            vals['document_node']['cbc:BuyerReference'] = {'_text': invoice.buyer_reference}
 
-        if invoice.purchase_order_reference:
+    def _ubl_add_order_reference_node(self, vals):
+        # EXTENDS account.edi.xml.ubl_bis3
+        super()._ubl_add_order_reference_node(vals)
+        if not self._is_document(vals, 'invoice', 'credit_note', 'self_invoice', 'self_credit_note'):
+            return
+        invoice = vals['invoice']
+        if self._is_customer_behind_chorus_pro(vals['customer'].commercial_partner_id) and invoice.purchase_order_reference:
             # Pagero doc states that the 'Commitment Number' should be in the OrderReference/ID node
-            document_node['cac:OrderReference'] = {
+            vals['document_node']['cac:OrderReference'] = {
                 'cbc:ID': {'_text': invoice.purchase_order_reference}
             }
 

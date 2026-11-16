@@ -20,7 +20,7 @@ Wewnętrzny numer wersji OpenGLOBE 1.02
     """,
     'depends': [
         'account',
-        'account_edi_ubl_cii',
+        'account_edi_cii',
     ],
     'auto_install': ['account'],
     'data': [

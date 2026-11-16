@@ -59,15 +59,6 @@ class AccountMove(models.Model):
                 and move.partner_id.nemhandel_response_support
             )
 
-    @api.model
-    def _get_ubl_cii_builder_from_xml_tree(self, tree):
-        # Deprecated
-        # Extends account_edi_ubl_cii
-        customization_id = tree.find('{*}CustomizationID')
-        if customization_id is not None and 'OIOUBL-2' in customization_id.text:
-            return self.env['account.edi.xml.oioubl_21']
-        return super()._get_ubl_cii_builder_from_xml_tree(tree)
-
     def _get_import_file_type(self, file_data):
         """ Identify OIOUBL files. """
         # EXTENDS 'account'

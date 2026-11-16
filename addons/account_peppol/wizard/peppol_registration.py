@@ -12,7 +12,7 @@ from odoo.tools.urls import urljoin
 from odoo.tools import single_email_re
 
 from odoo.addons.account_peppol.tools.demo_utils import handle_demo
-from odoo.addons.account_edi_ubl_cii.tools.partner_identifiers import DEPRECATED_ELECTRONIC_ADDRESS_SCHEMES_CODELIST
+from odoo.addons.account_edi_cii.tools.partner_identifiers import DEPRECATED_ELECTRONIC_ADDRESS_SCHEMES_CODELIST
 from odoo.addons.account_peppol.tools.peppol_iap_connector import PeppolIAPConnector
 from odoo.addons.account_peppol.tools.peppol_errors import ERROR_MESSAGES
 

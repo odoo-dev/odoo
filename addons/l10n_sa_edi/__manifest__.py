@@ -6,7 +6,7 @@
     'countries': ['sa'],
     'version': '0.3',
     'depends': [
-        'account_edi_ubl_cii',
+        'account_edi_ubl',
         'l10n_sa',
         'certificate',
     ],

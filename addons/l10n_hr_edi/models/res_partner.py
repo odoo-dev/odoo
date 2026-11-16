@@ -28,13 +28,13 @@ class ResPartner(models.Model):
     # -------------------------------------------------------------------------
 
     def _get_edi_builder(self, invoice_edi_format):
-        # EXTENDS 'account_edi_ubl_cii'
+        # EXTENDS 'account_edi_cii'
         if invoice_edi_format == 'ubl_hr':
             return self.env['account.edi.xml.ubl_hr']
         return super()._get_edi_builder(invoice_edi_format)
 
     def _get_ubl_cii_formats_info(self):
-        # EXTENDS 'account_edi_ubl_cii'
+        # EXTENDS 'account_edi_cii'
         formats_info = super()._get_ubl_cii_formats_info()
         formats_info['ubl_hr'] = {'countries': ['HR'], 'on_peppol': False}
         return formats_info

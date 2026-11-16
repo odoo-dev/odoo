@@ -17,7 +17,7 @@
     ],
     'depends': [
         'account_edi_proxy_client',
-        'account_edi_ubl_cii',
+        'account_edi_ubl',
     ],
     'external_dependencies': {
         'python': ['phonenumbers'],
@@ -56,5 +56,5 @@
             'account_peppol/static/src/interactions/*',
         ],
     },
-    'auto_install': ['account_edi_ubl_cii'],  # auto-install when account_edi_ubl_cii AND one company exists in countries above
+    'auto_install': ['account_edi_ubl'],  # auto-install when account_edi_cii AND one company exists in countries above
 }

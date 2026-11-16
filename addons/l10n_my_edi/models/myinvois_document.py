@@ -8,15 +8,12 @@ from collections import defaultdict
 import dateutil
 import werkzeug
 from dateutil.relativedelta import relativedelta
-from lxml import etree
 
 from odoo import SUPERUSER_ID, api, fields, models, modules
 from odoo.exceptions import RedirectWarning, UserError, ValidationError
 from odoo.fields import Domain
 from odoo.tools import BinaryBytes, SQL, config, date_utils, split_every
 from odoo.tools.image import image_data_uri
-
-from odoo.addons.account.tools import dict_to_xml
 
 # Holds the maximum amount of records that can be sent in a single submission.
 SUBMISSION_MAX_SIZE = 100
@@ -1144,17 +1141,8 @@ class MyInvoisDocument(models.Model):
         builder = self.env['account.edi.xml.ubl_myinvois_my']
         # 1. Validate the structure of the taxes
         self._validate_taxes()
-        # 2. Export the file data
-        vals = {'myinvois_document': self.with_context(lang=self.env.company.partner_id.lang)}
-        document_node = builder._get_myinvois_document_node(vals)
-        vals['document_node'] = document_node
-        # 3. Check for any issue with the data
-        errors = [constraint for constraint in builder._export_myinvois_document_constraints(vals).values() if constraint]
-        # 4. Generate the xml file
-        template = builder._get_document_template(vals)
-        nsmap = builder._get_document_nsmap(vals)
-        xml_content = dict_to_xml(document_node, nsmap=nsmap, template=template)
-        return etree.tostring(xml_content, xml_declaration=True, encoding='UTF-8'), set(errors)
+        # 2. Export the file data, check for any issue with the data and generate the xml file
+        return builder._export_myinvois_document(self.with_context(lang=self.env.company.partner_id.lang))
 
     def _submit_to_myinvois(self, allow_raising=True):
         """

@@ -2,7 +2,7 @@ import re
 
 from odoo import Command, models
 
-from odoo.addons.account_edi_ubl_cii.models.account_edi_common import FloatFmt
+from odoo.addons.account_edi_cii.models.account_edi_common import FloatFmt
 
 # ibr-128-ae: CountrySubentity is the 3-letter emirate code, not Odoo's state code or name.
 AE_COUNTRY_SUBENTITY_CODES = {
@@ -27,7 +27,7 @@ class AccountEdiXmlPintAe(models.AbstractModel):
     _description = "UAE implementation of Peppol International (PINT) model for Billing"
 
     def _export_invoice_filename(self, invoice):
-        # OVERRIDE account_edi_ubl_cii
+        # OVERRIDE account_edi_ubl
         return f"{invoice.name.replace('/', '_')}_pint_ae.xml"
 
     # -------------------------------------------------------------------------
@@ -35,11 +35,9 @@ class AccountEdiXmlPintAe(models.AbstractModel):
     # -------------------------------------------------------------------------
 
     def _init_invoice_export_values(self, invoice):
-        """ The transaction type flags (BTAE-02), exported as cbc:ProfileExecutionID. Also the
-        currency as 'currency_id', which the tax and monetary totals nodes read.
-        """
+        """ The transaction type flags (BTAE-02), exported as cbc:ProfileExecutionID. """
+        # EXTENDS account.edi.ubl
         vals = super()._init_invoice_export_values(invoice)
-        vals['currency_id'] = vals['currency']
         vals['l10n_ae_transaction_type_code'] = vals['invoice'].l10n_ae_transaction_type_ids._get_flags_code()
         return vals
 
@@ -262,13 +260,13 @@ class AccountEdiXmlPintAe(models.AbstractModel):
             node['cbc:Percent']['_text'] = None
         return node
 
-    def _export_document_node_constraints(self, vals):
+    def _export_document_constraints(self, vals):
         """
         Validates invoice constraints for PINT AE payload
         https://docs.peppol.eu/poac/ae/pint-ae/trn-invoice/rule/
         """
         # EXTENDS account.edi.ubl_pint
-        constraints = super()._export_document_node_constraints(vals)
+        constraints = super()._export_document_constraints(vals)
 
         document_node = vals['document_node']
         is_invoice = self._is_document(vals, 'invoice', 'self_invoice')
@@ -765,13 +763,13 @@ class AccountEdiXmlPintAe(models.AbstractModel):
             line.l10n_ae_service_accounting_code or '',
         )
 
-    def _ubl_get_collapsed_base_line_grouping_key(self, base_line):
+    def _get_collapsed_base_line_grouping_key(self, base_line):
         """ A collapsed section keeps one line per item classification rather than merging items
         that differ in it: the item type, goods type, HS code and service accounting code are all
         single per item (BTAE-13, BTAE-09, IBT-158 per classification, BTAE-17).
         """
         # EXTENDS account.edi.ubl
         return {
-            **super()._ubl_get_collapsed_base_line_grouping_key(base_line),
+            **super()._get_collapsed_base_line_grouping_key(base_line),
             'l10n_ae_classification': self._l10n_ae_get_line_classification_key(self._l10n_ae_get_base_line_record(base_line)),
         }

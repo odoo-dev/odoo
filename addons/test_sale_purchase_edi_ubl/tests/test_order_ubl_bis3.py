@@ -3,7 +3,7 @@
 from odoo.fields import Command
 from odoo.tests import tagged
 
-from odoo.addons.account_edi_ubl_cii.tests.test_ubl_cii import TestAccountEdiUblCii
+from odoo.addons.account_edi_cii.tests.test_ubl_cii import TestAccountEdiUblCii
 from odoo.addons.sale.tests.common import SaleCommon
 
 

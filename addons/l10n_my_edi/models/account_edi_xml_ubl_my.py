@@ -4,8 +4,11 @@ from datetime import datetime, UTC
 
 from lxml import etree
 
-from odoo import api, models
-from odoo.tools import html2plaintext
+from odoo import _, api, models
+from odoo.tools import float_round, html2plaintext
+
+from odoo.addons.account.tools import dict_to_xml
+from odoo.addons.account_edi_cii.models.account_edi_common import FloatFmt
 
 # Far from ideal, but no better solution yet.
 COUNTRY_CODE_MAP = {
@@ -42,49 +45,46 @@ E_164_REGEX = re.compile(r"^\+[1-9]\d{1,14}$")
 
 
 class AccountEdiXmlUBLMyInvoisMY(models.AbstractModel):
-    """
+    """ Malaysian e-Invoice (MyInvois) in the UBL 2.1 syntax.
+
+    MyInvois is a national UBL 2.1 customization defined by the Inland Revenue Board of Malaysia (LHDN): it is
+    neither an EN 16931 CIUS nor a Peppol format (no CustomizationID/ProfileID, the kind of document is given by the
+    InvoiceTypeCode 01-04/11-14, version 1.1), so it only relies on the UBL syntax layer 'account.edi.ubl'.
+
+    A MyInvois document (myinvois.document) is not necessarily a single invoice: it can consolidate several invoices
+    (or PoS orders). The export is thus driven by the document ('_export_myinvois_document') instead of an account.move,
+    every document being exported with the Invoice template.
+
     * MyInvois API formats doc: https://sdk.myinvois.hasil.gov.my/documents
+    * Invoice v1.1: https://sdk.myinvois.hasil.gov.my/documents/invoice-v1-1/
     """
-    _inherit = "account.edi.xml.ubl_21"
     _name = 'account.edi.xml.ubl_myinvois_my'
+    _inherit = 'account.edi.ubl'
     _description = "Malaysian implementation of ubl for the MyInvois portal"
 
-    # -----------------------
-    # EXPORT
-    # -----------------------
+    # -------------------------------------------------------------------------
+    # EXPORT: Builder interface
+    # -------------------------------------------------------------------------
 
-    def _get_myinvois_document_node(self, vals):
+    def _export_myinvois_document(self, myinvois_document):
+        """ Entry point of the export of a MyInvois document.
+
+        :param myinvois_document:   The myinvois.document to export.
+        :return:                    A tuple (xml_content as bytes, set of error messages).
         """
-        Entry point of the export of a MyInvois document.
-        The node returned by this function should be passed into dict_to_xml in order to generate the XML file to send to
-        MyInvois.
+        vals = self._init_myinvois_document_export_values(myinvois_document)
+        self._export_document(vals)
+        xml_content = dict_to_xml(
+            vals['document_node'],
+            nsmap=vals['document_node']['_nsmap'],
+            template=vals['document_node']['_template'],
+        )
+        return etree.tostring(xml_content, xml_declaration=True, encoding='UTF-8'), vals['errors']
+
+    def _init_myinvois_document_export_values(self, myinvois_document):
+        """ Collect the values describing the MyInvois document to export (the equivalent of
+        '_init_invoice_export_values' for a myinvois.document).
         """
-        self._add_myinvois_document_config_vals(vals)
-        self._add_myinvois_document_base_lines_vals(vals)
-        self._setup_base_lines(vals)
-        self._add_document_currency_vals(vals)
-        self._add_myinvois_document_tax_grouping_function_vals(vals)
-        self._add_myinvois_document_monetary_total_vals(vals)
-
-        document_node = {}
-        self._add_myinvois_document_header_nodes(document_node, vals)
-        self._add_myinvois_document_accounting_supplier_party_nodes(document_node, vals)
-        self._add_myinvois_document_accounting_customer_party_nodes(document_node, vals)
-
-        myinvois_document = vals["myinvois_document"]
-        if vals['document_type'] == 'invoice' and not myinvois_document._is_consolidated_invoice():
-            self._add_myinvois_document_delivery_nodes(document_node, vals)
-            self._add_myinvois_document_payment_terms_nodes(document_node, vals)
-
-        self._add_document_allowance_charge_nodes(document_node, vals)
-        self._add_myinvois_document_exchange_rate_nodes(document_node, vals)
-        self._add_document_tax_total_nodes(document_node, vals)
-        self._add_myinvois_document_monetary_total_nodes(document_node, vals)
-        self._add_myinvois_document_line_nodes(document_node, vals)
-        return document_node
-
-    def _add_myinvois_document_config_vals(self, vals):
-        myinvois_document = vals['myinvois_document']
         supplier = myinvois_document.company_id.partner_id.commercial_partner_id
 
         if myinvois_document._is_consolidated_invoice() or myinvois_document._is_consolidated_invoice_refund():
@@ -114,86 +114,158 @@ class AccountEdiXmlUBLMyInvoisMY(models.AbstractModel):
                     'l10n_my_edi_industrial_classification': self.env.ref('l10n_my_edi.class_00000', raise_if_not_found=False),
                 })
 
-            partner_shipping = None
-            payment_term_id = None  # wouldn't make sense in a consolidated invoice.
+            delivery = None
+            payment_term = None  # wouldn't make sense in a consolidated invoice.
         else:
             invoice = myinvois_document.invoice_ids[0]  # Otherwise it would be a consolidated invoice.
             customer = invoice.partner_id
-            partner_shipping = invoice.partner_shipping_id or customer
-            payment_term_id = invoice.invoice_payment_term_id
+            delivery = invoice.partner_shipping_id or customer
+            payment_term = invoice.invoice_payment_term_id
 
         document_type_code, original_documents = self._l10n_my_edi_get_document_type_code(myinvois_document)
         # In case of self billing, we want to invert the supplier and customer.
         if document_type_code in ("11", "12", "13", "14"):
             supplier, customer = customer, supplier
-            partner_shipping = customer
+            delivery = customer
             document_ref = ','.join([invoice.ref for invoice in myinvois_document.invoice_ids if invoice.ref]) or None
         else:
             document_ref = None
 
-        vals.update({
-            'document_type': 'invoice',
+        vals = {
+            'myinvois_document': myinvois_document,
             'document_type_code': document_type_code,
             'original_documents': original_documents,
-
             'document_name': myinvois_document.name,
-
+            'document_ref': document_ref,
+            'company': myinvois_document.company_id,
+            'currency': myinvois_document.currency_id,
+            'company_currency': myinvois_document.company_id.currency_id,
             'supplier': supplier,
             'customer': customer,
-            'partner_shipping': partner_shipping,
-
-            'company': myinvois_document.company_id,
-            'currency_id': myinvois_document.currency_id,
-            'company_currency_id': myinvois_document.company_id.currency_id,
-
-            'use_company_currency': False,
-            'fixed_taxes_as_allowance_charges': True,
+            'delivery': delivery,
             'custom_form_reference': myinvois_document.myinvois_custom_form_reference,
-            'document_ref': document_ref,
-            'incoterm_id': myinvois_document.invoice_ids.invoice_incoterm_id,
-            'invoice_payment_term_id': payment_term_id,
-        })
+            'incoterm': myinvois_document.invoice_ids.invoice_incoterm_id,
+            'payment_term': payment_term,
+        }
+        # Every MyInvois document is an Invoice, the kind of document being given by the type code.
+        self._define_document_type(vals, 'invoice')
 
-    def _add_myinvois_document_base_lines_vals(self, vals):
+        self._l10n_my_edi_add_base_lines_vals(vals)
+        self._l10n_my_edi_add_monetary_total_vals(vals)
+        self._l10n_my_edi_add_paid_amount_vals(vals)
+        return vals
+
+    def _l10n_my_edi_add_base_lines_vals(self, vals):
+        """ Add the base lines of the document. The recycling contribution taxes (e.g. RECUPEL) are reported as line
+        allowances/charges, the emptying taxes as separate lines and the cash rounding as rounding amount.
+        """
         myinvois_document = vals['myinvois_document']
-        vals['base_lines'] = myinvois_document._get_rounded_base_lines()
+        base_lines = myinvois_document._get_rounded_base_lines()
 
-    def _add_myinvois_document_tax_grouping_function_vals(self, vals):
-        def total_grouping_function(base_line, tax_data):
+        for base_line in base_lines:
+            base_line['_ubl_values'] = {'recycling_contribution_taxes_data': []}
+            tax_details = base_line['tax_details']
+            new_taxes_data = []
+            for tax_data in tax_details['taxes_data']:
+                if self._is_recycling_contribution_tax(tax_data):
+                    base_line['_ubl_values']['recycling_contribution_taxes_data'].append(tax_data)
+                    tax_details['raw_total_excluded_currency'] += tax_data['raw_tax_amount_currency']
+                    tax_details['raw_total_excluded'] += tax_data['raw_tax_amount']
+                    tax_details['total_excluded_currency'] += tax_data['tax_amount_currency']
+                    tax_details['total_excluded'] += tax_data['tax_amount']
+                else:
+                    new_taxes_data.append(tax_data)
+            tax_details['taxes_data'] = new_taxes_data
+
+        base_lines = self._turn_emptying_taxes_as_new_base_lines(base_lines, vals['company'], vals)
+
+        vals['base_lines'] = [base_line for base_line in base_lines if not self._is_cash_rounding_base_line(base_line)]
+        vals['cash_rounding_base_lines'] = [base_line for base_line in base_lines if self._is_cash_rounding_base_line(base_line)]
+
+    def _l10n_my_edi_get_tax_grouping_key(self, base_line, tax_data):
+        """ How the taxes are grouped in the TaxTotal/TaxSubtotal and ClassifiedTaxCategory nodes. """
+        tax = tax_data and tax_data['tax']
+        myinvois_document = base_line['myinvois_document']
+
+        if (
+            not tax
+            and not myinvois_document._is_consolidated_invoice()
+            and not myinvois_document._is_consolidated_invoice_refund()
+        ):
+            return None  # Triggers UserError for missing tax on simple invoice.
+
+        is_exempt_tax = tax and tax.l10n_my_tax_type == 'E'
+        tax_exemption_reason = is_exempt_tax and (
+            myinvois_document.myinvois_exemption_reason
+            or tax.l10n_my_tax_exemption_reason
+        )
+
+        return {
+            'tax_category_code': tax.l10n_my_tax_type if tax else '06',
+            'tax_exemption_reason': tax_exemption_reason,
+            'amount': tax.amount if tax else 0.0,
+            'amount_type': tax.amount_type if tax else 'percent',
+        }
+
+    def _l10n_my_edi_get_fixed_tax_amount(self, base_line, currency_suffix):
+        """ The amount of the fixed taxes of a base line, included in the line amounts. """
+        return sum(
+            tax_data[f'tax_amount{currency_suffix}']
+            for tax_data in base_line['tax_details']['taxes_data']
+            if tax_data['tax'].amount_type == 'fixed'
+        )
+
+    def _l10n_my_edi_add_monetary_total_vals(self, vals):
+        AccountTax = self.env['account.tax']
+
+        for currency_suffix in ('', '_currency'):
+            for key in ('total_allowance', 'total_charge', 'total_lines'):
+                vals[f'{key}{currency_suffix}'] = 0.0
+
+        for base_line in vals['base_lines']:
+            for currency_suffix in ('', '_currency'):
+                base_line_total_excluded = (
+                    base_line['tax_details'][f'total_excluded{currency_suffix}']
+                    + base_line['tax_details'][f'delta_total_excluded{currency_suffix}']
+                    + self._l10n_my_edi_get_fixed_tax_amount(base_line, currency_suffix)
+                )
+                if self._is_early_payment_base_line(base_line):
+                    if base_line_total_excluded < 0.0:
+                        vals[f'total_allowance{currency_suffix}'] += -base_line_total_excluded
+                    else:
+                        vals[f'total_charge{currency_suffix}'] += base_line_total_excluded
+                else:
+                    vals[f'total_lines{currency_suffix}'] += base_line_total_excluded
+
+        def non_fixed_grouping_function(base_line, tax_data):
+            if tax_data and tax_data['tax'].amount_type == 'fixed':
+                return None
             return True
 
-        def tax_grouping_function(base_line, tax_data):
-            tax = tax_data and tax_data['tax']
-            myinvois_document = base_line['myinvois_document']
-
-            if (
-                not tax
-                and not myinvois_document._is_consolidated_invoice()
-                and not myinvois_document._is_consolidated_invoice_refund()
-            ):
-                return None  # Triggers UserError for missing tax on simple invoice.
-
-            is_exempt_tax = tax and tax.l10n_my_tax_type == 'E'
-            tax_exemption_reason = is_exempt_tax and (
-                myinvois_document.myinvois_exemption_reason
-                or tax.l10n_my_tax_exemption_reason
+        base_lines_aggregated_tax_details = AccountTax._aggregate_base_lines_tax_details(vals['base_lines'], non_fixed_grouping_function)
+        aggregated_tax_details = AccountTax._aggregate_base_lines_aggregated_values(base_lines_aggregated_tax_details)
+        for currency_suffix in ('', '_currency'):
+            vals[f'tax_exclusive_amount{currency_suffix}'] = (
+                vals[f'total_lines{currency_suffix}']
+                + vals[f'total_charge{currency_suffix}']
+                - vals[f'total_allowance{currency_suffix}']
+            )
+            vals[f'total_tax_amount{currency_suffix}'] = sum(
+                tax_details[f'tax_amount{currency_suffix}']
+                for grouping_key, tax_details in aggregated_tax_details.items()
+                if grouping_key
+            )
+            vals[f'tax_inclusive_amount{currency_suffix}'] = vals[f'tax_exclusive_amount{currency_suffix}'] + vals[f'total_tax_amount{currency_suffix}']
+            vals[f'cash_rounding_base_amount{currency_suffix}'] = sum(
+                base_line['tax_details'][f'total_excluded{currency_suffix}']
+                for base_line in vals['cash_rounding_base_lines']
             )
 
-            return {
-                'tax_category_code': tax.l10n_my_tax_type if tax else '06',
-                'tax_exemption_reason': tax_exemption_reason,
-                'amount': tax.amount if tax else 0.0,
-                'amount_type': tax.amount_type if tax else 'percent',
-            }
-
-        vals['total_grouping_function'] = total_grouping_function
-        vals['tax_grouping_function'] = tax_grouping_function
-
-    def _add_myinvois_document_monetary_total_vals(self, vals):
-        self._add_document_monetary_total_vals(vals)
-        myinvois_document = vals["myinvois_document"]
+    def _l10n_my_edi_add_paid_amount_vals(self, vals):
+        """ Add the amount paid in advance ('total_paid_amount' and 'total_paid_amount_currency'). """
+        vals['total_paid_amount'] = vals['total_paid_amount_currency'] = 0.0
+        myinvois_document = vals['myinvois_document']
         if myinvois_document.invoice_ids:
-            # Add the total amount paid.
             # Genuine prepayments only; the base implementation would otherwise treat any reconciled payment,
             # regardless of its date, as a deposit.
             prepaid_amounts = {invoice: self._l10n_my_edi_get_prepaid_amount(invoice) for invoice in myinvois_document.invoice_ids}
@@ -202,17 +274,151 @@ class AccountEdiXmlUBLMyInvoisMY(models.AbstractModel):
                 'total_paid_amount_currency': sum(prepaid_amounts.values()),
             })
 
+    def _l10n_my_edi_get_reported_prepaid_amount(self, vals):
+        """ The prepaid amount reported in the PrepaidPayment node and deducted from the PayableAmount. """
+        myinvois_document = vals['myinvois_document']
+        # Consolidated invoices have no genuine prepayment to report.
+        # For credit, debit, refund notes, and their self-billed variants, the PrepaidPayment amount must be set to 0:
+        # the PayableAmount reflects the full refund/adjustment amount, as per MyInvois specifications.
+        if myinvois_document._is_consolidated_invoice() or vals['document_type_code'] in ('02', '03', '04', '12', '13', '14'):
+            return 0.0
+        return vals['total_paid_amount_currency']
+
+    def _l10n_my_edi_format_amount(self, vals, amount):
+        return FloatFmt(amount, min_dp=self._get_currency_decimal_places(vals['currency']))
+
+    def _l10n_my_edi_get_amount_node(self, vals, amount):
+        return {
+            '_text': self._l10n_my_edi_format_amount(vals, amount),
+            'currencyID': vals['currency'].name,
+        }
+
     # -------------------------------------------------------------------------
-    # EXPORT: Templates
+    # EXPORT: Document nodes
     # -------------------------------------------------------------------------
 
-    def _get_myinvois_document_address_node(self, vals):
-        partner = vals['partner']
+    def _fill_document_values(self, vals):
+        # OVERRIDE account.edi.ubl: a MyInvois document is always an Invoice, without the Peppol optional fields.
+        self._fill_template_values(vals)
+        self._fill_nsmap_values(vals)
+        self._fill_document_values_invoice(vals)
 
+    def _fill_document_values_invoice(self, vals):
+        # OVERRIDE account.edi.ubl
+        self._ubl_add_version_id_node(vals)
+        self._ubl_add_id_node(vals)
+        self._ubl_add_issue_date_node(vals)
+        self._ubl_add_due_date_node(vals)
+        self._ubl_add_invoice_type_code_node(vals)
+        self._ubl_add_document_currency_code_node(vals)
+        self._ubl_add_buyer_reference_node(vals)
+        self._ubl_add_order_reference_node(vals)
+        self._ubl_add_billing_reference_nodes(vals)
+        self._ubl_add_additional_document_reference_nodes(vals)
+        self._ubl_add_accounting_supplier_party_node(vals)
+        self._ubl_add_accounting_customer_party_node(vals)
+        self._ubl_add_delivery_nodes(vals)
+        self._ubl_add_payment_terms_nodes(vals)
+        self._ubl_add_prepaid_payment_node(vals)
+        self._ubl_add_allowance_charge_nodes(vals)
+        self._ubl_add_tax_exchange_rate_node(vals)
+        self._ubl_add_tax_totals_nodes(vals)
+        self._ubl_add_legal_monetary_total_node(vals)
+        self._ubl_add_invoice_line_nodes(vals)
+
+    def _ubl_add_version_id_node(self, vals):
+        # OVERRIDE account.edi.ubl
+        vals['document_node']['cbc:UBLVersionID'] = None
+
+    def _ubl_add_id_node(self, vals):
+        # OVERRIDE account.edi.ubl
+        document_id = vals['document_name']
+        # Self-billed invoices must use the number given by the supplier.
+        if vals['document_type_code'] in ('11', '12', '13', '14') and vals['document_ref'] and not vals['myinvois_document']._is_consolidated_invoice():
+            document_id = vals['document_ref']
+        vals['document_node']['cbc:ID'] = {'_text': document_id}
+
+    def _ubl_add_issue_date_node(self, vals):
+        # OVERRIDE account.edi.ubl
+        # The issue date and time must be the current time set in the UTC time zone
+        now = datetime.now(tz=UTC)
+        vals['document_node']['cbc:IssueDate'] = {'_text': now.strftime("%Y-%m-%d")}
+        vals['document_node']['cbc:IssueTime'] = {'_text': now.strftime("%H:%M:%SZ")}
+
+    def _ubl_add_due_date_node(self, vals):
+        # OVERRIDE account.edi.ubl
+        vals['document_node']['cbc:DueDate'] = None
+
+    def _ubl_add_invoice_type_code_node(self, vals):
+        # OVERRIDE account.edi.ubl
+        # The current version is 1.1 (document with signature), the type code depends on the move type.
+        vals['document_node']['cbc:InvoiceTypeCode'] = {
+            '_text': vals['document_type_code'],
+            'listVersionID': '1.1',
+        }
+
+    def _ubl_add_document_currency_code_node(self, vals):
+        # OVERRIDE account.edi.ubl
+        self._ubl_add_document_currency_code_node_foreign_currency(vals)
+
+    def _ubl_add_buyer_reference_node(self, vals):
+        # OVERRIDE account.edi.ubl
+        vals['document_node']['cbc:BuyerReference'] = {'_text': vals['customer'].commercial_partner_id.ref}
+
+    def _ubl_add_order_reference_node(self, vals):
+        # OVERRIDE account.edi.ubl
+        vals['document_node']['cac:OrderReference'] = None
+
+    def _l10n_my_edi_get_original_document_id(self, vals, original_document):
+        if vals['document_type_code'] in {'02', '03', '04', '12', '13', '14'} and original_document:
+            if original_document.myinvois_file:
+                decoded_vals = self._l10n_my_edi_decode_myinvois_attachment(original_document.myinvois_file)
+                return decoded_vals.get('original_document_id')
+            original_invoice = original_document.invoice_ids[:1]
+            if vals['document_type_code'] in {'12', '13', '14'} and original_invoice.ref:
+                return original_invoice.ref
+            if original_document.name:
+                return original_document.name
+        return None
+
+    def _ubl_add_billing_reference_nodes(self, vals):
+        # OVERRIDE account.edi.ubl
+        # Debit/Credit note original invoice ref.
+        # Applies to credit notes, debit notes, refunds for both invoices and self-billed invoices.
+        # The original document is mandatory; but in some specific cases it will be empty (sending a credit note for an invoice
+        # managed outside Odoo/...)
+        nodes = vals['document_node']['cac:BillingReference'] = []
+        if vals['document_type_code'] in {'02', '03', '04', '12', '13', '14'}:
+            for original_document in vals['original_documents'] or [None]:
+                nodes.append({
+                    'cac:InvoiceDocumentReference': {
+                        'cbc:ID': {'_text': self._l10n_my_edi_get_original_document_id(vals, original_document) or 'NA'},
+                        'cbc:UUID': {'_text': (original_document and original_document.myinvois_external_uuid) or 'NA'},
+                    }
+                })
+
+    def _ubl_add_additional_document_reference_nodes(self, vals):
+        nodes = vals['document_node']['cac:AdditionalDocumentReference'] = []
+        if vals['document_type_code'] in {'11', '12', '13', '14'} and vals['custom_form_reference']:
+            nodes.append({
+                'cbc:ID': {'_text': vals['custom_form_reference']},
+                'cbc:DocumentType': {'_text': 'CustomsImportForm'},
+            })
+        if vals['incoterm']:
+            nodes.append({
+                'cbc:ID': {'_text': vals['incoterm'].code},
+            })
+        if vals['document_type_code'] in {'01', '02', '03', '04'} and vals['custom_form_reference']:
+            nodes.append({
+                'cbc:ID': {'_text': vals['custom_form_reference']},
+                'cbc:DocumentType': {'_text': 'K2'},
+            })
+
+    def _ubl_get_partner_address_node(self, vals, partner):
+        # OVERRIDE account.edi.ubl
         # The API expects the iso3166-2 code for the state, in the same way as it expects the iso3166 code for the countries.
         # In Odoo, we mostly use these (although there is no standard format) so we'll try to use what Odoo gives us.
         # For malaysia, the codes were updated..
-
         subentity_code = ''
         country = partner.country_id
 
@@ -247,14 +453,18 @@ class AccountEdiXmlUBLMyInvoisMY(models.AbstractModel):
                     'listAgencyID': '6',
                     'listID': 'ISO3166-1',
                 },
-                'cbc:Name': {
-                    '_text': country.name,
-                    'languageID': vals.get('country_vals', {}).get('name_attrs', {}).get('languageID'),
-                },
+                'cbc:Name': {'_text': country.name},
             },
         }
 
-    def _get_myinvois_document_party_identification_node(self, vals):
+    def _ubl_add_party_industry_classification_code_node(self, vals):
+        commercial_partner = vals['party_vals']['partner'].commercial_partner_id
+        vals['party_node']['cbc:IndustryClassificationCode'] = {
+            '_text': commercial_partner.l10n_my_edi_industrial_classification.code,
+            'name': commercial_partner.l10n_my_edi_industrial_classification.name,
+        } if vals['party_vals']['role'] == 'supplier' else None
+
+    def _ubl_add_party_identification_nodes(self, vals):
         """ The id vals list must be filled with two values.
         The TIN, and then one of either:
             - Business registration number (BNR)
@@ -264,18 +474,20 @@ class AccountEdiXmlUBLMyInvoisMY(models.AbstractModel):
         Additionally, companies registered to use SST (sales & services tax) must provide their SST number.
         Finally, if a supplier is using TTX (tourism tax), once again that number must be provided.
         """
-        partner = vals['partner']
+        # OVERRIDE account.edi.ubl
+        partner = vals['party_vals']['partner'].commercial_partner_id
+        role = vals['party_vals']['role']
 
         tin = partner._l10n_my_edi_get_tin_for_myinvois()
 
         # If the invoice's commercial partner uses a Generic TIN, set it to the correct generic TIN
         # depending on whether the invoice is self-billed or not.
-        if vals['document_type_code'] in ('01', '02', '03', '04') and tin == 'EI00000000030' and vals['role'] == 'customer':
+        if vals['document_type_code'] in ('01', '02', '03', '04') and tin == 'EI00000000030' and role == 'customer':
             tin = 'EI00000000020'  # For normal invoices, this partner TIN should be used
-        elif vals['document_type_code'] in ('11', '12', '13', '14') and tin == 'EI00000000020' and vals['role'] == 'supplier':
+        elif vals['document_type_code'] in ('11', '12', '13', '14') and tin == 'EI00000000020' and role == 'supplier':
             tin = 'EI00000000030'  # For self-billed invoices, this partner TIN should be used
 
-        party_identification_node = [
+        nodes = vals['party_node']['cac:PartyIdentification'] = [
             {
                 'cbc:ID': {
                     '_text': tin,
@@ -285,55 +497,104 @@ class AccountEdiXmlUBLMyInvoisMY(models.AbstractModel):
         ]
 
         if partner.l10n_my_identification_type and partner.l10n_my_identification_number:
-            party_identification_node.append({
+            nodes.append({
                 'cbc:ID': {
                     '_text': partner.l10n_my_identification_number,
                     'schemeID': partner.l10n_my_identification_type,
                 }
             })
             if partner.sst_registration_number:
-                party_identification_node.append({
+                nodes.append({
                     'cbc:ID': {
                         '_text': partner.sst_registration_number,
                         'schemeID': 'SST',
                     }
                 })
-            if partner.ttx_registration_number and vals['role'] == 'supplier':
-                party_identification_node.append({
+            if partner.ttx_registration_number and role == 'supplier':
+                nodes.append({
                     'cbc:ID': {
                         '_text': partner.ttx_registration_number,
                         'schemeID': 'TTX',
                     }
                 })
-        return party_identification_node
 
-    def _get_myinvois_document_party_node(self, vals):
-        partner = vals['partner']
-        role = vals['role']
+    def _ubl_add_party_name_node(self, vals):
+        # OVERRIDE account.edi.ubl
+        partner = vals['party_vals']['partner']
+        vals['party_node']['cac:PartyName'] = {
+            'cbc:Name': {'_text': partner.display_name},
+        } if vals['party_vals']['role'] != 'delivery' else None
 
-        return {
-            'cbc:IndustryClassificationCode': {
-                '_text': partner.commercial_partner_id.l10n_my_edi_industrial_classification.code,
-                'name': partner.commercial_partner_id.l10n_my_edi_industrial_classification.name
-            } if role == 'supplier' else None,
-            'cac:PartyIdentification': self._get_myinvois_document_party_identification_node({**vals, 'partner': partner.commercial_partner_id}),
-            'cac:PartyName': {
-                'cbc:Name': {'_text': partner.display_name}
-            } if role != 'delivery' else None,
-            'cac:PostalAddress': self._get_myinvois_document_address_node(vals),
-            'cac:PartyLegalEntity': {
-                'cbc:RegistrationName': {'_text': partner.commercial_partner_id.name},
-            },
-            'cac:Contact': {
-                'cbc:ID': {'_text': partner.id},
-                'cbc:Name': {'_text': partner.name},
-                'cbc:Telephone': {'_text': self._l10n_my_edi_get_formatted_phone_number(partner.phone)},
-                'cbc:ElectronicMail': {'_text': partner.email},
-            } if role != 'delivery' else None,
+    def _ubl_add_party_legal_entity_nodes(self, vals):
+        # EXTENDS account.edi.ubl
+        super()._ubl_add_party_legal_entity_nodes(vals)
+        vals['party_node']['cac:PartyLegalEntity'].append({
+            'cbc:RegistrationName': {'_text': vals['party_vals']['partner'].commercial_partner_id.name},
+        })
+
+    def _ubl_add_party_contact_node(self, vals):
+        # OVERRIDE account.edi.ubl
+        partner = vals['party_vals']['partner']
+        vals['party_node']['cac:Contact'] = {
+            'cbc:ID': {'_text': partner.id},
+            'cbc:Name': {'_text': partner.name},
+            'cbc:Telephone': {'_text': self._l10n_my_edi_get_formatted_phone_number(partner.phone)},
+            'cbc:ElectronicMail': {'_text': partner.email},
+        } if vals['party_vals']['role'] != 'delivery' else None
+
+    def _l10n_my_edi_get_party_node(self, vals, partner, role):
+        party_node = {}
+        sub_vals = {
+            **vals,
+            'party_vals': {'partner': partner, 'role': role},
+            'party_node': party_node,
+        }
+        self._ubl_add_party_industry_classification_code_node(sub_vals)
+        self._ubl_add_party_identification_nodes(sub_vals)
+        self._ubl_add_party_name_node(sub_vals)
+        self._ubl_add_party_postal_address_node(sub_vals)
+        self._ubl_add_party_legal_entity_nodes(sub_vals)
+        self._ubl_add_party_contact_node(sub_vals)
+        return party_node
+
+    def _ubl_add_accounting_supplier_party_node(self, vals):
+        # OVERRIDE account.edi.ubl
+        vals['document_node']['cac:AccountingSupplierParty'] = {
+            'cac:Party': self._l10n_my_edi_get_party_node(vals, vals['supplier'], 'supplier'),
         }
 
-    def _get_tax_category_node(self, vals):
-        grouping_key = vals['grouping_key']
+    def _ubl_add_accounting_customer_party_node(self, vals):
+        # OVERRIDE account.edi.ubl
+        vals['document_node']['cac:AccountingCustomerParty'] = {
+            'cac:Party': self._l10n_my_edi_get_party_node(vals, vals['customer'], 'customer'),
+        }
+
+    def _ubl_add_delivery_nodes(self, vals):
+        # OVERRIDE account.edi.ubl
+        # The delivery party is the customer; there is no delivery on a consolidated invoice.
+        nodes = vals['document_node']['cac:Delivery'] = []
+        if not vals['myinvois_document']._is_consolidated_invoice():
+            nodes.append({
+                'cac:DeliveryParty': self._l10n_my_edi_get_party_node(vals, vals['customer'], 'delivery'),
+            })
+
+    def _ubl_add_payment_terms_nodes(self, vals):
+        # OVERRIDE account.edi.ubl
+        nodes = vals['document_node']['cac:PaymentTerms'] = []
+        if vals['payment_term'] and not vals['myinvois_document']._is_consolidated_invoice():
+            nodes.append({
+                # The payment term's note is automatically embedded in a <p> tag in Odoo
+                'cbc:Note': {'_text': html2plaintext(vals['payment_term'].note)},
+            })
+
+    def _ubl_add_prepaid_payment_node(self, vals):
+        amount_paid = self._l10n_my_edi_get_reported_prepaid_amount(vals)
+        # Omit the node entirely rather than emitting it with a 0.00 amount when there is no genuine prepayment.
+        vals['document_node']['cac:PrepaidPayment'] = {
+            'cbc:PaidAmount': self._l10n_my_edi_get_amount_node(vals, amount_paid),
+        } if amount_paid else None
+
+    def _l10n_my_edi_get_tax_category_node(self, vals, grouping_key):
         return {
             'cbc:ID': {'_text': grouping_key['tax_category_code']},
             'cbc:Name': {'_text': grouping_key['tax_exemption_reason']},
@@ -348,226 +609,286 @@ class AccountEdiXmlUBLMyInvoisMY(models.AbstractModel):
             }
         }
 
-    def _add_myinvois_document_header_nodes(self, document_node, vals):
-        def _get_original_document_id(original_document):
-            if vals['document_type_code'] in {'02', '03', '04', '12', '13', '14'} and original_document:
-                if original_document.myinvois_file:
-                    decoded_vals = self._l10n_my_edi_decode_myinvois_attachment(original_document.myinvois_file)
-                    return decoded_vals.get('original_document_id')
-                original_invoice = original_document.invoice_ids[:1]
-                if vals['document_type_code'] in {'12', '13', '14'} and original_invoice.ref:
-                    return original_invoice.ref
-                if original_document.name:
-                    return original_document.name
-            return None
-
-        document_node.update({
-            'cbc:UBLVersionID': None,
-            'cbc:ID': {'_text': vals['document_name']},
-            # The issue date and time must be the current time set in the UTC time zone
-            'cbc:IssueDate': {'_text': datetime.now(tz=UTC).strftime("%Y-%m-%d")},
-            'cbc:IssueTime': {'_text': datetime.now(tz=UTC).strftime("%H:%M:%SZ")},
-            'cbc:DueDate': None,
-
-            # The current version is 1.1 (document with signature), the type code depends on the move type.
-            'cbc:InvoiceTypeCode': {
-                '_text': vals['document_type_code'],
-                'listVersionID': '1.1',
-            },
-            'cbc:DocumentCurrencyCode': {'_text': vals['currency_id'].name},
-            'cac:OrderReference': None,
-            'cbc:BuyerReference': {'_text': vals['customer'].commercial_partner_id.ref},
-
-            # Debit/Credit note original invoice ref.
-            # Applies to credit notes, debit notes, refunds for both invoices and self-billed invoices.
-            # The original document is mandatory; but in some specific cases it will be empty (sending a credit note for an invoice
-            # managed outside Odoo/...)
-            'cac:BillingReference': [{
-                'cac:InvoiceDocumentReference': {
-                    'cbc:ID': {'_text': _get_original_document_id(original_document) or 'NA'},
-                    'cbc:UUID': {'_text': (original_document and original_document.myinvois_external_uuid) or 'NA'},
+    def _l10n_my_edi_get_tax_total_node(self, vals, aggregated_tax_details):
+        tax_details_per_key = [
+            (grouping_key, tax_details)
+            for grouping_key, tax_details in aggregated_tax_details.items()
+            if grouping_key
+        ]
+        return {
+            'cbc:TaxAmount': self._l10n_my_edi_get_amount_node(vals, sum(tax_details['tax_amount_currency'] for _key, tax_details in tax_details_per_key)),
+            'cac:TaxSubtotal': [
+                {
+                    'cbc:TaxableAmount': self._l10n_my_edi_get_amount_node(vals, tax_details['base_amount_currency']),
+                    'cbc:TaxAmount': self._l10n_my_edi_get_amount_node(vals, tax_details['tax_amount_currency']),
+                    'cbc:Percent': {'_text': grouping_key['amount']} if grouping_key['amount_type'] == 'percent' else None,
+                    'cac:TaxCategory': self._l10n_my_edi_get_tax_category_node(vals, grouping_key),
                 }
-            } for original_document in vals['original_documents'] or [None]] if vals['document_type_code'] in {'02', '03', '04', '12', '13', '14'} else None,
-            'cac:AdditionalDocumentReference': [
-                {
-                    'cbc:ID': {'_text': vals['custom_form_reference']},
-                    'cbc:DocumentType': {'_text': 'CustomsImportForm'},
-                } if vals['document_type_code'] in {'11', '12', '13', '14'} and vals['custom_form_reference'] else None,
-                {
-                    'cbc:ID': {'_text': vals["incoterm_id"].code}
-                } if vals["incoterm_id"] else None,
-                {
-                    'cbc:ID': {'_text': vals['custom_form_reference']},
-                    'cbc:DocumentType': {'_text': 'K2'},
-                } if vals['document_type_code'] in {'01', '02', '03', '04'} and vals['custom_form_reference'] else None,
+                for grouping_key, tax_details in tax_details_per_key
             ],
-        })
-
-        # Self-billed invoices must use the number given by the supplier.
-        if vals['document_type_code'] in ('11', '12', '13', '14') and vals['document_ref'] and not vals['myinvois_document']._is_consolidated_invoice():
-            document_node['cbc:ID']['_text'] = vals['document_ref']
-
-    def _add_myinvois_document_accounting_supplier_party_nodes(self, document_node, vals):
-        document_node['cac:AccountingSupplierParty'] = {
-            'cac:Party': self._get_myinvois_document_party_node({**vals, 'partner': vals['supplier'], 'role': 'supplier'}),
         }
 
-    def _add_myinvois_document_accounting_customer_party_nodes(self, document_node, vals):
-        document_node['cac:AccountingCustomerParty'] = {
-            'cac:Party': self._get_myinvois_document_party_node({**vals, 'partner': vals['customer'], 'role': 'customer'}),
+    def _l10n_my_edi_aggregate_base_line_tax_details(self, base_line):
+        return self.env['account.tax']._aggregate_base_line_tax_details(base_line, self._l10n_my_edi_get_tax_grouping_key)
+
+    def _ubl_add_allowance_charge_nodes(self, vals):
+        # OVERRIDE account.edi.ubl
+        # The early payment discounts are reported as document level allowances/charges.
+        nodes = vals['document_node']['cac:AllowanceCharge'] = []
+        for base_line in vals['base_lines']:
+            if not self._is_early_payment_base_line(base_line):
+                continue
+            base_amount = base_line['tax_details']['total_excluded_currency']
+            nodes.append({
+                'cbc:ChargeIndicator': {'_text': 'false' if base_amount < 0.0 else 'true'},
+                'cbc:AllowanceChargeReasonCode': {'_text': '66' if base_amount < 0.0 else 'ZZZ'},
+                'cbc:AllowanceChargeReason': {'_text': _("Conditional cash/payment discount")},
+                'cbc:Amount': self._l10n_my_edi_get_amount_node(vals, abs(base_amount)),
+                'cac:TaxCategory': [
+                    self._l10n_my_edi_get_tax_category_node(vals, grouping_key)
+                    for grouping_key in self._l10n_my_edi_aggregate_base_line_tax_details(base_line)
+                    if grouping_key
+                ],
+            })
+
+    def _ubl_add_tax_exchange_rate_node(self, vals):
+        currency = vals['currency']
+        if currency.name == 'MYR':
+            vals['document_node']['cac:TaxExchangeRate'] = None
+            return
+
+        # I couldn't find any information on maximum precision, so we will use the currency format.
+        total_amount_in_company_currency = total_amount_in_currency = 0.0
+        for base_line in vals['base_lines']:
+            total_amount_in_company_currency += base_line['tax_details']['raw_total_included']
+            total_amount_in_currency += base_line['tax_details']['raw_total_included_currency']
+        # We recalculate the rate so that it works in any cases, even when using consolidated invoices.
+        rate = self.env.ref('base.MYR').round(abs(total_amount_in_company_currency) / (total_amount_in_currency or 1))
+        # Exchange rate information must be provided if applicable
+        vals['document_node']['cac:TaxExchangeRate'] = {
+            'cbc:SourceCurrencyCode': {'_text': currency.name},
+            'cbc:TargetCurrencyCode': {'_text': 'MYR'},
+            'cbc:CalculationRate': {'_text': rate},
         }
 
-    def _add_myinvois_document_delivery_nodes(self, document_node, vals):
-        document_node['cac:Delivery'] = {
-            'cac:DeliveryParty': self._get_myinvois_document_party_node({**vals, 'partner': vals['customer'], 'role': 'delivery'}),
-        }
+    def _ubl_add_tax_totals_nodes(self, vals):
+        # OVERRIDE account.edi.ubl
+        AccountTax = self.env['account.tax']
+        base_lines_aggregated_tax_details = AccountTax._aggregate_base_lines_tax_details(vals['base_lines'], self._l10n_my_edi_get_tax_grouping_key)
+        aggregated_tax_details = AccountTax._aggregate_base_lines_aggregated_values(base_lines_aggregated_tax_details)
+        vals['document_node']['cac:TaxTotal'] = [self._l10n_my_edi_get_tax_total_node(vals, aggregated_tax_details)]
+        vals['document_node']['cac:WithholdingTaxTotal'] = None
 
-    def _add_myinvois_document_payment_terms_nodes(self, document_node, vals):
-        if vals['invoice_payment_term_id']:
-            document_node['cac:PaymentTerms'] = {
-                # The payment term's note is automatically embedded in a <p> tag in Odoo
-                'cbc:Note': {'_text': html2plaintext(vals['invoice_payment_term_id'].note)}
-            }
-
-    def _add_myinvois_document_exchange_rate_nodes(self, document_node, vals):
-        if vals['currency_id'].name != 'MYR':
-            # I couldn't find any information on maximum precision, so we will use the currency format.
-            total_amount_in_company_currency = total_amount_in_currency = 0.0
-            for base_line in vals['base_lines']:
-                total_amount_in_company_currency += base_line['tax_details']['raw_total_included']
-                total_amount_in_currency += base_line['tax_details']['raw_total_included_currency']
-            # We recalculate the rate so that it works in any cases, even when using consolidated invoices.
-            rate = self.env.ref('base.MYR').round(abs(total_amount_in_company_currency) / (total_amount_in_currency or 1))
-            # Exchange rate information must be provided if applicable
-            document_node['cac:TaxExchangeRate'] = {
-                'cbc:SourceCurrencyCode': {'_text': vals['currency_id'].name},
-                'cbc:TargetCurrencyCode': {'_text': 'MYR'},
-                'cbc:CalculationRate': {'_text': rate},
-            }
-
-    def _add_myinvois_document_monetary_total_nodes(self, document_node, vals):
-        self._add_document_monetary_total_nodes(document_node, vals)
-        currency_suffix = vals['currency_suffix']
-
-        amount_paid = vals[f'total_paid_amount{currency_suffix}']
-        myinvois_document = vals["myinvois_document"]
-        if myinvois_document._is_consolidated_invoice():
-            amount_paid = 0
-        # For credit, debit, refund notes, and their self-billed variants, the PrepaidPayment amount must be set to 0.
-        amount_paid = 0 if vals['document_type_code'] in ('02', '03', '04', '12', '13', '14') else amount_paid
-        # Omit the node entirely rather than emitting it with a 0.00 amount when there is no genuine prepayment.
-        if amount_paid:
-            document_node['cac:PrepaidPayment'] = {
-                'cbc:PaidAmount': {
-                    '_text': self.format_float(amount_paid, vals['currency_dp']),
-                    'currencyID': vals['currency_name'],
-                },
-            }
-        monetary_total_tag = self._get_tags_for_document_type(vals)['monetary_total']
+    def _ubl_add_legal_monetary_total_node(self, vals):
+        # OVERRIDE account.edi.ubl
         # For credit, debit, refund notes, and their self-billed variants, the PayableAmount reflects the full
         # refund/adjustment amount without being reduced by the prepayment, as per MyInvois specifications.
-        payable_amount = self.format_float(vals[f'tax_inclusive_amount{currency_suffix}'] - amount_paid, vals['currency_dp'])
-        document_node[monetary_total_tag]['cbc:PayableAmount']['_text'] = payable_amount
-
-    def _add_myinvois_document_line_nodes(self, document_node, vals):
-        line_idx = 1
-
-        line_tag = self._get_tags_for_document_type(vals)['document_line']
-        document_node[line_tag] = line_nodes = []
-        for base_line in vals['base_lines']:
-            if not self._is_document_allowance_charge(base_line):
-                line_vals = {
-                    **vals,
-                    'line_idx': line_idx,
-                    'base_line': base_line,
-                }
-                line_node = self._get_myinvois_document_line_node(line_vals)
-                line_nodes.append(line_node)
-                line_idx += 1
-
-    def _get_myinvois_document_line_node(self, vals):
-        self._add_myinvois_document_line_vals(vals)
-
-        line_node = {}
-        self._add_document_line_id_nodes(line_node, vals)
-        self._add_document_line_id_nodes(line_node, vals)
-        self._add_myinvois_document_line_amount_nodes(line_node, vals)
-        self._add_document_line_allowance_charge_nodes(line_node, vals)
-        self._add_document_line_tax_total_nodes(line_node, vals)
-        self._add_myinvois_document_line_item_nodes(line_node, vals)
-        self._add_document_line_tax_category_nodes(line_node, vals)
-        self._add_document_line_price_nodes(line_node, vals)
-        return line_node
-
-    def _add_myinvois_document_line_vals(self, vals):
-        """ Generic helper to calculate the amounts for a document line. """
-        self._add_document_line_total_vals(vals)
-        self._add_myinvois_document_line_gross_subtotal_and_discount_vals(vals)
-
-    def _add_myinvois_document_line_gross_subtotal_and_discount_vals(self, vals):
-        """
-        As we group lines together when consolidating, we lose the discount percentage in the process.
-        During the grouping, we stored the actual amount in the base line, se we will override here in order to use that
-        pre-computed amount.
-        """
-        self._add_document_line_gross_subtotal_and_discount_vals(vals)
-        myinvois_document = vals["myinvois_document"]
-        if myinvois_document._is_consolidated_invoice():
-            base_line = vals['base_line']
-
-            for currency_suffix in ['', '_currency']:
-                discount_amount = base_line[f'discount_amount{currency_suffix}']
-
-                vals[f'discount_amount{currency_suffix}'] = discount_amount
-                vals[f'gross_price_unit{currency_suffix}'] += discount_amount  # Price unit should be excluding discounts.
-
-    def _add_myinvois_document_line_amount_nodes(self, line_node, vals):
-        super()._add_document_line_amount_nodes(line_node, vals)
-
-        base_line = vals['base_line']
-        line_node['cac:ItemPriceExtension'] = {
-            'cbc:Amount': {
-                '_text': self.format_float(base_line['tax_details']['total_excluded_currency'], vals['currency_dp']),
-                'currencyID': vals['currency_name'],
-            }
+        amount_paid = self._l10n_my_edi_get_reported_prepaid_amount(vals)
+        vals['document_node']['cac:LegalMonetaryTotal'] = {
+            'cbc:LineExtensionAmount': self._l10n_my_edi_get_amount_node(vals, vals['total_lines_currency']),
+            'cbc:TaxExclusiveAmount': self._l10n_my_edi_get_amount_node(vals, vals['tax_exclusive_amount_currency']),
+            'cbc:TaxInclusiveAmount': self._l10n_my_edi_get_amount_node(vals, vals['tax_inclusive_amount_currency']),
+            'cbc:AllowanceTotalAmount': self._l10n_my_edi_get_amount_node(vals, vals['total_allowance_currency']) if vals['total_allowance_currency'] else None,
+            'cbc:ChargeTotalAmount': self._l10n_my_edi_get_amount_node(vals, vals['total_charge_currency']) if vals['total_charge_currency'] else None,
+            'cbc:PrepaidAmount': self._l10n_my_edi_get_amount_node(vals, 0.0),
+            'cbc:PayableRoundingAmount': self._l10n_my_edi_get_amount_node(vals, vals['cash_rounding_base_amount_currency']) if vals['cash_rounding_base_amount_currency'] else None,
+            'cbc:PayableAmount': self._l10n_my_edi_get_amount_node(vals, vals['tax_inclusive_amount_currency'] - amount_paid),
         }
 
-    def _add_myinvois_document_line_item_nodes(self, line_node, vals):
-        self._add_document_line_item_nodes(line_node, vals)
+    # -------------------------------------------------------------------------
+    # EXPORT: Line nodes
+    # -------------------------------------------------------------------------
 
-        record = vals['base_line']['record']
-        if record and record.name:
-            line_name = record.name and record.name.replace('\n', ' ')
+    def _should_export_early_payment_discount_as_line(self, vals):
+        # EXTENDS account.edi.common
+        # The early payment discounts are reported as document level allowances/charges.
+        return False
+
+    def _l10n_my_edi_add_line_amounts_vals(self, vals):
+        """ Compute the amounts of a line: the total excluded (including the fixed taxes), the gross price unit and the
+        discount amount (in 'line_vals').
+        """
+        line_vals = vals['line_vals']
+        base_line = line_vals['base_line']
+        company_currency = vals['company_currency']
+
+        for currency_suffix in ('', '_currency'):
+            line_vals[f'total_excluded{currency_suffix}'] = (
+                base_line['tax_details'][f'total_excluded{currency_suffix}']
+                + base_line['tax_details'][f'delta_total_excluded{currency_suffix}']
+                + self._l10n_my_edi_get_fixed_tax_amount(base_line, currency_suffix)
+            )
+
+        raw_total_excluded_currency = base_line['tax_details']['raw_total_excluded_currency']
+        raw_total_excluded = base_line['tax_details']['raw_total_excluded']
+        total_excluded_currency = base_line['tax_details']['total_excluded_currency']
+        total_excluded = base_line['tax_details']['total_excluded']
+        for tax_data in base_line.get('_ubl_values', {}).get('recycling_contribution_taxes_data', []):
+            raw_total_excluded_currency -= tax_data['raw_tax_amount_currency']
+            raw_total_excluded -= tax_data['raw_tax_amount']
+            total_excluded_currency -= tax_data['tax_amount_currency']
+            total_excluded -= tax_data['tax_amount']
+
+        discount_factor = 1 - (base_line['discount'] / 100.0)
+
+        if discount_factor != 0.0:
+            gross_subtotal_currency = base_line['currency_id'].round(raw_total_excluded_currency / discount_factor)
+            gross_subtotal = company_currency.round(raw_total_excluded / discount_factor)
         else:
-            line_name = vals['base_line'].get('line_name', '')
-        if line_name:
-            line_node['cac:Item']['cbc:Description']['_text'] = line_name
-            if not line_node['cac:Item']['cbc:Name']['_text']:
-                line_node['cac:Item']['cbc:Name']['_text'] = line_name
+            gross_subtotal_currency = base_line['currency_id'].round(base_line['price_unit'] * base_line['quantity'])
+            gross_subtotal = company_currency.round(gross_subtotal_currency / base_line['rate'])
 
+        if base_line['quantity'] == 0.0 or discount_factor == 0.0:
+            gross_price_unit_currency = base_line['price_unit']
+            gross_price_unit = company_currency.round(base_line['price_unit'] / base_line['rate'])
+        else:
+            gross_price_unit_currency = gross_subtotal_currency / base_line['quantity']
+            gross_price_unit = gross_subtotal / base_line['quantity']
+
+        line_vals.update({
+            'discount_amount_currency': gross_subtotal_currency - total_excluded_currency,
+            'discount_amount': gross_subtotal - total_excluded,
+            'gross_price_unit_currency': gross_price_unit_currency,
+            'gross_price_unit': gross_price_unit,
+        })
+
+        # As we group lines together when consolidating, we lose the discount percentage in the process.
+        # During the grouping, we stored the actual amount in the base line, so we use that pre-computed amount.
+        if vals['myinvois_document']._is_consolidated_invoice():
+            for currency_suffix in ('', '_currency'):
+                discount_amount = base_line[f'discount_amount{currency_suffix}']
+                line_vals[f'discount_amount{currency_suffix}'] = discount_amount
+                line_vals[f'gross_price_unit{currency_suffix}'] += discount_amount  # Price unit should be excluding discounts.
+
+    def _ubl_add_invoice_line_nodes(self, vals, filter_function=None):
+        # OVERRIDE account.edi.ubl: no Peppol optional fields.
+        nodes = vals['document_node']['cac:InvoiceLine'] = []
+        for sub_vals in self._line_nodes_filter_base_lines(vals, filter_function=filter_function):
+            self._ubl_add_invoice_line_node(sub_vals)
+            nodes.append(sub_vals['line_node'])
+
+    def _ubl_add_invoice_line_node(self, vals):
+        # OVERRIDE account.edi.ubl
+        self._l10n_my_edi_add_line_amounts_vals(vals)
+        self._ubl_add_line_id_node(vals)
+        self._ubl_add_line_invoiced_quantity_node(vals)
+        self._ubl_add_line_extension_amount_node(vals)
+        self._ubl_add_line_allowance_charge_nodes(vals)
+        self._ubl_add_line_tax_totals_nodes(vals)
+        self._ubl_add_line_item_node(vals)
+        self._ubl_add_line_price_node(vals)
+        self._ubl_add_line_item_price_extension_node(vals)
+
+    def _ubl_add_line_extension_amount_node(self, vals, in_foreign_currency=True):
+        # OVERRIDE account.edi.ubl
+        vals['line_node']['cbc:LineExtensionAmount'] = self._l10n_my_edi_get_amount_node(vals, vals['line_vals']['total_excluded_currency'])
+
+    def _ubl_add_line_allowance_charge_nodes(self, vals):
+        # EXTENDS account.edi.ubl
+        super()._ubl_add_line_allowance_charge_nodes(vals)
+        nodes = vals['line_node']['cac:AllowanceCharge']
+        line_vals = vals['line_vals']
+
+        # Discount.
+        discount_amount = line_vals['discount_amount_currency']
+        if not vals['currency'].is_zero(discount_amount):
+            nodes.append({
+                'cbc:ChargeIndicator': {'_text': 'false' if discount_amount > 0 else 'true'},
+                'cbc:AllowanceChargeReasonCode': {'_text': '95'},
+                'cbc:Amount': self._l10n_my_edi_get_amount_node(vals, abs(discount_amount)),
+            })
+
+        # Recycling contribution taxes.
+        for tax_data in line_vals['base_line'].get('_ubl_values', {}).get('recycling_contribution_taxes_data', []):
+            tax_amount = tax_data['tax_amount_currency']
+            nodes.append({
+                'cbc:ChargeIndicator': {'_text': 'true' if tax_amount > 0 else 'false'},
+                'cbc:AllowanceChargeReasonCode': {'_text': 'AEO' if tax_amount > 0 else '100'},
+                'cbc:AllowanceChargeReason': {'_text': tax_data['tax'].name},
+                'cbc:Amount': self._l10n_my_edi_get_amount_node(vals, abs(tax_amount)),
+            })
+
+    def _ubl_add_line_tax_totals_nodes(self, vals):
+        # OVERRIDE account.edi.ubl
+        aggregated_tax_details = self._l10n_my_edi_aggregate_base_line_tax_details(vals['line_vals']['base_line'])
+        vals['line_node']['cac:TaxTotal'] = [self._l10n_my_edi_get_tax_total_node(vals, aggregated_tax_details)]
+
+    def _ubl_add_line_item_name_description_nodes(self, vals):
+        # OVERRIDE account.edi.ubl
+        base_line = vals['line_vals']['base_line']
+        product = base_line['product_id']
+        record = base_line['record']
+        if record and record.name:
+            line_name = record.name.replace('\n', ' ')
+        else:
+            line_name = base_line.get('line_name', '')
+        vals['item_node']['cbc:Description'] = {'_text': line_name or product.description_sale}
+        vals['item_node']['cbc:Name'] = {'_text': product.name or line_name}
+
+    def _ubl_add_line_item_identification_nodes(self, vals):
+        # EXTENDS account.edi.ubl
+        super()._ubl_add_line_item_identification_nodes(vals)
+        vals['item_node']['cac:BuyersItemIdentification'] = None
+
+    def _ubl_add_line_item_additional_item_property_nodes(self, vals):
+        # OVERRIDE account.edi.ubl: only the product attributes (no vehicle plate number).
+        product = vals['line_vals']['base_line']['product_id']
+        vals['item_node']['cac:AdditionalItemProperty'] = [
+            {
+                'cbc:Name': {'_text': value.attribute_id.name},
+                'cbc:Value': {'_text': value.name},
+            }
+            for value in product.product_template_attribute_value_ids
+        ]
+
+    def _ubl_add_line_item_commodity_classification_nodes(self, vals):
+        # OVERRIDE account.edi.ubl
         # When the invoice is sent for the general public (refunding an order in a consolidated invoice/...) the item code
         # must be fixed to 004 (consolidated invoice) even if the product has something else set.
         myinvois_document = vals['myinvois_document']
+        base_line = vals['line_vals']['base_line']
         if myinvois_document._is_consolidated_invoice() or myinvois_document._is_consolidated_invoice_refund():
             class_code = '004'
         else:
-            base_line = vals['base_line']
             class_code = base_line['record'].l10n_my_edi_classification_code or \
                          base_line['record'].product_id.product_tmpl_id.l10n_my_edi_classification_code
 
-        if class_code:
-            line_node['cac:Item']['cac:CommodityClassification'] = {
-                'cbc:ItemClassificationCode': {
-                    '_text': class_code,
-                    'listID': 'CLASS',
-                }
+        vals['item_node']['cac:CommodityClassification'] = {
+            'cbc:ItemClassificationCode': {
+                '_text': class_code,
+                'listID': 'CLASS',
             }
+        } if class_code else None
+
+    def _ubl_add_line_item_classified_tax_category_nodes(self, vals, in_foreign_currency=True):
+        # OVERRIDE account.edi.ubl
+        vals['item_node']['cac:ClassifiedTaxCategory'] = [
+            self._l10n_my_edi_get_tax_category_node(vals, grouping_key)
+            for grouping_key in self._l10n_my_edi_aggregate_base_line_tax_details(vals['line_vals']['base_line'])
+            if grouping_key
+        ]
+
+    def _ubl_add_line_price_node(self, vals, in_foreign_currency=True):
+        # OVERRIDE account.edi.ubl
+        product_price_dp = self.env['decimal.precision'].precision_get('Product Price')
+        vals['line_node']['cac:Price'] = {
+            'cbc:PriceAmount': {
+                '_text': float_round(vals['line_vals']['gross_price_unit_currency'], precision_digits=product_price_dp),
+                'currencyID': vals['currency'].name,
+            },
+        }
+
+    def _ubl_add_line_item_price_extension_node(self, vals):
+        vals['line_node']['cac:ItemPriceExtension'] = {
+            'cbc:Amount': self._l10n_my_edi_get_amount_node(vals, vals['line_vals']['base_line']['tax_details']['total_excluded_currency']),
+        }
 
     # -------------------------------------------------------------------------
     # EXPORT: Constraints
     # -------------------------------------------------------------------------
 
-    def _export_myinvois_document_constraints(self, vals):
+    def _export_document_constraints(self, vals):
+        # OVERRIDE account.edi.ubl: the exported record is a myinvois.document, not an account.move.
         constraints = {
             'myinvois_supplier_name_required': self._check_required_fields(vals['supplier'], 'name'),
             'myinvois_customer_name_required': self._check_required_fields(vals['customer'].commercial_partner_id, 'name'),
@@ -604,10 +925,10 @@ class AccountEdiXmlUBLMyInvoisMY(models.AbstractModel):
             if partner.commercial_partner_id.sst_registration_number and len(partner.commercial_partner_id.sst_registration_number.split(';')) > 2:
                 self._l10n_my_edi_make_validation_error(constraints, 'too_many_sst', partner_type, partner.commercial_partner_id.display_name)
 
+        myinvois_document = vals["myinvois_document"]
         for line_vals in vals['document_node']['cac:InvoiceLine']:
-            myinvois_document = vals["myinvois_document"]
             line_item = line_vals['cac:Item']
-            if 'cac:CommodityClassification' not in line_item:
+            if not line_item.get('cac:CommodityClassification'):
                 self._l10n_my_edi_make_validation_error(constraints, 'class_code_required', line_vals['cbc:ID']['_text'], line_item['cbc:Name']['_text'])
             if not line_item.get('cac:ClassifiedTaxCategory'):
                 self._l10n_my_edi_make_validation_error(constraints, 'tax_ids_required', line_vals['cbc:ID']['_text'], line_item['cbc:Name']['_text'])
@@ -630,7 +951,7 @@ class AccountEdiXmlUBLMyInvoisMY(models.AbstractModel):
         is_general_public = vat == 'EI00000000010' and identification_number == 'NA'
 
         line_classification_codes = [
-            line_vals['cac:Item'].get('cac:CommodityClassification', {}).get('cbc:ItemClassificationCode', {}).get('_text')
+            (line_vals['cac:Item']['cac:CommodityClassification'] or {}).get('cbc:ItemClassificationCode', {}).get('_text')
             for line_vals in vals['document_node']['cac:InvoiceLine']
         ]
 

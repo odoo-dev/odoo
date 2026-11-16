@@ -286,7 +286,7 @@ class AccountMove(models.Model):
 
     @api.model
     def _get_ubl_cii_builder_from_xml_tree(self, tree):
-        # Extends account_edi_ubl_cii
+        # Extends account_edi_cii
         customization_id = tree.findtext('{*}CustomizationID')
         # Note: The CustomizationID alone is not enough because e.g. SuperPDP just sends `urn:cen.eu:en16931:2017`
         #       but still expects the full French validation.

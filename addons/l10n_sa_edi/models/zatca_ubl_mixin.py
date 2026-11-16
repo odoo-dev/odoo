@@ -1,8 +1,8 @@
 """
 Common ZATCA EDI functionality shared between Account and POS modules.
 
-This mixin provides base implementation for ZATCA-compliant UBL 2.1 XML generation
-that can be used by both account.edi.xml.ubl_21.zatca and pos.edi.xml.ubl_21.zatca.
+This mixin provides base implementation for ZATCA-compliant UBL 2.1 XML generation, on top of the UBL 2.1 syntax
+layer (account.edi.ubl), that can be used by both account.edi.xml.ubl_zatca and a pos.order builder.
 """
 import re
 from base64 import b64encode
@@ -10,8 +10,12 @@ from hashlib import sha256
 
 from lxml import etree
 
-from odoo import fields, models
+from odoo import _, fields, models
+from odoo.tools import html2plaintext
+from odoo.tools.float_utils import float_is_zero
 from odoo.tools.misc import file_path
+
+from odoo.addons.account_edi_cii.models.account_edi_common import FloatFmt
 
 # ZATCA Tax Classification Constants
 TAX_EXEMPTION_CODES = ['VATEX-SA-29', 'VATEX-SA-29-7', 'VATEX-SA-30']
@@ -33,55 +37,184 @@ class ZatcaUblMixin(models.AbstractModel):
 
     This provides shared functionality for generating ZATCA-compliant UBL 2.1 XML
     documents for both regular invoices (account.move) and POS orders (pos.order).
+    It is meant to be inherited together with (before) 'account.edi.ubl'.
     """
 
     _name = 'zatca.ubl.mixin'
     _description = 'ZATCA UBL Mixin'
 
     # -------------------------------------------------------------------------
-    # EXPORT
-    # Methods here take a dict, vals
+    # EXPORT: Helpers
     # -------------------------------------------------------------------------
 
-    def _add_invoice_config_vals(self, vals):
+    def format_float(self, amount, precision_digits=2):
+        return FloatFmt(amount, precision_digits)
+
+    def _l10n_sa_get_currency_values(self, vals, in_foreign_currency=True):
+        currency = vals['currency'] if in_foreign_currency else vals['company_currency']
+        return {
+            'suffix': '_currency' if in_foreign_currency else '',
+            'currency_dp': self._get_currency_decimal_places(currency),
+            'currency_name': currency.name,
+        }
+
+    def _l10n_sa_total_grouping_key(self, base_line, tax_data):
+        """ Grouping function used to compute the monetary totals: always ignore withholding taxes in the UBL. """
+        tax = tax_data and tax_data['tax']
+        if tax and tax.amount < 0:
+            return None
+        return True
+
+    def _l10n_sa_tax_grouping_key(self, base_line, tax_data, vals):
+        """ Grouping function used to compute the tax totals (document and line levels) by tax category. """
+        tax = tax_data and tax_data['tax']
+
+        # Ignore withholding taxes
+        if tax and tax.amount < 0:
+            return None
+        customer = vals['customer'].commercial_partner_id
+        supplier = vals['supplier']
+        return {
+            'tax_category_code': self._get_tax_category_code(customer, supplier, tax),
+            **self._get_tax_exemption_reason(customer, supplier, tax),
+            'amount': tax.amount if tax else 0.0,
+            'amount_type': tax.amount_type if tax else 'percent',
+        }
+
+    def _l10n_sa_aggregate_base_line_tax_details(self, vals, base_line):
+        return self.env['account.tax']._aggregate_base_line_tax_details(
+            base_line,
+            lambda base_line, tax_data: self._l10n_sa_tax_grouping_key(base_line, tax_data, vals),
+        )
+
+    def _l10n_sa_aggregate_base_lines_tax_details(self, vals, base_lines, grouping_function=None):
+        AccountTax = self.env['account.tax']
+        grouping_function = grouping_function or (lambda base_line, tax_data: self._l10n_sa_tax_grouping_key(base_line, tax_data, vals))
+        base_lines_aggregated_tax_details = AccountTax._aggregate_base_lines_tax_details(base_lines, grouping_function)
+        return AccountTax._aggregate_base_lines_aggregated_values(base_lines_aggregated_tax_details)
+
+    def _l10n_sa_prepare_base_lines(self, vals):
+        """ Turn the recycling contribution taxes into line allowances/charges, the emptying taxes into new base
+        lines and extract the cash rounding base lines (vals['cash_rounding_base_lines']).
         """
-            Only use Invoice in ZATCA, even for credit and debit notes because we want the root
-            tag of the document to be <Invoice>
+        base_lines = vals['base_lines']
+        for base_line in base_lines:
+            line_name = base_line['record'] and base_line['record'].name
+            base_line['_line_name'] = line_name and line_name.replace('\n', ' ')
+
+            # Manage taxes for recycling contribution such as RECUPEL / AUVIBEL: they are reported as
+            # allowances/charges and included in the line amount.
+            tax_details = base_line['tax_details']
+            taxes_data = tax_details['taxes_data']
+            recycling_contribution_taxes_data = base_line['_l10n_sa_recycling_contribution_taxes_data'] = []
+            new_taxes_data = tax_details['taxes_data'] = []
+            for tax_data in taxes_data:
+                if self._is_recycling_contribution_tax(tax_data):
+                    recycling_contribution_taxes_data.append(tax_data)
+                    tax_details['raw_total_excluded_currency'] += tax_data['raw_tax_amount_currency']
+                    tax_details['raw_total_excluded'] += tax_data['raw_tax_amount']
+                    tax_details['total_excluded_currency'] += tax_data['tax_amount_currency']
+                    tax_details['total_excluded'] += tax_data['tax_amount']
+                else:
+                    new_taxes_data.append(tax_data)
+
+        # Manage taxes for emptying.
+        base_lines = self._turn_emptying_taxes_as_new_base_lines(base_lines, vals['company'], vals)
+
+        # Extract cash rounding lines.
+        vals['base_lines'] = [base_line for base_line in base_lines if base_line['special_type'] != 'cash_rounding']
+        vals['cash_rounding_base_lines'] = [base_line for base_line in base_lines if base_line['special_type'] == 'cash_rounding']
+
+    def _round_base_lines_tax_details(self, vals, in_company_currency=True):
+        # EXTENDS account.edi.common
+        # The ZATCA amounts are computed from the raw amounts of the base lines (see '_l10n_sa_get_line_amounts'),
+        # rounded with the currency precision: don't round them with 6 digits beforehand.
+        return
+
+    def _l10n_sa_is_document_allowance_charge(self, base_line):
+        """ Whether the base line should be treated as a document-level AllowanceCharge (early payment discount
+        and lines with a negative amount, e.g. global discounts).
         """
-        super()._add_invoice_config_vals(vals)
-        vals['document_type'] = 'invoice'
+        return base_line['special_type'] == 'early_payment' or base_line['tax_details']['total_excluded_currency'] < 0
 
-    def _add_document_tax_grouping_function_vals(self, vals):
-        # Always ignore withholding taxes in the UBL
-        def total_grouping_function(base_line, tax_data):
-            tax = tax_data and tax_data['tax']
-            if tax and tax.amount < 0:
+    def _get_exported_invoice_base_lines(self, vals):
+        # EXTENDS account.edi.common
+        return [base_line for base_line in vals['base_lines'] if not self._l10n_sa_is_document_allowance_charge(base_line)]
+
+    def _l10n_sa_get_line_amounts(self, vals, base_line):
+        """ Compute the amounts of a document line: the total excluding taxes (including the fixed taxes),
+        the gross unit price and the discount amount, in the document currency.
+        """
+        tax_details = base_line['tax_details']
+
+        total_fixed_taxes_currency = sum(
+            tax_data['tax_amount_currency']
+            for tax_data in tax_details['taxes_data']
+            if tax_data['tax'].amount_type == 'fixed' and self._l10n_sa_total_grouping_key(base_line, tax_data)
+        )
+        total_excluded_currency = tax_details['total_excluded_currency'] + tax_details['delta_total_excluded_currency'] + total_fixed_taxes_currency
+
+        raw_total_excluded_currency = tax_details['raw_total_excluded_currency']
+        net_total_excluded_currency = tax_details['total_excluded_currency']
+        for tax_data in base_line.get('_l10n_sa_recycling_contribution_taxes_data', []):
+            raw_total_excluded_currency -= tax_data['raw_tax_amount_currency']
+            net_total_excluded_currency -= tax_data['tax_amount_currency']
+
+        discount_factor = 1 - (base_line['discount'] / 100.0)
+        if discount_factor != 0.0:
+            gross_subtotal_currency = base_line['currency_id'].round(raw_total_excluded_currency / discount_factor)
+        else:
+            gross_subtotal_currency = base_line['currency_id'].round(base_line['price_unit'] * base_line['quantity'])
+
+        if base_line['quantity'] == 0.0 or discount_factor == 0.0:
+            gross_price_unit_currency = base_line['price_unit']
+        else:
+            gross_price_unit_currency = gross_subtotal_currency / base_line['quantity']
+
+        return {
+            'total_excluded_currency': total_excluded_currency,
+            'gross_subtotal_currency': gross_subtotal_currency,
+            'gross_price_unit_currency': gross_price_unit_currency,
+            'discount_amount_currency': gross_subtotal_currency - net_total_excluded_currency,
+        }
+
+    def _l10n_sa_get_monetary_totals(self, vals):
+        """ Compute the document totals in the document currency. """
+        totals = {'total_allowance': 0.0, 'total_charge': 0.0, 'total_lines': 0.0}
+        for base_line in vals['base_lines']:
+            base_line_total_excluded = self._l10n_sa_get_line_amounts(vals, base_line)['total_excluded_currency']
+            if self._l10n_sa_is_document_allowance_charge(base_line):
+                if base_line_total_excluded < 0.0:
+                    totals['total_allowance'] += -base_line_total_excluded
+                else:
+                    totals['total_charge'] += base_line_total_excluded
+            else:
+                totals['total_lines'] += base_line_total_excluded
+        totals['tax_exclusive_amount'] = totals['total_lines'] + totals['total_charge'] - totals['total_allowance']
+
+        def non_fixed_total_grouping_function(base_line, tax_data):
+            if tax_data and tax_data['tax'].amount_type == 'fixed':
                 return None
-            return True
+            return self._l10n_sa_total_grouping_key(base_line, tax_data)
 
-        def tax_grouping_function(base_line, tax_data):
-            tax = tax_data and tax_data['tax']
-
-            # Ignore withholding taxes
-            if tax and tax.amount < 0:
-                return None
-            return {
-                'tax_category_code': self._get_tax_category_code(vals['customer'].commercial_partner_id, vals['supplier'], tax),
-                **self._get_tax_exemption_reason(vals['customer'].commercial_partner_id, vals['supplier'], tax),
-                'amount': tax.amount if tax else 0.0,
-                'amount_type': tax.amount_type if tax else 'percent',
-            }
-
-        vals['total_grouping_function'] = total_grouping_function
-        vals['tax_grouping_function'] = tax_grouping_function
+        aggregated_tax_details = self._l10n_sa_aggregate_base_lines_tax_details(vals, vals['base_lines'], non_fixed_total_grouping_function)
+        totals['total_tax_amount'] = sum(
+            tax_details['tax_amount_currency']
+            for grouping_key, tax_details in aggregated_tax_details.items()
+            if grouping_key
+        )
+        totals['tax_inclusive_amount'] = totals['tax_exclusive_amount'] + totals['total_tax_amount']
+        totals['cash_rounding_base_amount'] = sum(
+            base_line['tax_details']['total_excluded_currency']
+            for base_line in vals.get('cash_rounding_base_lines', [])
+        )
+        return totals
 
     # -------------------------------------------------------------------------
-    # EXPORT: Templates for document header nodes
+    # EXPORT: Party nodes
     # -------------------------------------------------------------------------
 
-    def _get_party_node(self, vals):
-        partner = vals['partner']
-        role = vals['role']
+    def _l10n_sa_get_party_node(self, vals, partner, role):
         commercial_partner = partner.commercial_partner_id
 
         party_node = {}
@@ -99,11 +232,11 @@ class ZatcaUblMixin(models.AbstractModel):
             'cac:PartyName': {
                 'cbc:Name': {'_text': partner.display_name},
             },
-            'cac:PostalAddress': self._get_address_node(vals),
+            'cac:PostalAddress': self._ubl_get_partner_address_node(vals, partner),
             'cac:PartyTaxScheme': {
                 'cbc:RegistrationName': {'_text': commercial_partner.name},
                 'cbc:CompanyID': {'_text': commercial_partner.vat},
-                'cac:RegistrationAddress': self._get_address_node({'partner': commercial_partner}),
+                'cac:RegistrationAddress': self._ubl_get_partner_address_node(vals, commercial_partner),
                 'cac:TaxScheme': {
                     'cbc:ID': {'_text': 'VAT'}
                 }
@@ -111,7 +244,7 @@ class ZatcaUblMixin(models.AbstractModel):
             'cac:PartyLegalEntity': {
                 'cbc:RegistrationName': {'_text': commercial_partner.name},
                 'cbc:CompanyID': {'_text': commercial_partner.vat} if commercial_partner.country_code == 'SA' else None,
-                'cac:RegistrationAddress': self._get_address_node({'partner': commercial_partner}),
+                'cac:RegistrationAddress': self._ubl_get_partner_address_node(vals, commercial_partner),
             },
             'cac:Contact': {
                 'cbc:ID': {'_text': partner.id},
@@ -124,8 +257,9 @@ class ZatcaUblMixin(models.AbstractModel):
         })
         return party_node
 
-    def _get_address_node(self, vals):
-        partner = vals['partner']
+    def _ubl_get_partner_address_node(self, vals, partner):
+        # OVERRIDE account.edi.ubl
+        # Also used for the address of a res.partner.bank.
         building_number = partner.l10n_sa_edi_building_number if partner._name == 'res.partner' else ''
         edi_plot_identification = partner.l10n_sa_edi_plot_identification if partner._name == 'res.partner' else ''
 
@@ -145,6 +279,10 @@ class ZatcaUblMixin(models.AbstractModel):
             },
         }
 
+    def _ubl_get_partner_bank_address_node(self, vals, partner_bank):
+        # OVERRIDE account.edi.ubl
+        return self._ubl_get_partner_address_node(vals, partner_bank)
+
     def _get_partner_party_identification_number(self, partner):
         """ Override to include/update values specific to ZATCA's UBL 2.1 specs """
         identification_number = partner.l10n_sa_edi_additional_identification_number
@@ -156,25 +294,126 @@ class ZatcaUblMixin(models.AbstractModel):
             identification_number = partner._l10n_sa_get_tin_from_vat(vat)
         return identification_number
 
+    def _ubl_add_accounting_supplier_party_node(self, vals):
+        # OVERRIDE account.edi.ubl
+        vals['document_node']['cac:AccountingSupplierParty'] = {
+            'cac:Party': self._l10n_sa_get_party_node(vals, vals['supplier'], 'supplier'),
+        }
+
+    def _ubl_add_accounting_customer_party_node(self, vals):
+        # OVERRIDE account.edi.ubl
+        vals['document_node']['cac:AccountingCustomerParty'] = {
+            'cac:Party': self._l10n_sa_get_party_node(vals, vals['customer'], 'customer'),
+        }
+
     # -------------------------------------------------------------------------
-    # EXPORT: Templates for document amount nodes
+    # EXPORT: Tax nodes
     # -------------------------------------------------------------------------
 
-    def _add_document_tax_total_nodes(self, document_node, vals):
-        super()._add_document_tax_total_nodes(document_node, vals)
+    def _get_tax_category_node(self, vals, grouping_key):
+        return {
+            'cbc:ID': {'_text': grouping_key['tax_category_code']},
+            'cbc:Name': {'_text': grouping_key.get('name')},
+            'cbc:Percent': {'_text': grouping_key['amount']} if grouping_key['amount_type'] == 'percent' else None,
+            'cbc:TaxExemptionReasonCode': {'_text': grouping_key.get('tax_exemption_reason_code')},
+            'cbc:TaxExemptionReason': {'_text': grouping_key.get('tax_exemption_reason')},
+            'cac:TaxScheme': {
+                'cbc:ID': {'_text': 'VAT'},
+            }
+        }
 
-        document_node['cac:TaxTotal'] = [document_node['cac:TaxTotal']]
+    def _l10n_sa_get_tax_total_node(self, vals, aggregated_tax_details, in_foreign_currency=True):
+        currency_values = self._l10n_sa_get_currency_values(vals, in_foreign_currency=in_foreign_currency)
+        suffix = currency_values['suffix']
+        currency_dp = currency_values['currency_dp']
+        currency_name = currency_values['currency_name']
+        return {
+            'cbc:TaxAmount': {
+                '_text': self.format_float(sum(
+                    values[f'tax_amount{suffix}']
+                    for grouping_key, values in aggregated_tax_details.items()
+                    if grouping_key
+                ), currency_dp),
+                'currencyID': currency_name,
+            },
+            'cac:TaxSubtotal': [
+                {
+                    'cbc:TaxableAmount': {
+                        '_text': self.format_float(values[f'base_amount{suffix}'], currency_dp),
+                        'currencyID': currency_name,
+                    },
+                    'cbc:TaxAmount': {
+                        '_text': self.format_float(values[f'tax_amount{suffix}'], currency_dp),
+                        'currencyID': currency_name,
+                    },
+                    'cbc:Percent': {'_text': grouping_key['amount']} if grouping_key['amount_type'] == 'percent' else None,
+                    'cac:TaxCategory': self._get_tax_category_node(vals, grouping_key),
+                }
+                for grouping_key, values in aggregated_tax_details.items()
+                if grouping_key
+            ] if in_foreign_currency else None,
+        }
 
-        self._add_tax_total_node_in_company_currency(document_node, vals)
-        document_node['cac:TaxTotal'][1]['cac:TaxSubtotal'] = None
+    def _ubl_add_tax_totals_nodes(self, vals):
+        # OVERRIDE account.edi.ubl
+        # Two TaxTotal: the first one in the document currency with the tax breakdown, the second one in the company
+        # currency (ZATCA's tax currency) without breakdown.
+        aggregated_tax_details = self._l10n_sa_aggregate_base_lines_tax_details(vals, vals['base_lines'])
+        vals['document_node']['cac:TaxTotal'] = [
+            self._l10n_sa_get_tax_total_node(vals, aggregated_tax_details),
+            self._l10n_sa_get_tax_total_node(vals, aggregated_tax_details, in_foreign_currency=False),
+        ]
+        vals['document_node']['cac:WithholdingTaxTotal'] = None
 
     # -------------------------------------------------------------------------
-    # EXPORT: Templates for document line nodes
+    # EXPORT: Line nodes
     # -------------------------------------------------------------------------
 
-    def _add_document_line_tax_total_nodes(self, line_node, vals):
-        base_line = vals['base_line']
-        aggregated_tax_details = self.env['account.tax']._aggregate_base_line_tax_details(base_line, vals['tax_grouping_function'])
+    def _ubl_add_line_id_node(self, vals):
+        vals['line_node']['cbc:ID'] = {'_text': vals['line_vals']['index']}
+
+    def _ubl_add_line_note_nodes(self, vals):
+        vals['line_node']['cbc:Note'] = None
+
+    def _ubl_add_line_extension_amount_node(self, vals, in_foreign_currency=True):
+        line_amounts = self._l10n_sa_get_line_amounts(vals, vals['line_vals']['base_line'])
+        vals['line_node']['cbc:LineExtensionAmount'] = {
+            '_text': self.format_float(line_amounts['total_excluded_currency'], self._get_currency_decimal_places(vals['currency'])),
+            'currencyID': vals['currency'].name,
+        }
+
+    def _ubl_add_line_allowance_charge_nodes(self, vals):
+        nodes = vals['line_node']['cac:AllowanceCharge'] = []
+        base_line = vals['line_vals']['base_line']
+        currency_dp = self._get_currency_decimal_places(vals['currency'])
+        currency_name = vals['currency'].name
+
+        discount_amount_currency = self._l10n_sa_get_line_amounts(vals, base_line)['discount_amount_currency']
+        if not float_is_zero(discount_amount_currency, precision_digits=currency_dp):
+            nodes.append({
+                'cbc:ChargeIndicator': {'_text': 'false' if discount_amount_currency > 0 else 'true'},
+                'cbc:AllowanceChargeReasonCode': {'_text': '95'},
+                'cbc:Amount': {
+                    '_text': self.format_float(abs(discount_amount_currency), currency_dp),
+                    'currencyID': currency_name,
+                },
+            })
+
+        for tax_data in base_line.get('_l10n_sa_recycling_contribution_taxes_data', []):
+            nodes.append({
+                'cbc:ChargeIndicator': {'_text': 'true' if tax_data['tax_amount_currency'] > 0 else 'false'},
+                'cbc:AllowanceChargeReasonCode': {'_text': 'AEO' if tax_data['tax_amount_currency'] > 0 else '100'},
+                'cbc:AllowanceChargeReason': {'_text': tax_data['tax'].name},
+                'cbc:Amount': {
+                    '_text': self.format_float(abs(tax_data['tax_amount_currency']), currency_dp),
+                    'currencyID': currency_name,
+                },
+            })
+
+    def _ubl_add_line_tax_totals_nodes(self, vals):
+        aggregated_tax_details = self._l10n_sa_aggregate_base_line_tax_details(vals, vals['line_vals']['base_line'])
+        currency_dp = self._get_currency_decimal_places(vals['currency'])
+        currency_name = vals['currency'].name
 
         total_tax_amount = sum(
             values['tax_amount_currency']
@@ -188,45 +427,58 @@ class ZatcaUblMixin(models.AbstractModel):
         )
         total_amount = total_base_amount + total_tax_amount
 
-        line_node['cac:TaxTotal'] = {
+        vals['line_node']['cac:TaxTotal'] = [{
             'cbc:TaxAmount': {
-                '_text': self.format_float(total_tax_amount, vals['currency_dp']),
-                'currencyID': vals['currency_name'],
+                '_text': self.format_float(total_tax_amount, currency_dp),
+                'currencyID': currency_name,
             },
             'cbc:RoundingAmount': {
                 # This should simply contain the net (base + tax) amount for the line.
-                '_text': self.format_float(total_amount, vals['currency_dp']),
-                'currencyID': vals['currency_name'],
+                '_text': self.format_float(total_amount, currency_dp),
+                'currencyID': currency_name,
             },
             # No TaxSubtotal: BR-KSA-80: only downpayment lines should have a tax subtotal breakdown.
+        }]
+
+    def _ubl_add_line_item_node(self, vals):
+        base_line = vals['line_vals']['base_line']
+        product = base_line['product_id']
+        line_name = base_line.get('_line_name')
+        item_node = vals['line_node']['cac:Item'] = {
+            'cbc:Description': {'_text': line_name or product.description_sale},
+            'cbc:Name': {'_text': product.name or line_name},
+            'cac:SellersItemIdentification': {
+                'cbc:ID': {'_text': product.code or product.default_code},
+            },
+            'cac:StandardItemIdentification': {
+                'cbc:ID': {
+                    '_text': product.barcode,
+                    'schemeID': '0160',  # GTIN
+                } if product.barcode else None,
+            },
+            'cac:AdditionalItemProperty': [
+                {
+                    'cbc:Name': {'_text': value.attribute_id.name},
+                    'cbc:Value': {'_text': value.name},
+                } for value in product.product_template_attribute_value_ids
+            ],
         }
-
-    def _add_document_line_item_nodes(self, line_node, vals):
-        super()._add_document_line_item_nodes(line_node, vals)
-        product = vals['base_line']['product_id']
-        line_node['cac:Item']['cac:SellersItemIdentification'] = {
-            'cbc:ID': {'_text': product.code or product.default_code},
-        }
-
-    def _add_document_line_tax_category_nodes(self, line_node, vals):
-        base_line = vals['base_line']
-        aggregated_tax_details = self.env['account.tax']._aggregate_base_line_tax_details(base_line, vals['tax_grouping_function'])
-
-        line_node['cac:Item']['cac:ClassifiedTaxCategory'] = [
-            self._get_tax_category_node({**vals, 'grouping_key': grouping_key})
+        aggregated_tax_details = self._l10n_sa_aggregate_base_line_tax_details(vals, base_line)
+        item_node['cac:ClassifiedTaxCategory'] = [
+            self._get_tax_category_node(vals, grouping_key)
             for grouping_key in aggregated_tax_details
             if grouping_key
         ]
 
-    def _add_document_line_price_nodes(self, line_node, vals):
+    def _ubl_add_line_price_node(self, vals, in_foreign_currency=True):
         """
         Use 10 decimal places for PriceAmount to satisfy ZATCA validation BR-KSA-EN16931-11
         """
-        currency_suffix = vals['currency_suffix']
-        line_node['cac:Price'] = {
+        line_amounts = self._l10n_sa_get_line_amounts(vals, vals['line_vals']['base_line'])
+        vals['line_node']['cac:Price'] = {
             'cbc:PriceAmount': {
-                '_text': round(vals[f'gross_price_unit{currency_suffix}'], 10),
-                'currencyID': vals['currency_name'],
+                '_text': round(line_amounts['gross_price_unit_currency'], 10),
+                'currencyID': vals['currency'].name,
             },
         }
 
@@ -253,19 +505,32 @@ class ZatcaUblMixin(models.AbstractModel):
     # EXPORT: Templates for document allowance charge nodes
     # -------------------------------------------------------------------------
 
-    def _get_document_allowance_charge_node(self, vals):
+    def _l10n_sa_get_document_allowance_charge_node(self, vals, base_line):
         """
         Charge Reasons & Codes (As per ZATCA):
         https://unece.org/fileadmin/DAM/trade/untdid/d16b/tred/tred5189.htm
         As far as ZATCA is concerned, we calculate Allowance/Charge vals for global discounts as
         a document level allowance, and we do not include any other charges or allowances.
         """
-        base_line = vals['base_line']
-        aggregated_tax_details = self.env['account.tax']._aggregate_base_line_tax_details(base_line, vals['tax_grouping_function'])
+        aggregated_tax_details = self._l10n_sa_aggregate_base_line_tax_details(vals, base_line)
+        tax_category_nodes = [
+            self._get_tax_category_node(vals, grouping_key)
+            for grouping_key in aggregated_tax_details
+            if grouping_key
+        ]
 
         base_amount_currency = base_line['tax_details']['total_excluded_currency']
         if base_line['special_type'] == 'early_payment':
-            return super()._get_document_allowance_charge_node(vals)
+            return {
+                'cbc:ChargeIndicator': {'_text': 'false' if base_amount_currency < 0.0 else 'true'},
+                'cbc:AllowanceChargeReasonCode': {'_text': '66' if base_amount_currency < 0.0 else 'ZZZ'},
+                'cbc:AllowanceChargeReason': {'_text': _("Conditional cash/payment discount")},
+                'cbc:Amount': {
+                    '_text': self.format_float(abs(base_amount_currency), self._get_currency_decimal_places(vals['currency'])),
+                    'currencyID': vals['currency'].name,
+                },
+                'cac:TaxCategory': tax_category_nodes,
+            }
         if base_amount_currency < 0:
             return {
                 'cbc:ChargeIndicator': {'_text': 'false'},
@@ -273,36 +538,59 @@ class ZatcaUblMixin(models.AbstractModel):
                 'cbc:AllowanceChargeReason': {'_text': 'Discount'},
                 'cbc:Amount': {
                     '_text': self.format_float(abs(base_amount_currency), 2),
-                    'currencyID': vals['currency_id'].name,
+                    'currencyID': vals['currency'].name,
                 },
-                'cac:TaxCategory': [
-                    self._get_tax_category_node({**vals, 'grouping_key': grouping_key})
-                    for grouping_key in aggregated_tax_details
-                    if grouping_key
-                ],
+                'cac:TaxCategory': tax_category_nodes,
             }
 
         return {}
+
+    def _ubl_add_allowance_charge_nodes(self, vals):
+        # OVERRIDE account.edi.ubl
+        vals['document_node']['cac:AllowanceCharge'] = [
+            self._l10n_sa_get_document_allowance_charge_node(vals, base_line)
+            for base_line in vals['base_lines']
+            if self._l10n_sa_is_document_allowance_charge(base_line)
+        ]
+
     # -------------------------------------------------------------------------
     # EXPORT: Templates for document header nodes helpers
     # -------------------------------------------------------------------------
 
-    def _set_delivery_nodes(self, document_node, record):
-        if 'cac:Delivery' not in document_node:
-            return
-
+    def _l10n_sa_get_delivery_node(self, vals, record, delivery_date=None):
         issue_date = fields.Datetime.context_timestamp(
             self.with_context(tz='Asia/Riyadh'),
             record.l10n_sa_confirmation_datetime,
         )
-        if document_node['cac:Delivery']['cac:DeliveryLocation']:
-            document_node['cac:Delivery']['cac:DeliveryLocation'] = None
-
-        if not document_node['cac:Delivery']['cbc:ActualDeliveryDate']['_text']:
-            document_node['cac:Delivery']['cbc:ActualDeliveryDate'] = {'_text': issue_date}
-
+        node = {
+            # The delivery address is not reported.
+            'cac:DeliveryLocation': None,
+            'cbc:ActualDeliveryDate': {'_text': delivery_date or issue_date},
+        }
         if record.l10n_sa_edi_supply_end_date:
-            document_node['cac:Delivery']['cbc:LatestDeliveryDate'] = {'_text': record.l10n_sa_edi_supply_end_date}
+            node['cbc:LatestDeliveryDate'] = {'_text': record.l10n_sa_edi_supply_end_date}
+        return node
+
+    def _l10n_sa_get_payment_means_node(self, vals, record):
+        """ PaymentMeans with the ZATCA payment means code (UN/ECE 4461) and the adjustment reason (KSA-10). """
+        node = {
+            'cbc:PaymentMeansCode': {
+                '_text': PAYMENT_MEANS_CODE.get(
+                    record._l10n_sa_get_payment_means_code(),
+                    PAYMENT_MEANS_CODE['unknown'],
+                ),
+                'listID': 'UN/ECE 4461',
+            },
+            'cbc:InstructionNote': {'_text': record._l10n_sa_get_adjustment_reason()},
+        }
+        return node
+
+    def _ubl_add_notes_nodes(self, vals):
+        # OVERRIDE account.edi.ubl
+        record = vals.get('invoice')
+        vals['document_node']['cbc:Note'] = [
+            {'_text': html2plaintext(record.narration) if record and record.narration else None},
+        ]
 
     # -------------------------------------------------------------------------
     # Tax Category and Exemption
@@ -364,25 +652,6 @@ class ZatcaUblMixin(models.AbstractModel):
             'tax_exemption_reason_code': None,
             'tax_exemption_reason': None,
         }
-
-    # -------------------------------------------------------------------------
-    # Payment Means
-    # -------------------------------------------------------------------------
-
-    def _add_invoice_payment_means_nodes(self, document_node, vals):
-        """ Override to include/update values specific to ZATCA's UBL 2.1 specs """
-        super()._add_invoice_payment_means_nodes(document_node, vals)
-        payment_means_node = document_node['cac:PaymentMeans']
-        invoice = vals['invoice']
-
-        payment_means_node['cbc:PaymentMeansCode'] = {
-            '_text': PAYMENT_MEANS_CODE.get(
-                invoice._l10n_sa_get_payment_means_code(),
-                PAYMENT_MEANS_CODE['unknown'],
-            ),
-            'listID': 'UN/ECE 4461',
-        }
-        payment_means_node['cbc:InstructionNote'] = {'_text': invoice._l10n_sa_get_adjustment_reason()}
 
     # -------------------------------------------------------------------------
     # XML Hash Generation

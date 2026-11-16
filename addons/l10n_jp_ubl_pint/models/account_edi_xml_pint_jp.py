@@ -1,40 +1,63 @@
-from odoo import models
+from odoo import _, models
 
 
 class AccountEdiXmlPint_Jp(models.AbstractModel):
-    _name = 'account.edi.xml.pint_jp'
-    _inherit = ["account.edi.xml.ubl_bis3"]
-    _description = "Japanese implementation of Peppol International (PINT) model for Billing"
-    """
-    Pint is a standard for International Billing from Peppol. It is based on Peppol BIS Billing 3.
-    It serves as a base for per-country specialization, while keeping a standard core for data being used
-    across countries. This is not meant to be used directly, but rather to be extended by country-specific modules.
+    """ Japanese implementation of Peppol International (PINT) model for Billing (PINT JP, "JP PINT").
 
-    The JP PINT format is the Japanese implementation of PINT.
+    PINT JP is a specialization of the Peppol International model (PINT), not a CIUS of the European norm EN 16931
+    nor of Peppol BIS Billing 3.0 (its CustomizationID is 'urn:peppol:pint:billing-1@jp-1'): it inherits the generic
+    PINT layer ('account.edi.ubl_pint') and only adds the PINT JP rules (aligned-ibrp-*-jp, aligned-ibr-jp-*).
 
     * PINT Official documentation: https://docs.peppol.eu/poac/pint/pint/
-    * PINT JP Official documentation: https://docs.peppol.eu/poac/jp/pint-jp
+    * PINT JP Official documentation: https://docs.peppol.eu/poac/jp/pint-jp/
     """
+    _name = 'account.edi.xml.pint_jp'
+    _inherit = ["account.edi.ubl_pint"]
+    _description = "Japanese implementation of Peppol International (PINT) model for Billing"
 
     # -------------------------------------------------------------------------
     # EXPORT
     # -------------------------------------------------------------------------
 
     def _export_invoice_filename(self, invoice):
-        # EXTENDS account_edi_ubl_cii
+        # EXTENDS account_edi_ubl
         return f"{invoice.name.replace('/', '_')}_pint_jp.xml"
 
     def _get_customization_id(self, process_type='billing'):
+        # EXTENDS account.edi.ubl_pint
         if process_type == 'billing':
             return 'urn:peppol:pint:billing-1@jp-1'
+        return None
+
+    def _export_get_document_type(self, invoice):
+        # EXTENDS account.edi.common
+        # PINT JP only knows invoices and credit notes: a debit note is an invoice.
+        document_type = super()._export_get_document_type(invoice)
+        if document_type == 'debit_note':
+            return 'invoice'
+        return document_type
+
+    def _init_invoice_export_values(self, invoice):
+        # EXTENDS account.edi.ubl
+        vals = super()._init_invoice_export_values(invoice)
+        # [ibr-027] The Item net price (ibt-146) MUST NOT be negative.
+        self._turn_price_unit_positive(vals)
+        return vals
+
+    def _get_tax_category_grouping_key(self, base_line, tax_data, vals, currency):
+        # EXTENDS account.edi.common
+        # The cash rounding is reported as the Rounding amount (ibt-114), not as a tax breakdown.
+        if self._is_cash_rounding_base_line(base_line):
+            return None
+        return super()._get_tax_category_grouping_key(base_line, tax_data, vals, currency)
 
     def _ubl_get_tax_subtotal_node(self, vals, tax_subtotal):
-        # EXTENDS account.edi.xml.ubl_bis3
+        # EXTENDS account.edi.ubl_pint
         tax_subtotal_node = super()._ubl_get_tax_subtotal_node(vals, tax_subtotal)
 
         # If there is a TaxTotal section in company currency,
         # its TaxSubtotals nodes should contain a 'Percent' node.
-        currency = vals['currency_id']
+        currency = vals['currency']
         company = vals['company']
         if (
             currency != company.currency_id
@@ -45,21 +68,21 @@ class AccountEdiXmlPint_Jp(models.AbstractModel):
         return tax_subtotal_node
 
     def _ubl_tax_totals_node_grouping_key(self, base_line, tax_data, vals, currency):
-        # OVERRIDE
+        # OVERRIDE account.edi.ubl_pint
+        # [aligned-ibr-jp-*] The TaxTotal in accounting currency (JPY) keeps its tax breakdown, and the withholding
+        # taxes are kept as such: skip the generic PINT behavior.
         return self.env['account.edi.ubl']._ubl_tax_totals_node_grouping_key(base_line, tax_data, vals, currency)
 
-    def _ubl_add_customization_id_node(self, vals):
-        # EXTENDS account.edi.xml.ubl_bis3
-        super()._ubl_add_customization_id_node(vals)
-        vals['document_node']['cbc:CustomizationID']['_text'] = 'urn:peppol:pint:billing-1@jp-1'
-
-    def _ubl_add_profile_id_node(self, vals):
-        # EXTENDS account.edi.xml.ubl_bis3
-        super()._ubl_add_profile_id_node(vals)
-        vals['document_node']['cbc:ProfileID']['_text'] = 'urn:peppol:bis:billing'
+    def _ubl_add_line_allowance_charge_nodes(self, vals):
+        # EXTENDS account.edi.ubl
+        # Invoice line allowances (ibg-27) and charges (ibg-28).
+        super()._ubl_add_line_allowance_charge_nodes(vals)
+        self._ubl_add_line_allowance_charge_nodes_for_discount(vals)
+        self._ubl_add_line_allowance_charge_nodes_for_recycling_contribution_taxes(vals)
+        self._ubl_add_line_allowance_charge_nodes_for_excise_taxes(vals)
 
     def _ubl_add_invoice_period_nodes(self, vals):
-        # EXTENDS account.edi.xml.ubl_bis3
+        # EXTENDS account.edi.ubl
         super()._ubl_add_invoice_period_nodes(vals)
         nodes = vals['document_node']['cac:InvoicePeriod']
         invoice = vals.get('invoice')
@@ -72,7 +95,7 @@ class AccountEdiXmlPint_Jp(models.AbstractModel):
             })
 
     def _ubl_add_party_legal_entity_nodes(self, vals):
-        # EXTENDS account.edi.ubl_bis3
+        # EXTENDS account.edi.ubl_pint
         super()._ubl_add_party_legal_entity_nodes(vals)
         nodes = vals['party_node']['cac:PartyLegalEntity']
         partner = vals['party_vals']['partner']
@@ -83,9 +106,22 @@ class AccountEdiXmlPint_Jp(models.AbstractModel):
             for node in nodes:
                 node['cbc:CompanyID'] = None
 
-    def _export_document_node_constraints(self, vals):
-        # EXTENDS account.edi.ubl_bis3
-        constraints = super()._export_document_node_constraints(vals)
-        constraints.pop('cen_en16931_supplier_vat_country_code', None)
-        constraints.pop('cen_en16931_customer_vat_country_code', None)
+    def _export_document_constraints(self, vals):
+        # EXTENDS account.edi.ubl_pint
+        constraints = super()._export_document_constraints(vals)
+        if not self._is_document(vals, 'invoice', 'credit_note'):
+            return constraints
+
+        document_node = vals['document_node']
+        line_nodes = document_node.get('cac:InvoiceLine') or document_node.get('cac:CreditNoteLine') or []
+
+        # Each invoice line has one and only one line tax information (ibg-30).
+        if any(len(line_node['cac:Item']['cac:ClassifiedTaxCategory']) != 1 for line_node in line_nodes):
+            constraints['jp_tax_line'] = _("Each invoice line shall have one and only one tax.")
+
+        # [ibr-057] Each Deliver to address (ibg-15) MUST contain a Deliver to country code (ibt-080).
+        delivery_node = document_node['cac:Delivery']
+        if delivery_node and not delivery_node['cac:DeliveryLocation']['cac:Address']['cac:Country']['cbc:IdentificationCode']['_text']:
+            constraints['jp_delivery_address'] = self._check_required_fields(vals['delivery'], 'country_id')
+
         return constraints
