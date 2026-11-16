@@ -491,3 +491,26 @@ class TestHrWorkEntryType(TestHrHolidaysCommon):
         })
 
         self.assertEqual(leave._get_durations()[leave.id], (0.125, 3.0))
+
+    def test_search_virtual_remaining_leaves(self):
+        """ Searching on `virtual_remaining_leaves` should compare each leave type's balance with the searched value."""
+
+        work_entry_type = self.env['hr.work.entry.type'].create({
+            'name': 'Time Off test_search_virtual_remaining_leaves',
+            'code': 'Time Off test_search_virtual_remaining_leaves',
+            'count_as': 'absence',
+            'requires_allocation': True,
+            'request_unit': 'day',
+            'unit_of_measure': 'day',
+        })
+
+        self.env['hr.leave.allocation'].create({
+            'employee_id': self.employee_emp_id,
+            'work_entry_type_id': work_entry_type.id,
+            'number_of_days': 5,
+            'date_from': date(date.today().year, 1, 1),
+        }).action_approve()
+
+        WorkEntryType = self.env['hr.work.entry.type'].with_context(employee_id=self.employee_emp_id)
+        self.assertNotIn(work_entry_type, WorkEntryType.search([('virtual_remaining_leaves', '>', 5)]))
+        self.assertIn(work_entry_type, WorkEntryType.search([('virtual_remaining_leaves', '>=', 5)]))
