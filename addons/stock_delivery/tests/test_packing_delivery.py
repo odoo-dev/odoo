@@ -1,7 +1,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import Command
-from odoo.addons.stock.tests.test_packing import TestPackingCommon
+from odoo.addons.stock.tests.archive.test_packing import TestPackingCommon
 from odoo.exceptions import UserError
 from odoo.tests import tagged, Form
 from unittest.mock import patch

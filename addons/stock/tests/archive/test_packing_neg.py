@@ -3,7 +3,7 @@
 
 from odoo.tests import tagged
 
-from odoo.addons.stock.tests.test_packing import TestPackingCommon
+from odoo.addons.stock.tests.archive.test_packing import TestPackingCommon
 
 
 class TestPackingNeg(TestPackingCommon):

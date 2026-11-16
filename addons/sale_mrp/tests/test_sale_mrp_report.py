@@ -6,7 +6,7 @@ from odoo.tools import html2plaintext
 
 
 from odoo.addons.sale.tests.common import TestSaleCommon
-from odoo.addons.stock.tests.test_report import TestReportsCommon
+from odoo.addons.stock.tests.archive.test_report import TestReportsCommon
 
 
 @tagged('post_install', '-at_install')

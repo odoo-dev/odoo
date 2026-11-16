@@ -2,7 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo.exceptions import AccessError
-from odoo.tests import tagged
+from odoo.tests import Form, tagged
 
 from odoo.addons.product.tests.common import ProductCommon
 
@@ -30,7 +30,10 @@ class TestProduct(ProductCommon):
         )
         self.assertEqual(self.pricelist.currency_id.name, self.currency.name)
 
-    def test_any_user_can_print_product_labels(self):
+    def test_product_user_access(self):
+        """ A user with no access beyond the baseline product read right
+        can print product labels and open `product.product`'s kanban,
+        list, and form views, without any ACL/field-access error. """
         base_user = self.env['res.users'].sudo().create({
             'name': 'Base user',
             'login': 'base_user',
@@ -56,3 +59,14 @@ class TestProduct(ProductCommon):
             product_product_print_label_action.with_user(base_user).with_context(product_product_context).run()
         except AccessError:
             self.fail("AccessError raised while printing product label with base user.")
+
+        product = self.product.with_user(base_user)
+
+        kanban_view = Form(product, view='product.product_kanban_view')
+        self.assertEqual(kanban_view.name, self.product.name)
+
+        list_view = Form(product, view='product.product_product_tree_view')
+        self.assertEqual(list_view.name, self.product.name)
+
+        form_view = Form(product, view='product.product_normal_form_view')
+        self.assertEqual(form_view.name, self.product.name)

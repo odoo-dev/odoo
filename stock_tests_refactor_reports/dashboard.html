@@ -1,0 +1,747 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>stock tests refactor — progress</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --fg: #1b1f24;
+    --muted: #5b6471;
+    --border: #e3e6ea;
+    --card: #f8f9fb;
+    --kept: #2e7d46;
+    --dropped: #b3472b;
+    --open: #b58900;
+    --pending: #c7cdd4;
+    --accent: #2f6fed;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #15181c;
+      --fg: #e7eaee;
+      --muted: #9aa4b1;
+      --border: #2a2f36;
+      --card: #1c2025;
+      --kept: #4caf6e;
+      --dropped: #e0684a;
+      --open: #d9ab2e;
+      --pending: #343b43;
+      --accent: #5b8ff9;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #15181c;
+    --fg: #e7eaee;
+    --muted: #9aa4b1;
+    --border: #2a2f36;
+    --card: #1c2025;
+    --kept: #4caf6e;
+    --dropped: #e0684a;
+    --open: #d9ab2e;
+    --pending: #343b43;
+    --accent: #5b8ff9;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 24px 16px 64px;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  }
+  .wrap { max-width: 920px; margin: 0 auto; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  .subtitle { color: var(--muted); font-size: 14px; margin: 0 0 28px; }
+  h2 { font-size: 16px; margin: 36px 0 12px; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+  }
+  .legend { display: flex; gap: 18px; flex-wrap: wrap; margin: 10px 0 18px; font-size: 13px; color: var(--muted); }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .swatch { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
+  .bar-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; font-size: 13px; }
+  .bar-label { width: 150px; flex: 0 0 150px; color: var(--muted); }
+  .bar-track {
+    flex: 1;
+    height: 22px;
+    background: var(--pending);
+    border-radius: 6px;
+    overflow: hidden;
+    display: flex;
+  }
+  .bar-seg { height: 100%; }
+  .bar-value { width: 110px; flex: 0 0 110px; text-align: right; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .stack-track {
+    height: 34px;
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    border: 1px solid var(--border);
+  }
+  .stack-seg { height: 100%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; font-weight: 600; }
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 14px;
+  }
+  .metric {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .metric .num { font-size: 24px; font-weight: 700; }
+  .metric .lbl { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .02em; }
+  .status-done { color: var(--kept); font-weight: 600; }
+  .status-progress { color: var(--accent); font-weight: 600; }
+  .status-empty { color: var(--muted); }
+  code { background: var(--card); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; font-size: 12px; }
+  footer { margin-top: 40px; color: var(--muted); font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>stock tests refactor — progress</h1>
+  <p class="subtitle">Branch <code>master-tests-stock-ref-arm</code> · generated from 00_MASTER_SUMMARY.md / test_move.md / test_move2.md · private scratch view, not published</p>
+
+  <h2>test_move.py + test_move2.py triage (170 + ~90 original tests)</h2>
+  <div class="card">
+    <p style="margin: 0 0 14px; font-size: 15px;"><strong style="color: var(--kept);">✓ BOTH FULLY COMPLETE</strong> — every test in both of the two largest archived files has now been examined and decided. <code>test_move2.py</code> was triaged solo (no per-cluster check-in) per explicit instruction — see <code>test_move2.md</code>.</p>
+    <div class="stack-track">
+      <div class="stack-seg" style="width: 68.1%; background: var(--kept);" title="Kept / ported (archived) — 175">175</div>
+      <div class="stack-seg" style="width: 31.9%; background: var(--dropped);" title="Dropped — 82">82</div>
+    </div>
+    <div class="legend">
+      <span><i class="swatch" style="background:var(--kept)"></i>Kept / ported (175 archived → 160 new tests combined, 20+2 merges + 1 fold + 2 Follow-up-3 folds)</span>
+      <span><i class="swatch" style="background:var(--dropped)"></i>Dropped (82)</span>
+      <span><i class="swatch" style="background:var(--open)"></i>Open / deferred (0)</span>
+    </div>
+    <p style="color: var(--muted); font-size: 13px; margin: 4px 0 0;">
+      <code>test_move.py</code>: 24 clusters, 170/170 decided, 130 kept/ported (118 new tests) / 40 dropped.
+      <code>test_move2.py</code>: 6 classes, 87/87 decided, 45 kept/ported (42 new tests, 4 merge pairs — Follow-up 3 folds 2 more dropped tests' residual lessons into already-kept tests, no new methods) / 42 dropped — see <code>test_move2.md</code> for the full per-test breakdown, including several archived tests whose premise turned out false once actually tried against the <em>default</em> push-based routing (a pushed move's reservation isn't restricted to what its origin delivered; a pushed move's own <code>move_dest_ids</code> link never exists before its own <code>_action_done()</code>) — though 4 of those later turned out to reproduce after all under a third, real warehouse configuration (see Follow-up 2 below).
+    </p>
+    <p style="color: var(--muted); font-size: 13px; margin: 8px 0 0;">
+      <strong>Follow-up:</strong> User pushback on the dropped <code>TestPickShip</code> MTO cluster — the real mechanic (a sale-like need pulling a receipt linked to a delivery) was added the right way: two new <code>common.py</code> helpers, <code>_create_procurement()</code> (wraps <code>stock.rule.run()</code>) and <code>_sell()</code> (defaults the need to <code>self.customer_location</code>), plus one new test in <code>test_warehouse_routing.py</code> — <code>test_sale_need_on_mto_resupplied_product_pulls_a_linked_receipt</code> — proving a real 3-move MTO pull chain end to end.
+    </p>
+    <p style="color: var(--muted); font-size: 13px; margin: 8px 0 0;">
+      <strong>Follow-up 2 (correction):</strong> a first re-check of the dropped <code>test_mto_to_mts</code>/<code>_2</code>/<code>_3</code>/<code>test_mto_moves_transfer</code>/<code>test_mto_cancel_move_line</code> group concluded "nothing to correct" — <strong>wrong</strong>. User pointed at <code>archive/test_old_rules.py</code>: a third real configuration exists where <em>every</em> delivery step (not just the first) is rewritten to a real pull rule, generating the whole chain upfront, fully linked — the "rigid process" setup some users still rely on. Under that real configuration, 4 of the 5 originally-dropped tests reproduce exactly as claimed. Ported as a new class, <code>TestStockMoveMultiStepPull</code> in <code>test_move.py</code> (sibling to <code>TestStockMoveMultiStep</code>), 5 tests total — User's explicit call for a dedicated class with its own <code>setUpClass</code> rather than a reusable <code>common.py</code> helper. The 5th (<code>test_mto_cancel_move_line</code>) also reproduces but was left unported (its lesson is an orthogonal <code>_recompute_state()</code> nuance). See <code>test_move2.md</code>'s "Follow-up 2" section.
+    </p>
+    <p style="color: var(--muted); font-size: 13px; margin: 8px 0 0;">
+      <strong>Follow-up 3:</strong> User noticed how many tests this triage dropped (48) and asked to check whether any could be folded into an existing test instead of staying dropped outright. Folded 2: <code>test_merge_moves_never_attributes</code> (a real merge-key nuance — <code>never_product_template_attribute_value_ids</code> is part of the merge key, same as <code>product_id</code>) into <code>test_same_product_moves_in_a_picking_merge_on_confirm</code> (<code>test_transfer_flow.py</code>, +1 move + 1 assertion); and <code>test_unreservation_on_qty_decrease</code> (the "shrink" half of <code>test_reservation_updates_with_move_quantity</code>'s own claim, which that test never actually exercised) into that same test (<code>test_move.py</code>, +1 shrink step reusing its existing fixture). Considered and rejected 2 more once checked against the candidate host's own ending (<code>test_no_backorder_1</code>, <code>test_mto_moves_return_extra</code>) — not actually cheap. <code>test_mtso_mto_adjust_01</code> isn't a fold candidate at all: the archived test never exercised the interesting branch, so there's nothing to extend. No new test methods anywhere. See <code>test_move2.md</code>'s "Follow-up 3" section.
+    </p>
+  </div>
+
+  <h2>Bucket files (9 total)</h2>
+  <div class="card">
+    <div class="bar-row">
+      <div class="bar-label">test_move.py</div>
+      <div class="bar-track"><div class="bar-seg" style="width: 100%; background: var(--accent);"></div></div>
+      <div class="bar-value">83 tests</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">test_warehouse_routing.py</div>
+      <div class="bar-track"><div class="bar-seg" style="width: 100%; background: var(--accent);"></div></div>
+      <div class="bar-value">22 tests</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">test_transfer_flow.py</div>
+      <div class="bar-track"><div class="bar-seg" style="width: 100%; background: var(--accent);"></div></div>
+      <div class="bar-value">32 tests</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">test_scrap.py</div>
+      <div class="bar-track"><div class="bar-seg" style="width: 100%; background: var(--accent);"></div></div>
+      <div class="bar-value">9 tests</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">test_packaging.py</div>
+      <div class="bar-track"><div class="bar-seg" style="width: 100%; background: var(--accent);"></div></div>
+      <div class="bar-value">3 tests</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">test_reporting.py</div>
+      <div class="bar-track"><div class="bar-seg" style="width: 100%; background: var(--accent);"></div></div>
+      <div class="bar-value">6 tests</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">test_lot_serial.py</div>
+      <div class="bar-track"><div class="bar-seg" style="width: 100%; background: var(--accent);"></div></div>
+      <div class="bar-value">6 tests</div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label">other 2 buckets</div>
+      <div class="bar-track"></div>
+      <div class="bar-value">0 tests</div>
+    </div>
+  </div>
+  <p style="color: var(--muted); font-size: 13px; margin: 8px 0 0;">
+    <code>test_scrap.py</code> is a new file within bucket 2 "Moves &amp; reservation", not a 10th
+    bucket — the 9-bucket grouping itself is unchanged, only the file split within a bucket.
+  </p>
+
+  <h2>Metrics — before vs. after</h2>
+  <div class="metrics-grid">
+    <div class="metric">
+      <div class="num">7,131</div>
+      <div class="lbl">archive/test_move.py — lines (before, structural only)</div>
+    </div>
+    <div class="metric">
+      <div class="num">~1,750</div>
+      <div class="lbl">test_move.py — lines (after, 3 classes; was 1,647 at 2 classes, 1,415 at 1)</div>
+    </div>
+    <div class="metric">
+      <div class="num">195</div>
+      <div class="lbl">test_lot_serial.py — lines (after, <code>TestLotSerial</code>; was 108)</div>
+    </div>
+    <div class="metric">
+      <div class="num">624</div>
+      <div class="lbl">test_warehouse_routing.py — lines (after, 3 classes; was 396)</div>
+    </div>
+    <div class="metric">
+      <div class="num">748</div>
+      <div class="lbl">test_transfer_flow.py — lines (after, <code>TestTransferFlow</code>; was 381)</div>
+    </div>
+    <div class="metric">
+      <div class="num">170</div>
+      <div class="lbl">test_scrap.py — lines (after, <code>TestScrap</code>)</div>
+    </div>
+    <div class="metric">
+      <div class="num">92</div>
+      <div class="lbl">test_packaging.py — lines (after, <code>TestPackaging</code>)</div>
+    </div>
+    <div class="metric">
+      <div class="num">192</div>
+      <div class="lbl">test_reporting.py — lines (after, <code>TestDeliverySlipReport</code>)</div>
+    </div>
+    <div class="metric">
+      <div class="num">0 / 191</div>
+      <div class="lbl"><code>_create_move()</code> reuse — before / raw <code>.create()</code> calls suite-wide</div>
+    </div>
+    <div class="metric">
+      <div class="num">100%</div>
+      <div class="lbl">new tests use shared helpers, not hand-rolled lifecycle code</div>
+    </div>
+    <div class="metric">
+      <div class="num">163</div>
+      <div class="lbl">tests passing, 0 errors, all seven active files (per-file verified; full <code>/stock</code> tag measured 163/163 passing for this state, unchanged by Follow-up 3 — no new tests, 2 existing ones extended; 158 after the first MTO follow-up, +5 for Follow-up 2's revived pull-chain tests; 157 after the <code>test_move2.py</code> pass; was 117/135 before)</div>
+    </div>
+  </div>
+  <p style="color: var(--muted); font-size: 13px;">
+    The chained-move cluster (<code>link_assign</code>) was first built by hand-wiring
+    <code>move_orig_ids</code>/<code>move_dest_ids</code> onto standalone moves, the same technique the
+    archived tests used — 4 of 6 new tests failed/errored against a real DB. Rebuilt per User's
+    redirection as a real 2-step (<code>pick_ship</code>) warehouse flow in a second class,
+    <code>TestMoveReservationMultiStep</code>: create only the pick, let Odoo's push rule generate
+    the ship. No hand-wired move chaining left in the file. Real finding: a backorder's push only
+    merges into an already-existing ship picking when both picks share a <code>stock.reference</code>
+    — kept as two separate tests, one per outcome, rather than picking just one. Fan-out
+    (1 source → 2 destinations, <code>test_link_assign_5</code>) was investigated via 2-step
+    reception + per-shelf orderpoints but confirmed empirically not to work that way (the second
+    reception leg is a push to the generic stock location, not a per-shelf pull) — dropped.
+    Mixed lot/serial tracking reservation cluster: 2 tests deferred (they edit a move after
+    <code>_action_done()</code> — ported since, see the edit-done-move-line cluster below) and
+    <code>test_multi_step_update</code> moved into <code>TestMoveReservationMultiStep</code>
+    (unrelated to tracking). A 7th test (quant-creation order reversed) was dropped on User's
+    review as a substantive duplicate of the serial-tracked reservation test.
+  </p>
+  <p style="color: var(--muted); font-size: 13px;">
+    Putaway cluster (21 archived → 13 kept, 6 dropped, 2 merges) went into
+    <code>test_warehouse_routing.py</code> (<code>TestPutaway</code>) instead of
+    <code>test_move_reservation.py</code>, per User's instruction — putaway is about where a
+    receipt routes, not reservation mechanics. Went through several rounds of simplification on
+    User's review: two kept tests initially wrote <code>result_package_id</code> directly on the
+    move line and failed against a real DB (the putaway recompute on package assignment is wired
+    through an <code>@api.onchange</code> that a plain ORM write never triggers — fixed via
+    <code>move_line_ids.action_put_in_pack(package_id=...)</code>, the same path the "Put in Pack"
+    button triggers); the smart-button test was dropped as too defensive, its check folded into
+    another kept test; the archive's own <code>_5</code> never actually set a category anywhere
+    despite its docstring — a bugged test in the original suite, faithfully carried over, fixed by
+    rewriting it to genuinely test a parent-category rule matching a product in a child category;
+    the two push-leg tests (package-type/category-filtered) were "overreacted" and merged into one
+    minimal test since the real lesson needs neither; <code>test_putaway_with_packaging</code> was
+    dropped as not actually demonstrating anything, since a receipt's move auto-assigns regardless;
+    and the "arbitrary" standalone <code>closest_location</code> test was merged into the
+    quantity-capacity test, which now also shows the parent is excluded even once every real
+    candidate is full. Naming convention clarified along the way:
+    <code>shelf_1</code>/<code>shelf_2</code> only for a genuine two-sublocation test, otherwise
+    <code>child_loc</code> — applied across the whole file. A later similarity pass found two more
+    tests in this cluster (<code>_3</code>, <code>_4</code>) with the same "category-wide" rule
+    that never set <code>category_id</code> bug as <code>_5</code> - fixed, see below.
+  </p>
+  <p style="color: var(--muted); font-size: 13px;">
+    Edit-done-move-line cluster (16 archived → 11 kept, 4 dropped, 1 merge) mirrors the
+    naming/economy of the <em>reservation-time</em> equivalent cluster
+    (<code>test_edit_reservation_follows_location_change</code> et al., which never bothered with
+    a package-alone or owner-alone test either): dropped the package-alone and owner-alone edits,
+    and a quantity-in-non-default-UoM test redundant with a richer one that also covers editing the
+    UoM itself. Real-DB finding: one archived test's own name/docstring claims zeroing a done
+    incoming line's quantity "removes" the quant - it doesn't, the row persists at quantity 0 (the
+    archive's own filtering helper masked this for display). Initially ported with a literal
+    row-absence assertion and failed against a real DB; fixed to assert the available quantity
+    directly instead, and renamed to drop the inaccurate claim. User later caught a further
+    duplicate on review: the "unavailable location" done-line test turned out nearly
+    byte-identical to its reservation-time counterpart - dropped.
+  </p>
+  <p style="color: var(--muted); font-size: 13px;">
+    Similarity pass across both new bucket files (per User's request). Found and fixed one more
+    instance of the same bug class already caught twice in putaway: two tests claiming to use a
+    "category-wide" rule (<code>test_putaway_rule_by_product_takes_precedence_over_category</code>,
+    <code>_falls_back_to_category_when_product_does_not_match</code>) that never actually set
+    <code>category_id</code> - fixed to genuinely set it, which also meant correcting the
+    smart-button assertion (now that the category match is real, the button lists both rules, not
+    just the product one). Three more near-duplicate pairs were flagged as judgment calls and left
+    open for User to decide.
+  </p>
+  <p style="color: var(--muted); font-size: 13px;">
+    Immediate-validate cluster (11 archived → 9 kept, 1 dropped, 1 merge) went into
+    <code>test_transfer_flow.py</code> (<code>TestTransferFlow</code>) instead of
+    <code>test_move_reservation.py</code> — same reasoning as putaway: this is entirely
+    <code>stock.picking.button_validate()</code> behavior (wizards, backorders, errors), matching
+    bucket 1 "Transfer flow", not bucket 2 "Moves & reservation". Unlike the putaway/edit-done-line
+    clusters, this one initially read as a deliberate coverage matrix rather than redundant
+    quant-characteristic edits, so all 11 were first kept 1:1 per User's confirmation - a later
+    review pass still found two to trim: merged the "serial receipt requires lots" error-side test
+    with the "tracked receipt without lots auto-fulfills" success-side test (same toggle, two
+    outcomes), and dropped the "nothing picked" test outright as too specific and duplicate of the
+    plain unavailable-picking error. Real-DB finding: the archive's own test stops at asserting a
+    wizard pops, never processing it to done - an initial over-extension failed against a real DB;
+    traced the real cause to <code>_pre_action_done_hook()</code>'s auto-pick-all-moves branch only
+    firing when no move has been picked yet, and fixed the assertion to match. User also asked to
+    prefer the <code>_receipt</code>/<code>_deliver</code> helpers over manual
+    <code>_create_picking()</code> control wherever a test doesn't need to inspect the return value
+    or interleave steps mid-flow - simplified several accordingly. One test renamed to match the
+    <code>test_backorder_*</code> convention already used elsewhere. Since this cluster uses
+    receipt/delivery pickings heavily, User asked to extend <code>_receipt</code>/<code>_deliver</code>
+    in <code>common.py</code> itself with the same <code>validate=True</code> flag
+    <code>_in_move</code>/<code>_out_move</code> already have, rather than keep falling back to
+    manual <code>_create_picking()</code> - updated <code>common.py</code> (329 → 343 lines) and
+    switched every remaining direct call over to the helper with <code>validate=False</code>.
+    General guidance from User for the rest of this refactor: don't hesitate to extend
+    <code>common.py</code> when a change is generic and has broad impact.
+  </p>
+  <p style="color: var(--muted); font-size: 13px;">
+    Scrap cluster (13 archived → 12 kept, 1 dropped, no merges) - <code>test_scrap_8</code> was
+    flagged before writing any code: it doesn't use <code>is_scrap</code> at all - 3 plain
+    internal-transfer pickings to the scrap location testing multi-picking cancel/partial-validate
+    resolution, already covered by the immediate-validate cluster plus the simpler
+    "destination is scrap" tests here. Dropped per User. Added <code>scrap_location</code> and two
+    new helpers, <code>_create_scrap</code>/<code>_scrap</code>, to <code>common.py</code>
+    (mirroring <code>_create_move</code>/<code>_validate_move</code>) since nearly every test builds
+    a scrap move the same way. Real-DB finding: the first quant/UoM numbers tried for the
+    UoM-aware-reservation test landed exactly on a rounding-direction ambiguity
+    (<code>4/6 = 0.6667</code> truncates to <code>0.66</code>, which <code>assertAlmostEqual</code>
+    at 2 decimal places can't absorb) that the archive's own dozen-based numbers happened to avoid by
+    luck - fixed by picking numbers that land exactly on a clean value instead of loosening the
+    assertion's precision. One test renamed: its archived docstring claimed to "modify the done
+    linked stock move" afterward when the code never actually did that. Placement moved twice on
+    review: first from <code>test_move_reservation.py</code> to <code>test_transfer_flow.py</code>
+    (several of these tests are genuinely picking-level rather than bare-move mechanics, "an upper
+    layer" built on classical move basis), then into its own new file, <code>test_scrap.py</code>
+    (<code>TestScrap</code>) - still within bucket 2's territory, not a 10th bucket. User also
+    strengthened one test on this pass:
+    <code>test_scrap_during_reserved_delivery_still_lets_picking_validate</code> now asserts the
+    delivery actually validated 9 pieces, not just that it reached <code>done</code>.
+  </p>
+  <p style="color: var(--muted); font-size: 13px;">
+    Further review pass on <code>test_scrap.py</code>: 2 more tests dropped outright
+    (<code>test_scrap_destination_can_be_a_plain_delivery</code> - "useless now since the flag is
+    on scrap move"; <code>test_scrap_unlink_on_discard_depends_on_context</code> - "not a flow or a
+    useful protection"), and <code>test_scrap_during_reserved_delivery_still_lets_picking_validate</code>
+    merged into <code>test_scrap_from_a_picking_adds_a_second_move</code> (same picking_id-linking
+    shape). Also tried, then reverted, converting the serial-warning test from a direct
+    <code>onchange()</code> call to a Form simulating the real scrap view - Form only logs a
+    warning, it doesn't hand the message back for an assertion, so direct <code>onchange()</code>
+    stays the cleaner choice when the warning's own content is what's under test. Final:
+    <strong>9 tests, 170 lines</strong> (down from 12/195).
+  </p>
+  <p style="color: var(--muted); font-size: 13px;">
+    Initial demand/quantity editing cluster (6 archived → 4 kept, 1 dropped, 1 merge). User asked,
+    before any code, to check whether <code>test_set_quantity_1</code> (writes <code>move.quantity</code>
+    directly on two bare confirmed moves, no real behavior shown) was already covered by an existing
+    test with quantity spread across two sub-locations — <code>test_reservation_updates_with_move_quantity</code>
+    (availability cluster) already shows it, far more richly - confirmed redundant, dropped. Also
+    asked to fold <code>test_initial_demand_3</code> into <code>_4</code>: despite its name, <code>_3</code>
+    edits <code>move.quantity</code>, not <code>product_uom_qty</code> - mislabeled, same bug class
+    already caught twice in the putaway cluster. On review, User asked to relocate and redesign the
+    merged <code>_3</code>+<code>_4</code> test: "Move it in picking flow and just check the delivery
+    status base on picking type (duplicate the test with all at once, or asap)." Moved from
+    <code>test_move_reservation.py</code> into <code>test_transfer_flow.py</code> (it was already
+    checking <code>delivery.state</code>, same "wrong bucket" lesson as scrap/putaway/immediate-validate),
+    split into two tests on <code>stock.picking.move_type</code> ("Shipping Policy": As soon as
+    possible vs. All at once) - confirmed via <code>stock.picking._compute_state()</code> that a
+    single <code>partially_available</code> move reads as the picking's own <code>assigned</code>
+    under ASAP but <code>confirmed</code> under All-at-once, exactly what the archive's unexplained
+    "actually, partially available" comment was gesturing at. Dropped the folded-in <code>_3</code>
+    tail that this refocus superseded. Then, same turn: "Also try to increase and decrease the move
+    initial demand to check if the delivery state is updated" - added a shrink-after-grow step to
+    both, verified empirically: shrinking below what's reserved unreserves the excess and drops to
+    <code>confirmed</code> under either policy, needing a manual re-assign same as growing (a
+    delivery never auto-reassigns itself on any demand edit, unlike a receipt). Final:
+    <strong>test_move_reservation.py 54 tests/1,097 lines, test_transfer_flow.py 11 tests/258 lines</strong>.
+  </p>
+  <p style="color: var(--muted); font-size: 13px;">
+    In-date/removal strategy cluster (3 archived → 3 kept, no drops, no merges) - checked for overlap
+    first: <code>test_edit_done_move_line_follows_lot_change</code> already covers the same mechanism
+    as <code>_2</code> (editing a done line's lot re-syncs quants), but never checks <code>in_date</code> -
+    confirmed <code>_2</code>'s unique value is the in_date-preservation angle specifically. All 3
+    kept as genuinely distinct mechanisms: plain in_date propagation across an internal move (the
+    baseline), FIFO removal strategy picking the oldest lot by default + editing the resulting done
+    line's lot afterward swapping both quants' in_dates correctly, and creating a brand-new move line
+    directly on an already-done move (not editing an existing one) also carrying the lot's own
+    in_date. New "In-date / removal strategy" section in <code>TestMoveReservation</code>. Real-DB
+    finding: <code>stock.quant._gather(..., strict=True)</code> with no <code>lot_id</code> passed
+    doesn't mean "any lot" - its domain becomes <code>lot_id in [False]</code> when strict and
+    <code>lot_id</code> is falsy, excluding every lot-tracked quant and matching only the untracked
+    pool. The scrap-cluster precedent for this call shape only worked because that product is
+    untracked; copying it for a lot-tracked product silently returned an empty recordset instead of
+    raising, so <code>quant.in_date</code> read back <code>False</code> with a misleading-looking
+    failure. Fixed by always passing the actual <code>lot_id</code> for a tracked product. Also fixed
+    in passing: <code>TestMoveReservation</code>'s class docstring still said "putaway... scrap..." -
+    stale since both moved out long ago - rewritten to match current scope. Final:
+    <strong>test_move_reservation.py 57 tests/1,185 lines</strong>.
+  </p>
+  <p style="color: var(--muted); font-size: 13px;">
+    Editing a done picking / put in pack cluster (5 archived → 4 kept, 1 dropped, no merges).
+    <code>test_change_product_type</code> dropped: its docstring claims changing a product's
+    type/tracking "will raise a user error" in several scenarios, but the test code never calls
+    <code>assertRaises</code>, and reading <code>product.template.write()</code> confirmed the
+    current model doesn't enforce this either. <code>test_edit_done_picking_1</code> - User: "keep
+    the test that adding a stock.move.line in a picking will create the stock.move (in done and not
+    done state - single test)" - extended into one test covering both halves, confirmed via
+    <code>stock.move.line.create()</code> to be genuinely different code paths (a not-done picking
+    first tries to link to an existing move for the same product; a done picking always creates a
+    fresh one, even for a product that already has one there). Moved to
+    <code>test_transfer_flow.py</code> (picking-level). <code>test_put_in_pack_1..3</code> - User:
+    "Keep 3 pack tests for now" - first real content for <code>test_packaging.py</code>. Read
+    <code>action_put_in_pack()</code>/<code>_get_lines_and_packages_to_pack()</code> first: the real
+    rule is picked-first filtering (if any candidate line is picked, only picked lines get packed
+    that call; otherwise every line with quantity &gt; 0 does) - "same package vs. different package"
+    is purely a function of one call vs. two calls, not of done-quantity state. Ported fairly
+    faithfully to the archive's own steps and verified empirically - all 3 passed on the first real-DB
+    run. Final: <strong>test_packaging.py 3 tests/92 lines, test_transfer_flow.py 12 tests/304
+    lines</strong>.
+  </p>
+  <p style="color: var(--muted); font-size: 13px;">
+    Move-line aggregation / delivery slip cluster (7 archived → 6 kept, 0 dropped, 2 merges) -
+    <code>_get_aggregated_product_quantities()</code>, the delivery-slip-printing grouping method,
+    split across two spots in the archive. Flagged first:
+    <code>test_move_line_aggregated_product_quantities</code> is a 185-line god-test (4 products, a
+    2-level backorder chain) - proposed splitting its real lessons into 2 focused tests. User: "You
+    can add them in reporting. Try to merge the cancel move in another test. also the splitted move
+    and move_line could be merged" - then "You can add a specific class by report", giving this
+    cluster its own class, <code>TestDeliverySlipReport</code>, in <code>test_reporting.py</code>
+    alongside the still-empty <code>TestReporting</code>. Folded the cancelled-move test into the
+    backorder test (simplified from the archive's <code>action_split_transfer()</code>+packaging setup
+    to a direct <code>move._action_cancel()</code>, confirmed to exercise the identical "empty move"
+    code path either way); merged the duplicate-moves and split-lines tests into one. Two real-DB
+    findings on the merged test: a plain <code>action_confirm()</code> silently merges two similar
+    moves into one (same lesson as the chained-move cluster, re-encountered) - fixed with
+    <code>merge=False</code>; and over-delivering a delivery's move just grows its existing line in
+    place instead of splitting a second one (a delivery can grow into its own quant; a receipt
+    bypasses reservation entirely and has nothing to grow into, so it always creates a new line) -
+    rewrote as a receipt. Also flagged two unrelated tests interspersed in this territory:
+    <code>test_newly_added_move_line_is_picked_if_move_is_picked</code> (different topic, left
+    deferred for <code>test_move_reservation.py</code>'s edit-a-move-line territory) and the
+    already-triaged scrap-unlink test. Final: <strong>test_reporting.py 6 tests/192 lines</strong>.
+  </p>
+  <p style="color: var(--muted); font-size: 13px;">
+    On review, User: "you can remove the cancel part since it's not possible anymore" - dropped the
+    cancelled-move half that had been folded into the backorder aggregation test, rather than re-homing
+    it; that archived test's disposition is now "dropped", not "folded in".
+  </p>
+  <p style="color: var(--muted); font-size: 13px;">
+    UoM conversion cluster (5 archived → 4 kept, 1 folded in, 0 dropped), plus one unrelated test
+    flagged and deferred (<code>test_move_line_compute_locations</code>). User: "Keep the comments of
+    test simple and don't add context or specific behavior in it. Except if it makes really sens[e]" -
+    applied throughout, terser docstrings except for the rounding test (a genuine historical-bug
+    regression guard). Folded <code>test_move_compute_uom</code> (a move's UoM follows a product
+    change) into the existing product-change test rather than a near-duplicate; kept the other 4 as
+    distinct mechanics, switching the archive's <code>uom_dozen</code> (factor 12) to this refactor's
+    standard <code>uom_pack_6</code> (factor 6). New "UoM conversion" section in
+    <code>TestMoveReservation</code>. Unrelated flaky test found and fixed along the way: a full-suite
+    run surfaced <code>test_edit_done_move_line_follows_lot_change_keeps_in_dates_correct</code> (in-date
+    cluster) failing intermittently on a live <code>fields.Datetime.now()</code> capture crossing a
+    second boundary during lot reassignment - exactly why the archive's own in-date tests used
+    <code>assertAlmostEqual(..., delta=timedelta(seconds=1))</code> instead of exact equality, a
+    precedent not registered when first ported. Fixed both occurrences; reran 2x after the fix, 0
+    failures. Final: <strong>test_move_reservation.py 61 tests/1,270 lines</strong>.
+  </p>
+  <p style="color: var(--muted); font-size: 13px;">
+    Forecast availability cluster (2 archived → 2 kept, no drops/merges) - the first of several
+    sub-clusters proposed out of the ~24 remaining leftover singletons in <code>test_move.py</code>
+    (groups A-H, smallest/cleanest first). User: "Go for A". Both kept 1:1, renamed descriptively,
+    appended as a new "Forecast availability" section in <code>TestMoveReservation</code>: a move's
+    <code>quantity</code> stays in its own UoM while <code>forecast_availability</code> stays in the
+    product's base UoM (switched the archive's <code>uom_dozen</code> to this refactor's
+    <code>uom_pack_6</code>, adjusting the expected number), and a move with no stock anywhere
+    reports the real shortfall (<code>-1</code>). User follow-up, same turn: check
+    <code>product.virtual_available</code> too (both tests), and for the second test, route the
+    move through the real <code>internal_transit_location_id</code> ("Inter-warehouse transit")
+    instead of a direct warehouse-to-warehouse hop - this also removed the need for a second
+    warehouse entirely, confirmed via a real DB run. Final:
+    <strong>test_move_reservation.py 63 tests/1,302 lines</strong>.
+  </p>
+  <p style="color: var(--muted); font-size: 13px;">
+    User-set-destination-location cluster (group B, 3 archived → 1 new test) - found the same
+    docstring-vs-code gap already caught twice in the putaway cluster: one archived test's docstring
+    claimed putaway rules were enabled, but its own code never created any. Merged the "destination
+    survives an onchange/over-receive" pair into one bare-move test; the third test's two halves were
+    first ported as a separate picking-level test, then dropped per User ("doesn't bring that much
+    value on top of the ones on stock.move"), with its "unblocks a waiting move" half re-derived into
+    the move-level test instead. Checked the real mechanism before writing anything: writing the
+    move's own <code>location_dest_id</code> skips a line already at a more specific child location
+    (the inverse's ancestor check) - and separately, the auto-reservation-retry
+    (<code>_trigger_assign()</code>) only fires from a picking's own <code>_action_done()</code>,
+    never a bare move's - confirmed with a throwaway probe test, reported back to User rather than
+    writing an assertion that would fail. Resolution: call <code>_action_assign()</code> explicitly
+    instead of assuming an automatic trigger. User then asked for the mirror-image direction too
+    (default destination updates when written to a child location) kept as a separate move rather than
+    one move walked through both transitions. Final:
+    <strong>test_move_reservation.py 64 tests/1,347 lines</strong>.
+  </p>
+  <p style="color: var(--muted); font-size: 13px;">
+    show_* computed fields cluster (group C, 2 archived → 1 new test) - read
+    <code>stock.move._compute_show_info()</code> before writing anything, since the two archived
+    tests each only exercised one combo of its formula. Merged into one test covering 3 moves:
+    incoming+lot-tracked with both lot settings True, outgoing+untracked with create-lots-only,
+    outgoing+lot-tracked with create-lots-only (this one also now asserts <code>show_lots_text</code>/
+    <code>show_lots_m2o</code>, not just <code>show_quant</code> like the archive did). Real-DB
+    finding: writing the picking type's lot settings directly needed
+    <code>with_user(self.user_stock_manager)</code> - the class's default <code>stock_user</code>
+    can't write <code>stock.picking.type</code>. New "Lot/quant display fields" section in
+    <code>TestMoveReservation</code>, right after "Basic in/out lifecycle".
+  </p>
+  <p style="color: var(--muted); font-size: 13px;">
+    Lot/serial editing on <code>stock.move.lot_ids</code> cluster (group D, 7 archived → 3 new
+    tests, 3 dropped, 1 merge pair) - first real content for <code>test_lot_serial.py</code>. Read
+    all 7 in full and proposed a plan before writing any code, confirmed with User. Kept: a
+    duplicate-serial-number warning test (also covers a location auto-correct on lot assignment);
+    a per-serial location/package-guessing test; a phantom-delivery regression guard merged with a
+    zero-then-regrow autopopulation test per User ("merge the last one in"). Dropped 3 as
+    duplicates of existing coverage (basic tracked-transfer works, already shown elsewhere; editing
+    a move's lot before validation, already shown by the reservation-time equivalent test).
+    Real-DB finding: the per-serial location-guessing test's first attempt used a second
+    locally-created location for the "wrong location" serial and failed, because
+    <code>_create_location()</code> defaults its parent to <code>self.stock_location</code> - that
+    location was genuinely reachable from the move's own source, not a fallback case at all. Fixed
+    by using <code>self.scrap_location</code> instead (a different branch of the location tree
+    entirely) - genuinely unreachable, correctly triggers the fallback. Final:
+    <strong>test_lot_serial.py 3 tests/108 lines</strong> (first real content).
+  </p>
+  <p style="color: var(--muted); font-size: 13px;">
+    <strong>Process change, same turn</strong>: User asked that the real-DB verification runs and
+    this doc-sync work happen in the background instead of blocking the foreground - verification
+    commands now run with <code>run_in_background: true</code>, and these three files are now
+    updated via a background <code>fork</code> agent rather than inline.
+  </p>
+  <p style="color: var(--muted); font-size: 13px;">
+    Picking-level misc cluster (group E, 5 archived → 2 kept, 3 dropped) went into
+    <code>test_transfer_flow.py</code>. Dropped two thin tests (a trivial
+    <code>reference</code> pass-through recompute; a one-line <code>move_type</code> default check
+    already superseded by the file's own deliberate Shipping Policy tests). Kept
+    <code>action_split_transfer()</code> coverage (genuinely novel - first time this action is
+    touched anywhere in the new suite) and a scheduled-date/backorder test. Real-DB finding: setting
+    a move's <code>date</code> inside a nested <code>move_ids: [(0, 0, {...})]</code> creation
+    command silently gets lost (ends up as "now" instead), even while still <code>draft</code> -
+    isolated via a throwaway probe to a framework-level quirk unrelated to stock's own logic (a
+    standalone move create, or one via an existing picking's FK, keeps the date fine). Fixed by
+    writing each move's <code>date</code> after creation instead of inside the nested command - new
+    lesson for future tests. User then asked to delete the third kept test entirely
+    ("we can't have cancelled move in the picking anymore"), landing on 2 kept instead of 3.
+  </p>
+  <p style="color: var(--muted); font-size: 13px;">
+    Likely-duplicates-vs.-existing-coverage cluster (group F, 2 archived → 1 new test, 1 dropped).
+    Compared both directly against their suspected duplicates before writing anything: one was a
+    straight duplicate of an already-kept putaway test (dropped outright); the other was only a
+    *partial* duplicate - its first half repeated existing UoM-conversion coverage, but its second
+    half (creating a second move line via <code>quant_id</code> only fills the demand a first,
+    shrunk line didn't already cover) was genuinely new. Re-derived a narrower test for just that
+    second half. Combined verification for both clusters: full <code>/stock</code> tag,
+    <strong>130/130 passing, 0 errors, ~13,587 queries</strong>.
+  </p>
+  <p style="color: var(--muted); font-size: 13px;">
+    Free_reservation tie-break cluster (group G, 1 archived → 1 new test, re-derived). First port
+    was a close-to-1:1 bare-move tiebreaker test and passed, but User judged it "an edge case" and
+    asked for the real primary rule instead: "it would be more interesting to check that the picking
+    with last scheduled date is unreserved." Read <code>_get_outdated_candidate_sort_key()</code>
+    before rewriting: candidates are sorted by same-picking-first, then by <em>latest scheduled date
+    first</em> — the picking scheduled furthest out gives up its reservation first, not just a
+    same-date tiebreaker. Deleted the first version, wrote a picking-level test in
+    <code>test_transfer_flow.py</code> instead: two deliveries, different scheduled dates, scrapping
+    enough stock leaves the sooner one untouched and partially unreserves the later one. Real-DB
+    finding: asserting on the <em>picking's</em> own state read <code>'assigned'</code> regardless of
+    the steal, because a single <code>partially_available</code> move reads as its picking's
+    <code>'assigned'</code> under the default ASAP policy — fixed by asserting on the move's own
+    state instead.
+  </p>
+  <p style="color: var(--muted); font-size: 13px;">
+    Multicompany orderpoint cluster (group H, 1 archived → 1 new test — the very last test in
+    <code>test_move.py</code>). Originally flagged to defer; User's answer instead redirected the
+    placement entirely: "Put it in transferflow in a new class for multi company. Don't create a new
+    company but use ones from test data in base." New class, <code>TestTransferFlowMultiCompany</code>,
+    in <code>test_transfer_flow.py</code> — not a new <code>test_multicompany.py</code> bucket file.
+    Used <code>base.test_company_template2</code>, a pre-made independent test company, instead of
+    <code>res.company.create()</code>. Real investigation via throwaway probes found the actual
+    blocker: <code>BaseCommon._callSetUp()</code> only rebinds <code>self.env</code> to the restricted
+    test user <em>per test method</em> — during <code>setUpClass</code>, <code>cls.env.user</code> is
+    still the admin test account, so granting the second company to <code>cls.env.user</code> there
+    silently grants the wrong record. Fixed by targeting <code>cls._test_user</code> explicitly. New
+    test proves an orderpoint's replenishment deadline/horizon always follow its own fixed company,
+    never whichever company is merely "active" when it's replenished — a genuine isolation guard, not
+    a tautology. Combined verification for everything in this session, full <code>/stock</code> tag:
+    <strong>134/134 passing, 0 errors, ~14,276 queries</strong>.
+  </p>
+  <p style="color: var(--muted); font-size: 13px;">
+    <strong style="color: var(--kept);">This closes out <code>test_move.py</code>'s entire triage</strong> —
+    all 170 original tests decided. Of the 6 originally left open/deferred, all have since been
+    resolved in later follow-up passes — see below.
+  </p>
+  <p style="color: var(--muted); font-size: 13px;">
+    Follow-up tidy-up: User: "Can you move the last company test in test_warehouse_routing and
+    delete test_multicompany file." Moved <code>TestTransferFlowMultiCompany</code> out of
+    <code>test_transfer_flow.py</code> into <code>test_warehouse_routing.py</code>, renamed
+    <code>TestWarehouseRoutingMultiCompany</code> (next to <code>TestWarehouseRouting</code>, whose
+    own docstring already names replenishment as its territory). Deleted the now-pointless empty
+    <code>test_multicompany.py</code> scaffold outright. No triage disposition changed, just the
+    file location. Real DB run: the four affected classes 29/29 passing, 0 errors; full
+    <code>/stock</code> tag re-run: <strong>134/134 passing, 0 errors, ~14,284 queries</strong> —
+    same total as before the move.
+  </p>
+  <p style="color: var(--muted); font-size: 13px;">
+    Follow-up on the open/deferred list: User: "I think we already have a test for picking that
+    check the state is correct back on picking type move_type, if yes drop it" (re:
+    <code>test_out_3</code>). Confirmed - the shipping-policy cluster's
+    <code>test_increasing_demand_past_available_stock_ships_partial_asap</code>/
+    <code>..._waits_all_at_once</code> already show <code>picking.state</code> tracking
+    <code>move_type</code> correctly when a move isn't fully ready, the same lesson
+    <code>test_out_3</code>'s 3-move scenario was testing. Dropped, no port - no test files changed.
+    Open/deferred count now 5, dropped count now 38.
+  </p>
+  <p style="color: var(--muted); font-size: 13px;">
+    Follow-up tidy-up #2: two more open/deferred tests resolved. <code>test_past_quantity</code> and
+    <code>test_past_availability_in_strict_mode</code> were a pair - compared directly,
+    <code>test_past_quantity</code>'s historical (<code>to_date</code>) check never actually produces
+    a different result (always 0, nothing backdated), its real content already covered elsewhere;
+    <code>test_past_availability_in_strict_mode</code> is the genuine historical-lookup test (moves
+    backdated 5-7 days, three past dates, three different results). User confirmed: drop the first,
+    keep the second renamed <code>test_availability_at_date</code>. First placed in
+    <code>test_reporting.py</code>'s <code>TestReporting</code>, then moved again per User's request
+    into <code>TestMoveReservation</code>'s Availability section. Verified at both stops: 1/1, then
+    61/61, full <code>/stock</code> tag 135/135 both times. Open/deferred count now 3, dropped count
+    now 39, kept count now 117.
+  </p>
+  <p style="color: var(--muted); font-size: 13px;">
+    Follow-up tidy-up #3: User: "I think it would be great to rename test_move_reservation by
+    something else since it tests the whole move ecosystem" - right, its scope had long outgrown
+    "reservation" specifically. Renamed to <code>test_move.py</code> (matching the archived source
+    file it supersedes). Same content, same class names at that point, only the file renamed. A
+    stray leftover probe file (<code>test_probe_trigger_assign.py</code>, from a much earlier
+    cluster, never actually registered/run) was found and deleted in the same pass. Full
+    <code>/stock</code> tag: <strong>135/135 passing, 0 errors</strong> - identical count to before
+    the rename.
+  </p>
+  <p style="color: var(--muted); font-size: 13px;">
+    Follow-up tidy-up #4: User asked to rename the classes too -
+    <code>TestMoveReservation</code> → <code>TestStockMove</code>,
+    <code>TestMoveReservationMultiStep</code> → <code>TestStockMoveMultiStep</code> (first tried the
+    plain <code>TestMove</code>, User redirected: "Use TestStockMove to avoid collision"). Test
+    method names inside both classes untouched. Full <code>/stock</code> tag:
+    <strong>135/135 passing, 0 errors</strong> - identical count again.
+  </p>
+  <p style="color: var(--muted); font-size: 13px;">
+    Follow-up tidy-up #5: continuing the open/deferred list, re-read
+    <code>test_product_tree_views</code> - a defensive ACL smoke test (a basic, no-stock-group user
+    opens <code>product.product_product_tree_view</code>/<code>product_template_tree_view</code> via
+    Form, checking no field-access error), not stock-move/picking behavior, no sign it guards a
+    historical bug. Same class of test already dropped elsewhere this refactor (the putaway
+    smart-button test, the scrap unlink-on-discard test). User confirmed: drop it, no port. Tallies
+    now stand at <strong>117 kept, 39 dropped, 2 left open/deferred</strong>
+    (<code>test_newly_added_move_line_is_picked_if_move_is_picked</code>,
+    <code>test_move_line_compute_locations</code>).
+  </p>
+  <p style="color: var(--muted); font-size: 13px;">
+    Side-quest (outside this file's own scope): the <code>test_product_tree_views</code> drop above
+    prompted User to ask whether an equivalent test already exists post-install in the
+    <code>product</code> module. Searched <code>addons/product/tests/</code> and broadly every
+    module - found nothing, so the drop still rests on its original reasoning. User then asked to add
+    the real equivalent directly in <code>product</code> instead (kanban, list, form views, one test) -
+    ended up as <code>addons/product/tests/test_common.py</code>'s
+    <code>TestProduct.test_product_user_access</code>, merged with the pre-existing
+    <code>test_any_user_can_print_product_labels</code> per User's request, after two renames.
+    Verified: full <code>product</code> module tag, <strong>206/206, 0 errors</strong> (one fewer than
+    the pre-merge baseline of 207). Not part of this file's own tallies.
+  </p>
+  <p style="color: var(--muted); font-size: 13px;">
+    Follow-up tidy-up #6: continuing the open/deferred list, <code>test_move_line_compute_locations</code>
+    read and kept. <code>stock.move.line._compute_location_id()</code>/<code>_compute_location_dest_id()</code>
+    prefer <code>line.move_id.location_id</code>/<code>_dest_id</code> first, falling back to
+    <code>line.picking_id.location_id</code>/<code>_dest_id</code> only when the line has no move at
+    all - exactly the two cases the archived test demonstrates. Distinct from the existing "Move line
+    destination location" section (that one is about surviving an edit after creation, this one is
+    about defaulting at creation time with no move yet). Ported close to 1:1 as
+    <code>test_move_line_location_defaults_from_its_move_or_its_picking</code>. 1 archived → 1 new
+    test, 0 drops/merges. <code>TestStockMove</code> now 62 tests. Real DB run: <code>TestStockMove</code>
+    62/62, full <code>/stock</code> tag <strong>136/136 passing, 0 errors</strong>. Tallies now stand
+    at <strong>118 kept, 39 dropped, 1 left open/deferred</strong>
+    (<code>test_newly_added_move_line_is_picked_if_move_is_picked</code>).
+  </p>
+  <p style="color: var(--muted); font-size: 13px;">
+    Follow-up tidy-up #7, closing out the open list:
+    <code>test_newly_added_move_line_is_picked_if_move_is_picked</code> read and kept - exercises
+    <code>stock.move.line.create()</code>'s <code>vals['picked'] = move.picked</code> default (a line
+    created with <code>move_id</code> set and no explicit <code>picked</code> key inherits the move's
+    own <code>picked</code> state), a real behavior worth protecting per User. Rather than port a new
+    test, User asked to fold it into an existing one. Folded into <code>TestStockMove</code>'s
+    <code>test_creating_a_second_line_from_quant_id_only_fills_remaining_demand</code>, which already
+    builds the same shape (a confirmed-but-not-done move, lines created directly via
+    <code>stock.move.line.create()</code>) - added <code>move.picked = True</code> mid-test plus two
+    assertions, renamed to
+    <code>test_creating_a_second_line_from_quant_id_fills_remaining_demand_and_inherits_picked</code>.
+    1 archived test folded in, <strong>0 new test methods</strong> -
+    <code>TestStockMove</code> holds at 62 tests (<code>test_move.py</code> holds at 68 total). Real DB
+    run: <code>TestStockMove</code> 62/62, full <code>/stock</code> tag <strong>0 failed, 0
+    errors</strong> (raw count drifted to 120 this run - a pre-existing, already-noted drift unrelated
+    to this change; not reconciled). Tallies now stand at <strong>118 kept, 39 dropped, 0 left
+    open/deferred</strong>. <strong style="color: var(--kept);">All 6 originally open/deferred tests
+    are resolved - <code>archive/test_move.py</code>'s triage is fully complete.</strong>
+  </p>
+  <p style="color: var(--muted); font-size: 13px;">
+    No "before" query/runtime number exists on purpose — the archived suite is reference-only and is
+    never run. The before/after comparison that matters here is structural (duplication eliminated,
+    helper reuse), not a timing diff.
+  </p>
+
+  <h2>All bucket files</h2>
+  <div class="card">
+    <table>
+      <thead><tr><th>Bucket file</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>test_move.py</td><td class="status-progress">In progress — 83 tests, 3 classes</td></tr>
+        <tr><td>test_warehouse_routing.py</td><td class="status-progress">In progress — 22 tests, 3 classes</td></tr>
+        <tr><td>test_transfer_flow.py</td><td class="status-progress">In progress — 32 tests</td></tr>
+        <tr><td>test_scrap.py</td><td class="status-progress">In progress — 9 tests</td></tr>
+        <tr><td>test_packaging.py</td><td class="status-progress">In progress — 3 tests</td></tr>
+        <tr><td>test_reporting.py</td><td class="status-progress">In progress — 6 tests</td></tr>
+        <tr><td>test_lot_serial.py</td><td class="status-progress">In progress — 6 tests</td></tr>
+        <tr><td>test_batch_wave.py</td><td class="status-empty">Empty scaffold</td></tr>
+        <tr><td>test_inventory_adjustment.py</td><td class="status-empty">Empty scaffold</td></tr>
+        <tr><td style="text-decoration: line-through; color: var(--muted);">test_multicompany.py</td><td class="status-empty">Deleted - test moved to test_warehouse_routing.py</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <footer>
+    Local file, not published — open directly from <code>stock_tests_refactor_reports/dashboard.html</code>.
+    Source data: <code>00_MASTER_SUMMARY.md</code>, <code>test_move.md</code>. Regenerate by hand when those change.
+  </footer>
+</div>
+</body>
+</html>
