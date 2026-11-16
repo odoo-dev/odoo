@@ -1,7 +1,7 @@
 from odoo import _, api, models
 from odoo.tools.misc import formatLang
 
-from odoo.addons.account_edi_ubl_cii.models.account_edi_common import FloatFmt
+from odoo.addons.account_edi_cii.models.account_edi_common import FloatFmt
 
 PDP_CUSTOMIZATION_ID = 'urn:cen.eu:en16931:2017#conformant#urn.cpro.gouv.fr:1p0:extended-ctc-fr'  # Not accepted by SuperPDP due to missing validator
 

@@ -10,7 +10,7 @@ Basic package for Cyprus that contains the chart of accounts, taxes, tax reports
     'category': 'Accounting/Localizations/Account Charts',
     'depends': [
         'account',
-        'account_edi_ubl_cii',
+        'account_edi_ubl',
     ],
     'auto_install': ['account'],
     'data': [

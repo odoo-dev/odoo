@@ -25,12 +25,12 @@ class AccountTax(models.Model):
 
     @api.depends('country_code')
     def _compute_ubl_cii_available_tax_category_codes(self):
-        # EXTENDS 'account_edi_ubl_cii'
+        # EXTENDS 'account_edi_cii'
         super()._compute_ubl_cii_available_tax_category_codes()
         self.filtered(lambda t: t.country_code == 'AE').ubl_cii_available_tax_category_codes = AE_TAX_CATEGORY_CODES
 
     @api.depends('country_code')
     def _compute_ubl_cii_available_tax_exemption_reason_codes(self):
-        # EXTENDS 'account_edi_ubl_cii'
+        # EXTENDS 'account_edi_cii'
         super()._compute_ubl_cii_available_tax_exemption_reason_codes()
         self.filtered(lambda t: t.country_code == 'AE').ubl_cii_available_tax_exemption_reason_codes = [code for code, label in AE_EXEMPTION_REASON_CODES]

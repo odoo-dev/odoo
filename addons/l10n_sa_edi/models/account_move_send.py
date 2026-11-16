@@ -85,7 +85,7 @@ class AccountMoveSend(models.AbstractModel):
             except Exception:
                 _logger.exception("Error while converting to PDF/A")
             content = self.env['ir.qweb']._render(
-                'account_edi_ubl_cii.account_invoice_pdfa_3_facturx_metadata',
+                'account_edi_cii.account_invoice_pdfa_3_facturx_metadata',
                 {
                     'title': invoice.name,
                     'date': fields.Date.context_today(self),

@@ -1,7 +1,7 @@
 from odoo import _, models
 from odoo.tools.misc import formatLang
 
-from odoo.addons.account_edi_ubl_cii.models.account_edi_cii import DEFAULT_CII_DATE_FORMAT
+from odoo.addons.account_edi_cii.models.account_edi_cii import DEFAULT_CII_DATE_FORMAT
 
 
 class L10nFRAccountEdiCii(models.AbstractModel):

@@ -2,8 +2,8 @@ from lxml import etree
 
 from odoo import models, Command, _
 from odoo.tools import html2plaintext
-from odoo.addons.account_edi_ubl_cii.models.account_edi_common import FloatFmt
-from odoo.addons.account_edi_ubl_cii.tools import Order
+from odoo.addons.account_edi_cii.models.account_edi_common import FloatFmt
+from odoo.addons.account_edi_ubl.tools import Order
 from odoo.addons.account.tools import dict_to_xml
 
 
@@ -52,11 +52,11 @@ class SaleEdiXmlUbl_Bis3(models.AbstractModel):
 
         # CEN-EN16931 layer.
         # [BR-27]-The Item net price (BT-146) shall NOT be negative.
-        self._ubl_turn_base_lines_price_unit_as_always_positive(vals)
+        self._turn_price_unit_positive(vals)
 
         # PINT layer.
         # Manage taxes for emptying.
-        vals['base_lines'] = self._ubl_turn_emptying_taxes_as_new_base_lines(
+        vals['base_lines'] = self._turn_emptying_taxes_as_new_base_lines(
             base_lines=vals['base_lines'],
             company=company,
             vals=vals,

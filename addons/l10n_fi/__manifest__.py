@@ -21,7 +21,7 @@ Set the payment reference type from the Sales Journal.
     """,
     'depends': [
         'account',
-        'account_edi_ubl_cii',
+        'account_edi_ubl',
     ],
     'auto_install': ['account'],
     'data': [

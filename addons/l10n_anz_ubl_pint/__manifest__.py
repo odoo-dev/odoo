@@ -6,7 +6,7 @@
     'description': """
     The UBL PINT e-invoicing format for Australia & New Zealand is based on the Peppol International (PINT) model for Billing.
     """,
-    'depends': ['account_edi_ubl_cii'],
+    'depends': ['account_edi_ubl'],
     'author': 'Odoo S.A.',
     'uninstall_hook': 'uninstall_hook',
     'license': 'LGPL-3'

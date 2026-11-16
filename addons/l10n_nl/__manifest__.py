@@ -9,7 +9,7 @@
     'website': 'https://www.odoo.com/documentation/latest/applications/finance/fiscal_localizations/netherlands.html',
     'depends': [
         'account',
-        'account_edi_ubl_cii',
+        'account_edi_ubl',
     ],
     'auto_install': ['account'],
     'data': [

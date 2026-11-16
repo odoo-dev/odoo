@@ -255,7 +255,7 @@ class TestAccountInvoiceImportMixin:
 
         attachments_created = attachment_capturer.records
         moves = move_capturer.records
-        # if account_edi_ubl_cii is installed and used as decoder, an attachment is linked to the imported bill with res_field = ubl_cii_xml_file
+        # if account_edi_cii is installed and used as decoder, an attachment is linked to the imported bill with res_field = ubl_cii_xml_file
         # Therefore it is not detected in the attachment_capturer (because res_field is not specified in domain used to search, see `_search` method override in ir.attachment)
         # So we need to catch it as some tests check that it has been created
         if 'ubl_cii_xml_file' in moves._fields:
@@ -1158,7 +1158,7 @@ class TestAccountIncomingSupplierInvoice(AccountTestInvoicingCommon, TestAccount
         self.assertEqual(self.env['account.move'].browse(move_id).attachment_ids, attachment)
 
     def test_import_xml_with_embedded_pdf(self):
-        self.ensure_installed('account_edi_ubl_cii')
+        self.ensure_installed('account_edi_cii')
         with file_open("account/tests/test_files/xml_with_embedded_pdf.xml", 'rb') as file:
             xml_vals = {'name': 'invoice.xml', 'raw': file.read(), 'mimetype': 'application/xml'}
 

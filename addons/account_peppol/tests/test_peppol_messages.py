@@ -191,7 +191,7 @@ class TestPeppolMessage(TestAccountMoveSendCommon, MailCommon):
         self.assertTrue('account_peppol_warning_partner' in wizard.alerts)
 
     def test_send_peppol_alerts_invalid_partner(self):
-        """If there's already account_edi_ubl_cii_configure_partner, the warning should not appear."""
+        """If there's already account_edi_ubl_configure_partner, the warning should not appear."""
         move = self.create_move(self.invalid_partner)
         move.action_post()
         self.invalid_partner.routing_identifier = False
@@ -203,7 +203,7 @@ class TestPeppolMessage(TestAccountMoveSendCommon, MailCommon):
         self.assertFalse(wizard.sending_methods and 'peppol' in wizard.sending_methods)  # by default peppol is not selected for non-valid partners
         wizard.sending_method_checkboxes = {**wizard.sending_method_checkboxes, 'peppol': {'checked': True}}
         self.assertTrue(wizard.sending_methods and 'peppol' in wizard.sending_methods)
-        self.assertTrue('account_edi_ubl_cii_configure_partner' in wizard.alerts)
+        self.assertTrue('account_edi_ubl_configure_partner' in wizard.alerts)
         self.assertFalse('account_peppol_warning_partner' in wizard.alerts)
 
     def test_resend_error_peppol_message(self):
@@ -584,7 +584,7 @@ class TestPeppolMessage(TestAccountMoveSendCommon, MailCommon):
         """When in multi/async mode, the generation of XML can fail silently (without raising).
         This needs to be reflected as an error and put the move in Peppol Error state.
         """
-        def mocked_export_document_node_constraints(self, vals):
+        def mocked_export_document_constraints(self, vals):
             return {'test_error_key': 'test_error_description'}
 
         self.valid_partner.invoice_edi_format = 'ubl_bis3'
@@ -597,8 +597,8 @@ class TestPeppolMessage(TestAccountMoveSendCommon, MailCommon):
         wizard.action_send_and_print()
         with (
             patch(
-                'odoo.addons.account_edi_ubl_cii.models.account_edi_ubl.AccountEdiUBL._export_document_node_constraints',
-                mocked_export_document_node_constraints,
+                'odoo.addons.account_edi_ubl.models.account_edi_ubl.AccountEdiUBL._export_document_constraints',
+                mocked_export_document_constraints,
             ),
             self.enter_registry_test_mode(),
         ):

@@ -10,7 +10,7 @@
     'depends': [
         'base',
         'account',
-        'account_edi_ubl_cii',
+        'account_edi_cii',
     ],
     'auto_install': ['account'],
     'data': [

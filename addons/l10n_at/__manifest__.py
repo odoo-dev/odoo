@@ -23,7 +23,7 @@ Austrian charts of accounts (Einheitskontenrahmen 2010).
     """,
     'depends': [
         'account',
-        'account_edi_ubl_cii',
+        'account_edi_ubl',
         'l10n_din5008',
     ],
     'auto_install': ['account'],

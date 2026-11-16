@@ -5,7 +5,7 @@ from lxml import etree
 from odoo import Command
 from odoo.tests import freeze_time, tagged
 
-from odoo.addons.account_edi_ubl_cii.tests.common import TestUblCiiCommon
+from odoo.addons.account_edi_cii.tests.common import TestUblCiiCommon
 
 
 @freeze_time('2025-03-05')
@@ -75,7 +75,7 @@ class TestExportPintAe(TestUblCiiCommon):
 
     @classmethod
     def _create_company(cls, **create_values):
-        # EXTENDS 'account_edi_ubl_cii': keep the AED of the AE chart instead of its EUR default.
+        # EXTENDS 'account_edi_ubl': keep the AED of the AE chart instead of its EUR default.
         create_values.setdefault('currency_id', cls.env.ref('base.AED').id)
         return super()._create_company(**create_values)
 

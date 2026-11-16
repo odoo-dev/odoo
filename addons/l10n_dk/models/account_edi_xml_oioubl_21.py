@@ -3,7 +3,7 @@ from odoo.tools import html2plaintext
 from odoo.tools.business_data import street_split
 from odoo.tools.float_utils import float_round
 
-from odoo.addons.account_edi_ubl_cii.models.account_edi_common import FloatFmt
+from odoo.addons.account_edi_cii.models.account_edi_common import FloatFmt
 
 DANISH_NATIONAL_IT_AND_TELECOM_AGENCY_ID = '320'
 
@@ -103,7 +103,7 @@ class AccountEdiXmlOIOUBL21(models.AbstractModel):
         })
 
     def _get_document_type_code_node(self, invoice, invoice_data):
-        # EXTENDS 'account_edi_ubl_cii
+        # EXTENDS 'account_edi_ubl
         # http://www.datypic.com/sc/ubl20/e-cbc_DocumentTypeCode.html
         return {
             '_text': '380' if invoice.move_type == 'out_invoice' else '381',

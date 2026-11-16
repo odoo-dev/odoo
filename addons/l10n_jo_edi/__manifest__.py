@@ -7,7 +7,7 @@
     'description': """
        Allows the users to integrate with JoFotara.
     """,
-    'depends': ['account_edi_ubl_cii', 'l10n_jo'],
+    'depends': ['account_edi_ubl', 'l10n_jo'],
     'data': [
         'views/account_move_views.xml',
         'views/report_invoice.xml',

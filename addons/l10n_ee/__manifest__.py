@@ -12,7 +12,7 @@ This is the base module to manage the accounting chart for Estonia in Odoo.
     'author': 'Odoo S.A.',
     'depends': [
         'account',
-        'account_edi_ubl_cii',
+        'account_edi_ubl',
     ],
     'auto_install': ['account'],
     'data': [

@@ -62,7 +62,7 @@ class AccountMove(models.Model):
     @api.model
     def _get_ubl_cii_builder_from_xml_tree(self, tree):
         # Deprecated
-        # Extends account_edi_ubl_cii
+        # Extends account_edi_cii
         customization_id = tree.find('{*}CustomizationID')
         if customization_id is not None and 'OIOUBL-2' in customization_id.text:
             return self.env['account.edi.xml.oioubl_21']

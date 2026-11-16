@@ -13,14 +13,14 @@ class AccountEdiXmlPint_My(models.AbstractModel):
     """
 
     def _export_invoice_filename(self, invoice):
-        # EXTENDS account_edi_ubl_cii
+        # EXTENDS account_edi_ubl
         return f"{invoice.name.replace('/', '_')}_pint_my.xml"
 
     # -------------------------------------------------------------------------
     # EXPORT: Templates
     # -------------------------------------------------------------------------
 
-    def _ubl_default_tax_category_grouping_key(self, base_line, tax_data, vals, currency):
+    def _get_tax_category_grouping_key(self, base_line, tax_data, vals, currency):
         # EXTENDS account.edi.xml.ubl_bis3
 
         # In malaysia, tax on good is paid at the manufacturer level. It is thus common to invoice without taxes,
@@ -28,7 +28,7 @@ class AccountEdiXmlPint_My(models.AbstractModel):
         if not tax_data:
             return
 
-        grouping_key = super()._ubl_default_tax_category_grouping_key(base_line, tax_data, vals, currency)
+        grouping_key = super()._get_tax_category_grouping_key(base_line, tax_data, vals, currency)
         if not grouping_key:
             return
 
@@ -107,7 +107,7 @@ class AccountEdiXmlPint_My(models.AbstractModel):
     # -------------------------------------------------------------------------
 
     def _export_invoice_constraints(self, invoice, vals):
-        # EXTENDS account_edi_ubl_cii
+        # EXTENDS account_edi_ubl
         constraints = super()._export_invoice_constraints(invoice, vals)
 
         # A tax category "Outside of tax cope" can only have an amount of 0.

@@ -1,83 +1,225 @@
-# UBL structure for CIUS HR
-# Updated to work with but doesn't entirely follow the full structure of the UBL rework
-# implemented in commit a3c6e5abe0d964f0768de68d526905ae3dccac8a
+# UBL structure for CIUS HR (HR-CIUS 2025 + HR extension 2025)
+
+from lxml import etree
 
 from odoo import fields, models
 from odoo.tools import html2plaintext
-from lxml import etree
+
+from odoo.addons.account_edi_cii.models.account_edi_common import FloatFmt
 
 
 class AccountEdiXmlUBLHR(models.AbstractModel):
-    _inherit = 'account.edi.xml.ubl_bis3'
+    """ Croatian CIUS of the European norm EN 16931 (HR-CIUS 2025) with its extension (HR-EXT 2025), in UBL 2.1.
+
+    The CustomizationID 'urn:cen.eu:en16931:2017#compliant#urn:mfin.gov.hr:cius-2025:1.0#conformant#urn:mfin.gov.hr:ext-2025:1.0'
+    declares the compliance with EN 16931 and the Croatian CIUS/extension only: it is not a Peppol BIS Billing 3.0
+    extension and the documents are exchanged through the Croatian information intermediaries (e.g. moj-eRačun), not
+    Peppol. The format is thus built on the EN 16931 rules mixed with the UBL syntax; the few EN 16931 UBL binding
+    behaviors it needs (previously inherited from Peppol BIS 3) are explicitly re-added below.
+
+    * Specification (Fiskalizacija 2.0 / eRačun, Porezna uprava):
+      https://porezna-uprava.gov.hr/hr/fiskalizacija-2-0-eracun/8003
+    * EN 16931 validation artefacts: https://github.com/ConnectingEurope/eInvoicing-EN16931
+    """
     _name = 'account.edi.xml.ubl_hr'
+    _inherit = ['account.edi.cen_en16931', 'account.edi.ubl']
     _description = "CIUS HR"
 
     def _export_invoice_filename(self, invoice):
         return f"{invoice.name.replace('/', '_')}_ubl_hr.xml"
 
+    def _get_customization_id(self, process_type='billing'):
+        # EXTENDS account.edi.ubl
+        if process_type == 'billing':
+            return 'urn:cen.eu:en16931:2017#compliant#urn:mfin.gov.hr:cius-2025:1.0#conformant#urn:mfin.gov.hr:ext-2025:1.0'
+        return super()._get_customization_id(process_type=process_type)
+
     # -------------------------------------------------------------------------
-    # EXPORT: New (dict_to_xml) helpers
+    # EXPORT: Values
     # -------------------------------------------------------------------------
 
-    def _get_document_template(self, vals):
-        ext_template = {
-            'ext:UBLExtension': {
-                'ext:ExtensionContent': {
-                    'hrextac:HRFISK20Data': {
-                        'hrextac:HRObracunPDVPoNaplati': {},
-                        'hrextac:HRTaxTotal': {
-                            'cbc:TaxAmount': {},
-                            'hrextac:HRTaxSubtotal': {
-                                'cbc:TaxableAmount': {},
-                                'cbc:TaxAmount': {},
-                                'hrextac:HRTaxCategory': {
-                                    'cbc:ID': {},
-                                    'cbc:Name': {},
-                                    'cbc:Percent': {},
-                                    'cbc:TaxExemptionReasonCode': {},
-                                    'cbc:TaxExemptionReason': {},
-                                    'hrextac:HRTaxScheme': {
-                                        'cbc:ID': {},
-                                    }
-                                }
-                            }
-                        },
-                        'hrextac:HRLegalMonetaryTotal': {
-                            'cbc:TaxExclusiveAmount': {},
-                            'hrextac:OutOfScopeOfVATAmount': {},
-                        }
-                    }
-                }
-            }
-        }
-        template = super()._get_document_template(vals)
-        # Overriding the node as it appears to be localization-specific
-        template['ext:UBLExtensions'] = ext_template
-        return template
+    def _ubl_prepare_base_lines(self, vals):
+        # EXTENDS account.edi.ubl
+        super()._ubl_prepare_base_lines(vals)
+        # The KPD classification (BT-158, listID 'CG') may be set on the invoice line itself.
+        for base_line in vals['base_lines']:
+            record = base_line.get('record')
+            if isinstance(record, models.Model) and 'l10n_hr_kpd_category_id' in record._fields:
+                base_line['cg_item_classification_code'] = record.l10n_hr_kpd_category_id
 
-    def _get_document_nsmap(self, vals):
-        nsmap = super()._get_document_nsmap(vals)
-        nsmap.update({
-            'hrextac': "urn:mfin.gov.hr:schema:xsd:HRExtensionAggregateComponents-1",
+    def _fill_nsmap_values(self, vals):
+        # EXTENDS account.edi.ubl
+        super()._fill_nsmap_values(vals)
+        vals['document_node']['_nsmap']['hrextac'] = "urn:mfin.gov.hr:schema:xsd:HRExtensionAggregateComponents-1"
+
+    def _fill_document_values(self, vals):
+        # EXTENDS account.edi.ubl
+        super()._fill_document_values(vals)
+        if self._is_document(vals, 'invoice', 'credit_note'):
+            # HRFISK20Data extension support
+            self._add_hr_extension_node(vals['document_node'])
+
+    # -------------------------------------------------------------------------
+    # EXPORT: EN 16931 UBL binding
+    # (generic EN 16931 behaviors previously inherited from Peppol BIS 3 / PINT EU)
+    # -------------------------------------------------------------------------
+
+    def _ubl_add_notes_nodes(self, vals):
+        # EXTENDS account.edi.ubl
+        # Invoice note (BT-22): the terms and conditions of the invoice.
+        super()._ubl_add_notes_nodes(vals)
+        if self._is_document(vals, 'invoice', 'credit_note'):
+            invoice = vals['invoice']
+            note = html2plaintext(invoice.narration) if invoice.narration else None
+            vals['document_node']['cbc:Note'] = {'_text': self._edi_truncate(note, 'BT-22')}
+
+    def _ubl_add_document_currency_code_node(self, vals):
+        # EXTENDS account.edi.ubl
+        # [BR-05] An Invoice shall have an Invoice currency code (BT-5).
+        self._ubl_add_document_currency_code_node_foreign_currency(vals)
+
+    def _ubl_add_tax_currency_code_node(self, vals):
+        # EXTENDS account.edi.ubl
+        # VAT accounting currency code (BT-6), only when different from the invoice currency.
+        super()._ubl_add_tax_currency_code_node(vals)
+        if vals['currency'] != vals['company_currency']:
+            vals['document_node']['cbc:TaxCurrencyCode']['_text'] = vals['company_currency'].name
+
+    def _ubl_add_buyer_reference_node(self, vals):
+        # EXTENDS account.edi.ubl
+        # Buyer reference (BT-10).
+        super()._ubl_add_buyer_reference_node(vals)
+        customer = vals['customer']
+        if customer_ref := customer.ref or customer.commercial_partner_id.ref:
+            vals['document_node']['cbc:BuyerReference']['_text'] = customer_ref
+
+    def _ubl_get_partner_address_node(self, vals, partner):
+        # EXTENDS account.edi.ubl
+        # The country subdivision code and the country name are not part of EN 16931 (UBL-CR-* warnings).
+        node = super()._ubl_get_partner_address_node(vals, partner)
+        node['cbc:CountrySubentityCode'] = None
+        node['cac:Country']['cbc:Name'] = None
+        return node
+
+    def _ubl_add_party_tax_scheme_nodes(self, vals):
+        # EXTENDS account.edi.ubl
+        # Seller VAT identifier (BT-31) / Buyer VAT identifier (BT-48).
+        super()._ubl_add_party_tax_scheme_nodes(vals)
+        if self._should_export_party_tax_scheme(vals):
+            self._ubl_add_party_tax_scheme_nodes_vat_gst(vals)
+
+    def _ubl_add_party_legal_entity_nodes(self, vals):
+        # EXTENDS account.edi.ubl
+        # Seller/Buyer legal registration name and identifier (BT-27/BT-30, BT-44/BT-47).
+        super()._ubl_add_party_legal_entity_nodes(vals)
+        self._ubl_add_party_legal_entity_nodes_iso_6523_icd(vals)
+
+    def _ubl_add_delivery_nodes(self, vals):
+        # EXTENDS account.edi.ubl
+        # DELIVERY INFORMATION (BG-13) occurs at most once.
+        super()._ubl_add_delivery_nodes(vals)
+        document_node = vals['document_node']
+        document_node['cac:Delivery'] = document_node['cac:Delivery'][0] if document_node['cac:Delivery'] else None
+
+    def _ubl_get_delivery_node_from_delivery_address(self, vals):
+        # EXTENDS account.edi.ubl
+        node = super()._ubl_get_delivery_node_from_delivery_address(vals)
+        # [BR-IC-11] Intra-community supply: the actual delivery date (BT-72) or the invoicing period is required.
+        if self._is_document(vals, 'invoice', 'credit_note') and self._is_intracommunity_supply(vals):
+            node['cbc:ActualDeliveryDate']['_text'] = vals['invoice'].invoice_date
+        # Only the Deliver to party name (BT-70) is part of EN 16931.
+        party_node = node['cac:DeliveryParty']
+        party_node.update({
+            'cbc:EndpointID': None,
+            'cac:PartyIdentification': [],
+            'cac:PostalAddress': None,
+            'cac:PartyTaxScheme': [],
+            'cac:PartyLegalEntity': [],
+            'cac:Contact': None,
         })
-        return nsmap
+        return node
 
-    def _export_invoice_constraints(self, invoice, vals):
-        # OVERRIDE 'account.edi.xml.ubl_bis3': don't apply Peppol rules
-        constraints = self.env['account.edi.xml.ubl_20']._export_invoice_constraints(invoice, vals)
-        constraints.update(
-            self._invoice_constraints_cen_en16931_ubl(invoice, vals)
-        )
-        constraints.update(
-            self._invoice_constraints_eracun_new(invoice, vals)
-        )
+    def _ubl_add_line_allowance_charge_nodes(self, vals):
+        # EXTENDS account.edi.ubl
+        # Invoice line allowances (BG-27) and charges (BG-28).
+        super()._ubl_add_line_allowance_charge_nodes(vals)
+        self._ubl_add_line_allowance_charge_nodes_for_discount(vals)
+        self._ubl_add_line_allowance_charge_nodes_for_recycling_contribution_taxes(vals)
+        self._ubl_add_line_allowance_charge_nodes_for_excise_taxes(vals)
+
+    def _ubl_get_payment_means_payee_financial_account_institution_branch_node_from_partner_bank(self, vals, partner_bank):
+        # EXTENDS account.edi.ubl
+        # Payment service provider identifier (BT-86): the BIC only (no scheme, no financial institution).
+        node = super()._ubl_get_payment_means_payee_financial_account_institution_branch_node_from_partner_bank(vals, partner_bank)
+        if node:
+            node['cbc:ID']['schemeID'] = None
+            node['cac:FinancialInstitution'] = None
+        return node
+
+    def _ubl_get_tax_subtotal_node(self, vals, tax_subtotal):
+        # EXTENDS account.edi.ubl
+        node = super()._ubl_get_tax_subtotal_node(vals, tax_subtotal)
+        # TaxSubtotal/Percent is not part of EN 16931 (UBL-CR-* warning): the rate is TaxCategory/Percent (BT-119).
+        node['cbc:Percent'] = None
+
+        # [BR-S-08]/[BR-E-08]/[BR-Z-08]/... The VAT category taxable amount (BT-116) shall equal the sum of the
+        # line net amounts plus the document level charges minus the document level allowances of that category.
+        currency = tax_subtotal['currency']
+        if currency != vals['currency']:
+            return node
+        document_node = vals['document_node']
+
+        def same_category(tax_category_node, other_tax_category_node):
+            return (
+                other_tax_category_node['cbc:ID']['_text'] == tax_category_node['cbc:ID']['_text']
+                and other_tax_category_node['cbc:Percent']['_text'] == tax_category_node['cbc:Percent']['_text']
+            )
+
+        amounts = []
+        for tax_category_node in node['cac:TaxCategory']:
+            for line_key in ('cac:InvoiceLine', 'cac:CreditNoteLine'):
+                for line_node in document_node.get(line_key, []):
+                    if any(same_category(tax_category_node, n) for n in line_node['cac:Item']['cac:ClassifiedTaxCategory']):
+                        amounts.append(line_node['cbc:LineExtensionAmount']['_text'])
+            for allowance_charge_node in document_node['cac:AllowanceCharge']:
+                if any(same_category(tax_category_node, n) for n in allowance_charge_node['cac:TaxCategory']):
+                    sign = 1 if allowance_charge_node['cbc:ChargeIndicator']['_text'] == 'true' else -1
+                    amounts.append(sign * allowance_charge_node['cbc:Amount']['_text'])
+        if amounts:
+            node['cbc:TaxableAmount']['_text'] = FloatFmt(sum(amounts), min_dp=currency.decimal_places)
+        return node
+
+    def _ubl_tax_totals_node_grouping_key(self, base_line, tax_data, vals, currency):
+        # EXTENDS account.edi.ubl
+        tax_total_keys = super()._ubl_tax_totals_node_grouping_key(base_line, tax_data, vals, currency)
+        # The Invoice total VAT amount in accounting currency (BT-111) is a TaxTotal without TaxSubtotal (UBL-SR-?).
+        if (
+            tax_total_keys['tax_subtotal_key']
+            and vals['company_currency'] != vals['currency']
+            and tax_total_keys['tax_subtotal_key']['currency'] == vals['company_currency']
+        ):
+            tax_total_keys['tax_subtotal_key'] = None
+        return tax_total_keys
+
+    # -------------------------------------------------------------------------
+    # EXPORT: Constraints
+    # -------------------------------------------------------------------------
+
+    def _export_document_constraints(self, vals):
+        # EXTENDS account.edi.cen_en16931
+        constraints = super()._export_document_constraints(vals)
+        constraints.update(self._invoice_constraints_eracun_new(vals))
         return constraints
 
-    def _invoice_constraints_eracun_new(self, invoice, vals):
+    def _invoice_constraints_eracun_new(self, vals):
         # Corresponds to Croatian eRacun format constrains
         constraints = {}
-        if vals['document_type'] in ['invoice', 'credit_note']:
-            for node in vals['document_node']['cac:PaymentMeans']:
+        if self._is_document(vals, 'invoice', 'credit_note'):
+            invoice = vals['invoice']
+            document_node = vals['document_node']
+            supplier_node = document_node['cac:AccountingSupplierParty']
+            customer_party_node = document_node['cac:AccountingCustomerParty']['cac:Party']
+            for node in document_node['cac:PaymentMeans']:
                 payee_account = node.get('cac:PayeeFinancialAccount')
                 if payee_account and any(char.isspace() for char in payee_account['cbc:ID']['_text']):
                     constraints['ubl_hr_br_1'] = self.env._("HR-BR-1: The account number must not contain whitespace characters.")
@@ -86,131 +228,130 @@ class AccountEdiXmlUBLHR(models.AbstractModel):
             constraints.update({
                 'ubl_hr_br_7_seller_email_required': (
                     self.env._("The Seller's e-mail must be provided.")
-                ) if not vals['document_node']['cac:AccountingSupplierParty']['cac:Party']['cac:Contact']['cbc:ElectronicMail'].get('_text') else None,
+                ) if not supplier_node['cac:Party']['cac:Contact']['cbc:ElectronicMail'].get('_text') else None,
                 'ubl_hr_br_10_buyer_email_required': (
                     self.env._("The Buyer's e-mail must be provided.")
-                ) if not vals['document_node']['cac:AccountingCustomerParty']['cac:Party']['cac:Contact']['cbc:ElectronicMail'].get('_text') else None,
+                ) if not customer_party_node['cac:Contact']['cbc:ElectronicMail'].get('_text') else None,
                 'ubl_hr_br_s_buyer_vat_required': (
                     self.env._("The invoice must contain the Customer's VAT identification number (BT-48).")
-                ) if any(not item['cbc:CompanyID'].get('_text') for item in vals['document_node']['cac:AccountingCustomerParty']['cac:Party']['cac:PartyTaxScheme']) else None,
+                ) if any(not item['cbc:CompanyID'].get('_text') for item in customer_party_node['cac:PartyTaxScheme']) else None,
                 'ubl_hr_br_37_operator_label_required': (
                     self.env._("The invoice must contain the Operator Label (HR-BT-4).")
-                ) if not vals['document_node']['cac:AccountingSupplierParty']['cac:SellerContact']['cbc:Name'].get('_text') else None,
+                ) if not supplier_node['cac:SellerContact']['cbc:Name'].get('_text') else None,
                 'ubl_hr_br_9_operator_oib_required': (
                     self.env._("The invoice must contain the Operator OIB (HR-BT-5).")
-                ) if not vals['document_node']['cac:AccountingSupplierParty']['cac:SellerContact']['cbc:ID'].get('_text') else None,
+                ) if not supplier_node['cac:SellerContact']['cbc:ID'].get('_text') else None,
             })
         return constraints
 
-    def _get_invoice_node(self, vals):
-        document_node = super()._get_invoice_node(vals)
-        # HRFISC20Data extension support
-        self._add_hr_extension_node(document_node)
-        return document_node
+    # -------------------------------------------------------------------------
+    # EXPORT: Header nodes
+    # -------------------------------------------------------------------------
 
     def _ubl_add_id_node(self, vals):
-        # EXTENDS account.edi.xml.ubl_bis3
+        # EXTENDS account.edi.ubl
         super()._ubl_add_id_node(vals)
-        invoice = vals.get('invoice')
-        if not invoice:
-            return
-
-        # For Croatia, ID should be the Croatian-format fiscalization number
-        vals['document_node']['cbc:ID']['_text'] = invoice.l10n_hr_fiscalization_number
-
-    def _ubl_add_customization_id_node(self, vals):
-        # EXTENDS account.edi.xml.ubl_bis3
-        super()._ubl_add_customization_id_node(vals)
-        vals['document_node']['cbc:CustomizationID']['_text'] = 'urn:cen.eu:en16931:2017#compliant#urn:mfin.gov.hr:cius-2025:1.0#conformant#urn:mfin.gov.hr:ext-2025:1.0'
+        if self._is_document(vals, 'invoice', 'credit_note'):
+            # For Croatia, ID should be the Croatian-format fiscalization number
+            vals['document_node']['cbc:ID']['_text'] = vals['invoice'].l10n_hr_fiscalization_number
 
     def _ubl_add_profile_id_node(self, vals):
-        # EXTENDS account.edi.xml.ubl_bis3
+        # EXTENDS account.edi.ubl
         super()._ubl_add_profile_id_node(vals)
-        invoice = vals.get('invoice')
-        if not invoice:
+        if not self._is_document(vals, 'invoice', 'credit_note'):
             return
 
         # HR-BR-34: The process label MUST be specified. Values P1-P12 or P99:Customer ID from Table 4 Business Process Types are used.
+        invoice = vals['invoice']
         if invoice.l10n_hr_process_type == 'P99':
             vals['document_node']['cbc:ProfileID']['_text'] = f"P99:{invoice.l10n_hr_customer_defined_process_name}"
         else:
             vals['document_node']['cbc:ProfileID']['_text'] = invoice.l10n_hr_process_type
 
     def _ubl_add_copy_indicator_node(self, vals):
-        # EXTENDS account.edi.xml.ubl_bis3
+        # EXTENDS account.edi.ubl
         super()._ubl_add_copy_indicator_node(vals)
-        invoice = vals.get('invoice')
-        if not invoice:
-            return
-
-        # HR-BT-1: Copy indicator - is the invoice the original or already sent
-        #   This doesn't appear to be currently supported in Odoo, and is set to 'false' in TR localization using a similar format
-        vals['document_node']['cbc:CopyIndicator']['_text'] = 'false'
+        if self._is_document(vals, 'invoice', 'credit_note'):
+            # HR-BT-1: Copy indicator - is the invoice the original or already sent
+            #   This doesn't appear to be currently supported in Odoo, and is set to 'false' in TR localization using a similar format
+            vals['document_node']['cbc:CopyIndicator']['_text'] = 'false'
 
     def _ubl_add_issue_date_node(self, vals):
-        # EXTENDS account.edi.xml.ubl_bis3
+        # EXTENDS account.edi.ubl
         super()._ubl_add_issue_date_node(vals)
-        invoice = vals.get('invoice')
-        if not invoice:
+        if not self._is_document(vals, 'invoice', 'credit_note'):
             return
 
         # HR-BT-2: The invoice must have an invoice issuance time.
         #   (in addition to BT-2: Date of issue)
+        invoice = vals['invoice']
         issue_date_str, issue_time_str = fields.Datetime.to_string(invoice.l10n_hr_invoice_sending_time).split()
         vals['document_node']['cbc:IssueDate']['_text'] = issue_date_str
         vals['document_node']['cbc:IssueTime']['_text'] = issue_time_str
 
     def _ubl_add_invoice_type_code_node(self, vals):
-        # EXTENDS account.edi.xml.ubl_bis3
+        # EXTENDS account.edi.ubl
         super()._ubl_add_invoice_type_code_node(vals)
-        invoice = vals.get('invoice')
-        if not invoice:
+        if not self._is_document(vals, 'invoice'):
             return
 
-        if (
-            invoice.l10n_hr_process_type in ('P4', 'P6')
-            and invoice.move_type == 'out_invoice'
-        ):
+        # [BR-04] Invoice type code (BT-3): 380 (Commercial invoice), 386 (Prepayment invoice) for advance payments.
+        invoice = vals['invoice']
+        if invoice.l10n_hr_process_type in ('P4', 'P6') and invoice.move_type == 'out_invoice':
             vals['document_node']['cbc:InvoiceTypeCode']['_text'] = '386'
+        else:
+            vals['document_node']['cbc:InvoiceTypeCode']['_text'] = 380
 
     def _ubl_add_credit_note_type_code_node(self, vals):
-        # EXTENDS account.edi.xml.ubl_bis3
+        # EXTENDS account.edi.ubl
         super()._ubl_add_credit_note_type_code_node(vals)
-        invoice = vals.get('invoice')
-        if not invoice:
+        if not self._is_document(vals, 'credit_note'):
             return
 
-        if (
-            invoice.l10n_hr_process_type in ('P4', 'P6')
-            and invoice.move_type == 'out_refund'
-        ):
-            vals['document_node']['cbc:CreditNoteTypeCode']['_text'] = '386'
+        # [BR-04] Invoice type code (BT-3): 381 (Credit note) by default.
+        invoice = vals['invoice']
+        node = vals['document_node']['cbc:CreditNoteTypeCode']
+        node['_text'] = 381
+        if invoice.l10n_hr_process_type in ('P4', 'P6') and invoice.move_type == 'out_refund':
+            node['_text'] = '386'
         elif invoice.l10n_hr_process_type == 'P9':
-            vals['document_node']['cbc:CreditNoteTypeCode']['_text'] = '381'
+            node['_text'] = '381'
         elif invoice.l10n_hr_process_type == 'P10':
-            vals['document_node']['cbc:CreditNoteTypeCode']['_text'] = '384'
+            node['_text'] = '384'
 
     def _ubl_add_billing_reference_nodes(self, vals):
-        # EXTENDS account.edi.xml.ubl_bis3
+        # EXTENDS account.edi.ubl
         super()._ubl_add_billing_reference_nodes(vals)
-        invoice = vals.get('invoice')
-        if not invoice:
+        if not self._is_document(vals, 'credit_note'):
             return
 
         # HR-BT-3: Note on previous invoice
         # HR-BR-6: Each previous invoice reference (BG-3) must have the date of issue of the previous invoice (BT-26).
-        if 'refund' in invoice.move_type and invoice.reversed_entry_id:
-            vals['document_node']['cac:BillingReference'] = [{
+        credit_note = vals['invoice']
+        nodes = vals['document_node']['cac:BillingReference']
+        if credit_note.reversed_entry_id:
+            nodes.append({
                 'cac:InvoiceDocumentReference': {
-                    'cbc:ID': {'_text': invoice.ref},
-                    'cbc:IssueDate': {'_text': invoice.reversed_entry_id.invoice_date},
+                    'cbc:ID': {'_text': credit_note.ref},
+                    'cbc:IssueDate': {'_text': credit_note.reversed_entry_id.invoice_date},
                 },
-            }]
+            })
+        else:
+            # The invoices reconciled with the credit note.
+            payment_term_lines = credit_note.line_ids.filtered(lambda line: line.account_id.account_type == 'asset_receivable')
+            for preceding_invoice in payment_term_lines.matched_credit_ids.credit_move_id.move_id:
+                if preceding_invoice.name and preceding_invoice.name != '/':
+                    nodes.append({
+                        'cac:InvoiceDocumentReference': {
+                            'cbc:ID': {'_text': preceding_invoice.name},
+                            'cbc:IssueDate': {'_text': preceding_invoice.invoice_date},
+                        },
+                    })
 
     def _add_hr_extension_node(self, document_node):
         """
         This function constructs hrextac node from existing data within the document.
-        The structure mostly follows that of 'cac:TaxTotal' node of a UBL 2.1/BIS 3 document,
+        The structure mostly follows that of 'cac:TaxTotal' node of a UBL 2.1 document,
         but requires additional data compared to the totals/subtotals nodes in UBL HR format.
         To avoid making additional queries and possible desyncs, we calculate all the data
         we need while assembling normal subtotals, then trim out the extra bits.
@@ -268,8 +409,13 @@ class AccountEdiXmlUBLHR(models.AbstractModel):
             }
         })
 
+    # -------------------------------------------------------------------------
+    # EXPORT: Party nodes
+    # -------------------------------------------------------------------------
+
     def _ubl_add_party_endpoint_id_node(self, vals):
-        # EXTENDS account.edi.ubl_bis3
+        # EXTENDS account.edi.ubl
+        # Seller/Buyer electronic address (BT-34/BT-49): the OIB, with the scheme 9934 (Croatian VAT number).
         super()._ubl_add_party_endpoint_id_node(vals)
         partner = vals['party_vals']['partner']
         commercial_partner = partner.commercial_partner_id
@@ -278,7 +424,7 @@ class AccountEdiXmlUBLHR(models.AbstractModel):
         vals['party_node']['cbc:EndpointID']['schemeID'] = '9934'
 
     def _ubl_add_party_identification_nodes(self, vals):
-        # EXTENDS account.edi.ubl_bis3
+        # EXTENDS account.edi.ubl
         super()._ubl_add_party_identification_nodes(vals)
         partner = vals['party_vals']['partner']
         commercial_partner = partner.commercial_partner_id
@@ -297,25 +443,27 @@ class AccountEdiXmlUBLHR(models.AbstractModel):
             },
         }]
 
-    def _add_invoice_accounting_supplier_party_nodes(self, document_node, vals):
-        super()._add_invoice_accounting_supplier_party_nodes(document_node, vals)
+    def _ubl_add_accounting_supplier_party_node(self, vals):
+        # EXTENDS account.edi.ubl
+        super()._ubl_add_accounting_supplier_party_node(vals)
+        if not self._is_document(vals, 'invoice', 'credit_note'):
+            return
+
         # HR-BR-37: Invoice must contain HR-BT-4: Operator code in accordance with the Fiscalization Act.
         # HR-BR-9: Invoice must contain HR-BT-5: Operator OIB in accordance with the Fiscalization Act.
         invoice = vals['invoice']
-        document_node['cac:AccountingSupplierParty'].update({
-            'cac:SellerContact': {
-                'cbc:ID': {
-                    '_text': invoice.l10n_hr_operator_oib
-                },
-                'cbc:Name': {
-                    '_text': invoice.l10n_hr_operator_name
-                }
-            }
-        })
+        vals['document_node']['cac:AccountingSupplierParty']['cac:SellerContact'] = {
+            'cbc:ID': {'_text': invoice.l10n_hr_operator_oib},
+            'cbc:Name': {'_text': invoice.l10n_hr_operator_name},
+        }
 
-    def _ubl_default_tax_category_grouping_key(self, base_line, tax_data, vals, currency):
-        # EXTENDS account.edi.xml.ubl_bis3
-        grouping_key = super()._ubl_default_tax_category_grouping_key(base_line, tax_data, vals, currency)
+    # -------------------------------------------------------------------------
+    # EXPORT: Taxes
+    # -------------------------------------------------------------------------
+
+    def _get_tax_category_grouping_key(self, base_line, tax_data, vals, currency):
+        # EXTENDS account.edi.cen_en16931
+        grouping_key = super()._get_tax_category_grouping_key(base_line, tax_data, vals, currency)
         if not grouping_key or not tax_data:
             return
 
@@ -351,29 +499,26 @@ class AccountEdiXmlUBLHR(models.AbstractModel):
         return grouping_key
 
     def _ubl_get_tax_category_node(self, vals, tax_category):
-        # EXTENDS account.edi.xml.ubl_bis3
+        # EXTENDS account.edi.ubl
         node = super()._ubl_get_tax_category_node(vals, tax_category)
         node['cbc:Name']['_text'] = tax_category['hr_category_name']
         node['hrextac:HRObracunPDVPoNaplati'] = {'_text': tax_category['invoice_legal_notes_str']}
         return node
 
     def _ubl_get_line_item_node_classified_tax_category_node(self, vals, tax_category):
-        # EXTENDS account.edi.xml.ubl_bis3
+        # EXTENDS account.edi.ubl
         node = super()._ubl_get_line_item_node_classified_tax_category_node(vals, tax_category)
         node['cbc:Name']['_text'] = tax_category['hr_category_name']
         node['cbc:TaxExemptionReasonCode']['_text'] = tax_category.get('tax_exemption_reason_code')
         node['cbc:TaxExemptionReason']['_text'] = tax_category.get('tax_exemption_reason')
         return node
 
-    def _setup_base_lines(self, vals):
-        # EXTENDS account.edi.xml.ubl_bis3
-        super()._setup_base_lines(vals)
-        for base_line in vals['base_lines']:
-            if base_line.get('record') and 'l10n_hr_kpd_category_id' in base_line['record']._fields:
-                base_line['cg_item_classification_code'] = base_line['record'].l10n_hr_kpd_category_id
+    # -------------------------------------------------------------------------
+    # IMPORT
+    # -------------------------------------------------------------------------
 
     def _import_ubl_invoice_write_collected_values(self, collected_values):
-        # EXTENDS account.edi.xml.ubl_bis3
+        # EXTENDS account.edi.ubl
         tree = collected_values['tree']
         profile_id = tree.findtext('./{*}ProfileID')
         to_write = collected_values['to_write']
@@ -391,7 +536,7 @@ class AccountEdiXmlUBLHR(models.AbstractModel):
         invoice.l10n_hr_edi_addendum_id.write({'fiscalization_number': tree.findtext('./{*}ID')})
 
     def _import_ubl_invoice_line_prepare_classified_tax_category_tax_values(self, collected_values, tax_category_tree):
-        # EXTENDS account.edi.xml.ubl_bis3
+        # EXTENDS account.edi.ubl
         tax_values = super()._import_ubl_invoice_line_prepare_classified_tax_category_tax_values(collected_values, tax_category_tree)
         if tax_values:
             tax_values['tax_exigibility'] = 'on_payment' if tax_category_tree.find('.//{*}HRObracunPDVPoNaplati') is not None else 'on_invoice'

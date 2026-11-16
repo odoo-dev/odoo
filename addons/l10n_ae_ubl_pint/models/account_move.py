@@ -139,7 +139,7 @@ class AccountMove(models.Model):
 
     def _get_import_file_type(self, file_data):
         """ Identify PINT AE files, billing and self-billing ones. """
-        # EXTENDS 'account_edi_ubl_cii'
+        # EXTENDS 'account_edi_cii'
         tree = file_data['xml_tree']
         if tree is not None and tree.findtext('{*}CustomizationID') in (
             'urn:peppol:pint:billing-1@ae-1',
@@ -150,7 +150,7 @@ class AccountMove(models.Model):
         return super()._get_import_file_type(file_data)
 
     def _get_ubl_cii_importable_models(self):
-        # EXTENDS 'account_edi_ubl_cii'
+        # EXTENDS 'account_edi_cii'
         return [*super()._get_ubl_cii_importable_models(), 'account.edi.xml.pint_ae']
 
     def _l10n_ae_pint_get_errors(self):

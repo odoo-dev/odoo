@@ -11,7 +11,7 @@ class ResCompany(models.Model):
 
     def _peppol_modules_document_types(self):
         document_types = super()._peppol_modules_document_types()
-        # The format itself lives in `account_edi_ubl_cii`, which cannot declare its document
+        # The format itself lives in `account_edi_cii`, which cannot declare its document
         # types as it does not depend on `account_peppol`. It is registered so that invoices
         # still sent in the legacy InvoiceNow format can be received; it stays out of
         # `_get_ubl_cii_formats_info` `on_peppol` as we do not offer it for sending.

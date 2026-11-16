@@ -23,7 +23,7 @@ class AccountEdiXmlPint_Sg(models.AbstractModel):
     """
 
     def _export_invoice_filename(self, invoice):
-        # OVERRIDE account_edi_ubl_cii
+        # OVERRIDE account_edi_ubl
         return f"{invoice.name.replace('/', '_')}_pint_sg.xml"
 
     # -------------------------------------------------------------------------
@@ -66,7 +66,7 @@ class AccountEdiXmlPint_Sg(models.AbstractModel):
         vals['document_node']['cbc:CustomizationID']['_text'] = 'urn:peppol:pint:billing-1@sg-1'
 
     def _export_invoice_constraints_new(self, invoice, vals):
-        # EXTENDS account_edi_ubl_cii
+        # EXTENDS account_edi_ubl
         constraints = super()._export_invoice_constraints(invoice, vals)
 
         # Tax category must be filled on the line, with a value from SG categories.

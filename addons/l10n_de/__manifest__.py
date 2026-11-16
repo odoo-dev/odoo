@@ -18,7 +18,7 @@ By default, the audit trail is enabled for GoBD compliance.
     'depends': [
         'l10n_din5008',
         'account',
-        'account_edi_ubl_cii',
+        'account_edi_ubl',
     ],
     'auto_install': ['account'],
     'data': [

@@ -16,7 +16,7 @@ It also includes the invoice OCR payment reference handling.
     """,
     'depends': [
         'account',
-        'account_edi_ubl_cii',
+        'account_edi_ubl',
     ],
     'auto_install': ['account'],
     'data': [

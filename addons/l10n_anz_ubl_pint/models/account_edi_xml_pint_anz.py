@@ -6,35 +6,59 @@ ANZ_TAX_CATEGORIES = {'S', 'E', 'Z', 'G', 'O'}
 
 
 class AccountEdiXmlPint_Anz(models.AbstractModel):
-    _name = 'account.edi.xml.pint_anz'
-    _inherit = ["account.edi.xml.ubl_bis3"]
-    _description = "Australia & New Zealand implementation of Peppol International (PINT) model for Billing"
-    """
-    Pint is a standard for International Billing from Peppol. It is based on Peppol BIS Billing 3.
-    It serves as a base for per-country specialization, while keeping a standard core for data being used
-    across countries. This is not meant to be used directly, but rather to be extended by country-specific modules.
+    """ Australia & New Zealand implementation of Peppol International (PINT) model for Billing (PINT A-NZ).
 
-    The ANZ PINT format is the Australia & New Zealand implementation of PINT.
+    PINT A-NZ is a specialization of the Peppol International model (PINT), not a CIUS of the European norm EN 16931
+    nor of Peppol BIS Billing 3.0 (its CustomizationID is 'urn:peppol:pint:billing-1@aunz-1'): it inherits the generic
+    PINT layer ('account.edi.ubl_pint') and only adds the PINT A-NZ rules (aligned-ibrp-*-aunz, aligned-ibr-*-aunz).
 
     * PINT Official documentation: https://docs.peppol.eu/poac/pint/pint/
-    * PINT ANZ Official documentation: https://docs.peppol.eu/poac/aunz/pint-aunz/
+    * PINT A-NZ Official documentation: https://docs.peppol.eu/poac/aunz/pint-aunz/
     """
+    _name = 'account.edi.xml.pint_anz'
+    _inherit = ["account.edi.ubl_pint"]
+    _description = "Australia & New Zealand implementation of Peppol International (PINT) model for Billing"
 
     def _export_invoice_filename(self, invoice):
-        # EXTENDS account_edi_ubl_cii
+        # EXTENDS account_edi_ubl
         return f"{invoice.name.replace('/', '_')}_pint_anz.xml"
 
     def _get_customization_id(self, process_type='billing'):
+        # EXTENDS account.edi.ubl_pint
         if process_type == 'billing':
             return 'urn:peppol:pint:billing-1@aunz-1'
+        return None
+
+    # -------------------------------------------------------------------------
+    # EXPORT: Values
+    # -------------------------------------------------------------------------
+
+    def _export_get_document_type(self, invoice):
+        # EXTENDS account.edi.common
+        # PINT A-NZ only knows invoices and credit notes: a debit note is an invoice.
+        document_type = super()._export_get_document_type(invoice)
+        if document_type == 'debit_note':
+            return 'invoice'
+        return document_type
+
+    def _init_invoice_export_values(self, invoice):
+        # EXTENDS account.edi.ubl
+        vals = super()._init_invoice_export_values(invoice)
+        # [ibr-027] The Item net price (ibt-146) MUST NOT be negative.
+        self._turn_price_unit_positive(vals)
+        return vals
 
     # -------------------------------------------------------------------------
     # EXPORT: Templates
     # -------------------------------------------------------------------------
 
-    def _ubl_default_tax_category_grouping_key(self, base_line, tax_data, vals, currency):
-        # EXTENDS account.edi.xml.ubl_bis3
-        grouping_key = super()._ubl_default_tax_category_grouping_key(base_line, tax_data, vals, currency)
+    def _get_tax_category_grouping_key(self, base_line, tax_data, vals, currency):
+        # EXTENDS account.edi.common
+        # The cash rounding is reported as the Rounding amount (ibt-114), not as a tax breakdown.
+        if self._is_cash_rounding_base_line(base_line):
+            return None
+
+        grouping_key = super()._get_tax_category_grouping_key(base_line, tax_data, vals, currency)
         if not grouping_key:
             return
 
@@ -55,15 +79,16 @@ class AccountEdiXmlPint_Anz(models.AbstractModel):
 
         return grouping_key
 
-    def _add_invoice_header_nodes(self, document_node, vals):
-        # EXTENDS account.edi.xml.ubl_bis3
-        super()._add_invoice_header_nodes(document_node, vals)
-
-        # see https://docs.peppol.eu/poac/aunz/pint-aunz/bis/#_identifying_the_a_nz_billing_specialisation
-        document_node['cbc:ProfileID'] = {'_text': 'urn:peppol:bis:billing'}
+    def _ubl_add_line_allowance_charge_nodes(self, vals):
+        # EXTENDS account.edi.ubl
+        # Invoice line allowances (ibg-27) and charges (ibg-28).
+        super()._ubl_add_line_allowance_charge_nodes(vals)
+        self._ubl_add_line_allowance_charge_nodes_for_discount(vals)
+        self._ubl_add_line_allowance_charge_nodes_for_recycling_contribution_taxes(vals)
+        self._ubl_add_line_allowance_charge_nodes_for_excise_taxes(vals)
 
     def _ubl_add_party_legal_entity_nodes(self, vals):
-        # EXTENDS
+        # EXTENDS account.edi.ubl_pint
         super()._ubl_add_party_legal_entity_nodes(vals)
         partner = vals['party_vals']['partner']
         commercial_partner = partner.commercial_partner_id
@@ -88,21 +113,40 @@ class AccountEdiXmlPint_Anz(models.AbstractModel):
                         },
                     }]
 
-    def _ubl_add_customization_id_node(self, vals):
-        # EXTENDS account.edi.xml.ubl_bis3
-        super()._ubl_add_customization_id_node(vals)
-        vals['document_node']['cbc:CustomizationID']['_text'] = 'urn:peppol:pint:billing-1@aunz-1'
-
     # -------------------------------------------------------------------------
     # EXPORT: Constraints
     # -------------------------------------------------------------------------
 
-    def _export_invoice_constraints(self, invoice, vals):
-        # EXTENDS account_edi_ubl_cii
-        constraints = super()._export_invoice_constraints(invoice, vals)
+    def _export_document_constraints(self, vals):
+        # EXTENDS account.edi.ubl_pint
+        constraints = super()._export_document_constraints(vals)
+        if not self._is_document(vals, 'invoice', 'credit_note'):
+            return constraints
 
-        # Tax category must be filled on the line, with a value from SG categories.
-        tax_total_node = vals['document_node']['cac:TaxTotal'][0]
+        document_node = vals['document_node']
+        line_nodes = document_node.get('cac:InvoiceLine') or document_node.get('cac:CreditNoteLine') or []
+
+        # Each invoice line has one and only one line tax information (ibg-30).
+        if any(len(line_node['cac:Item']['cac:ClassifiedTaxCategory']) != 1 for line_node in line_nodes):
+            constraints['anz_tax_line'] = _("Each invoice line shall have one and only one tax.")
+
+        # [aligned-ibrp-o-11-aunz]..[aligned-ibrp-o-14-aunz] An invoice containing the tax category "Not subject to
+        # tax" shall not contain any other tax category.
+        line_tax_category_codes = {
+            tax_category_node['cbc:ID']['_text']
+            for line_node in line_nodes
+            for tax_category_node in line_node['cac:Item']['cac:ClassifiedTaxCategory']
+        }
+        if 'O' in line_tax_category_codes and line_tax_category_codes != {'O'}:
+            constraints['anz_tax_category_o'] = _("Taxes of category 'Service outside scope of tax' shall not be mixed with tax from other categories. You should split your invoice in two")
+
+        # [ibr-057] Each Deliver to address (ibg-15) MUST contain a Deliver to country code (ibt-080).
+        delivery_node = document_node['cac:Delivery']
+        if delivery_node and not delivery_node['cac:DeliveryLocation']['cac:Address']['cac:Country']['cbc:IdentificationCode']['_text']:
+            constraints['anz_delivery_address'] = self._check_required_fields(vals['delivery'], 'country_id')
+
+        # Tax category must be filled on the line, with a value from A-NZ categories.
+        tax_total_node = document_node['cac:TaxTotal'][0]
         for tax_subtotal_node in tax_total_node['cac:TaxSubtotal']:
             if any(tax_category_node['cbc:ID']['_text'] not in ANZ_TAX_CATEGORIES for tax_category_node in tax_subtotal_node['cac:TaxCategory']):
                 constraints['anz_vat_category_required'] = _("You must set a tax category on each taxes of the invoice.\nValid categories are: S, E, Z, G, O")

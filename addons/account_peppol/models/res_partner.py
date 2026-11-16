@@ -69,7 +69,7 @@ class ResPartner(models.Model):
 
     @api.depends('routing_scheme')
     def _compute_available_routing_schemes(self):
-        # EXTENDS 'account_edi_ubl_cii'
+        # EXTENDS 'account_edi_cii'
         super()._compute_available_routing_schemes()
         is_demo = self.env.company._get_peppol_edi_mode() == 'demo'
         for partner in self:

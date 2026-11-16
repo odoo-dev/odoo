@@ -23,7 +23,7 @@ Notes:
     'author': 'Odoo S.A., ADN, ACSONE SA/NV',
     'depends': [
         'account',
-        'account_edi_ubl_cii',
+        'account_edi_ubl',
     ],
     'auto_install': ['account'],
     'data': [

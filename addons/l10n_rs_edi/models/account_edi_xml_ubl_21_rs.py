@@ -11,7 +11,7 @@ class AccountEdiXmlUBL21RS(models.AbstractModel):
         return 'urn:cen.eu:en16931:2017#compliant#urn:mfin.gov.rs:srbdt:2022#conformant#urn:mfin.gov.rs:srbdtext:2022'
 
     def _add_invoice_header_nodes(self, document_node, vals):
-        # EXTENDS 'account_edi_ubl_cii'
+        # EXTENDS 'account_edi_ubl'
         super()._add_invoice_header_nodes(document_node, vals)
         invoice = vals['invoice']
 
@@ -34,7 +34,7 @@ class AccountEdiXmlUBL21RS(models.AbstractModel):
         ]
 
     def _get_party_node(self, vals):
-        # EXTENDS 'account_edi_ubl_cii'
+        # EXTENDS 'account_edi_ubl'
         party_node = super()._get_party_node(vals)
         partner = vals['partner']
 
@@ -60,7 +60,7 @@ class AccountEdiXmlUBL21RS(models.AbstractModel):
         return party_node
 
     def _add_document_line_amount_nodes(self, line_node, vals):
-        # EXTENDS 'account_edi_ubl_cii'
+        # EXTENDS 'account_edi_ubl'
         super()._add_document_line_amount_nodes(line_node, vals)
         # SEF uses H87 as unit code instead of C62
         quantity_node = line_node[self._get_tags_for_document_type(vals)['line_quantity']]

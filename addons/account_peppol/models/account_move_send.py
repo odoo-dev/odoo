@@ -99,7 +99,7 @@ class AccountMoveSend(models.AbstractModel):
         # Check for invalid peppol partners.
         peppol_moves = moves.filtered(lambda m: 'peppol' in moves_data[m]['sending_methods'])
         invalid_partners = filter_peppol_state(peppol_moves, ['not_valid_format'])
-        if invalid_partners and not 'account_edi_ubl_cii_configure_partner' in alerts:
+        if invalid_partners and not 'account_edi_ubl_configure_partner' in alerts:
             alerts['account_peppol_warning_partner'] = {
                 'message': _("Customer is on Peppol but did not enable receiving documents."),
                 'action_text': _("View Partner(s)"),
@@ -118,7 +118,7 @@ class AccountMoveSend(models.AbstractModel):
             any_moves_not_sent_peppol,
             not filter_peppol_state(moves, ['not_valid', 'not_verified']),
         )):
-            alerts.pop('account_edi_ubl_cii_configure_company', False)
+            alerts.pop('account_edi_ubl_configure_company', False)
             alerts['account_peppol_what_is_peppol'] = {
                 'message': self._get_peppol_what_is_peppol_message(always_on_companies, moves, moves_not_sent_peppol),
                 **what_is_peppol_alert,

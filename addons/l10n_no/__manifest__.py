@@ -13,7 +13,7 @@ Updated for Odoo 9 by Bringsvor Consulting AS <www.bringsvor.com>
 """,
     'depends': [
         'account',
-        'account_edi_ubl_cii',
+        'account_edi_ubl',
     ],
     'auto_install': ['account'],
     'data': [

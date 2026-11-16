@@ -21,7 +21,7 @@ class AccountEdiXmlPint_Jp(models.AbstractModel):
     # -------------------------------------------------------------------------
 
     def _export_invoice_filename(self, invoice):
-        # EXTENDS account_edi_ubl_cii
+        # EXTENDS account_edi_ubl
         return f"{invoice.name.replace('/', '_')}_pint_jp.xml"
 
     def _get_customization_id(self, process_type='billing'):
@@ -83,9 +83,9 @@ class AccountEdiXmlPint_Jp(models.AbstractModel):
             for node in nodes:
                 node['cbc:CompanyID'] = None
 
-    def _export_document_node_constraints(self, vals):
+    def _export_document_constraints(self, vals):
         # EXTENDS account.edi.ubl_bis3
-        constraints = super()._export_document_node_constraints(vals)
+        constraints = super()._export_document_constraints(vals)
         constraints.pop('cen_en16931_supplier_vat_country_code', None)
         constraints.pop('cen_en16931_customer_vat_country_code', None)
         return constraints

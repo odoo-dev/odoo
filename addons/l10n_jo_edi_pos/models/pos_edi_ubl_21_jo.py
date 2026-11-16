@@ -5,7 +5,7 @@ from types import SimpleNamespace
 from odoo import models
 from odoo.tools import float_compare, float_round, float_is_zero
 from odoo.addons.l10n_jo_edi.models.account_edi_xml_ubl_21_jo import JO_MAX_DP
-from odoo.addons.account_edi_ubl_cii.models.account_edi_common import FloatFmt
+from odoo.addons.account_edi_cii.models.account_edi_common import FloatFmt
 
 
 class HashableNamespace(SimpleNamespace):
