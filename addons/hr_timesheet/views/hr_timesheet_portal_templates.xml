@@ -32,8 +32,8 @@
                     <t t-foreach="grouped_timesheets" t-as="timesheets_with_hours">
                         <t t-set="timesheets" t-value="timesheets_with_hours[0]"/>
                         <t t-set="hours_spent" t-value="timesheets_with_hours[1]"/>
-                        <tbody style="font-size: 0.8rem">
-                            <tr t-if="not groupby =='none'" class="table-light">
+                        <tbody t-if="groupby != 'none'" style="font-size: 0.8rem">
+                            <tr class="table-light">
                                 <t t-if="groupby == 'project_id'">
                                     <th colspan="5">
                                         <span t-field="timesheets[0].project_id.name"/>
@@ -95,7 +95,7 @@
     </template>
 
     <template id="portal_timesheet_table" name="Portal Timesheet Table">
-        <table class="o_portal_my_doc_table table table-sm table-striped">
+        <table class="o_portal_my_doc_table table align-middle">
             <thead>
               <tr>
                 <th>Date</th>

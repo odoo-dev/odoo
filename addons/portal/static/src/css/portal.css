@@ -81,3 +81,51 @@
 .o_portal_my_details .o_portal_address > div {
     display: grid;
 }
+
+/* Lists: the surrounding block draws the outer border */
+.o_portal_my_doc_table > tbody:last-child > tr:last-child > * {
+    border-bottom-width: 0;
+}
+
+@media (max-width: 767.98px) {
+    /* Rows wrap on two lines: the first cell, then the others */
+    .o_portal_my_doc_table,
+    .o_portal_my_doc_table > tbody {
+        display: block;
+    }
+    .o_portal_my_doc_table > thead {
+        display: none;
+    }
+    .o_portal_my_doc_table > tbody > tr {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        border-bottom: var(--border-width) solid var(--table-border-color);
+    }
+    .o_portal_my_doc_table > tbody:last-child > tr:last-child {
+        border-bottom-width: 0;
+    }
+    .o_portal_my_doc_table > tbody > tr > * {
+        border-bottom-width: 0;
+    }
+    /* Cells are no longer table cells, so portal.scss's max-width applies */
+    .o_portal_wrap .o_portal_my_doc_table > tbody > tr > * {
+        max-width: none;
+    }
+    .o_portal_my_doc_table > tbody > tr:not(.table-light) > :first-child {
+        flex-basis: 100%;
+        padding-bottom: 0;
+    }
+    .o_portal_my_doc_table > tbody > tr > :last-child {
+        margin-inline-start: auto;
+    }
+    /* Group rows stay on one line, the label gives way */
+    .o_portal_my_doc_table > tbody > tr.table-light {
+        flex-wrap: nowrap;
+        background-color: var(--table-bg);
+    }
+    .o_portal_my_doc_table > tbody > tr.table-light > :first-child {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+}
