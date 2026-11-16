@@ -6,10 +6,12 @@
             <span t-attf-class="o_notification_bar bg-{{this.props.type}} rounded-start"/>
             <div class="d-flex align-items-start w-100 py-2 ps-2 border border-start-0 rounded-end text-break">
                 <div class="o_notification_body d-flex flex-wrap flex-md-nowrap flex-grow-1 justify-content-between justify-content-md-normal">
-                    <span class="o_notification_content o_line_clamp w-auto w-md-100 align-self-start" t-att-title="this.props.message">
+                    <span class="o_notification_content o_line_clamp w-auto w-md-100 align-self-start">
                         <!-- TODO-IPB: at the end, title has to be removed, but the change is too important to do all in once now -->
                         <t t-if="this.props.title"><t t-out="this.props.title"/>. </t>
-                        <t t-out="this.props.message"/>
+                        <span class="text-truncate" data-tooltip-position="bottom" t-ref="this.notificationMessage">
+                            <t t-out="this.props.message"/>
+                        </span>
                     </span>
                     <div t-if="this.props.buttons.length" class="o_notification_buttons align-self-start justify-content-end d-flex gap-3 flex-wrap flex-md-nowrap mw-100 w-md-auto ms-auto ms-md-2">
                         <button t-foreach="this.props.buttons" t-as="button" type="button" t-key="button_index" t-attf-class="btn {{ button.primary ? 'btn-primary btn-sm' : 'btn-link p-0 border-0'}} text-nowrap p-0 border-0" t-on-click="button.onClick">
