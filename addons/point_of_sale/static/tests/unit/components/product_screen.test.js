@@ -85,7 +85,7 @@ test("full slots remain available in POS", async () => {
         (s) => s.time === "2019-03-12 12:00:00"
     );
     expect(fullSlot.isFull).toBe(true);
-    expect(fullSlots[0].textContent.trim()).toBe("12:00");
+    expect(fullSlots[0].textContent.trim()).toBe("12:00pm");
 });
 
 test("long press on a product opens the product info popup", async () => {

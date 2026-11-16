@@ -20,9 +20,9 @@ test("should allow changing datetime fields from the sidebar", async () => {
         </time>`
     );
     await contains(":iframe time").click();
-    expect("[data-action-id=fieldDateTime] input").toHaveValue("07/30/2025 09:54");
+    expect("[data-action-id=fieldDateTime] input").toHaveValue("07/30/2025 09:54 AM");
     await contains("[data-action-id=fieldDateTime] input").edit("09/22/2042 01:23:45");
-    expect(":iframe time").toHaveText("09/22/2042 01:23:00");
+    expect(":iframe time").toHaveText("09/22/2042 01:23:00 AM");
 });
 
 test("should allow changing date fields from the sidebar", async () => {

@@ -1462,7 +1462,7 @@ test(`create event with timezone in week mode European locale`, async () => {
         `,
     });
     await selectTimeRange("2016-12-13 08:00:00", "2016-12-13 10:00:00");
-    expect(`.o_calendar_event_mirror`).toHaveText("08:00 - 10:00");
+    expect(`.o_calendar_event_mirror`).toHaveText("08:00 AM - 10:00 AM");
 
     await contains(`.o-calendar-quick-create--input`).edit("new event", { confirm: false });
     await contains(`.o-calendar-quick-create--create-btn`).click();
@@ -1489,7 +1489,7 @@ test(`create multi day event in week mode`, async () => {
         arch: `<calendar date_start="start" date_stop="stop" mode="week"/>`,
     });
     await selectTimeRange("2016-12-13 11:00:00", "2016-12-14 16:00:00");
-    expect(`.o_calendar_event_mirror`).toHaveText("11:00 - 16:00");
+    expect(`.o_calendar_event_mirror`).toHaveText("11:00 AM - 04:00 PM");
 });
 
 test(`default week start (US)`, async () => {
@@ -1574,7 +1574,9 @@ test(`render popover`, async () => {
     expect(`.o_calendar_popover .o_calendar_popover_delete`).toHaveCount(1);
     expect(`.o_calendar_popover .o_card_popover_close`).toHaveCount(1);
     expect(`.o_calendar_popover .o_card_record > div:eq(0)`).toHaveText("December 12, 2016");
-    expect(`.o_calendar_popover .o_card_record > div:eq(1)`).toHaveText("11:55 - 15:55\n(4 hours)");
+    expect(`.o_calendar_popover .o_card_record > div:eq(1)`).toHaveText(
+        "11:55 AM - 03:55 PM\n(4 hours)"
+    );
     expect(`.o_calendar_popover .o_card_record > div:eq(2) .o_field_char`).toHaveCount(1);
     expect(`.o_calendar_popover .o_card_record > div:eq(2) .o_field_char`).toHaveText("event 2");
     expect(`.o_calendar_popover .o_card_record > div:eq(2) span.fw-bold`).toHaveText("Custom Name");
@@ -2464,7 +2466,7 @@ test(`show start time of single day event`, async () => {
         arch: `<calendar date_start="start" date_stop="stop" all_day="is_all_day" mode="month"/>`,
     });
     expect(`.o_event[data-event-id="2"] .o_calendar_event_main .o_calendar_event_time`).toHaveText(
-        "06:55"
+        "06:55 AM"
     );
     expect(`.o_event[data-event-id="4"] .o_calendar_event_main .o_calendar_event_time`).toHaveCount(
         0
@@ -3610,7 +3612,7 @@ test(`events starting at midnight on desktop`, async () => {
         confirm: false,
     });
     await contains(`.o-calendar-quick-create--create-btn`).click();
-    expect(`.o_event[data-event-id="8"]`).toHaveText("00:00\nnew event in quick create");
+    expect(`.o_event[data-event-id="8"]`).toHaveText("12:00 AM\nnew event in quick create");
 });
 
 test.tags("mobile");
@@ -3898,22 +3900,22 @@ test(`timezone does not affect drag and drop on desktop`, async () => {
     });
 
     await clickEvent(1);
-    expect(`.o_event[data-event-id="1"]`).toHaveText("01:00\nevent 1");
+    expect(`.o_event[data-event-id="1"]`).toHaveText("01:00 AM\nevent 1");
     expect(`.o_field_widget[name="start"]`).toHaveText("Dec 10, 1:00 AM");
 
     await clickEvent(6);
-    expect(`.o_event[data-event-id="6"]`).toHaveText("09:00\nevent 6");
+    expect(`.o_event[data-event-id="6"]`).toHaveText("09:00 AM\nevent 6");
     expect(`.o_field_widget[name="start"]`).toHaveText("Dec 17, 9:00 AM");
 
     await closeCwPopOver();
     await moveEventToDate(6, "2016-11-27");
     await clickEvent(6);
-    expect(`.o_event[data-event-id="6"]`).toHaveText("09:00\nevent 6");
+    expect(`.o_event[data-event-id="6"]`).toHaveText("09:00 AM\nevent 6");
     expect(`.o_field_widget[name="start"]`).toHaveText("Nov 27, 9:00 AM");
     expect.verifySteps(["write"]);
 
     await clickEvent(1);
-    expect(`.o_event[data-event-id="1"]`).toHaveText("01:00\nevent 1");
+    expect(`.o_event[data-event-id="1"]`).toHaveText("01:00 AM\nevent 1");
     expect(`.o_field_widget[name="start"]`).toHaveText("Dec 10, 1:00 AM");
 });
 
@@ -4057,7 +4059,7 @@ test(`drag and drop on month mode`, async () => {
 
     await moveEventToDate(8, "2016-12-19");
     await clickEvent(8);
-    expect(`.o_card_record > div:eq(1)`).toHaveText("07:00 - 19:00\n(12 hours)");
+    expect(`.o_card_record > div:eq(1)`).toHaveText("07:00 AM - 07:00 PM\n(12 hours)");
 });
 
 test(`drag and drop on month mode with all_day mapping`, async () => {
@@ -4095,7 +4097,7 @@ test(`drag and drop on month mode with all_day mapping`, async () => {
     await contains(`.modal .o_form_button_save`).click();
     await moveEventToDate(8, "2016-12-19");
     await clickEvent(8);
-    expect(`.o_card_record > div:eq(1)`).toHaveText("07:00 - 19:00\n(12 hours)");
+    expect(`.o_card_record > div:eq(1)`).toHaveText("07:00 AM - 07:00 PM\n(12 hours)");
 });
 
 test(`form_view_id attribute works (for creating events)`, async () => {
@@ -6340,7 +6342,7 @@ test(`Hour format mirror event`, async () => {
 
     await selectTimeRange("2016-12-13 11:00:00", "2016-12-13 16:30:00");
     // Verify highlighted event
-    expect(`.o_calendar_event_mirror`).toHaveText("11:00 - 16:30");
+    expect(`.o_calendar_event_mirror`).toHaveText("11:00 AM - 04:30 PM");
     await contains(`.o-calendar-quick-create--input`).edit("mirror_event", { confirm: false });
     await contains(`.o-calendar-quick-create--create-btn`).click();
 
@@ -6350,7 +6352,7 @@ test(`Hour format mirror event`, async () => {
         "mirror_event"
     );
     expect(`.o_event[data-event-id="8"] .o_calendar_event_main .o_calendar_event_time`).toHaveText(
-        "11:00"
+        "11:00 AM"
     );
 });
 

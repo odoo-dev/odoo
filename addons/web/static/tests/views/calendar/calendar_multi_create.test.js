@@ -465,7 +465,7 @@ test("multi_create: basic creation (datetime field)", async () => {
     await expect(".o_popover").toHaveCount(1);
     await expect(".o_popover .o_popover_body div:eq(1) [data-icon='schedule']").toHaveCount(1);
     await expect(".o_popover .o_popover_body div:eq(1)").toHaveText(
-        "08:00 - 11:30\n(3 hours, 30 minutes)"
+        "08:00 AM - 11:30 AM\n(3 hours, 30 minutes)"
     );
     await expect(".o_popover .o_field_widget[name='name']").toHaveText("Time off");
     await expect(".o_popover .o_field_widget[name='type']").toHaveText("Event Type 3");
@@ -477,7 +477,7 @@ test("multi_create: basic creation (datetime field)", async () => {
     await expect(".o_popover").toHaveCount(1);
     await expect(".o_popover .o_popover_body div:eq(1) [data-icon='schedule']").toHaveCount(1);
     await expect(".o_popover .o_popover_body div:eq(1)").toHaveText(
-        "08:00 - 11:30\n(3 hours, 30 minutes)"
+        "08:00 AM - 11:30 AM\n(3 hours, 30 minutes)"
     );
     await expect(".o_popover .o_field_widget[name='user_id']").toHaveText("user 3");
 
@@ -553,7 +553,7 @@ test("multi_create: input validation (datetime field)", async () => {
     // Valid input
     await click(".o_time_picker_input:eq(1)");
     await animationFrame();
-    await click(".o_time_picker_option:contains(12:00)");
+    await click(".o_time_picker_option:contains(12:00pm)");
     await animationFrame();
 
     await multiCreatePopoverClickAddButton();
@@ -627,8 +627,8 @@ test("multi_create: use state to keep values of inputs", async () => {
 
     await multiCreateClickAddButton();
 
-    expect(".o_time_picker_input:eq(0)").toHaveValue("1:30");
-    expect(".o_time_picker_input:eq(1)").toHaveValue("8:00");
+    expect(".o_time_picker_input:eq(0)").toHaveValue("1:30am");
+    expect(".o_time_picker_input:eq(1)").toHaveValue("8:00am");
     expect(".o_form_view [name='name'] input").toHaveValue("Test state");
     expect(".o_form_view [name='type'] input").toHaveValue("Event Type 3");
     expect(queryAllTexts(".o_form_view [name='user_ids'] .o_tag")).toEqual(["user 1", "user 3"]);

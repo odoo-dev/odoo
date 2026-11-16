@@ -82,7 +82,7 @@ test("show correspondent local time in DM header when timezones differ", async (
     });
     await start();
     await openDiscuss(channelId);
-    await waitFor(".o-mail-DiscussContent-header:has(:text('17:30 local time')):count(1)");
+    await waitFor(".o-mail-DiscussContent-header:has(:text('05:30 PM local time')):count(1)");
 });
 
 test("discard push notification of already seen channel message", async () => {

@@ -152,7 +152,7 @@ test("Avatar card shows local timezone", async () => {
     await waitStoreFetch(["avatar_card"]);
     await animationFrame();
     await waitFor(".o-mail-avatar-card-name:text('Demo'):count(1)");
-    await waitFor(".o-mail-avatar-card-localtime:contains('17:30 local time'):count(1)");
+    await waitFor(".o-mail-avatar-card-localtime:contains('05:30 PM local time'):count(1)");
     await contains(".o-mail-Thread:count(1)").click();
     await waitForNone(".o-mail-avatar-card-name:text('Demo')");
     // Case 2: correspondent tz === self tz ('localtime' tz)

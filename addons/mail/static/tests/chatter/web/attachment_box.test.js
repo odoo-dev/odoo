@@ -215,13 +215,13 @@ test("attachment box groups copies of the same file under a counter", async () =
     );
     await waitFor(".o-mail-Attachment-duplicate:count(3)");
     await waitFor(
-        ".o-mail-Attachment-duplicate:eq(0):text('signature.png – 07/27/2026 10:00:00'):count(1)"
+        ".o-mail-Attachment-duplicate:eq(0):text('signature.png – 07/27/2026 10:00:00 AM'):count(1)"
     );
     await waitFor(
-        ".o-mail-Attachment-duplicate:eq(1):text('signature.png – 07/26/2026 10:00:00'):count(1)"
+        ".o-mail-Attachment-duplicate:eq(1):text('signature.png – 07/26/2026 10:00:00 AM'):count(1)"
     );
     await waitFor(
-        ".o-mail-Attachment-duplicate:eq(2):text('signature.png – 07/25/2026 10:00:00'):count(1)"
+        ".o-mail-Attachment-duplicate:eq(2):text('signature.png – 07/25/2026 10:00:00 AM'):count(1)"
     );
 });
 

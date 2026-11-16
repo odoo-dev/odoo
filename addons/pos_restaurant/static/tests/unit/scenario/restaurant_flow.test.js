@@ -251,7 +251,7 @@ test("test_preset_timing_restaurant: select takeaway preset, name popup, pick ti
 
     const allSlots = document.querySelectorAll(".modal .preset-slot-button");
     const slotTexts = [...allSlots].map((el) => el.textContent.trim());
-    expect(slotTexts.some((t) => t === "9:00")).toBe(false);
+    expect(slotTexts.some((t) => t === "9:00am")).toBe(false);
     await contains('.modal .preset-slot-button:contains("12:00")').click();
     await animationFrame();
 
@@ -917,7 +917,7 @@ test("test_open_register_with_preset_takeaway: timing popup on table, cancel rem
     expect(document.querySelector(".modal .btn-primary").textContent).toInclude("Today");
     const allSlots = document.querySelectorAll(".modal .preset-slot-button");
     const slotTexts = [...allSlots].map((el) => el.textContent.trim());
-    expect(slotTexts.some((t) => t == "9:00")).toBe(false);
+    expect(slotTexts.some((t) => t == "9:00am")).toBe(false);
 
     await contains('.modal .preset-slot-button:contains("12:20")').click();
     await animationFrame();

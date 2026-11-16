@@ -103,7 +103,7 @@ describe("date command", () => {
         await contains('[data-embedded="date"] span').click();
         await expectElementCount(".o_time_picker", 1);
         await contains(".o_time_picker input").click();
-        await contains(".o_time_picker_option:contains(15:00)").click();
+        await contains(".o_time_picker_option:contains(3:00pm)").click();
         await expectElementCount(".o_time_picker", 0);
         expect('[data-embedded="date"] span').toHaveText("3:00 PM");
 
@@ -186,7 +186,7 @@ describe("date command", () => {
         expect(".o_time_picker").toHaveCount(1);
         await contains(".o_date_item_cell:contains('7')").click();
         await contains(".o_time_picker input").click();
-        await contains(".o_time_picker_option:contains(10:30)").click();
+        await contains(".o_time_picker_option:contains(10:30am)").click();
         await contains(".o_datetime_buttons button").click();
         await expectElementCount(".o_datetime_picker", 0);
         expect('[data-embedded="date"]').toHaveCount(1);
@@ -197,7 +197,7 @@ describe("date command", () => {
         await expectElementCount(".o_datetime_picker", 1);
         await contains(".o_date_item_cell:contains('6')").click();
         await contains(".o_time_picker input").click();
-        await contains(".o_time_picker_option:contains(16:30)").click();
+        await contains(".o_time_picker_option:contains(4:30pm)").click();
         await contains(".o_datetime_buttons button").click();
         await expectElementCount(".o_datetime_picker", 0);
         expect('[data-embedded="date"] span').toHaveText("Apr 6, 2026, 4:30 PM");

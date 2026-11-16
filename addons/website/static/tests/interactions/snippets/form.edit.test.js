@@ -63,7 +63,7 @@ test("form formats date in edit mode", async () => {
     const { core } = await startInteractions(formXml, { waitForStart: true, editMode: true });
     await switchToEditMode(core);
     expect(core.interactions).toHaveLength(1);
-    expect("form input[name=When]").toHaveValue("01/01/2025 10:00:00");
+    expect("form input[name=When]").toHaveValue("01/01/2025 10:00:00 AM");
     // Verify that non-edit code did not run.
     expect(".s_website_form_datetime").not.toHaveClass("s_website_form_datepicker_initialized");
 });

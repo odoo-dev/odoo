@@ -15,7 +15,7 @@ function isExpectedDateTime({
     expectedDateTime = DateTime.now(),
     tolerance = TIME_TOLERANCE,
 }) {
-    const actualTimestamp = DateTime.fromFormat(dateString, "MM/dd/yyyy HH:mm").toUnixInteger();
+    const actualTimestamp = DateTime.fromFormat(dateString, "MM/dd/yyyy hh:mm a").toUnixInteger();
     const expectedTimestamp = 60 * Math.floor(expectedDateTime.toUnixInteger() / 60);
     const difference = Math.abs(actualTimestamp - expectedTimestamp);
     return difference <= tolerance;
@@ -62,16 +62,16 @@ test("defaults to last one when invalid date provided", async () => {
     });
     await setupHTMLBuilder(`<div class="test-options-target" data-date="1554219400">b</div>`);
     await contains(":iframe .test-options-target").click();
-    expect(".o_hb_bg_options_container input").toHaveValue("04/02/2019 16:36");
+    expect(".o_hb_bg_options_container input").toHaveValue("04/02/2019 04:36 PM");
 
     await contains(".o_hb_bg_options_container input").edit("INVALID DATE");
-    expect(".o_hb_bg_options_container input").toHaveValue("04/02/2019 16:36");
+    expect(".o_hb_bg_options_container input").toHaveValue("04/02/2019 04:36 PM");
 
     await contains(".o_hb_bg_options_container input").edit("04/01/2019 10:00");
-    expect(".o_hb_bg_options_container input").toHaveValue("04/01/2019 10:00");
+    expect(".o_hb_bg_options_container input").toHaveValue("04/01/2019 10:00 AM");
 
     await contains(".o_hb_bg_options_container input").edit("INVALID DATE");
-    expect(".o_hb_bg_options_container input").toHaveValue("04/01/2019 10:00");
+    expect(".o_hb_bg_options_container input").toHaveValue("04/01/2019 10:00 AM");
 });
 
 test("defaults to last one when invalid date provided (date)", async () => {
@@ -101,7 +101,7 @@ test("defaults to now when no date is selected", async () => {
     await setupHTMLBuilder(`<div class="test-options-target">b</div>`);
     await contains(":iframe .test-options-target").click();
     await contains(".o_hb_bg_options_container input").edit("04/01/2019 10:00");
-    expect(".o_hb_bg_options_container input").toHaveValue("04/01/2019 10:00");
+    expect(".o_hb_bg_options_container input").toHaveValue("04/01/2019 10:00 AM");
 
     await contains(".o_hb_bg_options_container input").edit("");
     const dateString = queryOne(".o_hb_bg_options_container input").value;
@@ -116,7 +116,7 @@ test("defaults to now when clicking on clear button", async () => {
     await setupHTMLBuilder(`<div class="test-options-target">b</div>`);
     await contains(":iframe .test-options-target").click();
     await contains(".o_hb_bg_options_container input").edit("04/01/2019 10:00");
-    expect(".o_hb_bg_options_container input").toHaveValue("04/01/2019 10:00");
+    expect(".o_hb_bg_options_container input").toHaveValue("04/01/2019 10:00 AM");
 
     for (let i = 0; i < 3; i++) {
         await contains(".o_hb_bg_options_container input").click();
@@ -178,16 +178,16 @@ test("edit a date with the datetime picker should correctly apply the mutation",
     await contains(":iframe .test-options-target").click();
     await contains(".o_hb_bg_options_container input").click();
     await contains(".o_date_item_cell:contains('9')").click();
-    expect(".o_hb_bg_options_container input").toHaveValue("04/09/2019 16:36");
+    expect(".o_hb_bg_options_container input").toHaveValue("04/09/2019 04:36 PM");
 
     await contains(".o_datetime_buttons .btn:contains('apply')").click();
-    expect(".o_hb_bg_options_container input").toHaveValue("04/09/2019 16:36");
+    expect(".o_hb_bg_options_container input").toHaveValue("04/09/2019 04:36 PM");
     expect(":iframe .test-options-target").toHaveAttribute("data-date", "1554824160");
 
     // refresh the Edit tab
     await contains(":iframe .another-target").click();
     await contains(":iframe .test-options-target").click();
-    expect(".o_hb_bg_options_container input").toHaveValue("04/09/2019 16:36");
+    expect(".o_hb_bg_options_container input").toHaveValue("04/09/2019 04:36 PM");
     expect(":iframe .test-options-target").toHaveAttribute("data-date", "1554824160");
 });
 

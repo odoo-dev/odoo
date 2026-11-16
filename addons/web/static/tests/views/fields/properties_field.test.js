@@ -1375,7 +1375,7 @@ test("properties: date(time) property manipulations", async () => {
     // check initial properties
     expect("[property-name=property_1] .o_property_field_value input").toHaveValue("01/01/2019");
     expect("[property-name=property_2] .o_property_field_value input").toHaveValue(
-        "01/01/2019 11:00:00"
+        "01/01/2019 11:00:00 AM"
     );
 
     // edit date property
@@ -1394,7 +1394,7 @@ test("properties: date(time) property manipulations", async () => {
     await click(getPickerCell("31"));
     await animationFrame();
     await editTime("12:05");
-    expect("[property-name=property_2] input").toHaveValue("12/31/2018 12:05:00");
+    expect("[property-name=property_2] input").toHaveValue("12/31/2018 12:05:00 PM");
 
     // save
     expect.verifySteps([]);
@@ -1599,7 +1599,7 @@ test("properties: kanban view with date and datetime property fields", async () 
         "01/01/2019"
     );
     expect(".o_kanban_record:nth-child(5) .o_card_property_field:nth-child(2) span").toHaveText(
-        "01/01/2019 11:00:00"
+        "01/01/2019 11:00:00 AM"
     );
 });
 

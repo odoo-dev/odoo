@@ -300,7 +300,7 @@ test("RelativeDateField on a datetime field in form view", async () => {
         resId: 1,
         arch: /* xml */ `<form><field name="datetime" widget="relative_date" /></form>`,
     });
-    expect(".o_field_widget button").toHaveValue("10/08/2017 11:00:00");
+    expect(".o_field_widget button").toHaveValue("10/08/2017 11:00:00 AM");
     expect("div.o_field_widget[name='datetime'] button").toHaveCount(1);
 
     await contains(".o_field_widget button").click();
@@ -315,7 +315,7 @@ test("RelativeDateField on a datetime field in form view", async () => {
     await animationFrame();
     await click(".o_form_button_save");
     await animationFrame();
-    expect(".o_field_widget button").toHaveValue("10/09/2017 11:00:00");
+    expect(".o_field_widget button").toHaveValue("10/09/2017 11:00:00 AM");
 });
 
 test("RelativeDateField on a datetime field in list view in UTC", async () => {
