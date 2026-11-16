@@ -898,7 +898,8 @@ class AccountMoveLine(models.Model):
 
     def _compute_sql_consolidation_rate(self, table):
         currency_translation = self.env.context.get('currency_translation', 'current')
-        if len(self.env.companies.currency_id) == 1:
+        consolidation_currency_id = self.env.context.get('consolidation_forced_currency_id') or self.env.company.currency_id.id
+        if len(self.env.companies.currency_id) == 1 and consolidation_currency_id == self.env.company.currency_id.id:
             return SQL("1")
 
         date_from = self.env.context.get('date_from')
@@ -951,7 +952,7 @@ class AccountMoveLine(models.Model):
     def _compute_sql_balance_converted(self, table):
         return SQL("(%s * %s)", table.consolidation_rate, table.balance)
 
-    @api.depends_context('allowed_company_ids', 'currency_translation', 'date_from', 'date_to', 'cta_date_to')
+    @api.depends_context('allowed_company_ids', 'consolidation_forced_currency_id', 'currency_translation', 'date_from', 'date_to', 'cta_date_to')
     def _compute_consolidation_rate(self):
         line2rate = {}
         if len(self.env.companies.currency_id) > 1:

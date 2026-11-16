@@ -42,11 +42,13 @@ class ResCurrency(models.Model):
         self.ensure_one()
         return bool(self.env['account.move.line'].sudo().search_count(['|', ('currency_id', '=', self.id), ('company_currency_id', '=', self.id)]))
 
-    def _get_raw_rates(self, companies, date_from, date_to):
+    def _get_raw_rates(self, companies, date_from, date_to, forced_target_currency=None):
+        forced_currency_id = self.env.context.get('consolidation_forced_currency_id')
+
         before = Domain.custom(to_sql=lambda table: SQL("%s <= date.date", table.name))
         company_match = Domain.custom(to_sql=lambda table: SQL("%s = target_root_company.id", table.company_id))
         company_null = Domain.custom(to_sql=lambda table: SQL("%s IS NULL", table.company_id))
-        target_currency = Domain.custom(to_sql=lambda table: SQL("%s = target_company.currency_id", table.currency_id))
+        target_currency = Domain('currency_id', '=', forced_currency_id or self.env.company.currency_id.id)
         source_currency = Domain.custom(to_sql=lambda table: SQL("%s = source_company.currency_id", table.currency_id))
         CurrencyRate = self.env['res.currency.rate'].sudo()
         return self.env.execute_query(SQL(

@@ -22,7 +22,7 @@ class ConsolidationRateMixin(models.AbstractModel):
         compute_sudo=True,
     )
 
-    @api.depends_context('allowed_company_ids')
+    @api.depends_context('allowed_company_ids', 'consolidation_forced_currency_id')
     def _compute_consolidation_rate(self):
         if len(self.env.companies.currency_id) <= 1:
             self.consolidation_rate = 1
@@ -33,7 +33,8 @@ class ConsolidationRateMixin(models.AbstractModel):
             record.consolidation_rate = line2rate.get(record._origin.id, 1)
 
     def _compute_sql_consolidation_rate(self, table):
-        if len(self.env.companies.currency_id) == 1:
+        consolidation_currency_id = self.env.context.get('consolidation_forced_currency_id') or self.env.company.currency_id.id
+        if len(self.env.companies.currency_id) == 1 and consolidation_currency_id == self.env.company.currency_id.id:
             return SQL("1")
 
         date_to = fields.Date.to_date(self.env.context.get('date_to'))

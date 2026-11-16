@@ -139,6 +139,14 @@ class AccountReport(models.Model):
         precompute=True,
         readonly=False, store=True, depends=['root_report_id', 'section_main_report_ids'],
     )
+    currency_id = fields.Many2one(
+        string="Currency",
+        comodel_name='res.currency',
+        compute=lambda x: x._compute_report_option_filter('currency_id'),
+        precompute=True,
+        readonly=False, store=True, depends=['root_report_id', 'section_main_report_ids'],
+        help="Currency in which the amounts of the report needs to be displayed. If empty, the currency of the current company will be used.",
+    )
 
     enable_snapshots = fields.Boolean(
         string="Enable Snapshots",
