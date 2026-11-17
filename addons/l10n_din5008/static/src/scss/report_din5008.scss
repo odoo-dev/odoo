@@ -13,7 +13,7 @@
                 margin: 0;
             }
             div.h3 {
-                color: $o-default-report-primary-color;
+                color: var(--o-default-report-primary-color);
                 position: relative;
                 top: -10mm;
                 margin-bottom: -10mm;
@@ -39,7 +39,7 @@
                     margin-top: 1mm;
                 }
                 .colored_address {
-                    color: $o-default-report-secondary-color;
+                    color: var(--o-default-report-secondary-color);
                 }
                 font-size: 0.8em;
             }
@@ -59,7 +59,7 @@
             margin-left: 5mm;
             margin-right: 10mm;
             margin-top: 8.46mm;
-            color: $o-default-report-primary-color;
+            color: var(--o-default-report-primary-color);
         }
         > .pt-5 {  /* hide hardcoded address from base.template.layout */
             display: none;
@@ -73,7 +73,7 @@
             [name=invoice_line_table], [name=stock_move_table], .o_main_table {
                 margin-top: 8.46mm;
                 th {
-                    color: $o-default-report-secondary-color;
+                    color: var(--o-default-report-secondary-color);
                 }
             }
         }
@@ -121,7 +121,7 @@
     table.o_main_table{
         tr {
             &.o_line_section td {
-                background-color: rgba($gray-300, .5);
+                background-color: color-mix(in srgb, var(--gray-300) 50%, transparent);
             }
     
             th {
