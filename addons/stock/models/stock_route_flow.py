@@ -21,8 +21,8 @@ class StockRoute(models.Model):
 
         :param dict params:
             - kind: 'shortcut' (goods go directly from a location to another
-              one, skipping the steps in between) or 'insert' (add a step in
-              the middle of a rule)
+              one, skipping the steps in between), 'insert' (add a step in
+              the middle of a rule) or 'remove' (remove a step from the flow)
             - warehouse_id
             - scope: 'route' | 'category' | 'product', target_id: its id
             - product_id: product used to check the result (optional)
@@ -30,6 +30,9 @@ class StockRoute(models.Model):
               destination, in order), to_location_id, next_rule_id (rule taking
               the goods from the destination, if any)
             - insert: rule_id, step_name, location_id (optional, else created)
+            - remove: path_rule_ids (the rule bringing the goods in the step and
+              the one taking them out), to_location_id, next_rule_id (as for a
+              shortcut, used when the step cannot simply be skipped)
         :param bool apply: False to only get a preview (everything is rolled back)
         :return: dict with the actions done, warnings, and the path of the
             product before / after, computed by the procurement itself.
@@ -186,6 +189,8 @@ class StockRoute(models.Model):
             self._route_flow_shortcut(params, route, actions, warnings)
         elif params['kind'] == 'insert':
             self._route_flow_insert(params, warehouse, route, actions, warnings)
+        elif params['kind'] == 'remove':
+            self._route_flow_remove(params, route, actions, warnings)
         else:
             raise UserError(self.env._('Unknown edition.'))
         return actions, warnings
@@ -198,7 +203,6 @@ class StockRoute(models.Model):
         if not rules:
             raise UserError(self.env._('There is no flow between these two locations.'))
         destination = self.env['stock.location'].browse(params['to_location_id'])
-        in_route = params['scope'] == 'route'
         path_locations = self.env['stock.location']
         for rule in rules:
             source, rule_destination = self._route_flow_physical(rule)
@@ -211,16 +215,16 @@ class StockRoute(models.Model):
         )[-1:]
         need_moves_to_destination = False
         if first.action == 'push':
-            self._route_flow_rule(first, route, in_route and first.route_id == route, actions,
+            self._route_flow_rule(first, route, first.route_id == route, actions,
                                   location_dest_id=destination.id)
         elif first == demand_rule:
             # Keep the need, only change where the goods are put.
-            self._route_flow_rule(first, route, in_route and first.route_id == route, actions,
+            self._route_flow_rule(first, route, first.route_id == route, actions,
                                   picking_type_id=self._route_flow_type_to(first.picking_type_id, destination, actions).id)
             demand_rule = Rule
         else:
             # The need moves with the goods: the rule now refills the destination.
-            self._route_flow_rule(first, route, in_route and first.route_id == route, actions,
+            self._route_flow_rule(first, route, first.route_id == route, actions,
                                   location_dest_id=destination.id, location_dest_from_rule=True)
             need_moves_to_destination = True
         if demand_rule:
@@ -231,9 +235,12 @@ class StockRoute(models.Model):
                                   location_dest_from_rule=False,
                                   picking_type_id=picking_type.id,
                                   procure_method='make_to_order' if need_moves_to_destination else 'make_to_stock')
-        skipped = rules - first
-        # Reordering rules on the skipped locations keep refilling them.
         skipped_locations = path_locations - self._route_flow_physical(first)[0] - destination
+        self._route_flow_skip(params, route, rules - first, skipped_locations, actions, warnings)
+
+    def _route_flow_skip(self, params, route, skipped, skipped_locations, actions, warnings):
+        """ Rules and locations no longer used by the edited flow. """
+        # Reordering rules on the skipped locations keep refilling them.
         orderpoint_domain = [('location_id', 'in', skipped_locations.ids)]
         if params['scope'] == 'product':
             orderpoint_domain.append(('product_id', '=', params['target_id']))
@@ -245,22 +252,48 @@ class StockRoute(models.Model):
                 'Reordering rules still refill the skipped locations: %(orderpoints)s. Archive them if the stock there is not needed anymore.',
                 orderpoints=', '.join('%s (%s)' % (op.product_id.display_name, op.location_id.complete_name) for op in orderpoints),
             ))
-        if in_route:
-            own = skipped.filtered(lambda r: r.route_id == route)
-            if own:
-                own.active = False
-                actions.append(self.env._('Archive the skipped rules: %(rules)s.', rules=', '.join(own.mapped('name'))))
-            others = skipped - own
-            if others:
-                warnings.append(self.env._(
-                    'These rules belong to other routes and still apply: %(rules)s.',
-                    rules=', '.join(others.mapped('name')),
-                ))
-        elif skipped:
+        # Rules of the edited route are archived, the others are bypassed (route
+        # scope: they still apply; product / category scope: searched after).
+        own = skipped.filtered(lambda r: r.route_id == route)
+        if own:
+            own.active = False
+            actions.append(self.env._('Archive the skipped rules: %(rules)s.', rules=', '.join(own.mapped('name'))))
+        others = skipped - own
+        if others and params['scope'] == 'route':
+            warnings.append(self.env._(
+                'These rules belong to other routes and still apply: %(rules)s.',
+                rules=', '.join(others.mapped('name')),
+            ))
+        elif others:
             actions.append(self.env._(
                 'Skip %(rules)s: the new route is searched first for this %(scope)s.',
-                rules=', '.join(skipped.mapped('name')), scope=params['scope'],
+                rules=', '.join(others.mapped('name')), scope=params['scope'],
             ))
+
+    def _route_flow_remove(self, params, route, actions, warnings):
+        """ Remove the step X from A → X → B: the operation taking the goods out of
+        X keeps its role (e.g. the delivery still ships to the customer) and now
+        takes them in A, the operation bringing them in X disappears. When nothing
+        brings the goods physically from A (Buy / Manufacture), or when the operation
+        bringing them in X carries the need, it is a shortcut A → B instead. """
+        Rule = self.env['stock.rule']
+        incoming, outgoing = Rule.browse(params['path_rule_ids'])
+        source, step = self._route_flow_physical(incoming)
+        if incoming.action in ('buy', 'manufacture') or not source or (
+            incoming.action in ('pull', 'pull_push') and outgoing.action == 'push'
+        ):
+            # Nothing brings the goods from A, or the removed operation carries the need
+            # (the push only follows it): the goods go directly from A to B instead.
+            return self._route_flow_shortcut(params, route, actions, warnings)
+        vals = {'location_src_id': source.id}
+        if incoming.action in ('pull', 'pull_push') and outgoing.action in ('pull', 'pull_push'):
+            # The goods are now taken in A as the removed operation used to (stock or chain).
+            vals['procure_method'] = incoming.procure_method
+        if params['scope'] != 'route' and outgoing.route_id == route:
+            # Rule of a custom flow, named after its locations: keep it readable.
+            vals['name'] = '%s → %s' % (source.name, outgoing.name.split(' → ')[-1])
+        self._route_flow_rule(outgoing, route, outgoing.route_id == route, actions, **vals)
+        self._route_flow_skip(params, route, incoming, step, actions, warnings)
 
     def _route_flow_insert(self, params, warehouse, route, actions, warnings):
         """ Add a step in the middle of a rule: A → B becomes A → step → B.
