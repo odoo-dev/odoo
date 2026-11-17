@@ -6,7 +6,6 @@ import { MobileTablePicker } from "./mobile_table_picker";
 import { TableMenu } from "./table_menu";
 import { TablePicker } from "./table_picker";
 import { TableDragDrop } from "./table_drag_drop";
-import { registry } from "@web/core/registry";
 import { getRowIndex } from "@html_editor/utils/table";
 import { allowsParagraphRelatedElements, isTableCell } from "@html_editor/utils/dom_info";
 import { hasTouch } from "@web/core/browser/feature_detection";
@@ -17,7 +16,7 @@ import { hasTouch } from "@web/core/browser/feature_detection";
  */
 export class TableUIPlugin extends Plugin {
     static id = "tableUi";
-    static dependencies = ["dom", "history", "overlay", "selection", "table"];
+    static dependencies = ["dom", "history", "localOverlay", "overlay", "selection", "table"];
     /** @type {import("plugins").EditorResources} */
     resources = {
         user_commands: [
@@ -73,8 +72,6 @@ export class TableUIPlugin extends Plugin {
         });
 
         this.activeTd = null;
-        this.columnMenuOverlayKey = "table-column-menu";
-        this.rowMenuOverlayKey = "table-row-menu";
 
         /** @type {import("@html_editor/core/overlay_plugin").Overlay} */
         this.tableDragDropOverlay = this.dependencies.overlay.createOverlay(TableDragDrop);
@@ -202,11 +199,11 @@ export class TableUIPlugin extends Plugin {
     }
 
     closeColumnMenu() {
-        registry.category(this.config.localOverlayContainers.key).remove(this.columnMenuOverlayKey);
+        this.tableColumnMenu?.remove();
     }
 
     closeRowMenu() {
-        registry.category(this.config.localOverlayContainers.key).remove(this.rowMenuOverlayKey);
+        this.tableRowMenu?.remove();
     }
 
     setActiveTd(td) {
@@ -219,9 +216,10 @@ export class TableUIPlugin extends Plugin {
         const grid = this.dependencies.table.buildTableGrid(closestElement(td, "table"));
         const rowIndex = getRowIndex(td.parentElement);
         if (grid[rowIndex][0] === td || hasTouch()) {
-            registry.category(this.config.localOverlayContainers.key).add(this.rowMenuOverlayKey, {
-                Component: TableMenu,
-                props: {
+            this.tableRowMenu = this.dependencies.localOverlay.addLocalOverlay(
+                "table-row-menu",
+                TableMenu,
+                {
                     type: "row",
                     tableDragDropOverlay: this.tableDragDropOverlay,
                     target: td,
@@ -232,27 +230,26 @@ export class TableUIPlugin extends Plugin {
                     editable: this.editable,
                     commit: this.dependencies.history.commit,
                     ...this.tableMenuMethods,
-                },
-            });
+                }
+            );
         }
         if (td.parentElement.rowIndex === 0 || hasTouch()) {
-            registry
-                .category(this.config.localOverlayContainers.key)
-                .add(this.columnMenuOverlayKey, {
-                    Component: TableMenu,
-                    props: {
-                        type: "column",
-                        target: td,
-                        tableDragDropOverlay: this.tableDragDropOverlay,
-                        dropdownState: this.createDropdownState(this.closeRowMenu.bind(this)),
-                        direction: this.config.direction || "ltr",
-                        document: this.document,
-                        editable: this.editable,
-                        close: () => this.closeColumnMenu(),
-                        commit: this.dependencies.history.commit,
-                        ...this.tableMenuMethods,
-                    },
-                });
+            this.tableColumnMenu = this.dependencies.localOverlay.addLocalOverlay(
+                "table-column-menu",
+                TableMenu,
+                {
+                    type: "column",
+                    target: td,
+                    tableDragDropOverlay: this.tableDragDropOverlay,
+                    dropdownState: this.createDropdownState(this.closeRowMenu.bind(this)),
+                    direction: this.config.direction || "ltr",
+                    document: this.document,
+                    editable: this.editable,
+                    close: () => this.closeColumnMenu(),
+                    commit: this.dependencies.history.commit,
+                    ...this.tableMenuMethods,
+                }
+            );
         }
     }
 }

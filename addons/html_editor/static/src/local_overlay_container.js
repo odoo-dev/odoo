@@ -1,35 +1,34 @@
-import { useProps, signal, t } from "@odoo/owl";
-import { MainComponentsContainer } from "@web/core/main_components_container";
-import { registry } from "@web/core/registry";
-import { useRegistry } from "@web/core/registry_hook";
+import { Component, Resource, signal, t, useProps } from "@odoo/owl";
+import { ErrorHandler } from "@web/core/utils/components";
 
 /**
- * TODO ABD: refactor to propagate a reactive object instead of using a registry with an identifier
+ * Renders the components of the `localOverlays` resource, each in its own
+ * local overlay.
  */
-export class LocalOverlayContainer extends MainComponentsContainer {
+export class LocalOverlayContainer extends Component {
     static template = "html_editor.LocalOverlayContainer";
+    static components = { ErrorHandler };
     props = useProps({
-        identifier: t.string().optional("overlay_components"),
+        localOverlays: t.instanceOf(Resource),
     });
 
-    // Ref on the overlay element, either owned by the parent (`localOverlay`
-    // prop) or local.
-    localOverlay = useProps.static(
-        "localOverlay",
+    // Ref on the local overlay element, either owned by the parent
+    // (`localOverlayRef` prop) or local.
+    localOverlayRef = useProps.static(
+        "localOverlayRef",
         t.signal(t.ref()).optional(() => signal.ref())
     );
 
-    setup() {
-        const overlayComponents = registry.category(this.props.identifier);
-        // todo: remove this somehow
-        if (!overlayComponents.validationSchema) {
-            overlayComponents.addValidation(
-                t.object({
-                    Component: t.component(),
-                    props: t.object().optional(),
-                })
-            );
-        }
-        this.Components = useRegistry(overlayComponents);
+    handleComponentError(error, localOverlay) {
+        // remove the faulty component and rerender without it
+        this.props.localOverlays.delete(localOverlay);
+        /**
+         * we rethrow the error to notify the user something bad happened.
+         * We do it after a tick to make sure owl can properly finish its
+         * rendering
+         */
+        Promise.resolve().then(() => {
+            throw error;
+        });
     }
 }

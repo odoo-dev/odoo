@@ -12,7 +12,7 @@ import { LocalOverlayContainer } from "@html_editor/local_overlay_container";
 import { Plugin } from "@html_editor/plugin";
 import { after, click, queryAll, queryFirst } from "@odoo/hoot";
 import { advanceTime, animationFrame, queryOne, tick, waitFor, waitForNone } from "@odoo/hoot-dom";
-import { Component, onMounted, proxy, signal, t, useProps, xml } from "@odoo/owl";
+import { Component, onMounted, proxy, Resource, signal, t, useProps, xml } from "@odoo/owl";
 import {
     contains,
     defineModels,
@@ -119,7 +119,7 @@ class BuilderContainer extends Component {
                     </div>
                 </div>
             </div>
-            <LocalOverlayContainer localOverlay="this.overlayRef" identifier="this.localOverlayContainerKey"/>
+            <LocalOverlayContainer localOverlayRef="this.localOverlayRef" localOverlays="this.localOverlays"/>
             <div t-if="this.state.isEditing" t-att-class="{'o_builder_sidebar_open': this.state.isEditing and this.state.showSidebar}" class="o_website_builder_sidebar border-start border-dark">
                 <Builder t-props="this.getBuilderProps()"/>
             </div>
@@ -139,8 +139,8 @@ class BuilderContainer extends Component {
     containerRef = signal.ref();
     websitePreviewRef = signal.ref();
     iframeRef = signal.ref();
-    overlayRef = signal.ref();
-    localOverlayContainerKey = uniqueId("test");
+    localOverlayRef = signal.ref();
+    localOverlays = new Resource();
 
     setup() {
         this.state = proxy({ isMobile: false, isEditing: false, showSidebar: true });
@@ -173,14 +173,14 @@ class BuilderContainer extends Component {
 
     getBuilderProps() {
         return {
-            localOverlayContainerKey: this.localOverlayContainerKey,
+            localOverlays: this.localOverlays,
             onEditorLoad: this.props.onEditorLoad,
             closeEditor: () => {},
             snippetsName: "",
             toggleMobile: () => {
                 this.state.isMobile = !this.state.isMobile;
             },
-            overlayRef: this.overlayRef,
+            localOverlayRef: this.localOverlayRef,
             editableSelector: this.props.editableSelector,
             iframeLoaded: this.iframeLoaded,
             isMobile: this.state.isMobile,

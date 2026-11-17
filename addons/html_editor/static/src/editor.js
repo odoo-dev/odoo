@@ -33,7 +33,7 @@ import { sortPlugins } from "@html_editor/plugin_utils";
  * @property { string[] } [baseContainers]
  * @property { PluginConstructor[] } [Plugins]
  * @property { string[] } [classList]
- * @property { Object } [localOverlayContainers]
+ * @property { { ref: () => HTMLElement, localOverlays: import("@odoo/owl").Resource } } [localOverlayContainers]
  * @property { Object } [embeddedComponentInfo]
  * @property { Object } [resources]
  * @property { string } [direction="ltr"]

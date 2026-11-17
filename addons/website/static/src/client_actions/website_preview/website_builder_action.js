@@ -8,6 +8,7 @@ import {
     onWillStart,
     onWillUnmount,
     proxy,
+    Resource,
     signal,
     useEffect,
     usePlugin,
@@ -28,7 +29,6 @@ import { post } from "@web/core/network/http_service";
 import { rpc, RPCError } from "@web/core/network/rpc";
 import { registry } from "@web/core/registry";
 import { ResizablePanel } from "@web/core/resizable_panel/resizable_panel";
-import { uniqueId } from "@web/core/utils/functions";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { renderToElement } from "@web/core/utils/render";
 import { getScrollingElement } from "@web/core/utils/scrolling";
@@ -119,8 +119,8 @@ export class WebsiteBuilderClientAction extends Component {
         });
         onWillDestroy(disposeToggleMobileEffect);
 
-        this.overlayRef = signal.ref();
-        this.localOverlayContainerKey = uniqueId("website");
+        this.localOverlayRef = signal.ref();
+        this.localOverlays = new Resource();
         this.websitePreviewRef = signal.ref();
         this.iframeContainerRef = signal.ref();
 
@@ -267,7 +267,7 @@ export class WebsiteBuilderClientAction extends Component {
             snippetsName: this.snippetsTemplate,
             toggleMobile: this.toggleMobile.bind(this),
             installSnippetModule: this.installSnippetModule.bind(this),
-            overlayRef: this.overlayRef,
+            localOverlayRef: this.localOverlayRef,
             iframeLoaded: iframeLoaded,
             isMobile: this.websiteContext.isMobile,
             initialTab: this.reloadContext?.initialTab,
@@ -286,7 +286,7 @@ export class WebsiteBuilderClientAction extends Component {
                     },
                 },
             },
-            localOverlayContainerKey: this.localOverlayContainerKey,
+            localOverlays: this.localOverlays,
         };
         return { translation: this.translation, builderProps };
     }

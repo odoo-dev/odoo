@@ -8,6 +8,7 @@ import {
     onWillStart,
     onWillUnmount,
     providePlugins,
+    Resource,
     signal,
     proxy,
     useProps,
@@ -68,11 +69,11 @@ export class Builder extends Component {
         initialTab: t.string().optional("blocks"),
         onlyCustomizeTab: t.boolean().optional(false),
         animateThemeTabSwitch: t.boolean().optional(false),
-        localOverlayContainerKey: t.string(),
+        localOverlays: t.instanceOf(Resource),
     });
 
     // Ref on the local overlay container element, owned by the parent.
-    overlayRef = useProps.static("overlayRef", t.signal(t.ref()));
+    localOverlayRef = useProps.static("localOverlayRef", t.signal(t.ref()));
 
     builderSidebarRef = signal.ref();
     tabListRef = signal.ref();
@@ -207,8 +208,8 @@ export class Builder extends Component {
                 },
             },
             localOverlayContainers: {
-                key: this.props.localOverlayContainerKey,
-                ref: this.overlayRef,
+                localOverlays: this.props.localOverlays,
+                ref: this.localOverlayRef,
             },
             saveSnippet: (snippetEl, cloneAndPrepareForSave) =>
                 this.snippetModel.saveSnippet(snippetEl, cloneAndPrepareForSave),

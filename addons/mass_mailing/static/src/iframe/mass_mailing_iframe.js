@@ -10,6 +10,7 @@ import {
     useProps,
     signal,
     proxy,
+    Resource,
     t,
     useEffect,
     useScope,
@@ -18,7 +19,6 @@ import { LazyComponent } from "@web/core/lazy_component";
 import { isBrowserSafari } from "@web/core/browser/feature_detection";
 import { localization } from "@web/core/l10n/localization";
 import { _t } from "@web/core/l10n/translation";
-import { uniqueId } from "@web/core/utils/functions";
 import { useBus, useService } from "@web/core/utils/hooks";
 import { renderToFragment } from "@web/core/utils/render";
 import { closestScrollableY } from "@web/core/utils/scrolling";
@@ -59,9 +59,9 @@ export class MassMailingIframe extends Component {
 
     setup() {
         this.ui = useService("ui");
-        this.overlayRef = signal.ref();
+        this.localOverlayRef = signal.ref();
         this.isRTL = localization.direction === "rtl";
-        this.localOverlayContainerKey = uniqueId("mass_mailing_iframe");
+        this.localOverlays = new Resource();
         this.state = proxy({
             showFullscreen: this.props.showFullscreen && !this.ui.isSmall,
             isMobile: false,
@@ -292,8 +292,8 @@ export class MassMailingIframe extends Component {
             return;
         }
         this.editor.config.localOverlayContainers = {
-            key: this.localOverlayContainerKey,
-            ref: this.overlayRef,
+            localOverlays: this.localOverlays,
+            ref: this.localOverlayRef,
         };
         this.editor.attachTo(
             this.iframeRef().contentDocument.body.querySelector(IFRAME_VALUE_SELECTOR)
@@ -327,7 +327,7 @@ export class MassMailingIframe extends Component {
     getBuilderProps() {
         const onEditorReady = this.props.config.onEditorReady;
         return {
-            overlayRef: this.overlayRef,
+            localOverlayRef: this.localOverlayRef,
             iframeLoaded: this.iframeLoaded.promise,
             snippetsName: "mass_mailing.email_designer_snippets",
             config: {
@@ -358,7 +358,7 @@ export class MassMailingIframe extends Component {
             getThemeTab: () =>
                 odoo.loader.modules.get("@mass_mailing/builder/tabs/design_tab").DesignTab,
             themeTabDisplayName: _t("Design"),
-            localOverlayContainerKey: this.localOverlayContainerKey,
+            localOverlays: this.localOverlays,
         };
     }
 

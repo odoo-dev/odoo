@@ -1,5 +1,4 @@
-import { Component, onMounted, onWillDestroy, signal, t, useProps } from "@odoo/owl";
-import { uniqueId } from "@web/core/utils/functions";
+import { Component, onMounted, onWillDestroy, Resource, signal, t, useProps } from "@odoo/owl";
 import { useSpellCheck } from "@web/core/utils/hooks";
 import { render } from "@web/owl2/utils";
 import { useEditor } from "./editor";
@@ -43,8 +42,8 @@ export class Wysiwyg extends Component {
     contentRef = signal.ref();
 
     setup() {
-        this.overlayRef = signal.ref();
-        this.localOverlayContainerKey = uniqueId("wysiwyg");
+        this.localOverlayRef = signal.ref();
+        this.localOverlays = new Resource();
         this.editor = this.props.editor;
         const config = this.getEditorConfig();
         this.editor = useEditor(config);
@@ -98,8 +97,8 @@ export class Wysiwyg extends Component {
         return {
             ...this.props.config,
             localOverlayContainers: {
-                key: this.localOverlayContainerKey,
-                ref: this.overlayRef,
+                localOverlays: this.localOverlays,
+                ref: this.localOverlayRef,
             },
         };
     }
