@@ -4,6 +4,10 @@ $o-default-report-secondary-color: $o-default-report-primary-color !default;
 $o-default-report-margins:  11mm !default; /* 7mm + container padding */
 $o-snailmail-address-padding-top: 42px;
 
+:root {
+    --o-default-report-margins: #{$o-default-report-margins};
+}
+
 
 html, body {
     height: 100%;

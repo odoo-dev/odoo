@@ -3,10 +3,10 @@
 /* external_layout_light */
 .o_report_layout_standard {
     h2 {
-        margin-bottom: map-get($spacers, 2) !important;
+        margin-bottom: var(--o-bs-spacer-2) !important;
     }
     #informations {
-        margin-bottom: map-get($spacers, 2) !important;
+        margin-bottom: var(--o-bs-spacer-2) !important;
     }
 }
 
@@ -14,8 +14,8 @@
 .o_report_layout_bubble {
     #informations {
         margin: 0;
-        border-radius: $border-radius-lg;
-        padding: map-get($spacers, 2) $table-cell-padding-y;
+        border-radius: var(--o-bs-border-radius-lg);
+        padding: var(--o-bs-spacer-2) var(--o-bs-table-cell-padding-y);
 
         /* In pdf it overlaps with existing margin, set to 0 to replicate in HTML */
         div:first-child {
@@ -35,10 +35,10 @@
 .o_shape_bubble_2 {
     left: -450px;
     top: 0px;
+}
 
-    &-html {
-        top: -50%;
-    }
+.o_shape_bubble_2-html {
+    top: -50%;
 }
 
 /* external_layout_folder */
@@ -51,22 +51,22 @@
     }
 
     .o_folder_title {
-        margin-right: $o-default-report-margins;
+        margin-right: var(--o-default-report-margins);
     }
 }
 
 /* external_layout_column */
 .o_report_layout_column {
     #informations > div.col:not(:last-child) {
-        margin-right: map-get($spacers, 2);
-        border-right: $border-width solid;
+        margin-right: var(--o-bs-spacer-2);
+        border-right: var(--border-width) solid;
     }
 }
 
 /* external_layout_center */
 .o_layout_center_header {
-    margin: (-$o-default-report-margins) (-$o-default-report-margins) (-$o-default-report-margins * .5);
-    padding: $o-default-report-margins $o-default-report-margins ($o-default-report-margins * .5);
+    margin: calc(var(--o-default-report-margins) * -1) calc(var(--o-default-report-margins) * -1) calc(var(--o-default-report-margins) * -.5);
+    padding: var(--o-default-report-margins) var(--o-default-report-margins) calc(var(--o-default-report-margins) * .5);
     max-height: 60mm;
 
     ul {
@@ -80,7 +80,7 @@
 .o_layout_lines_header {
     [name="company_address_list"] {
         margin-bottom: 0;
-        line-height: $line-height-sm;
+        line-height: var(--o-bs-line-height-sm);
 
         p {
             margin-bottom: 0;
@@ -91,10 +91,10 @@
 /* external_layout_compact */
 .o_report_layout_compact {
     h2 {
-        margin-bottom: map-get($spacers, 1) !important;
+        margin-bottom: var(--o-bs-spacer-1) !important;
     }
     #informations {
-        margin-bottom: map-get($spacers, 1) !important;
+        margin-bottom: var(--o-bs-spacer-1) !important;
     }
 }
 
