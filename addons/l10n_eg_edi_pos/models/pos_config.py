@@ -14,9 +14,9 @@ class PosConfig(models.Model):
     l10n_eg_edi_pos_client_secret = fields.Char(string="POS ETA Client Secret", groups='base.group_system')
     l10n_eg_edi_pos_serial_number = fields.Char(string="POS ETA Serial Number", groups='base.group_system')
     l10n_eg_edi_pos_preprod = fields.Boolean(string="Use Pre-production Environment")
-    l10n_eg_edi_pos_access_token = fields.Char(groups='base.group_system', readonly=True)
-    l10n_eg_edi_pos_token_expiry = fields.Datetime(groups='base.group_system', readonly=True)
-    l10n_eg_edi_pos_last_uuid = fields.Char(groups='base.group_system', readonly=True)
+    l10n_eg_edi_pos_access_token = fields.Char(groups='base.group_system', ui_readonly=True)
+    l10n_eg_edi_pos_token_expiry = fields.Datetime(groups='base.group_system', ui_readonly=True)
+    l10n_eg_edi_pos_last_uuid = fields.Char(groups='base.group_system', ui_readonly=True)
 
     def _load_pos_data_read(self, records, config):
         read_records = super()._load_pos_data_read(records, config)
