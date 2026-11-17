@@ -91,7 +91,7 @@
             'hr/static/src/**/*',
             ('remove', 'hr/static/src/views/hr_employee_hierarchy/*'),
             ('remove', 'hr/static/src/views/skills_graph.js'),
-            ('remove', 'hr/static/src/scss/report_employee_cv.scss'),
+            ('remove', 'hr/static/src/scss/report_employee_cv.css'),
         ],
         'web.assets_backend_lazy': [
             'hr/static/src/views/hr_employee_hierarchy/*',
@@ -122,7 +122,7 @@
             'hr/static/src/scss/css_variables.scss',
         ],
         'web.report_assets_pdf': [
-            'hr/static/src/scss/report_employee_cv.scss',
+            'hr/static/src/scss/report_employee_cv.css',
         ],
     },
     'author': 'Odoo S.A.',
