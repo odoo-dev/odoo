@@ -52,7 +52,6 @@ $report-text-colors: null;
 /* This should work fine in most cases, but will yield ugly results */
 /* when 6+ columns are rendered */
 .col {
-    -webkit-box-flex: 1;
     flex: 1 0 0%;
 }
 
@@ -69,10 +68,6 @@ $report-text-colors: null;
 /* Even if the width is smaller than the media querry limit from bootstrap. */
 /* This need come from the footer being editable via the Odoo editor. */
 .footer {
-    .row, .col-lg-3, .col-lg-4, .col-lg-6 {
-        -webkit-box-flex: 1 !important;
-    }
-
     .col-lg-3, .col-lg-4, .col-lg-6 {
         flex: 0 0 auto;
     }
@@ -111,52 +106,5 @@ $report-text-colors: null;
     }
     > :not(:first-child) {
         border-top-style: none;
-    }
-}
-
-/* Fix flex utilites for compatibility with wkhtmltopdf 12.6 */
-.flex-column {
-    -webkit-box-orient: vertical;
-}
-
-.justify-content {
-    &-center {
-        -webkit-box-pack: center;
-    }
-    &-between {
-        -webkit-box-pack: justify;
-    }
-}
-
-.align-items {
-    &-start {
-        -webkit-box-align: start;
-    }
-    &-center {
-        -webkit-box-align: center;
-    }
-    &-between {
-        -webkit-box-align: justify;
-    }
-    &-end {
-        -webkit-box-align: end;
-    }
-}
-
-.flex-grow {
-    &-0{
-        -webkit-box-flex: 0;
-    }
-    &-1{
-        -webkit-box-flex: 1;
-    }
-}
-
-.flex-shrink {
-    &-0 {
-        -webkit-box-flex-group: 0;
-    }
-    &-1 {
-        -webkit-box-flex-group: 1;
     }
 }
