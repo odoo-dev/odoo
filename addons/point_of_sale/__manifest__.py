@@ -248,7 +248,7 @@
             ('remove', 'web/static/src/views/**/*.dark.css'),
             'web/static/src/search/**/*',
             'web/static/src/webclient/actions/**/*',
-            ('remove', 'web/static/src/webclient/actions/reports/report_layouts.scss'),
+            ('remove', 'web/static/src/webclient/actions/reports/report_layouts.css'),
             ('remove', 'web/static/src/webclient/actions/**/*css'),
             'google_address_autocomplete/static/src/**/*',
             'point_of_sale/static/src/backend/pos_res_partner_view/*',
