@@ -1150,7 +1150,7 @@ class TestAccountIncomingSupplierInvoice(AccountTestInvoicingCommon, TestAccount
 
         with (
             self._patch_import_methods(),
-            patch('odoo.addons.account.models.partner.ResPartner.search', side_effect=ValueError('We want to test an unexpected error')),
+            patch('odoo.addons.account.models.res_partner.ResPartner.search', side_effect=ValueError('We want to test an unexpected error')),
             mute_logger('odoo.addons.account.models.account_document_import_mixin'),
         ):
             move_id = self.journal.create_document_from_attachment(attachment.ids).get('res_id')

@@ -15,7 +15,7 @@ class TestStructure(TransactionCase):
         cls.env.user.company_id.vat_check_vies = False
         cls._check_vies_validity_iap = _check_vies_validity_iap
 
-    @mute_logger('odoo.addons.account.models.partner')
+    @mute_logger('odoo.addons.account.models.res_partner')
     def test_missing_company_country(self):
         company = self.add_company('base.test_company_template', {
             'name': 'Test Company No Country',
@@ -34,7 +34,7 @@ class TestStructure(TransactionCase):
         invalid = partner._get_vat_required_valid(company=company)
         self.assertEqual(invalid, False)
 
-    @mute_logger('odoo.addons.account.models.partner')
+    @mute_logger('odoo.addons.account.models.res_partner')
     def test_parent_validation(self):
         """Test the validation with company and contact"""
 
