@@ -159,12 +159,13 @@ class StockWarehouseOrderpoint(models.Model):
     _inherit = "stock.warehouse.orderpoint"
 
     show_supplier = fields.Boolean('Show supplier column', compute='_compute_show_supplier')
-    supplier_id = fields.Many2one(
-        'product.supplierinfo', string='Vendor Pricelist', check_company=True,
-        ui_domain="['|', ('product_id', '=', product_id), '&', ('product_id', '=', False), ('product_tmpl_id', '=', product_tmpl_id)]",
-        inverse='_inverse_supplier_id',
+    partner_id = fields.Many2one(
+        'res.partner', string='Vendor', check_company=True, index='btree_not_null',
+        inverse='_inverse_partner_id',
+        help="Vendor to buy from. The best matching pricelist of this vendor is used when creating the RFQ. "
+             "If empty, the vendor of the best matching pricelist of the product is used.",
     )
-    supplier_id_placeholder = fields.Char(compute='_compute_supplier_id_placeholder')
+    partner_id_placeholder = fields.Char(compute='_compute_partner_id_placeholder')
     vendor_ids = fields.One2many(related='product_id.seller_ids', string="Vendors")
     effective_vendor_id = fields.Many2one(
         'res.partner', search='_search_effective_vendor_id', compute='_compute_effective_vendor_id',
@@ -175,22 +176,22 @@ class StockWarehouseOrderpoint(models.Model):
     def _inverse_route_id(self):
         for orderpoint in self:
             if not orderpoint.route_id:
-                orderpoint.supplier_id = False
+                orderpoint.partner_id = False
         super()._inverse_route_id()
 
-    @api.depends('supplier_id')
+    @api.depends('partner_id')
     def _compute_deadline_date(self):
         """ Extend to add more depends values """
         super()._compute_deadline_date()
 
-    @api.depends('product_id.purchase_order_line_ids.product_qty', 'product_id.purchase_order_line_ids.state', 'supplier_id', 'supplier_id.uom_id', 'product_id.seller_ids', 'product_id.seller_ids.uom_id')
+    @api.depends('product_id.purchase_order_line_ids.product_qty', 'product_id.purchase_order_line_ids.state', 'partner_id', 'product_id.seller_ids', 'product_id.seller_ids.uom_id')
     def _compute_qty_to_order_computed(self):
         """ Extend to add more depends values
         TODO: Probably performance costly due to x2many in depends
         """
         return super()._compute_qty_to_order_computed()
 
-    @api.depends('supplier_id')
+    @api.depends('partner_id')
     def _compute_lead_days(self):
         return super()._compute_lead_days()
 
@@ -214,21 +215,20 @@ class StockWarehouseOrderpoint(models.Model):
         for orderpoint in self:
             orderpoint.show_supplier = orderpoint.effective_route_id.id in buy_route
 
-    def _inverse_supplier_id(self):
+    def _inverse_partner_id(self):
         for orderpoint in self:
-            if not orderpoint.route_id and orderpoint.supplier_id:
+            if not orderpoint.route_id and orderpoint.partner_id:
                 orderpoint.route_id = orderpoint._get_default_route(force_action="buy")
 
-    @api.depends('effective_route_id', 'supplier_id', 'rule_ids', 'product_id.seller_ids', 'product_id.seller_ids.delay')
-    def _compute_supplier_id_placeholder(self):
+    @api.depends('effective_route_id', 'partner_id', 'rule_ids', 'product_id.seller_ids', 'product_id.seller_ids.delay')
+    def _compute_partner_id_placeholder(self):
         for orderpoint in self:
-            orderpoint.supplier_id_placeholder = self.env['product.supplierinfo']._get_seller_info_display_name(
-                orderpoint._get_default_supplier())
+            orderpoint.partner_id_placeholder = orderpoint._get_default_supplier().get('partner_id', self.env['res.partner']).display_name or ''
 
-    @api.depends('effective_route_id', 'supplier_id', 'rule_ids', 'product_id.seller_ids', 'product_id.seller_ids.delay')
+    @api.depends('effective_route_id', 'partner_id', 'rule_ids', 'product_id.seller_ids', 'product_id.seller_ids.delay')
     def _compute_effective_vendor_id(self):
         for orderpoint in self:
-            orderpoint.effective_vendor_id = orderpoint.supplier_id.partner_id or orderpoint._get_default_supplier().get('partner_id')
+            orderpoint.effective_vendor_id = orderpoint.partner_id or orderpoint._get_default_supplier().get('partner_id')
 
     def _search_effective_vendor_id(self, operator, value):
         target_partners = self.env['res.partner'].search([('id', operator, value)])
@@ -262,7 +262,9 @@ class StockWarehouseOrderpoint(models.Model):
     def _compute_show_supply_warning(self):
         for orderpoint in self:
             if 'buy' in orderpoint.rule_ids.mapped('action') and not orderpoint.show_supply_warning:
-                orderpoint.show_supply_warning = not orderpoint.vendor_ids \
+                company_sellers = orderpoint.vendor_ids.filtered(
+                    lambda s: not s.company_id or s.company_id == orderpoint.company_id)
+                orderpoint.show_supply_warning = not company_sellers \
                     and not orderpoint.product_id._has_confirmed_purchase(orderpoint.company_id)
                 continue
             super(StockWarehouseOrderpoint, orderpoint)._compute_show_supply_warning()
@@ -294,6 +296,7 @@ class StockWarehouseOrderpoint(models.Model):
         return super()._get_default_route(force_action=force_action)
 
     def _get_default_supplier(self):
+        """ Seller information of the best pricelist, regardless of the vendor set on the orderpoint. """
         self.ensure_one()
         if self.show_supplier and self.product_id:
             return self.env['stock.rule']._pick_supplier(
@@ -302,10 +305,21 @@ class StockWarehouseOrderpoint(models.Model):
         else:
             return {}
 
+    def _get_vendor_supplier_info(self, qty=None):
+        """ Seller information of the best pricelist of the vendor set on the orderpoint,
+            using the same logic as the buy rule to stay consistent with the generated RFQ. """
+        self.ensure_one()
+        if not (self.partner_id and self.product_id):
+            return {}
+        return self.env['stock.rule']._pick_supplier(
+            self.company_id, self.product_id, partner=self.partner_id, qty=qty, uom=self.uom_id
+        )
+
     def _get_lead_days_values(self):
         values = super()._get_lead_days_values()
-        if self.supplier_id:
-            values['supplierinfo'] = self.supplier_id
+        supplierinfo = self._get_vendor_supplier_info().get('supplierinfo')
+        if supplierinfo:
+            values['supplierinfo'] = supplierinfo
         return values
 
     def _get_replenishment_order_notification(self, written_after=None):
@@ -333,7 +347,8 @@ class StockWarehouseOrderpoint(models.Model):
 
     def _prepare_procurement_values(self, date=False):
         values = super()._prepare_procurement_values(date=date)
-        values['supplierinfo_id'] = self.supplier_id
+        if self.partner_id:
+            values['procurement_partner'] = self.partner_id
         return values
 
     def _get_replenishment_multiple_alternative(self, qty_to_order):
@@ -347,7 +362,8 @@ class StockWarehouseOrderpoint(models.Model):
             planned_date -= relativedelta.relativedelta(days=int(global_horizon_days))
         date_deadline = planned_date or fields.Date.today()
         dates_info = self.product_id._get_dates_info(date_deadline, self.location_id, route_ids=self.route_id)
-        seller_info = self.supplier_id._get_seller_info() or self.product_id.with_company(self.company_id)._select_seller(
+        seller_info = self.product_id.with_company(self.company_id)._select_seller(
+            partner_id=self.partner_id,
             quantity=qty_to_order,
             date=max(dates_info['date_order'].date(), fields.Date.today()),
             uom_id=self.uom_id
@@ -362,17 +378,6 @@ class StockWarehouseOrderpoint(models.Model):
             product_uom_qty = orderpoint.product_id.uom_id._compute_quantity(product_qty, orderpoint.uom_id, round=False)
             res[orderpoint.id] += product_uom_qty
         return res
-
-    def _order_field_to_sql(self, table, field_expr, direction, nulls):
-        # Override the order by logic for 'supplier_id' to sort by vendor name
-        if field_expr == 'supplier_id':
-            # get partner_id from supplierinfo
-            supplier_table = table._join('supplier_id')
-            # sort by vendor name using 'partner_id'
-            return self.env['product.supplierinfo']._order_field_to_sql(
-                supplier_table, 'partner_id', direction, nulls,
-            )
-        return super()._order_field_to_sql(table, field_expr, direction, nulls)
 
 
 class StockLot(models.Model):

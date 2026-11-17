@@ -1677,7 +1677,7 @@ class TestPosStockFlow(CommonPosStockTest):
             'company_id': company_a.id,
             'product_min_qty': 1.0,
             'product_max_qty': 5.0,
-            'supplier_id': vendor_a.id,
+            'partner_id': vendor_a.partner_id.id,
         })
         payment_method_b = self.env['pos.payment.method'].create({
             'name': 'Cash B',

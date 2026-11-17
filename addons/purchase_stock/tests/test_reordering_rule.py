@@ -1239,9 +1239,60 @@ class TestReorderingRule(TransactionCase):
             'product_max_qty': 500,
         })
         product.seller_ids.with_context(orderpoint_id=orderpoint.id).action_set_supplier()
-        self.assertEqual(orderpoint.supplier_id, product.seller_ids, 'The supplier should be set in the orderpoint')
+        self.assertEqual(orderpoint.partner_id, product.seller_ids.partner_id, 'The vendor should be set in the orderpoint')
         self.assertEqual(orderpoint.uom_id, product.uom_id, 'The orderpoint uom should be the same as the product uom')
         self.assertEqual(orderpoint.qty_to_order, 6000)
+
+    def test_vendor_in_orderpoint(self):
+        """ The orderpoint holds a vendor (not a vendor pricelist): the RFQ must use
+        the best pricelist of that vendor, and the replenishment info wizard must
+        highlight that pricelist and hide "Set as Vendor" on all its pricelists. """
+        other_vendor = self.env['res.partner'].create({'name': 'Cheaper Vendor'})
+        product = self.env['product.product'].create({
+            'name': 'Product Vendor RR',
+            'is_storable': True,
+            'route_ids': [Command.link(self.buy_route.id)],
+            'seller_ids': [
+                Command.create({'partner_id': self.partner.id, 'price': 10.0}),
+                Command.create({'partner_id': self.partner.id, 'price': 8.0}),
+                Command.create({'partner_id': other_vendor.id, 'price': 5.0}),
+            ],
+        })
+        smith_expensive, smith_best, other_seller = product.seller_ids.sorted('id')
+        warehouse = self.env['stock.warehouse'].search([('company_id', '=', self.env.company.id)], limit=1)
+        orderpoint = self.env['stock.warehouse.orderpoint'].create({
+            'warehouse_id': warehouse.id,
+            'location_id': warehouse.lot_stock_id.id,
+            'product_id': product.id,
+            'product_min_qty': 5,
+            'product_max_qty': 10,
+        })
+        # No vendor set: the placeholder shows the vendor of the best pricelist
+        self.assertFalse(orderpoint.partner_id)
+        self.assertEqual(orderpoint.partner_id_placeholder, other_vendor.display_name)
+        self.assertEqual(orderpoint.effective_vendor_id, other_vendor)
+
+        # Set the vendor from the replenishment info wizard, clicking its most expensive pricelist
+        smith_expensive.with_context(orderpoint_id=orderpoint.id).action_set_supplier()
+        self.assertEqual(orderpoint.partner_id, self.partner)
+        self.assertEqual(orderpoint.effective_vendor_id, self.partner)
+
+        info = self.env['stock.replenishment.info'].create({'orderpoint_id': orderpoint.id})
+        self.assertEqual(info.supplierinfo_id, smith_best, "The best pricelist of the vendor should be highlighted")
+        sellers = product.seller_ids.with_context(orderpoint_id=orderpoint.id)
+        sellers._compute_show_set_supplier_button()
+        self.assertEqual(sellers.filtered('show_set_supplier_button'), other_seller)
+
+        # The vendor can be used to group the orderpoints
+        [(group_vendor, count)] = self.env['stock.warehouse.orderpoint']._read_group(
+            [('id', '=', orderpoint.id)], ['partner_id'], ['__count'])
+        self.assertEqual((group_vendor, count), (self.partner, 1))
+
+        # The RFQ uses the vendor of the orderpoint with its best price
+        orderpoint.action_replenish()
+        po_line = self.env['purchase.order.line'].search([('product_id', '=', product.id)])
+        self.assertEqual(po_line.partner_id, self.partner)
+        self.assertEqual(po_line.price_unit, 8.0)
 
     def test_tax_po_line_reordering_rule_with_branch_company(self):
         """

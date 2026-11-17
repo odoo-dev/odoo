@@ -8,9 +8,24 @@ class StockReplenishmentInfo(models.TransientModel):
     _inherit = 'stock.replenishment.info'
     _description = 'Stock supplier replenishment information'
 
-    supplierinfo_id = fields.Many2one(related='orderpoint_id.supplier_id')
+    supplierinfo_id = fields.Many2one(
+        'product.supplierinfo', compute='_compute_supplierinfo_id',
+        help="Pricelist that will be used to buy the product (best pricelist of the selected vendor, if any).")
     supplierinfo_ids = fields.Many2many('product.supplierinfo', compute='_compute_supplierinfo_ids', store=True)
     show_vendor_tab = fields.Boolean(compute='_compute_show_vendor_tab')
+
+    @api.depends('orderpoint_id', 'orderpoint_id.partner_id')
+    def _compute_supplierinfo_id(self):
+        for replenishment_info in self:
+            orderpoint = replenishment_info.orderpoint_id
+            if not orderpoint:
+                replenishment_info.supplierinfo_id = False
+                continue
+            if orderpoint.partner_id:
+                seller_info = orderpoint._get_vendor_supplier_info(qty=orderpoint.qty_to_order)
+            else:
+                seller_info = orderpoint._get_default_supplier()
+            replenishment_info.supplierinfo_id = seller_info.get('supplierinfo', False)
 
     @api.depends('orderpoint_id')
     def _compute_supplierinfo_ids(self):

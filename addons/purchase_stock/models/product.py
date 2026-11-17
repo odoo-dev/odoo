@@ -283,8 +283,9 @@ class ProductSupplierinfo(models.Model):
         orderpoint_id = self.env.context.get('orderpoint_id', self.env.context.get('default_orderpoint_id'))
         if orderpoint_id:
             orderpoint = self.env['stock.warehouse.orderpoint'].browse(orderpoint_id)
+            # A vendor is set as a whole: hide the button on all its pricelists
             self.filtered(
-                lambda s: s.id == orderpoint.supplier_id.id
+                lambda s: s.partner_id == orderpoint.partner_id
             ).show_set_supplier_button = False
 
     @api.depends('partner_id', 'min_qty', 'uom_id', 'currency_id', 'price')
@@ -296,13 +297,6 @@ class ProductSupplierinfo(models.Model):
             for supplier in self:
                 price_str = formatLang(self.env, supplier.price, currency_obj=supplier.currency_id)
                 supplier.display_name = f'{supplier.partner_id.display_name} ({supplier.min_qty} {supplier.uom_id.name} - {price_str})'
-
-    @api.model
-    def _get_seller_info_display_name(self, seller_info):
-        if not seller_info:
-            return ''
-        price_str = formatLang(self.env, seller_info['price'], currency_obj=seller_info['currency_id'])
-        return f"{seller_info['partner_id'].display_name} ({seller_info['min_qty']} {seller_info['uom_id'].name} - {price_str})"
 
     def action_set_supplier(self):
         self.ensure_one()
@@ -319,13 +313,16 @@ class ProductSupplierinfo(models.Model):
                 ]),
             ])
             orderpoint.route_id = self.env['stock.rule'].search(domain, limit=1).route_id.id
-        orderpoint.supplier_id = self
-        supplier_min_qty = self.uom_id._compute_quantity(self.min_qty, orderpoint.product_id.uom_id)
-        if orderpoint.qty_to_order < supplier_min_qty:
-            orderpoint.qty_to_order = supplier_min_qty
+        orderpoint.partner_id = self.partner_id
+        # The best pricelist of the vendor is used on the RFQ, not necessarily the clicked one
+        seller_info = orderpoint._get_vendor_supplier_info(qty=orderpoint.qty_to_order)
+        if seller_info:
+            supplier_min_qty = seller_info['uom_id']._compute_quantity(seller_info['min_qty'], orderpoint.product_id.uom_id)
+            if orderpoint.qty_to_order < supplier_min_qty:
+                orderpoint.qty_to_order = supplier_min_qty
         if self.env.context.get('replenish_id'):
             replenish = self.env['product.replenish'].browse(self.env.context.get('replenish_id'))
-            replenish.supplier_id = self
+            replenish.partner_id = self.partner_id
             return {
                 'type': 'ir.actions.act_window',
                 'name': 'Replenish',

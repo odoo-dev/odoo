@@ -9,6 +9,9 @@
                 <field string="Vendor" name="effective_vendor_id"/>
                 <field name="available_vendor"/>
             </xpath>
+            <xpath expr="//filter[@name='groupby_category']" position="after">
+                <filter string="Vendor" name="groupby_vendor" domain="[]" context="{'group_by': 'partner_id'}"/>
+            </xpath>
         </field>
     </record>
 </odoo>
