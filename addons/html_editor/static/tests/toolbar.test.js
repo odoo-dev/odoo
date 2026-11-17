@@ -1451,12 +1451,12 @@ test("toolbar works: show the correct vertical alignment", async () => {
         `)
     );
     await expandToolbar();
-    expect("button[name='vertical_align'] svg[name='vertical_align_top']").toHaveCount(1);
+    expect("button[name='vertical_align'] [data-icon='vertical_align_top']").toHaveCount(1);
     await click("button[name='vertical_align']");
     await animationFrame();
     await contains(".dropdown-menu button[name='vertical_align_middle']").click();
-    expect("button[name='vertical_align'] svg[name='vertical_align_middle']").toHaveCount(1);
-    expectElementCount(".dropdown-menu button.active svg[name='vertical_align_middle']", 0);
+    expect("button[name='vertical_align'] [data-icon='vertical_align_center']").toHaveCount(1);
+    expectElementCount(".dropdown-menu button.active [data-icon='vertical_align_center']", 0);
     expect(getContent(el)).toBe(
         unformat(`
             <p data-selection-placeholder=""><br></p>
@@ -1497,12 +1497,12 @@ test("toolbar works: show the correct vertical alignment after undo/redo", async
         `)
     );
     await expandToolbar();
-    expect("button[name='vertical_align'] svg[name='vertical_align_top']").toHaveCount(1);
+    expect("button[name='vertical_align'] [data-icon='vertical_align_top']").toHaveCount(1);
     await click("button[name='vertical_align']");
     await animationFrame();
     await contains(".dropdown-menu button[name='vertical_align_bottom']").click();
-    expect("button[name='vertical_align'] svg[name='vertical_align_bottom']").toHaveCount(1);
-    expectElementCount(".dropdown-menu button.active svg[name='vertical_align_bottom']", 0);
+    expect("button[name='vertical_align'] [data-icon='vertical_align_bottom']").toHaveCount(1);
+    expectElementCount(".dropdown-menu button.active [data-icon='vertical_align_bottom']", 0);
     expect(getContent(el)).toBe(
         unformat(`
             <p data-selection-placeholder=""><br></p>
@@ -1523,7 +1523,7 @@ test("toolbar works: show the correct vertical alignment after undo/redo", async
     );
     await press(["ctrl", "z"]);
     await animationFrame();
-    expect("button[name='vertical_align'] svg[name='vertical_align_top']").toHaveCount(1);
+    expect("button[name='vertical_align'] [data-icon='vertical_align_top']").toHaveCount(1);
     expect(getContent(el)).toBe(
         unformat(`
             <p data-selection-placeholder=""><br></p>
@@ -1544,7 +1544,7 @@ test("toolbar works: show the correct vertical alignment after undo/redo", async
     );
     await press(["ctrl", "y"]);
     await animationFrame();
-    expect("button[name='vertical_align'] svg[name='vertical_align_bottom']").toHaveCount(1);
+    expect("button[name='vertical_align'] [data-icon='vertical_align_bottom']").toHaveCount(1);
     expect(getContent(el)).toBe(
         unformat(`
             <p data-selection-placeholder=""><br></p>
