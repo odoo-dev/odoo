@@ -39,7 +39,6 @@ from . import account_incoterms
 from . import decimal_precision
 from . import digest
 from . import kpi_provider
-from . import res_users
 from . import ir_attachment
 from . import ir_actions_report
 from . import ir_http
