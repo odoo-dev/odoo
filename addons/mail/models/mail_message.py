@@ -677,6 +677,16 @@ class Message(models.Model):
             vals.pop('author_id', None)
             vals.pop('email_from', None)
         record_changed = 'model' in vals or 'res_id' in vals
+        if record_changed and not self.env.is_system():
+            raise AccessError(_("Only administrators can modify 'model' and 'res_id' fields."))
+        if (
+            "message_type" in vals
+            and "user_notification" in [vals["message_type"], *self.mapped("message_type")]
+            and not self.env.is_system()
+        ):
+            raise AccessError(
+                _("Only administrators can change a message to or from a user notification."),
+            )
         if record_changed or 'message_type' in vals:
             self._invalidate_documents()
         res = super(Message, self).write(vals)

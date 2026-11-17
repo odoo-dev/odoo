@@ -596,17 +596,37 @@ class TestMailMessageAccess(MessageAccessCommon):
         """ Test updating message envelope require some privileges """
         message = self.record_internal.with_user(self.user_employee).message_ids[0]
         message.write({'body': 'Update Me'})
-        # To change in 18+
-        message.write({'model': 'res.partner'})
-        message.sudo().write({'model': self.record_internal._name})  # back to original model
+        with self.assertRaises(AccessError):
+            message.write({'model': 'res.partner'})
         # To change in 18+
         message.write({'partner_ids': [(4, self.user_portal_2.partner_id.id)]})
-        # To change in 18+
-        message.write({'res_id': self.record_public.id})
+        with self.assertRaises(AccessError):
+            message.write({'res_id': self.record_public.id})
         # To change in 18+
         message.write({'notification_ids': [
             (0, 0, {'res_partner_id': self.user_portal_2.partner_id.id})
         ]})
+
+    @mute_logger("odoo.addons.base.models.ir_rule")
+    def test_access_write_message_type_user_notification(self):
+        """Test only an admin can change a message to or from a user notification"""
+        notification = self.env["mail.message"].with_user(self.user_employee).create({
+            "message_type": "user_notification",
+            "model": self.record_admin._name,
+            "partner_ids": [(4, self.user_employee.partner_id.id)],
+            "reply_to": "avoid.catchall@my.test.com",
+            "res_id": self.record_admin.id,
+        })
+        with self.assertRaises(AccessError):
+            notification.write({"message_type": "comment"})
+        notification.sudo().write({"message_type": "comment"})
+        comment = self.record_internal.with_user(self.user_employee).message_post(
+            body="Comment",
+            message_type="comment",
+        )
+        comment.write({"body": "Update Me"})
+        with self.assertRaises(AccessError):
+            comment.write({"message_type": "user_notification"})
 
     @mute_logger('odoo.addons.base.models.ir_rule')
     def test_access_write_portal_notification(self):
