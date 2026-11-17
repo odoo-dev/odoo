@@ -805,12 +805,27 @@ export class PosStore extends WithLazyGetterTrap {
 
     async deleteOrders(orders, serverIds = [], ignoreChange = false) {
         const ordersToDelete = [];
+        const offlineCancelledIds = [];
         const actionPosOrderCancelCall = async (orderIds) => {
-            await this.data.call("pos.order", "cancel_order_from_pos", [orderIds], {
-                context: {
-                    device_identifier: this.device.identifier,
-                },
-            });
+            if (!this.data.network.offline) {
+                try {
+                    await this.data.call("pos.order", "cancel_order_from_pos", [orderIds], {
+                        context: {
+                            device_identifier: this.device.identifier,
+                        },
+                    });
+                    // Resent cancellations leave the queue once the server has them
+                    orderIds.forEach((id) => this.pendingOrder["delete"].delete(id));
+                    this.savePendingOrders();
+                    return;
+                } catch (error) {
+                    // On a server error, the queued cancellations stay queued for the next sync
+                    if (!(error instanceof ConnectionLostError)) {
+                        throw error;
+                    }
+                }
+            }
+            offlineCancelledIds.push(...orderIds);
         };
         try {
             for (const order of orders) {
@@ -823,10 +838,16 @@ export class PosStore extends WithLazyGetterTrap {
                         const orderPresetDate = DateTime.fromISO(order.preset_time);
                         const isSame = DateTime.now().hasSame(orderPresetDate, "day");
                         if (!order.preset_time || isSame) {
-                            await this.sendOrderInPreparation(order, {
-                                cancelled: true,
-                                orderDone: true,
-                            });
+                            try {
+                                await this.sendOrderInPreparation(order, {
+                                    cancelled: true,
+                                    orderDone: true,
+                                });
+                            } catch (error) {
+                                if (!(error instanceof ConnectionLostError)) {
+                                    throw error;
+                                }
+                            }
                         }
                     }
 
@@ -839,10 +860,9 @@ export class PosStore extends WithLazyGetterTrap {
                 }
             }
 
-            if (serverIds.length > 0) {
-                await actionPosOrderCancelCall([
-                    ...new Set(serverIds.filter((id) => typeof id === "number")),
-                ]);
+            const serverOrderIds = [...new Set(serverIds.filter((id) => typeof id === "number"))];
+            if (serverOrderIds.length > 0) {
+                await actionPosOrderCancelCall(serverOrderIds);
             }
         } finally {
             // Remove orders locally at the end to avoid reactivity during the async process
@@ -850,6 +870,8 @@ export class PosStore extends WithLazyGetterTrap {
                 this.removeOrder(order, false);
                 this.removePendingOrder(order);
             }
+            // Queued after removePendingOrder, which would otherwise drop them
+            this.addPendingOrder(offlineCancelledIds, true);
         }
 
         return true;
@@ -898,7 +920,13 @@ export class PosStore extends WithLazyGetterTrap {
         const orderPathUuid = this.router.currentScreenParams().orderUuid;
         const order = this.models["pos.order"].find((order) => order.uuid === orderPathUuid);
         if (orderPathUuid && !order) {
-            await this.data.loadServerOrders([["uuid", "=", orderPathUuid]]);
+            try {
+                await this.data.loadServerOrders([["uuid", "=", orderPathUuid]]);
+            } catch (error) {
+                if (!(error instanceof ConnectionLostError)) {
+                    throw error;
+                }
+            }
             const order = this.models["pos.order"].find((order) => order.uuid === orderPathUuid);
             if (order) {
                 this.setOrder(order);
@@ -912,9 +940,10 @@ export class PosStore extends WithLazyGetterTrap {
     }
 
     async afterProcessServerData() {
-        // Adding the not synced paid orders to the pending orders
+        this.restorePendingOrders();
+        // Also covers a queue lost with the browser storage: paid orders must reach the server
         const paidUnsyncedOrders = this.models["pos.order"].filter((order) => order.isUnsyncedPaid);
-        // Orders known by the server aren't dirty after a reload, they would be skipped by the sync
+        // Their dirty flag can be missing (stored before it was saved): the sync would skip them
         paidUnsyncedOrders.forEach((order) => order._markDirty());
         const paidUnsyncedOrderIds = paidUnsyncedOrders.map((order) => order.id);
 
@@ -1630,24 +1659,18 @@ export class PosStore extends WithLazyGetterTrap {
     }
 
     addPendingOrder(orderIds, remove = false) {
-        if (remove) {
-            for (const id of orderIds) {
+        for (const id of orderIds) {
+            if (remove) {
                 this.pendingOrder["create"].delete(id);
                 this.pendingOrder["write"].delete(id);
-            }
-
-            this.pendingOrder["delete"].add(...orderIds);
-            return true;
-        }
-
-        for (const id of orderIds) {
-            if (typeof id === "number") {
+                this.pendingOrder["delete"].add(id);
+            } else if (typeof id === "number") {
                 this.pendingOrder["write"].add(id);
             } else {
                 this.pendingOrder["create"].add(id);
             }
         }
-
+        this.savePendingOrders();
         return true;
     }
 
@@ -1672,6 +1695,18 @@ export class PosStore extends WithLazyGetterTrap {
         };
     }
 
+    /**
+     * Number of operations the next sync has to send to the server.
+     */
+    getPendingSyncCount() {
+        const { orderToCreate, orderToUpdate } = this.getPendingOrder();
+        const orders = new Set([
+            ...[...orderToCreate, ...orderToUpdate].filter((order) => order.isDirty()),
+            ...this.models["pos.order"].filter((order) => order.isUnsyncedPaid),
+        ]);
+        return orders.size + this.pendingOrder["delete"].size + this.data.network.unsyncData.length;
+    }
+
     shouldCreatePendingOrder(order) {
         return (
             order.lines.length > 0 ||
@@ -1687,6 +1722,7 @@ export class PosStore extends WithLazyGetterTrap {
         this.pendingOrder["create"].delete(order.uuid);
         this.pendingOrder["write"].delete(order.id);
         this.pendingOrder["delete"].delete(order.id);
+        this.savePendingOrders();
         return true;
     }
 
@@ -1696,6 +1732,51 @@ export class PosStore extends WithLazyGetterTrap {
             write: new Set(),
             delete: new Set(),
         };
+        this.savePendingOrders();
+    }
+
+    getPendingOrdersKey() {
+        // Same scope as the IndexedDB holding the orders: config and database
+        return `pos.pending_orders.${this.data.databaseName}`;
+    }
+
+    /**
+     * Keep the queue across reloads: the orders are restored from IndexedDB, but nothing else
+     * tells which ones the next sync has to send, nor which ones were cancelled, as cancelled
+     * orders are removed locally right away.
+     */
+    savePendingOrders() {
+        const queue = Object.entries(this.pendingOrder).map(([operation, ids]) => [
+            operation,
+            [...ids],
+        ]);
+        try {
+            localStorage.setItem(
+                this.getPendingOrdersKey(),
+                JSON.stringify(Object.fromEntries(queue))
+            );
+            this.data.network.failedStorages.delete("localStorage");
+        } catch (error) {
+            // E.g. over quota: the queue is still sent as long as this tab stays open
+            this.data.reportStorageFailure(
+                "localStorage",
+                `Could not save the pending orders queue: ${error}`
+            );
+        }
+    }
+
+    restorePendingOrders() {
+        const queue = JSON.parse(localStorage.getItem(this.getPendingOrdersKey())) || {};
+        for (const [operation, ids] of Object.entries(queue)) {
+            ids.forEach((id) => this.pendingOrder[operation].add(id));
+        }
+        for (const id of queue.delete || []) {
+            // The server sends the order as open until it receives the cancellation
+            const order = this.models["pos.order"].get(id);
+            if (order && !order.finalized) {
+                this.data.localDeleteCascade(order);
+            }
+        }
     }
 
     getSyncAllOrdersContext(orders, options = {}) {
@@ -1735,7 +1816,18 @@ export class PosStore extends WithLazyGetterTrap {
 
         // Delete orders first
         if (orderIdsToDelete.length > 0) {
-            await this.deleteOrders([], orderIdsToDelete);
+            try {
+                await this.deleteOrders([], orderIdsToDelete);
+            } catch (error) {
+                // The cancellations stay queued: sync the orders anyway and retry them next time
+                logPosMessage(
+                    "Store",
+                    "syncAllOrders",
+                    "Failed to cancel orders on the server, will retry on next sync",
+                    CONSOLE_COLOR,
+                    [error]
+                );
+            }
         }
 
         // Allow us to force the sync of the orders In the case of
@@ -1752,10 +1844,10 @@ export class PosStore extends WithLazyGetterTrap {
 
         for (const order of orders) {
             const context = this.getSyncAllOrdersContext([order], options);
-            await this.preSyncAllOrders([order]);
             this.syncingOrders.add(order.uuid);
 
             try {
+                await this.preSyncAllOrders([order]);
                 const serialized = order.serializeForORM({ keepCommands: true });
                 const data = await this.data.call("pos.order", "sync_from_ui", [[serialized]], {
                     context,

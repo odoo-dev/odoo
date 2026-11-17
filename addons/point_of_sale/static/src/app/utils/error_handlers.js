@@ -3,6 +3,7 @@ import { odooExceptionTitleMap, ErrorDialog } from "@web/core/errors/error_dialo
 import { ConnectionLostError, RPCError } from "@web/core/network/rpc";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { useService } from "@web/core/utils/hooks";
+import { useEnv } from "@web/owl2/utils";
 import { _t } from "@web/core/l10n/translation";
 
 export function handleRPCError(error, dialog) {
@@ -34,24 +35,27 @@ function rpcErrorHandler({ originalError }) {
 }
 registry.category("error_handlers").add("pos-rpcErrorHandler", rpcErrorHandler);
 
+// Stands for the network state of the pos service until it is available
+const startupNetwork = {};
+
 /** @type {import("registries").ErrorHandler} */
 export function offlineErrorHandler({ originalError }) {
-    const pos = useService("pos");
-    const dialog = useService("dialog");
-    if (originalError instanceof ConnectionLostError) {
-        if (!pos.data.network.warningTriggered) {
-            dialog.add(AlertDialog, {
-                title: _t("Connection Lost"),
-                body: _t(
-                    "Until the connection is reestablished, Odoo Point of Sale will operate with limited functionality."
-                ),
-                confirmLabel: _t("Continue with limited functionality"),
-            });
-            pos.data.network.warningTriggered = true;
-        }
-
-        return true;
+    if (!(originalError instanceof ConnectionLostError)) {
+        return;
     }
+    // The pos service is not available yet when the connection drops at start
+    const network = useEnv().services.pos?.data.network ?? startupNetwork;
+    if (!network.warningTriggered) {
+        useService("dialog").add(AlertDialog, {
+            title: _t("Connection Lost"),
+            body: _t(
+                "Until the connection is reestablished, Odoo Point of Sale will operate with limited functionality."
+            ),
+            confirmLabel: _t("Continue with limited functionality"),
+        });
+        network.warningTriggered = true;
+    }
+    return true;
 }
 registry.category("error_handlers").add("pos-offlineErrorHandler", offlineErrorHandler);
 

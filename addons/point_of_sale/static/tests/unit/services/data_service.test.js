@@ -1,5 +1,5 @@
 import { test, expect, describe } from "@odoo/hoot";
-import { MockServer } from "@web/../tests/web_test_helpers";
+import { MockServer, patchWithCleanup } from "@web/../tests/web_test_helpers";
 import { patch } from "@web/core/utils/patch";
 import { getFilledOrder, setupPosEnv } from "../utils";
 import { definePosModels } from "../data/generate_model_definitions";
@@ -15,8 +15,12 @@ describe("data_service", () => {
         patch(store.data.orm, {
             call: () => Promise.reject(new ConnectionLostError("/web/dataset/call_kw")),
         });
+        const session = { ...store.models["pos.session"].getFirst().raw };
         patch(store.data, {
-            getCachedServerDataFromIndexedDB: async () => ({ "ir.ui.view": views }),
+            getCachedServerDataFromIndexedDB: async () => ({
+                "ir.ui.view": views,
+                "pos.session": [session],
+            }),
         });
 
         await store.data.initData();
@@ -144,5 +148,65 @@ describe("data_service", () => {
         bus.handleMessage({ data: { type: "BUS:CONNECT" } });
         expect.verifySteps(["addChannel", "addChannel"]);
         expect(addedListeners).toBe(0);
+    });
+});
+
+describe("local persistence", () => {
+    test("a failed local write is reported once and stops the pruning", async () => {
+        const store = await setupPosEnv();
+        const data = store.data;
+        await getFilledOrder(store);
+        let dialogCount = 0;
+        patchWithCleanup(data.dialog, {
+            add() {
+                dialogCount++;
+            },
+        });
+        let pruned = false;
+        data.indexedDB.create = async () => false;
+        data.indexedDB.readAll = async () => {
+            pruned = true;
+            return {};
+        };
+
+        await data._synchronizeLocalDataInIndexedDB();
+        await data._synchronizeLocalDataInIndexedDB();
+        expect([...data.network.failedStorages]).toEqual(["IndexedDB"]);
+        expect(dialogCount).toBe(1);
+        expect(pruned).toBe(false);
+
+        data.indexedDB.create = async () => true;
+        await data._synchronizeLocalDataInIndexedDB();
+        expect(data.network.failedStorages.size).toBe(0);
+        expect(pruned).toBe(true);
+    });
+
+    test("the local data pass returns what it writes", async () => {
+        const store = await setupPosEnv();
+        const order = await getFilledOrder(store);
+
+        const result = await store.data._synchronizeLocalDataInIndexedDB();
+
+        expect(result["pos.order"].map((o) => o.uuid)).toInclude(order.uuid);
+        const lineUuids = result["pos.order.line"].map((l) => l.uuid);
+        for (const line of order.lines) {
+            expect(lineUuids).toInclude(line.uuid);
+        }
+    });
+
+    test("a connection loss while checking the orders on the server keeps them", async () => {
+        const store = await setupPosEnv();
+        const order = await getFilledOrder(store);
+        await store.syncAllOrders();
+        expect(order.isSynced).toBe(true);
+
+        patchWithCleanup(store.data, {
+            async callRelated() {
+                throw new ConnectionLostError();
+            },
+        });
+        await store.data.checkAndDeleteMissingOrders({ "pos.order": [order] });
+
+        expect(store.models["pos.order"].get(order.id)).toBe(order);
     });
 });

@@ -154,6 +154,11 @@ export function isSyncStatusConnected() {
         trigger: negate(".oe_status", ".pos-rightheader .status-buttons"),
     };
 }
+export function isNotLoading() {
+    return {
+        trigger: negate(".oe_status .oi-spin", ".pos-rightheader .status-buttons"),
+    };
+}
 export function clickPlanButton() {
     return [
         {

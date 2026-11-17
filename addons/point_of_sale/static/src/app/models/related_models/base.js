@@ -57,10 +57,15 @@ export class Base extends WithLazyGetterTrap {
      */
     restoreState(uiState) {
         this.initState();
+        // The dirty flag is saved with the UI state, see serializeState
+        const { _dirty, ...restoredUiState } = uiState;
         this.uiState = {
             ...this.uiState,
-            ...uiState,
+            ...restoredUiState,
         };
+        if (_dirty) {
+            this._dirty = true;
+        }
     }
 
     isDirty() {
@@ -101,7 +106,7 @@ export class Base extends WithLazyGetterTrap {
         if (!this.uiState) {
             return;
         }
-        return { ...this.uiState };
+        return { ...this.uiState, _dirty: Boolean(this._dirty) };
     }
 
     backLink(link) {

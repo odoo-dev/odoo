@@ -14,6 +14,8 @@ import {
     RPCError,
 } from "@web/core/network/rpc";
 import { _t } from "@web/core/l10n/translation";
+import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { DialogPlugin } from "@web/core/dialog/dialog_plugin";
 import DeviceIdentifierSequence from "../utils/devices_identifier_sequence";
 import { logPosMessage } from "../utils/pretty_console_log";
 import { deserializeDateTime } from "@web/core/l10n/dates";
@@ -39,14 +41,17 @@ export class PosDataPlugin extends Plugin {
     debugMode = usePlugin(DebugModePlugin);
     bus = usePlugin(BusPlugin);
     orm = usePlugin(ORM);
+    dialog = usePlugin(DialogPlugin);
     syncInProgress = signal(false);
     dataLoadedFromCache = signal(false);
     localUnsyncedPaidOrderUuids = signal.Set(new Set()); // UUIDs of paid orders written to IndexedDB but not yet confirmed synced to the server.
+    storageFailureDialogShown = false;
     network = proxy({
         warningTriggered: false,
         offline: false,
         loading: true,
         unsyncData: [],
+        failedStorages: new Set(), // Storages whose last write failed: "IndexedDB", "localStorage"
     });
 
     setup() {
@@ -258,6 +263,46 @@ export class PosDataPlugin extends Plugin {
         });
     }
 
+    /**
+     * @param {Object<string, Object[]>} recordsByModel records serialized for IndexedDB
+     * @returns {Promise<boolean>} whether every record was written
+     */
+    async writeLocalRecords(recordsByModel) {
+        const failedModels = [];
+        for (const [model, records] of Object.entries(recordsByModel)) {
+            if (!(await this.indexedDB.create(model, records))) {
+                failedModels.push(model);
+            }
+        }
+        if (!failedModels.length) {
+            return true;
+        }
+        this.reportStorageFailure(
+            "IndexedDB",
+            `Could not write ${failedModels.join(", ")} in IndexedDB: records only exist in memory`
+        );
+        return false;
+    }
+
+    /**
+     * Data that could not be saved on this device only lives in this tab: show it in the
+     * navbar until the storage is written again, and warn the cashier once.
+     * @param {"IndexedDB"|"localStorage"} storage
+     */
+    reportStorageFailure(storage, message) {
+        this.network.failedStorages.add(storage);
+        logPosMessage("DataService", "reportStorageFailure", message, CONSOLE_COLOR, [], true);
+        if (!this.storageFailureDialogShown) {
+            this.storageFailureDialogShown = true;
+            this.dialog.add(AlertDialog, {
+                title: _t("Orders Could Not Be Saved Locally"),
+                body: _t(
+                    "Some orders could not be saved on this device and only exist in this browser tab. Do not reload or close this page before they have been synced."
+                ),
+            });
+        }
+    }
+
     async synchronizeLocalDataInIndexedDB() {
         return this.indexedDBMutex.exec(async () => await this._synchronizeLocalDataInIndexedDB());
     }
@@ -273,65 +318,52 @@ export class PosDataPlugin extends Plugin {
         const modelsParams = Object.entries(this.opts.databaseTable);
         const data = {};
         const dataToKeep = {};
+        const putRecords = (model, records) => {
+            const key = this.opts.databaseTable[model].key;
+            data[model] = records.map((r) => r.serializeForIndexedDB());
+            dataToKeep[model] = new Set(records.map((r) => r[key]));
+        };
         let orderlinesToKeep = [];
 
         for (const [model, params] of modelsParams) {
             if (!params.getRecordsBasedOnLines) {
-                const data = this.models[model].getAll();
-                const recordsToPut = data.filter((record) => !params.condition(record));
-
+                const recordsToPut = this.models[model]
+                    .getAll()
+                    .filter((record) => !params.condition(record));
                 if (model === "pos.order.line") {
                     orderlinesToKeep = recordsToPut;
                 }
-
-                data[model] = recordsToPut;
-
-                if (recordsToPut.length) {
-                    await this.indexedDB.create(
-                        model,
-                        recordsToPut.map((r) => r.serializeForIndexedDB())
-                    );
-                    dataToKeep[model] = recordsToPut.map((r) => r[params.key]);
-                }
+                putRecords(model, recordsToPut);
             }
         }
 
         for (const [model, params] of modelsParams) {
             if (params.getRecordsBasedOnLines) {
-                const recordsToPut = params.getRecordsBasedOnLines(orderlinesToKeep);
-
-                if (recordsToPut?.length) {
-                    const uniqueRecords = [
-                        ...new Map(recordsToPut.map((r) => [r[params.key], r])).values(),
-                    ];
-
-                    data[model] = uniqueRecords;
-
-                    await this.indexedDB.create(
-                        model,
-                        uniqueRecords.map((r) => r.serializeForIndexedDB())
-                    );
-                    dataToKeep[model] = uniqueRecords.map((r) => r[params.key]);
-                }
+                const recordsToPut = params.getRecordsBasedOnLines(orderlinesToKeep) || [];
+                putRecords(model, [
+                    ...new Map(recordsToPut.map((r) => [r[params.key], r])).values(),
+                ]);
             }
         }
 
-        this.indexedDB.readAll(Object.keys(this.opts.databaseTable)).then((data) => {
-            if (!data) {
+        if (!(await this.writeLocalRecords(data))) {
+            // Pruning would delete the records that could not be written
+            return data;
+        }
+        this.network.failedStorages.delete("IndexedDB");
+
+        this.indexedDB.readAll(Object.keys(this.opts.databaseTable)).then((idbData) => {
+            if (!idbData) {
                 return;
             }
 
-            for (const [model, records] of Object.entries(data)) {
+            for (const [model, records] of Object.entries(idbData)) {
                 const key = this.opts.databaseTable[model].key;
                 const keysToDelete = [];
 
                 for (const record of records) {
                     const localRecord = this.models[model].get(record.id);
-                    if (!localRecord) {
-                        keysToDelete.push(record[key]);
-                        continue;
-                    }
-                    if (!dataToKeep[model] || !dataToKeep[model].includes(record[key])) {
+                    if (!localRecord || !dataToKeep[model].has(record[key])) {
                         keysToDelete.push(record[key]);
                     }
                 }
@@ -380,26 +412,9 @@ export class PosDataPlugin extends Plugin {
     }
 
     async synchronizeServerDataInIndexedDB(serverData = {}) {
-        try {
-            for (const [model, data] of Object.entries(serverData)) {
-                try {
-                    await this.indexedDB.create(model, data);
-                } catch {
-                    logPosMessage(
-                        "DataService",
-                        "synchronizeServerDataInIndexedDB",
-                        `Error while updating ${model} in indexedDB.`,
-                        CONSOLE_COLOR
-                    );
-                }
-            }
-        } catch {
-            logPosMessage(
-                "DataService",
-                "synchronizeServerDataInIndexedDB",
-                "Error while synchronizing server data in indexedDB.",
-                CONSOLE_COLOR
-            );
+        for (const [model, data] of Object.entries(serverData)) {
+            // Failures are logged by IndexedDB.create
+            await this.indexedDB.create(model, data);
         }
     }
 
@@ -607,12 +622,25 @@ export class PosDataPlugin extends Plugin {
     }
 
     handleLoadingDataError(error, localData) {
+        const hasUsableSession = localData["pos.session"]?.some(
+            (record) => record.id === parseInt(odoo.pos_session_id)
+        );
+        if (!hasUsableSession) {
+            logPosMessage(
+                "DataService",
+                "loadInitialData",
+                `Cannot load session ${odoo.pos_session_id} and no usable cached session is available.`,
+                CONSOLE_COLOR,
+                [],
+                true
+            );
+            throw error;
+        }
+
         if (error instanceof ConnectionLostError) {
+            // Server unreachable, start silently on the cached data
             this.network.offline = true;
-            // Server unreachable, fallback silently on local data if there is any
-            if (Object.values(localData).some((records) => records.length)) {
-                return localData;
-            }
+            return localData;
         }
 
         let message = _t("An error occurred while loading the Point of Sale: \n");
@@ -1115,6 +1143,8 @@ export class PosDataPlugin extends Plugin {
         const finalizedStates = new Map(
             this.models["pos.order"].filter((o) => o.finalized).map((o) => [o.uuid, o.state])
         );
+        // Let ConnectionLostError propagate: an empty result must mean the server has no such
+        // orders, callers like checkAndDeleteMissingOrders delete local orders based on it.
         const result = await this.callRelated(
             "pos.order",
             "read_pos_orders",
@@ -1140,16 +1170,26 @@ export class PosDataPlugin extends Plugin {
     }
 
     async checkAndDeleteMissingOrders(results) {
-        if (results && results["pos.order"]) {
-            const ids = new Set(results["pos.order"].filter((o) => o.isSynced).map((o) => o.id));
-            if (ids.size) {
-                const orders = await this.loadServerOrders([["id", "in", [...ids]]]);
-                const serverIds = orders.map((r) => r.id);
-                for (const id of [...ids]) {
-                    if (!serverIds.includes(id)) {
-                        this.localDeleteCascade(this.models["pos.order"].get(id));
-                    }
-                }
+        if (this.network.offline || !results?.["pos.order"]) {
+            return;
+        }
+        const ids = new Set(results["pos.order"].filter((o) => o.isSynced).map((o) => o.id));
+        if (!ids.size) {
+            return;
+        }
+        let orders;
+        try {
+            orders = await this.loadServerOrders([["id", "in", [...ids]]]);
+        } catch (error) {
+            if (error instanceof ConnectionLostError) {
+                return;
+            }
+            throw error;
+        }
+        const serverIds = orders.map((r) => r.id);
+        for (const id of ids) {
+            if (!serverIds.includes(id)) {
+                this.localDeleteCascade(this.models["pos.order"].get(id));
             }
         }
     }

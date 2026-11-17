@@ -1,13 +1,13 @@
 import { test, expect, describe } from "@odoo/hoot";
 import { getFilledOrder, setupPosEnv, createPaymentLine } from "../utils";
 import { definePosModels } from "../data/generate_model_definitions";
-import { ConnectionLostError } from "@web/core/network/rpc";
+import { ConnectionLostError, RPCError } from "@web/core/network/rpc";
 import {
     getStrNotes,
     filterChangeByCategories,
 } from "@point_of_sale/app/models/utils/order_change";
 import { prepareRoundingVals } from "../accounting/utils";
-import { getService, patchWithCleanup } from "@web/../tests/web_test_helpers";
+import { getService, MockServer, patchWithCleanup } from "@web/../tests/web_test_helpers";
 import { localization } from "@web/core/l10n/localization";
 import { PosNumberBufferPlugin } from "@point_of_sale/app/plugins/pos_number_buffer_plugin";
 import { patch } from "@web/core/utils/patch";
@@ -1188,5 +1188,207 @@ describe("pos_store.js", () => {
             await expect(store.reloadData()).rejects.toThrow("stop before leaving the page");
             expect.verifySteps(["resetIndexedDB, synced: true"]);
         });
+    });
+});
+
+describe("offline queue", () => {
+    test("counts what the next sync has to send", async () => {
+        const store = await setupPosEnv();
+        store.clearPendingOrder();
+        const baseline = store.getPendingSyncCount();
+
+        // Drafts outside the queue are local work, not pending sync
+        const draft = store.addNewOrder();
+        await store.addLineToOrder(
+            { product_tmpl_id: store.models["product.template"].get(5) },
+            draft
+        );
+        expect(store.getPendingSyncCount()).toBe(baseline);
+
+        const queued = await getFilledOrder(store);
+        const paid = await getFilledOrder(store);
+        paid.state = "paid";
+        store.addPendingOrder([998, 999], true);
+        store.data.network.unsyncData.push({
+            date: DateTime.now(),
+            uuid: "op",
+            try: 1,
+            args: [{}],
+        });
+        expect(store.getPendingSyncCount()).toBe(baseline + 5);
+
+        queued.unmarkDirty();
+        expect(store.getPendingSyncCount()).toBe(baseline + 4);
+    });
+
+    test("the queued orders are sent again after a reload", async () => {
+        const store = await setupPosEnv();
+        const queued = await getFilledOrder(store);
+        // Retail drafts stay local until payment: not in the queue
+        const localDraft = store.addNewOrder();
+        await store.addLineToOrder(
+            { product_tmpl_id: store.models["product.template"].get(5) },
+            localDraft
+        );
+
+        // Reload: the in-memory queue is gone
+        store.pendingOrder.create.clear();
+        patchWithCleanup(store, { syncAllOrders: async () => {} });
+        patchWithCleanup(store.deviceSync, { readDataFromServer: async () => ({}) });
+        await store.afterProcessServerData();
+
+        const toCreate = store.getPendingOrder().orderToCreate;
+        expect(toCreate).toInclude(queued);
+        expect(toCreate).not.toInclude(localDraft);
+    });
+
+    test("the dirty flag is restored with the UI state", async () => {
+        const store = await setupPosEnv();
+        const order = await getFilledOrder(store);
+        const dirtyState = order.serializeState();
+        order.unmarkDirty();
+        const cleanState = order.serializeState();
+
+        order.restoreState(cleanState);
+        expect(order.isDirty()).toBe(false);
+        order.restoreState(dirtyState);
+        expect(order.isDirty()).toBe(true);
+        expect("_dirty" in order.uiState).toBe(false);
+    });
+
+    test("an order failing to sync does not stop the sync of the next ones", async () => {
+        const store = await setupPosEnv();
+        const first = await getFilledOrder(store);
+        const second = await getFilledOrder(store);
+        patchWithCleanup(store.deviceSync, { readDataFromServer: async () => ({}) });
+        patchWithCleanup(store, {
+            async preSyncAllOrders(orders) {
+                if (orders[0] === first) {
+                    throw new Error("fiscal module unreachable");
+                }
+                return super.preSyncAllOrders(...arguments);
+            },
+        });
+
+        await store.syncAllOrders({ orders: [first, second] });
+
+        expect(first.isSynced).toBe(false);
+        expect(second.isSynced).toBe(true);
+    });
+
+    test("a queue that cannot be saved does not stop the order operations", async () => {
+        const store = await setupPosEnv();
+        const order = await getFilledOrder(store);
+        await store.syncAllOrders();
+        let quotaExceeded = true;
+        patchWithCleanup(localStorage, {
+            setItem(key) {
+                if (quotaExceeded && key === store.getPendingOrdersKey()) {
+                    throw new Error("Quota exceeded");
+                }
+                return super.setItem(...arguments);
+            },
+        });
+
+        store.data.network.offline = true;
+        expect(await store.deleteOrders([order])).toBe(true);
+
+        expect(store.models["pos.order"].get(order.id)).toBe(undefined);
+        expect(store.pendingOrder.delete.has(order.id)).toBe(true);
+        expect([...store.data.network.failedStorages]).toEqual(["localStorage"]);
+
+        // Writing IndexedDB does not save the queue: the failure stays shown
+        await store.data._synchronizeLocalDataInIndexedDB();
+        expect([...store.data.network.failedStorages]).toEqual(["localStorage"]);
+
+        quotaExceeded = false;
+        store.savePendingOrders();
+        expect(store.data.network.failedStorages.size).toBe(0);
+    });
+
+    test("a cancellation accepted while the orders are read does not reopen the order", async () => {
+        const store = await setupPosEnv();
+        const order = await getFilledOrder(store);
+        await store.syncAllOrders();
+        const orderId = order.id;
+        store.data.network.offline = true;
+        await store.deleteOrders([order]);
+        store.data.network.offline = false;
+        patchWithCleanup(store.data, {
+            async call(model, method) {
+                const result = await super.call(...arguments);
+                if (method === "read_config_open_orders") {
+                    // The order is read as open, then the server accepts its cancellation
+                    store.pendingOrder.delete.delete(orderId);
+                }
+                return result;
+            },
+        });
+
+        await store.deviceSync.readDataFromServer();
+
+        expect(store.models["pos.order"].get(orderId)).toBe(undefined);
+    });
+
+    test("offline cancellations survive a reload and server errors", async () => {
+        const store = await setupPosEnv();
+        const orders = [await getFilledOrder(store), await getFilledOrder(store)];
+        await store.syncAllOrders();
+        const orderIds = orders.map((order) => order.id);
+        const serverData = orders.map((order) => ({ ...order.raw }));
+
+        store.data.network.offline = true;
+        expect(await store.deleteOrders(orders)).toBe(true);
+        expect(orderIds.map((id) => store.models["pos.order"].get(id))).toEqual([
+            undefined,
+            undefined,
+        ]);
+        expect([...store.pendingOrder.delete]).toEqual(orderIds);
+
+        // Reload: the in-memory queue is gone and the server still sends the orders as open
+        store.pendingOrder.delete.clear();
+        store.models.connectNewData({ "pos.order": serverData });
+        store.restorePendingOrders();
+        expect([...store.pendingOrder.delete]).toEqual(orderIds);
+        expect(orderIds.map((id) => store.models["pos.order"].get(id))).toEqual([
+            undefined,
+            undefined,
+        ]);
+
+        // Back online, the orders read from the server are not reopened
+        store.data.network.offline = false;
+        await store.deviceSync.readDataFromServer();
+        expect(orderIds.map((id) => store.models["pos.order"].get(id))).toEqual([
+            undefined,
+            undefined,
+        ]);
+        expect(
+            store.models["pos.order.line"].some((line) => orderIds.includes(line.raw.order_id))
+        ).toBe(false);
+
+        // The server refuses the cancellations: they stay queued, the sync goes on
+        let serverDown = true;
+        patchWithCleanup(store.data, {
+            async call(model, method) {
+                if (method === "cancel_order_from_pos" && serverDown) {
+                    throw new RPCError("Service Unavailable");
+                }
+                return super.call(...arguments);
+            },
+        });
+        const draft = await getFilledOrder(store);
+        await store.syncAllOrders();
+        expect(draft.isSynced).toBe(true);
+        expect(JSON.parse(localStorage.getItem(store.getPendingOrdersKey())).delete).toEqual(
+            orderIds
+        );
+
+        serverDown = false;
+        await store.syncAllOrders();
+        expect(MockServer.env["pos.order"].browse(orderIds).map((o) => o.state)).toEqual([
+            "cancel",
+            "cancel",
+        ]);
+        expect(store.pendingOrder.delete.size).toBe(0);
     });
 });

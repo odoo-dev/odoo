@@ -110,6 +110,9 @@ export default class DevicesSynchronisation {
             return this.nextSync;
         }
 
+        // The server may accept a cancellation while the orders are read, the response still
+        // sending the order as open
+        const cancelledOrderIds = new Set(this.pos.pendingOrder["delete"]);
         try {
             this.inSync = this.pos.data.call("pos.config", "read_config_open_orders", [
                 odoo.pos_config_id,
@@ -130,6 +133,7 @@ export default class DevicesSynchronisation {
         }
 
         if (Object.keys(response.dynamic_records).length) {
+            this.dropCancelledOrders(response.dynamic_records, cancelledOrderIds);
             // A paid order not yet received by the server must not be reopened by its draft version
             const serverPaymentUuids = new Set(
                 (response.dynamic_records["pos.payment"] || []).map((p) => p.uuid)
@@ -173,6 +177,29 @@ export default class DevicesSynchronisation {
         if (Object.keys(response.deleted_record_ids).length) {
             this.processDeletedRecords(response.deleted_record_ids);
         }
+    }
+
+    /**
+     * The server sends the orders cancelled offline as open until it receives their
+     * cancellation: drop them and their records, so that they are not reopened.
+     * @param {Object} records - Records read from the server by models.
+     * @param {Set<number>} cancelledOrderIds - Orders whose cancellation was queued when the
+     *  records were requested.
+     */
+    dropCancelledOrders(records, cancelledOrderIds) {
+        const drop = (model, ids) => {
+            const dropped = records[model]?.filter((vals) => ids.has(vals.id)) || [];
+            if (!dropped.length) {
+                return;
+            }
+            records[model] = records[model].filter((vals) => !ids.has(vals.id));
+            for (const field of Object.values(this.pos.data.relations[model])) {
+                if (field.type === "one2many") {
+                    drop(field.relation, new Set(dropped.flatMap((vals) => vals[field.name])));
+                }
+            }
+        };
+        drop("pos.order", new Set([...cancelledOrderIds, ...this.pos.pendingOrder["delete"]]));
     }
 
     /**

@@ -994,9 +994,16 @@ class PosConfig(models.Model):
         }
 
     def _get_url_to_cache(self, debug):
+        # The payment method images are only requested on the payment screen: precache them so
+        # that they are displayed offline as well, see PaymentScreen.paymentMethodImage
+        payment_methods = self.payment_method_ids.with_context(bin_size=True)
         url_to_cache = [
             f"/pos/ui/{self.id}?from_backend=True",
             f"/pos/ui/{self.id}",
+            "/point_of_sale/static/src/img/money.png",
+            "/point_of_sale/static/src/img/pay-later.png",
+            "/point_of_sale/static/src/img/card-bank.png",
+            *(f"/web/image/pos.payment.method/{method.id}/image" for method in payment_methods if method.image),
         ]
         return self.env["ir.qweb"]._get_asset_links("point_of_sale.assets_prod", debug=debug) + url_to_cache
 

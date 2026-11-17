@@ -90,3 +90,16 @@ test("keeps unrelated stores untouched when dropping a stale one", async () => {
 
     second.db.close();
 });
+
+test("writes settle once committed and report their failures", async () => {
+    const db = await openDB(uniqueDbName(), [["uuid", "pos.order"]]);
+
+    expect(await db.create("pos.order", [{ uuid: "order-1" }])).toBe(true);
+    // Without the key of the store
+    expect(await db.create("pos.order", [{ id: 2 }])).toBe(false);
+
+    const data = await db.readAll(["pos.order"]);
+    expect(data["pos.order"]).toEqual([{ uuid: "order-1" }]);
+
+    db.db.close();
+});

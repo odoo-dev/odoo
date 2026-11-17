@@ -137,119 +137,72 @@ export default class IndexedDB {
         };
     }
 
+    /**
+     * @returns {Promise<Error[]>} the errors of the failed batches
+     */
     async promises(storeName, arrData, method) {
-        if (!arrData?.length) {
-            return;
-        }
-
+        const errors = [];
         // Batch processing for large arrays to avoid performance issues
         // or transaction failures due to large data sets
         for (let i = 0; i < arrData.length; i += BATCH_SIZE) {
-            let timeoutId;
-            let finished = false;
-
             const batch = arrData.slice(i, i + BATCH_SIZE);
             const transaction = this.getNewTransaction([storeName], "readwrite");
-
             if (!transaction) {
-                return;
+                // The connection is closing or unavailable: the next batches would fail too
+                errors.push(new Error("Transaction could not be created"));
+                break;
             }
+            try {
+                await this.processBatch(transaction, storeName, batch, method);
+            } catch (error) {
+                errors.push(error);
+            }
+        }
+        return errors;
+    }
 
-            const doneMethod = () => {
-                finished = true;
-                clearTimeout(timeoutId);
-                this.activeTransactions.delete(transaction);
-            };
-
-            // Mark transaction as finished in all cases
-            transaction.oncomplete = doneMethod;
-            transaction.onabort = doneMethod;
-            transaction.onerror = doneMethod;
-            transaction.onsuccess = doneMethod;
-
-            const batchPromise = new Promise((resolve, reject) => {
-                const store = transaction.objectStore(storeName);
-                let completed = 0;
-                let hasError = false;
-
+    /**
+     * Settles on the completion of the transaction: only then is the data committed.
+     */
+    async processBatch(transaction, storeName, batch, method) {
+        logPosMessage(
+            "IndexedDB",
+            method,
+            `Processing ${batch.length} items in store ${storeName}`,
+            CONSOLE_COLOR
+        );
+        let timeoutId;
+        try {
+            await new Promise((resolve, reject) => {
+                transaction.oncomplete = resolve;
+                // Failing requests abort their transaction
+                transaction.onabort = () =>
+                    reject(transaction.error || new Error("IndexedDB transaction aborted"));
                 timeoutId = setTimeout(() => {
-                    if (!finished) {
-                        logPosMessage(
-                            "IndexedDB",
-                            `promises.timeout.${method}`,
-                            `Transaction timeout for store: ${storeName}`,
-                            CONSOLE_COLOR,
-                            [],
-                            true
-                        );
-                        reject(new Error("IndexedDB transaction timeout"));
-                        try {
-                            transaction.abort();
-                        } catch (e) {
-                            logPosMessage(
-                                "IndexedDB",
-                                method,
-                                `Error aborting transaction: ${e.message}`,
-                                CONSOLE_COLOR
-                            );
-                        }
+                    reject(new Error("IndexedDB transaction timeout"));
+                    try {
+                        transaction.abort();
+                    } catch {
+                        // The transaction is already committing
                     }
                 }, TRANSACTION_TIMEOUT);
 
-                logPosMessage(
-                    "IndexedDB",
-                    method,
-                    `Processing ${batch.length} items in store ${storeName}`,
-                    CONSOLE_COLOR
-                );
-
-                for (const data of batch) {
-                    try {
-                        const deepCloned = JSON.parse(JSON.stringify(data));
-                        const request = store[method](deepCloned);
-
-                        request.onsuccess = () => {
-                            completed++;
-                            if (completed === batch.length && !hasError && !finished) {
-                                clearTimeout(timeoutId);
-                                resolve();
-                            }
-                        };
-
-                        request.onerror = (event) => {
-                            hasError = true;
-                            clearTimeout(timeoutId);
-                            logPosMessage(
-                                "IndexedDB",
-                                method,
-                                `Error processing ${method} for ${storeName}: ${event.target?.error}`,
-                                CONSOLE_COLOR
-                            );
-                            reject(event.target?.error || "Unknown error");
-                        };
-                    } catch (e) {
-                        hasError = true;
-                        clearTimeout(timeoutId);
-                        logPosMessage(
-                            "IndexedDB",
-                            method,
-                            `Error processing ${method} for ${storeName}: Invalid data format`,
-                            CONSOLE_COLOR,
-                            [],
-                            true
+                const store = transaction.objectStore(storeName);
+                try {
+                    for (const data of batch) {
+                        store[method](
+                            method === "delete" ? data : JSON.parse(JSON.stringify(data))
                         );
-                        reject(e);
-                        try {
-                            transaction.abort();
-                        } catch {
-                            // transaction may already be aborted/completed
-                        }
                     }
+                } catch (error) {
+                    // Invalid data, e.g. without key
+                    reject(error);
+                    transaction.abort();
                 }
             });
-
-            // Batch failures are already logged, keep processing the next ones
-            await batchPromise.catch(() => {});
+        } finally {
+            clearTimeout(timeoutId);
+            this.activeTransactions.delete(transaction);
         }
     }
 
@@ -410,11 +363,29 @@ export default class IndexedDB {
         });
     }
 
-    create(storeName, arrData) {
+    /**
+     * @returns {Promise<boolean>} whether every record was written
+     */
+    async write(method, storeName, arrData) {
         if (!arrData?.length) {
-            return;
+            return true;
         }
-        return this.promises(storeName, arrData, "put");
+        const errors = await this.promises(storeName, arrData, method);
+        if (errors.length) {
+            logPosMessage(
+                "IndexedDB",
+                `${method}.failed`,
+                `${errors.length} batch(es) failed on store ${storeName}: ${errors.join("; ")}`,
+                CONSOLE_COLOR,
+                [],
+                true
+            );
+        }
+        return !errors.length;
+    }
+
+    create(storeName, arrData) {
+        return this.write("put", storeName, arrData);
     }
     async readAllExceptStores(storeToIgnores = []) {
         const allStoreNames = this.dbStores.map((store) => store[1]);
@@ -482,10 +453,7 @@ export default class IndexedDB {
         );
     }
 
-    delete(storeName, uuids) {
-        if (!uuids?.length) {
-            return;
-        }
-        return this.promises(storeName, uuids, "delete");
+    delete(storeName, keys) {
+        return this.write("delete", storeName, keys);
     }
 }

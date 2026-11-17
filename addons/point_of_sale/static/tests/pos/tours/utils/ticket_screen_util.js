@@ -1,6 +1,6 @@
 import * as ProductScreen from "@point_of_sale/../tests/pos/tours/utils/product_screen_util";
 import { inLeftSide } from "@point_of_sale/../tests/pos/tours/utils/common";
-import { isSyncStatusConnected } from "@point_of_sale/../tests/pos/tours/utils/chrome_util";
+import { isNotLoading } from "@point_of_sale/../tests/pos/tours/utils/chrome_util";
 
 export function nbOrdersIs(nb) {
     return [
@@ -135,7 +135,8 @@ export function settleTips() {
             trigger: ".ticket-screen .controls .settle-tips",
             run: "click",
         },
-        isSyncStatusConnected(),
+        // The tipped orders stay pending: the tips are written to the server directly
+        isNotLoading(),
     ];
 }
 export function clickControlButton(name) {
