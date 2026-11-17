@@ -101,7 +101,8 @@ class TestImportFiles(TransactionCase):
         self.assertEqual(self.env.ref('__import__.product_tshirt_SW_blue_xl').standard_price, 55)
         self.assertEqual(self.env.ref('__import__.product_product_1').lst_price, 110)
         self.assertEqual(self.env.ref('__import__.product_product_6').lst_price, 110)
-        # self.assertEqual(self.env.ref('__import__.product_tshirt_SW_red_l').lst_price, 0)  # TODO: the price can be imported for each product regardless of others
+        self.assertEqual(self.env.ref('__import__.product_tshirt_SW_red_s').lst_price, 100)
+        self.assertEqual(self.env.ref('__import__.product_tshirt_SW_red_l').lst_price, 1)
 
         self.import_product_xls("product.product", filepath="product/static/xls/test_import_update_product_price.xls")  # update products
 
@@ -113,7 +114,7 @@ class TestImportFiles(TransactionCase):
         self.assertEqual(self.env.ref('__import__.product_tshirt_SW_red_m').standard_price, 45)
         self.assertEqual(self.env.ref('__import__.product_tshirt_SW_red_l').standard_price, 1002)
         self.assertEqual(self.env.ref('__import__.product_tshirt_SW_blue_xl').standard_price, 55)
-        # self.assertEqual(self.env.ref('__import__.product_product_1').lst_price, 2000)  # TODO: the price can be imported for each product regardless of others
+        self.assertEqual(self.env.ref('__import__.product_product_1').lst_price, 2000)
         self.assertEqual(self.env.ref('__import__.product_product_6').lst_price, 2001)
         self.assertEqual(self.env.ref('__import__.product_tshirt_SW_red_l').lst_price, 2002)
 

@@ -795,7 +795,7 @@ class ProductTemplate(models.Model):
                 data_list_templates.append(values)
 
         if data_list_templates:
-            template_fields = list(fields)
+            template_fields = ['list_price' if fname == 'lst_price' else fname for fname in fields]
             template_fields.pop(column_no)
             result = super().load(template_fields, data_list_templates, limit=limit)
             if any(message['type'] == 'error' for message in result['messages']):
