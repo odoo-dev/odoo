@@ -29,17 +29,24 @@
         box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.3);
     }
 
-    &:has(input:focus-visible) {
-        --o-focus-ring: var(--o-focus-ring-inset);
+    /* Size and alignment formerly given by the in-flow input (13px + 2 * 8px
+       margin). */
+    width: calc(29px + 10px);
+    height: calc(29px + 10px);
+    vertical-align: top;
 
-        box-shadow: var(--o-focus-ring);
-    }
-
+    /* The visually empty input covers the swatch and carries the focus ring
+       itself. */
     input {
-        margin: 8px;
-        height: 13px;
-        width: 13px;
-        opacity: 0;
+        position: absolute;
+        inset: 0;
+        margin: 0;
+        border-radius: 50%;
+        appearance: none;
+
+        &:focus-visible {
+            box-shadow: var(--o-focus-ring-inset);
+        }
     }
 
     &.active {
