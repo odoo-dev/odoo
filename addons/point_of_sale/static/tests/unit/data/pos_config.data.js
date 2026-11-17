@@ -1,7 +1,16 @@
-import { models } from "@web/../tests/web_test_helpers";
+import { MockServer, models } from "@web/../tests/web_test_helpers";
 
 export class PosConfig extends models.ServerModel {
     _name = "pos.config";
+
+    ui_callrelated(configId, model, method, args, kwargs) {
+        return MockServer.current.callKw(
+            new Request(`/web/dataset/call_kw/${model}/${method}`, {
+                method: "POST",
+                body: JSON.stringify({ params: { model, method, args, kwargs } }),
+            })
+        );
+    }
 
     notify_synchronisation(session_id, device_identifier, records = {}) {
         return true;

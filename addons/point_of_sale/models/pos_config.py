@@ -12,6 +12,7 @@ from odoo import SUPERUSER_ID, Command, _, api, fields, models, tools
 from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.fields import Domain
 from odoo.http import request
+from odoo.service.model import call_kw
 from odoo.tools import SQL, convert
 from odoo.tools.misc import get_lang
 
@@ -238,6 +239,19 @@ class PosConfig(models.Model):
         next_number = self.order_backend_seq_id._next()
         year_2_digits = str(datetime.now().year)[-2:]
         return f"{year_2_digits}{device_identifier}-{self.id}-{next_number}", False
+
+    def ui_callrelated(self, model, method, args, kwargs, device_identifier, sync_models):
+        self.ensure_one()
+        data = call_kw(self.env[model], method, args, kwargs)
+        if isinstance(data, dict):
+            record_ids = {
+                name: [rec['id'] for rec in recs]
+                for name, recs in data.items()
+                if name in sync_models and isinstance(recs, list)
+            }
+            if record_ids:
+                self._notify_synchronisation(self.current_session_id.id, device_identifier, record_ids)
+        return data
 
     def notify_synchronisation(self, session_id, device_identifier, records={}):
         self._notify_synchronisation(session_id, device_identifier, records)

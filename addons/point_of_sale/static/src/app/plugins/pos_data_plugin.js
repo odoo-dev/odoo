@@ -1231,14 +1231,28 @@ export class PosDataPlugin extends Plugin {
         queue = true,
         loadMessingRecords = false
     ) {
-        let data = await this.execute({ type: "call", model, method, args, kwargs, queue });
+        const syncModels = this.deviceSync ? [...this.deviceSync.staticModels] : [];
+        let data = await this.execute({
+            type: "call",
+            model: "pos.config",
+            method: "ui_callrelated",
+            args: [
+                odoo.pos_config_id,
+                model,
+                method,
+                args,
+                kwargs,
+                this.device.identifier,
+                syncModels,
+            ],
+            queue,
+        });
 
         if (loadMessingRecords) {
             data = await this.missingRecursive(data);
         }
 
         if (data) {
-            this.deviceSync?.dispatch && this.deviceSync.dispatch(data);
             const result = this.models.connectNewData(data);
             this.synchronizeServerDataInIndexedDB(data);
             return result;
