@@ -8,7 +8,9 @@
     src: url('../font/LiberationSans-Regular.woff') format('woff');
 }
 
-$l10n-ch-qr-ratio: 1.25;
+:is(.swissqr_page_title, .swissqr_content_v2) {
+    --l10n-ch-qr-ratio: 1.25;
+}
 
 body.l10n_ch_qr{
     padding: 0;
@@ -27,7 +29,7 @@ body.l10n_ch_qr{
 .swissqr_page_title {
     color: black;
     font-weight: bold;
-    height: 7mm * $l10n-ch-qr-ratio;
+    height: calc(7mm * var(--l10n-ch-qr-ratio));
     padding: 15px;
     padding-top: 150px;
     h1{
@@ -38,19 +40,10 @@ body.l10n_ch_qr{
 
 .swissqr_content_v2 {
 
-    $receipt_width: 52mm * $l10n-ch-qr-ratio;
-    $left_col_width: 46mm * $l10n-ch-qr-ratio;
-    $right_col_width: 87mm * $l10n-ch-qr-ratio;
-    $rounding_offset: 0.25mm;
-
-    @mixin font {
-        font-family: LiberationSans;
-        color: black;
-    }
-    @mixin title {
-        @include font;
-        font-weight: bold;
-    }
+    --l10n-ch-qr-receipt-width: calc(52mm * var(--l10n-ch-qr-ratio));
+    --l10n-ch-qr-left-col-width: calc(46mm * var(--l10n-ch-qr-ratio));
+    --l10n-ch-qr-right-col-width: calc(87mm * var(--l10n-ch-qr-ratio));
+    --l10n-ch-qr-rounding-offset: 0.25mm;
 
     /* New QR Bill code */
     background-color: white !important;
@@ -61,62 +54,67 @@ body.l10n_ch_qr{
     }
 
     .title {
-        @include title;
+        font-family: LiberationSans;
+        color: black;
+        font-weight: bold;
     }
 
     .swissqr_text {
-        @include font;
+        font-family: LiberationSans;
+        color: black;
     }
 
     .swissqr_section_title {
-        @include title;
-        width: $receipt_width;
-        height: 7mm * $l10n-ch-qr-ratio;
-        font-size: 11pt * $l10n-ch-qr-ratio;
-        line-height: 9pt * $l10n-ch-qr-ratio;
+        font-family: LiberationSans;
+        color: black;
+        font-weight: bold;
+        width: var(--l10n-ch-qr-receipt-width);
+        height: calc(7mm * var(--l10n-ch-qr-ratio));
+        font-size: calc(11pt * var(--l10n-ch-qr-ratio));
+        line-height: calc(9pt * var(--l10n-ch-qr-ratio));
     }
 
     .swissqr_receipt {
         background-color: white !important;
         position: absolute;
         left: 0mm;
-        top: 192mm * $l10n-ch-qr-ratio;
-        width: 62mm * $l10n-ch-qr-ratio;
-        height: 105mm * $l10n-ch-qr-ratio - $rounding_offset;
-        border-top: 0.75pt * $l10n-ch-qr-ratio dashed black;
-        padding: 5mm * $l10n-ch-qr-ratio;
+        top: calc(192mm * var(--l10n-ch-qr-ratio));
+        width: calc(62mm * var(--l10n-ch-qr-ratio));
+        height: calc(105mm * var(--l10n-ch-qr-ratio) - var(--l10n-ch-qr-rounding-offset));
+        border-top: calc(0.75pt * var(--l10n-ch-qr-ratio)) dashed black;
+        padding: calc(5mm * var(--l10n-ch-qr-ratio));
         .title {
-            font-size: 6pt * $l10n-ch-qr-ratio;
-            line-height: 9pt * $l10n-ch-qr-ratio;
+            font-size: calc(6pt * var(--l10n-ch-qr-ratio));
+            line-height: calc(9pt * var(--l10n-ch-qr-ratio));
         }
         .content {
-            font-size: 8pt * $l10n-ch-qr-ratio;
-            line-height: 9pt * $l10n-ch-qr-ratio;
+            font-size: calc(8pt * var(--l10n-ch-qr-ratio));
+            line-height: calc(9pt * var(--l10n-ch-qr-ratio));
         }
         .receipt_indication_zone {
-            width: $receipt_width;
-            height: 56mm * $l10n-ch-qr-ratio;
+            width: var(--l10n-ch-qr-receipt-width);
+            height: calc(56mm * var(--l10n-ch-qr-ratio));
         }
         .receipt_amount_zone {
-            width: $receipt_width;
-            height: 14mm * $l10n-ch-qr-ratio;
+            width: var(--l10n-ch-qr-receipt-width);
+            height: calc(14mm * var(--l10n-ch-qr-ratio));
             .column {
                 float: left;
                 margin-right: 5mm;
             }
             .content {
-                font-size: 8pt * $l10n-ch-qr-ratio;
-                line-height: 11pt * $l10n-ch-qr-ratio;
+                font-size: calc(8pt * var(--l10n-ch-qr-ratio));
+                line-height: calc(11pt * var(--l10n-ch-qr-ratio));
             }
         }
         .receipt_acceptance_point_zone {
-            width: $receipt_width;
-            height: 18mm * $l10n-ch-qr-ratio;
+            width: var(--l10n-ch-qr-receipt-width);
+            height: calc(18mm * var(--l10n-ch-qr-ratio));
             .content {
                 float: right;
-                padding-right: 2mm * $l10n-ch-qr-ratio;
-                font-size: 6pt * $l10n-ch-qr-ratio;
-                line-height: 8pt * $l10n-ch-qr-ratio;
+                padding-right: calc(2mm * var(--l10n-ch-qr-ratio));
+                font-size: calc(6pt * var(--l10n-ch-qr-ratio));
+                line-height: calc(8pt * var(--l10n-ch-qr-ratio));
             }
         }
     }
@@ -124,54 +122,54 @@ body.l10n_ch_qr{
     .swissqr_body {
         background-color: white !important;
         position: absolute;
-        top: 192mm * $l10n-ch-qr-ratio;
-        left: 62mm * $l10n-ch-qr-ratio;
-        width: 148mm * $l10n-ch-qr-ratio;
-        height: 105mm * $l10n-ch-qr-ratio - $rounding_offset;
-        border: 0.75pt * $l10n-ch-qr-ratio dashed black;
+        top: calc(192mm * var(--l10n-ch-qr-ratio));
+        left: calc(62mm * var(--l10n-ch-qr-ratio));
+        width: calc(148mm * var(--l10n-ch-qr-ratio));
+        height: calc(105mm * var(--l10n-ch-qr-ratio) - var(--l10n-ch-qr-rounding-offset));
+        border: calc(0.75pt * var(--l10n-ch-qr-ratio)) dashed black;
         border-bottom: none;
         border-right: none;
-        padding: 5mm * $l10n-ch-qr-ratio;
+        padding: calc(5mm * var(--l10n-ch-qr-ratio));
         .title {
-            font-size: 8pt * $l10n-ch-qr-ratio;
-            line-height: 11pt * $l10n-ch-qr-ratio;
+            font-size: calc(8pt * var(--l10n-ch-qr-ratio));
+            line-height: calc(11pt * var(--l10n-ch-qr-ratio));
         }
         .content {
-            font-size: 10pt * $l10n-ch-qr-ratio;
-            line-height: 11pt * $l10n-ch-qr-ratio;
+            font-size: calc(10pt * var(--l10n-ch-qr-ratio));
+            line-height: calc(11pt * var(--l10n-ch-qr-ratio));
         }
         .swissqr_column_left {
             float: left;
-            width: $left_col_width;
+            width: var(--l10n-ch-qr-left-col-width);
             .swissqr_section_title{
-                height: 7mm * $l10n-ch-qr-ratio;
+                height: calc(7mm * var(--l10n-ch-qr-ratio));
             }
             .swissqr {
-                margin-top: 5mm * $l10n-ch-qr-ratio;
-                margin-bottom: 5mm * $l10n-ch-qr-ratio;
-                height: 46mm * $l10n-ch-qr-ratio;
-                width: 46mm * $l10n-ch-qr-ratio;
+                margin-top: calc(5mm * var(--l10n-ch-qr-ratio));
+                margin-bottom: calc(5mm * var(--l10n-ch-qr-ratio));
+                height: calc(46mm * var(--l10n-ch-qr-ratio));
+                width: calc(46mm * var(--l10n-ch-qr-ratio));
             }
             .amount_zone {
-                width: $left_col_width;
-                height: 22mm * $l10n-ch-qr-ratio;
+                width: var(--l10n-ch-qr-left-col-width);
+                height: calc(22mm * var(--l10n-ch-qr-ratio));
                 .column {
                     margin-right: 3mm;
                     float: left;
                 }
                 .title {
-                    font-size: 8pt * $l10n-ch-qr-ratio;
-                    line-height: 11pt * $l10n-ch-qr-ratio;
+                    font-size: calc(8pt * var(--l10n-ch-qr-ratio));
+                    line-height: calc(11pt * var(--l10n-ch-qr-ratio));
                 }
                 .content {
-                    font-size: 10pt * $l10n-ch-qr-ratio;
-                    line-height: 13pt * $l10n-ch-qr-ratio;
+                    font-size: calc(10pt * var(--l10n-ch-qr-ratio));
+                    line-height: calc(13pt * var(--l10n-ch-qr-ratio));
                 }
             }
         }
         .swissqr_column_right {
             float: right;
-            width: $right_col_width;
+            width: var(--l10n-ch-qr-right-col-width);
         }
     }
 
@@ -181,13 +179,13 @@ body.l10n_ch_qr{
     }
     .vertical_scissors {
         position: absolute;
-        top: 5mm * $l10n-ch-qr-ratio;
-        left: -1.8mm * $l10n-ch-qr-ratio;
+        top: calc(5mm * var(--l10n-ch-qr-ratio));
+        left: calc(-1.8mm * var(--l10n-ch-qr-ratio));
     }
     .horizontal_scissors {
         position: absolute;
-        top: -2mm * $l10n-ch-qr-ratio;
-        left: 6mm * $l10n-ch-qr-ratio;
+        top: calc(-2mm * var(--l10n-ch-qr-ratio));
+        left: calc(6mm * var(--l10n-ch-qr-ratio));
     }
 
 }
