@@ -5,7 +5,7 @@ import { AddVerifactuRefundReasonPopup } from "@l10n_es_edi_verifactu_pos/app/co
 
 patch(TicketScreen.prototype, {
     async addAdditionalRefundInfo(order, destinationOrder) {
-        if (this.pos.company.l10n_es_edi_verifactu_required) {
+        if (this.pos.config._l10n_es_pos_fiscal_mode === "verifactu") {
             const payload = await makeAwaitable(this.dialog, AddVerifactuRefundReasonPopup, {
                 order: destinationOrder,
             });

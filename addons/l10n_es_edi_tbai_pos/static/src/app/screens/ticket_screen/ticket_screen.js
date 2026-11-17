@@ -6,7 +6,7 @@ import { qrCodeSrc } from "@point_of_sale/utils";
 
 patch(TicketScreen.prototype, {
     async addAdditionalRefundInfo(order, destinationOrder) {
-        if (this.pos.company.l10n_es_tbai_is_enabled && order.account_move) {
+        if (this.pos.config._l10n_es_pos_fiscal_mode === 'tbai' && order.to_invoice) {
             const payload = await makeAwaitable(this.dialog, AddTbaiRefundReasonPopup, {
                 order: destinationOrder,
             });
@@ -21,12 +21,12 @@ patch(TicketScreen.prototype, {
         if (
             this.pos.company.l10n_es_tbai_is_enabled &&
             typeof order.id === "number" &&
-            !order.l10n_es_pos_tbai_qrsrc
+            !order.l10n_es_pos_tbai_qrurl
         ) {
             const url = await this.pos.data.call("pos.order", "get_l10n_es_pos_tbai_qrurl", [
                 order.id,
             ]);
-            order.l10n_es_pos_tbai_qrsrc = url ? qrCodeSrc(url) : undefined;
+            order.uiState.l10n_es_pos_tbai_qrurl = url || undefined;
         }
         return super.print(...arguments);
     },
