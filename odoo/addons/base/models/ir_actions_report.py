@@ -785,7 +785,7 @@ class IrActionsReport(models.Model):
         data['is_html_empty'] = is_html_empty
         return data
 
-    def _get_pdf_engine(self, report=None, default_engine='wkhtmltopdf') -> str:
+    def _get_pdf_engine(self, report=None, default_engine='paper-muncher') -> str:
         """Resolve the PDF engine name from report settings and db's fallback.
 
         This helper is shared by modules that manually call low-level PDF rendering

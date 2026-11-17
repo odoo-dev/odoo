@@ -14,6 +14,8 @@ https://odoo.github.io/paper-muncher/
         'base_setup',
     ],
     'category': 'Hidden/Tools',
+    'auto_install': True,
+    'post_init_hook': 'post_init_hook',
     'author': 'Odoo S.A.',
     'license': 'LGPL-3',
 }
