@@ -1,0 +1,26 @@
+<templates xml:space="preserve">
+    <t t-name="html_editor.CollaborationSelectionOverlay">
+        <t t-foreach="this.props.peerSelections()" t-as="peerSelection" t-key="peerSelection.peerId">
+            <div class="oe-collaboration-caret position-absolute"
+                t-attf-style="
+                    top: {{ peerSelection.caretRect.top }}px;
+                    left: {{ peerSelection.caretRect.left }}px;
+                    height: {{ peerSelection.caretRect.height }}px;
+                    border-left: 2px solid {{ peerSelection.selectionColor }};
+                ">
+                <div class="oe-collaboration-caret-top-square"
+                    t-att-data-peer-name="peerSelection.peerName"
+                    t-att-style="`background-color: ${peerSelection.selectionColor};`"/>
+            </div>
+            <div t-foreach="peerSelection.selectionRects" t-as="selectionRect" t-key="selectionRect_index"
+                class="position-absolute opacity-25 pe-none"
+                t-attf-style="
+                    top: {{ selectionRect.top }}px;
+                    left: {{ selectionRect.left }}px;
+                    width: {{ selectionRect.width }}px;
+                    height: {{ selectionRect.height }}px;
+                    background-color: {{ peerSelection.selectionColor }};
+                "/>
+        </t>
+    </t>
+</templates>

@@ -9,6 +9,8 @@ import { childNodes } from "@html_editor/utils/dom_traversal";
 import { DIRECTIONS } from "@html_editor/utils/position";
 import { getCursorDirection } from "@html_editor/utils/selection";
 import { _t } from "@web/core/l10n/translation";
+import { signal } from "@odoo/owl";
+import { CollaborationSelectionOverlay } from "./collaboration_selection_overlay";
 
 export class CollaborationSelectionPlugin extends Plugin {
     static id = "collaborationSelection";
@@ -25,8 +27,12 @@ export class CollaborationSelectionPlugin extends Plugin {
     selectionInfos = new Map();
 
     setup() {
-        this.selectionOverlay =
-            this.dependencies.localOverlay.makeLocalOverlay("oe-selections-container");
+        this.peerSelections = signal([]);
+        this.collaborationSelectionOverlay = this.dependencies.localOverlay.addLocalOverlay(
+            "oe-selections-container",
+            CollaborationSelectionOverlay,
+            { peerSelections: this.peerSelections }
+        );
         this.selectionColor = `hsl(${(Math.random() * 360).toFixed(0)}, 75%, 50%)`;
     }
     handleCollaborationNotification({ notificationName, notificationPayload }) {
@@ -111,60 +117,45 @@ export class CollaborationSelectionPlugin extends Plugin {
         }
 
         // Draw rects (in case the selection is not collapsed).
-        const containerRect = this.selectionOverlay.getBoundingClientRect();
-        const indicators = clientRects.map(({ x, y, width, height }) => {
-            const rectElement = this.dependencies.localOverlay.createElement("div");
-            rectElement.style = `
-                position: absolute;
-                top: ${y - containerRect.y}px;
-                left: ${x - containerRect.x}px;
-                width: ${width}px;
-                height: ${height}px;
-                background-color: ${selectionColor};
-                opacity: 0.25;
-                pointer-events: none;
-            `;
-            rectElement.setAttribute("data-selection-peer-id", peerId);
-            return rectElement;
-        });
+        const localOverlayContainerRect =
+            this.collaborationSelectionOverlay.getLocalOverlayContainerRect();
+        const selectionRects = clientRects.map(({ x, y, width, height }) => ({
+            top: y - localOverlayContainerRect.y,
+            left: x - localOverlayContainerRect.x,
+            width,
+            height,
+        }));
 
         // Draw carret.
-        const caretElement = this.dependencies.localOverlay.createElement("div");
-        caretElement.style = `border-left: 2px solid ${selectionColor}; position: absolute;`;
-        caretElement.setAttribute("data-selection-peer-id", peerId);
-        caretElement.className = "oe-collaboration-caret";
-
-        // Draw carret top square.
-        const caretTopSquare = this.dependencies.localOverlay.createElement("div");
-        caretTopSquare.className = "oe-collaboration-caret-top-square";
-        caretTopSquare.style["background-color"] = selectionColor;
-        caretTopSquare.setAttribute("data-peer-name", peerName);
-        caretElement.append(caretTopSquare);
-
+        let caretRect;
         if (direction === DIRECTIONS.LEFT) {
-            const rect = clientRects[0];
-            caretElement.style.height = `${rect.height * 1.2}px`;
-            caretElement.style.top = `${rect.y - containerRect.y}px`;
-            caretElement.style.left = `${rect.x - containerRect.x}px`;
+            const firstClientRect = clientRects[0];
+            caretRect = {
+                height: firstClientRect.height * 1.2,
+                top: firstClientRect.y - localOverlayContainerRect.y,
+                left: firstClientRect.x - localOverlayContainerRect.x,
+            };
         } else {
-            const rect = clientRects.at(-1);
-            caretElement.style.height = `${rect.height * 1.2}px`;
-            caretElement.style.top = `${rect.y - containerRect.y}px`;
-            caretElement.style.left = `${rect.right - containerRect.x}px`;
+            const lastClientRect = clientRects.at(-1);
+            caretRect = {
+                height: lastClientRect.height * 1.2,
+                top: lastClientRect.y - localOverlayContainerRect.y,
+                left: lastClientRect.right - localOverlayContainerRect.x,
+            };
         }
-        this.selectionOverlay.append(caretElement, ...indicators);
+        this.peerSelections.set([
+            ...this.peerSelections(),
+            { peerId, peerName, selectionColor, selectionRects, caretRect },
+        ]);
     }
 
     multiselectionRemove(peerId) {
-        const elements = this.selectionOverlay.querySelectorAll(
-            `[data-selection-peer-id="${peerId}"]`
+        this.peerSelections.set(
+            this.peerSelections().filter((peerSelection) => peerSelection.peerId !== peerId)
         );
-        for (const element of elements) {
-            element.remove();
-        }
     }
     refreshSelection() {
-        this.selectionOverlay.replaceChildren();
+        this.peerSelections.set([]);
         for (const selection of this.selectionInfos.values()) {
             this.drawPeerSelection(selection);
         }
