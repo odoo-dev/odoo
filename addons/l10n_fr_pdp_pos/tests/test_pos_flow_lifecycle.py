@@ -46,7 +46,7 @@ class TestPdpPosFlowLifecycle(TestPoSCommon):
         })
         cls.currency_pricelist.currency_id = cls.company.currency_id
 
-        cls.company._compute_l10n_fr_f10_enable_reporting()
+        cls.env.add_to_compute(cls.company._fields['l10n_fr_f10_enable_reporting'], cls.company)
 
         tax_group = cls.env['account.tax.group'].search([
             ('country_id', '=', cls.env.ref('base.fr').id),
