@@ -3,7 +3,7 @@ from urllib.parse import urljoin
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 
-from odoo.addons.account.models.company import PEPPOL_LIST
+from odoo.addons.account.models.res_company import PEPPOL_LIST
 
 try:
     import phonenumbers

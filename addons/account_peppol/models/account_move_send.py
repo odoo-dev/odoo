@@ -4,7 +4,7 @@ from datetime import timedelta
 from odoo import api, fields, models, _
 from odoo.tools import BinaryBytes
 
-from odoo.addons.account.models.company import PEPPOL_DEFAULT_COUNTRIES, PEPPOL_LIST
+from odoo.addons.account.models.res_company import PEPPOL_DEFAULT_COUNTRIES, PEPPOL_LIST
 from odoo.addons.account_edi_proxy_client.models.account_edi_proxy_user import AccountEdiProxyError
 from odoo.addons.account_peppol.exceptions import get_peppol_error_message
 

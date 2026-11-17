@@ -3,7 +3,7 @@ from odoo.fields import Domain
 from odoo.tools.misc import format_datetime
 from odoo.exceptions import UserError, ValidationError
 
-from odoo.addons.account.models.company import SOFT_LOCK_DATE_FIELDS
+from odoo.addons.account.models.res_company import SOFT_LOCK_DATE_FIELDS
 
 from datetime import date
 

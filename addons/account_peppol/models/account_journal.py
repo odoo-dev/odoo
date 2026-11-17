@@ -1,6 +1,6 @@
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
-from odoo.addons.account.models.company import PEPPOL_DEFAULT_COUNTRIES
+from odoo.addons.account.models.res_company import PEPPOL_DEFAULT_COUNTRIES
 
 
 class AccountJournal(models.Model):

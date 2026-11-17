@@ -3,7 +3,7 @@ from odoo import models, fields, api
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools.partner_identifiers import validation_error_message
 
-from odoo.addons.account.models.company import PEPPOL_DEFAULT_COUNTRIES
+from odoo.addons.account.models.res_company import PEPPOL_DEFAULT_COUNTRIES
 from odoo.addons.account_edi_ubl_cii.tools.partner_identifiers import (
     CORNER_CASE_IDENTIFIERS_METADATA,
     DEPRECATED_ELECTRONIC_ADDRESS_SCHEMES_CODELIST,

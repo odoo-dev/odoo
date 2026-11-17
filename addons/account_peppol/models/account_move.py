@@ -2,7 +2,7 @@
 
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
-from odoo.addons.account.models.company import PEPPOL_MAILING_COUNTRIES
+from odoo.addons.account.models.res_company import PEPPOL_MAILING_COUNTRIES
 
 # Context value letting `button_cancel` go through `_check_draftable`. A plain boolean could be
 # passed through RPC to bypass the restriction.

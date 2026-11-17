@@ -4,7 +4,7 @@ from odoo.http import request
 from odoo.tools.partner_identifiers import validation_error_message
 
 from odoo.addons.account.controllers.portal import PortalAccount as CustomerPortal
-from odoo.addons.account.models.company import PEPPOL_LIST
+from odoo.addons.account.models.res_company import PEPPOL_LIST
 
 
 class PortalAccount(CustomerPortal):

@@ -10,7 +10,7 @@ from odoo import api, fields, models
 from odoo.fields import Domain
 
 from odoo.addons.account_peppol.tools.demo_utils import handle_demo
-from odoo.addons.account.models.company import PEPPOL_LIST
+from odoo.addons.account.models.res_company import PEPPOL_LIST
 
 INVOICE_RESPONSE_CUSTOMISATION_ID = "busdox-docid-qns::urn:oasis:names:specification:ubl:schema:xsd:ApplicationResponse-2::ApplicationResponse##urn:fdc:peppol.eu:poacc:trns:invoice_response:3::2.1"
 TIMEOUT = 10

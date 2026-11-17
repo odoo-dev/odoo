@@ -3,7 +3,7 @@ from contextlib import closing
 from datetime import datetime, timedelta
 
 from odoo import fields
-from odoo.addons.account.models.company import SOFT_LOCK_DATE_FIELDS
+from odoo.addons.account.models.res_company import SOFT_LOCK_DATE_FIELDS
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 from odoo.addons.mail.tests.common import MailCase
 from odoo.exceptions import UserError

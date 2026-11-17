@@ -513,7 +513,7 @@ class TestAccountMoveInalterableHash(AccountTestInvoicingCommon):
                     def _validate_locks(*args, **kwargs):
                         pass
 
-                    with patch('odoo.addons.account.models.company.ResCompany._validate_locks', new=_validate_locks):
+                    with patch('odoo.addons.account.models.res_company.ResCompany._validate_locks', new=_validate_locks):
                         self.company_data['company'][lock_date_field] = False
                 else:
                     self.company_data['company'][lock_date_field] = False
@@ -652,16 +652,16 @@ class TestAccountMoveInalterableHash(AccountTestInvoicingCommon):
         for move in moves:
             self.assertNotEqual(move.inalterable_hash, False)
 
-        with patch('odoo.addons.account.models.company.INTEGRITY_HASH_BATCH_SIZE', 3):
+        with patch('odoo.addons.account.models.res_company.INTEGRITY_HASH_BATCH_SIZE', 3):
             self._verify_integrity(moves, "Entries are correctly hashed", moves[0], moves[-1], moves[0].journal_id.name)
 
-        with patch('odoo.addons.account.models.company.INTEGRITY_HASH_BATCH_SIZE', 5):
+        with patch('odoo.addons.account.models.res_company.INTEGRITY_HASH_BATCH_SIZE', 5):
             self._verify_integrity(moves, "Entries are correctly hashed", moves[0], moves[-1], moves[0].journal_id.name)
 
-        with patch('odoo.addons.account.models.company.INTEGRITY_HASH_BATCH_SIZE', 10):
+        with patch('odoo.addons.account.models.res_company.INTEGRITY_HASH_BATCH_SIZE', 10):
             self._verify_integrity(moves, "Entries are correctly hashed", moves[0], moves[-1], moves[0].journal_id.name)
 
-        with patch('odoo.addons.account.models.company.INTEGRITY_HASH_BATCH_SIZE', 12):
+        with patch('odoo.addons.account.models.res_company.INTEGRITY_HASH_BATCH_SIZE', 12):
             self._verify_integrity(moves, "Entries are correctly hashed", moves[0], moves[-1], moves[0].journal_id.name)
 
     def test_error_on_unreconciled_bank_statement_lines(self):
