@@ -93,11 +93,6 @@ $report-text-colors: null;
     padding-left: $container-padding-x;
 }
 
-.table > :not(caption) > * > * {
-    color: $table-color;
-    background-color: $table-bg;
-}
-
 /* Removes borders within a table-borderless as its new definition in */
 /* Boostrap 5 still has its borders visible in PDFs */
 .table-borderless {
