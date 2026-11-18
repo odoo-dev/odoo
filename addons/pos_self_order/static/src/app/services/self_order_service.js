@@ -1180,13 +1180,8 @@ export class SelfOrder {
         const pricelist = order.preset_id?.pricelist_id || this.config.pricelist_id;
         const productVariant = product || productTemplate.product_variant_ids[0];
         const price =
-            productTemplate.getPrice(
-                pricelist,
-                1 * productTemplate.getUomPriceFactor(uom),
-                priceExtra,
-                false,
-                productVariant
-            ) * productTemplate.getUomPriceFactor(uom);
+            productTemplate.getPrice(pricelist, 1, priceExtra, false, productVariant) *
+            productTemplate.getUomPriceFactor(uom);
         const taxesData = (productVariant || productTemplate).getTaxDetails({
             overridedValues: {
                 price,

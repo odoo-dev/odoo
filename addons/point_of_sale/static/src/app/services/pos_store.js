@@ -1007,7 +1007,7 @@ export class PosStore extends WithLazyGetterTrap {
         );
         const skipConfigure =
             opts.code && this.models["product.uom"].getBy("barcode", opts.code?.code);
-        const skipUom = pTemplate.skipUomSelection() || opts.hideUoMSelection;
+        const skipUom = pTemplate._skipUomSelection() || opts.hideUoMSelection;
         if (hasConfigurableAttributes || (pTemplate.uom_ids.length && !skipUom && !skipConfigure)) {
             const forceVariantValue =
                 opts.forceVariantValue ||

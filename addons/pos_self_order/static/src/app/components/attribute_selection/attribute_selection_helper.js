@@ -55,8 +55,8 @@ export class AttributeSelectionHelper {
         }
     }
 
-    selectUom(Uom) {
-        this.selectedUoMValue = Uom;
+    selectUom(uom) {
+        this.selectedUoMValue = uom;
     }
 
     getMissingAttributeValue(attributes) {

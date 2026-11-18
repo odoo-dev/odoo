@@ -4,7 +4,7 @@ export class UomUom extends models.ServerModel {
     _name = "uom.uom";
 
     _load_pos_data_fields() {
-        return ["id", "name", "factor", "is_pos_groupable", "parent_path", "relative_factor"];
+        return ["id", "name", "factor", "is_pos_groupable", "parent_path"];
     }
 
     _records = [
@@ -20,7 +20,6 @@ export class UomUom extends models.ServerModel {
             id: 2,
             name: "Pack of 6",
             factor: 6.0,
-            relative_factor: 6.0,
             is_pos_groupable: true,
             parent_path: "1/2/",
             write_date: "2025-01-01 10:00:00",

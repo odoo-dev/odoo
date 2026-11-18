@@ -15,7 +15,7 @@ patch(ProductTemplate.prototype, {
         );
     },
 
-    skipUomSelection() {
-        return super.skipUomSelection() || this.tracking === "serial";
+    _skipUomSelection() {
+        return super._skipUomSelection() || this.tracking === "serial";
     },
 });

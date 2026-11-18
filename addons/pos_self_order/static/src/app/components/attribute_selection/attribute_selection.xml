@@ -41,8 +41,8 @@
             <div class="d-flex gap-2 flex-wrap">
                 <div t-foreach="this.uomToDisplay" t-as="uom" t-key="uom.id">
                     <button
-                        t-on-click="() => this.selectUom(uom)" style="min-height:105px;"
-                        class="uom-selection-value btn btn-light px-3 px-sm-3 py-3 py-sm-3 w-100 d-flex flex-column align-items-start align-items-md-center text-start text-md-center justify-content-center gap-0 border-2 shadow-sm rounded-4"
+                        t-on-click="() => this.selectUom(uom)"
+                        class="o_self_uom_selection_btn uom-selection-value btn btn-light px-3 px-sm-3 py-3 py-sm-3 w-100 d-flex flex-column align-items-start align-items-md-center text-start text-md-center justify-content-center gap-0 border-2 shadow-sm rounded-4"
                         t-attf-class="{{ this.isUomSelected(uom) ? 'border-primary': 'border-transparent' }}">
                         <div class="d-flex d-inline-flex justify-content-between w-100 align-items-center gap-1">
                             <div class="text-center d-flex flex-column gap-2 align-items-center w-100">

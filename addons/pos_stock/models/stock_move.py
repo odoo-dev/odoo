@@ -17,7 +17,6 @@ class StockMove(models.Model):
 
     def _prepare_procurement_values(self):
         res = super()._prepare_procurement_values()
-        # to pass sale_line_id fom SO to MO in mto
         if self.env.user.has_group('point_of_sale.group_pos_user') and self.pos_order_line_ids:
             res['pos_order_line_ids'] = self.pos_order_line_ids.ids
         return res
@@ -37,11 +36,16 @@ class StockMove(models.Model):
 
     @api.model
     def _prepare_lines_data_dict(self, order_lines):
-        return {
-            move.id: {'order_lines': lines}
-            for move_ids, lines in order_lines.grouped('move_ids').items()
-            for move in move_ids
-        }
+        lines_data = {}
+        for move_ids, lines in order_lines.grouped('move_ids').items():
+            if not move_ids:
+                # No stock move was generated for these lines (yet): nothing to attach them to.
+                continue
+            for move in move_ids:
+                # A move can be shared by several groups, so accumulate instead of overwriting.
+                data = lines_data.setdefault(move.id, {'order_lines': lines.browse()})
+                data['order_lines'] |= lines
+        return lines_data
 
     def _create_production_lots_for_pos_order(self, lines):
         ''' Search for existing lots and create missing ones.
@@ -212,13 +216,13 @@ class StockMove(models.Model):
         """
         Group stock moves for merging with POS-specific logic.
 
-        For POS users, groups moves by their associated POS order lines.
+        Groups moves by their associated POS order lines.
         Products without packaging keep POS order lines in the grouping key.
         Products with packaging are additionally grouped by the POS order line UoM.
 
         :param candidate_moves: stock moves to group
         :param key: grouping key from parent method
-        :return: dict items of grouped moves
+        :return: iterable of (group_key, moves) pairs, like the parent's groupby (here dict items)
         """
         if (
             not self.env.user.has_group('point_of_sale.group_pos_user')

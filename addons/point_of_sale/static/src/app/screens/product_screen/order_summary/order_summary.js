@@ -138,14 +138,14 @@ export class OrderSummary extends Component {
         }
         if (values.product_uom_id !== undefined) {
             orderline.product_uom_id = values.product_uom_id;
-        } else {
+        } else if (values.product_id?.uom_id) {
             orderline.product_uom_id = values.product_id.uom_id;
         }
         if (values.price_type !== undefined) {
             orderline.price_type = values.price_type;
         } else if (
             values.product_uom_id &&
-            values.product_uom_id.id === values.product_id?.uom_id.id
+            values.product_uom_id.id === values.product_id?.uom_id?.id
         ) {
             orderline.price_type = "original";
         }

@@ -1674,8 +1674,11 @@ class TestPosStockFlow(CommonPosStockTest):
         self.assertEqual(len(order.picking_ids), 1)
         self.assertEqual(order.picking_ids.state, 'done')
         self.assertEqual(len(order.picking_ids.move_line_ids), 2)
+        # Lines are grouped per UoM, so the order produces two moves:
+        # move 0: the line sold in Units -> 1 Unit, i.e. 1 packaging UoM (Unit)
         self.assertEqual(order.picking_ids.move_ids[0].product_uom_qty, 1)
         self.assertEqual(order.picking_ids.move_ids[0].packaging_uom_qty, 1)
+        # move 1: the line sold as 1 Pack of 6 -> 6 Units in the product UoM, 1 packaging UoM (Pack of 6)
         self.assertEqual(order.picking_ids.move_ids[1].product_uom_qty, 6)
         self.assertEqual(order.picking_ids.move_ids[1].packaging_uom_qty, 1)
         self.assertEqual(self.ten_dollars_no_tax.qty_available, 93, "Available quantity should be reduced from 100 to 93 (100 - 1 - 6).")

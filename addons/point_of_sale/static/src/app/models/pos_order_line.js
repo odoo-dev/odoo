@@ -100,7 +100,7 @@ export class PosOrderline extends PosOrderlineAccounting {
                         this.price_extra,
                         false,
                         this.product_id
-                    ) * (uom.relative_factor || 1);
+                    ) * uom.getFactorTo(this.product_id.product_tmpl_id.uom_id);
                 this.price_type = "manual";
             }
         }

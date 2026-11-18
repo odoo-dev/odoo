@@ -147,8 +147,8 @@
     </t>
 
     <t t-name="point_of_sale.UomSelection">
-        <div class="mb-2 fw-bolder">Packaging</div>
-        <div class="d-flex gap-2 flex-wrap">
+        <div id="uom-selection-label" class="mb-2 fw-bolder">Packaging</div>
+        <div class="d-flex gap-2 flex-wrap" role="radiogroup" aria-labelledby="uom-selection-label">
             <div t-foreach="this.props.availableUoMs" t-as="uom" t-key="uom.id">
                 <input
                     class="form-check-input d-none"
@@ -160,7 +160,6 @@
                 <label
                     role="button"
                     t-attf-class="form-check-label uom-selection-value btn btn-secondary btn-lg lh-lg d-flex {{ uom.id == this.props.selectedUomId ? 'active' : '' }}"
-                    t-attf-name="uom-{{uom.id}}"
                     t-attf-for="uom-{{uom.id}}">
                     <span t-out="uom.name"/>
                 </label>

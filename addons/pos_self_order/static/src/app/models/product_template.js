@@ -13,7 +13,7 @@ patch(ProductTemplate.prototype, {
     },
 
     get hasUoMs() {
-        return !this.skipUomSelection() && this.uom_ids.length > 0;
+        return !this._skipUomSelection() && this.uom_ids.length > 0;
     },
 
     showComboSelectionPage() {
