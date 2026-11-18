@@ -4,7 +4,7 @@ from collections import defaultdict
 
 from lxml import etree
 
-from odoo import Command, _, api, fields, models
+from odoo import _, api, fields, models
 from odoo.fields import Domain
 from odoo.tools import formatLang, frozendict, html2plaintext, html_escape, unique
 from odoo.tools.float_utils import float_compare
@@ -41,43 +41,6 @@ class AccountEdiUBL(models.AbstractModel):
         return super()._find_value(xpath, tree, UBL_NAMESPACES)
 
     # -------------------------------------------------------------------------
-    # BASE LINES HELPERS
-    # -------------------------------------------------------------------------
-
-    def _ubl_default_tax_subtotal_tax_category_grouping_key(self, tax_grouping_key, vals):
-        """ Give the values about how taxes are grouped together in TaxTotal -> TaxSubtotal -> TaxCategory
-        (or WithholdingTaxTotal depending on 'is_withholding').
-
-        :param tax_grouping_key:            The grouping key returned by '_get_tax_category_grouping_key'.
-        :param vals:                        Some custom data.
-        :return:                            A dictionary that could be used as a grouping key for the taxes helpers.
-        """
-        return dict(tax_grouping_key)
-
-    def _ubl_default_tax_subtotal_grouping_key(self, tax_category_grouping_key, vals):
-        """ Give the values about how taxes are grouped together in TaxTotal -> TaxSubtotal
-        (or WithholdingTaxTotal depending on 'is_withholding').
-
-        :param tax_category_grouping_key:   The grouping key returned by '_ubl_default_tax_subtotal_tax_category_grouping_key'.
-        :param vals:                        Some custom data.
-        :return:                            A dictionary that could be used as a grouping key for the taxes helpers.
-        """
-        return dict(tax_category_grouping_key)
-
-    def _ubl_default_tax_total_grouping_key(self, tax_subtotal_grouping_key, vals):
-        """ Give the values about how taxes are grouped together in TaxTotal
-        (or WithholdingTaxTotal depending on 'is_withholding').
-
-        :param tax_subtotal_grouping_key:   The grouping key returned by '_ubl_default_tax_subtotal_grouping_key'.
-        :param vals:                        Some custom data.
-        :return:                            A dictionary that could be used as a grouping key for the taxes helpers.
-        """
-        return {
-            'is_withholding': tax_subtotal_grouping_key['is_withholding'],
-            'currency': tax_subtotal_grouping_key['currency'],
-        }
-
-    # -------------------------------------------------------------------------
     # BUILDER INTERFACE
     # -------------------------------------------------------------------------
 
@@ -95,9 +58,19 @@ class AccountEdiUBL(models.AbstractModel):
         self._round_base_lines_tax_details(vals)
         return vals
 
+    def _ubl_should_export_emptying_taxes_as_lines(self, vals):
+        """ Whether the emptying taxes (e.g. deposits on bottles), which are not taxes for the format, are reported as
+        separated lines (see '_turn_emptying_taxes_as_new_base_lines'). """
+        return False
+
     def _ubl_prepare_base_lines(self, vals):
         """ Hook to alter vals['base_lines'] before rounding them (e.g. to split some taxes into new lines). """
-        return
+        if self._ubl_should_export_emptying_taxes_as_lines(vals):
+            vals['base_lines'] = self._turn_emptying_taxes_as_new_base_lines(
+                base_lines=vals['base_lines'],
+                company=vals['company'],
+                vals=vals,
+            )
 
     def _ubl_report_withholding_taxes_as_prepaid_amount(self, vals):
         """ Whether the withholding taxes are reported as a prepaid amount (cbc:PrepaidAmount, explained in the
@@ -931,17 +904,11 @@ class AccountEdiUBL(models.AbstractModel):
     def _ubl_add_credit_note_type_code_node(self, vals):
         vals['document_node']['cbc:CreditNoteTypeCode'] = {'_text': None}
 
-    def _ubl_add_order_type_code_node(self, vals):
-        vals['document_node']['cbc:OrderTypeCode'] = {'_text': None}
-
     def _ubl_add_notes_nodes(self, vals):
         vals['document_node']['cbc:Note'] = []
 
     def _ubl_add_document_currency_code_node_foreign_currency(self, vals):
         vals['document_node']['cbc:DocumentCurrencyCode'] = {'_text': vals['currency'].name}
-
-    def _ubl_add_document_currency_code_node_company_currency(self, vals):
-        vals['document_node']['cbc:DocumentCurrencyCode'] = {'_text': vals['company'].currency_id.name}
 
     def _ubl_add_document_currency_code_node(self, vals):
         vals['document_node']['cbc:DocumentCurrencyCode'] = {'_text': None}
@@ -1157,7 +1124,15 @@ class AccountEdiUBL(models.AbstractModel):
             ],
         }
 
-    def _ubl_add_allowance_charge_nodes_early_payment_discount(self, vals, in_foreign_currency=True):
+    def _ubl_add_allowance_charge_nodes_by_grouping_key(self, vals, get_grouping_key, get_node, in_foreign_currency=True):
+        """ Add a document level cac:AllowanceCharge per grouping key of the base lines.
+
+        :param vals:                Some custom data.
+        :param get_grouping_key:    The grouping key method (base_line, tax_data, vals, currency): lines with a falsy key
+                                    are ignored.
+        :param get_node:            The node builder method (vals, allowance_charge_values).
+        :param in_foreign_currency: Whether the amounts are expressed in the document currency or the company one.
+        """
         AccountTax = self.env['account.tax']
         suffix = '_currency' if in_foreign_currency else ''
         currency = vals['currency'] if in_foreign_currency else vals['company_currency']
@@ -1165,7 +1140,7 @@ class AccountEdiUBL(models.AbstractModel):
         allowance_charge_nodes = vals['document_node']['cac:AllowanceCharge']
         base_lines_aggregated_values = AccountTax._aggregate_base_lines_tax_details(
             base_lines=vals['base_lines'],
-            grouping_function=lambda base_line, tax_data: self._get_allowance_charge_early_payment_grouping_key(
+            grouping_function=lambda base_line, tax_data: get_grouping_key(
                 base_line=base_line,
                 tax_data=tax_data,
                 vals=vals,
@@ -1177,7 +1152,7 @@ class AccountEdiUBL(models.AbstractModel):
             if not grouping_key:
                 continue
 
-            allowance_charge_nodes.append(self._ubl_get_allowance_charge_early_payment_node(vals, {
+            allowance_charge_nodes.append(get_node(vals, {
                 'currency': currency,
                 'amount': values[f'total_excluded{suffix}'],
                 'is_charge': values[f'total_excluded{suffix}'] > 0.0,
@@ -1190,40 +1165,21 @@ class AccountEdiUBL(models.AbstractModel):
                 },
             }))
 
-    def _ubl_add_allowance_charge_nodes_global_discount(self, vals, in_foreign_currency=True):
-        AccountTax = self.env['account.tax']
-        suffix = '_currency' if in_foreign_currency else ''
-        currency = vals['currency'] if in_foreign_currency else vals['company_currency']
-
-        allowance_charge_nodes = vals['document_node']['cac:AllowanceCharge']
-        base_lines_aggregated_values = AccountTax._aggregate_base_lines_tax_details(
-            base_lines=vals['base_lines'],
-            grouping_function=lambda base_line, tax_data: self._get_allowance_charge_global_discount_grouping_key(
-                base_line=base_line,
-                tax_data=tax_data,
-                vals=vals,
-                currency=currency,
-            ),
+    def _ubl_add_allowance_charge_nodes_early_payment_discount(self, vals, in_foreign_currency=True):
+        self._ubl_add_allowance_charge_nodes_by_grouping_key(
+            vals,
+            get_grouping_key=self._get_allowance_charge_early_payment_grouping_key,
+            get_node=self._ubl_get_allowance_charge_early_payment_node,
+            in_foreign_currency=in_foreign_currency,
         )
-        values_per_grouping_key = AccountTax._aggregate_base_lines_aggregated_values(base_lines_aggregated_values)
-        for grouping_key, values in values_per_grouping_key.items():
-            if not grouping_key:
-                continue
 
-            allowance_charge_nodes.append(
-                self._ubl_get_allowance_charge_global_discount_node(vals, {
-                    'currency': currency,
-                    'amount': values[f'total_excluded{suffix}'],
-                    'is_charge': values[f'total_excluded{suffix}'] > 0.0,
-                    'tax_categories': {
-                        grouping_key: {
-                            **grouping_key,
-                            'base_amount': values[f'base_amount{suffix}'],
-                            'tax_amount': values[f'tax_amount{suffix}'],
-                        },
-                    },
-                }),
-            )
+    def _ubl_add_allowance_charge_nodes_global_discount(self, vals, in_foreign_currency=True):
+        self._ubl_add_allowance_charge_nodes_by_grouping_key(
+            vals,
+            get_grouping_key=self._get_allowance_charge_global_discount_grouping_key,
+            get_node=self._ubl_get_allowance_charge_global_discount_node,
+            in_foreign_currency=in_foreign_currency,
+        )
 
     def _ubl_add_allowance_charge_nodes(self, vals):
         vals['document_node']['cac:AllowanceCharge'] = []
@@ -1569,25 +1525,6 @@ class AccountEdiUBL(models.AbstractModel):
             ),
             'currencyID': currency.name,
         }
-
-        if self._is_document(vals, 'invoice', 'credit_note', 'debit_note', 'self_invoice', 'self_credit_note'):
-            invoice = vals['invoice']
-
-            if in_foreign_currency:
-                amount_total = invoice.amount_total
-                amount_residual = invoice.amount_residual
-            else:
-                amount_total = invoice.amount_total_signed * -invoice.direction_sign
-                amount_residual = invoice.amount_residual_signed * -invoice.direction_sign
-
-            node['cbc:PayableAmount']['_text'] = FloatFmt(
-                amount_residual,
-                min_dp=currency.decimal_places,
-            )
-            node['cbc:PrepaidAmount']['_text'] = FloatFmt(
-                amount_total - amount_residual,
-                min_dp=currency.decimal_places,
-            )
 
         if self._is_document(vals, 'invoice', 'credit_note', 'debit_note', 'self_invoice', 'self_credit_note'):
             invoice = vals['invoice']
@@ -2068,24 +2005,13 @@ class AccountEdiUBL(models.AbstractModel):
             collected_values['to_write']['invoice_incoterm_id'] = incoterm.id
 
     def _import_ubl_invoice_add_prepaid_amount(self, collected_values):
-        file_document_sign = collected_values['file_document_sign']
-        currency = collected_values['currency_values']['currency']
-        tree = collected_values['tree']
-        prepaid_amount_str = tree.findtext('./{*}LegalMonetaryTotal/{*}PrepaidAmount')
-        prepaid_amount = file_document_sign * float(prepaid_amount_str or 0.0)
-        if currency.is_zero(prepaid_amount):
-            return
-
-        collected_values['prepaid_amount'] = prepaid_amount
-        formatted_prepaid_amount = formatLang(self.env, prepaid_amount, currency_obj=currency)
-        collected_values['logs'].append(_("A payment of %s was detected.", formatted_prepaid_amount))
+        prepaid_amount_str = collected_values['tree'].findtext('./{*}LegalMonetaryTotal/{*}PrepaidAmount')
+        self._import_invoice_add_prepaid_amount(collected_values, prepaid_amount_str)
 
     def _import_ubl_invoice_add_tax_total_values(self, collected_values):
-        file_document_sign = collected_values['file_document_sign']
-        odoo_document_type = collected_values['odoo_document_type']
         currency = collected_values['currency_values']['currency']
 
-        taxes_values = collected_values['tax_total_values'] = {}
+        collected_values['tax_total_values'] = {}
         tree = collected_values['tree']
         for subtotal_elem in tree.findall('./{*}TaxTotal/{*}TaxSubtotal'):
             amount_node = subtotal_elem.find('.//{*}TaxAmount')
@@ -2106,69 +2032,34 @@ class AccountEdiUBL(models.AbstractModel):
             if percentage is None:
                 continue
 
-            percentage = float(percentage)
-            tax_key = frozendict({
-                'category_code': category_code,
-                'percentage': percentage,
-            })
-            tax_values = taxes_values.setdefault(tax_key, {
-                'amount_type': 'percent',
-                'type_tax_use': odoo_document_type,
-                'amount': percentage,
-                'ubl_cii_tax_category_code': category_code,
-                'tax_amount_currency': 0.0,
-                'related_taxes_values': [],
-            })
-            tax_values['tax_amount_currency'] += file_document_sign * float(amount)
+            self._import_invoice_add_tax_total_value(collected_values, category_code, float(percentage), amount)
 
     def _import_ubl_invoice_add_allowances_charges_values(self, collected_values):
         tree = collected_values['tree']
         odoo_document_type = collected_values['odoo_document_type']
-        allowances = collected_values['allowances'] = []
-        charges = collected_values['charges'] = []
+        collected_values['allowances'] = []
+        collected_values['charges'] = []
         taxes_values = collected_values['taxes_values'] = []
-        tax_total_values = collected_values['tax_total_values']
 
         for element in tree.iterfind('./{*}AllowanceCharge'):
-            reason = element.findtext('./{*}AllowanceChargeReason')
-            reason_code = element.findtext('./{*}AllowanceChargeReasonCode')
-            charge_indicator = element.findtext('./{*}ChargeIndicator')
-            amount_str = element.findtext('./{*}Amount')
-            base_amount_str = element.findtext('./{*}BaseAmount')
-            multiplier_factor_numeric_str = element.findtext('./{*}MultiplierFactorNumeric')
             percentage_str = element.findtext('./{*}TaxCategory/{*}Percent')
             category_code = element.findtext('./{*}TaxCategory/{*}ID')
-
-            if amount_str:
-                amount = float(amount_str)
-            else:
-                amount = 0.0
-
             if not percentage_str:
                 continue
 
             percentage = float(percentage_str)
-            allowance_charge_values = {
-                'amount': amount,
-                'base_amount': float(base_amount_str) if base_amount_str else None,
-                'reason': reason,
-                'reason_code': reason_code,
-                'multiplier_factor_numeric': float(multiplier_factor_numeric_str) if multiplier_factor_numeric_str else None,
-                'tax_percentage': percentage,
-                'charge_indicator': charge_indicator,
-            }
-
             tax_category_tree = element.find('./{*}TaxCategory')
-            tax_values = self._import_ubl_invoice_line_prepare_classified_tax_category_tax_values(collected_values, tax_category_tree)
-            if tax_values:
-                allowance_charge_values['taxes_values'] = tax_values
-                global_tax_values = tax_total_values.get(tax_values['_tax_key'])
-                global_tax_values['related_taxes_values'].append(tax_values)
-
-            if charge_indicator.lower() == 'true':
-                charges.append(allowance_charge_values)
-            else:
-                allowances.append(allowance_charge_values)
+            allowance_charge_values = self._import_invoice_add_document_allowance_charge_values(
+                collected_values,
+                charge_indicator=element.findtext('./{*}ChargeIndicator'),
+                amount_str=element.findtext('./{*}Amount'),
+                base_amount_str=element.findtext('./{*}BaseAmount'),
+                multiplier_factor_numeric_str=element.findtext('./{*}MultiplierFactorNumeric'),
+                reason=element.findtext('./{*}AllowanceChargeReason'),
+                reason_code=element.findtext('./{*}AllowanceChargeReasonCode'),
+                percentage=percentage,
+                tax_values=self._import_ubl_invoice_line_prepare_classified_tax_category_tax_values(collected_values, tax_category_tree),
+            )
 
             # Try to link the allowance / charge with a percentage tax.
             if not category_code:
@@ -2214,52 +2105,29 @@ class AccountEdiUBL(models.AbstractModel):
 
     def _import_ubl_invoice_line_add_allowance_charges_values(self, collected_values):
         line_tree = collected_values['line_tree']
-        allowances = collected_values['allowances'] = []
-        charges = collected_values['charges'] = []
+        collected_values['allowances'] = []
+        collected_values['charges'] = []
         for allowance_charge_elem in line_tree.iterfind('./{*}AllowanceCharge'):
-            charge_indicator = allowance_charge_elem.findtext('.//{*}ChargeIndicator')
-            amount_str = allowance_charge_elem.findtext('.//{*}Amount')
-            base_amount_str = allowance_charge_elem.findtext('.//{*}BaseAmount')
-            reason = allowance_charge_elem.findtext('.//{*}AllowanceChargeReason')
-            reason_code = allowance_charge_elem.findtext('.//{*}AllowanceChargeReasonCode')
-
-            if amount_str:
-                amount = float(amount_str)
-            else:
-                continue
-
-            allowance_charge_values = {
-                'amount': amount,
-                'base_amount': float(base_amount_str) if base_amount_str else None,
-                'reason': reason,
-                'reason_code': reason_code,
-            }
-            if charge_indicator.lower() == 'true':
-                charges.append(allowance_charge_values)
-            else:
-                allowances.append(allowance_charge_values)
+            self._import_invoice_line_add_allowance_charge_values(
+                collected_values,
+                charge_indicator=allowance_charge_elem.findtext('.//{*}ChargeIndicator'),
+                amount_str=allowance_charge_elem.findtext('.//{*}Amount'),
+                base_amount_str=allowance_charge_elem.findtext('.//{*}BaseAmount'),
+                reason=allowance_charge_elem.findtext('.//{*}AllowanceChargeReason'),
+                reason_code=allowance_charge_elem.findtext('.//{*}AllowanceChargeReasonCode'),
+            )
 
         allowance_elem = line_tree.find('./{*}Price/{*}AllowanceCharge')
         collected_values['price_allowance_values'] = {}
         if allowance_elem is not None:
-            charge_indicator = allowance_elem.findtext('./{*}ChargeIndicator') or 'false'
-            amount_str = allowance_elem.findtext('./{*}Amount')
-            base_amount_str = allowance_elem.findtext('./{*}BaseAmount')
-            reason = allowance_elem.findtext('./{*}AllowanceChargeReason')
-            reason_code = allowance_elem.findtext('./{*}AllowanceChargeReasonCode')
-
-            if charge_indicator.lower() == 'true':
-                charge_indicator_sign = 1
-            else:
-                charge_indicator_sign = -1
-
-            collected_values['price_allowance_values'] = {
-                'charge_indicator_sign': charge_indicator_sign,
-                'amount': float(amount_str) if amount_str else None,
-                'base_amount': float(base_amount_str) if base_amount_str else None,
-                'reason': reason,
-                'reason_code': reason_code,
-            }
+            self._import_invoice_line_add_price_allowance_values(
+                collected_values,
+                charge_indicator=allowance_elem.findtext('./{*}ChargeIndicator'),
+                amount_str=allowance_elem.findtext('./{*}Amount'),
+                base_amount_str=allowance_elem.findtext('./{*}BaseAmount'),
+                reason=allowance_elem.findtext('./{*}AllowanceChargeReason'),
+                reason_code=allowance_elem.findtext('./{*}AllowanceChargeReasonCode'),
+            )
 
     def _import_ubl_invoice_line_get_base_quantity(self, collected_values):
         """ Return the quantity 'cbc:PriceAmount' is expressed for, or None when there is none.
@@ -2542,22 +2410,7 @@ class AccountEdiUBL(models.AbstractModel):
         if percentage is None or category_code is None:
             return
 
-        percentage = float(percentage)
-        tax_key = frozendict({
-            'category_code': category_code,
-            'percentage': percentage,
-        })
-        global_tax_values = collected_values['tax_total_values'].get(tax_key)
-        if not global_tax_values:
-            return
-
-        return {
-            'amount_type': global_tax_values['amount_type'],
-            'type_tax_use': global_tax_values['type_tax_use'],
-            'amount': global_tax_values['amount'],
-            'ubl_cii_tax_category_code': global_tax_values['ubl_cii_tax_category_code'],
-            '_tax_key': tax_key,
-        }
+        return self._import_invoice_line_get_tax_values_from_tax_total(collected_values, category_code, float(percentage))
 
     def _import_ubl_invoice_line_prepare_charge_tax_values(self, collected_values, charge):
         discount_precision_digits = self.env['decimal.precision'].precision_get('Discount')
@@ -2570,36 +2423,21 @@ class AccountEdiUBL(models.AbstractModel):
         ):
             return
 
-        odoo_document_type = collected_values['odoo_document_type']
-        fixed_tax_amount = charge['amount'] / collected_values['to_write']['quantity']
-        charge['attempt_tax_values'] = tax_values = {
-            'name': charge['reason'],
-            'amount_type': 'fixed',
-            'type_tax_use': odoo_document_type,
-            'amount': fixed_tax_amount,
-            'tax_amount_currency': fixed_tax_amount,
-        }
-
-        return tax_values
+        return self._import_invoice_line_get_fixed_tax_values(collected_values, charge)
 
     def _import_ubl_invoice_line_add_taxes_values(self, collected_values):
         line_tree = collected_values['line_tree']
-        taxes_values = collected_values['taxes_values'] = []
-        tax_total_values = collected_values['tax_total_values']
+        collected_values['taxes_values'] = []
 
         # Percentage taxes.
         for tax_category_tree in line_tree.findall('.//{*}Item/{*}ClassifiedTaxCategory'):
-            tax_values = self._import_ubl_invoice_line_prepare_classified_tax_category_tax_values(collected_values, tax_category_tree)
-            if tax_values:
-                taxes_values.append(tax_values)
-                global_tax_values = tax_total_values.get(tax_values['_tax_key'])
-                global_tax_values['related_taxes_values'].append(tax_values)
+            if tax_values := self._import_ubl_invoice_line_prepare_classified_tax_category_tax_values(collected_values, tax_category_tree):
+                self._import_invoice_line_add_percentage_tax_values(collected_values, tax_values)
 
         # Fixed taxes.
         for charge in collected_values['charges']:
-            tax_values = self._import_ubl_invoice_line_prepare_charge_tax_values(collected_values, charge)
-            if tax_values:
-                taxes_values.append(tax_values)
+            if tax_values := self._import_ubl_invoice_line_prepare_charge_tax_values(collected_values, charge):
+                collected_values['taxes_values'].append(tax_values)
 
     def _import_invoice_line_add_optional_fields(self, collected_values):
         return self._import_ubl_invoice_line_add_optional_fields(collected_values)
@@ -2743,45 +2581,12 @@ class AccountEdiUBL(models.AbstractModel):
             collected_values['to_write'][field_name] = node_value
 
     def _import_ubl_invoice_fix_untaxed_amount(self, collected_values):
-        if not collected_values['are_taxes_complete']:
-            return
-
         tree = collected_values['tree']
-        file_document_sign = collected_values['file_document_sign']
-        currency = collected_values['currency_values']['currency']
-        tax_exclusive_amount_str = tree.findtext('./{*}LegalMonetaryTotal/{*}TaxExclusiveAmount')
-        if not tax_exclusive_amount_str:
-            return
-
-        payable_rounding_amount_str = tree.findtext('./{*}LegalMonetaryTotal/{*}PayableRoundingAmount')
-        tax_exclusive_amount = file_document_sign * float(tax_exclusive_amount_str or 0.0)
-        payable_rounding_amount = file_document_sign * float(payable_rounding_amount_str or 0.0)
-        expected_untaxed_amount = tax_exclusive_amount + payable_rounding_amount
-        invoice = collected_values['invoice']
-        difference = currency.round(expected_untaxed_amount - invoice.amount_untaxed)
-        for line_collected_values in collected_values['lines_collected_values']:
-            for charge in line_collected_values['charges']:
-                attempt_tax_values = charge.get('attempt_tax_values')
-                if attempt_tax_values and attempt_tax_values.get('tax'):
-                    difference -= charge['amount']
-        if currency.is_zero(difference):
-            return
-
-        container = {'records': invoice}
-        with (
-            invoice._check_balanced(container),
-            invoice._disable_discount_precision(),
-            invoice._sync_dynamic_lines(container),
-        ):
-            invoice.invoice_line_ids = [
-                Command.create({
-                    'display_type': 'product',
-                    'name': _("Rounding"),
-                    'quantity': 1,
-                    'price_unit': difference,
-                    'tax_ids': [],
-                }),
-            ]
+        self._import_invoice_fix_untaxed_amount(
+            collected_values,
+            tax_exclusive_amount_str=tree.findtext('./{*}LegalMonetaryTotal/{*}TaxExclusiveAmount'),
+            payable_rounding_amount_str=tree.findtext('./{*}LegalMonetaryTotal/{*}PayableRoundingAmount'),
+        )
 
     def _import_attachments(self, invoice, tree):
         """ EXTENDS 'account_edi_common': ATTEMPTS to create a PDF attachment when the XML file doesn't provide one."""

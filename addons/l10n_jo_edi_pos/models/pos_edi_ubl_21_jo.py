@@ -1,18 +1,16 @@
-import re
-
 from odoo import models
 from odoo.tools import float_compare
 from odoo.addons.l10n_jo_edi.models.account_edi_xml_ubl_21_jo import JO_MAX_DP
-from odoo.addons.account_edi_cii.models.account_edi_common import FloatFmt
 
 
 class PosEdiXmlUBL21Jo(models.AbstractModel):
-    """ JoFotara UBL 2.1 export of the POS orders, see account.edi.xml.ubl_21.jo for the format.
+    """ JoFotara UBL 2.1 export of the POS orders: the JoFotara builder of the invoices ('account.edi.xml.ubl_21.jo')
+    applied on the POS orders exported by 'pos.edi.xml.ubl_21'. Only what depends on the POS order is overridden here.
 
     Regular orders and refunds are both rendered as an UBL <Invoice> (InvoiceTypeCode 388 / 381).
     """
     _name = 'pos.edi.xml.ubl_21.jo'
-    _inherit = ['pos.edi.xml.ubl_21']
+    _inherit = ['account.edi.xml.ubl_21.jo', 'pos.edi.xml.ubl_21']
     _description = 'UBL 2.1 (JoFotara) for PoS Orders'
 
     # -------------------------------------------------------------------------
@@ -39,9 +37,6 @@ class PosEdiXmlUBL21Jo(models.AbstractModel):
             for base_line in vals['base_lines']
         )
         return vals
-
-    def _l10n_jo_get_currency_9_dp(self):
-        return self.env['account.edi.xml.ubl_21.jo']._l10n_jo_get_currency_9_dp()
 
     def _l10n_jo_get_base_lines(self, pos_order, currency_9_dp):
         """ Compute values for order lines. In Jordan, because the web-service has absolutely no tolerance,
@@ -78,9 +73,9 @@ class PosEdiXmlUBL21Jo(models.AbstractModel):
         vals['base_lines'] = self._l10n_jo_get_base_lines(vals['pos_order'], vals['jo_currency'])
         vals['tax_lines'] = []
 
-    def _round_base_lines_tax_details(self, vals, in_company_currency=True):
-        # EXTENDS account.edi.common
-        # The JO base lines are already rounded with 9 decimals, see '_l10n_jo_get_base_lines'.
+    def _ubl_prepare_base_lines(self, vals):
+        # OVERRIDE account.edi.xml.ubl_21.jo
+        # The base lines of the POS order are computed by '_pos_order_prepare_base_lines'.
         return
 
     def _l10n_jo_get_base_lines_edi_ids(self, vals):
@@ -111,73 +106,12 @@ class PosEdiXmlUBL21Jo(models.AbstractModel):
                     overflow_edi_id += 1
         return base_lines_edi_ids
 
-    def _get_exported_invoice_base_lines(self, vals):
-        # EXTENDS account.edi.common
-        return [base_line for base_line in vals['base_lines'] if not self._is_early_payment_base_line(base_line)]
-
     # -------------------------------------------------------------------------
     # EXPORT: Helpers
     # -------------------------------------------------------------------------
 
-    def format_float(self, amount, precision_digits=3):
-        # Force all floats to be formatted with at least 3 decimals and at most 9 decimals
-        return FloatFmt(amount, 3, max_dp=JO_MAX_DP)
-
-    def _get_tax_category_code(self, customer, supplier, tax):
-        if tax and tax._l10n_jo_is_exempt_tax():
-            return "Z"
-        if tax and tax.amount:
-            return "S"
-        return "O"
-
-    def _sanitize_phone(self, raw):
-        return re.sub(r'[^0-9]', '', raw or '')[:15]
-
     def _get_payment_method_code(self, order):
         return order._get_order_scope_code() + order._get_order_payment_method_code() + order._get_order_tax_payer_type_code()
-
-    def _l10n_jo_tax_grouping_key(self, base_line, tax_data, vals):
-        """ Group the taxes by tax category (TaxTotal/TaxSubtotal/TaxCategory). """
-        customer = vals['customer'].commercial_partner_id
-        supplier = vals['supplier']
-        tax = tax_data and tax_data['tax']
-        return {
-            'tax_category_code': self._get_tax_category_code(customer, supplier, tax),
-            **self._get_tax_exemption_reason(customer, supplier, tax),
-            'amount': tax.amount if tax and not tax.has_negative_factor else 0.0,
-            'amount_type': tax.amount_type if tax else 'percent',
-        }
-
-    def _l10n_jo_get_line_amounts(self, vals, base_line):
-        """ In JO, because of the precision requirements, we first compute an exact
-        gross unit price, rounded to 9 decimals, and then use it to compute the discount amounts.
-        """
-        currency_9_dp = vals['jo_currency']
-
-        discount_factor = 1 - (base_line['discount'] / 100.0)
-        if discount_factor != 0.0:
-            gross_subtotal_currency = base_line['tax_details']['raw_total_excluded_currency'] / discount_factor
-        else:
-            gross_subtotal_currency = base_line['currency_id'].round(base_line['price_unit'] * base_line['quantity'])
-
-        # Start by getting a gross unit price rounded to 9 decimals
-        gross_price_unit_currency = currency_9_dp.round(gross_subtotal_currency / base_line['quantity']) if base_line['quantity'] else 0.0
-
-        # Then compute the gross subtotal from the rounded unit price
-        gross_subtotal_currency = currency_9_dp.round(gross_price_unit_currency * base_line['quantity'])
-
-        return {
-            'gross_price_unit_currency': gross_price_unit_currency,
-            'gross_subtotal_currency': gross_subtotal_currency,
-            # Then compute the discount from the gross subtotal
-            'discount_amount_currency': gross_subtotal_currency - base_line['tax_details']['total_excluded_currency'],
-        }
-
-    def _l10n_jo_get_amount_node(self, vals, amount):
-        return {
-            '_text': self.format_float(amount, JO_MAX_DP),
-            'currencyID': vals['jo_currency'].name,
-        }
 
     def _get_tax_category_node(self, vals, grouping_key):
         return {
@@ -205,12 +139,6 @@ class PosEdiXmlUBL21Jo(models.AbstractModel):
     # EXPORT: Document header nodes
     # -------------------------------------------------------------------------
 
-    def _ubl_add_version_id_node(self, vals):
-        vals['document_node']['cbc:UBLVersionID'] = {'_text': None}
-
-    def _ubl_add_profile_id_node(self, vals):
-        vals['document_node']['cbc:ProfileID'] = {'_text': 'reporting:1.0'}
-
     def _ubl_add_id_node(self, vals):
         vals['document_node']['cbc:ID'] = {'_text': (vals['pos_order'].name or '').replace('/', '_')}
 
@@ -226,9 +154,6 @@ class PosEdiXmlUBL21Jo(models.AbstractModel):
         }
         vals['document_node']['cbc:IssueTime'] = {'_text': None}
 
-    def _ubl_add_due_date_node(self, vals):
-        vals['document_node']['cbc:DueDate'] = {'_text': None}
-
     def _ubl_add_invoice_type_code_node(self, vals):
         vals['document_node']['cbc:InvoiceTypeCode'] = {
             '_text': 381 if vals['is_refund'] else 388,
@@ -237,12 +162,6 @@ class PosEdiXmlUBL21Jo(models.AbstractModel):
 
     def _ubl_add_notes_nodes(self, vals):
         vals['document_node']['cbc:Note'] = [{'_text': vals['pos_order'].general_customer_note}]
-
-    def _ubl_add_tax_currency_code_node(self, vals):
-        vals['document_node']['cbc:TaxCurrencyCode'] = {'_text': vals['currency'].name}
-
-    def _ubl_add_order_reference_node(self, vals):
-        vals['document_node']['cac:OrderReference'] = None
 
     def _ubl_add_billing_reference_nodes(self, vals):
         nodes = vals['document_node']['cac:BillingReference'] = []
@@ -268,20 +187,9 @@ class PosEdiXmlUBL21Jo(models.AbstractModel):
     # EXPORT: Party nodes
     # -------------------------------------------------------------------------
 
-    def _ubl_get_partner_address_node(self, vals, partner):
-        return {
-            'cbc:PostalZone': {'_text': partner.zip},
-            'cbc:CountrySubentityCode': {'_text': partner.state_id.code},
-            'cac:Country': {
-                'cbc:IdentificationCode': {'_text': partner.country_id.code},
-            },
-        }
-
-    def _ubl_add_party_endpoint_id_node(self, vals):
-        vals['party_node']['cbc:EndpointID'] = None
-
-    def _ubl_add_party_name_node(self, vals):
-        vals['party_node']['cac:PartyName'] = None
+    def _l10n_jo_get_customer_phone(self, vals):
+        # EXTENDS account.edi.xml.ubl_21.jo
+        return vals['customer'].phone
 
     def _ubl_add_accounting_customer_party_identification_nodes(self, vals):
         partner = vals['party_vals']['partner']
@@ -306,27 +214,6 @@ class PosEdiXmlUBL21Jo(models.AbstractModel):
         vals['party_node']['cac:PartyLegalEntity'] = [{
             'cbc:RegistrationName': {'_text': partner.commercial_partner_id.name},
         }]
-
-    def _ubl_add_party_contact_node(self, vals):
-        vals['party_node']['cac:Contact'] = None
-
-    def _ubl_add_accounting_customer_party_node(self, vals):
-        super()._ubl_add_accounting_customer_party_node(vals)
-        vals['document_node']['cac:AccountingCustomerParty']['cac:AccountingContact'] = {
-            'cbc:Telephone': {'_text': self._sanitize_phone(vals['customer'].phone)},
-        }
-
-    def _ubl_add_seller_supplier_party_node(self, vals):
-        vals['document_node']['cac:SellerSupplierParty'] = {
-            'cac:Party': {
-                'cac:PartyIdentification': {
-                    'cbc:ID': {'_text': vals['company'].l10n_jo_edi_sequence_income_source},
-                },
-            },
-        }
-
-    def _ubl_add_delivery_nodes(self, vals):
-        vals['document_node']['cac:Delivery'] = []
 
     def _ubl_add_payment_means_nodes(self, vals):
         nodes = vals['document_node']['cac:PaymentMeans'] = []
@@ -406,27 +293,6 @@ class PosEdiXmlUBL21Jo(models.AbstractModel):
     # EXPORT: Line nodes
     # -------------------------------------------------------------------------
 
-    def _ubl_add_line_id_node(self, vals):
-        index = vals['line_vals']['index']
-        vals['line_node']['cbc:ID'] = {'_text': vals['base_lines_edi_ids'].get(index, index)}
-
-    def _ubl_add_line_invoiced_quantity_node(self, vals):
-        vals['line_node']['cbc:InvoicedQuantity'] = {
-            '_text': vals['line_vals']['base_line']['quantity'],
-            'unitCode': 'PCE',
-        }
-
-    def _ubl_add_line_allowance_charge_nodes(self, vals):
-        # The line-level AllowanceCharge is added to the Price node
-        vals['line_node']['cac:AllowanceCharge'] = []
-
-    def _ubl_add_line_extension_amount_node(self, vals):
-        tax_details = vals['line_vals']['base_line']['tax_details']
-        vals['line_node']['cbc:LineExtensionAmount'] = self._l10n_jo_get_amount_node(
-            vals,
-            tax_details['total_excluded_currency'] + tax_details['delta_total_excluded_currency'],
-        )
-
     def _ubl_add_line_period_nodes(self, vals):
         vals['line_node']['cac:InvoicePeriod'] = []
 
@@ -460,17 +326,6 @@ class PosEdiXmlUBL21Jo(models.AbstractModel):
     def _ubl_add_line_item_node(self, vals):
         vals['line_node']['cac:Item'] = {
             'cbc:Name': {'_text': vals['line_vals']['base_line']['product_id'].name},
-        }
-
-    def _ubl_add_line_price_node(self, vals, in_foreign_currency=True):
-        line_amounts = self._l10n_jo_get_line_amounts(vals, vals['line_vals']['base_line'])
-        vals['line_node']['cac:Price'] = {
-            'cbc:PriceAmount': self._l10n_jo_get_amount_node(vals, line_amounts['gross_price_unit_currency']),
-            'cac:AllowanceCharge': {
-                'cbc:ChargeIndicator': {'_text': 'false'},
-                'cbc:AllowanceChargeReason': {'_text': 'DISCOUNT'},
-                'cbc:Amount': self._l10n_jo_get_amount_node(vals, abs(line_amounts['discount_amount_currency'])),
-            },
         }
 
     # -------------------------------------------------------------------------

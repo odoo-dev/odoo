@@ -49,23 +49,9 @@ class AccountEdiXmlUbl_Nl(models.AbstractModel):
         grouping_key['tax_exemption_reason_code'] = None
         return grouping_key
 
-    def _ubl_add_tax_currency_code_node(self, vals):
-        # OVERRIDE account.edi.xml.ubl_bis3
-        self._ubl_add_tax_currency_code_node_empty(vals)
-
-    def _ubl_tax_totals_node_grouping_key(self, base_line, tax_data, vals, currency):
+    def _ubl_bis3_report_tax_accounting_currency(self, vals):
         # EXTENDS account.edi.xml.ubl_bis3
-        tax_total_keys = super()._ubl_tax_totals_node_grouping_key(base_line, tax_data, vals, currency)
-
-        company_currency = vals['company'].currency_id
-        if (
-            tax_total_keys['tax_total_key']
-            and company_currency != vals['currency']
-            and tax_total_keys['tax_total_key']['currency'] == company_currency
-        ):
-            tax_total_keys['tax_total_key'] = None
-
-        return tax_total_keys
+        return False
 
     def _ubl_get_line_allowance_charge_discount_node(self, vals, discount_values):
         # EXTENDS account.edi.xml.ubl_bis3

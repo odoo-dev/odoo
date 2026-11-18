@@ -1,94 +1,15 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
-import base64
 from io import BytesIO
 from lxml import etree
 from zipfile import ZipFile
 from odoo import fields, Command
 from odoo.tests import HttpCase, tagged
-from odoo.tools.safe_eval import datetime
 
-from odoo.addons.account_edi_cii.tests.common import TestUblCiiCommon
+from odoo.addons.account_edi_cii.tests.common import TestAccountEdiUblCiiCommon
 
 
 @tagged('post_install', '-at_install')
-class TestAccountEdiUbl(TestUblCiiCommon, HttpCase):
-
-    _test_user_groups = None  # FIXME list needed groups
-
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        cls.company_data_2 = cls.setup_other_company()
-
-        cls.uom_units = cls.env.ref('uom.product_uom_unit')
-        cls.uom_dozens = cls.env.ref('uom.product_uom_dozen')
-
-        cls.displace_prdct = cls.env['product.product'].create({
-            'name': 'Displacement',
-            'uom_id': cls.uom_units.id,
-            'standard_price': 90.0,
-        })
-
-        cls.place_prdct = cls.env['product.product'].create({
-            'name': 'Placement',
-            'uom_id': cls.uom_units.id,
-            'standard_price': 80.0,
-        })
-
-        cls.namespaces = {
-            'rsm': "urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100",
-            'ram': "urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100",
-            'udt': "urn:un:unece:uncefact:data:standard:UnqualifiedDataType:100",
-            'qdt': "urn:un:unece:uncefact:data:standard:QualifiedDataType:100",
-            'xsi': "http://www.w3.org/2001/XMLSchema-instance",
-        }
-
-        cls.ubl_namespaces = {
-            'cbc': "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2",
-            'cac': "urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2",
-        }
-
-        cls.reverse_charge_tax = cls.company_data['default_tax_sale'].copy({
-            'name': 'Reverse charge tax',
-            'ubl_cii_tax_category_code': 'AE',
-            'ubl_cii_tax_exemption_reason_code': 'VATEX-EU-AE'
-        })
-        cls.zero_rated_tax = cls.company_data['default_tax_sale'].copy({
-            'name': 'Zero rated tax',
-            'ubl_cii_tax_category_code': 'Z'
-        })
-        cls.prod_tax = cls.company_data['default_tax_sale'].copy({
-            'name': 'Production tax',
-            'ubl_cii_tax_category_code': 'M'
-        })
-        cls.free_export_tax = cls.company_data['default_tax_sale'].copy({
-            'name': 'Free export tax',
-            'ubl_cii_tax_category_code': 'G',
-            'ubl_cii_tax_exemption_reason_code': 'VATEX-EU-132-1G'
-        })
-
-    def _configure_seller_for_cii_export(self):
-        """ Factur-X/ZUGFeRD/CII exports require a fully configured seller (VAT, phone, email,
-        bank account with a sanitized account number) or the export raises validation errors. """
-        company = self.env.company
-        company.write({
-            'country_id': self.env.ref('base.fr').id,
-            'vat': 'FR23334175221',
-            'phone': '+33499999999',
-            'email': 'company@test.example',
-        })
-        # set explicitly instead of relying on the routing_scheme/routing_endpoint auto-compute from
-        # vat + country_id, since its result depends on the order fields are written in `write()`
-        company.partner_id.write({
-            'routing_scheme': '9957',
-            'routing_endpoint': 'FR23334175221',
-        })
-        company.partner_id.bank_ids = [Command.create({
-            'account_number': '999999',
-            'partner_id': company.partner_id.id,
-            'allow_out_payment': True,
-        })]
-        return company
+class TestAccountEdiUbl(TestAccountEdiUblCiiCommon, HttpCase):
 
     def test_ubl_bis3_keeps_xml_attachment(self):
         """ Unlike Factur-X/ZUGFeRD, Peppol UBL formats don't embed an identical XML in the PDF,

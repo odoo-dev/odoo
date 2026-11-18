@@ -252,29 +252,3 @@ class AccountMove(models.Model):
     def _is_exportable_as_self_invoice(self):
         """ Whether this vendor bill can be exported as a self-billed invoice (see account_edi_ubl). """
         return False
-
-    @api.model
-    def _get_line_vals_list(self, lines_vals):
-        """ Get invoice line values list.
-
-        :param list[tuple] lines_vals: List of values ``[(name, qty, price, tax), ...]``.
-        :returns: List of invoice line values.
-        """
-        return [{
-            'sequence': 0,  # be sure to put these lines above the 'real' invoice lines
-            'name': name,
-            'quantity': quantity,
-            'price_unit': price_unit,
-            'tax_ids': [Command.set(tax_ids)],
-        } for name, quantity, price_unit, tax_ids in lines_vals]
-
-    def _get_specific_tax(self, name, domain):
-        AccountMoveLine = self.env['account.move.line']
-        if hasattr(AccountMoveLine, '_get_predicted_values'):
-            # company check is already done in the prediction query
-            return AccountMoveLine._get_predicted_values(
-                name,
-                move=self,
-                line_domain=[('tax_ids', 'any', domain)],
-            ).get('tax_ids', self.env['account.tax'])
-        return self.env['account.tax']

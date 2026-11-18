@@ -5,7 +5,7 @@ from odoo.addons.account_edi_cii.models.account_edi_common import FloatFmt
 
 class AccountEdiUBLPint(models.AbstractModel):
     _name = "account.edi.ubl_pint"
-    _inherit = 'account.edi.ubl'
+    _inherit = 'account.edi.ubl_core_invoice'
     _description = "UBL PINT"
 
     # -------------------------------------------------------------------------
@@ -26,27 +26,6 @@ class AccountEdiUBLPint(models.AbstractModel):
             vals['document_node']['cbc:ProfileID']['_text'] = 'urn:peppol:bis:billing'
         elif self._is_document(vals, 'self_invoice', 'self_credit_note'):
             vals['document_node']['cbc:ProfileID']['_text'] = 'urn:peppol:bis:selfbilling'
-
-    def _ubl_add_invoice_type_code_node(self, vals):
-        super()._ubl_add_invoice_type_code_node(vals)
-
-        if self._is_document(vals, 'invoice'):
-            vals['document_node']['cbc:InvoiceTypeCode']['_text'] = 380
-        elif self._is_document(vals, 'self_invoice'):
-            vals['document_node']['cbc:InvoiceTypeCode']['_text'] = 389
-
-    def _ubl_add_credit_note_type_code_node(self, vals):
-        super()._ubl_add_credit_note_type_code_node(vals)
-
-        if self._is_document(vals, 'credit_note'):
-            vals['document_node']['cbc:CreditNoteTypeCode']['_text'] = 381
-        elif self._is_document(vals, 'self_credit_note'):
-            vals['document_node']['cbc:CreditNoteTypeCode']['_text'] = 261
-
-    def _ubl_report_withholding_taxes_as_prepaid_amount(self, vals):
-        # EXTENDS account.edi.ubl
-        # WithholdingTaxTotal is not part of the PINT syntax: the withheld amount is reported as a PrepaidAmount.
-        return True
 
     def _ubl_add_notes_nodes_all_invoices(self, vals):
         invoice = vals['invoice']
@@ -80,13 +59,6 @@ class AccountEdiUBLPint(models.AbstractModel):
             else:
                 document_node['cac:Delivery'] = None
 
-    def _ubl_add_document_currency_code_node(self, vals):
-        # The currency in which the invoice is issued and in which all monetary amounts are expressed.
-        # [ibr-005]-An Invoice MUST have an Invoice currency code (ibt-005).
-        # [ibr-cl-04]-Invoice currency code (ibt-005) MUST be coded using ISO code list 4217 alpha-3
-        super()._ubl_add_document_currency_code_node(vals)
-        vals['document_node']['cbc:DocumentCurrencyCode']['_text'] = vals['currency'].name
-
     def _ubl_add_tax_currency_code_node(self, vals):
         # The currency used for TAX accounting and reporting purposes as accepted or required in the country of the Seller.
         # [ibr-077]-Tax accounting currency code (ibt-006) MUST be different from invoice currency code (ibt-005) when provided.
@@ -95,13 +67,6 @@ class AccountEdiUBLPint(models.AbstractModel):
         company_currency = vals['company'].currency_id
         if vals['document_node']['cbc:DocumentCurrencyCode']['_text'] != company_currency.name:
             vals['document_node']['cbc:TaxCurrencyCode']['_text'] = company_currency.name
-
-    def _ubl_add_buyer_reference_node(self, vals):
-        super()._ubl_add_buyer_reference_node(vals)
-
-        customer = vals['customer']
-        if customer_ref := customer.ref or customer.commercial_partner_id.ref:
-            vals['document_node']['cbc:BuyerReference']['_text'] = customer_ref
 
     def _ubl_add_billing_reference_nodes(self, vals):
         # A group of business terms providing information on one or more preceding Invoices.
@@ -141,21 +106,6 @@ class AccountEdiUBLPint(models.AbstractModel):
     def _should_export_cash_rounding_as_line(self, vals):
         # Cash rounding lines should not appear as lines but in PayableRoundingAmount.
         return False
-
-    def _ubl_get_partner_address_node(self, vals, partner):
-        node = super()._ubl_get_partner_address_node(vals, partner)
-        node['cbc:CountrySubentityCode'] = None
-        node['cac:Country']['cbc:Name'] = None
-        return node
-
-    def _ubl_add_party_endpoint_id_node(self, vals):
-        super()._ubl_add_party_endpoint_id_node(vals)
-        partner = vals['party_vals']['partner']
-        identifier_vals = partner._get_preferred_routing_identifier_vals()
-        if identifier_vals:
-            normalized_value = self.env['res.partner']._validate_identifier_by_scheme(identifier_vals['scheme'], identifier_vals['value']).get('value')
-            vals['party_node']['cbc:EndpointID']['_text'] = normalized_value
-            vals['party_node']['cbc:EndpointID']['schemeID'] = identifier_vals['scheme']
 
     def _ubl_add_party_identification_nodes(self, vals):
         super()._ubl_add_party_identification_nodes(vals)
@@ -204,31 +154,6 @@ class AccountEdiUBLPint(models.AbstractModel):
         super()._ubl_add_party_legal_entity_nodes(vals)
         self._ubl_add_party_legal_entity_nodes_iso_6523_icd(vals)
 
-    def _ubl_add_delivery_party_endpoint_id_node(self, vals):
-        pass
-
-    def _ubl_add_delivery_party_identification_nodes(self, vals):
-        pass
-
-    def _ubl_add_delivery_party_postal_address_node(self, vals):
-        pass
-
-    def _ubl_add_delivery_party_tax_scheme_nodes(self, vals):
-        pass
-
-    def _ubl_add_delivery_party_legal_entity_nodes(self, vals):
-        pass
-
-    def _ubl_add_delivery_party_contact_node(self, vals):
-        pass
-
-    def _ubl_get_payment_means_payee_financial_account_institution_branch_node_from_partner_bank(self, vals, partner_bank):
-        node = super()._ubl_get_payment_means_payee_financial_account_institution_branch_node_from_partner_bank(vals, partner_bank)
-        if node:
-            node['cbc:ID']['schemeID'] = None
-            node['cac:FinancialInstitution'] = None
-        return node
-
     def _ubl_add_line_allowance_charge_nodes(self, vals):
         # EXTENDS account.edi.ubl
         # Invoice line allowances (ibg-27) and charges (ibg-28): the line discount, the recycling contributions and
@@ -239,86 +164,10 @@ class AccountEdiUBLPint(models.AbstractModel):
         self._ubl_add_line_allowance_charge_nodes_for_recycling_contribution_taxes(vals)
         self._ubl_add_line_allowance_charge_nodes_for_excise_taxes(vals)
 
-    def _ubl_get_tax_subtotal_node(self, vals, tax_subtotal):
-        # This override is a fix for the taxes engine.
-        # Currently the taxes computation is not perfect for PINT and then,
-        # produce discrepancies between the tax's base amount and the sum of base amount of lines.
-        node = super()._ubl_get_tax_subtotal_node(vals, tax_subtotal)
-
-        # Not allowed by PINT.
-        node['cbc:Percent']['_text'] = None
-
-        # [BR-S-08]/[BR-E-08]/[BR-Z-08]/... cac:TaxSubtotal -> cbc:TaxableAmount should be
-        # computed based on the cbc:LineExtensionAmount of each line linked to the tax.
-        # This applies to all tax category codes (S, E, Z, AE, etc.) as each has a
-        # corresponding BR-*-08 schematron rule requiring this consistency.
-        currency = tax_subtotal['currency']
-        corresponding_line_node_amounts = [
-            line_node['cbc:LineExtensionAmount']['_text']
-            for tax_category_node in node['cac:TaxCategory']
-            for line_key in ('cac:InvoiceLine', 'cac:CreditNoteLine')
-            for line_node in vals['document_node'].get(line_key, [])
-            for line_node_tax_category_node in line_node['cac:Item']['cac:ClassifiedTaxCategory']
-            if (
-                    line_node_tax_category_node['cbc:ID']['_text'] == tax_category_node['cbc:ID']['_text']
-                    and line_node_tax_category_node['cbc:Percent']['_text'] == tax_category_node['cbc:Percent']['_text']
-                    and line_node_tax_category_node['_currency'] == tax_category_node['_currency']
-            )
-            ] + [
-            -allowance_node['cbc:Amount']['_text']
-            for tax_category_node in node['cac:TaxCategory']
-            for allowance_node in vals['document_node']['cac:AllowanceCharge']
-            if allowance_node['cbc:ChargeIndicator']['_text'] == 'false'
-            for allowance_node_tax_category_node in allowance_node['cac:TaxCategory']
-            if (
-                    allowance_node_tax_category_node['cbc:ID']['_text'] == tax_category_node['cbc:ID']['_text']
-                    and allowance_node_tax_category_node['cbc:Percent']['_text'] == tax_category_node['cbc:Percent']['_text']
-                    and allowance_node_tax_category_node['_currency'] == tax_category_node['_currency']
-            )
-            ] + [
-            allowance_node['cbc:Amount']['_text']
-            for tax_category_node in node['cac:TaxCategory']
-            for allowance_node in vals['document_node']['cac:AllowanceCharge']
-            if allowance_node['cbc:ChargeIndicator']['_text'] == 'true'
-            for allowance_node_tax_category_node in allowance_node['cac:TaxCategory']
-            if (
-                    allowance_node_tax_category_node['cbc:ID']['_text'] == tax_category_node['cbc:ID']['_text']
-                    and allowance_node_tax_category_node['cbc:Percent']['_text'] == tax_category_node['cbc:Percent']['_text']
-                    and allowance_node_tax_category_node['_currency'] == tax_category_node['_currency']
-            )
-        ]
-        if corresponding_line_node_amounts:
-            node['cbc:TaxableAmount'] = {
-                '_text': FloatFmt(sum(corresponding_line_node_amounts), min_dp=currency.decimal_places),
-                'currencyID': currency.name,
-            }
-
-        return node
-
-    def _ubl_tax_totals_node_grouping_key(self, base_line, tax_data, vals, currency):
-        tax_total_keys = super()._ubl_tax_totals_node_grouping_key(base_line, tax_data, vals, currency)
-
-        # In case of multi-currencies, there will be 2 TaxTotals but the one expressed in
-        # foreign currency must not have any TaxSubtotal.
-        company_currency = vals['company'].currency_id
-        if (
-            tax_total_keys['tax_subtotal_key']
-            and company_currency != vals['currency']
-            and tax_total_keys['tax_subtotal_key']['currency'] == company_currency
-        ):
-            tax_total_keys['tax_subtotal_key'] = None
-
-        return tax_total_keys
-
-    def _ubl_prepare_base_lines(self, vals):
+    def _ubl_should_export_emptying_taxes_as_lines(self, vals):
         # EXTENDS account.edi.ubl
-        super()._ubl_prepare_base_lines(vals)
         # The emptying taxes (e.g. deposits on bottles) are reported as separated lines.
-        vals['base_lines'] = self._turn_emptying_taxes_as_new_base_lines(
-            base_lines=vals['base_lines'],
-            company=vals['company'],
-            vals=vals,
-        )
+        return True
 
     def _export_document_constraints(self, vals):
         """
@@ -500,13 +349,4 @@ class AccountEdiUBLPint(models.AbstractModel):
                         )
 
         return constraints
-
-    # -------------------------------------------------------------------------
-    # IMPORT
-    # -------------------------------------------------------------------------
-
-    def _import_invoice_ubl_cii(self, invoice, file_data, new=False):
-        if invoice.invoice_line_ids:
-            return invoice._reason_cannot_decode_has_invoice_lines()
-        return self._ubl_import_invoice(invoice, file_data, new=new)
 

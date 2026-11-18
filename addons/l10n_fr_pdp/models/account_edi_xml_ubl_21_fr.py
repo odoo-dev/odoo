@@ -1,7 +1,7 @@
-from odoo import _, api, models
-from odoo.tools.misc import formatLang
+from odoo import api, models
 
 from odoo.addons.account_edi_cii.models.account_edi_common import FloatFmt
+from odoo.addons.l10n_fr_pdp.models.account_edi_common import L10N_FR_PDP_BUSINESS_TERM_MAX_LENGTHS
 
 PDP_CUSTOMIZATION_ID = 'urn:cen.eu:en16931:2017#conformant#urn.cpro.gouv.fr:1p0:extended-ctc-fr'  # Not accepted by SuperPDP due to missing validator
 
@@ -64,24 +64,13 @@ class AccountEdiXmlUbl21Fr(models.AbstractModel):
         # [BR-FR-MAP-17/18/19] The French CIUS caps the length of some business terms.
         return {
             **super()._get_business_term_max_lengths(),
-            'BT-22': 1024,  # Invoice note
-            'BT-35': 255,  # Address line 1 (BT-35, BT-50, BT-75, ...)
-            'BT-36': 255,  # Address line 2
-            'BT-37': 255,  # City
-            'BT-38': 10,  # Post code
-            'BT-39': 255,  # Country subdivision
-            'BT-153': 255,  # Item name
+            **L10N_FR_PDP_BUSINESS_TERM_MAX_LENGTHS,
         }
 
-    def _ubl_prepare_base_lines(self, vals):
+    def _ubl_should_export_emptying_taxes_as_lines(self, vals):
         # EXTENDS account.edi.ubl
-        super()._ubl_prepare_base_lines(vals)
         # The emptying taxes (e.g. deposits on bottles) are not VAT: they are reported as separated lines.
-        vals['base_lines'] = self._turn_emptying_taxes_as_new_base_lines(
-            base_lines=vals['base_lines'],
-            company=vals['company'],
-            vals=vals,
-        )
+        return True
 
     # -------------------------------------------------------------------------
     # EXPORT: HEADER NODES
@@ -346,47 +335,17 @@ class AccountEdiXmlUbl21Fr(models.AbstractModel):
         ]
 
     def _import_ubl_invoice_add_prepaid_amount(self, collected_values):
-        # imported invoice is a final invoice following downpayments.
-        # We assume all billing references are references to downpayments.
-        invoice = collected_values['invoice']
-        currency = collected_values['currency_values']['currency']
+        # Final invoice following downpayments: the billing references are the downpayments.
         tree = collected_values['tree']
         if tree.findtext('./{*}ProfileID') in ('B4', 'S4', 'M4'):
-            prepaid_amount = float(tree.findtext('./{*}LegalMonetaryTotal/{*}PrepaidAmount') or 0)
-            collected_values['prepaid_amount'] = prepaid_amount
-            if not invoice.currency_id.is_zero(prepaid_amount):
-                downpayments_names = tree.findall('./{*}BillingReference/{*}InvoiceDocumentReference/{*}ID')
-                # groups downpayments by ref to avoid a downpayment being duplicated in the db being substracted multiple times
-                grouped_downpayments = self.env['account.move'].search([('ref', 'in', [downpayment.text for downpayment in downpayments_names])]).grouped('ref')
-
-                downpayment_lines = self.env['account.move.line']
-                for downpayments in grouped_downpayments.values():
-                    downpayment = downpayments[0]
-                    for line in downpayment.invoice_line_ids:
-                        downpayment_lines |= line.copy({'quantity': -line.quantity if downpayment.move_type == 'in_invoice' else line.quantity})
-                collected_values['downpayment_lines'] = downpayment_lines
-
-                # logging
-                formatted_amount = formatLang(self.env, prepaid_amount, currency_obj=currency)
-                collected_values['logs'].append(_("A downpayment of %s was detected.", formatted_amount))
-                for downpayment_name in downpayments_names:
-                    if downpayment_name.text not in grouped_downpayments:
-                        collected_values['logs'].append(_("Downpayment %s not found. Imported amounts will probably be incorrect.", downpayment_name.text))
+            self._l10n_fr_pdp_import_downpayments(
+                collected_values,
+                prepaid_amount=float(tree.findtext('./{*}LegalMonetaryTotal/{*}PrepaidAmount') or 0),
+                downpayment_name_nodes=tree.findall('./{*}BillingReference/{*}InvoiceDocumentReference/{*}ID'),
+                downpayment_domain=[],
+            )
         super()._import_ubl_invoice_add_prepaid_amount(collected_values)
 
     def _import_ubl_invoice_fix_untaxed_amount(self, collected_values):
-        # Downpayments may be reported as a prepaid amount.
-        # In this case, the final invoice untaxed amount, tax amount and total amount
-        # correspond to the amounts without any downpayments made.
-        # We need to add the downpayment lines as negative lines in the final invoice
-        # because we already imported and accounted for the downpayments.
         super()._import_ubl_invoice_fix_untaxed_amount(collected_values)
-        invoice = collected_values['invoice']
-        if downpayment_lines := collected_values.get('downpayment_lines'):
-            container = {'records': invoice}
-            with (
-                invoice._check_balanced(container),
-                invoice._disable_discount_precision(),
-                invoice._sync_dynamic_lines(container),
-            ):
-                downpayment_lines.move_id = invoice.id
+        self._l10n_fr_pdp_import_add_downpayment_lines(collected_values)

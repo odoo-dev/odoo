@@ -7,19 +7,6 @@ import logging
 
 _logger = logging.getLogger(__name__)
 
-DEFAULT_FACTURX_DATE_FORMAT = '%Y%m%d'
-CII_NAMESPACES = {
-    'ram': "urn:un:unece:uncefact:data:standard:ReusableAggregateBusinessInformationEntity:100",
-    'rsm': "urn:un:unece:uncefact:data:standard:CrossIndustryInvoice:100",
-    'udt': "urn:un:unece:uncefact:data:standard:UnqualifiedDataType:100",
-}
-
-# Imcomplete, full list on https://service.unece.org/trade/untdid/d16b/tred/tred4461.htm
-PAYMENT_MEAN_CODES = {
-    'Payment to bank account': 42,
-    'SEPA direct debit': 59
-}
-
 
 class AccountEdiXmlCii(models.AbstractModel):
     """ Factur-X / ZUGFeRD: a UN/CEFACT CII D16B XML following the EN 16931 business rules, embedded in a PDF/A-3.
@@ -29,10 +16,6 @@ class AccountEdiXmlCii(models.AbstractModel):
     _name = 'account.edi.xml.cii'
     _inherit = ['account.edi.cen_en16931', 'account.edi.cii']
     _description = "Factur-x/ZUGFeRD CII 2.2.0"
-
-    def _find_value(self, xpath, tree, nsmap=False):
-        # EXTENDS account.edi.common
-        return super()._find_value(xpath, tree, CII_NAMESPACES)
 
     # -------------------------------------------------------------------------
     # EXPORT

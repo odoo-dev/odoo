@@ -76,7 +76,7 @@ class TestCiiImportFacturXFRGroupLinesByTax(CiiImportFacturXFR):
         self.percent_tax(21.0, type_tax_use='purchase')
 
         # This invoice tax amount computation by odoo is 9.07 while in the XML, the amount is 9.06
-        # The _correct_invoice_tax_amount method will update the tax amount to match the XML data
+        # The _import_invoice_fix_taxes_amounts method will update the tax amount to match the XML data
         invoice = self._import_invoice_as_attachment_on(
             test_name='test_import_invoice_group_lines_correct_tax_amount',
             journal=self.company_data['default_journal_purchase'],

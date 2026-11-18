@@ -1,4 +1,5 @@
 from . import account_edi_ubl
+from . import account_edi_ubl_core_invoice
 from . import account_edi_ubl_cen_en16931
 from . import account_edi_ubl_pint
 from . import account_edi_ubl_pint_eu
@@ -7,6 +8,7 @@ from . import account_edi_xml_ubl_xrechnung
 from . import account_edi_xml_ubl_nlcius
 from . import account_edi_xml_ubl_a_nz
 from . import account_edi_xml_ubl_sg
+from . import account_edi_ubl_order
 from . import account_move
 from . import account_move_send
 from . import res_partner

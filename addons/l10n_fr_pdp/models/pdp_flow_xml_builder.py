@@ -176,11 +176,6 @@ class PdpFlow10XMLBuilder(models.AbstractModel):
         return summary
 
     @api.model
-    def _is_payment_partial_aml(self, aml):
-        """Return True when a reconciled AML corresponds to an actual payment."""
-        return bool(aml and (aml.move_id.origin_payment_id or aml.move_id.statement_line_id))
-
-    @api.model
     def _add_transactions(self, document, flow, moves):
         b2c_moves, b2bi_moves = self._split_moves_by_transaction_type(flow, moves)
 
@@ -534,10 +529,6 @@ class PdpFlow10XMLBuilder(models.AbstractModel):
         )
 
     @api.model
-    def _is_line_for_payment_reporting(self, line):
-        return any(tax.tax_exigibility == 'on_payment' for tax in line.tax_ids)
-
-    @api.model
     def _invoice_add_tax_sub_total(self, invoice, move, seller, buyer):
         invoice['TaxSubTotal'] = []
         tax_summary = self._get_tax_summary(move.line_ids, buyer, seller)
@@ -626,50 +617,11 @@ class PdpFlow10XMLBuilder(models.AbstractModel):
         return tax_code, exemption_reason_code, exemption_reason
 
     @api.model
-    def _get_move_business_process_id(self, move):
-        """Determine billing framework code (TT-28) from invoice"""
-        product_lines = move.invoice_line_ids.filtered(lambda ln: ln.display_type == 'product')
-        scopes = set(product_lines.tax_ids.mapped('tax_scope'))
-        if 'service' in scopes:
-            if 'consu' in scopes:
-                prefix = 'M'
-            else:
-                prefix = 'S'
-        else:
-            prefix = 'B'
-
-        if move._is_downpayment():
-            if any(line.display_type == 'product' and not line.is_downpayment for line in move.invoice_line_ids):
-                suffix = '4'
-            else:
-                suffix = '2' if move.payment_state in ('paid', 'reversed') else '1'
-        else:
-            suffix = '1'
-        return f'{prefix}{suffix}'
-
-    @api.model
     def _get_move_typecode(self, move):
         is_credit_note = move.is_refund()
         if move.journal_id.is_self_billing:
             return '261' if is_credit_note else '389'
         return '381' if is_credit_note else '380'
-
-    @api.model
-    def _get_payments(self, flow):
-        return {
-            'PaymentsReport': {
-                **self._get_report_period(flow),
-            }
-        }
-
-    @api.model
-    def _get_report_period(self, flow):
-        return {
-            'ReportPeriod': {
-                'StartDate': self._format_date(flow.period_start),
-                'EndDate': self._format_date(flow.period_end),
-            }
-        }
 
     @api.model
     def _format_date(self, date):

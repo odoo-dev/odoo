@@ -1,5 +1,5 @@
-from odoo import models, Command
-from odoo.tools import formatLang, frozendict, html2plaintext
+from odoo import models
+from odoo.tools import formatLang, html2plaintext
 from odoo.tools.misc import NON_BREAKING_SPACE
 from odoo.tools.partner_identifiers import is_identifier_void
 from datetime import datetime
@@ -35,8 +35,6 @@ class AccountEdiCii(models.AbstractModel):
             vals['cash_rounding_base_lines'] = []
         if not self._should_export_early_payment_discount_as_line(vals):
             self._cii_extract_early_pay_discount_lines(vals)
-        else:
-            vals['early_payment_discount_lines'] = []
 
         # [BR-IC-11] An intra-community supply needs a delivery date (BT-72) or an invoicing period (BG-14).
         # The invoicing period is only exported when every line has a start and an end date: it then goes from the
@@ -72,13 +70,11 @@ class AccountEdiCii(models.AbstractModel):
 
     def _cii_extract_early_pay_discount_lines(self, vals):
         """
-        Extract the early payment discount lines.
+        Remove the early payment discount lines from the base lines (they are reported at the document level).
 
         :param vals: Some custom data
         """
-        base_lines = vals['base_lines']
-        vals['base_lines'] = [base_line for base_line in base_lines if base_line['special_type'] != 'early_payment']
-        vals['early_payment_discount_lines'] = [base_line for base_line in base_lines if base_line['special_type'] == 'early_payment']
+        vals['base_lines'] = [base_line for base_line in vals['base_lines'] if base_line['special_type'] != 'early_payment']
 
     # ----------------------------------------------------------------------------
     # EXPORT : build nodes
@@ -753,9 +749,6 @@ class AccountEdiCii(models.AbstractModel):
         self._cii_check_seller(invoice, vals, constraints)
         self._cii_check_buyer(vals, constraints)
 
-        if vals.get('intracom_delivery'):
-            self._cii_check_intracom_delivery(vals, constraints)
-
         if vals['customer']['country_id']['code'] == 'ES' \
             and vals['customer']['zip'] \
             and vals['customer']['zip'][:2] in ['35', '38']:
@@ -828,21 +821,6 @@ class AccountEdiCii(models.AbstractModel):
         constraints['buyer_postal_address'] = self._check_required_fields(
                 vals['customer'].commercial_partner_id, 'country_id'
             )
-
-    def _cii_check_intracom_delivery(self, vals, constraints):
-        """
-        [BR-IC-02]-An Invoice that contains an Invoice line (BG-25) where the Invoiced item VAT category code (BT-151)
-        is "Intra-community supply" shall contain the Seller VAT Identifier (BT-31) or the Seller tax representative
-        VAT identifier (BT-63) and the Buyer VAT identifier (BT-48).
-        """
-        constraints.update({
-            'intracom_seller_vat': self._check_required_fields(
-                vals['supplier'], 'vat'
-            ),
-            'intracom_buyer_vat': self._check_required_fields(
-                vals['customer']['commercial_partner_id'], 'vat'
-            ),
-        })
 
     def _cii_check_igi_tax_rate(self, invoice, vals, constraints):
         for line in invoice.invoice_line_ids.filtered(lambda x: x.display_type not in ('line_note', 'line_section')):
@@ -976,23 +954,11 @@ class AccountEdiCii(models.AbstractModel):
         self._import_retrieve_partner_bank(collected_values)
 
     def _import_cii_invoice_add_prepaid_amount(self, collected_values):
-        file_document_sign = collected_values['file_document_sign']
-        currency = collected_values['currency_values']['currency']
-        tree = collected_values['tree']
-        prepaid_amount_str = tree.findtext('.//{*}SpecifiedTradeSettlementHeaderMonetarySummation/{*}TotalPrepaidAmount')
-        prepaid_amount = file_document_sign * float(prepaid_amount_str or 0.0)
-        if currency.is_zero(prepaid_amount):
-            return
-
-        collected_values['prepaid_amount'] = prepaid_amount
-        formatted_prepaid_amount = formatLang(self.env, prepaid_amount, currency_obj=currency)
-        collected_values['logs'].append(self.env._("A payment of %s was detected.", formatted_prepaid_amount))
+        prepaid_amount_str = collected_values['tree'].findtext('.//{*}SpecifiedTradeSettlementHeaderMonetarySummation/{*}TotalPrepaidAmount')
+        self._import_invoice_add_prepaid_amount(collected_values, prepaid_amount_str)
 
     def _import_cii_invoice_add_tax_total_values(self, collected_values):
-        file_document_sign = collected_values['file_document_sign']
-        odoo_document_type = collected_values['odoo_document_type']
-
-        taxes_values = collected_values['tax_total_values'] = {}
+        collected_values['tax_total_values'] = {}
         tree = collected_values['tree']
         for subtotal_elem in tree.findall('.//{*}ApplicableHeaderTradeSettlement/{*}ApplicableTradeTax'):
             amount = subtotal_elem.findtext('./{*}CalculatedAmount')
@@ -1004,66 +970,30 @@ class AccountEdiCii(models.AbstractModel):
             if percentage is None:
                 continue
 
-            percentage = float(percentage)
-            tax_key = frozendict({
-                'category_code': category_code,
-                'percentage': percentage,
-            })
-            tax_values = taxes_values.setdefault(tax_key, {
-                'amount_type': 'percent',
-                'type_tax_use': odoo_document_type,
-                'amount': percentage,
-                'ubl_cii_tax_category_code': category_code,
-                'tax_amount_currency': 0.0,
-                'related_taxes_values': [],
-            })
-            tax_values['tax_amount_currency'] += file_document_sign * float(amount)
+            self._import_invoice_add_tax_total_value(collected_values, category_code, float(percentage), amount)
 
     def _import_cii_invoice_add_allowances_charges_values(self, collected_values):
         tree = collected_values['tree']
-        allowances = collected_values['allowances'] = []
-        charges = collected_values['charges'] = []
-        tax_total_values = collected_values['tax_total_values']
+        collected_values['allowances'] = []
+        collected_values['charges'] = []
 
         for element in tree.iterfind('./{*}SupplyChainTradeTransaction/{*}ApplicableHeaderTradeSettlement/{*}SpecifiedTradeAllowanceCharge'):
-            reason = element.findtext('./{*}Reason')
-            reason_code = element.findtext('./{*}ReasonCode')
-            charge_indicator = element.findtext('./{*}ChargeIndicator/{*}Indicator')
-            amount_str = element.findtext('./{*}ActualAmount')
-            base_amount_str = element.findtext('./{*}BasisAmount')
-            multiplier_factor_numeric_str = element.findtext('./{*}CalculationPercent')
             percentage_str = element.findtext('./{*}CategoryTradeTax/{*}RateApplicablePercent')
-
-            if amount_str:
-                amount = float(amount_str)
-            else:
-                amount = 0.0
-
             if not percentage_str:
                 continue
 
-            percentage = float(percentage_str)
-            allowance_charge_values = {
-                'amount': amount,
-                'base_amount': float(base_amount_str) if base_amount_str else None,
-                'reason': reason,
-                'reason_code': reason_code,
-                'multiplier_factor_numeric': float(multiplier_factor_numeric_str) if multiplier_factor_numeric_str else None,
-                'tax_percentage': percentage,
-                'charge_indicator': charge_indicator,
-            }
-
             tax_category_tree = element.find('./{*}CategoryTradeTax')
-            tax_values = self._import_cii_invoice_line_prepare_classified_tax_category_tax_values(collected_values, tax_category_tree)
-            if tax_values:
-                allowance_charge_values['taxes_values'] = tax_values
-                global_tax_values = tax_total_values.get(tax_values['_tax_key'])
-                global_tax_values['related_taxes_values'].append(tax_values)
-
-            if charge_indicator.lower() == 'true':
-                charges.append(allowance_charge_values)
-            else:
-                allowances.append(allowance_charge_values)
+            self._import_invoice_add_document_allowance_charge_values(
+                collected_values,
+                charge_indicator=element.findtext('./{*}ChargeIndicator/{*}Indicator'),
+                amount_str=element.findtext('./{*}ActualAmount'),
+                base_amount_str=element.findtext('./{*}BasisAmount'),
+                multiplier_factor_numeric_str=element.findtext('./{*}CalculationPercent'),
+                reason=element.findtext('./{*}Reason'),
+                reason_code=element.findtext('./{*}ReasonCode'),
+                percentage=float(percentage_str),
+                tax_values=self._import_cii_invoice_line_prepare_classified_tax_category_tax_values(collected_values, tax_category_tree),
+            )
 
     def _import_cii_invoice_add_invoice_line_values(self, collected_values):
         lines_collected_values = collected_values['lines_collected_values'] = []
@@ -1092,52 +1022,29 @@ class AccountEdiCii(models.AbstractModel):
 
     def _import_cii_invoice_line_add_allowance_charges_values(self, collected_values):
         line_tree = collected_values['line_tree']
-        allowances = collected_values['allowances'] = []
-        charges = collected_values['charges'] = []
+        collected_values['allowances'] = []
+        collected_values['charges'] = []
         for allowance_charge_elem in line_tree.iterfind('.//{*}SpecifiedTradeAllowanceCharge'):
-            charge_indicator = allowance_charge_elem.findtext('.//{*}ChargeIndicator/{*}Indicator')
-            amount_str = allowance_charge_elem.findtext('.//{*}ActualAmount')
-            base_amount_str = allowance_charge_elem.findtext('.//{*}BasisAmount')
-            reason = allowance_charge_elem.findtext('.//{*}Reason')
-            reason_code = allowance_charge_elem.findtext('.//{*}ReasonCode')
-
-            if amount_str:
-                amount = float(amount_str)
-            else:
-                continue
-
-            allowance_charge_values = {
-                'amount': amount,
-                'base_amount': float(base_amount_str) if base_amount_str else None,
-                'reason': reason,
-                'reason_code': reason_code,
-            }
-            if charge_indicator.lower() == 'true':
-                charges.append(allowance_charge_values)
-            else:
-                allowances.append(allowance_charge_values)
+            self._import_invoice_line_add_allowance_charge_values(
+                collected_values,
+                charge_indicator=allowance_charge_elem.findtext('.//{*}ChargeIndicator/{*}Indicator'),
+                amount_str=allowance_charge_elem.findtext('.//{*}ActualAmount'),
+                base_amount_str=allowance_charge_elem.findtext('.//{*}BasisAmount'),
+                reason=allowance_charge_elem.findtext('.//{*}Reason'),
+                reason_code=allowance_charge_elem.findtext('.//{*}ReasonCode'),
+            )
 
         allowance_elem = line_tree.find('.//{*}GrossPriceProductTradePrice/{*}AppliedTradeAllowanceCharge')
         collected_values['price_allowance_values'] = {}
         if allowance_elem is not None:
-            charge_indicator = allowance_elem.findtext('./{*}ChargeIndicator/{*}Indicator') or 'false'
-            amount_str = allowance_elem.findtext('./{*}ActualAmount')
-            base_amount_str = allowance_elem.findtext('./{*}BasisAmount')
-            reason = allowance_elem.findtext('./{*}AllowanceChargeReason')
-            reason_code = allowance_elem.findtext('./{*}AllowanceChargeReasonCode')
-
-            if charge_indicator.lower() == 'true':
-                charge_indicator_sign = 1
-            else:
-                charge_indicator_sign = -1
-
-            collected_values['price_allowance_values'] = {
-                'charge_indicator_sign': charge_indicator_sign,
-                'amount': float(amount_str) if amount_str else None,
-                'base_amount': float(base_amount_str) if base_amount_str else None,
-                'reason': reason,
-                'reason_code': reason_code,
-            }
+            self._import_invoice_line_add_price_allowance_values(
+                collected_values,
+                charge_indicator=allowance_elem.findtext('./{*}ChargeIndicator/{*}Indicator'),
+                amount_str=allowance_elem.findtext('./{*}ActualAmount'),
+                base_amount_str=allowance_elem.findtext('./{*}BasisAmount'),
+                reason=allowance_elem.findtext('./{*}AllowanceChargeReason'),
+                reason_code=allowance_elem.findtext('./{*}AllowanceChargeReasonCode'),
+            )
 
     def _import_cii_invoice_line_add_name(self, collected_values):
         line_tree = collected_values['line_tree']
@@ -1330,22 +1237,9 @@ class AccountEdiCii(models.AbstractModel):
         if percentage is None or category_code is None:
             return
 
-        percentage = float(percentage)
-        tax_key = frozendict({
-            'category_code': category_code,
-            'percentage': percentage,
-        })
-        global_tax_values = collected_values['tax_total_values'].get(tax_key)
-        if not global_tax_values:
+        tax_values = self._import_invoice_line_get_tax_values_from_tax_total(collected_values, category_code, float(percentage))
+        if not tax_values:
             return
-
-        tax_values = {
-            'amount_type': global_tax_values['amount_type'],
-            'type_tax_use': global_tax_values['type_tax_use'],
-            'amount': global_tax_values['amount'],
-            'ubl_cii_tax_category_code': global_tax_values['ubl_cii_tax_category_code'],
-            '_tax_key': tax_key,
-        }
 
         partner = collected_values.get('customer_values', {}).get('customer')
         if partner and (name := collected_values['to_write'].get('name')):
@@ -1360,16 +1254,7 @@ class AccountEdiCii(models.AbstractModel):
         if charge['reason_code'] != 'AEO':
             return
 
-        odoo_document_type = collected_values['odoo_document_type']
-        fixed_tax_amount = charge['amount'] / collected_values['to_write']['quantity']
-        charge['attempt_tax_values'] = tax_values = {
-            'name': charge['reason'],
-            'amount_type': 'fixed',
-            'type_tax_use': odoo_document_type,
-            'amount': fixed_tax_amount,
-            'tax_amount_currency': fixed_tax_amount,
-        }
-
+        tax_values = self._import_invoice_line_get_fixed_tax_values(collected_values, charge)
         partner = collected_values.get('customer_values', {}).get('customer')
         if partner and (name := collected_values['to_write'].get('name')):
             tax_values['invoice_predictive'] = {
@@ -1381,22 +1266,17 @@ class AccountEdiCii(models.AbstractModel):
 
     def _import_cii_invoice_line_add_taxes_values(self, collected_values):
         line_tree = collected_values['line_tree']
-        taxes_values = collected_values['taxes_values'] = []
-        tax_total_values = collected_values['tax_total_values']
+        collected_values['taxes_values'] = []
 
         # Percentage taxes.
         for tax_category_tree in line_tree.findall('./{*}SpecifiedLineTradeSettlement/{*}ApplicableTradeTax'):
-            tax_values = self._import_cii_invoice_line_prepare_classified_tax_category_tax_values(collected_values, tax_category_tree)
-            if tax_values:
-                taxes_values.append(tax_values)
-                global_tax_values = tax_total_values.get(tax_values['_tax_key'])
-                global_tax_values['related_taxes_values'].append(tax_values)
+            if tax_values := self._import_cii_invoice_line_prepare_classified_tax_category_tax_values(collected_values, tax_category_tree):
+                self._import_invoice_line_add_percentage_tax_values(collected_values, tax_values)
 
         # Fixed taxes.
         for charge in collected_values['charges']:
-            tax_values = self._import_cii_invoice_line_prepare_charge_tax_values(collected_values, charge)
-            if tax_values:
-                taxes_values.append(tax_values)
+            if tax_values := self._import_cii_invoice_line_prepare_charge_tax_values(collected_values, charge):
+                collected_values['taxes_values'].append(tax_values)
 
     def _import_cii_invoice_predict_values(self, collected_values):
         self._import_invoice_predict_values(collected_values)
@@ -1426,45 +1306,12 @@ class AccountEdiCii(models.AbstractModel):
         self._import_invoice_fix_taxes_amounts(collected_values)
 
     def _import_cii_invoice_fix_untaxed_amount(self, collected_values):
-        if not collected_values['are_taxes_complete']:
-            return
-
         tree = collected_values['tree']
-        file_document_sign = collected_values['file_document_sign']
-        currency = collected_values['currency_values']['currency']
-        tax_exclusive_amount_str = tree.findtext('.//{*}SpecifiedTradeSettlementHeaderMonetarySummation/{*}TaxBasisTotalAmount')
-        if not tax_exclusive_amount_str:
-            return
-
-        payable_rounding_amount_str = tree.findtext('.//{*}SpecifiedTradeSettlementHeaderMonetarySummation/{*}RoundingAmount')
-        tax_exclusive_amount = file_document_sign * float(tax_exclusive_amount_str or 0.0)
-        payable_rounding_amount = file_document_sign * float(payable_rounding_amount_str or 0.0)
-        expected_untaxed_amount = tax_exclusive_amount + payable_rounding_amount
-        invoice = collected_values['invoice']
-        difference = currency.round(expected_untaxed_amount - invoice.amount_untaxed)
-        for line_collected_values in collected_values['lines_collected_values']:
-            for charge in line_collected_values['charges']:
-                attempt_tax_values = charge.get('attempt_tax_values')
-                if attempt_tax_values and attempt_tax_values.get('tax'):
-                    difference -= charge['amount']
-        if currency.is_zero(difference):
-            return
-
-        container = {'records': invoice}
-        with (
-            invoice._check_balanced(container),
-            invoice._disable_discount_precision(),
-            invoice._sync_dynamic_lines(container),
-        ):
-            invoice.invoice_line_ids = [
-                Command.create({
-                    'display_type': 'product',
-                    'name': self.env._("Rounding"),
-                    'quantity': 1,
-                    'price_unit': difference,
-                    'tax_ids': [],
-                }),
-            ]
+        self._import_invoice_fix_untaxed_amount(
+            collected_values,
+            tax_exclusive_amount_str=tree.findtext('.//{*}SpecifiedTradeSettlementHeaderMonetarySummation/{*}TaxBasisTotalAmount'),
+            payable_rounding_amount_str=tree.findtext('.//{*}SpecifiedTradeSettlementHeaderMonetarySummation/{*}RoundingAmount'),
+        )
 
     def _import_cii_invoice_post_processing(self, collected_values):
         self._import_invoice_post_processing(collected_values)

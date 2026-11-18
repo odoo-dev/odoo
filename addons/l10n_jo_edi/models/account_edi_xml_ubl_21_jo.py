@@ -330,11 +330,14 @@ class AccountEdiXmlUBL21JO(models.AbstractModel):
     def _ubl_add_party_contact_node(self, vals):
         vals['party_node']['cac:Contact'] = None
 
+    def _l10n_jo_get_customer_phone(self, vals):
+        return vals['invoice'].partner_id.phone
+
     def _ubl_add_accounting_customer_party_node(self, vals):
         super()._ubl_add_accounting_customer_party_node(vals)
         vals['document_node']['cac:AccountingCustomerParty']['cac:AccountingContact'] = {
             'cbc:Telephone': {
-                '_text': self._sanitize_phone(vals['invoice'].partner_id.phone),
+                '_text': self._sanitize_phone(self._l10n_jo_get_customer_phone(vals)),
             },
         }
 

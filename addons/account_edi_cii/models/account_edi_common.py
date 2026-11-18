@@ -1,17 +1,15 @@
 import logging
 import re
 
-from collections import defaultdict
 from copy import deepcopy
 from markupsafe import Markup
-from datetime import datetime
 
 from odoo import _, api, fields, models, Command
 from odoo.exceptions import UserError, ValidationError
 from odoo.fields import Domain
-from odoo.tools import float_compare, float_is_zero, float_repr, html2plaintext
+from odoo.tools import float_repr, frozendict, html2plaintext
 from odoo.tools.float_utils import float_round
-from odoo.tools.misc import formatLang, html_escape
+from odoo.tools.misc import formatLang
 from odoo.tools.translate import _lt
 from odoo.tools.xml_utils import find_xml_value
 
@@ -1116,73 +1114,16 @@ class AccountEdiCommon(models.AbstractModel):
     # -------------------------------------------------------------------------
 
     def _import_invoice_ubl_cii(self, invoice, file_data, new=False):
-        invoice.ensure_one()
-        if invoice.invoice_line_ids:
-            return invoice._reason_cannot_decode_has_invoice_lines()
+        """ Decoder of the UBL/CII files (see account.move._get_edi_decoder): fill ``invoice`` from ``file_data``.
 
-        tree = file_data['xml_tree']
+        Implemented by each syntax: ``account.edi.ubl`` (``_ubl_import_invoice``) and ``account.edi.xml.cii``
+        (``_cii_import_invoice``), both relying on the import pipeline below (``_import_init_collected_values``, ...).
 
-        # Not able to decode the move_type from the xml.
-        move_type, qty_factor = self._get_import_document_amount_sign(tree)
-        if not move_type:
-            return
-
-        # Check for inconsistent move_type.
-        journal = invoice.journal_id
-        if journal.type == 'sale':
-            move_type = 'out_' + move_type
-        elif journal.type == 'purchase':
-            move_type = 'in_' + move_type
-        else:
-            return
-        if not new and invoice.move_type != move_type:
-            # with an email alias to create account_move, first the move is created (using alias_defaults, which
-            # contains move_type = 'out_invoice') then the attachment is decoded, if it represents a credit note,
-            # the move type needs to be changed to 'out_refund'
-            types = {move_type, invoice.move_type}
-            if types == {'out_invoice', 'out_refund'} or types == {'in_invoice', 'in_refund'}:
-                invoice.move_type = move_type
-            else:
-                return
-
-        # Update the invoice.
-        invoice.move_type = move_type
-        with invoice.with_context(disable_onchange_name_predictive=['all'])._get_edi_creation() as invoice:
-            fill_invoice_logs = self._import_fill_invoice(invoice, tree, qty_factor)
-
-        # For UBL, we should override the computed tax amount if it is less than 0.05 different of the one in the xml.
-        # In order to support use case where the tax total is adapted for rounding purpose.
-        # This has to be done after the first import in order to let Odoo compute the taxes before overriding if needed.
-        with invoice._get_edi_creation() as invoice:
-            self._correct_invoice_tax_amount(tree, invoice)
-
-        # Set XML as ubl_cii_xml_file (XML used to import)
-        if file_data['attachment'] and invoice.is_purchase_document(include_receipts=True):
-            file_data['attachment'].write({
-                'res_field': 'ubl_cii_xml_file',
-                'res_model': invoice._name,
-                'res_id': invoice.id,
-            })
-
-        source_attachment = file_data['attachment'] or self.env['ir.attachment']
-        attachments = source_attachment + self._import_attachments(invoice, tree)
-
-        self._log_import_invoice_ubl_cii(invoice, invoice_logs=fill_invoice_logs, attachments=attachments)
-
-    def _add_logs_import_invoice_ubl_cii(self, invoice, invoice_logs=None):
-        invoice.ensure_one()
-        if invoice_logs is None:
-            invoice_logs = []
-        format_log = self.env._("Format: %s", self.env['ir.model']._get(self._name).name)
-        return [format_log] + invoice_logs
-
-    def _log_import_invoice_ubl_cii(self, invoice, title_logs=None, invoice_logs=None, attachments=None):
-        invoice.ensure_one()
-        body = Markup("<strong>%s</strong>") % (title_logs or self.env._("Invoice imported"))
-        if invoice_logs := self._add_logs_import_invoice_ubl_cii(invoice, invoice_logs=invoice_logs):
-            body += Markup("<ul>%s</ul>") % \
-                    Markup().join(Markup("<li>%s</li>") % l for l in invoice_logs)
-        invoice.message_post(body=body, attachment_ids=attachments.ids if attachments else None)
+        :param account.move invoice: The invoice to fill.
+        :param dict file_data: The file data (see ``ir.attachment._to_files_data``), with the parsed ``xml_tree``.
+        :param bool new: Whether the invoice has just been created for this import.
+        """
+        raise NotImplementedError()
 
     def _import_attachments(self, invoice, tree):
         # Import the embedded documents in the xml if some are found
@@ -1302,580 +1243,6 @@ class AccountEdiCommon(models.AbstractModel):
                 invoice._message_log(body=_("The bank account couldn't be fetched: %s", str(e)))
         if banks:
             invoice.partner_bank_id = banks[0]
-
-    def _import_document_allowance_charges(self, tree, record, tax_type, qty_factor=1):
-        logs = []
-        xpaths = self._get_document_allowance_charge_xpaths()
-        line_vals = []
-        for allow_el in tree.iterfind(xpaths['root']):
-            name = allow_el.findtext(xpaths['reason']) or ""
-            # Charge indicator factor: -1 for discount, 1 for charge
-            charge_indicator = -1 if allow_el.findtext(xpaths['charge_indicator']).lower() == 'false' else 1
-            amount = float(allow_el.findtext(xpaths['amount']) or 0)
-            base_amount = float(allow_el.findtext(xpaths['base_amount']) or 0)
-            if base_amount:
-                price_unit = base_amount * charge_indicator * qty_factor
-                percentage = float(allow_el.findtext(xpaths['percentage']) or 100)
-                quantity = percentage / 100
-            else:
-                price_unit = amount * charge_indicator * qty_factor
-                quantity = 1
-
-            # Taxes
-            tax_ids = []
-            for tax_percent_node in allow_el.iterfind(xpaths['tax_percentage']):
-                tax_amount = float(tax_percent_node.text)
-                tax = self.env['account.tax'].search([
-                    *self.env['account.tax']._check_company_domain(record.company_id),
-                    ('amount', '=', tax_amount),
-                    ('amount_type', '=', 'percent'),
-                    ('type_tax_use', '=', tax_type),
-                ], limit=1)
-                if tax:
-                    tax_ids += tax.ids
-                elif name:
-                    logs.append(_(
-                        "Could not retrieve the tax: %(tax_percentage)s %% for line '%(line)s'.",
-                        tax_percentage=tax_amount,
-                        line=name,
-                    ))
-                else:
-                    logs.append(
-                        _("Could not retrieve the tax: %s for the document level allowance/charge.", tax_amount))
-
-            line_vals.append([name, quantity, price_unit, tax_ids])
-        return record._get_line_vals_list(line_vals), logs
-
-    def _import_currency(self, tree, xpath):
-        logs = []
-        currency_name = tree.findtext(xpath)
-        currency = self.env.company.currency_id
-        if currency_name is not None:
-            currency = currency.with_context(active_test=False).search([
-                ('name', '=', currency_name),
-            ], limit=1)
-            if currency:
-                if not currency.active:
-                    logs.append(_("The currency '%s' is not active.", currency.name))
-            else:
-                logs.append(_("Could not retrieve currency: %s. Did you enable the multicurrency option "
-                              "and activate the currency?", currency_name))
-        return currency.id, logs
-
-    def _import_description(self, tree, xpaths):
-        description = ""
-        for xpath in xpaths:
-            note = tree.findtext(xpath)
-            if note:
-                description += f"<p>{html_escape(note)}</p>"
-        return description
-
-    def _import_prepaid_amount(self, invoice, tree, xpath, qty_factor):
-        logs = []
-        prepaid_amount = float(tree.findtext(xpath) or 0)
-        if not invoice.currency_id.is_zero(prepaid_amount):
-            amount = prepaid_amount * qty_factor
-            formatted_amount = formatLang(self.env, amount, currency_obj=invoice.currency_id)
-            logs.append(_("A payment of %s was detected.", formatted_amount))
-        return logs
-
-    def _import_lines(self, record, tree, xpath, document_type=False, tax_type=False, qty_factor=1):
-        logs = []
-        lines_values = []
-        vehicle = self._import_vehicle(tree, 'move', document_type, record.company_id)
-        for line_tree in tree.iterfind(xpath):
-            line_values = self.with_company(record.company_id)._retrieve_invoice_line_vals(record, line_tree, document_type, qty_factor)
-            if line_values is None:
-                continue
-
-            line_values['tax_ids'], tax_logs = self._retrieve_taxes(record, line_values, tax_type)
-            logs += tax_logs
-            if not line_values['product_uom_id']:
-                line_values.pop('product_uom_id')  # if no uom, pop it so it's inferred from the product_id
-            if self._need_vehicle_id(document_type):
-                line_values['vehicle_id'] = vehicle or self._import_vehicle(line_tree, 'line', document_type, record.company_id)
-            lines_values.append(line_values)
-            lines_values += self._retrieve_line_charges(record, line_values, line_values['tax_ids'])
-            if isinstance(record, self.env.registry['account.move']) and hasattr(self.env['account.move.line'], '_get_predicted_values'):
-                for fname, value in self.env['account.move.line']._get_predicted_values(
-                    self._get_line_label(line_values),
-                    move=record,
-                    line_domain=[('tax_ids', '=', line_values['tax_ids'][0])] if len(line_values['tax_ids']) == 1 else [],
-                ).items():
-                    if fname not in line_values:
-                        line_values[fname] = self.env['account.move.line']._fields[fname].convert_to_write(value, self.env['account.move.line'])
-        return lines_values, logs
-
-    def _import_rounding_amount(self, invoice, tree, xpath, document_type=False, qty_factor=1):
-        """
-        Add an invoice line representing the rounding amount given in the document.
-        - The amount is assumed to be in document currency
-        """
-        logs = []
-        lines_values = []
-
-        currency = invoice.currency_id
-        rounding_amount_currency = currency.round(qty_factor * float(tree.findtext(xpath) or 0))
-
-        if invoice.currency_id.is_zero(rounding_amount_currency):
-            return lines_values, logs
-
-        inverse_rate = abs(invoice.amount_total_signed) / invoice.amount_total if invoice.amount_total else 0
-        rounding_amount = invoice.company_id.currency_id.round(rounding_amount_currency * inverse_rate)
-
-        lines_values.append({
-            'display_type': 'product',
-            'name': _('Rounding'),
-            'quantity': 1,
-            'product_id': False,
-            'price_unit': rounding_amount_currency,
-            'amount_currency': invoice.direction_sign * rounding_amount_currency,
-            'balance': invoice.direction_sign * rounding_amount,
-            'company_id': invoice.company_id.id,
-            'move_id': invoice.id,
-            'tax_ids': False,
-        })
-
-        formatted_amount = formatLang(self.env, rounding_amount_currency, currency_obj=currency)
-        logs.append(_("A rounding amount of %s was detected.", formatted_amount))
-
-        return lines_values, logs
-
-    def _retrieve_invoice_line_vals(self, record, tree, document_type=False, qty_factor=1):
-        # Start and End date (enterprise fields)
-        xpath_dict = self._get_invoice_line_xpaths(document_type, qty_factor)
-        deferred_values = {}
-        start_date = end_date = None
-        if self.env['account.move.line']._fields.get('deferred_start_date'):
-            start_date_node = tree.find(xpath_dict['deferred_start_date'])
-            end_date_node = tree.find(xpath_dict['deferred_end_date'])
-            if start_date_node is not None and end_date_node is not None:  # there is a constraint forcing none or the two to be set
-                start_date = datetime.strptime(start_date_node.text.strip(), xpath_dict['date_format'])
-                end_date = datetime.strptime(end_date_node.text.strip(), xpath_dict['date_format'])
-                deferred_values = {
-                    'deferred_start_date': start_date,
-                    'deferred_end_date': end_date,
-                }
-        line_vals = self._retrieve_line_vals(record, tree, document_type, qty_factor)
-        if not line_vals.get('price_subtotal'):
-            return None
-
-        return {
-            **line_vals,
-            **deferred_values,
-        }
-
-    @api.model
-    def _retrieve_rebate_val(self, tree, xpath_dict, quantity):
-        # Discount. /!\ as no percent discount can be set on a line, need to infer the percentage
-        # from the amount of the actual amount of the discount (the allowance charge)
-        rebate = 0
-        rebate_node = tree.find(xpath_dict['rebate'])
-        net_price_unit_node = tree.find(xpath_dict['net_price_unit'])
-        gross_price_unit_node = tree.find(xpath_dict['gross_price_unit'])
-        if rebate_node is not None:
-            rebate = float(rebate_node.text)
-        elif net_price_unit_node is not None and gross_price_unit_node is not None:
-            rebate = float(gross_price_unit_node.text) - float(net_price_unit_node.text)
-        return rebate
-
-    @api.model
-    def _retrieve_charge_allowance_vals(self, tree, xpath_dict, quantity):
-        charges = []
-        discount_amount = 0
-        for allowance_charge_node in tree.iterfind(xpath_dict['allowance_charge']):
-            charge_indicator = allowance_charge_node.findtext(xpath_dict['allowance_charge_indicator']) or 'false'
-            amount = float(allowance_charge_node.findtext(xpath_dict['allowance_charge_amount'], default='0'))
-            reason_code = allowance_charge_node.findtext(xpath_dict['allowance_charge_reason_code'], default='')
-            reason = allowance_charge_node.findtext(xpath_dict['allowance_charge_reason'], default='')
-            if charge_indicator.lower() == 'true':
-                charges.append({
-                    'amount': amount,
-                    'line_quantity': quantity,
-                    'reason': reason,
-                    'reason_code': reason_code,
-                })
-            else:
-                discount_amount += amount
-        return discount_amount, charges
-
-    def _get_basis_qty(self, tree, xpath_dict):
-        """ Return the base quantity used to derive the unit price from PriceAmount.
-        The standard UBL/CII divides PriceAmount by BaseQuantity to obtain the unit price upon
-        import.
-        """
-        return float(self._find_value(xpath_dict['basis_qty'], tree) or 1) or 1.0
-
-    def _retrieve_line_vals(self, record, tree, document_type=False, qty_factor=1):
-        """
-        Read the xml invoice, extract the invoice line values, compute the odoo values
-        to fill an invoice line form: quantity, price_unit, discount, product_uom_id.
-
-        The way of computing invoice line is quite complicated:
-        https://docs.peppol.eu/poacc/billing/3.0/bis/#_calculation_on_line_level (same as in factur-x documentation)
-
-        line_net_subtotal = ( gross_unit_price - rebate ) * (delivered_qty / basis_qty) - allow_charge_amount
-
-        with (UBL | CII):
-            * net_unit_price = 'Price/PriceAmount' | 'NetPriceProductTradePrice' (mandatory) (BT-146)
-            * gross_unit_price = 'Price/AllowanceCharge/BaseAmount' | 'GrossPriceProductTradePrice' (optional) (BT-148)
-            * basis_qty = 'Price/BaseQuantity' | 'BasisQuantity' (optional, either below net_price node or
-                gross_price node) (BT-149)
-            * delivered_qty = 'InvoicedQuantity' (invoice) | 'BilledQuantity' (bill) | 'Quantity' (order) (mandatory) (BT-129)
-            * allow_charge_amount = sum of 'AllowanceCharge' | 'SpecifiedTradeAllowanceCharge' (same level as Price)
-                ON THE LINE level (optional) (BT-136 / BT-141)
-            * line_net_subtotal = 'LineExtensionAmount' | 'LineTotalAmount' (mandatory) (BT-131)
-            * rebate = 'Price/AllowanceCharge' | 'AppliedTradeAllowanceCharge' below gross_price node ! (BT-147)
-                "item price discount" which is different from the usual allow_charge_amount
-                gross_unit_price (BT-148) - rebate (BT-147) = net_unit_price (BT-146)
-
-        In Odoo, we obtain:
-        (1) = price_unit  =  gross_price_unit / basis_qty  =  (net_price_unit + rebate) / basis_qty
-        (2) = quantity  =  delivered_qty
-        (3) = discount (converted into a percentage)  =  100 * (1 - price_subtotal / (delivered_qty * price_unit))
-        (4) = price_subtotal
-
-        Alternatively, we could also set: quantity = delivered_qty/basis_qty
-
-        WARNING, the basis quantity parameter is annoying, for instance, an invoice with a line:
-            item A  | price per unit of measure/unit price: 30  | uom = 3 pieces | billed qty = 3 | rebate = 2  | untaxed total = 28
-        Indeed, 30 $ / 3 pieces = 10 $ / piece => 10 * 3 (billed quantity) - 2 (rebate) = 28
-
-        UBL ROUNDING: "the result of Item line net
-            amount = ((Item net price (BT-146)÷Item price base quantity (BT-149))×(Invoiced Quantity (BT-129))
-        must be rounded to two decimals, and the allowance/charge amounts are also rounded separately."
-        It is not possible to do it in Odoo.
-        """
-        xpath_dict = self._get_line_xpaths(document_type, qty_factor)
-        # basis_qty (optional)
-        basis_qty = self._get_basis_qty(tree, xpath_dict)
-
-        # gross_price_unit (optional)
-        gross_price_unit = None
-        gross_price_unit_node = tree.find(xpath_dict['gross_price_unit'])
-        if gross_price_unit_node is not None:
-            gross_price_unit = float(gross_price_unit_node.text)
-
-        # net_price_unit (mandatory)
-        net_price_unit = None
-        net_price_unit_node = tree.find(xpath_dict['net_price_unit'])
-        if net_price_unit_node is not None:
-            net_price_unit = float(net_price_unit_node.text)
-
-        # delivered_qty (mandatory)
-        delivered_qty = 1
-        product_vals = {k: self._find_value(v, tree) for k, v in xpath_dict['product'].items()}
-        product = self._import_product(record.partner_id, **product_vals)
-        product_uom = self.env['uom.uom']
-        quantity_node = tree.find(xpath_dict['delivered_qty'])
-        if quantity_node is not None:
-            delivered_qty = float(quantity_node.text)
-            if unece_code := quantity_node.attrib.get('unitCode'):
-                product_uom = self.env['uom.uom']._get_uom_from_unece_code(unece_code)
-        if product and product_uom and not product_uom._has_common_reference(product.product_tmpl_id.uom_id):
-            # uom incompatibility
-            product_uom = self.env['uom.uom']
-
-        # line_net_subtotal (mandatory)
-        price_subtotal = None
-        line_total_amount_node = tree.find(xpath_dict['line_total_amount'])
-        if line_total_amount_node is not None and line_total_amount_node.text and line_total_amount_node.text.strip():
-            price_subtotal = float(line_total_amount_node.text)
-
-        # quantity
-        quantity = delivered_qty * qty_factor
-
-        # rebate (optional)
-        rebate = self._retrieve_rebate_val(tree, xpath_dict, quantity)
-
-        # Charges are collected (they are used to create new lines), Allowances are transformed into discounts
-        discount_amount, charges = self._retrieve_charge_allowance_vals(tree, xpath_dict, quantity)
-
-        # price_unit
-        charge_amount = sum(d['amount'] for d in charges)
-        allow_charge_amount = discount_amount - charge_amount
-        if gross_price_unit is not None:
-            price_unit = gross_price_unit / basis_qty
-        elif net_price_unit is not None:
-            price_unit = (net_price_unit + rebate) / basis_qty
-        elif price_subtotal is not None:
-            price_unit = (price_subtotal + allow_charge_amount) / (delivered_qty or 1)
-        else:
-            price_unit = 0
-
-        # discount
-        discount = 0
-        currency = self.env.company.currency_id
-        if not float_is_zero(delivered_qty * price_unit, currency.decimal_places) and price_subtotal is not None:
-            inferred_discount = 100 * (1 - (price_subtotal - charge_amount) / currency.round(delivered_qty * price_unit))
-            discount = inferred_discount if not float_is_zero(inferred_discount, currency.decimal_places) else 0.0
-
-        # Sometimes, the xml received is very bad; e.g.:
-        #   * unit price = 0, qty = 0, but price_subtotal = -200
-        #   * unit price = 0, qty = 1, but price_subtotal = -200
-        #   * unit price = 1, qty = 0, but price_subtotal = -200
-        # for instance, when filling a down payment as an document line. The equation in the docstring is not
-        # respected, and the result will not be correct, so we just follow the simple rule below:
-        if (
-            net_price_unit is not None
-            and price_subtotal is not None
-            and float_compare(price_subtotal, net_price_unit * (delivered_qty / basis_qty) - allow_charge_amount, currency.decimal_places)
-        ):
-            if net_price_unit == 0 and delivered_qty == 0:
-                quantity = 1
-                price_unit = price_subtotal
-            elif net_price_unit == 0:
-                price_unit = price_subtotal / delivered_qty
-            elif delivered_qty == 0:
-                quantity = price_subtotal / price_unit
-
-        line_vals = {
-            # vals to be written on the document line
-            'product_id': product.id,
-            'product_uom_id': product_uom.id,
-            'price_unit': price_unit,
-            'quantity': quantity,
-            'discount': discount,
-            'tax_nodes': self._get_tax_nodes(tree),  # see `_retrieve_taxes`
-            'charges': charges,  # see `_retrieve_line_charges`
-            'price_subtotal': price_subtotal,
-        }
-
-        name = self._find_value(xpath_dict['name'], tree) or ''
-        if product:
-            name = re.sub(rf"^{re.escape(product.name)}($|\n)", "", name)
-
-        if name:
-            line_vals['name'] = name
-
-        return line_vals
-
-    def _get_line_label(self, line_values):
-        product = self.env['product.product'].browse(line_values.get('product_id'))
-        return ' '.join(filter(None, [product.name, line_values.get('name')]))
-
-    def _import_product(self, partner, **product_vals):
-        return self.env['product.product']._retrieve_product(**product_vals)
-
-    def _import_vehicle(self, tree, tree_type, document_type, company):
-        """
-        For xmls where the VIN is located somewhere in a tag under Invoice or InvoiceLine
-        :param tree: etree object
-        :param tree_type: 'line' if the tree root element is <InvoiceLine> or 'move' if it's <Invoice>
-        """
-        if not self._need_vehicle_id(document_type):
-            return False
-        default_parent_node_path = './{*}Item/{*}AdditionalItemProperty'
-        default_value_path = './{*}Value'
-        default_linked_field = 'vin_sn'
-
-        def default_condition(parent_node, node, value):
-            return parent_node.findtext('./{*}Name') == value
-        paths = [
-            # {
-            #   'path_type': 'line' or 'move'
-            #   'parent_node_path': 'path to the parent node',
-            #   'condition': lambda parent_node, node, value: 'where parent_node = parent node, node = node containing VIN Number, value = identifier',
-            #   'value_path': 'path to the node where the information is to be found',
-            #   'identifier': 'to be used in condition to perform a check, inner text of a node allowing to identify the node to read',
-            #   'linked_field': the field to search in DB (vin_sn, license_plate),
-            #   'pattern': if the value to search is not in a field specific to it (with other words like in a description)
-            # }
-            {'path_type': 'line', 'identifier': 'SerialNumber'},  # VIN in AdditionalItemProperty/Value with AdditionalItemProperty/Name == 'SerialNumber'
-            {'path_type': 'line', 'identifier': 'VIN'},  # VIN in AdditionalItemProperty/Value with AdditionalItemProperty/Name == 'VIN'
-            {'path_type': 'line', 'identifier': 'PlateNumber', 'linked_field': 'license_plate'},  # LICENSE PLATE in AdditionalItemProperty/Value with AdditionalItemProperty/Name == 'PlateNumber'
-            {'path_type': 'line', 'identifier': 'LCPL-NO', 'linked_field': 'license_plate'},  # LICENSE PLATE in AdditionalItemProperty/Value with AdditionalItemProperty/Name == 'LCPL-NO'
-            {
-                # VIN in Item/Description
-                'path_type': 'line',
-                'parent_node_path': './{*}Item',
-                'condition': lambda parent_node, node, value: True,
-                'value_path': './{*}Description',
-                'pattern': r'[A-Za-z0-9]{17}',
-            },
-            {
-                # LICENSE PLATE in Item/Description
-                'path_type': 'line',
-                'parent_node_path': './{*}Item',
-                'condition': lambda parent_node, node, value: True,
-                'value_path': './{*}Description',
-                'linked_field': 'license_plate',
-                'pattern': r'\d-[A-Za-z]{3}-\d{3}',  # BE license plate format
-            },
-            {
-                # VIN in AdditionalDocumentReference/ID with schemeID == 'AKG' (1 vin for the whole invoice)
-                'path_type': 'move',
-                'parent_node_path': './{*}AdditionalDocumentReference',
-                'condition': lambda parent_node, node, value: node.get('schemeID') == 'AKG',
-                'value_path': './{*}ID',
-            },
-            {
-                # LICENSE PLATE in AdditionalDocumentReference/ID with schemeID == 'ABZ' (1 license plate for the whole invoice)
-                'path_type': 'move',
-                'parent_node_path': './{*}AdditionalDocumentReference',
-                'condition': lambda parent_node, node, value: node.get('schemeID') == 'ABZ',
-                'value_path': './{*}ID',
-                'linked_field': 'license_plate',
-            },
-        ]
-
-        results = defaultdict(set)  # {field (vin_sn|license_plate): {'AZERTYUIOP', 'POIUYTREZA'}}
-        for path in [p for p in paths if p['path_type'] == tree_type]:
-            parent_nodes = tree.findall(path.get('parent_node_path', default_parent_node_path))
-            for parent_node in parent_nodes:
-                value_node = parent_node.find(path.get('value_path', default_value_path))
-                if value_node is None or not path.get('condition', default_condition)(parent_node, value_node, path.get('identifier', '')):
-                    continue
-                value = value_node.text
-                if value is None:
-                    continue
-                if path.get('pattern'):
-                    # we need to find the car identifier in the node
-                    if candidates := re.findall(path['pattern'], value or ''):
-                        results[path.get('linked_field', default_linked_field)].update(candidates)
-                else:
-                    # the car identifier is the full text of the node
-                    results[path.get('linked_field', default_linked_field)].add(value)
-
-        if len(results) == 0 or any(len(vals) != 1 for vals in results.values()):
-            return False
-
-        vehicles = self.env.get('fleet.vehicle').search([
-            ('company_id', '=', company.id),
-        ] + Domain.OR([
-            [(field, 'in', vals)] for field, vals in results.items()
-        ]), limit=2)
-        if len(vehicles) == 1:
-            return vehicles.id
-        return False
-
-    def _need_vehicle_id(self, document_type):
-        return document_type == 'in_invoice' and 'fleet.vehicle' in self.env
-
-    def _retrieve_fixed_tax(self, company_id, fixed_tax_vals):
-        """ Retrieve the fixed tax at import, iteratively search for a tax:
-        1. not price_include matching the name and the amount
-        2. not price_include matching the amount
-        3. price_include matching the name and the amount
-        4. price_include matching the amount
-        """
-        base_domain = [
-            *self.env['account.journal']._check_company_domain(company_id),
-            ('amount_type', '=', 'fixed'),
-            ('amount', '=', fixed_tax_vals['amount']),
-        ]
-        for price_include in (False, True):
-            for name in (fixed_tax_vals['reason'], False):
-                domain = base_domain + [('price_include', '=', price_include)]
-                if name:
-                    domain.append(('name', '=', name))
-                tax = self.env['account.tax'].search(domain, limit=1)
-                if tax:
-                    return tax
-        return self.env['account.tax']
-
-    def _retrieve_taxes(self, record, line_values, tax_type, tax_exigibility=None):
-        """
-        Retrieve the taxes on the document line at import.
-
-        In a UBL/CII xml, the Odoo "price_include" concept does not exist. Hence, first look for a price_include=False,
-        if it is unsuccessful, look for a price_include=True.
-        """
-        # Taxes: all amounts are tax excluded, so first try to fetch price_include=False taxes,
-        # if no results, try to fetch the price_include=True taxes. If results, need to adapt the price_unit.
-        logs = []
-        taxes = []
-        fpos_domain = [('fiscal_position_ids', '=', record.fiscal_position_id.id)]
-        if record.fiscal_position_id.is_domestic:
-            fpos_domain = ['|', ('fiscal_position_ids', '=', False)] + fpos_domain
-        line_label = self._get_line_label(line_values)
-        for tax_node in line_values.pop('tax_nodes'):
-            amount = float(tax_node.text)
-            domain = [
-                *self.env['account.journal']._check_company_domain(record.company_id),
-                ('amount_type', '=', 'percent'),
-                ('type_tax_use', '=', tax_type),
-                ('amount', '=', amount),
-            ]
-            tax = self.env['account.tax']
-            if hasattr(record, '_get_specific_tax'):
-                tax = record._get_specific_tax(line_label, domain).filtered_domain(domain)[:1]
-            if tax_exigibility is not None:
-                if not tax:
-                    tax = self.env['account.tax'].search(domain + fpos_domain + [('price_include', '=', False), ('tax_exigibility', '=', tax_exigibility)], limit=1)
-                if not tax:
-                    tax = self.env['account.tax'].search(domain + fpos_domain + [('price_include', '=', True), ('tax_exigibility', '=', tax_exigibility)], limit=1)
-                if not tax:
-                    tax = self.env['account.tax'].search(domain + [('price_include', '=', False), ('tax_exigibility', '=', tax_exigibility)], limit=1)
-                if not tax:
-                    tax = self.env['account.tax'].search(domain + [('price_include', '=', True), ('tax_exigibility', '=', tax_exigibility)], limit=1)
-                if not tax:
-                    logs.append(
-                        _("Tax with matching exigibility could not be retrieved: '%(exigibility)s' for line '%(line)s'.",
-                        exigibility=tax_exigibility,
-                        line=line_label),
-                    )
-            if not tax:
-                tax = self.env['account.tax'].search(domain + fpos_domain + [('price_include', '=', False)], limit=1)
-            if not tax:
-                tax = self.env['account.tax'].search(domain + fpos_domain + [('price_include', '=', True)], limit=1)
-            if not tax:
-                tax = self.env['account.tax'].search(domain + [('price_include', '=', False)], limit=1)
-            if not tax:
-                tax = self.env['account.tax'].search(domain + [('price_include', '=', True)], limit=1)
-
-            if not tax:
-                logs.append(
-                    _("Could not retrieve the tax: %(amount)s %% for line '%(line)s'.",
-                    amount=amount,
-                    line=line_label),
-                )
-            else:
-                taxes.append(tax.id)
-                if tax.price_include:
-                    line_values['price_unit'] *= (1 + tax.amount / 100)
-        return taxes, logs
-
-    def _retrieve_line_charges(self, record, line_values, taxes):
-        """
-        Handle the charges on the document line at import.
-
-        For each charge on the line, it creates a new aml.
-        Special case: if the ReasonCode == 'AEO', there is a high chance the xml was produced by Odoo and the
-        corresponding line had a fixed tax, so it first tries to find a matching fixed tax to apply to the current aml.
-        """
-        charges_vals = []
-        for charge in line_values.pop('charges'):
-            if not charge['line_quantity']:
-                continue
-
-            if charge['reason_code'] == 'AEO':
-                # a 1 eur fixed tax on a line with quantity=2 will yield an AllowanceCharge with amount = 2
-                charge_copy = charge.copy()
-                charge_copy['amount'] /= charge_copy['line_quantity']
-                if tax := self._retrieve_fixed_tax(record.company_id, charge_copy):
-                    taxes.append(tax.id)
-                    if tax.price_include:
-                        line_values['price_unit'] += tax.amount
-                    continue
-
-            price_subtotal_before = line_values['price_unit'] * charge['line_quantity'] * (1.0 - line_values['discount'] / 100.0)
-            price_subtotal_after = price_subtotal_before + charge['amount']
-            line_values['price_unit'] += charge['amount'] / charge['line_quantity']
-            new_price_subtotal_before_discount = line_values['price_unit'] * charge['line_quantity']
-            line_values['discount'] = (1 - (price_subtotal_after / new_price_subtotal_before_discount)) * 100.0
-        return record._get_line_vals_list(charges_vals)
-
-    def _get_document_allowance_charge_xpaths(self):
-        # OVERRIDE
-        pass
-
-    def _get_invoice_line_xpaths(self, invoice_line, qty_factor):
-        # OVERRIDE
-        pass
-
-    def _correct_invoice_tax_amount(self, tree, invoice):
-        pass  # To be implemented by the format if needed
 
     def _import_init_collected_values(self, invoice, file_data):
         tree = file_data['xml_tree']
@@ -2557,6 +1924,193 @@ class AccountEdiCommon(models.AbstractModel):
             invoice._sync_dynamic_lines(container),
         ):
             invoice.line_ids = line_ids_commands
+
+    # -------------------------------------------------------------------------
+    # IMPORT: syntax-neutral helpers
+    # The '_import_{cii,ubl}_*' hooks extract the values from the xml tree and call these helpers.
+    # -------------------------------------------------------------------------
+
+    def _import_invoice_add_prepaid_amount(self, collected_values, prepaid_amount_str):
+        """ Collect the already paid amount (BT-113) as 'prepaid_amount'.
+
+        :param prepaid_amount_str: The prepaid amount, as found in the document.
+        """
+        file_document_sign = collected_values['file_document_sign']
+        currency = collected_values['currency_values']['currency']
+        prepaid_amount = file_document_sign * float(prepaid_amount_str or 0.0)
+        if currency.is_zero(prepaid_amount):
+            return
+
+        collected_values['prepaid_amount'] = prepaid_amount
+        formatted_prepaid_amount = formatLang(self.env, prepaid_amount, currency_obj=currency)
+        collected_values['logs'].append(self.env._("A payment of %s was detected.", formatted_prepaid_amount))
+
+    def _import_invoice_add_tax_total_value(self, collected_values, category_code, percentage, amount_str):
+        """ Add a VAT breakdown (BG-23) of the document to 'tax_total_values' (grouped by category code and rate).
+
+        :param category_code:   The VAT category code (BT-118).
+        :param percentage:      The VAT rate (BT-119), as a float.
+        :param amount_str:      The VAT category tax amount (BT-117), as found in the document.
+        """
+        tax_key = frozendict({
+            'category_code': category_code,
+            'percentage': percentage,
+        })
+        tax_values = collected_values['tax_total_values'].setdefault(tax_key, {
+            'amount_type': 'percent',
+            'type_tax_use': collected_values['odoo_document_type'],
+            'amount': percentage,
+            'ubl_cii_tax_category_code': category_code,
+            'tax_amount_currency': 0.0,
+            'related_taxes_values': [],
+        })
+        tax_values['tax_amount_currency'] += collected_values['file_document_sign'] * float(amount_str)
+
+    def _import_invoice_add_document_allowance_charge_values(self, collected_values, *, charge_indicator, amount_str,
+                                                             base_amount_str, multiplier_factor_numeric_str, reason,
+                                                             reason_code, percentage, tax_values):
+        """ Add a document level allowance (BG-20) or charge (BG-21) to 'allowances' / 'charges'.
+
+        :param charge_indicator:    The charge indicator, as found in the document ('true' / 'false').
+        :param percentage:          The VAT rate of the allowance/charge, as a float.
+        :param tax_values:          The tax values of the allowance/charge (see
+                                    '_import_invoice_line_get_tax_values_from_tax_total'), if any.
+        :return:                    The values of the allowance/charge.
+        """
+        allowance_charge_values = {
+            'amount': float(amount_str) if amount_str else 0.0,
+            'base_amount': float(base_amount_str) if base_amount_str else None,
+            'reason': reason,
+            'reason_code': reason_code,
+            'multiplier_factor_numeric': float(multiplier_factor_numeric_str) if multiplier_factor_numeric_str else None,
+            'tax_percentage': percentage,
+            'charge_indicator': charge_indicator,
+        }
+
+        if tax_values:
+            allowance_charge_values['taxes_values'] = tax_values
+            global_tax_values = collected_values['tax_total_values'].get(tax_values['_tax_key'])
+            global_tax_values['related_taxes_values'].append(tax_values)
+
+        if charge_indicator.lower() == 'true':
+            collected_values['charges'].append(allowance_charge_values)
+        else:
+            collected_values['allowances'].append(allowance_charge_values)
+        return allowance_charge_values
+
+    def _import_invoice_line_add_allowance_charge_values(self, collected_values, *, charge_indicator, amount_str,
+                                                         base_amount_str, reason, reason_code):
+        """ Add a line level allowance (BG-27) or charge (BG-28) to the 'allowances' / 'charges' of the line. """
+        if not amount_str:
+            return
+
+        allowance_charge_values = {
+            'amount': float(amount_str),
+            'base_amount': float(base_amount_str) if base_amount_str else None,
+            'reason': reason,
+            'reason_code': reason_code,
+        }
+        if charge_indicator.lower() == 'true':
+            collected_values['charges'].append(allowance_charge_values)
+        else:
+            collected_values['allowances'].append(allowance_charge_values)
+
+    def _import_invoice_line_add_price_allowance_values(self, collected_values, *, charge_indicator, amount_str,
+                                                        base_amount_str, reason, reason_code):
+        """ Collect the item price discount (BT-147) and the item gross price (BT-148) of the line as
+        'price_allowance_values'.
+        """
+        collected_values['price_allowance_values'] = {
+            'charge_indicator_sign': 1 if (charge_indicator or 'false').lower() == 'true' else -1,
+            'amount': float(amount_str) if amount_str else None,
+            'base_amount': float(base_amount_str) if base_amount_str else None,
+            'reason': reason,
+            'reason_code': reason_code,
+        }
+
+    def _import_invoice_line_get_tax_values_from_tax_total(self, collected_values, category_code, percentage):
+        """ The tax values of a VAT category (category code + rate), None if the document doesn't have a VAT
+        breakdown (BG-23) for it.
+
+        :param percentage: The VAT rate, as a float.
+        """
+        tax_key = frozendict({
+            'category_code': category_code,
+            'percentage': percentage,
+        })
+        global_tax_values = collected_values['tax_total_values'].get(tax_key)
+        if not global_tax_values:
+            return None
+
+        return {
+            'amount_type': global_tax_values['amount_type'],
+            'type_tax_use': global_tax_values['type_tax_use'],
+            'amount': global_tax_values['amount'],
+            'ubl_cii_tax_category_code': global_tax_values['ubl_cii_tax_category_code'],
+            '_tax_key': tax_key,
+        }
+
+    def _import_invoice_line_get_fixed_tax_values(self, collected_values, charge):
+        """ The values of the fixed tax a line charge may come from (a fixed tax is exported as a line charge with
+        the 'AEO' reason code), also stored as 'attempt_tax_values' on the charge.
+        """
+        fixed_tax_amount = charge['amount'] / collected_values['to_write']['quantity']
+        charge['attempt_tax_values'] = tax_values = {
+            'name': charge['reason'],
+            'amount_type': 'fixed',
+            'type_tax_use': collected_values['odoo_document_type'],
+            'amount': fixed_tax_amount,
+            'tax_amount_currency': fixed_tax_amount,
+        }
+        return tax_values
+
+    def _import_invoice_line_add_percentage_tax_values(self, collected_values, tax_values):
+        """ Add the values of a percentage tax of the line (see '_import_invoice_line_get_tax_values_from_tax_total')
+        to its 'taxes_values' and link them to the VAT breakdown of the document.
+        """
+        collected_values['taxes_values'].append(tax_values)
+        global_tax_values = collected_values['tax_total_values'].get(tax_values['_tax_key'])
+        global_tax_values['related_taxes_values'].append(tax_values)
+
+    def _import_invoice_fix_untaxed_amount(self, collected_values, tax_exclusive_amount_str, payable_rounding_amount_str):
+        """ Add a 'Rounding' line when the untaxed amount of the imported invoice doesn't match the one of the document.
+
+        :param tax_exclusive_amount_str:    The invoice total amount without VAT (BT-109), as found in the document.
+        :param payable_rounding_amount_str: The rounding amount (BT-114), as found in the document.
+        """
+        if not collected_values['are_taxes_complete'] or not tax_exclusive_amount_str:
+            return
+
+        file_document_sign = collected_values['file_document_sign']
+        currency = collected_values['currency_values']['currency']
+        tax_exclusive_amount = file_document_sign * float(tax_exclusive_amount_str)
+        payable_rounding_amount = file_document_sign * float(payable_rounding_amount_str or 0.0)
+        expected_untaxed_amount = tax_exclusive_amount + payable_rounding_amount
+        invoice = collected_values['invoice']
+        difference = currency.round(expected_untaxed_amount - invoice.amount_untaxed)
+        for line_collected_values in collected_values['lines_collected_values']:
+            for charge in line_collected_values['charges']:
+                attempt_tax_values = charge.get('attempt_tax_values')
+                if attempt_tax_values and attempt_tax_values.get('tax'):
+                    difference -= charge['amount']
+        if currency.is_zero(difference):
+            return
+
+        container = {'records': invoice}
+        with (
+            invoice._check_balanced(container),
+            invoice._disable_discount_precision(),
+            invoice._sync_dynamic_lines(container),
+        ):
+            invoice.invoice_line_ids = [
+                Command.create({
+                    'display_type': 'product',
+                    'name': self.env._("Rounding"),
+                    'quantity': 1,
+                    'price_unit': difference,
+                    'tax_ids': [],
+                }),
+            ]
 
     def _import_invoice_post_processing(self, collected_values):
         # During the import, fill 'ubl_cii_xml_file' to be retrieved later if necessary.

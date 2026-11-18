@@ -1,8 +1,20 @@
-from odoo import models
+from odoo import _, models
 from odoo.tools import html2plaintext
+from odoo.tools.misc import formatLang
 
 
 PAID_STATES = frozenset({'paid', 'in_payment', 'reversed'})
+
+# [BR-FR-MAP-17/18/19] The French CIUS caps the length of some business terms.
+L10N_FR_PDP_BUSINESS_TERM_MAX_LENGTHS = {
+    'BT-22': 1024,  # Invoice note
+    'BT-35': 255,  # Address line 1 (BT-35, BT-50, BT-75, ...)
+    'BT-36': 255,  # Address line 2
+    'BT-37': 255,  # City
+    'BT-38': 10,  # Post code
+    'BT-39': 255,  # Country subdivision
+    'BT-153': 255,  # Item name
+}
 
 
 class AccountEdiCommon(models.AbstractModel):
@@ -59,3 +71,57 @@ class AccountEdiCommon(models.AbstractModel):
 
         profile_id = f"{profile_scope}{profile_number}"
         return profile_id
+
+    # -------------------------------------------------------------------------
+    # IMPORT: DOWN PAYMENTS (shared by the UBL and CII syntaxes)
+    # -------------------------------------------------------------------------
+
+    def _l10n_fr_pdp_import_downpayments(self, collected_values, prepaid_amount, downpayment_name_nodes, downpayment_domain):
+        """ The imported invoice is a final invoice following downpayments (profile B4/S4/M4): all the billing
+        references are assumed to be references to the downpayments, whose lines are copied to be subtracted from the
+        final invoice (see '_l10n_fr_pdp_import_add_downpayment_lines').
+
+        :param collected_values:        The import values.
+        :param prepaid_amount:          The paid amount (BT-113) of the document.
+        :param downpayment_name_nodes:  The nodes holding the references of the downpayments.
+        :param downpayment_domain:      An additional domain to search the downpayments.
+        """
+        invoice = collected_values['invoice']
+        currency = collected_values['currency_values']['currency']
+        collected_values['prepaid_amount'] = prepaid_amount
+        if invoice.currency_id.is_zero(prepaid_amount):
+            return
+
+        # groups downpayments by ref to avoid a downpayment being duplicated in the db being substracted multiple times
+        grouped_downpayments = self.env['account.move'].search([
+            ('ref', 'in', [downpayment.text for downpayment in downpayment_name_nodes]),
+            *downpayment_domain,
+        ]).grouped('ref')
+        downpayment_lines = self.env['account.move.line']
+        for downpayments in grouped_downpayments.values():
+            downpayment = downpayments[0]
+            for line in downpayment.invoice_line_ids:
+                downpayment_lines |= line.copy({'quantity': -line.quantity if downpayment.move_type == 'in_invoice' else line.quantity})
+        collected_values['downpayment_lines'] = downpayment_lines
+
+        # logging
+        formatted_amount = formatLang(self.env, prepaid_amount, currency_obj=currency)
+        collected_values['logs'].append(_("A downpayment of %s was detected.", formatted_amount))
+        for downpayment_name in downpayment_name_nodes:
+            if downpayment_name.text not in grouped_downpayments:
+                collected_values['logs'].append(_("Downpayment %s not found. Imported amounts will probably be incorrect.", downpayment_name.text))
+
+    def _l10n_fr_pdp_import_add_downpayment_lines(self, collected_values):
+        """ Downpayments may be reported as a prepaid amount. In this case, the final invoice untaxed amount, tax amount
+        and total amount correspond to the amounts without any downpayments made. We need to add the downpayment lines
+        as negative lines in the final invoice because we already imported and accounted for the downpayments.
+        """
+        invoice = collected_values['invoice']
+        if downpayment_lines := collected_values.get('downpayment_lines'):
+            container = {'records': invoice}
+            with (
+                invoice._check_balanced(container),
+                invoice._disable_discount_precision(),
+                invoice._sync_dynamic_lines(container),
+            ):
+                downpayment_lines.move_id = invoice.id

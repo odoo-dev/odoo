@@ -32,9 +32,6 @@ class PosEdiXmlUBL21(models.AbstractModel):
     # EXPORT: ENTRY POINTS
     # -------------------------------------------------------------------------
 
-    def _export_pos_order_filename(self, pos_order):
-        return f"{pos_order.name.replace('/', '_')}_{self._name.rsplit('.', 1)[-1]}.xml"
-
     def _export_pos_order(self, pos_order):
         """ Generate the UBL XML of a POS order.
 

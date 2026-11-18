@@ -94,11 +94,10 @@ class AccountEdiXmlOIOUBL21(models.AbstractModel):
     # EXPORT: Values
     # -------------------------------------------------------------------------
 
-    def _ubl_prepare_base_lines(self, vals):
+    def _ubl_should_export_emptying_taxes_as_lines(self, vals):
         # EXTENDS account.edi.ubl
-        super()._ubl_prepare_base_lines(vals)
         # The emptying taxes (e.g. deposits on bottles) are reported as separated lines.
-        vals['base_lines'] = self._turn_emptying_taxes_as_new_base_lines(vals['base_lines'], vals['company'], vals)
+        return True
 
     def _should_export_early_payment_discount_as_line(self, vals):
         # EXTENDS account.edi.common

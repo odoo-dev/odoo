@@ -1,4 +1,3 @@
-from markupsafe import Markup
 from stdnum.no import mva
 from stdnum.be import vat as be_vat
 
@@ -19,8 +18,7 @@ class AccountEdiXmlUBLBIS3(models.AbstractModel):
     * EHF Billing 3.0 (Norway) is Peppol BIS Billing 3.0 without extension:
       https://anskaffelser.dev/postaward/g3/spec/current/billing-3.0/norway/#_implementation
 
-    The Peppol Order transaction (https://docs.peppol.eu/poacc/upgrade-3/syntax/Order/tree/) helpers, used by the
-    sale/purchase modules, are also defined here.
+    The Peppol Order transaction (used by the sale/purchase modules) is defined on 'account.edi.ubl_order'.
     """
     _name = "account.edi.xml.ubl_bis3"
     _inherit = ['account.edi.ubl_pint_eu']
@@ -52,6 +50,43 @@ class AccountEdiXmlUBLBIS3(models.AbstractModel):
             vals['document_node']['cbc:ProfileID']['_text'] = 'urn:fdc:peppol.eu:2017:poacc:billing:01:1.0'
         elif self._is_document(vals, 'self_invoice', 'self_credit_note'):
             vals['document_node']['cbc:ProfileID']['_text'] = 'urn:fdc:peppol.eu:2017:poacc:selfbilling:01:1.0'
+
+    def _ubl_bis3_report_tax_accounting_currency(self, vals):
+        """ Whether the VAT accounting currency (cbc:TaxCurrencyCode, BT-6) and the cac:TaxTotal in that currency
+        (BT-111) are reported when the invoice is in a foreign currency. Some national CIUS of Peppol BIS don't allow
+        them (A-NZ, NLCIUS, SG, XRechnung). """
+        return True
+
+    def _ubl_add_tax_currency_code_node(self, vals):
+        # EXTENDS account.edi.ubl_pint_eu
+        if not self._ubl_bis3_report_tax_accounting_currency(vals):
+            self._ubl_add_tax_currency_code_node_empty(vals)
+            return
+        super()._ubl_add_tax_currency_code_node(vals)
+
+    def _ubl_tax_totals_node_grouping_key(self, base_line, tax_data, vals, currency):
+        # EXTENDS account.edi.ubl_pint_eu
+        tax_total_keys = super()._ubl_tax_totals_node_grouping_key(base_line, tax_data, vals, currency)
+
+        # No cac:TaxTotal in company currency when the VAT accounting currency is not reported.
+        company_currency = vals['company'].currency_id
+        if (
+            not self._ubl_bis3_report_tax_accounting_currency(vals)
+            and tax_total_keys['tax_total_key']
+            and company_currency != vals['currency']
+            and tax_total_keys['tax_total_key']['currency'] == company_currency
+        ):
+            tax_total_keys['tax_total_key'] = None
+
+        return tax_total_keys
+
+    def _ubl_bis3_trim_line_allowance_charge_discount_node(self, discount_node):
+        """ Helper for the national CIUS of Peppol BIS (A-NZ, SG, XRechnung) reporting the line discount (BG-27) by
+        its amount only: without reason, percentage (BT-138) nor base amount (BT-137). """
+        discount_node['cbc:AllowanceChargeReason'] = None
+        discount_node['cbc:MultiplierFactorNumeric'] = None
+        discount_node['cbc:BaseAmount'] = None
+        return discount_node
 
     # -------------------------------------------------------------------------
     # EXPORT: Constraints
@@ -89,44 +124,3 @@ class AccountEdiXmlUBLBIS3(models.AbstractModel):
 
         return constraints
 
-    # -------------------------------------------------------------------------
-    # Sale/Purchase Order: Import
-    # -------------------------------------------------------------------------
-
-    def _import_order_payment_terms_id(self, company_id, tree, xpath):
-        """ Return payment term name from given tree and try to find a match. """
-        payment_term_name = self._find_value(xpath, tree)
-        if not payment_term_name:
-            return False
-        payment_term_domain = self.env['account.payment.term']._check_company_domain(company_id)
-        payment_term_domain.append(('name', '=', payment_term_name))
-        return self.env['account.payment.term'].search(payment_term_domain, limit=1)
-
-    def _retrieve_order_vals(self, order, tree):
-        order_vals = {}
-        logs = []
-
-        order_vals['date_order'] = tree.findtext('.//{*}EndDate') or tree.findtext('.//{*}IssueDate')
-        order_vals['note'] = self._import_description(tree, xpaths=['./{*}Note'])
-        order_vals['payment_term_id'] = self._import_order_payment_terms_id(order.company_id, tree, './/cac:PaymentTerms/cbc:Note')
-        order_vals['currency_id'], currency_logs = self._import_currency(tree, './/{*}DocumentCurrencyCode')
-
-        logs += currency_logs
-        return order_vals, logs
-
-    def _import_order_ubl(self, order, file_data, new):
-        """ Common importing method to extract order data from file_data.
-        :param order: Order to fill details from file_data.
-        :param file_data: File data to extract order related data from.
-        :return: True if there's no exception while extraction.
-        :rtype: Boolean
-        """
-        tree = file_data['xml_tree']
-
-        # Update the order.
-        order_vals, logs = self._retrieve_order_vals(order, tree)
-        if order:
-            order.write(order_vals)
-            order.message_post(body=Markup("<strong>%s</strong>") % _("Format used to import the document: %s", self._description))
-            if logs:
-                order._create_activity_set_details(Markup("<ul>%s</ul>") % Markup().join(Markup("<li>%s</li>") % l for l in logs))
