@@ -8,7 +8,7 @@ from collections.abc import Set as AbstractSet
 import dateutil.relativedelta
 
 from odoo.exceptions import ValidationError
-from odoo.tools import SQL
+from odoo.tools import SQL, OrderedSet
 
 regex_alphanumeric = re.compile(r'^[a-z0-9_]+$', re.IGNORECASE)
 regex_object_name = re.compile(r'^[a-z0-9_.]+$')
@@ -148,13 +148,17 @@ class Prefetch:
         result = self._tree['origin'] = PrefetchOrigin(self)
         return result
 
-    def relate(self, field, env) -> Prefetch:
+    def relate(self, field, env, fallback=()) -> Prefetch:
         """ Return a prefetch object for the values of a relational field on
         ``self`` (via the field's cache).
         """
         if result := self._tree.get(field):
+            if fallback:
+                result._fallback.update(fallback)
             return result
         result = self._tree[field] = PrefetchRelational(self, field, env)
+        if fallback:
+            result._fallback.update(fallback)
         return result
 
     @staticmethod
@@ -190,7 +194,7 @@ class PrefetchOrigin(Prefetch):
 
 
 class PrefetchRelational(Prefetch):
-    __slots__ = ('_env', '_field')
+    __slots__ = ('_env', '_fallback', '_field')
 
     def __init__(self, prefetch: Prefetch, field, env):
         # self._arg is a Prefetch object
@@ -198,10 +202,13 @@ class PrefetchRelational(Prefetch):
         self._tree = {}
         self._field = field
         self._env = env
+        self._fallback = OrderedSet()
 
     def __iter__(self):
         field_cache = self._field._get_cache(self._env)
-        if self._field.type == 'many2one':
+        if not field_cache:
+            yield from self._fallback
+        elif self._field.type == 'many2one':
             for id_ in self._arg:
                 if (coid := field_cache.get(id_)) is not None:
                     yield coid
