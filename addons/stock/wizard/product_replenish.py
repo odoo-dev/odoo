@@ -30,6 +30,8 @@ class ProductReplenish(models.TransientModel):
 
     @api.onchange('product_id', 'warehouse_id')
     def _onchange_product_id(self):
+        if self.product_id and self.uom_id not in self.allowed_uom_ids:
+            self.uom_id = self.product_id.uom_id
         if not self.env.context.get('default_quantity'):
             self.quantity = abs(self.forecasted_quantity) if self.forecasted_quantity < 0 else 1
 
@@ -67,7 +69,8 @@ class ProductReplenish(models.TransientModel):
                     res['product_has_variants'] = True
         company = product_tmpl_id.company_id or self.env.company
         if 'uom_id' in fields:
-            res['uom_id'] = product_tmpl_id.uom_id.id
+            product = self.env['product.product'].browse(res.get('product_id'))
+            res['uom_id'] = (product or product_tmpl_id).uom_id.id
         if 'company_id' in fields:
             res['company_id'] = company.id
         if 'warehouse_id' in fields and 'warehouse_id' not in res:
