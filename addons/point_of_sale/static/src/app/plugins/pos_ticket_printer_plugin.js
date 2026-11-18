@@ -327,55 +327,26 @@ export class PosTicketPrinterPlugin extends Plugin {
         printers = this.config.preparation_printer_ids,
         retryChanges = new Map(),
     }) {
+        const jobs = await this._printChangeTickets({ order, opts, printers, retryChanges });
+
         let isPrinted = false;
         const unsuccessfulPrints = [];
         // Each printer has its own change (filtered on its categories) to print again on retry
         const failedChanges = new Map();
-
-        for (const printer of printers) {
-            const template = opts.template || "point_of_sale.pos_order_change_receipt";
-            const generator = this.getGenerator({ models: this.data.models, order });
-            const categoryIds = new Set(printer.product_categories_ids.map((c) => c.id));
-            const printerOpts = retryChanges.has(printer)
-                ? { ...opts, orderChange: retryChanges.get(printer) }
-                : opts;
-            const changes = generator.generatePreparationData(categoryIds, printerOpts);
-            const tickets = printer.is_split_per_product
-                ? this._splitTicketsPerProduct(changes, generator)
-                : changes;
-
-            for (const ticket of tickets) {
-                if (ticket.extra_data.reprint && !opts.explicitReprint) {
-                    continue;
-                }
-
-                if (!printer?._instance) {
-                    unsuccessfulPrints.push(printer.name + " is not connected");
-                    break;
-                }
-
-                let result;
-                if (printer.paper_size === "label") {
-                    const zpl = renderToString(
-                        "point_of_sale.pos_order_change_receipt_zpl",
-                        ticket
-                    );
-                    result = await printer._instance.print(zpl);
-                } else {
-                    const iframe = await this.generateIframe(template, ticket);
-                    this.setIframeSizeFromPrinter(iframe, printer);
-                    const image = await this.generateImage(iframe);
-                    result = await this.print({ printer, image });
-                }
+        for (const { printer, connected, results } of jobs) {
+            if (!connected) {
+                unsuccessfulPrints.push(printer.name + " is not connected");
+                continue;
+            }
+            for (const { ticket, result } of results) {
                 if (result.successful) {
                     isPrinted = true;
-                }
-
-                if (!result.successful) {
+                    if (result.warningCode) {
+                        this.displayPrinterWarning(result, printer.name);
+                    }
+                } else {
                     failedChanges.set(printer, ticket._rawChange);
                     unsuccessfulPrints.push(printer.name + ": " + result.message.body);
-                } else if (result.warningCode) {
-                    this.displayPrinterWarning(result, printer.name);
                 }
             }
         }
@@ -398,6 +369,90 @@ export class PosTicketPrinterPlugin extends Plugin {
         }
 
         return isPrinted;
+    }
+
+    /**
+     * Render the preparation tickets of each printer, and send them as soon as the printer's
+     * tickets are rendered. Return one job per printer: `{ printer, connected, results }`.
+     *
+     * - Tickets are filtered on the printer categories, split per product
+     * - On retry, a printer listed in `retryChanges` uses its own failed change
+     * - Identical tickets (same content and printer style) are rendered once and shared between printers
+     * - Printers print in parallel, while the tickets of a same printer are sent one by one, in order
+     * - Printers with nothing to print are skipped
+     * - Disconnected printers (no `_instance`) are kept with no results so they can be reported as not connected
+     */
+    async _printChangeTickets({ order, opts, printers, retryChanges }) {
+        const template = opts.template || "point_of_sale.pos_order_change_receipt";
+        const generator = this.getGenerator({ models: this.data.models, order });
+        const imageCache = new Map();
+        const printJobs = [];
+
+        for (const printer of printers) {
+            const categoryIds = new Set(printer.product_categories_ids.map((c) => c.id));
+            const printerOpts = retryChanges.has(printer)
+                ? { ...opts, orderChange: retryChanges.get(printer) }
+                : opts;
+            const changes = generator.generatePreparationData(categoryIds, printerOpts);
+            const tickets = (
+                printer.is_split_per_product
+                    ? this._splitTicketsPerProduct(changes, generator)
+                    : changes
+            ).filter((ticket) => !ticket.extra_data.reprint || opts.explicitReprint);
+            if (!tickets.length) {
+                continue;
+            }
+
+            // A disconnected printer keeps an empty job, to be reported as not connected.
+            if (!printer._instance) {
+                printJobs.push({ printer, connected: false, results: [] });
+                continue;
+            }
+            const payloads = [];
+            for (const ticket of tickets) {
+                const payload = await this._renderChangeTicket(
+                    template,
+                    ticket,
+                    printer,
+                    imageCache
+                );
+                payloads.push({ ticket, payload });
+            }
+            // Not awaited: the printer prints while the next printers are rendered
+            printJobs.push(this._sendChangeTickets(printer, payloads));
+        }
+        return Promise.all(printJobs);
+    }
+
+    /**
+     * Return the payload sent to the printer (ZPL for label printers, rendered image otherwise)
+     * - Images are cached by content and printer style, shared across printers with the same paper size
+     */
+    async _renderChangeTicket(template, ticket, printer, imageCache) {
+        if (printer.paper_size === "label") {
+            return renderToString("point_of_sale.pos_order_change_receipt_zpl", ticket);
+        }
+        const { maxWidth, fontSize } = printer._instance.getStyle?.() || {};
+        const key = `${maxWidth}|${fontSize}|${renderToString(template, ticket)}`;
+        if (!imageCache.has(key)) {
+            const iframe = await this.generateIframe(template, ticket);
+            this.setIframeSizeFromPrinter(iframe, printer);
+            imageCache.set(key, await this.generateImage(iframe));
+        }
+        return imageCache.get(key);
+    }
+
+    // Send the rendered tickets of a printer one by one, in order
+    async _sendChangeTickets(printer, payloads) {
+        const results = [];
+        for (const { ticket, payload } of payloads) {
+            const result =
+                printer.paper_size === "label"
+                    ? await printer._instance.print(payload)
+                    : await this.print({ printer, image: payload });
+            results.push({ ticket, result });
+        }
+        return { printer, connected: true, results };
     }
 
     /**
