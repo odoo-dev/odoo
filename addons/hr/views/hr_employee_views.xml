@@ -213,7 +213,7 @@
                                         <div class="o_row" name="wage">
                                             <field name="wage" class="oe_inline o_hr_narrow_field" nolabel="1"/>
                                         </div>
-                                        <field name="structure_type_id" string="Pay Category" placeholder="Employee will be excluded from Pay Runs"
+                                        <field name="structure_type_id" string="Payroll Category" placeholder="Employee will be excluded from Pay Runs"
                                                 domain="['|', ('country_id', '=', False), ('country_id', '=', company_country_id)]"/>
                                     </group>
                                     <group name="schedule" string="Schedule">

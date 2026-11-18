@@ -3,9 +3,9 @@ from odoo import fields, models
 
 class HrPayrollStructureType(models.Model):
     _name = 'hr.payroll.structure.type'
-    _description = 'Salary Structure Type'
+    _description = 'Payroll Category'
 
-    name = fields.Char('Salary Structure Type')
+    name = fields.Char('Payroll Category')
     default_resource_calendar_id = fields.Many2one(
         'resource.calendar',
         string='Working Hours',

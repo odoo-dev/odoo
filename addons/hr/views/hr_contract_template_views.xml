@@ -40,7 +40,7 @@
                                         <field name="wage" class="o_hr_narrow_field"/>
                                         <div name="wage_period_label">/ month</div>
                                     </div>
-                                    <field name="structure_type_id" string="Pay Category" placeholder="Employee will be excluded from Pay Runs"
+                                    <field name="structure_type_id" string="Payroll Category" placeholder="Employee will be excluded from Pay Runs"
                                             domain="['|', ('country_id', '=', False), ('country_id', '=', company_country_id)]"/>
 
                                     

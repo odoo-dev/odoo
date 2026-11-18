@@ -166,9 +166,9 @@ class HrVersion(models.Model):
         'hr.version', string="Contract Template", groups="hr.group_hr_user",
         ui_domain="[('company_id', '=', company_id), ('employee_id', '=', False)]", tracking=1,
         help="Select a contract template to auto-fill the contract form with predefined values. You can still edit the fields as needed after applying the template.")
-    structure_type_id = fields.Many2one('hr.payroll.structure.type', string="Salary Structure Type",
+    structure_type_id = fields.Many2one('hr.payroll.structure.type', string="Payroll Category",
                                         compute="_compute_structure_type_id", readonly=False, store=True, index='btree_not_null', tracking=1,
-                                        groups="hr.group_hr_manager", default=_default_salary_structure)
+                                        groups="hr.group_hr_manager")
     active_employee = fields.Boolean(related="employee_id.active", string="Active Employee", groups="hr.group_hr_user")
     currency_id = fields.Many2one(string="Currency", related='company_id.currency_id', readonly=True)
     wage = fields.Monetary('Wage', tracking=1, help="Employee's monthly gross wage.", aggregator="avg",
@@ -943,7 +943,7 @@ class HrVersion(models.Model):
         return 12.0
 
     def _is_struct_from_country(self, country_code):
-        """Return whether the version's salary structure type belongs to the given country.
+        """Return whether the version's payroll category belongs to the given country.
 
         :param str country_code: ISO country code, e.g. ``'BE'``
         :rtype: bool
