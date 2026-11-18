@@ -4,7 +4,8 @@ import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { _t } from "@web/core/l10n/translation";
 import { Many2XAutocomplete } from "@web/views/fields/relational_utils";
-import { Component, onMounted, useProps, signal, t } from "@odoo/owl";
+import { Component, onMounted, useProps, signal, t, usePlugin } from "@odoo/owl";
+import { MrpOverviewPlugin } from "../mrp_overview_plugin";
 import { useService } from "@web/core/utils/hooks";
 
 export class BomOverviewControlPanel extends Component {
@@ -38,6 +39,7 @@ export class BomOverviewControlPanel extends Component {
     quantity = signal.ref();
 
     setup() {
+        this.overviewPlugin = usePlugin(MrpOverviewPlugin);
         this.action = useService("action");
         this.controlPanelDisplay = {};
         if (this.props.showOptions.mode == "forecast") {
@@ -64,7 +66,7 @@ export class BomOverviewControlPanel extends Component {
     }
 
     clickTogglefold() {
-        this.env.overviewBus.trigger("toggle-fold-all");
+        this.overviewPlugin.toggleFoldAll(!this.props.allFolded);
     }
 
     getDomain() {
