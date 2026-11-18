@@ -76,6 +76,7 @@ export class PosScaleService extends Reactive {
             decimalAccuracy,
             unitPrice,
         };
+        this.weight = 0;
     }
 
     _setTareIfRequested() {
