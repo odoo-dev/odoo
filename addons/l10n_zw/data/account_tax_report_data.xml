@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo auto_sequence="1">
+    <record id="zw_tax_report" model="account.report">
+        <field name="name">VAT Return</field>
+        <field name="root_report_id" ref="account.generic_tax_report"/>
+        <field name="country_id" ref="base.zw"/>
+        <field name="allow_foreign_vat" eval="True"/>
+        <field name="availability_condition">country</field>
+        <field name="column_ids">
+            <record id="zw_tax_report_no_vat" model="account.report.column">
+                <field name="name">Value</field>
+                <field name="expression_label">no_vat</field>
+            </record>
+            <record id="zw_tax_report_vat" model="account.report.column">
+                <field name="name">VAT</field>
+                <field name="expression_label">vat</field>
+            </record>
+        </field>
+        <field name="line_ids">
+            <record id="zw_tax_report_title_output" model="account.report.line">
+                <field name="name">Part II - Declaration of Output Tax</field>
+                <field name="hierarchy_level">0</field>
+                <field name="children_ids">
+                    <record id="zw_tax_report_line_09" model="account.report.line">
+                        <field name="name">9 - Supply of goods and/or services at standard rate</field>
+                        <field name="code">zw_vat_09</field>
+                        <field name="expression_ids">
+                            <record id="zw_tax_report_line_09_no_vat" model="account.report.expression">
+                                <field name="label">no_vat</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">-zw_vat_09_no_vat</field>
+                            </record>
+                            <record id="zw_tax_report_line_09_vat" model="account.report.expression">
+                                <field name="label">vat</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">-zw_vat_09_vat</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="zw_tax_report_line_10" model="account.report.line">
+                        <field name="name">10 - Supply of goods and/or services at 0% - Local</field>
+                        <field name="code">zw_vat_10</field>
+                        <field name="expression_ids">
+                            <record id="zw_tax_report_line_10_no_vat" model="account.report.expression">
+                                <field name="label">no_vat</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">-zw_vat_10_no_vat</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="zw_tax_report_line_10a" model="account.report.line">
+                        <field name="name">10a - Supply of goods and/or services at 0% - Exports</field>
+                        <field name="code">zw_vat_10a</field>
+                        <field name="expression_ids">
+                            <record id="zw_tax_report_line_10a_no_vat" model="account.report.expression">
+                                <field name="label">no_vat</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">-zw_vat_10a_no_vat</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="zw_tax_report_line_12" model="account.report.line">
+                        <field name="name">12 - Exempt supplies</field>
+                        <field name="code">zw_vat_12</field>
+                        <field name="expression_ids">
+                            <record id="zw_tax_report_line_12_no_vat" model="account.report.expression">
+                                <field name="label">no_vat</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">-zw_vat_12_no_vat</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="zw_tax_report_line_13" model="account.report.line">
+                        <field name="name">13 - Imported services</field>
+                        <field name="code">zw_vat_13</field>
+                        <field name="expression_ids">
+                            <record id="zw_tax_report_line_13_no_vat" model="account.report.expression">
+                                <field name="label">no_vat</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">zw_vat_13_no_vat</field>
+                            </record>
+                            <record id="zw_tax_report_line_13_vat" model="account.report.expression">
+                                <field name="label">vat</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">-zw_vat_13_vat</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="zw_tax_report_line_18" model="account.report.line">
+                        <field name="name">18 - Debit/credit notes</field>
+                        <field name="code">zw_vat_18</field>
+                        <field name="expression_ids">
+                            <record id="zw_tax_report_line_18_no_vat" model="account.report.expression">
+                                <field name="label">no_vat</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">-zw_vat_18_no_vat</field>
+                            </record>
+                            <record id="zw_tax_report_line_18_vat" model="account.report.expression">
+                                <field name="label">vat</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">-zw_vat_18_vat</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="zw_tax_report_line_20" model="account.report.line">
+                        <field name="name">20 - Total output tax [A]</field>
+                        <field name="code">zw_vat_20</field>
+                        <field name="expression_ids">
+                            <record id="zw_tax_report_line_20_vat" model="account.report.expression">
+                                <field name="label">vat</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">zw_vat_09.vat + zw_vat_13.vat + zw_vat_18.vat</field>
+                            </record>
+                        </field>
+                    </record>
+                </field>
+            </record>
+            <record id="zw_tax_report_title_input" model="account.report.line">
+                <field name="name">Part III - Input Tax Claim</field>
+                <field name="hierarchy_level">0</field>
+                <field name="children_ids">
+                    <record id="zw_tax_report_line_21" model="account.report.line">
+                        <field name="name">21 - Domestic goods and/or services purchased to make taxable supplies at standard rate</field>
+                        <field name="code">zw_vat_21</field>
+                        <field name="expression_ids">
+                            <record id="zw_tax_report_line_21_no_vat" model="account.report.expression">
+                                <field name="label">no_vat</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">zw_vat_21_no_vat</field>
+                            </record>
+                            <record id="zw_tax_report_line_21_vat" model="account.report.expression">
+                                <field name="label">vat</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">zw_vat_21_vat</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="zw_tax_report_line_21a" model="account.report.line">
+                        <field name="name">21a - Domestic goods and/or services purchased to make taxable supplies at 0%</field>
+                        <field name="code">zw_vat_21a</field>
+                        <field name="expression_ids">
+                            <record id="zw_tax_report_line_21a_no_vat" model="account.report.expression">
+                                <field name="label">no_vat</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">zw_vat_21a_no_vat</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="zw_tax_report_line_23" model="account.report.line">
+                        <field name="name">23 - Imported goods to make taxable supplies (exclude capital goods) at standard rate</field>
+                        <field name="code">zw_vat_23</field>
+                        <field name="expression_ids">
+                            <record id="zw_tax_report_line_23_no_vat" model="account.report.expression">
+                                <field name="label">no_vat</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">zw_vat_23_no_vat</field>
+                            </record>
+                            <record id="zw_tax_report_line_23_vat" model="account.report.expression">
+                                <field name="label">vat</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">zw_vat_23_vat</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="zw_tax_report_line_23a" model="account.report.line">
+                        <field name="name">23a - Imported goods to make taxable supplies (exclude capital goods) at 0%</field>
+                        <field name="code">zw_vat_23a</field>
+                        <field name="expression_ids">
+                            <record id="zw_tax_report_line_23a_no_vat" model="account.report.expression">
+                                <field name="label">no_vat</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">zw_vat_23a_no_vat</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="zw_tax_report_line_24" model="account.report.line">
+                        <field name="name">24 - Imported capital goods to make taxable supplies</field>
+                        <field name="code">zw_vat_24</field>
+                        <field name="expression_ids">
+                            <record id="zw_tax_report_line_24_no_vat" model="account.report.expression">
+                                <field name="label">no_vat</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">zw_vat_24_no_vat</field>
+                            </record>
+                            <record id="zw_tax_report_line_24_vat" model="account.report.expression">
+                                <field name="label">vat</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">zw_vat_24_vat</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="zw_tax_report_line_24a" model="account.report.line">
+                        <field name="name">24a - Domestic capital goods purchased to make taxable supplies</field>
+                        <field name="code">zw_vat_24a</field>
+                        <field name="expression_ids">
+                            <record id="zw_tax_report_line_24a_no_vat" model="account.report.expression">
+                                <field name="label">no_vat</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">zw_vat_24a_no_vat</field>
+                            </record>
+                            <record id="zw_tax_report_line_24a_vat" model="account.report.expression">
+                                <field name="label">vat</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">zw_vat_24a_vat</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="zw_tax_report_line_25" model="account.report.line">
+                        <field name="name">25 - Exempt purchases - Local</field>
+                        <field name="code">zw_vat_25</field>
+                        <field name="expression_ids">
+                            <record id="zw_tax_report_line_25_no_vat" model="account.report.expression">
+                                <field name="label">no_vat</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">zw_vat_25_no_vat</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="zw_tax_report_line_25a" model="account.report.line">
+                        <field name="name">25a - Exempt purchases - Imports</field>
+                        <field name="code">zw_vat_25a</field>
+                        <field name="expression_ids">
+                            <record id="zw_tax_report_line_25a_no_vat" model="account.report.expression">
+                                <field name="label">no_vat</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">zw_vat_25a_no_vat</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="zw_tax_report_line_29" model="account.report.line">
+                        <field name="name">29 - Credit/debit notes</field>
+                        <field name="code">zw_vat_29</field>
+                        <field name="expression_ids">
+                            <record id="zw_tax_report_line_29_no_vat" model="account.report.expression">
+                                <field name="label">no_vat</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">zw_vat_29_no_vat</field>
+                            </record>
+                            <record id="zw_tax_report_line_29_vat" model="account.report.expression">
+                                <field name="label">vat</field>
+                                <field name="engine">tax_tags</field>
+                                <field name="formula">zw_vat_29_vat</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="zw_tax_report_line_30" model="account.report.line">
+                        <field name="name">30 - Total input tax [B]</field>
+                        <field name="code">zw_vat_30</field>
+                        <field name="expression_ids">
+                            <record id="zw_tax_report_line_30_vat" model="account.report.expression">
+                                <field name="label">vat</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">zw_vat_21.vat + zw_vat_23.vat + zw_vat_24.vat + zw_vat_24a.vat + zw_vat_29.vat</field>
+                            </record>
+                        </field>
+                    </record>
+                </field>
+            </record>
+            <record id="zw_tax_report_title_payable" model="account.report.line">
+                <field name="name">Part IV - Calculation of VAT Payable/Refundable</field>
+                <field name="hierarchy_level">0</field>
+                <field name="children_ids">
+                    <record id="zw_tax_report_line_31" model="account.report.line">
+                        <field name="name">31 - Total output tax</field>
+                        <field name="code">zw_vat_31</field>
+                        <field name="expression_ids">
+                            <record id="zw_tax_report_line_31_vat" model="account.report.expression">
+                                <field name="label">vat</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">zw_vat_20.vat</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="zw_tax_report_line_32" model="account.report.line">
+                        <field name="name">32 - Less total input tax</field>
+                        <field name="code">zw_vat_32</field>
+                        <field name="expression_ids">
+                            <record id="zw_tax_report_line_32_vat" model="account.report.expression">
+                                <field name="label">vat</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">zw_vat_30.vat</field>
+                            </record>
+                        </field>
+                    </record>
+                    <record id="zw_tax_report_line_34" model="account.report.line">
+                        <field name="name">34 - Amount payable/refundable</field>
+                        <field name="code">zw_vat_34</field>
+                        <field name="expression_ids">
+                            <record id="zw_tax_report_line_34_vat" model="account.report.expression">
+                                <field name="label">vat</field>
+                                <field name="engine">aggregation</field>
+                                <field name="formula">zw_vat_31.vat - zw_vat_32.vat</field>
+                            </record>
+                        </field>
+                    </record>
+                </field>
+            </record>
+        </field>
+    </record>
+</odoo>

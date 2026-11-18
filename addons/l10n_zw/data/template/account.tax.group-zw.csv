@@ -1,0 +1,5 @@
+"id","name","country_id"
+"zw_tax_group_15_5","VAT 15.5%","base.zw"
+"zw_tax_group_0","VAT 0%","base.zw"
+"zw_tax_group_exempt","Exempt","base.zw"
+"zw_tax_group_import","Import VAT","base.zw"

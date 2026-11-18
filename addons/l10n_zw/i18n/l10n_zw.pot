@@ -1,0 +1,185 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* l10n_zw
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 20.1a1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-17 13:59+0000\n"
+"PO-Revision-Date: 2026-11-17 13:59+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: l10n_zw
+#: model:ir.module.module,description:base.module_l10n_zw
+msgid ""
+"\n"
+"This is the basic Zimbabwean localization necessary to run Odoo in ZW:\n"
+"================================================================================\n"
+"    - Chart of Accounts (IFRS based)\n"
+"    - Taxes (VAT 15.5%, zero-rated, exempt, imports and imported services)\n"
+"    - Tax Report (ZIMRA VAT 7 return)\n"
+"    - Fiscal Positions\n"
+msgstr ""
+
+#. module: l10n_zw
+#: model:account.report.line,name:l10n_zw.zw_tax_report_line_10
+msgid "10 - Supply of goods and/or services at 0% - Local"
+msgstr ""
+
+#. module: l10n_zw
+#: model:account.report.line,name:l10n_zw.zw_tax_report_line_10a
+msgid "10a - Supply of goods and/or services at 0% - Exports"
+msgstr ""
+
+#. module: l10n_zw
+#: model:account.report.line,name:l10n_zw.zw_tax_report_line_12
+msgid "12 - Exempt supplies"
+msgstr ""
+
+#. module: l10n_zw
+#: model:account.report.line,name:l10n_zw.zw_tax_report_line_13
+msgid "13 - Imported services"
+msgstr ""
+
+#. module: l10n_zw
+#: model:account.report.line,name:l10n_zw.zw_tax_report_line_18
+msgid "18 - Debit/credit notes"
+msgstr ""
+
+#. module: l10n_zw
+#: model:account.report.line,name:l10n_zw.zw_tax_report_line_20
+msgid "20 - Total output tax [A]"
+msgstr ""
+
+#. module: l10n_zw
+#: model:account.report.line,name:l10n_zw.zw_tax_report_line_21
+msgid ""
+"21 - Domestic goods and/or services purchased to make taxable supplies at "
+"standard rate"
+msgstr ""
+
+#. module: l10n_zw
+#: model:account.report.line,name:l10n_zw.zw_tax_report_line_21a
+msgid ""
+"21a - Domestic goods and/or services purchased to make taxable supplies at "
+"0%"
+msgstr ""
+
+#. module: l10n_zw
+#: model:account.report.line,name:l10n_zw.zw_tax_report_line_23
+msgid ""
+"23 - Imported goods to make taxable supplies (exclude capital goods) at "
+"standard rate"
+msgstr ""
+
+#. module: l10n_zw
+#: model:account.report.line,name:l10n_zw.zw_tax_report_line_23a
+msgid ""
+"23a - Imported goods to make taxable supplies (exclude capital goods) at 0%"
+msgstr ""
+
+#. module: l10n_zw
+#: model:account.report.line,name:l10n_zw.zw_tax_report_line_24
+msgid "24 - Imported capital goods to make taxable supplies"
+msgstr ""
+
+#. module: l10n_zw
+#: model:account.report.line,name:l10n_zw.zw_tax_report_line_24a
+msgid "24a - Domestic capital goods purchased to make taxable supplies"
+msgstr ""
+
+#. module: l10n_zw
+#: model:account.report.line,name:l10n_zw.zw_tax_report_line_25
+msgid "25 - Exempt purchases - Local"
+msgstr ""
+
+#. module: l10n_zw
+#: model:account.report.line,name:l10n_zw.zw_tax_report_line_25a
+msgid "25a - Exempt purchases - Imports"
+msgstr ""
+
+#. module: l10n_zw
+#: model:account.report.line,name:l10n_zw.zw_tax_report_line_29
+msgid "29 - Credit/debit notes"
+msgstr ""
+
+#. module: l10n_zw
+#: model:account.report.line,name:l10n_zw.zw_tax_report_line_30
+msgid "30 - Total input tax [B]"
+msgstr ""
+
+#. module: l10n_zw
+#: model:account.report.line,name:l10n_zw.zw_tax_report_line_31
+msgid "31 - Total output tax"
+msgstr ""
+
+#. module: l10n_zw
+#: model:account.report.line,name:l10n_zw.zw_tax_report_line_32
+msgid "32 - Less total input tax"
+msgstr ""
+
+#. module: l10n_zw
+#: model:account.report.line,name:l10n_zw.zw_tax_report_line_34
+msgid "34 - Amount payable/refundable"
+msgstr ""
+
+#. module: l10n_zw
+#: model:account.report.line,name:l10n_zw.zw_tax_report_line_09
+msgid "9 - Supply of goods and/or services at standard rate"
+msgstr ""
+
+#. module: l10n_zw
+#: model:ir.model,name:l10n_zw.model_account_chart_template
+msgid "Account Chart Template"
+msgstr ""
+
+#. module: l10n_zw
+#: model:ir.model.fields,field_description:l10n_zw.field_account_chart_template__display_name
+msgid "Display Name"
+msgstr ""
+
+#. module: l10n_zw
+#: model:ir.model.fields,field_description:l10n_zw.field_account_chart_template__id
+msgid "ID"
+msgstr ""
+
+#. module: l10n_zw
+#: model:account.report.line,name:l10n_zw.zw_tax_report_title_output
+msgid "Part II - Declaration of Output Tax"
+msgstr ""
+
+#. module: l10n_zw
+#: model:account.report.line,name:l10n_zw.zw_tax_report_title_input
+msgid "Part III - Input Tax Claim"
+msgstr ""
+
+#. module: l10n_zw
+#: model:account.report.line,name:l10n_zw.zw_tax_report_title_payable
+msgid "Part IV - Calculation of VAT Payable/Refundable"
+msgstr ""
+
+#. module: l10n_zw
+#: model:account.report.column,name:l10n_zw.zw_tax_report_vat
+msgid "VAT"
+msgstr ""
+
+#. module: l10n_zw
+#: model:account.report,name:l10n_zw.zw_tax_report
+msgid "VAT Return"
+msgstr ""
+
+#. module: l10n_zw
+#: model:account.report.column,name:l10n_zw.zw_tax_report_no_vat
+msgid "Value"
+msgstr ""
+
+#. module: l10n_zw
+#: model:ir.module.module,shortdesc:base.module_l10n_zw
+msgid "Zimbabwe - Accounting"
+msgstr ""

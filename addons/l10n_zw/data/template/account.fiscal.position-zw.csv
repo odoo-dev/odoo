@@ -1,0 +1,4 @@
+"id","sequence","name","auto_apply","country_id","account_ids/account_src_id","account_ids/account_dest_id"
+"zw_fiscal_position_national","1","National","1","base.zw","",""
+"zw_fiscal_position_international","2","International","1","","zw_account_411000","zw_account_413000"
+"","","","","","zw_account_412000","zw_account_413000"
