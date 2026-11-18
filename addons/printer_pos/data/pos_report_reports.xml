@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_pos_report" model="ir.actions.report">
+        <field name="name">Point of Sale Reports</field>
+        <field name="model">pos.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">printer_pos.pos_report</field>
+    </record>
+</odoo>

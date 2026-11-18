@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="printer_pos.PrintToPrinterButton">
+        <button t-if="this.hasPrinters()" class="btn btn-secondary" t-on-click="() => this.print()">
+            Print
+        </button>
+    </t>
+
+    <t t-inherit="pos_reports.PosReport" t-inherit-mode="extension">
+        <xpath expr="//t[@t-set-slot='control-panel-buttons']" position="inside">
+            <PrintToPrinterButton/>
+        </xpath>
+    </t>
+</templates>
