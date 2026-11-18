@@ -23,6 +23,14 @@
                     <button t-if="this.state.productId" class="btn btn-link btn-sm p-0" title="All products"
                             t-on-click="() => this.onProductChange(false)"><i class="oi" data-icon="close"/></button>
                 </div>
+                <div class="o_route_flow_category d-flex align-items-center gap-2">
+                    <label class="fw-bold mb-0">Category</label>
+                    <RecordSelector resModel="'product.category'" resId="this.state.categoryId"
+                                    update="(categoryId) => this.onCategoryChange(categoryId)"
+                                    placeholder="'All categories'"/>
+                    <button t-if="this.state.categoryId" class="btn btn-link btn-sm p-0" title="All categories"
+                            t-on-click="() => this.onCategoryChange(false)"><i class="oi" data-icon="close"/></button>
+                </div>
                 <div class="btn-group btn-group-sm ms-3" role="group" aria-label="Zoom">
                     <button class="btn btn-light" title="Zoom out" t-on-click="() => this.zoomBy(-0.1)"><i class="oi" data-icon="zoom_out"/></button>
                     <button class="btn btn-light" title="Fit to screen" t-on-click="() => this.zoomFit()">
@@ -48,6 +56,7 @@
                          t-on-click="() => this.selectRoute(false)">
                         <div class="fw-bold"><i class="oi me-2" data-icon="account_tree"/>All routes</div>
                         <div t-if="this.state.productId" class="small text-muted">Path of this product: delivery, then replenishment</div>
+                        <div t-elif="this.state.categoryId" class="small text-muted">Path of a product of this category without its own routes, vendor or bill of materials: delivery, then receipt</div>
                         <div t-else="" class="small text-muted">Everything that can happen in this warehouse</div>
                     </div>
                     <t t-foreach="this.routeList" t-as="route" t-key="route.id">

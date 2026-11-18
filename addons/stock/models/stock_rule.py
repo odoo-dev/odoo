@@ -625,7 +625,7 @@ class StockRule(models.Model):
         return result
 
     @api.model
-    def get_product_flow(self, product_id, warehouse_id, with_orderpoints=False):
+    def get_product_flow(self, product_id, warehouse_id, with_orderpoints=False, category_id=False):
         """ Rules a product goes through in a warehouse, found the same way as
         a real procurement (see `_get_rule` and `_get_push_rule`): the chain
         pulled by a customer need, the replenishment of the locations it takes
@@ -633,18 +633,25 @@ class StockRule(models.Model):
         rules applied when the goods arrive.
         Used by the route flow view.
 
+        With `category_id` instead of a product: path of a product of this
+        category without routes of its own, vendor nor bill of materials.
+
         :return: list of {'rule_id': int, 'role': 'demand'|'replenishment'|'push'},
             or with `with_orderpoints`, {'rules': <that list>, 'replenishments': [
             {'location_id', 'rule_id', 'orderpoint': {...} or False}]}
         """
-        product = self.env['product.product'].browse(product_id)
+        if category_id:
+            product = self.env['product.product'].new({'categ_id': category_id, 'is_storable': True})
+            orderpoints = self.env['stock.warehouse.orderpoint']
+        else:
+            product = self.env['product.product'].browse(product_id)
+            orderpoints = self.env['stock.warehouse.orderpoint'].search([('product_id', '=', product.id)])
         warehouse = self.env['stock.warehouse'].browse(warehouse_id)
         move = self.env['stock.move'].new({'product_id': product.id})
         no_route = self.env['stock.route']
         flow = {}
         visited = set()
         replenishments = []
-        orderpoints = self.env['stock.warehouse.orderpoint'].search([('product_id', '=', product.id)])
 
         def push_from(location, wh):
             while location and location.id not in visited:
@@ -706,6 +713,9 @@ class StockRule(models.Model):
                 pull_to(source, source_wh, role, chained=True)
 
         pull_to(self.env.ref('stock.stock_location_customers'), warehouse, 'demand')
+        if category_id:
+            # Not bought by itself (no vendor): show what happens to the goods received.
+            push_from(warehouse.in_type_id.default_location_dest_id, warehouse)
         # Locations refilled by a reordering rule, even if the sale does not take from them.
         for orderpoint in orderpoints.filtered(lambda op: op.warehouse_id == warehouse):
             pull_to(orderpoint.location_id, warehouse, 'replenishment')

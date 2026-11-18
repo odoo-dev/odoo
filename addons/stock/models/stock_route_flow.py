@@ -39,13 +39,15 @@ class StockRoute(models.Model):
         """
         warehouse = self.env['stock.warehouse'].browse(params['warehouse_id'])
         product = self._route_flow_check_product(params)
+        # No product to check a category edition on: a product of this category is simulated.
+        category = not product and params['scope'] == 'category' and self.env['product.category'].browse(params['target_id'])
         self.env.flush_all()
-        before = self._route_flow_describe_path(product, warehouse)
+        before = self._route_flow_describe_path(product, warehouse, category)
         savepoint = self.env.cr.savepoint()
         try:
             actions, warnings = self._route_flow_do_edit(params, warehouse)
             self.env.flush_all()
-            after = self._route_flow_describe_path(product, warehouse)
+            after = self._route_flow_describe_path(product, warehouse, category)
         except Exception:
             savepoint.close(rollback=True)
             self.env.invalidate_all(flush=False)
@@ -55,16 +57,18 @@ class StockRoute(models.Model):
         else:
             savepoint.close(rollback=True)
             self.env.invalidate_all(flush=False)
-        if product and before == after:
+        checked_on = product.display_name if product else category and self.env._(
+            'a product of %(category)s', category=category.display_name)
+        if checked_on and before == after:
             warnings.append(self.env._(
                 "No change for %(product)s: the procurement still picks the same rules "
                 "(e.g. Buy and Manufacture are searched before the product routes).",
-                product=product.display_name,
+                product=checked_on,
             ))
         return {
             'actions': actions,
             'warnings': warnings,
-            'checked_on': product.display_name if product else False,
+            'checked_on': checked_on or False,
             'before': before,
             'after': after,
         }
@@ -91,10 +95,10 @@ class StockRoute(models.Model):
             destination = picking_type.default_location_dest_id
         return source or self.env['stock.location'], destination
 
-    def _route_flow_describe_path(self, product, warehouse):
-        if not product:
+    def _route_flow_describe_path(self, product, warehouse, category=False):
+        if not product and not category:
             return []
-        flow = self.env['stock.rule'].get_product_flow(product.id, warehouse.id)
+        flow = self.env['stock.rule'].get_product_flow(product.id, warehouse.id, category_id=not product and category.id)
         lines = []
         for step in flow:
             rule = self.env['stock.rule'].browse(step['rule_id'])

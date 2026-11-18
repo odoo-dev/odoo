@@ -53,6 +53,7 @@ export class RouteFlow extends Component {
             warehouseId: false,
             routeId: false, // false = all routes of the warehouse
             productId: false, // set = only the rules this product goes through
+            categoryId: false, // set = only the rules a product of this category goes through
             version: 0, // bumped after each (re)load to trigger a render
             hoveredRuleId: false,
             zoom: false, // false = fit to screen width
@@ -177,11 +178,13 @@ export class RouteFlow extends Component {
     /** Rules the selected product goes through, as found by the procurement (server side). */
     async loadProductFlow() {
         this.data.productFlow = null;
-        if (this.state.productId && this.state.warehouseId) {
-            const flow = await this.orm.call("stock.rule", "get_product_flow", [
-                this.state.productId,
-                this.state.warehouseId,
-            ]);
+        if ((this.state.productId || this.state.categoryId) && this.state.warehouseId) {
+            const flow = await this.orm.call(
+                "stock.rule",
+                "get_product_flow",
+                [this.state.productId || false, this.state.warehouseId],
+                { category_id: this.state.productId ? false : this.state.categoryId }
+            );
             this.data.productFlow = new Map(flow.map((step) => [step.rule_id, step.role]));
         }
         this.state.version++;
@@ -475,6 +478,18 @@ export class RouteFlow extends Component {
 
     onProductChange(productId) {
         this.state.productId = productId || false;
+        if (productId) {
+            this.state.categoryId = false;
+        }
+        this.state.routeId = false;
+        this.loadProductFlow();
+    }
+
+    onCategoryChange(categoryId) {
+        this.state.categoryId = categoryId || false;
+        if (categoryId) {
+            this.state.productId = false;
+        }
         this.state.routeId = false;
         this.loadProductFlow();
     }
