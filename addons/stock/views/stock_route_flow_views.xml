@@ -6,6 +6,5 @@
         <field name="path">route-flow</field>
     </record>
 
-    <menuitem id="menu_stock_route_flow" name="ROUTE TEST" action="action_stock_route_flow"
-              parent="menu_warehouse_config" sequence="5"/>
+    <!-- No menu: the main view is ROUTE VOIP (stock_route_flow_voip), this one is its base. -->
 </odoo>
