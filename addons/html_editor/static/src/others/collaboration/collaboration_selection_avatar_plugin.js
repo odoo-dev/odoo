@@ -5,6 +5,8 @@ import { closestElement } from "@html_editor/utils/dom_traversal";
 import { location } from "@web/core/browser/browser";
 import { _t } from "@web/core/l10n/translation";
 import { user } from "@web/core/user";
+import { proxy, signal } from "@odoo/owl";
+import { CollaborationSelectionAvatarOverlay } from "./collaboration_selection_avatar_overlay";
 
 /**
  * @typedef {Object} SelectionInfo
@@ -13,7 +15,7 @@ import { user } from "@web/core/user";
  * @property {string} peerId
  * @property {string} peerName
  * @property {string} avatarPositionKey
- * @property {HTMLElement} avatarElement
+ * @property {{ avatarUrl: string, top: number, left: number, isLoaded: boolean, isHidden: boolean }} avatar
  * @property {HTMLElement} avatarTargetElement
  */
 
@@ -39,9 +41,12 @@ export class CollaborationSelectionAvatarPlugin extends Plugin {
     selectionInfos = new Map();
 
     setup() {
-        this.avatarOverlay = this.dependencies.localOverlay.makeLocalOverlay("oe-avatars-overlay");
-        this.avatarsCountersOverlay = this.dependencies.localOverlay.makeLocalOverlay(
-            "oe-avatars-counters-overlay"
+        this.avatars = proxy([]);
+        this.avatarCounters = signal([]);
+        this.collaborationSelectionAvatarOverlay = this.dependencies.localOverlay.addLocalOverlay(
+            "oe-avatars-overlay",
+            CollaborationSelectionAvatarOverlay,
+            { avatars: this.avatars, avatarCounters: this.avatarCounters }
         );
         this.avatarUrl = `${
             location.origin
@@ -95,37 +100,29 @@ export class CollaborationSelectionAvatarPlugin extends Plugin {
             }
         }
 
-        const containerRect = this.avatarOverlay.getBoundingClientRect();
+        const localOverlayContainerRect =
+            this.collaborationSelectionAvatarOverlay.getLocalOverlayContainerRect();
 
         // Draw user avatar.
-        let avatarElement = selectionInfo.avatarElement;
-        if (!avatarElement) {
-            avatarElement = this.dependencies.localOverlay.createElement("div");
-            avatarElement.className = "oe-collaboration-caret-avatar";
-            avatarElement.style.display = "none";
-            const image = this.dependencies.localOverlay.createElement("img");
-            avatarElement.append(image);
-            image.onload = () => avatarElement.style.removeProperty("display");
-            image.setAttribute("src", avatarUrl);
-            image.classList.add("object-fit-cover");
-        }
-        // Avoid re-appending the element in the dom.
-        if (!avatarElement.parentElement) {
-            this.avatarOverlay.append(avatarElement);
+        let avatar = selectionInfo.avatar;
+        if (!avatar) {
+            this.avatars.push({ avatarUrl, isLoaded: false, isHidden: false });
+            // Keep the reactive item, so that updating it re-renders the avatar.
+            avatar = this.avatars.at(-1);
         }
         // Make sure data is up to date.
-        selectionInfo.avatarElement = avatarElement;
+        selectionInfo.avatar = avatar;
         selectionInfo.peerName = peerName;
         selectionInfo.avatarTargetElement = anchorBlock;
         this.selectionInfos.set(peerId, selectionInfo);
 
         const anchorBlockRect = anchorBlock.getBoundingClientRect();
-        const top = anchorBlockRect.y - containerRect.y;
-        avatarElement.style.top = top + "px";
+        const top = anchorBlockRect.y - localOverlayContainerRect.y;
+        avatar.top = top;
         const closestList = closestElement(anchorNode, "ul, ol"); // Prevent overlap bullets.
         const anchorX = closestList ? closestList.getBoundingClientRect().x : anchorBlockRect.x;
-        const left = anchorX - containerRect.x - AVATAR_SIZE;
-        avatarElement.style.left = left + "px";
+        const left = anchorX - localOverlayContainerRect.x - AVATAR_SIZE;
+        avatar.left = left;
         selectionInfo.avatarPositionKey = `${left}|${top}`;
     }
     updateAvatarCounters() {
@@ -137,25 +134,20 @@ export class CollaborationSelectionAvatarPlugin extends Plugin {
         }
 
         // Render avatars overlap.
-        this.avatarsCountersOverlay.replaceChildren();
+        const avatarCounters = [];
         for (const [overlapKey, infos] of Object.entries(avatarsOverlaps)) {
             const size = infos.size;
             if (size > 1) {
                 const [left, top] = overlapKey.split("|").map((n) => parseInt(n, 10));
-                const div = this.dependencies.localOverlay.createElement("div");
-                div.className = "oe-overlapping-counter";
-                div.style.left = left + 10 + "px";
-                div.style.top = top + 10 + "px";
-                div.textContent = size;
-                this.avatarsCountersOverlay.append(div);
+                avatarCounters.push({ left: left + 10, top: top + 10, size });
             }
         }
+        this.avatarCounters.set(avatarCounters);
     }
     refreshSelection() {
         if (!this.selectionInfos.size) {
-            this.avatarOverlay.replaceChildren();
+            this.avatars.splice(0);
         }
-        this.avatarsCountersOverlay.replaceChildren();
         for (const selection of this.selectionInfos.values()) {
             this.drawPeerAvatar(selection);
         }
@@ -166,17 +158,13 @@ export class CollaborationSelectionAvatarPlugin extends Plugin {
         this.enableAvatars();
         for (const info of this.selectionInfos.values()) {
             if (info.avatarTargetElement === element) {
-                if (!info.avatarElement.classList.contains("invisible")) {
-                    info.avatarElement.classList.add("invisible");
-                }
+                info.avatar.isHidden = true;
             }
         }
     }
     enableAvatars() {
-        for (const element of this.avatarOverlay.querySelectorAll(
-            ".oe-collaboration-caret-avatar.invisible"
-        )) {
-            element.classList.remove("invisible");
+        for (const avatar of this.avatars) {
+            avatar.isHidden = false;
         }
     }
 }

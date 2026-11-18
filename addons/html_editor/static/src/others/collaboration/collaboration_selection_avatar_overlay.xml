@@ -1,0 +1,14 @@
+<templates xml:space="preserve">
+    <t t-name="html_editor.CollaborationSelectionAvatarOverlay">
+        <div t-foreach="this.props.avatars" t-as="avatar" t-key="avatar_index"
+            class="oe-collaboration-caret-avatar"
+            t-att-class="{ 'd-none': !avatar.isLoaded, 'invisible': avatar.isHidden }"
+            t-att-style="`top: ${avatar.top}px; left: ${avatar.left}px;`">
+            <img class="object-fit-cover" t-att-src="avatar.avatarUrl" t-on-load="() => avatar.isLoaded = true"/>
+        </div>
+        <div t-foreach="this.props.avatarCounters()" t-as="avatarCounter" t-key="avatarCounter_index"
+            class="oe-overlapping-counter"
+            t-att-style="`left: ${avatarCounter.left}px; top: ${avatarCounter.top}px;`"
+            t-out="avatarCounter.size"/>
+    </t>
+</templates>
