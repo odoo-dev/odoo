@@ -1,5 +1,6 @@
 import { _t } from "@web/core/l10n/translation";
-import { Component, t, useProps } from "@odoo/owl";
+import { Component, t, useProps, usePlugin } from "@odoo/owl";
+import { MrpOverviewPlugin } from "../mrp_overview_plugin";
 import { useService } from "@web/core/utils/hooks";
 import { formatFloat, formatFloatTime, formatMonetary } from "@web/views/fields/formatters";
 import { getStateDecorator } from "./mo_overview_colors";
@@ -50,6 +51,7 @@ export class MoOverviewLine extends Component {
     static template = "mrp.MoOverviewLine";
 
     setup() {
+        this.overviewPlugin = usePlugin(MrpOverviewPlugin);
         this.actionService = useService("action");
         this.ormService = useService("orm");
         this.formatFloat = (val) => formatFloat(val, { digits: [false, this.data.uom_precision || undefined] });
@@ -93,7 +95,7 @@ export class MoOverviewLine extends Component {
             onClose: (closeInfo) => {
                 if (closeInfo?.done) {
                     // Trigger the reload only if a replenishment was done.
-                    this.env.overviewBus.trigger("reload");
+                    this.overviewPlugin.reload();
                 }
             },
         });
@@ -137,10 +139,6 @@ export class MoOverviewLine extends Component {
             return this.formatFloatTime(this.data.quantity, { unit: this.data.state ? "minutes" : "hours", showSeconds: true });
         }
         return this.formatFloat(this.data.quantity);
-    }
-
-    get hasFoldButton() {
-        return false;
     }
 
     get marginMultiplicator() {
