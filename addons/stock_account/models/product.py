@@ -635,13 +635,33 @@ class ProductProduct(models.Model):
         quantity for the computation defined in extra_value params.
         """
         products_by_cost_method = defaultdict(set)
+        lot_valuated_avco_product_ids = []
         for product in self:
+            if product.lot_valuated and product.cost_method == 'average':
+                lot_valuated_avco_product_ids.append(product.id)
+                continue
             if product.lot_valuated and product.cost_method != 'standard':
                 product.sudo().with_context(
                     disable_auto_revaluation=True
                 ).standard_price = product.with_context(allowed_company_ids=self.env.company.ids).avg_cost
                 continue
             products_by_cost_method[product.cost_method].add(product.id)
+        if lot_valuated_avco_product_ids:
+            # The cost of each lot is kept up to date by `stock.lot._update_standard_price`: average
+            # them instead of reading `avg_cost`, which replays the moves of every lot.
+            products = self.env['product.product'].sudo().browse(lot_valuated_avco_product_ids).with_context(
+                allowed_company_ids=self.env.company.ids,
+            )._with_valuation_context()
+            lots_by_product = products.env['stock.lot']._read_group(
+                [('product_id', 'in', products.ids), ('product_qty', '!=', 0)],
+                groupby=['product_id'],
+                aggregates=['id:recordset'],
+            )
+            for product, lots in lots_by_product:
+                if product.uom_id.is_zero(product.qty_available):
+                    continue
+                value = sum(lot.standard_price * lot.product_qty for lot in lots)
+                product.with_context(disable_auto_revaluation=True).standard_price = value / product.qty_available
         for cost_method, product_ids in products_by_cost_method.items():
             products = self.env['product.product'].sudo().browse(product_ids)
             if cost_method == 'standard':
