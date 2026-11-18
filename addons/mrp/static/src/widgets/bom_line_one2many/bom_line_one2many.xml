@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <!-- the menu of a section in place of its delete button -->
+    <t t-name="mrp.BomLineListRenderer.RecordRow" t-inherit="web.ListRenderer.RecordRow" t-inherit-mode="primary">
+        <xpath expr="//td[hasclass('o_list_record_remove')]" position="attributes">
+            <attribute name="t-if">!this.isSection(record)</attribute>
+        </xpath>
+        <xpath expr="//td[hasclass('o_list_record_remove')]" position="after">
+            <td t-else="" class="o_list_section_options w-print-0 p-print-0 text-center">
+                <Dropdown position="'bottom-end'" t-if="!this.props.readonly">
+                    <button class="oi btn" data-icon="more_vert" aria-label="Section actions" title="Section actions"/>
+                    <t t-set-slot="content">
+                        <DropdownItem onSelected="() => this.moveSectionUp(record)" class="this.getPreviousBlock(record) ? '' : 'disabled'">
+                            <i class="oi oi-fw me-1" data-icon="arrow_upward"/><span>Move Up</span>
+                        </DropdownItem>
+                        <DropdownItem onSelected="() => this.moveSectionDown(record)" class="this.getNextSection(record) ? '' : 'disabled'">
+                            <i class="oi oi-fw me-1" data-icon="arrow_downward"/><span>Move Down</span>
+                        </DropdownItem>
+                        <DropdownItem onSelected="() => this.removeSection(record)" class="'text-danger'">
+                            <i class="oi oi-fw oi-filled me-1" data-icon="delete"/><span>Remove Section</span>
+                        </DropdownItem>
+                        <div class="dropdown-divider"/>
+                        <DropdownItem onSelected="() => this.saveSection(record)">
+                            <i class="oi oi-fw me-1" t-att-class="{'oi-filled': this.savedSections.get(record.data.name)}" data-icon="bookmark"/><span>Save Section</span>
+                        </DropdownItem>
+                    </t>
+                </Dropdown>
+            </td>
+        </xpath>
+    </t>
+
+    <!-- "Add a section": a new section (on bills of materials) or a saved one -->
+    <t t-name="mrp.SectionsCreateRow" t-inherit="web.ListRenderer.CreateRow" t-inherit-mode="primary">
+        <xpath expr="//button[@t-if]" position="attributes">
+            <attribute name="t-if">control.type === 'create' and control.name !== 'add_section_control' and !this.evalColumnInvisible(control.invisible)</attribute>
+        </xpath>
+        <xpath expr="//button[@t-if]" position="after">
+            <t t-if="control.type === 'create' and control.name === 'add_section_control' and !this.evalColumnInvisible(control.invisible)">
+                <button t-if="this.canAddEmptySection and !this.savedSections.records.length"
+                    t-attf-class="btn btn-link #{control_index !== 0 ? 'ml16' : ''}"
+                    t-att-tabindex="this.props.list.editedRecord ? '-1' : '0'"
+                    t-on-click.stop.prevent="() => this.add({ context: control.context })">
+                    <t t-out="control.string"/>
+                </button>
+                <Dropdown t-else="" position="'bottom-start'" beforeOpen="() => this.savedSections.load()">
+                    <button t-attf-class="btn btn-link #{control_index !== 0 ? 'ml16' : ''}"
+                        t-att-tabindex="this.props.list.editedRecord ? '-1' : '0'">
+                        <t t-out="control.string"/>
+                    </button>
+                    <t t-set-slot="content">
+                        <t t-if="this.canAddEmptySection">
+                            <DropdownItem onSelected="() => this.add({ context: control.context })">
+                                <i class="oi oi-fw me-1" data-icon="add"/><span>New Section</span>
+                            </DropdownItem>
+                            <div class="dropdown-divider"/>
+                        </t>
+                        <h6 class="dropdown-header">Saved Sections</h6>
+                        <DropdownItem t-foreach="this.savedSections.records" t-as="template" t-key="template.id"
+                            onSelected="() => this.savedSections.add(template)" class="'d-flex align-items-center'">
+                            <i class="oi oi-fw me-1" data-icon="bookmark"/><span class="flex-grow-1" t-out="template.name"/>
+                            <!-- deletes the saved section (without adding it, the menu stays open) -->
+                            <button class="oi btn btn-link btn-hover-danger text-muted p-0 ms-3" data-icon="delete"
+                                aria-label="Delete this saved section" title="Delete this saved section"
+                                t-on-click.stop.prevent="() => this.savedSections.remove(template)"/>
+                        </DropdownItem>
+                        <span t-if="!this.savedSections.records.length" class="dropdown-item-text text-muted fst-italic">
+                            No saved sections yet: save one from the menu of a section.
+                        </span>
+                    </t>
+                </Dropdown>
+            </t>
+        </xpath>
+    </t>
+</templates>

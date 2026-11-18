@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <!-- the row of the section above its first component, as on the bill of materials -->
+    <t t-name="mrp.ProductionComponentsListRenderer.RecordRow">
+        <t t-set="section" t-value="this.getSectionAbove(record)"/>
+        <tr t-if="section" class="o_is_line_section o_mrp_production_section_row"
+            t-att-class="{'o_row_draggable': this.canResequenceRows and this.canEditSections}"
+            t-att-data-id="this.getSectionRowId(record)">
+            <t t-set="sectionCells" t-value="this.getSectionCells()"/>
+            <td t-if="this.hasSelectors" class="o_list_record_selector"/>
+            <td t-foreach="sectionCells.handleIndexes" t-as="handleIndex" t-key="handleIndex" class="o_data_cell o_handle_cell">
+                <span class="o_row_handle oi ui-sortable-handle" data-icon="drag_indicator"
+                      t-att-class="{ 'o_disabled': !this.canEditSections }" t-on-click.stop=""/>
+            </td>
+            <td class="o_data_cell o_field_cell" t-att-class="{'cursor-pointer': this.canEditSections}"
+                t-att-colspan="sectionCells.nameSpan" name="name"
+                t-on-click="() => this.editSection(section, 'name')">
+                <input t-if="this.isEditingSection(section, 'name')" t-ref="this.sectionInputRef"
+                       type="text" class="o_input" placeholder="Section Name..."
+                       t-att-value="section.data.name or ''"
+                       t-on-keydown="(ev) => this.onSectionInputKeydown(ev)"
+                       t-on-blur="(ev) => this.updateSectionName(section, ev.target.value)"/>
+                <span t-else="" t-out="section.data.name"/>
+            </td>
+            <td t-if="sectionCells.hasQty" class="o_data_cell o_field_cell o_list_number" t-att-class="{'cursor-pointer': this.canEditSections}"
+                name="product_uom_qty"
+                t-on-click="() => this.editSection(section, 'product_qty')">
+                <input t-if="this.isEditingSection(section, 'product_qty')" t-ref="this.sectionInputRef"
+                       type="text" class="o_input text-end"
+                       t-att-value="this.formatSectionQty(section)"
+                       t-on-keydown="(ev) => this.onSectionInputKeydown(ev)"
+                       t-on-blur="(ev) => this.updateSectionQty(section, ev.target.value)"/>
+                <span t-else="" t-out="this.formatSectionQty(section)"/>
+            </td>
+            <td t-if="sectionCells.tailSpan > 1" t-att-colspan="sectionCells.tailSpan - 1"/>
+            <td t-if="sectionCells.tailSpan > 0" class="o_list_section_options w-print-0 p-print-0 text-center">
+                <Dropdown position="'bottom-end'" t-if="this.canEditSections">
+                    <button class="oi btn" data-icon="more_vert" aria-label="Section actions" title="Section actions"/>
+                    <t t-set-slot="content">
+                        <DropdownItem onSelected="() => this.moveSectionUp(record)" class="this.getPreviousBlock(record) ? '' : 'disabled'">
+                            <i class="oi oi-fw me-1" data-icon="arrow_upward"/><span>Move Up</span>
+                        </DropdownItem>
+                        <DropdownItem onSelected="() => this.moveSectionDown(record)" class="this.getNextBlock(record) ? '' : 'disabled'">
+                            <i class="oi oi-fw me-1" data-icon="arrow_downward"/><span>Move Down</span>
+                        </DropdownItem>
+                        <DropdownItem onSelected="() => this.removeSection(record)" class="'text-danger'">
+                            <i class="oi oi-fw oi-filled me-1" data-icon="delete"/><span>Remove Section</span>
+                        </DropdownItem>
+                        <div class="dropdown-divider"/>
+                        <DropdownItem onSelected="() => this.saveSection(record)">
+                            <i class="oi oi-fw me-1" t-att-class="{'oi-filled': this.savedSections.get(this.getSectionAbove(record)?.data.name)}" data-icon="bookmark"/><span>Save Section</span>
+                        </DropdownItem>
+                    </t>
+                </Dropdown>
+            </td>
+        </tr>
+        <t t-call="web.ListRenderer.RecordRow"/>
+    </t>
+</templates>

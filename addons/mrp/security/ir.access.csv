@@ -57,3 +57,9 @@ access_mrp_workcenter_capacity_group_user,mrp.workcenter.capacity,mrp.workcenter
 access_stock_move_mrp_user,stock.move mrp_user,stock.move,mrp.group_mrp_user,crud,
 access_mrp_production_serials,access.mrp_production_serials,mrp.production.serials,mrp.group_mrp_user,cru,
 access_mrp_finished_product_label_layout,mrp.finished.product.label.layout,mrp.finished.product.label.layout,mrp.group_mrp_user,cru,
+access_mrp_production_section,mrp.production.section user,mrp.production.section,mrp.group_mrp_user,crud,
+access_mrp_production_section_stock_worker,mrp.production.section stock_worker,mrp.production.section,stock.group_stock_user,r,
+mrp_production_section_rule,mrp_production_section multi-company,mrp.production.section,,crud,"[('company_id', 'in', company_ids)]"
+access_mrp_section_template,mrp.section.template user,mrp.section.template,mrp.group_mrp_user,crud,
+access_mrp_section_template_line,mrp.section.template.line user,mrp.section.template.line,mrp.group_mrp_user,crud,
+mrp_section_template_rule,mrp_section_template multi-company,mrp.section.template,,crud,"[('company_id', 'in', company_ids + [False])]"

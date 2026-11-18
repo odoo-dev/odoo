@@ -1,0 +1,23 @@
+// sections of the components of a bill of materials (as on sales orders), and
+// of a manufacturing order (production_components_one2many)
+.o_field_one2many tr.o_is_line_section {
+    --table-striped-bg: var(--table-bg-type);
+    --table-hover-bg: color-mix(in srgb, var(--emphasis-color) 10%, transparent);
+    --table-bg-type: color-mix(in srgb, var(--emphasis-color) 8%, transparent);
+    --ListRenderer-data-row-focused-striped-bg: var(--table-bg-type);
+    font-weight: var(--o-bs-font-weight-bolder);
+}
+
+// the menu of a section, exactly as the delete button of the other rows
+.o_field_one2many .o_list_section_options {
+    width: 1px; // the column does not expand
+    text-overflow: unset !important;
+
+    button {
+        padding: 0px;
+        background: none;
+        border-style: none;
+        display: table-cell;
+        cursor: pointer;
+    }
+}

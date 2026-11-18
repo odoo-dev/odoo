@@ -508,7 +508,19 @@
                     </group>
                     <notebook>
                         <page string="Components" name="components">
+                            <!-- loaded (not always invisible) for the section rows of move_raw_ids -->
+                            <field name="production_section_ids" invisible="id or not id">
+                                <list>
+                                    <field name="key"/>
+                                    <field name="bom_section_line_id"/>
+                                    <field name="name"/>
+                                    <field name="sequence"/>
+                                    <field name="product_qty"/>
+                                    <field name="applied_product_qty"/>
+                                </list>
+                            </field>
                             <field name="move_raw_ids"
+                                widget="mrp_production_components_one2many"
                                 mode="list,kanban"
                                 context="{'default_date': date_start, 'default_date_deadline': date_start, 'default_location_id': location_src_id, 'default_location_dest_id': production_location_id, 'default_warehouse_id': warehouse_id, 'default_state': 'draft', 'default_raw_material_production_id': id, 'default_picking_type_id': picking_type_id, 'default_company_id': company_id, 'form_view_ref': 'mrp.view_mrp_stock_move_operations', 'active_mo_id': id}"
                                 readonly="state in ('done', 'cancel')"
@@ -517,6 +529,7 @@
                                     <control>
                                         <create string="Add a line"/>
                                         <button name="action_add_from_catalog_raw" string="Catalog" type="object" class="px-4 btn-link" context="{'order_id': parent.id}"/>
+                                        <create name="add_section_control" string="Add a section"/>
                                     </control>
                                     <field name="sequence" widget="handle"/>
                                     <field name="product_id" force_save="1" context="{'default_is_storable': True}" required="1" readonly="move_lines_count &gt; 0 or state == 'cancel' or (state != 'draft' and not additional)" domain="[('type', '=', 'consu')]"/>
@@ -536,6 +549,7 @@
                                     <field name="has_tracking" column_invisible="True"/> <!-- drives readonly of quantity and invisible of the two Details buttons -->
                                     <field name="operation_id" column_invisible="True"/> <!-- set by _get_move_raw_values on the components generated from the BoM, the column must exist for the client to post it back when the MO is saved -->
                                     <field name="bom_line_id" column_invisible="True"/> <!-- set by _get_move_raw_values on the components generated from the BoM, the column must exist for the client to post it back when the MO is saved -->
+                                    <field name="production_section_key" column_invisible="True"/> <!-- set by _get_moves_raw_values: the section row shown above the component (see the mrp_production_components_one2many widget) -->
                                     <field name="warehouse_id" column_invisible="True"/> <!-- filled from the default_warehouse_id of the context when a component line is added -->
                                     <field name="move_lines_count" column_invisible="True"/> <!-- drives readonly of product_id -->
                                     <field name="location_dest_id" domain="[('id', 'child_of', parent.location_dest_id)]" column_invisible="True"/> <!-- filled from the default_location_dest_id of the context, the domain restricts it to the production destination -->

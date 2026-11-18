@@ -214,6 +214,10 @@ class MrpProduction(models.Model):
         'stock.move', 'production_id', 'Finished Products', readonly=False,
         compute='_compute_move_finished_ids', store=True, copy=False,
         domain=[('is_scrap', '=', False)])
+    # the sections of the bill of materials, with their own quantity
+    production_section_ids = fields.One2many(
+        'mrp.production.section', 'production_id', 'Sections',
+        compute='_compute_production_section_ids', store=True, readonly=False, copy=False)
     # technical field: inverse field for `stock.move.raw_material_production_id`
     all_move_raw_ids = fields.One2many('stock.move', 'raw_material_production_id')
     # technical field: inverse field for `stock.move.production_id`
@@ -847,6 +851,41 @@ class MrpProduction(models.Model):
             date_finished_per_workcenter[wo.workcenter_id.id] = to_date
         return max(date_finished_per_workcenter.values())
 
+    @api.depends('bom_id')
+    def _compute_production_section_ids(self):
+        """ The sections of the bill of materials, at their quantity: the ones of
+        the previous bill of materials are replaced. """
+        for production in self:
+            if production.state != 'draft' and production.production_section_ids:
+                continue
+            bom_sections = production.bom_id.bom_line_ids.filtered('display_type').sorted('sequence')
+            existing = {section.bom_section_line_id._origin: section for section in production.production_section_ids}
+            commands = [Command.delete(section.id) for bom_section, section in existing.items() if bom_section not in bom_sections._origin]
+            for bom_section in bom_sections:
+                if bom_section._origin not in existing:
+                    commands.append(Command.create({
+                        'key': self.env['mrp.production.section']._get_bom_section_key(bom_section),
+                        'bom_section_line_id': bom_section.id,
+                        'name': bom_section.name,
+                        'sequence': bom_section.sequence,
+                        'product_qty': bom_section.product_qty,
+                        'applied_product_qty': bom_section.product_qty,
+                    }))
+            if commands:
+                production.production_section_ids = commands
+
+    @api.onchange('production_section_ids')
+    def _onchange_production_section_quantity(self):
+        """ Changing the quantity of a section scales the quantities of its
+        components. """
+        for section in self.production_section_ids:
+            if section.applied_product_qty and section.product_qty != section.applied_product_qty:
+                ratio = section.product_qty / section.applied_product_qty
+                for move in self.move_raw_ids:
+                    if move.production_section_key == section.key and move.state not in ('done', 'cancel'):
+                        move.product_uom_qty = move.uom_id.round(move.product_uom_qty * ratio)
+            section.applied_product_qty = section.product_qty
+
     @api.depends('company_id', 'bom_id', 'product_id', 'product_qty', 'uom_id', 'location_src_id', 'never_product_template_attribute_value_ids')
     def _compute_move_raw_ids(self):
         for production in self:
@@ -1459,18 +1498,31 @@ class MrpProduction(models.Model):
                 continue
             factor = production.uom_id._compute_quantity(production.product_qty, production.bom_id.uom_id, round=False) / production.bom_id.product_qty
             _boms, lines = production.bom_id.explode(production.product_id, factor, picking_type=production.bom_id.picking_type_id, never_attribute_values=production.never_product_template_attribute_value_ids)
+            # the quantity of a section of the order, relative to the one of the BoM
+            section_ratios = {
+                section.bom_section_line_id._origin: section.product_qty / section.bom_section_line_id.product_qty
+                for section in production.production_section_ids
+                if section.bom_section_line_id.product_qty
+            }
+            Section = self.env['mrp.production.section']
             for bom_line, line_data in lines:
                 if bom_line.child_bom_id and bom_line.child_bom_id.type == 'phantom' or\
                         bom_line.product_id.type != 'consu':
                     continue
                 operation = bom_line.operation_id.id or line_data['parent_line'] and line_data['parent_line'].operation_id.id
-                moves.append(production._get_move_raw_values(
+                # the section of the line in the BoM of the order (of its kit line)
+                top_line = line_data['parent_line'] or bom_line
+                section = top_line.section_line_id if top_line.bom_id == production.bom_id else self.env['mrp.bom.line']
+                quantity = line_data['qty'] * section_ratios.get(section, 1.0)
+                move_values = production._get_move_raw_values(
                     bom_line.product_id,
-                    line_data['qty'],
+                    quantity,
                     bom_line.uom_id,
                     operation,
                     bom_line
-                ))
+                )
+                move_values['production_section_key'] = Section._get_bom_section_key(section) if section else False
+                moves.append(move_values)
         return moves
 
     def _get_move_raw_values(self, product, product_uom_qty, product_uom, operation_id=False, bom_line=False):
@@ -3393,3 +3445,27 @@ class MrpProduction(models.Model):
         """ remove the given references from the list of references. """
         self.ensure_one()
         self.reference_ids = [Command.unlink(reference.id) for reference in references]
+
+
+class MrpProductionSection(models.Model):
+    """ A section of the bill of materials of a manufacturing order: its components
+    (the moves of the components of the section) are at its quantity. """
+    _name = 'mrp.production.section'
+    _description = 'Section of a Manufacturing Order'
+    _order = 'sequence, id'
+
+    production_id = fields.Many2one('mrp.production', 'Manufacturing Order', required=True, index=True, ondelete='cascade')
+    company_id = fields.Many2one(related='production_id.company_id', store=True)
+    # the key of the section on the components (`stock.move.production_section_key`)
+    key = fields.Char(required=True)
+    # the section of the bill of materials (none for a saved section added to the order)
+    bom_section_line_id = fields.Many2one('mrp.bom.line', 'BoM Section', ondelete='set null')
+    name = fields.Char('Section Name', copy=True)
+    sequence = fields.Integer(default=10)
+    product_qty = fields.Float('Quantity', digits='Product Unit', default=1.0)
+    # quantity the components are at (see `mrp.production._onchange_production_section_quantity`)
+    applied_product_qty = fields.Float(digits='Product Unit', default=1.0)
+
+    @api.model
+    def _get_bom_section_key(self, bom_section):
+        return 'bom_%s' % bom_section._origin.id

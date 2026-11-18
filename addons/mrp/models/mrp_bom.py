@@ -111,7 +111,7 @@ class MrpBom(models.Model):
             if not bom.id:
                 bom.component_count = bom._origin.component_count
                 continue
-            bom.component_count = len(bom.bom_line_ids)
+            bom.component_count = len(bom.bom_line_ids.filtered(lambda line: not line.display_type))
 
     @api.depends('bom_line_ids')
     def _compute_subassembly_count(self):
@@ -232,6 +232,19 @@ class MrpBom(models.Model):
                         'You should rather archive the product and create a new one with a new bill of materials.'),
                 }
             }
+
+    @api.onchange('bom_line_ids')
+    def _onchange_section_quantity(self):
+        """ Changing the quantity of a section scales the quantities of its
+        components (the lines below it, until the next section). """
+        ratio = False
+        for line in self.bom_line_ids.sorted('sequence'):
+            if line.display_type:
+                ratio = line.applied_product_qty and line.product_qty != line.applied_product_qty \
+                    and line.product_qty / line.applied_product_qty
+                line.applied_product_qty = line.product_qty
+            elif ratio:
+                line.product_qty = line.uom_id.round(line.product_qty * ratio) if line.uom_id else line.product_qty * ratio
 
     @api.onchange('product_tmpl_id')
     def onchange_product_tmpl_id(self):
@@ -476,7 +489,8 @@ class MrpBom(models.Model):
         for bom_line in self.bom_line_ids:
             product_id = bom_line.product_id
             bom_lines.append((bom_line, product, quantity, False))
-            product_ids.add(product_id.id)
+            if product_id:  # not on a section
+                product_ids.add(product_id.id)
         update_product_boms()
         product_ids.clear()
         while bom_lines:
@@ -497,7 +511,7 @@ class MrpBom(models.Model):
                 )
                 bom_lines = [(line, current_line.product_id, converted_line_quantity, current_line) for line in bom.bom_line_ids] + bom_lines
                 for bom_line in bom.bom_line_ids:
-                    if bom_line.product_id not in product_boms:
+                    if bom_line.product_id and bom_line.product_id not in product_boms:
                         product_ids.add(bom_line.product_id.id)
                 boms_done.append((bom, current_line._prepare_bom_done_values(converted_line_quantity, current_product, quantity, boms_done)))
             else:
@@ -523,7 +537,7 @@ class MrpBom(models.Model):
                 for child_line in bom_line.child_line_ids:
                     _traverse_bom_line(child_line)
 
-        for bom_line in self.bom_line_ids:
+        for bom_line in self.bom_line_ids.filtered(lambda line: not line.display_type):
             _traverse_bom_line(bom_line)
 
         return exploded_bom_line_ids, subassembly_count
@@ -667,7 +681,17 @@ class MrpBomLine(models.Model):
     def _default_uom_id(self):
         return self.env['uom.uom'].search([], limit=1, order='id').id
 
-    product_id = fields.Many2one('product.product', 'Component', required=True, check_company=True, index=True, domain="[('type', 'in', ['consu', 'service'])]")
+    # a section groups the components below it (until the next section), it has
+    # a name and no component
+    display_type = fields.Selection([('line_section', "Section")], default=False)
+    name = fields.Char('Section Name', copy=True)  # copied as is (no "(copy)" suffix)
+    # quantity of a section the quantities of its components are at: changing the
+    # quantity of the section scales them (see `mrp.bom._onchange_section_quantity`)
+    applied_product_qty = fields.Float(digits='Product Unit', default=1.0)
+    section_line_id = fields.Many2one(
+        'mrp.bom.line', compute='_compute_section_line_id',
+        help="The section of the bill of materials the component is in")
+    product_id = fields.Many2one('product.product', 'Component', check_company=True, index=True, domain="[('type', 'in', ['consu', 'service'])]")
     product_tmpl_id = fields.Many2one('product.template', 'Product Template', related='product_id.product_tmpl_id', store=True, index=True)
     company_id = fields.Many2one(
         related='bom_id.company_id', store=True, index=True, readonly=True)
@@ -676,7 +700,7 @@ class MrpBomLine(models.Model):
         digits='Product Unit', required=True)
     uom_id = fields.Many2one(
         'uom.uom', 'Unit',
-        default=_default_uom_id, required=True)
+        default=_default_uom_id)
     sequence = fields.Integer(
         'Sequence', default=1,
         help="Gives the sequence order when displaying.")
@@ -704,6 +728,10 @@ class MrpBomLine(models.Model):
     bom_type = fields.Selection(related='bom_id.type')
     bom_product_tmpl_id = fields.Many2one(related='bom_id.product_tmpl_id')
 
+    _component_required = models.Constraint(
+        'CHECK (display_type IS NOT NULL OR (product_id IS NOT NULL AND uom_id IS NOT NULL))',
+        'A component and its unit are required on a line of a bill of materials (except on a section).',
+    )
     _bom_qty_zero = models.Constraint(
         'CHECK (product_qty>=0)',
         'All product quantities must be greater or equal to 0.\nLines with 0 quantities can be used as optional lines. \nYou should install the mrp_byproduct module if you want to manage extra products on BoMs!',
@@ -719,11 +747,22 @@ class MrpBomLine(models.Model):
             else:
                 line.child_bom_id = bom_by_product.get(line.product_id, False)
 
+    @api.depends('bom_id.bom_line_ids.sequence', 'bom_id.bom_line_ids.display_type')
+    def _compute_section_line_id(self):
+        self.section_line_id = False
+        for bom in self.bom_id:
+            section = self.env['mrp.bom.line']
+            for line in bom.bom_line_ids.sorted('sequence'):
+                if line.display_type:
+                    section = line
+                elif line in self:
+                    line.section_line_id = section
+
     @api.depends('child_bom_id')
     def _compute_child_line_ids(self):
         """ If the BOM line refers to a BOM, return the ids of the child BOM lines """
         for line in self:
-            line.child_line_ids = line.child_bom_id.bom_line_ids.ids or False
+            line.child_line_ids = line.child_bom_id.bom_line_ids.filtered(lambda l: not l.display_type).ids or False
 
     @api.constrains('bom_product_template_attribute_value_ids')
     def _check_bom_product_template_attribute_value_ids(self):
@@ -746,6 +785,8 @@ class MrpBomLine(models.Model):
         for values in vals_list:
             if 'product_id' in values and 'uom_id' not in values:
                 values['uom_id'] = self.env['product.product'].browse(values['product_id']).uom_id.id
+            if values.get('display_type') and 'product_qty' in values and 'applied_product_qty' not in values:
+                values['applied_product_qty'] = values['product_qty']
         return super(MrpBomLine, self).create(vals_list)
 
     def write(self, vals):
@@ -781,6 +822,9 @@ class MrpBomLine(models.Model):
                 - always and dynamic: match_all_variant_values()
         """
         self.ensure_one()
+        if self.display_type:
+            # a section is not produced
+            return True
         if not product or product._name == 'product.template':
             return False
 

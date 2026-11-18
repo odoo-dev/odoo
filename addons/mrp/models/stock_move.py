@@ -47,6 +47,9 @@ class StockMove(models.Model):
         'mrp.workorder', 'Work Order To Consume', copy=False, check_company=True, index='btree_not_null')
     # Quantities to process, in normalized UoMs
     bom_line_id = fields.Many2one('mrp.bom.line', 'BoM Line', check_company=True)
+    # the section of the manufacturing order the component is in (its `key`): see
+    # `mrp.production.section`
+    production_section_key = fields.Char('Section', index='btree_not_null')
     byproduct_id = fields.Many2one(
         'mrp.bom.byproduct', 'By-products', check_company=True,
         help="By-product line that generated the move in a manufacturing order")
@@ -588,7 +591,7 @@ class StockMove(models.Model):
     @api.model
     def _prepare_merge_moves_distinct_fields(self):
         res = super()._prepare_merge_moves_distinct_fields()
-        res += ['created_production_id', 'cost_share', 'production_group_id']
+        res += ['created_production_id', 'cost_share', 'production_group_id', 'production_section_key']
         if self.bom_line_id and ("phantom" in self.bom_line_id.bom_id.mapped('type')):
             res.append('bom_line_id')
         return res
