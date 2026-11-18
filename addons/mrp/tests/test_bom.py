@@ -3084,7 +3084,7 @@ class TestBoM(TestMrpCommon):
                 'value_ids': [Command.set([self.size_attribute_s.id, self.size_attribute_m.id])],
             })],
         })
-        variant_pack = template.product_variant_ids.sorted('id')[1]
+        variant_single, variant_pack = template.product_variant_ids.sorted('id')
         variant_pack.uom_id = self.uom_pack_6
 
         bom = self.env['mrp.bom'].new({
@@ -3094,14 +3094,17 @@ class TestBoM(TestMrpCommon):
         })
         bom._onchange_product_id()
         self.assertEqual(bom.uom_id, self.uom_pack_6)
+        bom.product_id = variant_single
+        bom._onchange_product_id()
+        self.assertEqual(bom.uom_id, self.uom_unit, "Switching to another variant should follow its unit")
 
-        bom = self.env['mrp.bom'].new({
+        bom = self.env['mrp.bom'].with_context(default_uom_id=self.uom_dozen.id).new({
             'product_tmpl_id': template.id,
             'product_id': variant_pack.id,
             'uom_id': self.uom_dozen.id,
         })
         bom._onchange_product_id()
-        self.assertEqual(bom.uom_id, self.uom_dozen, "A unit chosen by the user should be kept")
+        self.assertEqual(bom.uom_id, self.uom_dozen, "A unit passed as default value should be kept")
 
 
 class TestTourBoM(HttpCase):
