@@ -10,7 +10,7 @@ from textwrap import wrap
 from odoo.addons.base.models.ir_qweb_fields import Markup, nl2br, nl2br_enclose
 from odoo.exceptions import LockError, UserError, ValidationError
 from odoo.fields import Domain
-from odoo.tools import BinaryBytes, cleanup_xml_node, float_compare, float_is_zero, float_repr, float_round, html2plaintext
+from odoo.tools import BinaryBytes, cleanup_xml_node, float_compare, float_is_zero, float_repr, float_round, formatLang, html2plaintext
 
 from stdnum.it import codicefiscale, iva
 
@@ -27,6 +27,9 @@ _logger = logging.getLogger(__name__)
 WAITING_STATES = ('being_sent', 'processing', 'forward_attempt')
 SDI_RESETTABLE_STATES = (False, 'rejected', 'rejected_by_pa_partner')
 FATTURAPA_FILENAME_RE = r"[A-Z]{2}[A-Za-z0-9]{2,28}_[A-Za-z0-9]{0,5}\.((?i:xml\.p7m|xml))"
+# Largest gap between ImportoTotaleDocumento and the imported bill booked as a rounding,
+# besides the <Arrotondamento> declared in the document.
+L10N_IT_EDI_ROUNDING_TOLERANCE = 2.0
 
 
 # -------------------------------------------------------------------------
@@ -393,6 +396,17 @@ class AccountMove(models.Model):
         moves_with_it_attachments.filtered('l10n_it_edi_attachment_name').write({
             'l10n_it_edi_attachment_name': False,
         })
+
+    def _recompute_cash_rounding_lines(self):
+        # EXTENDS account
+        # Without a cash rounding method, the base method removes every rounding line.
+        # Keep the one imported from the FatturaPA document total; choosing a cash
+        # rounding method afterwards still replaces it.
+        if not self.invoice_cash_rounding_id and any(
+            line.display_type == 'rounding' and line.is_imported for line in self.line_ids
+        ):
+            return
+        return super()._recompute_cash_rounding_lines()
 
     # -------------------------------------------------------------------------
     # Business actions
@@ -1678,6 +1692,87 @@ class AccountMove(models.Model):
             'email': get_text(node, './Contatti/Email') or False,
         }
 
+    def _l10n_it_edi_get_import_total(self):
+        """ Total of the imported bill as FatturaPA defines ImportoTotaleDocumento (2.1.1.9):
+        Odoo's total before the withholding taxes (2.1.1.5.2, ENASARCO included) and the
+        split payment VAT (2.2.2.6 'S') are deducted, as both are kept inside the document total.
+        """
+        self.ensure_one()
+        base_lines, _tax_lines = self._get_rounded_base_and_tax_lines(round_from_tax_lines=False)
+        total = 0.0
+        for base_line in base_lines:
+            tax_details = base_line['tax_details']
+            total += tax_details['total_excluded_currency'] + tax_details['delta_total_excluded_currency']
+            for tax_data in tax_details['taxes_data']:
+                if not (
+                    tax_data['tax']._l10n_it_filter_kind('withholding')
+                    or self._l10n_it_edi_is_neg_split_payment(tax_data)
+                ):
+                    total += tax_data['tax_amount_currency']
+        return total
+
+    def _l10n_it_edi_import_rounding(self, tree):
+        """ Add a rounding line so that the bill totals what the FatturaPA document asks to pay:
+        the declared Arrotondamento (2.1.1.10), plus any difference between ImportoTotaleDocumento
+        (2.1.1.9) and the total computed by Odoo.
+
+        :param tree: the FatturaElettronicaBody node being imported
+        :returns:    a list of messages to log on the move
+        """
+        self.ensure_one()
+        currency = self.currency_id
+        declared_rounding = currency.round(get_float(tree, './/DatiGeneraliDocumento/Arrotondamento'))
+        if get_text(tree, './/DatiGeneraliDocumento/ImportoTotaleDocumento'):
+            document_total = get_float(tree, './/DatiGeneraliDocumento/ImportoTotaleDocumento')
+            bill_total = self._l10n_it_edi_get_import_total()
+            gap = currency.round(document_total - bill_total)
+            # Most vendors give ImportoTotaleDocumento before the Arrotondamento, some after it:
+            # keep the reading that leaves the smaller unexplained gap.
+            if declared_rounding and abs(gap - declared_rounding) < abs(gap):
+                unexplained_gap = gap - declared_rounding
+                difference = gap
+            else:
+                unexplained_gap = gap
+                difference = currency.round(gap + declared_rounding)
+            if currency.compare_amounts(abs(unexplained_gap), L10N_IT_EDI_ROUNDING_TOLERANCE) > 0:
+                return [self.env._(
+                    "The total in the XML file (%(document_total)s, rounding %(rounding)s) does not match the total"
+                    " of the bill (%(bill_total)s): the gap is too large to be a rounding. Please check the bill.",
+                    document_total=formatLang(self.env, document_total, currency_obj=currency),
+                    rounding=formatLang(self.env, declared_rounding, currency_obj=currency),
+                    bill_total=formatLang(self.env, bill_total, currency_obj=currency),
+                )]
+        else:
+            difference = declared_rounding
+        if currency.is_zero(difference):
+            return []
+
+        amount_currency = self.direction_sign * difference
+        balance = currency._convert(amount_currency, self.company_currency_id, self.company_id, self.invoice_date or self.date)
+        # A debit raises what is paid or lowers what is received: it is a loss.
+        if balance > 0.0:
+            account = self.company_id.cash_rounding_loss_account_id
+        else:
+            account = self.company_id.cash_rounding_profit_account_id
+        if not account:
+            return [self.env._(
+                "A rounding of %(difference)s was found in the XML file, but no Total Rounding Accounts are set."
+                " Please enable Cash Rounding in the Accounting settings and set them.",
+                difference=formatLang(self.env, difference, currency_obj=currency),
+            )]
+
+        self.line_ids = [Command.create({
+            'name': self.env._("Rounding"),
+            'display_type': 'rounding',
+            'is_imported': True,
+            'account_id': account.id,
+            'partner_id': self.commercial_partner_id.id,
+            'currency_id': currency.id,
+            'amount_currency': amount_currency,
+            'balance': balance,
+        })]
+        return []
+
     def _l10n_it_edi_import_invoice(self, invoice, data, is_new):
         """ Decode a FatturaPA attachment into an Odoo move.
 
@@ -1906,6 +2001,8 @@ class AccountMove(models.Model):
                     to_remove_index = int(get_float(parent_element, './NumeroLinea')) - 1
                     self.invoice_line_ids[to_remove_index].unlink()
                     self.invoice_line_ids.tax_ids |= enasarco_tax
+
+            message_to_log += self._l10n_it_edi_import_rounding(tree)
 
             for message in message_to_log:
                 self.sudo().message_post(body=message)

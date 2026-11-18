@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<p:FatturaElettronica versione="FPR12" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:p="http://ivaservizi.agenziaentrate.gov.it/docs/xsd/fatture/v1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <FatturaElettronicaHeader>
+    <DatiTrasmissione>
+      <IdTrasmittente><IdPaese>IT</IdPaese><IdCodice>09999990022</IdCodice></IdTrasmittente>
+      <ProgressivoInvio>00011</ProgressivoInvio>
+      <FormatoTrasmissione>FPR12</FormatoTrasmissione>
+      <CodiceDestinatario>0000000</CodiceDestinatario>
+    </DatiTrasmissione>
+    <CedentePrestatore>
+      <DatiAnagrafici>
+        <IdFiscaleIVA><IdPaese>IT</IdPaese><IdCodice>09999990022</IdCodice></IdFiscaleIVA>
+        <CodiceFiscale>09999990022</CodiceFiscale>
+        <Anagrafica><Denominazione>Officina Beta S.r.l.</Denominazione></Anagrafica>
+        <RegimeFiscale>RF01</RegimeFiscale>
+      </DatiAnagrafici>
+      <Sede><Indirizzo>Via Esempio 2</Indirizzo><CAP>00100</CAP><Comune>Roma</Comune><Provincia>RM</Provincia><Nazione>IT</Nazione></Sede>
+    </CedentePrestatore>
+    <CessionarioCommittente>
+      <DatiAnagrafici>
+        <IdFiscaleIVA><IdPaese>IT</IdPaese><IdCodice>01234560157</IdCodice></IdFiscaleIVA>
+        <CodiceFiscale>01234560157</CodiceFiscale>
+        <Anagrafica><Denominazione>IT Company</Denominazione></Anagrafica>
+      </DatiAnagrafici>
+      <Sede><Indirizzo>Test Street</Indirizzo><CAP>12345</CAP><Comune>Prova</Comune><Provincia>VT</Provincia><Nazione>IT</Nazione></Sede>
+    </CessionarioCommittente>
+  </FatturaElettronicaHeader>
+  <FatturaElettronicaBody>
+    <DatiGenerali>
+      <DatiGeneraliDocumento>
+        <TipoDocumento>TD01</TipoDocumento>
+        <Divisa>EUR</Divisa>
+        <Data>2026-04-10</Data>
+        <Numero>FPR 11/26</Numero>
+        <ImportoTotaleDocumento>400.00</ImportoTotaleDocumento>
+        <Arrotondamento>-2.60</Arrotondamento>
+        <Causale>Lavori di manutenzione</Causale>
+      </DatiGeneraliDocumento>
+    </DatiGenerali>
+    <DatiBeniServizi>
+      <DettaglioLinee>
+        <NumeroLinea>1</NumeroLinea>
+        <Descrizione>Manodopera</Descrizione>
+        <Quantita>1.00</Quantita>
+        <PrezzoUnitario>330.00</PrezzoUnitario>
+        <PrezzoTotale>330.00</PrezzoTotale>
+        <AliquotaIVA>22.00</AliquotaIVA>
+      </DettaglioLinee>
+      <DatiRiepilogo>
+        <AliquotaIVA>22.00</AliquotaIVA>
+        <ImponibileImporto>330.00</ImponibileImporto>
+        <Imposta>72.60</Imposta>
+        <EsigibilitaIVA>I</EsigibilitaIVA>
+      </DatiRiepilogo>
+    </DatiBeniServizi>
+    <DatiPagamento>
+      <CondizioniPagamento>TP02</CondizioniPagamento>
+      <DettaglioPagamento>
+        <ModalitaPagamento>MP05</ModalitaPagamento>
+        <DataScadenzaPagamento>2026-04-10</DataScadenzaPagamento>
+        <ImportoPagamento>400.00</ImportoPagamento>
+        <IBAN>IT60X0542811101000000123456</IBAN>
+      </DettaglioPagamento>
+    </DatiPagamento>
+  </FatturaElettronicaBody>
+</p:FatturaElettronica>

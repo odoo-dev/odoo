@@ -176,8 +176,9 @@ class TestItEdiImport(TestItEdi, TestAccountEdiProxyUser):
         self._assert_import_invoice('IT01234567890_DISC1.xml', [{
             'move_type': 'in_invoice',
             'invoice_date': fields.Date.from_string('2014-12-18'),
-            'amount_untaxed': 28.75,
             'amount_tax': 6.33,
+            # The vendor rounded the VAT down (Imposta 6.32): a -0.01 rounding matches ImportoTotaleDocumento.
+            'amount_total': 35.07,
             'invoice_line_ids': [{
                 'quantity': 5.0,
                 'price_unit': 1.0,
@@ -1161,3 +1162,92 @@ class TestItEdiImport(TestItEdi, TestAccountEdiProxyUser):
             "A FatturaPA seller with no VAT number must not match any existing partner "
             "(including partners with '/' as a placeholder VAT). A new partner should be created.",
         )
+
+    def _import_bill_with_document_data(self, document_data, document_type='TD01'):
+        """ Import IT01234567890_FPR01.xml (5.00 + 1.10 VAT = 6.10) with extra DatiGeneraliDocumento nodes. """
+        applied_xml = f"""
+            <xpath expr="//FatturaElettronicaBody/DatiGenerali/DatiGeneraliDocumento/TipoDocumento" position="replace">
+                <TipoDocumento>{document_type}</TipoDocumento>
+            </xpath>
+            <xpath expr="//FatturaElettronicaBody/DatiGenerali/DatiGeneraliDocumento" position="inside">
+                {document_data}
+            </xpath>
+        """
+        return self._assert_import_invoice('IT01234567890_FPR01.xml', [{}], applied_xml)
+
+    def test_import_rounding_document_total_before_arrotondamento(self):
+        """ 330.00 + 72.60 VAT, ImportoTotaleDocumento 402.60 and Arrotondamento -2.60: 400.00 to pay. """
+        bill = self._assert_import_invoice('IT09999990014_00003.xml', [{
+            'amount_tax': 72.6,
+            'amount_total': 400.0,
+            'invoice_line_ids': [{'price_unit': 330.0}],
+        }])
+        self.assertRecordValues(bill.line_ids.filtered(lambda line: line.display_type == 'rounding'), [{
+            'credit': 2.6,
+            'account_id': self.company.cash_rounding_profit_account_id.id,
+        }])
+
+    def test_import_rounding_declared_arrotondamento(self):
+        """ 330.00 + 72.60 VAT, ImportoTotaleDocumento 400.00 already after Arrotondamento -2.60. """
+        bill = self._assert_import_invoice('IT09999990022_00011.xml', [{
+            'amount_tax': 72.6,
+            'amount_total': 400.0,
+            'invoice_line_ids': [{'price_unit': 330.0}],
+        }])
+        # As for cash rounding, the totals show the rounding apart from the taxable amount.
+        self.assertEqual(bill.tax_totals['base_amount_currency'], 330.0)
+        rounding_line = bill.line_ids.filtered(lambda line: line.display_type == 'rounding')
+        self.assertRecordValues(rounding_line, [{
+            'amount_currency': -2.6,
+            'credit': 2.6,
+            'tax_ids': [],
+            'account_id': self.company.cash_rounding_profit_account_id.id,
+        }])
+        self.assertEqual(bill.tax_totals['cash_rounding_base_amount_currency'], -2.6)
+
+        # The imported rounding survives edits of the draft bill.
+        bill.invoice_line_ids.price_unit = 300.0
+        self.assertRecordValues(bill.line_ids.filtered(lambda line: line.display_type == 'rounding'), [{'credit': 2.6}])
+
+    def test_import_rounding_from_document_total(self):
+        """ Each line is rounded down by the vendor: the bill gets the difference with ImportoTotaleDocumento. """
+        bill = self._assert_import_invoice('IT09999990030_00042.xml', [{'amount_total': 573.45}])
+        self.assertRecordValues(bill.line_ids.filtered(lambda line: line.display_type == 'rounding'), [{
+            'account_id': self.company.cash_rounding_profit_account_id.id,
+        }])
+
+    def test_import_rounding_refund(self):
+        bill = self._import_bill_with_document_data('<ImportoTotaleDocumento>6.11</ImportoTotaleDocumento>', 'TD04')
+        self.assertRecordValues(bill, [{'move_type': 'in_refund', 'amount_total': 6.11}])
+        self.assertRecordValues(bill.line_ids.filtered(lambda line: line.display_type == 'rounding'), [{
+            'credit': 0.01,
+            'account_id': self.company.cash_rounding_profit_account_id.id,
+        }])
+
+    def test_import_rounding_loss(self):
+        bill = self._import_bill_with_document_data('<ImportoTotaleDocumento>6.11</ImportoTotaleDocumento>')
+        self.assertRecordValues(bill, [{'move_type': 'in_invoice', 'amount_total': 6.11}])
+        self.assertRecordValues(bill.line_ids.filtered(lambda line: line.display_type == 'rounding'), [{
+            'debit': 0.01,
+            'account_id': self.company.cash_rounding_loss_account_id.id,
+        }])
+
+    def test_import_rounding_without_document_total(self):
+        bill = self._import_bill_with_document_data('<Arrotondamento>-0.02</Arrotondamento>')
+        self.assertRecordValues(bill, [{'amount_total': 6.08}])
+
+    def test_import_rounding_difference_too_large(self):
+        bill = self._import_bill_with_document_data('<ImportoTotaleDocumento>16.10</ImportoTotaleDocumento>')
+        self.assertRecordValues(bill, [{'amount_total': 6.10}])
+        self.assertFalse(bill.line_ids.filtered(lambda line: line.display_type == 'rounding'))
+        self.assertTrue(any('too large to be a rounding' in message.body for message in bill.message_ids))
+
+    def test_import_rounding_without_rounding_accounts(self):
+        self.company.write({
+            'cash_rounding_profit_account_id': False,
+            'cash_rounding_loss_account_id': False,
+        })
+        bill = self._import_bill_with_document_data('<ImportoTotaleDocumento>6.11</ImportoTotaleDocumento>')
+        self.assertRecordValues(bill, [{'amount_total': 6.10}])
+        self.assertFalse(bill.line_ids.filtered(lambda line: line.display_type == 'rounding'))
+        self.assertTrue(any('Total Rounding Accounts' in message.body for message in bill.message_ids))
