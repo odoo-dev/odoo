@@ -92,8 +92,9 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
     #       - search discuss_channel JOIN member (is_member, first occurrence)
     #       2: load more (the priority domain first, then the rest):
     #           - search_fetch discuss_channel
-    #   4: channel tab:
+    #   5: channel tab:
     #       - search_fetch discuss_channel_member (pinned channel ids)
+    #       - search mail_notification (unread notifications of the user)
     #       - read group mail_message (needaction channel ids)
     #       2: load more:
     #           - search_fetch discuss_channel
@@ -180,7 +181,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
     #       - search mail_message_schedule (last message of the needaction message)
     #       - search discuss_channel (linkedSubChannel of the needaction message)
     #   1: select the current db snapshot
-    _query_count_messaging_menu_channels = 81
+    _query_count_messaging_menu_channels = 82
 
     def setUp(self):
         super().setUp()
