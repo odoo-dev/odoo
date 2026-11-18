@@ -880,6 +880,30 @@ class TestVariants(ProductVariantsCommon):
         })
         self.assertEqual(template.product_variant_ids.uom_id, self.uom_pack_6, "Without a unit, use the template one")
 
+    def test_variant_specific_uom_creation_with_template(self):
+        """A variant creating its template gives it its unit from the start, as what is created with
+        the template (ex: its vendor lines) uses the unit of the template."""
+        vendor = self.env['res.partner'].create({'name': 'Vendor'})
+        existing_template = self.env['product.template'].create({'name': 'Juice', 'uom_id': self.uom_pack_6.id})
+        eggs, juice, water = self.env['product.product'].create([{
+            'name': 'Eggs',
+            'uom_id': self.uom_dozen.id,
+            'seller_ids': [Command.create({'partner_id': vendor.id, 'price': 3})],
+        }, {
+            'product_tmpl_id': existing_template.id,
+        }, {
+            'name': 'Water',
+            'seller_ids': [Command.create({'partner_id': vendor.id})],
+        }])
+        self.assertRecordValues(eggs + juice + water, [
+            {'name': 'Eggs', 'uom_id': self.uom_dozen.id},
+            {'name': 'Juice', 'uom_id': self.uom_pack_6.id},
+            {'name': 'Water', 'uom_id': self.uom_unit.id},
+        ])
+        self.assertEqual(eggs.product_tmpl_id.uom_id, self.uom_dozen)
+        self.assertEqual(eggs.seller_ids.uom_id, self.uom_dozen, "The vendor price is per dozen, not per unit")
+        self.assertEqual(water.seller_ids.uom_id, self.uom_unit)
+
 
 @tagged('post_install', '-at_install')
 class TestVariantsNoCreate(ProductVariantsCommon):

@@ -364,7 +364,7 @@ class TestWebsiteSalePerformanceWithTrackedProducts(TestWebsiteSalePerformanceNo
 
     def _get_shop_page_queries(self):
         res = super()._get_shop_page_queries()
-        res["product_product"] += 1
+        res["product_product"] += 2  # +1 for the variants unit, in which their quantity is expressed
         res["res_users"] += 1
         res["res_partner"] += 1
         if "website_sale_stock" in self.installed_modules:
