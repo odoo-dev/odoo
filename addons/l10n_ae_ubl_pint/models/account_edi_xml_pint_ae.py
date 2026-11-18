@@ -572,6 +572,18 @@ class AccountEdiXmlPintAe(models.AbstractModel):
         if not item_node['cbc:Description']:
             item_node['cbc:Description'] = item_node['cbc:Name']
 
+    def _ubl_add_line_allowance_charge_nodes(self, vals):
+        # EXTENDS account.edi.ubl
+        super()._ubl_add_line_allowance_charge_nodes(vals)
+        # line discounts.
+        self._ubl_add_line_allowance_charge_nodes_for_discount(vals)
+
+    def _ubl_default_tax_category_grouping_key(self, base_line, tax_data, vals, currency):
+        # EXTENDS account.edi.ubl
+        if self._ubl_is_cash_rounding_base_line(base_line):
+            return None
+        return super()._ubl_default_tax_category_grouping_key(base_line, tax_data, vals, currency)
+
     def _ubl_add_line_price_node(self, vals, in_foreign_currency=True):
         """ ibr-126-ae: Item price base quantity (IBT-149) and gross price (IBT-148) are mandatory.
 

@@ -481,6 +481,77 @@ class TestExportPintAe(TestUblCiiCommon):
         self._generate_invoice_ubl_file(invoice)
         self._assert_invoice_ubl_file(invoice, 'early_payment_discount')
 
+    def test_export_line_discount(self):
+        """ A discount on a line is its allowance: the line net amount and the totals are the invoice's (ibr-147-ae). """
+        for discount, net_amount, name in ((10.0, 900.0, 'INV/2025/00001'), (100.0, 0.0, 'INV/2025/00002')):
+            with self.subTest(discount=discount):
+                invoice = self._create_invoice(
+                    move_type='out_invoice',
+                    partner_id=self.partner_ae,
+                    invoice_line_ids=[
+                        self._prepare_invoice_line(
+                            product_id=self.product_a, quantity=10, price_unit=100.0, discount=discount, tax_ids=self.tax_sale_a,
+                        ),
+                        self._prepare_invoice_line(product_id=self.product_a, quantity=1, price_unit=50.0, tax_ids=self.tax_sale_a),
+                    ],
+                    name=name,
+                    post=True,
+                )
+                self._generate_invoice_ubl_file(invoice)
+                tree = etree.fromstring(invoice.ubl_cii_xml_id.raw)
+                line = tree.find('{*}InvoiceLine')
+                self.assertEqual(invoice.amount_untaxed, net_amount + 50.0)
+                self.assertEqual(float(line.findtext('{*}LineExtensionAmount')), net_amount)
+                self.assertEqual(line.findtext('{*}AllowanceCharge/{*}ChargeIndicator'), 'false')
+                self.assertEqual(float(line.findtext('{*}AllowanceCharge/{*}Amount')), 1000.0 - net_amount)
+                self.assertEqual(float(line.findtext('{*}AllowanceCharge/{*}BaseAmount')), 1000.0)
+                self.assertTrue(line.findtext('{*}AllowanceCharge/{*}AllowanceChargeReason'))
+                # ibr-126-ae: the price stays the gross one.
+                self.assertEqual(float(line.findtext('{*}Price/{*}PriceAmount')), 100.0)
+                self.assertEqual(float(tree.findtext('{*}LegalMonetaryTotal/{*}LineExtensionAmount')), invoice.amount_untaxed)
+                self.assertEqual(float(tree.findtext('{*}LegalMonetaryTotal/{*}TaxExclusiveAmount')), invoice.amount_untaxed)
+                self.assertEqual(float(tree.findtext('{*}LegalMonetaryTotal/{*}PayableAmount')), invoice.amount_total)
+                self.assertIsNone(tree.find('{*}LegalMonetaryTotal/{*}PayableRoundingAmount'))
+
+    def _export_single_line_invoice(self, name, line_values, **invoice_values):
+        """ Export an invoice of one line of 10 units at 100.00, with `line_values`.
+
+        :returns: (invoice, tree of its PINT AE document, export errors).
+        """
+        invoice = self._create_invoice(
+            move_type='out_invoice',
+            partner_id=self.partner_ae,
+            invoice_line_ids=[self._prepare_invoice_line(**{
+                'product_id': self.product_a, 'quantity': 10, 'price_unit': 100.0, 'tax_ids': self.tax_sale_a, **line_values,
+            })],
+            name=name,
+            post=True,
+            **invoice_values,
+        )
+        xml, errors = self.env['account.edi.xml.pint_ae']._export_invoice(invoice)
+        return invoice, etree.fromstring(xml), errors
+
+    def test_export_cash_rounding(self):
+        """ A cash rounding is the rounding amount (IBT-114) only: not a VAT breakdown without any line. """
+        cash_rounding = self.env['account.cash.rounding'].create({
+            'name': 'Rounding to 0.25',
+            'rounding': 0.25,
+            'strategy': 'add_invoice_line',
+            'rounding_method': 'HALF-UP',
+            'profit_account_id': self.company_data['default_account_revenue'].id,
+            'loss_account_id': self.company_data['default_account_expense'].id,
+        })
+        invoice, tree, errors = self._export_single_line_invoice(
+            'INV/2025/00005', {'price_unit': 99.99}, invoice_cash_rounding_id=cash_rounding.id)
+        self.assertFalse(errors)
+        self.assertEqual(invoice.amount_total, 1050.0)
+        self.assertEqual(
+            [(subtotal.findtext('{*}TaxCategory/{*}ID'), float(subtotal.findtext('{*}TaxableAmount'))) for subtotal in tree.findall('{*}TaxTotal/{*}TaxSubtotal')],
+            [('S', 999.9)],
+        )
+        self.assertEqual(float(tree.findtext('{*}LegalMonetaryTotal/{*}PayableRoundingAmount')), 0.1)
+        self.assertEqual(float(tree.findtext('{*}LegalMonetaryTotal/{*}PayableAmount')), 1050.0)
+
     def test_export_global_discount(self):
         """ A global discount is exported as document level allowance, not as a line with a negative price (ibr-027). """
         self.ensure_installed('sale')
