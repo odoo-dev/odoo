@@ -1,4 +1,4 @@
-from odoo import api, models
+from odoo import Command, api, models
 
 
 class TestOrmDiscussion(models.Model):
@@ -20,7 +20,8 @@ class TestOrmDiscussion(models.Model):
 
     @api.onchange('moderator')
     def _onchange_moderator(self):
-        self.participants |= self.moderator
+        if self.moderator:
+            self.participants = [Command.link(self.moderator.id)]
 
     @api.onchange('messages')
     def _onchange_messages(self):

@@ -12,8 +12,10 @@ class StockStorageCategory(models.Model):
     name = fields.Char('Storage Category', required=True)
     max_weight = fields.Float('Max Weight', digits='Stock Weight')
     capacity_ids = fields.One2many('stock.storage.category.capacity', 'storage_category_id', copy=True)
-    product_capacity_ids = fields.One2many('stock.storage.category.capacity', compute="_compute_storage_capacity_ids", inverse="_set_storage_capacity_ids")
-    package_capacity_ids = fields.One2many('stock.storage.category.capacity', compute="_compute_storage_capacity_ids", inverse="_set_storage_capacity_ids")
+    product_capacity_ids = fields.One2many('stock.storage.category.capacity', 'storage_category_id',
+                                           compute="_compute_storage_capacity_ids", store=True, readonly=False)
+    package_capacity_ids = fields.One2many('stock.storage.category.capacity', 'storage_category_id',
+                                           compute="_compute_storage_capacity_ids", store=True, readonly=False)
     allow_new_product = fields.Selection([
         ('empty', 'If the location is empty'),
         ('same', 'If all products are same'),
@@ -35,10 +37,6 @@ class StockStorageCategory(models.Model):
 
     def _compute_weight_uom_name(self):
         self.weight_uom_name = self.env['product.template']._get_weight_uom_name_from_ir_config_parameter()
-
-    def _set_storage_capacity_ids(self):
-        for storage_category in self:
-            storage_category.capacity_ids = storage_category.product_capacity_ids | storage_category.package_capacity_ids
 
 
 class StockStorageCategoryCapacity(models.Model):

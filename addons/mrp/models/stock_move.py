@@ -63,7 +63,7 @@ class StockMove(models.Model):
     def _compute_allowed_uom_ids(self):
         super()._compute_allowed_uom_ids()
         for move in self:
-            move.allowed_uom_ids |= move.product_id.bom_ids.uom_id
+            move.allowed_uom_ids = [Command.link(bom.uom_id.id) for bom in move.product_id.bom_ids]
 
     @api.depends('production_id')
     def _compute_packaging_uom_id(self):

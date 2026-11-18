@@ -985,13 +985,13 @@ class TestPurchase(AccountTestInvoicingCommon):
         self.product_a.write({
             'seller_ids': [
                 Command.create({
-                    'partner_id': self.partner_a,
+                    'partner_id': self.partner_a.id,
                     'product_code': 'A',
                     'company_id': company_a.id,
                     'price': 10.0,
                 }),
                 Command.create({
-                    'partner_id': self.partner_a,
+                    'partner_id': self.partner_a.id,
                     'product_code': 'B',
                     'company_id': company_b.id,
                     'price': 15.0,

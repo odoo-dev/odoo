@@ -460,7 +460,7 @@ class ResUsers(models.Model):
             if group_user not in self.all_group_ids:
                 self.group_ids += self._default_groups()
             # Reduce all access to light user.
-            self.group_ids = group_user + self.group_ids._origin._reduce_to_light_groups()
+            self.group_ids = (group_user + self.group_ids)._origin._reduce_to_light_groups()
 
     def _search_role(self, operator, value):
         if operator != 'in':
