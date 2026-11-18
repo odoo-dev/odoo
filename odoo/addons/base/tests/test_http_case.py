@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import logging
+import os
+import signal
 import threading
 from concurrent.futures import Future
 from unittest.mock import patch
@@ -118,6 +120,33 @@ class TestChromeBrowserShutdown(HttpCase):
             with self.assertNoLogs('odoo.tests.common', 'WARNING'):
                 browser.stop()
         self.assertTrue(close_request.cancelled())
+
+    def test_lost_browser_runs_once_more(self):
+        wait_code_ok = ChromeBrowser._wait_code_ok
+        browsers = []
+
+        def crash_first_browser(browser, *args, **kwargs):
+            browsers.append(browser)
+            self.env["res.partner"].create({"name": "Lost browser run"})
+            if len(browsers) == 1:
+                threading.Timer(1, os.kill, (browser.chrome.pid, signal.SIGSEGV)).start()
+            return wait_code_ok(browser, *args, **kwargs)
+
+        with patch.object(ChromeBrowser, "_wait_code_ok", crash_first_browser):
+            with self.assertLogs(self._logger, "WARNING") as log_catcher:
+                self.browser_js(
+                    "about:blank",
+                    "setTimeout(() => console.log('test successful'), 2000)",
+                )
+        self.assertEqual(len(browsers), 2)
+        self.assertEqual(
+            self.env["res.partner"].search_count([("name", "=", "Lost browser run")]),
+            1,
+        )
+        self.assertEqual(
+            log_catcher.records[0].getMessage(),
+            "Lost the browser (exit status -11), running the test once more",
+        )
 
 
 class TestRequestRemaining(HttpCase):

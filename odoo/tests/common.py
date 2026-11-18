@@ -2448,68 +2448,81 @@ class HttpCase(TransactionCase):
         if watch:
             self._logger.warning('watch mode is only suitable for local testing')
 
-        browser = ChromeBrowser(self, headless=not watch, success_signal=success_signal, debug=debug)
-        try:
-            self.http_request_key = self.canonical_tag + '_browser_js'
-            self.authenticate(login, login, browser=browser)
-            self.http_request_strict_check = True
-            # Flush and clear the current transaction.  This is useful in case
-            # we make requests to the server, as these requests are made with
-            # test cursors, which uses different caches than this transaction.
-            self.cr.flush()
-            self.cr.clear()
-            url = werkzeug.urls.url_join(self.base_url(), url_path)
-            if watch:
-                parsed = werkzeug.urls.url_parse(url)
-                qs = parsed.decode_query()
-                qs['watch'] = '1'
-                if debug is not False:
-                    qs['debug'] = "assets"
-                url = parsed.replace(query=werkzeug.urls.url_encode(qs)).to_url()
-            self._logger.info('Open "%s" in browser', url)
+        cpu_throttling_os = os.environ.get('ODOO_BROWSER_CPU_THROTTLING') # used by dedicated runbot builds
+        cpu_throttling = int(cpu_throttling_os) if cpu_throttling_os else cpu_throttling
 
-            if browser.screencasts_dir:
-                self._logger.info('Starting screencast')
-                browser.start_screencast()
-            if cookies:
-                for name, value in cookies.items():
-                    browser.set_cookie(name, value, '/', HOST)
+        if cpu_throttling:
+            assert 1 <= cpu_throttling <= 50  # arbitrary upper limit
+            timeout *= cpu_throttling  # extend the timeout as test will be slower to execute
+            _logger.log(
+                logging.INFO if cpu_throttling_os else logging.WARNING,
+                'CPU throttling mode is only suitable for local testing - ' \
+                'Throttling browser CPU to %sx slowdown and extending timeout to %s sec', cpu_throttling, timeout)
 
-            cpu_throttling_os = os.environ.get('ODOO_BROWSER_CPU_THROTTLING') # used by dedicated runbot builds
-            cpu_throttling = int(cpu_throttling_os) if cpu_throttling_os else cpu_throttling
+        for retry in (False, True):
+            browser = ChromeBrowser(self, headless=not watch, success_signal=success_signal, debug=debug)
+            with self.cr.savepoint() as savepoint:
+                try:
+                    self.http_request_key = self.canonical_tag + '_browser_js'
+                    self.authenticate(login, login, browser=browser)
+                    self.http_request_strict_check = True
+                    # Flush and clear the current transaction.  This is useful in case
+                    # we make requests to the server, as these requests are made with
+                    # test cursors, which uses different caches than this transaction.
+                    self.cr.flush()
+                    self.cr.clear()
+                    url = werkzeug.urls.url_join(self.base_url(), url_path)
+                    if watch:
+                        parsed = werkzeug.urls.url_parse(url)
+                        qs = parsed.decode_query()
+                        qs['watch'] = '1'
+                        if debug is not False:
+                            qs['debug'] = "assets"
+                        url = parsed.replace(query=werkzeug.urls.url_encode(qs)).to_url()
+                    self._logger.info('Open "%s" in browser', url)
 
-            if cpu_throttling:
-                assert 1 <= cpu_throttling <= 50  # arbitrary upper limit
-                timeout *= cpu_throttling  # extend the timeout as test will be slower to execute
-                _logger.log(
-                    logging.INFO if cpu_throttling_os else logging.WARNING,
-                    'CPU throttling mode is only suitable for local testing - ' \
-                    'Throttling browser CPU to %sx slowdown and extending timeout to %s sec', cpu_throttling, timeout)
-                browser._websocket_request('Emulation.setCPUThrottlingRate', params={'rate': cpu_throttling})
+                    if browser.screencasts_dir:
+                        self._logger.info('Starting screencast')
+                        browser.start_screencast()
+                    if cookies:
+                        for name, value in cookies.items():
+                            browser.set_cookie(name, value, '/', HOST)
 
-            browser.navigate_to(url, wait_stop=not bool(ready))
+                    if cpu_throttling:
+                        browser._websocket_request('Emulation.setCPUThrottlingRate', params={'rate': cpu_throttling})
 
-            # Needed because tests like test01.js (qunit tests) are passing a ready
-            # code = ""
-            self.assertTrue(browser._wait_ready(ready), 'The ready "%s" code was always falsy' % ready)
+                    browser.navigate_to(url, wait_stop=not bool(ready))
 
-            error = False
-            try:
-                browser._wait_code_ok(code, timeout, error_checker=error_checker)
-            except ChromeBrowserException as chrome_browser_exception:
-                error = chrome_browser_exception
-            if error:  # dont keep initial traceback, keep that outside of except
-                if code:
-                    message = 'The test code "%s" failed' % code
+                    # Needed because tests like test01.js (qunit tests) are passing a ready
+                    # code = ""
+                    self.assertTrue(browser._wait_ready(ready), 'The ready "%s" code was always falsy' % ready)
+
+                    error = False
+                    try:
+                        browser._wait_code_ok(code, timeout, error_checker=error_checker)
+                    except ChromeBrowserException as chrome_browser_exception:
+                        error = chrome_browser_exception
+                    if error:  # dont keep initial traceback, keep that outside of except
+                        if code:
+                            message = 'The test code "%s" failed' % code
+                        else:
+                            message = "Some js test failed"
+                        self.fail('%s\n\n%s' % (message, error))
+                except Exception:
+                    if retry or (browser.chrome.returncode or 0) >= 0:
+                        raise
                 else:
-                    message = "Some js test failed"
-                self.fail('%s\n\n%s' % (message, error))
-
-        finally:
-            browser.stop()
-            self._wait_remaining_requests()
-            self.http_request_key = self.canonical_tag
-            self.opener.cookies[TEST_CURSOR_COOKIE_NAME] = self.http_request_key
+                    return
+                finally:
+                    browser.stop()
+                    self._wait_remaining_requests()
+                    self.http_request_key = self.canonical_tag
+                    self.opener.cookies[TEST_CURSOR_COOKIE_NAME] = self.http_request_key
+                savepoint.close()
+            self._logger.warning(
+                "Lost the browser (exit status %s), running the test once more",
+                browser.chrome.returncode,
+            )
 
     def start_tour(self, url_path, tour_name, step_delay=None, **kwargs):
         """Wrapper for `browser_js` to start the given `tour_name` with the
