@@ -507,6 +507,19 @@ export class Message extends Record {
         if (this.notificationType === "pin") {
             return _t("%(user)s pinned a message to this channel.", { user: this.authorName });
         }
+        if (["channel-joined", "channel-left"].includes(this.notificationType)) {
+            // The invited member (partner link or guest name) is the only data of the body,
+            // the rest is a fallback text for consumers unaware of the notification type.
+            const inviteeEl = this.bodyEl.querySelector(".o_mail_notification > :is(a, strong)");
+            return this.getMemberNotificationText({
+                type: this.notificationType,
+                user: this.authorName,
+                invitee: inviteeEl ? getOuterHtml(inviteeEl) : undefined,
+            });
+        }
+        if (this.notificationType === "channel_creation") {
+            return _t("%(user)s created this channel.", { user: this.authorName });
+        }
         if (this.isEmpty) {
             return _t("This message has been removed");
         }
@@ -820,6 +833,25 @@ export class Message extends Record {
      */
     onShowDeleteConfirm(owner, ancestors = {}) {
         this.remove({ removeFromThread: this.shouldHideFromMessageListOnDelete(ancestors) });
+    }
+
+    /**
+     * Sentence of a member notification, built at display time so that the
+     * name of the author stays up to date and is translated for the viewer.
+     *
+     * @param {Object} param0
+     * @param {"channel-joined"|"channel-left"} param0.type
+     * @param {string} param0.user name of the author of the notification
+     * @param {import("@odoo/owl").Markup} [param0.invitee] member invited by the author
+     */
+    getMemberNotificationText({ type, user, invitee }) {
+        if (type === "channel-left") {
+            return _t("%(user)s left the channel", { user });
+        }
+        if (invitee) {
+            return _t("%(user)s invited %(invitee)s to the channel", { user, invitee });
+        }
+        return _t("%(user)s joined the channel", { user });
     }
 
     /**

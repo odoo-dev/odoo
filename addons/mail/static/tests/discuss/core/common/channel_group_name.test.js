@@ -57,6 +57,8 @@ test("Group name is based on channel members when name is not set", async () => 
     await contains("button[title='Add People']:count(1)").click();
     await contains(".o-discuss-ChannelInvitation-selectable:has(:text('Sam')):count(1)").click();
     await contains("button:text('Invite to Group Chat'):count(1)").click();
-    await waitFor(".o_mail_notification:text('invited Sam to the channel'):count(1)");
+    await waitFor(
+        ".o-mail-NotificationMessage:contains('Mitchell Admin invited @Sam to the channel'):count(1)"
+    );
     await waitFor(".o-mail-DiscussContent-threadName[title='Custom name']:count(1)");
 });

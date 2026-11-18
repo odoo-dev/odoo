@@ -2118,7 +2118,7 @@ class DiscussChannel(models.Model):
         new_channel = self.create(vals)
         group = self.env['res.groups'].search([('id', '=', group_id)]) if group_id else None
         new_channel.group_public_id = group.id if group else None
-        notification = Markup('<div class="o_mail_notification">%s</div>') % _("created this channel.")
+        notification = Markup('<div class="o_mail_notification" data-oe-type="channel_creation">%s</div>') % _("created this channel.")
         new_channel.message_post(body=notification, message_type="notification", subtype_xmlid="mail.mt_comment")
         return new_channel
 

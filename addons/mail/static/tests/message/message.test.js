@@ -2934,6 +2934,54 @@ test("display the notification message's posting date and time", async () => {
     );
 });
 
+test("member notifications are full sentences built from the current author name", async () => {
+    const pyEnv = await startServer();
+    const channelId = pyEnv["discuss.channel"].create({ name: "Hogwarts", channel_type: "group" });
+    const partnerId = pyEnv["res.partner"].create({ name: "Tom Riddle" });
+    const guestId = pyEnv["mail.guest"].create({ name: "Visitor" });
+    const notification = (type, content) =>
+        pyEnv["mail.message"].create({
+            author_id: partnerId,
+            body: `<div class="o_mail_notification" data-oe-type="${type}">${content}</div>`,
+            message_type: "notification",
+            model: "discuss.channel",
+            res_id: channelId,
+        });
+    notification("channel_creation", "created this channel.");
+    notification("channel-joined", "joined the channel");
+    notification("channel-joined", "invited <strong>Visitor</strong> to the channel");
+    notification("channel-left", "left the channel");
+    pyEnv["mail.message"].create({
+        author_guest_id: guestId,
+        author_id: false,
+        body: '<div class="o_mail_notification" data-oe-type="channel-joined">joined the channel</div>',
+        message_type: "notification",
+        model: "discuss.channel",
+        res_id: channelId,
+    });
+    // legacy notification without type: the author name is still prepended to the body
+    pyEnv["mail.message"].create({
+        author_id: partnerId,
+        body: '<div class="o_mail_notification">did something legacy</div>',
+        message_type: "notification",
+        model: "discuss.channel",
+        res_id: channelId,
+    });
+    await start();
+    await openDiscuss(channelId);
+    await waitFor(".o-mail-NotificationMessage:contains('Tom Riddle created this channel.')");
+    await waitFor(".o-mail-NotificationMessage:contains('Tom Riddle joined the channel')");
+    await waitFor(
+        ".o-mail-NotificationMessage:contains('Tom Riddle invited Visitor to the channel')"
+    );
+    await waitFor(".o-mail-NotificationMessage:contains('Tom Riddle left the channel')");
+    await waitFor(".o-mail-NotificationMessage:contains('Visitor joined the channel')");
+    await waitFor(".o-mail-NotificationMessage:contains('Tom Riddle did something legacy')");
+    getService("mail.store")["res.partner"].insert({ id: partnerId, name: "Lord Voldemort" });
+    await waitFor(".o-mail-NotificationMessage:contains('Lord Voldemort joined the channel')");
+    await waitForNone(".o-mail-NotificationMessage:contains('Tom Riddle')");
+});
+
 test("Pause GIF attachment when thread is not focused", async () => {
     const pyEnv = await startServer();
     const channelId = pyEnv["discuss.channel"].create({ name: "General" });

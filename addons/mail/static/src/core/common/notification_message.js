@@ -99,6 +99,9 @@ export class NotificationMessage extends Component {
 
     get showInlineBody() {
         return [
+            "channel-joined",
+            "channel-left",
+            "channel_creation",
             "channel_rename",
             "meeting_to_group_chat",
             "thread_deletion",

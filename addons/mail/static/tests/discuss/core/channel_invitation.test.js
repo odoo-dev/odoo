@@ -77,7 +77,7 @@ test("can invite users in channel from chat window", async () => {
         locale: user.lang,
     });
     await waitFor(
-        `.o-mail-Thread .o-mail-NotificationMessage:text('Mitchell Admin invited TestPartner to the channel${time}'):count(1)`
+        `.o-mail-Thread .o-mail-NotificationMessage:text('Mitchell Admin invited @TestPartner to the channel${time}'):count(1)`
     );
 });
 

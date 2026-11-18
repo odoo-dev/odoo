@@ -68,10 +68,34 @@ test("Can invite a partner to a livechat channel", async () => {
     );
     await click("button:enabled", { text: "Invite" });
     await contains(".o-mail-NotificationMessage", {
-        text: "Mitch (FR) invited James to the channel1:00 PM",
+        text: "Mitch (FR) invited @James to the conversation1:00 PM",
     });
     await waitForNone(".o-discuss-ChannelInvitation");
     await contains(".o-discuss-ChannelMember", { text: "James" });
+});
+
+test("Join notification of a livechat uses the live chat user name", async () => {
+    const pyEnv = await startServer();
+    pyEnv["res.partner"].write([serverState.partnerId], { user_livechat_username: "Mitch (FR)" });
+    const guestId = pyEnv["mail.guest"].create({ name: "Visitor 20" });
+    const channelId = pyEnv["discuss.channel"].create({
+        name: "Visitor 20",
+        channel_member_ids: [
+            Command.create({ partner_id: serverState.partnerId, livechat_member_type: "agent" }),
+            Command.create({ guest_id: guestId, livechat_member_type: "visitor" }),
+        ],
+        channel_type: "livechat",
+    });
+    pyEnv["mail.message"].create({
+        author_id: serverState.partnerId,
+        body: '<div class="o_mail_notification" data-oe-type="channel-joined">joined the conversation</div>',
+        message_type: "notification",
+        model: "discuss.channel",
+        res_id: channelId,
+    });
+    await start();
+    await openDiscuss(channelId);
+    await waitFor(".o-mail-NotificationMessage:contains('Mitch (FR) joined the conversation')");
 });
 
 test("Available operators come first", async () => {

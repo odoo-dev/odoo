@@ -1155,7 +1155,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                     "author_id": partner_0.id,
                     "body": [
                         "markup",
-                        '<div class="o_mail_notification">created this channel.</div>',
+                        '<div class="o_mail_notification" data-oe-type="channel_creation">created this channel.</div>',
                     ],
                     "create_date": fields.Datetime.to_string(first_message.create_date),
                     "date": fields.Datetime.to_string(first_message.date),
@@ -2348,7 +2348,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "author_id": user_0.partner_id.id,
                 "body": [
                     "markup",
-                    '<div class="o_mail_notification">created this channel.</div>',
+                    '<div class="o_mail_notification" data-oe-type="channel_creation">created this channel.</div>',
                 ],
                 "create_date": create_date,
                 "date": date,
@@ -2425,7 +2425,7 @@ class TestDiscussFullPerformance(HttpCase, MailCommon):
                 "author_id": user_0.partner_id.id,
                 "body": [
                     "markup",
-                    '<div class="o_mail_notification">created this channel.</div>',
+                    '<div class="o_mail_notification" data-oe-type="channel_creation">created this channel.</div>',
                 ],
                 "create_date": create_date,
                 "date": date,

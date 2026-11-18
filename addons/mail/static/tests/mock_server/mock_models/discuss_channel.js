@@ -184,7 +184,7 @@ export class DiscussChannel extends models.ServerModel {
             channel.id,
             makeKwArgs({
                 author_id: serverState.partnerId,
-                body: '<div class="o_mail_notification">left the channel</div>',
+                body: '<div class="o_mail_notification" data-oe-type="channel-left">left the channel</div>',
                 subtype_xmlid: "mail.mt_comment",
             })
         );
@@ -237,7 +237,8 @@ export class DiscussChannel extends models.ServerModel {
             if (partner.id === this.env.user.partner_id) {
                 continue; // adding 'yourself' to the conversation is handled below
             }
-            const body = `<div class="o_mail_notification">invited ${partner.name} to the channel</div>`;
+            const link = `<a href="/mail/view?model=res.partner&amp;res_id=${partner.id}" data-oe-model="res.partner" data-oe-id="${partner.id}" class="o_mail_redirect">@${partner.name}</a>`;
+            const body = `<div class="o_mail_notification" data-oe-type="channel-joined">invited ${link} to the channel</div>`;
             const message_type = "notification";
             const subtype_xmlid = "mail.mt_comment";
             this.message_post(channel.id, makeKwArgs({ body, message_type, subtype_xmlid }));
@@ -270,7 +271,7 @@ export class DiscussChannel extends models.ServerModel {
         const selfPartner = partners.find((partner) => partner.id === this.env.user.partner_id);
         if (selfPartner) {
             // needs to be done after adding 'self' as a member
-            const body = `<div class="o_mail_notification">${selfPartner.name} joined the channel</div>`;
+            const body = `<div class="o_mail_notification" data-oe-type="channel-joined">joined the channel</div>`;
             const message_type = "notification";
             const subtype_xmlid = "mail.mt_comment";
             this.message_post(channel.id, makeKwArgs({ body, message_type, subtype_xmlid }));
