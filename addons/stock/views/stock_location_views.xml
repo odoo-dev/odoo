@@ -106,8 +106,10 @@
         <field name="model">stock.location</field>
         <field name="priority" eval="2"/>
         <field name="arch" type="xml">
-            <list string="Stock Location" decoration-info="usage=='view'" multi_edit="1">
+            <list string="Stock Location" js_class="stock_location_hierarchy_list" decoration-info="usage=='view'" multi_edit="1">
                 <field name="company_id" column_invisible="True"/> <!-- kept to feed the visible company_id column's groups toggle -->
+                <field name="parent_path" column_invisible="True"/> <!-- needed to compute the hierarchy indent -->
+                <field name="name" column_invisible="True"/> <!-- needed for the hierarchy indent (replace the `complete_name`) -->
                 <field name="active" column_invisible="True"/> <!-- used to allow displaying archived locations in this editable list -->
                 <field name="complete_name" string="Location"/>
                 <field name="usage"/>
