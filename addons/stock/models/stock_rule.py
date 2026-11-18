@@ -625,7 +625,7 @@ class StockRule(models.Model):
         return result
 
     @api.model
-    def get_product_flow(self, product_id, warehouse_id, with_orderpoints=False, category_id=False):
+    def get_product_flow(self, product_id, warehouse_id, with_orderpoints=False, category_id=False, with_priorities=False):
         """ Rules a product goes through in a warehouse, found the same way as
         a real procurement (see `_get_rule` and `_get_push_rule`): the chain
         pulled by a customer need, the replenishment of the locations it takes
@@ -635,6 +635,9 @@ class StockRule(models.Model):
 
         With `category_id` instead of a product: path of a product of this
         category without routes of its own, vendor nor bill of materials.
+        With `with_priorities`: each rule found gets its 'priority' (see
+        `_get_rule_candidates`), and the rules it beat are added with the
+        role 'beaten'.
 
         :return: list of {'rule_id': int, 'role': 'demand'|'replenishment'|'push'},
             or with `with_orderpoints`, {'rules': <that list>, 'replenishments': [
@@ -652,6 +655,8 @@ class StockRule(models.Model):
         flow = {}
         visited = set()
         replenishments = []
+        priorities = {}
+        beaten = {}
 
         def push_from(location, wh):
             while location and location.id not in visited:
@@ -676,6 +681,12 @@ class StockRule(models.Model):
                 if orderpoint.route_id:
                     values['route_ids'] = orderpoint.route_id
             rule = self._get_rule(product, location, values)
+            if with_priorities and rule:
+                for candidate in self._get_rule_candidates(product, location, values):
+                    if candidate['rule_id'] == rule.id:
+                        priorities.setdefault(rule.id, candidate)
+                    else:
+                        beaten.setdefault(candidate['rule_id'], {**candidate, 'beaten_by': rule.id})
             if is_stock_point:
                 replenishments.append({
                     'location_id': location.id,
@@ -720,9 +731,76 @@ class StockRule(models.Model):
         for orderpoint in orderpoints.filtered(lambda op: op.warehouse_id == warehouse):
             pull_to(orderpoint.location_id, warehouse, 'replenishment')
         rules = [{'rule_id': rule_id, 'role': role} for rule_id, role in flow.items()]
+        if with_priorities:
+            for step in rules:
+                step['priority'] = priorities.get(step['rule_id'], False)
+            rules += [
+                {'rule_id': rule_id, 'role': 'beaten', 'priority': priority}
+                for rule_id, priority in beaten.items() if rule_id not in flow
+            ]
         if with_orderpoints:
             return {'rules': rules, 'replenishments': replenishments}
         return rules
+
+    @api.model
+    def _get_rule_candidates(self, product, location, values):
+        """ Pull rules competing to serve a need in `location`, in the order
+        `_get_rule` considers them: forced routes (e.g. of a reordering rule) and
+        routes without warehouse, then the product routes, the category routes,
+        and the warehouse routes (by sequence). Like `_get_rule`, the parent
+        locations are searched when no rule is found in the location.
+
+        :return: list of {'rule_id', 'rank' (1 = the rule used, False if it cannot
+            apply), 'level': 'forced'|'global'|'product'|'category'|'warehouse',
+            'reason': why it cannot apply (or False)}
+        """
+        Route = self.env['stock.route']
+        warehouse = values.get('warehouse_id') or location.warehouse_id
+        company = values.get('company_id') or warehouse.company_id
+        explicit = values.get('route_ids') or Route
+        product_routes = product.route_ids
+        category_routes = product.categ_id.total_route_ids
+        ordered = []
+
+        def add(routes, key, level):
+            for route in routes.sorted(key):
+                if route not in (r for r, __ in ordered):
+                    ordered.append((route, level(route)))
+
+        add(explicit | Route._get_routes_with_no_warehouse(),
+            lambda r: (r not in explicit, r not in product_routes, r.sequence),
+            lambda r: 'forced' if r in explicit else 'global')
+        add(product_routes | category_routes, lambda r: (r not in product_routes, r.sequence),
+            lambda r: 'product' if r in product_routes else 'category')
+        add(warehouse.route_ids, lambda r: r.sequence, lambda r: 'warehouse')
+        while location:
+            rules = self.search([
+                ('location_dest_id', '=', location.id), ('action', '!=', 'push'),
+                ('route_id', 'in', [r.id for r, __ in ordered]),
+                ('warehouse_id', 'in', [False, warehouse.id]),
+                ('company_id', 'in', [False, company.id]),
+            ], order='route_sequence, sequence')
+            candidates = []
+            rank = 0
+            for route, level in ordered:
+                route_rules = rules.filtered(lambda r: r.route_id == route)
+                # Same preference as `_get_rule`: the rule of the warehouse, else a rule without warehouse.
+                rule = route_rules.filtered(lambda r: r.warehouse_id == warehouse)[:1] or route_rules[:1]
+                if not rule:
+                    continue
+                reason = False
+                if level == 'warehouse' and not self._filter_warehouse_routes(product, warehouse, route):
+                    reason = {
+                        'buy': self.env._('No vendor for this product'),
+                        'manufacture': self.env._('No bill of materials for this product'),
+                    }.get(rule.action, self.env._('Not available for this product'))
+                if not reason:
+                    rank += 1
+                candidates.append({'rule_id': rule.id, 'rank': not reason and rank, 'level': level, 'reason': reason})
+            if rank:
+                return candidates
+            location = location.location_id
+        return []
 
     @api.model
     def _check_intercomp_location(self, locations):

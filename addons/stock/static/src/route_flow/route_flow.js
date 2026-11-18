@@ -178,14 +178,19 @@ export class RouteFlow extends Component {
     /** Rules the selected product goes through, as found by the procurement (server side). */
     async loadProductFlow() {
         this.data.productFlow = null;
+        this.data.priorities = new Map();
         if ((this.state.productId || this.state.categoryId) && this.state.warehouseId) {
             const flow = await this.orm.call(
                 "stock.rule",
                 "get_product_flow",
                 [this.state.productId || false, this.state.warehouseId],
-                { category_id: this.state.productId ? false : this.state.categoryId }
+                {
+                    category_id: this.state.productId ? false : this.state.categoryId,
+                    with_priorities: this.withPriorities,
+                }
             );
             this.data.productFlow = new Map(flow.map((step) => [step.rule_id, step.role]));
+            this.data.priorities = new Map(flow.filter((s) => s.priority).map((s) => [s.rule_id, s.priority]));
         }
         this.state.version++;
     }
@@ -463,7 +468,20 @@ export class RouteFlow extends Component {
             needIn: rule.physicalDest.id !== rule.location_dest_id.id ? rule.location_dest_id.display_name : false,
             color: this.routeColor(rule.route_id.id),
             replenishment: this.data.productFlow?.get(rule.id) === "replenishment",
+            // With priorities: rank among the rules competing for the same need, or why it lost.
+            beaten: this.isBeaten(rule),
+            priority: this.data.priorities?.get(rule.id) || false,
         };
+    }
+
+    /** Also load the rules each rule of the product path beat (shown greyed out). */
+    get withPriorities() {
+        return false;
+    }
+
+    /** Rule competing with a rule of the product path, but not used for this product. */
+    isBeaten(rule) {
+        return this.data.productFlow?.get(rule.id) === "beaten";
     }
 
     // -------------------------------------------------------------------------
