@@ -310,12 +310,14 @@ class ProductProduct(models.Model):
                 ratios_outgoing_qty.append(component.uom_id.round(component_res["outgoing_qty"] / qty_per_kit, rounding_method='DOWN'))
                 ratios_free_qty.append(component.uom_id.round(component_res["free_qty"] / qty_per_kit, rounding_method='DOWN'))
             if bom_sub_lines and ratios_virtual_available:  # Guard against all cnsumable bom: at least one ratio should be present.
+                # Quantity of one kit, expressed in the product unit (the BoM can use another one)
+                kit_qty = bom_kits[product].uom_id._compute_quantity(bom_kits[product].product_qty, product.uom_id, round=False)
                 res[product.id] = {
-                    'virtual_available': component.uom_id.round(min(ratios_virtual_available) * bom_kits[product].product_qty) // 1,
-                    'qty_available': component.uom_id.round(min(ratios_qty_available) * bom_kits[product].product_qty) // 1,
-                    'incoming_qty': component.uom_id.round(min(ratios_incoming_qty) * bom_kits[product].product_qty) // 1,
-                    'outgoing_qty': component.uom_id.round(min(ratios_outgoing_qty) * bom_kits[product].product_qty) // 1,
-                    'free_qty': component.uom_id.round(min(ratios_free_qty) * bom_kits[product].product_qty) // 1,
+                    'virtual_available': component.uom_id.round(min(ratios_virtual_available) * kit_qty) // 1,
+                    'qty_available': component.uom_id.round(min(ratios_qty_available) * kit_qty) // 1,
+                    'incoming_qty': component.uom_id.round(min(ratios_incoming_qty) * kit_qty) // 1,
+                    'outgoing_qty': component.uom_id.round(min(ratios_outgoing_qty) * kit_qty) // 1,
+                    'free_qty': component.uom_id.round(min(ratios_free_qty) * kit_qty) // 1,
                 }
             else:
                 res[product.id] = {
@@ -419,16 +421,27 @@ class ProductProduct(models.Model):
         return super()._get_backend_root_menu_ids() + [self.env.ref('mrp.menu_mrp_root').id]
 
     def _update_uom(self, to_uom_id):
-        for uom, product_template, boms in self.env['mrp.bom']._read_group(
-            [('product_tmpl_id', 'in', self.product_tmpl_id.ids)],
-            ['uom_id', 'product_tmpl_id'],
+        # BoMs shared by all variants only follow when all the variants change their unit
+        updated_templates = self.product_tmpl_id.filtered(lambda template: all(
+            variant in self or variant.uom_id.id == to_uom_id
+            for variant in template.with_context(active_test=False).product_variant_ids
+        ))
+        for uom, product_template, product, boms in self.env['mrp.bom']._read_group(
+            ['|', ('product_id', 'in', self.ids),
+                  '&', ('product_id', '=', False), ('product_tmpl_id', 'in', updated_templates.ids)],
+            ['uom_id', 'product_tmpl_id', 'product_id'],
             ['id:recordset'],
         ):
-            if product_template.uom_id != uom:
+            if product:
+                product_uoms = product.uom_id
+            else:
+                # Variants still have their former unit, the template one can already be the new one
+                product_uoms = self.filtered(lambda p: p.product_tmpl_id == product_template).uom_id
+            if uom not in product_uoms:
                 raise UserError(_('As other units of measure (ex : %(problem_uom)s) '
                 'than %(uom)s have already been used for this product, the change of unit of measure can not be done.'
                 'If you want to change it, please archive the product and create a new one.',
-                problem_uom=uom.name, uom=product_template.uom_id.name))
+                problem_uom=uom.name, uom=product_uoms[:1].name))
             boms.uom_id = to_uom_id
 
         for uom, product, bom_lines in self.env['mrp.bom.line']._read_group(

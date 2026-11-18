@@ -917,16 +917,35 @@ class ProductProduct(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+        check_barcode_uniqueness = any('barcode' in vals or 'company_id' in vals for vals in vals_list)
+        vals_list = [dict(vals) for vals in vals_list]
+        new_template_vals_list = []
         for vals in vals_list:
-            if vals.get('product_tmpl_id') and not vals.get('uom_id'):
-                # New variants of an existing template start with the template unit
-                vals['uom_id'] = self.env['product.template'].browse(vals['product_tmpl_id']).uom_id.id
+            if vals.get('product_tmpl_id'):
+                if not vals.get('uom_id'):
+                    # New variants of an existing template start with the template unit
+                    vals['uom_id'] = self.env['product.template'].browse(vals['product_tmpl_id']).uom_id.id
+            elif vals.get('uom_id'):
+                # The unit is a field of the variant, so the ORM would create the template without it:
+                # create the template here with this unit, as what is created with it (e.g. its vendor
+                # lines) uses the unit of the template
+                template_vals = {
+                    fname: vals.pop(fname) for fname in list(vals)
+                    if (field := self._fields.get(fname)) and field.inherited
+                }
+                new_template_vals_list.append((vals, {**template_vals, 'uom_id': vals['uom_id']}))
+        if new_template_vals_list:
+            templates = self.env['product.template'].with_context(create_product_product=False).create(
+                [template_vals for __, template_vals in new_template_vals_list]
+            )
+            for (vals, __), template in zip(new_template_vals_list, templates):
+                vals['product_tmpl_id'] = template.id
         products = super(ProductProduct, self.with_context(create_product_product=False)).create(
             vals_list
         )
         # Make sure the `create_product_product` context is not kept, unless it was already set.
         products = products.with_env(self.env)
-        if any('barcode' in vals or 'company_id' in vals for vals in vals_list):
+        if check_barcode_uniqueness:
             products._check_barcode_uniqueness()
         return products
 

@@ -928,7 +928,6 @@ class ProductTemplate(models.Model):
 
         combination = combination or self.env["product.template.attribute.value"]
         website = self.env.website
-        uom = self.env["uom.uom"].browse(uom_id) or self._get_main_uom()
 
         if not product_id and not combination and not only_template:
             combination = self._get_first_available_combination()
@@ -946,6 +945,10 @@ class ProductTemplate(models.Model):
 
         product_or_template = product or self
         combination = combination or product.product_template_attribute_value_ids
+        uom = self.env["uom.uom"].browse(uom_id)
+        # The unit selected for the previous variant may not be available for this one
+        if not uom or uom not in product_or_template._get_available_uoms():
+            uom = product_or_template._get_main_uom()
 
         display_name = product_or_template.with_context(display_default_code=False).display_name
         if not product:
@@ -965,6 +968,7 @@ class ProductTemplate(models.Model):
             "combination": combination,
             "product_id": product.id,
             "product_template_id": self.id,
+            "uom_id": uom.id,
             "display_name": display_name,
             "is_combination_possible": self._is_combination_possible(combination=combination),
             **self.with_context(**price_context)._get_additional_combination_info(
@@ -1066,7 +1070,7 @@ class ProductTemplate(models.Model):
 
         if website.show_product_reference_price:
             price_per_product_uom = uom._compute_price(
-                price=combination_info["price"], to_unit=self.uom_id
+                price=combination_info["price"], to_unit=product_or_template.uom_id
             )
             combination_info.update({
                 "base_unit_name": product_or_template.base_unit_name,
