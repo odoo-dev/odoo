@@ -2271,6 +2271,22 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
         with self.assertRaises(ValueError):
             Model.browse([real_id, new_id2])
 
+        # concat and union with same kind of ids
+        self.assertEqual((real_record + real_record)._ids, real_record._ids + real_record._ids)
+        self.assertEqual((new_record + new_origin)._ids, new_record._ids + new_origin._ids)
+        self.assertEqual((real_record | real_record)._ids, real_record._ids)
+        self.assertEqual((new_record | new_origin)._ids, new_record._ids + new_origin._ids)
+
+        # concat and union with mixed ids are errors
+        with self.assertRaises(ValueError):
+            real_record + new_record
+        with self.assertRaises(ValueError):
+            Model.concat([real_record, new_record])
+        with self.assertRaises(ValueError):
+            real_record | new_record
+        with self.assertRaises(ValueError):
+            Model.union([real_record, new_record])
+
     def test_40_new_defaults(self):
         """ Test new records with defaults. """
         user = self.env.user
@@ -2788,7 +2804,6 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
     def test_70_x2many_write(self):
         discussion = self.env.ref('test_base.discussion_0')
 
-        Message = self.env['test_orm.message']
         # There must be 3 messages, 0 important
         self.assertEqual(len(discussion.messages), 3)
         self.assertEqual(len(discussion.important_messages), 0)
@@ -2801,10 +2816,10 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
         self.assertEqual(len(discussion.messages), 4)
         self.assertEqual(len(discussion.important_messages), 1)
         self.assertEqual(len(discussion.very_important_messages), 1)
-        discussion.very_important_messages |= Message.new({
+        discussion.very_important_messages = [Command.create({
             'body': '42',
             'important': True,
-        })
+        })]
         # There must be 5 messages, 2 important
         self.assertEqual(len(discussion.messages), 5)
         self.assertEqual(len(discussion.important_messages), 2)

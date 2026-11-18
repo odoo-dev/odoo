@@ -6265,6 +6265,8 @@ class BaseModel(metaclass=MetaModel):
             if other._name != self._name:
                 raise TypeError(f"inconsistent models in: {self} + {other}")
             if other:
+                if self._ids and bool(self._ids[0]) != bool(other._ids[0]):
+                    raise ValueError(f"mixing ids in {self} + {other}")
                 ids = self._ids + other._ids
                 return self.__class__(self.env, ids, Prefetch.union(self._prefetch_ids, other._prefetch_ids))
         except AttributeError:
@@ -6281,23 +6283,28 @@ class BaseModel(metaclass=MetaModel):
             warnings.warn("Since 20.0, use concat() with only one iterable")
         if self:
             warnings.warn("Since 20.0, use concat() on an empty recordset")
-        ids = []
-        prefetch_ids_list = []
+
+        recs_list = []
+        is_real = set()
         for arg in (self, *it, *args):
             try:
                 if arg._name != self._name:
                     raise TypeError(f"inconsistent models in: {self} + {arg}")
                 if not arg._ids:
                     continue
-                ids.extend(arg._ids)
-                prefetch_ids_list.append(arg._prefetch_ids)
+                recs_list.append(arg)
+                is_real.add(bool(arg._ids[0]))
             except AttributeError:
                 raise TypeError(f"unsupported operand types in: {self} + {arg!r}")
-        ids = tuple(ids)
-        if len(prefetch_ids_list) == 1:
-            prefetch_ids = prefetch_ids_list[0]
+
+        if len(is_real) > 1:
+            raise ValueError(f"mixing ids in concat({recs_list})")
+
+        ids = tuple(id_ for recs in recs_list for id_ in recs._ids)
+        if len(recs_list) == 1:
+            prefetch_ids = recs_list[0]._prefetch_ids
         else:
-            prefetch_ids = Prefetch.union(*prefetch_ids_list)
+            prefetch_ids = Prefetch.union(*(recs._prefetch_ids for recs in recs_list))
         return self.__class__(self.env, ids, prefetch_ids)
 
     def __sub__(self, other) -> Self:
@@ -6334,6 +6341,8 @@ class BaseModel(metaclass=MetaModel):
             if other._name != self._name:
                 raise TypeError(f"inconsistent models in: {self} | {other}")
             if other:
+                if self._ids and bool(self._ids[0]) != bool(other._ids[0]):
+                    raise ValueError(f"mixing ids in {self} | {other}")
                 ids = tuple(dict.fromkeys(self._ids + other._ids))
                 return self.__class__(self.env, ids, Prefetch.union(self._prefetch_ids, other._prefetch_ids))
         except AttributeError:
@@ -6350,23 +6359,28 @@ class BaseModel(metaclass=MetaModel):
             warnings.warn("Since 20.0, use union() with only one iterable")
         if self:
             warnings.warn("Since 20.0, use union() on an empty recordset")
-        ids = []
-        prefetch_ids_list = []
+
+        recs_list = []
+        is_real = set()
         for arg in (self, *it, *args):
             try:
                 if arg._name != self._name:
-                    raise TypeError(f"inconsistent models in: {self} | {arg}")
+                    raise TypeError(f"inconsistent models in: {self} + {arg}")
                 if not arg._ids:
                     continue
-                ids.extend(arg._ids)
-                prefetch_ids_list.append(arg._prefetch_ids)
+                recs_list.append(arg)
+                is_real.add(bool(arg._ids[0]))
             except AttributeError:
-                raise TypeError(f"unsupported operand types in: {self} | {arg!r}")
-        ids = tuple(dict.fromkeys(ids))
-        if len(prefetch_ids_list) == 1:
-            prefetch_ids = prefetch_ids_list[0]
+                raise TypeError(f"unsupported operand types in: {self} + {arg!r}")
+
+        if len(is_real) > 1:
+            raise ValueError(f"mixing ids in union({recs_list})")
+
+        ids = tuple(dict.fromkeys(id_ for recs in recs_list for id_ in recs._ids))
+        if len(recs_list) == 1:
+            prefetch_ids = recs_list[0]._prefetch_ids
         else:
-            prefetch_ids = Prefetch.union(*prefetch_ids_list)
+            prefetch_ids = Prefetch.union(*(recs._prefetch_ids for recs in recs_list))
         return self.__class__(self.env, ids, prefetch_ids)
 
     def __eq__(self, other):
