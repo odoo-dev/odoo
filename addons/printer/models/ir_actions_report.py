@@ -42,6 +42,12 @@ class IrActionsReport(models.Model):
 
     printer_ids = fields.Many2many("printer.printer", string="Printers")
 
+    def _render_qweb_pdf(self, report_ref, res_ids=None, data=None):
+        if data and "printer_data" in data:
+            records = self.env[self._get_report(report_ref).model].browse(res_ids)
+            return records.export_to_pdf(data["printer_data"])["file_content"], "pdf"
+        return super()._render_qweb_pdf(report_ref, res_ids=res_ids, data=data)
+
     @api.model
     def get_print_jobs(self, report_name, docids, data) -> list:
         """Method to render reports for printers.
@@ -61,7 +67,8 @@ class IrActionsReport(models.Model):
         jobs = []
         if report.report_type == "qweb-text" and "zpl" in report.name.lower() and has_printer("zpl"):
             jobs.append({"type": "zpl", "report": base64.b64encode(self._render(report_name, docids, data=data)[0])})
-        elif report.report_type == "qweb-pdf" and has_printer("epos"):
+        # printer.report.mixin reports have no QWeb HTML to render as an ePOS image
+        elif report.report_type == "qweb-pdf" and has_printer("epos") and "printer_data" not in (data or {}):
             html = self._render_qweb_html(report_name, docids, data=data)[0].decode()
             # Reports reference relative URLs (e.g. the barcode widget's <img src="/report/barcode/...">),
             # which wkhtmltoimage can't resolve without a <base href> since it renders a standalone local file.
