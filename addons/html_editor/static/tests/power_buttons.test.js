@@ -167,6 +167,7 @@ describe("cleanup", () => {
         const { editor } = await setupEditor("<p>[]<br></p>");
         expect("[data-oe-local-overlay-id='oe-power-buttons-overlay']").toHaveCount(1);
         editor.destroy();
+        await animationFrame();
         expect("[data-oe-local-overlay-id='oe-power-buttons-overlay']").toHaveCount(0);
     });
 });

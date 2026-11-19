@@ -1,0 +1,15 @@
+<templates xml:space="preserve">
+    <t t-name="html_editor.PowerButtonsOverlay">
+        <div class="o_we_power_buttons d-flex justify-content-center invisible position-absolute" t-ref="this.powerButtonsContainerRef">
+            <button t-foreach="this.props.powerButtons" t-as="powerButton" t-key="powerButton_index"
+                class="power_button btn px-2 py-1 cursor-pointer"
+                t-att-class="powerButton.icon and `oi ${powerButton.iconClass or ''}`"
+                t-att-data-icon="powerButton.icon"
+                t-att-title="powerButton.description"
+                t-on-pointerdown="(ev) => ev.preventDefault()"
+                t-on-click="() => this.applyCommand(powerButton.run)">
+                <span t-if="!powerButton.icon" class="d-flex align-items-center text-nowrap" style="height: 1em;" t-out="powerButton.text"/>
+            </button>
+        </div>
+    </t>
+</templates>

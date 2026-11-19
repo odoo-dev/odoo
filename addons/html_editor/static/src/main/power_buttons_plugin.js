@@ -5,6 +5,8 @@ import { getIframeAdjustedBoundingRect } from "@html_editor/utils/dom_info";
 import { closestElement } from "@html_editor/utils/dom_traversal";
 import { omit, pick } from "@web/core/utils/objects";
 import { debounce } from "@web/core/utils/timing";
+import { signal } from "@odoo/owl";
+import { PowerButtonsOverlay } from "./power_buttons_overlay";
 
 /** @typedef {import("./powerbox/powerbox_plugin").PowerboxCommand} PowerboxCommand */
 
@@ -69,10 +71,17 @@ export class PowerButtonsPlugin extends Plugin {
     };
 
     setup() {
-        this.powerButtonsOverlay = this.dependencies.localOverlay.makeLocalOverlay(
-            "oe-power-buttons-overlay"
+        this.powerButtons = this.createPowerButtons();
+        this.powerButtonsTarget = signal(null);
+        this.dependencies.localOverlay.addLocalOverlay(
+            "oe-power-buttons-overlay",
+            PowerButtonsOverlay,
+            {
+                powerButtons: this.powerButtons,
+                powerButtonsTarget: this.powerButtonsTarget,
+                editable: this.editable,
+            }
         );
-        this.createPowerButtons();
         const shouldDebounce = this.config.debouncePowerbuttons !== false;
         if (shouldDebounce) {
             this.debouncedUpdatePowerButtons = debounce(this.updatePowerButtons.bind(this), 30);
@@ -94,46 +103,20 @@ export class PowerButtonsPlugin extends Plugin {
                         .every((predicate) => predicate(selection)),
             };
         };
-        const renderButton = ({ description, icon, iconClass, text, run }) => {
-            const btn = this.dependencies.localOverlay.createElement("button");
-            let className = "power_button btn px-2 py-1 cursor-pointer";
-            if (icon) {
-                className += ` oi ${iconClass ?? ""}`;
-                btn.dataset.icon = icon;
-            } else {
-                const span = this.document.createElement("span");
-                span.textContent = text;
-                span.className = "d-flex align-items-center text-nowrap";
-                span.style.height = "1em";
-                btn.append(span);
-            }
-            btn.className = className;
-            btn.title = description;
-            this.addDomListener(btn, "pointerdown", (ev) => ev.preventDefault());
-            this.addDomListener(btn, "click", () => this.applyCommand(run));
-            return btn;
-        };
 
         /** @type {PowerButton[]} */
         const powerButtonsDefinitions = this.getResource("power_buttons");
         // Merge properties from power_button and user_command.
-        const powerButtons = powerButtonsDefinitions.map(composePowerButton);
-        // Render HTML buttons.
-        this.descriptionToElementMap = new Map(powerButtons.map((pb) => [pb, renderButton(pb)]));
-
-        this.powerButtonsContainer = this.dependencies.localOverlay.createElement("div");
-        this.powerButtonsContainer.className = `o_we_power_buttons d-flex justify-content-center invisible position-absolute`;
-        this.powerButtonsContainer.append(...this.descriptionToElementMap.values());
-        this.powerButtonsOverlay.append(this.powerButtonsContainer);
+        return powerButtonsDefinitions.map(composePowerButton);
     }
 
     triggerDebouncedUpdatePowerButtons() {
-        this.powerButtonsContainer.classList.add("invisible");
+        this.powerButtonsTarget.set(null);
         this.debouncedUpdatePowerButtons();
     }
 
     updatePowerButtons() {
-        this.powerButtonsContainer.classList.add("invisible");
+        this.powerButtonsTarget.set(null);
         const { documentSelection, editableSelection, documentSelectionIsInEditable } =
             this.dependencies.selection.getSelectionData();
         if (
@@ -156,70 +139,14 @@ export class PowerButtonsPlugin extends Plugin {
             this.dependencies.properties.get(documentSelection.anchorNode, "powerButtons", false)
         ) {
             const direction = closestElement(block, "[dir]")?.getAttribute("dir");
-            // Hide/show buttons based on their availability.
-            for (const [{ isAvailable }, buttonElement] of this.descriptionToElementMap.entries()) {
-                const shouldHide = Boolean(!isAvailable(editableSelection));
-                buttonElement.classList.toggle("d-none", shouldHide); // 2nd arg must be a boolean
-            }
-            this.setPowerButtonsPosition(block, blockRect, direction);
-            this.powerButtonsContainer.classList.remove("invisible");
-            this.powerButtonsContainer.setAttribute("dir", direction);
+            this.powerButtonsTarget.set({
+                block,
+                blockRect,
+                direction,
+                availability: this.powerButtons.map(({ isAvailable }) =>
+                    Boolean(isAvailable(editableSelection))
+                ),
+            });
         }
-    }
-
-    getPlaceholderWidth(block) {
-        const hintText = block.getAttribute("o-we-hint-text");
-        const cs = getComputedStyle(block);
-        const canvas = this.canvas || (this.canvas = document.createElement("canvas"));
-        const ctx = canvas.getContext("2d");
-        ctx.font = cs.font;
-        const width = ctx.measureText(hintText).width;
-        return width;
-    }
-
-    /**
-     *
-     * @param {HTMLElement} block
-     * @param {string} direction
-     */
-    setPowerButtonsPosition(block, blockRect, direction) {
-        // Resetting the position of the power buttons.
-        const overlayRect = this.powerButtonsOverlay.getBoundingClientRect();
-        const placeholderWidth = this.getPlaceholderWidth(block);
-        let newButtonContainerLeft;
-        const editableRect = getIframeAdjustedBoundingRect(this.editable);
-        if (direction === "rtl") {
-            newButtonContainerLeft = blockRect.right - overlayRect.left - placeholderWidth - 30;
-            if (newButtonContainerLeft <= 0) {
-                this.powerButtonsContainer
-                    .querySelectorAll(".power_button:not(:last-child)")
-                    .forEach((el) => el.classList.add("d-none"));
-                newButtonContainerLeft = blockRect.right - overlayRect.left - placeholderWidth - 30;
-            }
-            this.powerButtonsContainer.style.transform = "translateX(-100%)";
-        } else {
-            this.powerButtonsContainer.style.transform = "unset";
-            newButtonContainerLeft = blockRect.left - overlayRect.left + placeholderWidth + 30;
-            if (
-                newButtonContainerLeft + this.powerButtonsContainer.offsetWidth >
-                editableRect.right
-            ) {
-                this.powerButtonsContainer
-                    .querySelectorAll(".power_button:not(:last-child)")
-                    .forEach((el) => el.classList.add("d-none"));
-            }
-        }
-        this.powerButtonsContainer.style.left = newButtonContainerLeft + "px";
-        this.powerButtonsContainer.style.top = blockRect.top - overlayRect.top + "px";
-    }
-
-    /**
-     * @param {Function} commandFn
-     */
-    async applyCommand(commandFn) {
-        const btns = [...this.powerButtonsContainer.querySelectorAll(".btn")];
-        btns.forEach((btn) => btn.classList.add("disabled"));
-        await commandFn();
-        btns.forEach((btn) => btn.classList.remove("disabled"));
     }
 }
