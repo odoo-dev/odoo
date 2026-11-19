@@ -128,9 +128,15 @@ class StockRule(models.Model):
         """ Modify locations to the default picking type's locations source and
         destination.
         Enable the delay alert if the picking type is a delivery
+
+        With `route_flow_keep_locations` in the context (rule drawn in the route
+        flow view), the locations already set are kept.
         """
-        self.location_src_id = self.picking_type_id.default_location_src_id.id
-        self.location_dest_id = self.picking_type_id.default_location_dest_id.id
+        keep = self.env.context.get('route_flow_keep_locations')
+        if not (keep and self.location_src_id):
+            self.location_src_id = self.picking_type_id.default_location_src_id.id
+        if not (keep and self.location_dest_id):
+            self.location_dest_id = self.picking_type_id.default_location_dest_id.id
 
     @api.onchange('route_id', 'company_id')
     def _onchange_route(self):
