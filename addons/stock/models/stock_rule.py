@@ -631,7 +631,7 @@ class StockRule(models.Model):
         return result
 
     @api.model
-    def get_product_flow(self, product_id, warehouse_id, with_orderpoints=False, category_id=False, with_priorities=False):
+    def get_product_flow(self, product_id, warehouse_id, with_orderpoints=False, category_id=False, with_priorities=False, route_id=False):
         """ Rules a product goes through in a warehouse, found the same way as
         a real procurement (see `_get_rule` and `_get_push_rule`): the chain
         pulled by a customer need, the replenishment of the locations it takes
@@ -645,11 +645,24 @@ class StockRule(models.Model):
         `_get_rule_candidates`), and the rules it beat are added with the
         role 'beaten'.
 
+        With `route_id` instead of a product (inter-warehouse route): path of a
+        replenishment of the supplied warehouse through this route, with the
+        steps of the other routes it goes through (delivery steps of the
+        supplying warehouse, reception steps of the supplied one).
+
+        A push rule whose goods land elsewhere than its destination (the move
+        goes to its final location, e.g. Output -> Customers lands in the
+        transit location of a resupply) gives it as 'arrival_id'.
+
         :return: list of {'rule_id': int, 'role': 'demand'|'replenishment'|'push'},
             or with `with_orderpoints`, {'rules': <that list>, 'replenishments': [
             {'location_id', 'rule_id', 'orderpoint': {...} or False}]}
         """
-        if category_id:
+        route = self.env['stock.route'].browse(route_id)
+        if route_id:
+            product = self.env['product.product'].new({'is_storable': True})
+            orderpoints = self.env['stock.warehouse.orderpoint']
+        elif category_id:
             product = self.env['product.product'].new({'categ_id': category_id, 'is_storable': True})
             orderpoints = self.env['stock.warehouse.orderpoint']
         else:
@@ -663,8 +676,9 @@ class StockRule(models.Model):
         replenishments = []
         priorities = {}
         beaten = {}
+        arrivals = {}
 
-        def push_from(location, wh):
+        def push_from(location, wh, final=False):
             while location and location.id not in visited:
                 visited.add(location.id)
                 rule = self._get_push_rule(move, location, no_route, wh)
@@ -672,12 +686,25 @@ class StockRule(models.Model):
                     return
                 flow[rule.id] = 'push'
                 location = rule.location_dest_id
+                # Like `_push_prepare_move_copy_values`: the move goes to its final
+                # location (the need) when it is in the destination of the rule, or
+                # when it is a transit location and the rule goes to the customers.
+                if final and final != location and (
+                    final._child_of(location) or (location.usage == 'customer' and final.usage == 'transit')
+                ):
+                    arrivals[rule.id] = final.id
+                    return
+                if final and location == final:
+                    return
 
         def pull_to(location, wh, role, chained=False):
             if not location or (location.id, wh.id) in visited:
                 return
             visited.add((location.id, wh.id))
             values = {'warehouse_id': wh, 'company_id': warehouse.company_id}
+            if route:
+                # The route of the resupply goes with the chained procurements (move route_ids).
+                values['route_ids'] = route
             orderpoint = self.env['stock.warehouse.orderpoint']
             # A stock point (not a location crossed by a make-to-order chain).
             is_stock_point = role == 'replenishment' and not chained
@@ -715,10 +742,13 @@ class StockRule(models.Model):
                 arrival = rule.picking_type_id.default_location_dest_id
             # Like `_skip_push`: no push when the chained move takes the goods where they arrive.
             if not (chained and (location._child_of(arrival) or arrival._child_of(location))):
-                push_from(arrival, wh)
+                push_from(arrival, wh, final=location)
             if rule.action in ('buy', 'manufacture'):
                 return
             source = rule.location_src_id
+            if rule.procure_method == 'make_to_stock' and route:
+                # The path of the route stops at the stock it takes from.
+                return
             if rule.procure_method == 'make_to_stock':
                 # Taken from stock: what refills this stock (e.g. a reordering rule) uses the same search.
                 pull_to(source, source.warehouse_id or wh, 'replenishment')
@@ -729,14 +759,22 @@ class StockRule(models.Model):
                     source_wh = rule.route_id.supplier_wh_id or source_wh
                 pull_to(source, source_wh, role, chained=True)
 
-        pull_to(self.env.ref('stock.stock_location_customers'), warehouse, 'demand')
-        if category_id:
+        if route:
+            # A replenishment of the warehouse supplied by the route.
+            supplied = route.supplied_wh_id or warehouse
+            pull_to(supplied.lot_stock_id, supplied, 'replenishment', chained=True)
+        else:
+            pull_to(self.env.ref('stock.stock_location_customers'), warehouse, 'demand')
+        if category_id and not route:
             # Not bought by itself (no vendor): show what happens to the goods received.
             push_from(warehouse.in_type_id.default_location_dest_id, warehouse)
         # Locations refilled by a reordering rule, even if the sale does not take from them.
         for orderpoint in orderpoints.filtered(lambda op: op.warehouse_id == warehouse):
             pull_to(orderpoint.location_id, warehouse, 'replenishment')
-        rules = [{'rule_id': rule_id, 'role': role} for rule_id, role in flow.items()]
+        rules = [
+            {'rule_id': rule_id, 'role': role, **({'arrival_id': arrivals[rule_id]} if rule_id in arrivals else {})}
+            for rule_id, role in flow.items()
+        ]
         if with_priorities:
             for step in rules:
                 step['priority'] = priorities.get(step['rule_id'], False)

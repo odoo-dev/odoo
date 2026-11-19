@@ -101,7 +101,7 @@ export class RouteFlow extends Component {
             this.orm.searchRead("stock.warehouse", [], ["name", "code", "lot_stock_id"]),
             this.orm.searchRead("stock.route", [], [
                 "name", "sequence", "product_selectable", "product_categ_selectable",
-                "warehouse_selectable", "package_type_selectable", "warehouse_ids",
+                "warehouse_selectable", "package_type_selectable", "warehouse_ids", "supplied_wh_id",
             ]),
         ]);
         const rules = await this.orm.searchRead(
@@ -179,6 +179,7 @@ export class RouteFlow extends Component {
     async loadProductFlow() {
         this.data.productFlow = null;
         this.data.priorities = new Map();
+        this.data.arrivals = new Map();
         if ((this.state.productId || this.state.categoryId) && this.state.warehouseId) {
             const flow = await this.orm.call(
                 "stock.rule",
@@ -191,6 +192,7 @@ export class RouteFlow extends Component {
             );
             this.data.productFlow = new Map(flow.map((step) => [step.rule_id, step.role]));
             this.data.priorities = new Map(flow.filter((s) => s.priority).map((s) => [s.rule_id, s.priority]));
+            this.data.arrivals = new Map(flow.filter((s) => s.arrival_id).map((s) => [s.rule_id, s.arrival_id]));
         }
         this.state.version++;
     }
@@ -289,7 +291,8 @@ export class RouteFlow extends Component {
         const edges = [];
         for (const rule of rules) {
             const from = this._sourceNode(rule);
-            const to = this._locationNode(rule.physicalDest.id);
+            // Where the goods land in the path shown (e.g. a push to the customers ending in a transit location).
+            const to = this._locationNode(this.data.arrivals?.get(rule.id) || rule.physicalDest.id);
             nodes.set(from.key, nodes.get(from.key) || from);
             nodes.set(to.key, nodes.get(to.key) || to);
             edges.push({ rule, from: from.key, to: to.key });
