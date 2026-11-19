@@ -25,10 +25,18 @@ Activates:
         'l10n_account_withholding_tax',
     ],
     'auto_install': ['account'],
+    'post_init_hook': '_l10n_eg_post_init',
     'data': [
         'data/account_tax_report_data.xml',
         'views/account_tax.xml',
+        'views/report_invoice.xml',
+        'views/res_config_settings_views.xml',
     ],
+    'assets': {
+        'web.report_assets_common': [
+            'l10n_eg/static/src/css/report_invoice.css',
+        ],
+    },
     'demo': [
         'demo/demo_company.xml',
         'demo/demo_partner.xml',
