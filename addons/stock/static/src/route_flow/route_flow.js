@@ -294,8 +294,25 @@ export class RouteFlow extends Component {
             nodes.set(to.key, nodes.get(to.key) || to);
             edges.push({ rule, from: from.key, to: to.key });
         }
+        // Pull rules whose operation type takes the goods elsewhere than where the
+        // need is (e.g. Pick: Stock → Customers, the goods go to the Packing Zone).
+        const needs = [];
+        const needOnly = new Set();
+        if (this.showPullNeeds) {
+            for (const rule of rules) {
+                if (rule.physicalDest.id === rule.location_dest_id.id || this.isBeaten(rule)) {
+                    continue;
+                }
+                const to = this._locationNode(rule.location_dest_id.id);
+                if (!nodes.has(to.key)) {
+                    nodes.set(to.key, to);
+                    needOnly.add(to.key);
+                }
+                needs.push({ rule, to: to.key, physicalTo: `loc_${rule.physicalDest.id}` });
+            }
+        }
         if (!nodes.size) {
-            return { nodes: [], edges: [], cards: [], width: 0, height: 0 };
+            return { nodes: [], edges: [], cards: [], needs: [], width: 0, height: 0 };
         }
 
         // 1. Rank = longest path from a source (capped to break cycles).
@@ -311,6 +328,12 @@ export class RouteFlow extends Component {
             }
             if (!changed) {
                 break;
+            }
+        }
+        // Locations only reached by a need: right after where the goods physically go.
+        for (const need of needs) {
+            if (needOnly.has(need.to)) {
+                rank[need.to] = Math.max(rank[need.to], rank[need.physicalTo] + 1);
             }
         }
         // Nodes without incoming edge (vendors, production...) are placed as late as
@@ -418,7 +441,7 @@ export class RouteFlow extends Component {
                 ...nodeList.map((n) => n.y + NODE_H + 90),
                 ...cards.map((c) => c.y + CARD_H)
             ) + PAD;
-        return { nodes: nodeList, cards, paths, width, height };
+        return { nodes: nodeList, cards, paths, needs, width, height };
     }
 
     /** Scale applied to the canvas: user zoom, or fit-to-width (never above 100%). */
@@ -472,6 +495,11 @@ export class RouteFlow extends Component {
             beaten: this.isBeaten(rule),
             priority: this.data.priorities?.get(rule.id) || false,
         };
+    }
+
+    /** Also draw where the need of a pull rule is, when its goods go elsewhere. */
+    get showPullNeeds() {
+        return false;
     }
 
     /** Also load the rules each rule of the product path beat (shown greyed out). */
