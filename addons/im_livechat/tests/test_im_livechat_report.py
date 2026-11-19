@@ -70,6 +70,43 @@ class TestImLivechatReport(TestImLivechatCommon):
         self.assertEqual(report.time_to_answer, 7800 / 3600)
         self.assertEqual(int(report.duration), 195)
 
+    def test_channel_report_fields_match_report(self):
+        channel = self.env["discuss.channel"].search(
+            [("livechat_channel_id", "=", self.livechat_channel.id)],
+        )
+        report = self.env["im_livechat.report.channel"].search([("channel_id", "=", channel.id)])
+        report_fname_by_channel_fname = {
+            "livechat_start_hour": "start_hour",
+            "livechat_week_day": "day_number",
+            "livechat_response_time_hour": "time_to_answer",
+            "livechat_message_count": "nbr_message",
+            "livechat_first_agent_partner_id": "partner_id",
+            "livechat_first_customer_partner_id": "visitor_partner_id",
+            "livechat_handled_by_agent": "handled_by_agent",
+            "livechat_handled_by_bot": "handled_by_bot",
+            "livechat_chatbot_script_id": "chatbot_script_id",
+            "livechat_has_call": "has_call",
+            "livechat_call_duration_hour": "call_duration_hour",
+            "livechat_chatbot_answers_path": "chatbot_answers_path",
+            "livechat_chatbot_answers_path_str": "chatbot_answers_path_str",
+        }
+        for channel_fname, report_fname in report_fname_by_channel_fname.items():
+            self.assertEqual(channel[channel_fname], report[report_fname], channel_fname)
+        self.assertAlmostEqual(channel.duration, report.duration / 60)
+        self.assertEqual(channel.livechat_first_agent_partner_id, self.operator)
+        self.assertEqual(channel.livechat_handled_by_agent, 1)
+        aggregates = ["livechat_response_time_hour:avg", "duration:avg", "livechat_message_count:avg"]
+        [channel_group] = self.env["discuss.channel"].formatted_read_group(
+            [("id", "=", channel.id)], aggregates=aggregates,
+        )
+        self.assertEqual(channel_group["livechat_response_time_hour:avg"], 7800 / 3600)
+        self.assertEqual(round(channel_group["duration:avg"] * 60), 195)
+        self.assertEqual(channel_group["livechat_message_count:avg"], report.nbr_message)
+        result = self.env["discuss.channel"].formatted_read_group(
+            [("id", "=", channel.id)], groupby=["livechat_first_agent_partner_id"],
+        )
+        self.assertEqual(result[0]["livechat_first_agent_partner_id"][0], self.operator.id)
+
     def test_im_livechat_report_operator(self):
         result = self.env["im_livechat.report.channel"].formatted_read_group(
             [], aggregates=["time_to_answer:avg", "duration:avg"]
