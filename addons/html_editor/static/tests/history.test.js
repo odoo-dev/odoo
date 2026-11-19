@@ -864,21 +864,14 @@ describe("history properties", () => {
         expect(history.getStaged("label")).toBe(undefined);
     });
 
-    test("processors prepare the draft before the properties are collected", async () => {
+    test("plugins stage values when the draft is collected", async () => {
         let history;
         const { editor, el } = await setupEditor(`<p>[]x</p>`, {
             config: {
                 resources: {
                     history_metadata_properties: { label: {} },
-                    pending_history_commit_data_processors: (data, metadata) => {
-                        const relatedCommit = history
-                            .getCommits()
-                            .find((commit) => commit.id === metadata.related_commit_id);
-                        history.stage(
-                            "label",
-                            relatedCommit ? `reverts ${relatedCommit.metadata.label}` : "edit"
-                        );
-                        return { ...data, isProcessed: true };
+                    on_will_collect_history_draft_handlers: (type) => {
+                        history.stage("label", `${type} commit`);
                     },
                 },
             },
@@ -886,10 +879,9 @@ describe("history properties", () => {
         history = editor.shared.history;
         el.querySelector("p").dataset.test = "1";
         const commit = history.commit();
-        expect(commit.metadata.label).toBe("edit");
-        expect(commit.data.isProcessed).toBe(true);
+        expect(commit.metadata.label).toBe("standard commit");
         history.undo();
-        expect(history.getCommits().at(-1).metadata.label).toBe("reverts edit");
+        expect(history.getCommits().at(-1).metadata.label).toBe("undo commit");
     });
 
     test("discarding changes reverts them and keeps metadata", async () => {
@@ -926,10 +918,8 @@ describe("history properties", () => {
                         ids.map((id, index) => [
                             id,
                             {
-                                apply: (target, { ensureNewMutations }) =>
-                                    ensureNewMutations && history.stage(id, target),
-                                revert: (target, { ensureNewMutations }) =>
-                                    ensureNewMutations && history.stage(ids[1 - index], target),
+                                apply: (target) => history.stage(id, target),
+                                revert: (target) => history.stage(ids[1 - index], target),
                             },
                         ])
                     ),
