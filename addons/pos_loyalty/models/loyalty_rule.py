@@ -3,6 +3,10 @@
 from odoo import api, fields, models
 from odoo.fields import Domain
 
+import ast
+from collections import defaultdict
+
+
 
 class LoyaltyRule(models.Model):
     _name = 'loyalty.rule'
@@ -31,7 +35,27 @@ class LoyaltyRule(models.Model):
 
     @api.depends('product_ids', 'product_category_id', 'product_tag_id', 'product_domain')  # TODO later: product tags
     def _compute_valid_product_ids(self):
-        for key, rules in self.grouped(lambda rule: (
+        ProductProduct = self.env['product.product']
+        tag_rules = self.filtered(lambda rule: (
+            rule.product_tag_id
+            and not rule.product_ids
+            and not rule.product_category_id
+            and rule.product_domain in (False, '', '[]', "[['sale_ok', '=', True]]")
+        ))
+        for product_domain, rules in tag_rules.grouped('product_domain').items():
+            domain = Domain.AND([
+                [('available_in_pos', '=', True), ('all_product_tag_ids', 'in', rules.product_tag_id.ids)],
+                Domain(ast.literal_eval(product_domain)) if product_domain else Domain.TRUE,
+            ])
+            product_ids_by_tag = defaultdict(list)
+            for product in ProductProduct.search(domain, order="id"):
+                for tag_id in (product.product_tmpl_id.product_tag_ids | product.additional_product_tag_ids).ids:
+                    product_ids_by_tag[tag_id].append(product.id)
+            for rule in rules:
+                rule.valid_product_ids = ProductProduct.browse(product_ids_by_tag[rule.product_tag_id.id])
+                rule.any_product = False
+
+        for key, rules in (self - tag_rules).grouped(lambda rule: (
             tuple(rule.product_ids.ids),
             rule.product_category_id.id,
             rule.product_tag_id.id,
