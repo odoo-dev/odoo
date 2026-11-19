@@ -1,159 +1,154 @@
-import { animationFrame } from "@odoo/hoot";
-import { waitFor } from "@odoo/hoot-dom";
+import { animationFrame, before, click, press, queryOne, tick, waitFor } from "@odoo/hoot";
+import { unmockedOrm } from "@web/../tests/_framework/module_set.hoot";
 import {
-    fields,
-    getService,
+    defineModels,
     models,
-    mountWithCleanup,
+    mountView,
+    patchWithCleanup,
     serverState,
     webModels,
 } from "@web/../tests/web_test_helpers";
-import { WebClient } from "@web/webclient/webclient";
-import {
-    getMediaManagertDialogProps,
-    MediaManagerDialog,
-} from "@html_editor/backend/media_manager/media_manager_dialog";
+import { HtmlField } from "@html_editor/fields/html_field";
+import { setSelection } from "../_helpers/selection";
+import { expectElementCount } from "../_helpers/ui_expectations";
+import { insertText } from "../_helpers/user_actions";
 
-// 1x1 transparent png, loadable by `loadImage` when an image is inserted.
+/**
+ * The tests use the product as the end user does: a form view with an html
+ * field, the media manager opened from the editor, the real views of the media
+ * manager and the fields of the real models. Only the data and the server
+ * routes are mocked.
+ */
+
+// 1x1 png, loadable by `loadImage` when an image is inserted in the editor.
 export const PNG_DATA_URL =
     "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
 
+export const EDITED_PARTNER_ID = 101;
+export const OTHER_PARTNER_ID = 102;
+/** A partner whose notes contain an image. */
+export const PARTNER_WITH_IMAGE_ID = 103;
+
+// -----------------------------------------------------------------------------
+// Views: the real ones, as defined by html_editor
+// -----------------------------------------------------------------------------
+
+const VIEW_REFS = {
+    kanban: "html_editor.mediamanager_media_kanban",
+    search: "html_editor.mediamanager_media_search",
+};
+
+const archsPromises = {};
+const archs = { own: {}, combined: {} };
+
 /**
- * Same card as `html_editor.mediamanager_media_kanban`, without the fields
- * relying on other modules widgets (create_uid avatar) or server defaults
- * (create_date).
+ * Fetch the archs of the media manager views from the server.
+ *
+ * @param {"own"|"combined"} mode "own": the views as defined by html_editor,
+ *  "combined": with the extensions of the installed modules (e.g. ai)
  */
-export const MEDIA_MANAGER_KANBAN_ARCH = /* xml */ `
-    <kanban edit="false" import="false" class="media-manager-kanban-view" js_class="media_manager_kanban">
-        <field name="id"/>
-        <field name="mimetype"/>
-        <field name="type"/>
-        <field name="public"/>
-        <field name="name"/>
-        <field name="description"/>
-        <field name="local_url"/>
-        <field name="url"/>
-        <field name="is_favorite"/>
-        <templates>
-            <t t-name="menu">
-                <div class="o_media_tags_menu o-navigable px-3 py-1">
-                    <field name="media_tag_ids" widget="media_tags" options="{'color_field': 'color', 'no_create_edit': True}" placeholder="Add a tag..."/>
-                </div>
-            </t>
-            <t t-name="card" class="o_kanban_attachment">
-                <aside class="o_kanban_image">
-                    <div class="o_kanban_image_wrapper">
-                        <div t-if="record.type.raw_value == 'url'" class="fa fa-link fa-3x text-muted" aria-label="Image is a link"/>
-                        <img t-else="" t-attf-src="#{record.local_url.raw_value}" t-att-alt="record.name.raw_value"/>
-                    </div>
-                </aside>
-                <main class="position-absolute">
-                    <div t-if="record.media_tag_ids.raw_value.length" class="o_media_tags px-2 pt-1">
-                        <field name="media_tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
-                    </div>
-                    <div class="o_kanban_details_wrapper">
-                        <div class="o_media_name text-truncate"><field name="display_name"/></div>
-                    </div>
-                </main>
-            </t>
-        </templates>
-    </kanban>`;
+function fetchMediaManagerArchs(mode) {
+    archsPromises[mode] ||= (async () => {
+        for (const [viewType, ref] of Object.entries(VIEW_REFS)) {
+            const [module, name] = ref.split(".");
+            const [{ res_id }] = await unmockedOrm(
+                "ir.model.data",
+                "search_read",
+                [[["module", "=", module], ["name", "=", name]], ["res_id"]],
+                {}
+            );
+            archs[mode][viewType] =
+                mode === "own"
+                    ? (await unmockedOrm("ir.ui.view", "read", [[res_id], ["arch_db"]], {}))[0].arch_db
+                    : await unmockedOrm("ir.ui.view", "get_combined_arch", [[res_id]], {});
+        }
+    })();
+    return archsPromises[mode];
+}
 
-export const MEDIA_MANAGER_SEARCH_ARCH = /* xml */ `
-    <search string="Media">
-        <field name="name" filter_domain="[('name','ilike',self)]" string="Attachment"/>
-        <field name="media_tag_ids"/>
-        <filter name="url_filter" string="URL" domain="[('type', '=', 'url')]"/>
-        <group>
-            <filter name="media_tags" string="Tags" domain="[]" context="{'group_by':'media_tag_ids'}"/>
-        </group>
-    </search>`;
+/**
+ * The views of `ir.attachment` requested by the media manager dialog.
+ *
+ * @param {Object} [params]
+ * @param {boolean} [params.withExtensions] include the extensions of the
+ *  installed modules (only when their assets are loaded, see
+ *  `defineMediaManagerViews`)
+ */
+export function getMediaManagerViews({ withExtensions = false } = {}) {
+    const views = archs[withExtensions ? "combined" : "own"];
+    return {
+        [`kanban,${VIEW_REFS.kanban}`]: views.kanban,
+        [`search,${VIEW_REFS.search}`]: views.search,
+    };
+}
 
-export class MediaTag extends models.Model {
+// -----------------------------------------------------------------------------
+// Data
+// -----------------------------------------------------------------------------
+
+export const TAGS = { banner: 1, logo: 2 };
+
+export class MediaTag extends models.ServerModel {
     _name = "html_editor.media.tag";
 
-    name = fields.Char();
-    color = fields.Integer();
-
     _records = [
-        { id: 1, name: "Banner", color: 1 },
-        { id: 2, name: "Logo", color: 2 },
+        { id: TAGS.banner, name: "Banner", color: 1 },
+        { id: TAGS.logo, name: "Logo", color: 2 },
     ];
 }
 
-/** The edited record, to which some images are attached. */
-export class Partner extends webModels.ResPartner {
-    _name = "res.partner";
-
-    name = fields.Char();
-
+export class ResPartner extends webModels.ResPartner {
     _records = [
-        { id: 1, name: "Edited partner" },
-        { id: 2, name: "Other partner" },
-        // partners of the default users (see web's ResUsers mock)
+        // the partners of the default company and users
+        ...serverState.companies.map(({ id, name }) => ({ id, name })),
         { id: serverState.partnerId, name: serverState.partnerName },
         { id: serverState.publicPartnerId, name: serverState.publicPartnerName, active: false },
         { id: serverState.odoobotId, name: "OdooBot", active: false },
+        { id: EDITED_PARTNER_ID, name: "Edited partner", comment: "<p>Some notes</p>" },
+        { id: OTHER_PARTNER_ID, name: "Other partner", comment: "<p>Other notes</p>" },
+        {
+            id: PARTNER_WITH_IMAGE_ID,
+            name: "Partner with an image",
+            comment: `<p><img class="img-fluid" src="${PNG_DATA_URL}" alt="old"></p>`,
+        },
     ];
 }
 
-export const ATTACHMENT_RECORDS = [
-    // Displayed in the media manager of partner 1
-    image(1, "banner.png", { public: true, media_tag_ids: [1] }),
-    image(2, "logo.png", { public: true, is_favorite: true }),
-    image(3, "partner.jpg", { mimetype: "image/jpeg", res_model: "res.partner", res_id: 1 }),
-    // Not displayed in the media manager of partner 1
-    image(4, "other_partner.png", { res_model: "res.partner", res_id: 2 }),
-    image(5, "document.pdf", { public: true, mimetype: "application/pdf" }),
-    image(6, "banner.png.crop", { public: true }),
-    image(7, "banner.webp", { public: true, mimetype: "image/webp", original_id: 1 }),
-    image(8, "static.png", { public: true, url: "/web/static/img/logo.png" }),
-    image(9, "shape.svg", {
-        public: true,
-        mimetype: "image/svg+xml",
-        url: "/html_editor/shape/brushes/01.svg",
-    }),
-    image(10, "link.png", { public: true, type: "url", url: "https://example.com/link.png" }),
-];
-
-export class IrAttachment extends webModels.IrAttachment {
-    _name = "ir.attachment";
-
-    name = fields.Char();
-    description = fields.Char();
-    mimetype = fields.Char();
-    type = fields.Selection({
-        selection: [
-            ["binary", "File"],
-            ["url", "URL"],
-        ],
-    });
-    url = fields.Char();
-    public = fields.Boolean();
-    checksum = fields.Char();
-    access_token = fields.Char();
-    local_url = fields.Char();
-    image_src = fields.Char();
-    image_width = fields.Integer();
-    image_height = fields.Integer();
-    res_model = fields.Char();
-    res_id = fields.Integer();
-    original_id = fields.Many2one({ relation: "ir.attachment" });
-    is_favorite = fields.Boolean();
-    media_tag_ids = fields.Many2many({ relation: "html_editor.media.tag", string: "Media Tags" });
-
-    // Fresh copies: the mock server modifies its records in place, and they
-    // must not leak from one test to the next.
-    _records = ATTACHMENT_RECORDS.map((record) => ({
-        ...record,
-        media_tag_ids: [...record.media_tag_ids],
-    }));
-
-    _views = {
-        kanban: MEDIA_MANAGER_KANBAN_ARCH,
-        search: MEDIA_MANAGER_SEARCH_ARCH,
-    };
+/**
+ * The attachments of the database: the media manager of the edited partner
+ * only shows the first three ones.
+ */
+export function getAttachmentRecords() {
+    return [
+        image(1, "banner.png", {
+            public: true,
+            media_tag_ids: [TAGS.banner],
+            create_date: "2026-11-02 10:00:00",
+        }),
+        image(2, "logo.png", { public: true, is_favorite: true }),
+        image(3, "partner.jpg", {
+            mimetype: "image/jpeg",
+            res_model: "res.partner",
+            res_id: EDITED_PARTNER_ID,
+            create_uid: serverState.odoobotUid,
+        }),
+        // Not displayed: images of another record, not images, technical images
+        image(4, "other_partner.png", { res_model: "res.partner", res_id: OTHER_PARTNER_ID }),
+        image(5, "document.pdf", { public: true, mimetype: "application/pdf" }),
+        image(6, "banner.png.crop", { public: true }),
+        image(7, "logo.webp", { public: true, mimetype: "image/webp", original_id: 2, is_favorite: true }),
+        image(8, "static.png", { public: true, url: "/web/static/img/logo.png" }),
+        image(9, "shape.svg", {
+            public: true,
+            mimetype: "image/svg+xml",
+            url: "/html_editor/shape/brushes/01.svg",
+        }),
+        image(10, "link.png", { public: true, type: "url", url: "https://example.com/link.png" }),
+    ];
 }
+
+/** Names of the images shown to the edited partner, in the default order. */
+export const PARTNER_IMAGES = ["banner.png", "logo.png", "partner.jpg"];
 
 function image(id, name, values = {}) {
     return {
@@ -161,59 +156,119 @@ function image(id, name, values = {}) {
         name,
         mimetype: "image/png",
         type: "binary",
-        url: false,
         public: false,
-        res_model: false,
-        res_id: 0,
-        original_id: false,
-        is_favorite: false,
-        media_tag_ids: [],
         local_url: PNG_DATA_URL,
         image_src: PNG_DATA_URL,
+        create_uid: serverState.userId,
+        create_date: "2026-11-16 10:00:00",
         ...values,
     };
 }
 
-// The standard web models are needed by the web client (e.g. `res.users` for
-// `user.hasGroup` in the kanban view), with our partners and attachments.
-export const mediaManagerModels = {
-    ...webModels,
-    IrAttachment,
-    MediaTag,
-    ResPartner: Partner,
-};
-
-/** Names of the media displayed for partner 1, in the default order (id). */
-export const PARTNER_MEDIA_NAMES = ["banner.png", "logo.png", "partner.jpg"];
-
-export const CARD = ".o_kanban_record:not(.o_kanban_ghost)";
-
-/** @param {string} name */
-export function card(name) {
-    return `${CARD}:has(.o_media_name:contains(/^${name}$/))`;
+export class IrAttachment extends webModels.IrAttachment {
+    // fresh copies: the mock server updates its records in place
+    _records = getAttachmentRecords();
+    _views = getMediaManagerViews();
 }
 
 /**
- * Open the media manager dialog for the given record, the same way the media
- * manager plugin does.
- *
- * @param {Object} [props] props overriding the default ones
- * @param {{ resModel?: string, resId?: number }} [recordInfo]
+ * Define the models and views used by the media manager. The other modules
+ * (e.g. website) can define their own `ir.attachment` with the records and
+ * views of the helpers.
  */
-export async function openMediaManager(props = {}, recordInfo = { resModel: "res.partner", resId: 1 }) {
-    await mountWithCleanup(WebClient);
-    getService("dialog").add(MediaManagerDialog, {
-        ...getMediaManagertDialogProps(recordInfo),
-        multiSelect: true,
-        ...props,
+export function defineMediaManagerModels() {
+    before(() => fetchMediaManagerArchs("own"));
+    defineModels({ ...webModels, IrAttachment, MediaTag, ResPartner });
+}
+
+/** @param {{ withExtensions?: boolean }} [params] see `getMediaManagerViews` */
+export function defineMediaManagerViews({ withExtensions = false } = {}) {
+    before(() => fetchMediaManagerArchs(withExtensions ? "combined" : "own"));
+}
+
+// -----------------------------------------------------------------------------
+// User interactions
+// -----------------------------------------------------------------------------
+
+export const PARTNER_FORM_ARCH = /* xml */ `
+    <form>
+        <field name="name"/>
+        <field name="comment" widget="html"/>
+    </form>`;
+
+/**
+ * Open the form of a partner, with its notes in an html field.
+ *
+ * @param {Object} [params]
+ * @param {number|false} [params.resId] false for a new partner
+ * @param {number[]} [params.resIds] the records of the pager
+ * @returns {Promise<{ editor: import("@html_editor/editor").Editor }>} the
+ *  editor of the displayed record (updated when another record is displayed)
+ */
+export async function openPartnerForm({ resId = EDITED_PARTNER_ID, resIds } = {}) {
+    const result = captureHtmlFieldEditor();
+    await mountView({
+        type: "form",
+        resModel: "res.partner",
+        resId: resId || undefined,
+        resIds,
+        arch: PARTNER_FORM_ARCH,
     });
-    await waitFor(".media-manager-kanban-view");
+    return result;
+}
+
+/**
+ * @returns {{ editor: import("@html_editor/editor").Editor }} the editor of the
+ *  last loaded html field
+ */
+export function captureHtmlFieldEditor() {
+    const result = {};
+    patchWithCleanup(HtmlField.prototype, {
+        onEditorLoad(editor) {
+            result.editor = editor;
+            return super.onEditorLoad(...arguments);
+        },
+    });
+    return result;
+}
+
+export async function waitForMediaManager() {
+    await waitFor(".modal .media-manager-kanban-view");
     await animationFrame();
 }
 
-/** @param {string} [selector] */
-export function getCardNames(selector = CARD) {
-    return [...document.querySelectorAll(`${selector} .o_media_name`)].map((el) =>
-        el.textContent.trim()
-    );
+/**
+ * In the notes of the opened partner, insert media with the "/media" command
+ * of the powerbox.
+ */
+export async function openMediaManagerFromPowerbox(editor) {
+    const editable = queryOne("[name='comment'] .odoo-editor-editable");
+    await click(editable);
+    // the notes of a new record are empty
+    setSelection({ anchorNode: editable.querySelector("p") || editable, anchorOffset: 0 });
+    await insertText(editor, "/media");
+    await expectElementCount(".o-we-powerbox", 1);
+    await press("Enter");
+    await waitForMediaManager();
+}
+
+/** Replace an image of the notes from the toolbar. */
+export async function openMediaManagerFromImageToolbar(imageSelector = "img") {
+    await click(`[name='comment'] .odoo-editor-editable ${imageSelector}`);
+    await tick(); // selectionchange
+    await waitFor(".o-we-toolbar");
+    await click(".o-we-toolbar button[name='replace_image']");
+    await waitForMediaManager();
+}
+
+export const CARD = ".modal .o_kanban_record:not(.o_kanban_ghost)";
+
+/** @param {string} name */
+export function card(name) {
+    return `${CARD}:has(img[alt='${name}'])`;
+}
+
+/** Names of the displayed images, from the alt of their thumbnail. */
+export function getCardNames() {
+    return [...document.querySelectorAll(`${CARD} .o_kanban_image img`)].map((img) => img.alt);
 }
