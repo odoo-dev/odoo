@@ -6,6 +6,7 @@ from unittest.mock import patch
 
 from odoo import Command
 from odoo import fields
+from odoo.exceptions import AccessError
 from odoo.addons.im_livechat.tests.common import TestImLivechatCommon
 from odoo.addons.mail.tests.common import mail_new_test_user
 from odoo.tests.common import new_test_user
@@ -56,8 +57,8 @@ class TestImLivechatReport(TestImLivechatCommon):
         self.env['mail.message'].flush_model()
 
     def test_im_livechat_report_channel(self):
-        report = self.env['im_livechat.report.channel'].search([('livechat_channel_id', '=', self.livechat_channel.id)])
-        self.assertEqual(len(report), 1, 'Should have one channel report for this live channel')
+        channel = self.env["discuss.channel"].search([("livechat_channel_id", "=", self.livechat_channel.id)])
+        self.assertEqual(len(channel), 1, "Should have one session for this live chat channel")
         # We have those messages, ordered by creation;
         # 05:05:54: wrong model
         # 06:05:54: session create
@@ -67,53 +68,41 @@ class TestImLivechatReport(TestImLivechatCommon):
         # 09:15:54: wrong model
         # So the duration of the session is: (09:20:54 - 06:05:54) = 3h15 = 195 minutes
         # The time to answer of this session is: (08:15:54 - 06:05:54) = 2h10 = 7800 seconds
-        self.assertEqual(report.time_to_answer, 7800 / 3600)
-        self.assertEqual(int(report.duration), 195)
-
-    def test_channel_report_fields_match_report(self):
-        channel = self.env["discuss.channel"].search(
-            [("livechat_channel_id", "=", self.livechat_channel.id)],
-        )
-        report = self.env["im_livechat.report.channel"].search([("channel_id", "=", channel.id)])
-        report_fname_by_channel_fname = {
-            "livechat_start_hour": "start_hour",
-            "livechat_week_day": "day_number",
-            "livechat_response_time_hour": "time_to_answer",
-            "livechat_message_count": "nbr_message",
-            "livechat_first_agent_partner_id": "partner_id",
-            "livechat_first_customer_partner_id": "visitor_partner_id",
-            "livechat_handled_by_agent": "handled_by_agent",
-            "livechat_handled_by_bot": "handled_by_bot",
-            "livechat_chatbot_script_id": "chatbot_script_id",
-            "livechat_has_call": "has_call",
-            "livechat_call_duration_hour": "call_duration_hour",
-            "livechat_chatbot_answers_path": "chatbot_answers_path",
-            "livechat_chatbot_answers_path_str": "chatbot_answers_path_str",
-        }
-        for channel_fname, report_fname in report_fname_by_channel_fname.items():
-            self.assertEqual(channel[channel_fname], report[report_fname], channel_fname)
-        self.assertAlmostEqual(channel.duration, report.duration / 60)
+        self.assertEqual(channel.livechat_response_time_hour, 7800 / 3600)
+        self.assertEqual(round(channel.duration * 60), 195)
         self.assertEqual(channel.livechat_first_agent_partner_id, self.operator)
         self.assertEqual(channel.livechat_handled_by_agent, 1)
-        aggregates = ["livechat_response_time_hour:avg", "duration:avg", "livechat_message_count:avg"]
-        [channel_group] = self.env["discuss.channel"].formatted_read_group(
-            [("id", "=", channel.id)], aggregates=aggregates,
-        )
-        self.assertEqual(channel_group["livechat_response_time_hour:avg"], 7800 / 3600)
-        self.assertEqual(round(channel_group["duration:avg"] * 60), 195)
-        self.assertEqual(channel_group["livechat_message_count:avg"], report.nbr_message)
-        result = self.env["discuss.channel"].formatted_read_group(
-            [("id", "=", channel.id)], groupby=["livechat_first_agent_partner_id"],
-        )
-        self.assertEqual(result[0]["livechat_first_agent_partner_id"][0], self.operator.id)
+        self.assertEqual(channel.livechat_handled_by_bot, 0)
+        self.assertFalse(channel.livechat_chatbot_script_id)
+        self.assertEqual(channel.livechat_has_call, 0)
+        # values computed in SQL (search, group by) match the ones computed in Python
+        for fname in (
+            "livechat_first_agent_partner_id",
+            "livechat_first_customer_partner_id",
+            "livechat_handled_by_agent",
+            "livechat_message_count",
+            "livechat_start_hour",
+            "livechat_week_day",
+        ):
+            value = channel[fname].id if channel._fields[fname].type == "many2one" else channel[fname]
+            self.assertEqual(
+                self.env["discuss.channel"].search_count([("id", "=", channel.id), (fname, "=", value)]),
+                1,
+                fname,
+            )
 
     def test_im_livechat_report_operator(self):
-        result = self.env["im_livechat.report.channel"].formatted_read_group(
-            [], aggregates=["time_to_answer:avg", "duration:avg"]
+        livechat_domain = [("channel_type", "=", "livechat")]
+        result = self.env["discuss.channel"].formatted_read_group(
+            livechat_domain, aggregates=["livechat_response_time_hour:avg", "duration:avg"],
         )
         self.assertEqual(len(result), 1)
-        self.assertEqual(result[0]["time_to_answer:avg"], 7800 / 3600)
-        self.assertEqual(int(result[0]['duration:avg']), 195)
+        self.assertEqual(result[0]["livechat_response_time_hour:avg"], 7800 / 3600)
+        self.assertEqual(round(result[0]["duration:avg"] * 60), 195)
+        result = self.env["discuss.channel"].formatted_read_group(
+            livechat_domain, groupby=["livechat_first_agent_partner_id"],
+        )
+        self.assertEqual(result[0]["livechat_first_agent_partner_id"][0], self.operator.id)
         rated_channel_id = self.make_jsonrpc_request(
             "/im_livechat/get_session", {"channel_id": self.livechat_channel.id}
         )["channel_id"]
@@ -125,14 +114,29 @@ class TestImLivechatReport(TestImLivechatCommon):
             self.operator,
             "2023-03-18 11:00:00",
         )
-        result = self.env["im_livechat.report.channel"].formatted_read_group(
-            [], aggregates=["rating_percentage:avg"]
+        result = self.env["discuss.channel"].formatted_read_group(
+            livechat_domain, aggregates=["livechat_rating_percentage:avg"],
         )
         self.assertEqual(
-            result[0]["rating_percentage:avg"],
+            result[0]["livechat_rating_percentage:avg"],
             100.0,
             "Rating percentage should be 100%, excluding unrated sessions",
         )
+
+    def test_report_fields_restricted_to_managers(self):
+        livechat_user = new_test_user(
+            self.env, login="livechat_user", groups="base.group_user,im_livechat.im_livechat_group_user",
+        )
+        channel = self.env["discuss.channel"].search(
+            [("livechat_channel_id", "=", self.livechat_channel.id)],
+        ).with_user(livechat_user)
+        self.assertEqual(channel.livechat_channel_id, self.livechat_channel)
+        with self.assertRaises(AccessError):
+            channel.livechat_response_time_hour
+        with self.assertRaises(AccessError):
+            channel.formatted_read_group(
+                [("id", "=", channel.id)], aggregates=["livechat_response_time_hour:avg"],
+            )
 
     @classmethod
     def _create_message(cls, channel, author, date):
@@ -211,8 +215,7 @@ class TestImLivechatReport(TestImLivechatCommon):
                 lambda m: m.livechat_member_type == "agent"
             ).partner_id
             self._create_message(chat, agent, datetime.now())
-            report = self.env["im_livechat.report.channel"].search([("channel_id", "=", chat.id)])
-            self.assertEqual(report.time_to_answer, 0.0)
+            self.assertEqual(chat.livechat_response_time_hour, 0.0)
 
     def test_day_of_week_ordered_by_lang_week_start(self):
         agent = new_test_user(self.env, login="test_agent", groups="im_livechat.im_livechat_group_manager")
@@ -233,26 +236,21 @@ class TestImLivechatReport(TestImLivechatCommon):
                 ).partner_id
                 self._create_message(channel, channel_agent, date)
         en_lang = self.env["res.lang"]._activate_lang("en_US")
-        report_model = self.env["im_livechat.report.channel"].with_user(agent)
         channel_model = self.env["discuss.channel"].with_user(agent)
         channel_domain = [("livechat_channel_id", "=", livechat_channel.id)]
-        result = report_model.formatted_read_group(domain=[], groupby=["day_number"])
-        expected_order = ["0", "1", "2", "3", "4", "5", "6"]
-        actual_order = [group["day_number"] for group in result]
-        self.assertEqual(actual_order, expected_order)
         result = channel_model.formatted_read_group(channel_domain, groupby=["livechat_week_day"])
-        self.assertEqual([group["livechat_week_day"] for group in result], expected_order)
+        expected_order = ["0", "1", "2", "3", "4", "5", "6"]
+        actual_order = [group["livechat_week_day"] for group in result]
+        self.assertEqual(actual_order, expected_order)
         en_lang.week_start = "6"
-        result = report_model.formatted_read_group(domain=[], groupby=["day_number"])
+        result = channel_model.formatted_read_group(channel_domain, groupby=["livechat_week_day"])
         expected_order = ["6", "0", "1", "2", "3", "4", "5"]
-        actual_order = [group["day_number"] for group in result]
+        actual_order = [group["livechat_week_day"] for group in result]
         self.assertEqual(
             actual_order,
             expected_order,
             f"Days should be ordered starting from Saturday. Got {actual_order}, expected {expected_order}"
         )
-        result = channel_model.formatted_read_group(channel_domain, groupby=["livechat_week_day"])
-        self.assertEqual([group["livechat_week_day"] for group in result], expected_order)
 
     def test_hour_and_day_of_week_in_user_timezone(self):
         alice_user = mail_new_test_user(
@@ -271,12 +269,7 @@ class TestImLivechatReport(TestImLivechatCommon):
                     "/im_livechat/get_session",
                     {"channel_id": livechat_channel.id},
                 )
-        report_model = self.env["im_livechat.report.channel"].with_user(alice_user)
         domain = [("livechat_channel_id", "=", livechat_channel.id)]
-        result = report_model.formatted_read_group(domain, groupby=["start_hour"])
-        self.assertEqual([group["start_hour"] for group in result], ["00", "01"])
-        result = report_model.formatted_read_group(domain, groupby=["day_number"])
-        self.assertEqual([group["day_number"] for group in result], ["6"])
         channel_model = self.env["discuss.channel"].with_user(alice_user)
         channels = channel_model.search(domain)
         self.assertEqual(sorted(channels.mapped("livechat_start_hour")), ["00", "01"])

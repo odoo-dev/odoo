@@ -881,6 +881,22 @@ class DiscussChannel(models.Model):
             )
         return result
 
+    @api.model
+    def action_open_discuss_channel_view(self, domain=()):
+        channels = self.search(domain)
+        action = self.env["ir.actions.act_window"]._for_xml_id("im_livechat.discuss_channel_action")
+        if len(channels) == 1:
+            action["res_id"] = channels.id
+            action["view_mode"] = "form"
+            action["views"] = [view for view in action["views"] if view[1] == "form"]
+            return action
+        action["context"] = {}
+        action["domain"] = [("id", "in", channels.ids)]
+        action["mobile_view_mode"] = "list"
+        action["view_mode"] = "list"
+        action["views"] = [view for view in action["views"] if view[1] in ("list", "form")]
+        return action
+
     def _read_group_orderby(self, table, order, groupby_terms):
         # Order the days of the week starting from the first day of the week
         # of the user language.
