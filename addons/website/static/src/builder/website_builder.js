@@ -206,7 +206,10 @@ export class WebsiteBuilder extends Component {
                   ...registry.category("website-plugins").getAll(),
               ];
         const builderPluginsToRemove = [
-            // Replaced by WebsiteMediaPlugin.
+            // Replaced by WebsiteMediaPlugin. Both names: MediaManagerPlugin
+            // replaces MediaPlugin in MAIN_PLUGINS only once its module is
+            // loaded, which may happen after CORE_PLUGINS was built.
+            "MediaPlugin",
             "MediaManagerPlugin",
         ];
         const pluginsBlockedInTranslationMode = [

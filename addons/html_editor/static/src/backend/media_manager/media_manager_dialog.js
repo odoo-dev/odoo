@@ -1,3 +1,4 @@
+import { serializeDateTime } from "@web/core/l10n/dates";
 import { _t } from "@web/core/l10n/translation";
 import { omit } from "@web/core/utils/objects";
 import {
@@ -77,7 +78,8 @@ export class MediaManagerDialog extends SelectCreateDialog {
 }
 
 export function getMediaManagertDialogProps(recordInfo) {
-    const lastWeekDate = luxon.DateTime.now().minus({ weeks: 1 }).toFormat("yyyy-MM-dd HH:mm:ss");
+    // domains on datetime fields are in UTC
+    const lastWeekDate = serializeDateTime(luxon.DateTime.now().minus({ weeks: 1 }));
     return {
         title: _t("Select a media"),
         resModel: "ir.attachment", // todo we probably don't need this
