@@ -688,8 +688,9 @@ class StockRule(models.Model):
         # Minimum stock rules
         domain = self._get_orderpoint_domain(company_id=company_id)
         orderpoints = self.env['stock.warehouse.orderpoint'].search(domain)
-        orderpoints.sudo()._compute_qty_to_order_computed()
-        orderpoints.sudo()._compute_deadline_date()
+        orderpoints.env.add_to_compute(orderpoints._fields['qty_to_order_computed'], orderpoints)
+        orderpoints.env.add_to_compute(orderpoints._fields['deadline_date'], orderpoints)
+        orderpoints._recompute_model()
 
         if use_new_cursor:
             self.env['ir.cron']._commit_progress(1)

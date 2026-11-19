@@ -463,7 +463,8 @@ class StockWarehouseOrderpoint(models.Model):
         orderpoints = self.filtered(to_compute)
         qty_in_progress_by_orderpoint = orderpoints._quantity_in_progress()
         for orderpoint in orderpoints:
-            orderpoint.qty_to_order_computed = orderpoint._get_qty_to_order(qty_in_progress_by_orderpoint=qty_in_progress_by_orderpoint)
+            with self.env.protecting([orderpoints._fields['qty_to_order_computed']], orderpoint):
+                orderpoint.qty_to_order_computed = orderpoint._get_qty_to_order(qty_in_progress_by_orderpoint=qty_in_progress_by_orderpoint)
         (self - orderpoints).qty_to_order_computed = False
 
     @api.depends('replenishment_uom_id', 'product_max_qty')
