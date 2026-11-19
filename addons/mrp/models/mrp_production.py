@@ -158,6 +158,7 @@ class MrpProduction(models.Model):
     date_finished = fields.Datetime(
         'End', copy=False, default=_get_default_date_finished,
         compute='_compute_date_finished', store=True,
+        readonly=False, ui_readonly=True,
         help="Date you expect to finish production or actual date you finished production.")
     duration_expected = fields.Float("Expected Duration", help="Total expected duration (in minutes)", compute='_compute_duration_expected', store=True)
     duration = fields.Float("Real Duration", help="Total real duration (in minutes)", compute='_compute_duration', store=True)
@@ -186,7 +187,7 @@ class MrpProduction(models.Model):
         ('to_close', 'To Close'),
         ('done', 'Done'),
         ('cancel', 'Cancelled')], string='State',
-        compute='_compute_state', copy=False, index=True, ui_readonly=True,
+        compute='_compute_state', copy=False, index=True, readonly=False, ui_readonly=True,
         store=True, tracking=True,
         help=" * Draft: The MO is not confirmed yet.\n"
              " * Confirmed: The MO is confirmed, the stock rules and the reordering of the components are trigerred.\n"
