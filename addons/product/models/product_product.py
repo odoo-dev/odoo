@@ -43,7 +43,7 @@ class ProductProduct(models.Model):
         help="This is the sum of the extra price of all attributes")
     # lst_price: catalog value + extra, or custom value
     lst_price = fields.Float(
-        'Sales Price',
+        'Variant Price',
         compute='_compute_product_lst_price',
         inverse='_inverse_product_lst_price',
         min_display_digits='Product Price',
@@ -785,7 +785,7 @@ class ProductProduct(models.Model):
         for vals in with_import_values:
             name = vals['name']
             if name and name not in name2template and name not in template_vals_list:
-                template_vals_list[name] = {key: value for key, value in vals.items() if PT._fields[key].required}
+                template_vals_list[name] = {key: value for key, value in vals.items() if key in PT._fields and PT._fields[key].required}
 
         # create the first product to have default values
         created_templates = PT.with_context(create_product_product=True).create(list(template_vals_list.values()))

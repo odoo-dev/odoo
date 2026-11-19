@@ -31,6 +31,9 @@ class ResourceResource(models.Model):
     def _default_color(self):
         return randint(1, 11)
 
+    def _default_calendar_id(self):
+        return self.env.company.resource_calendar_id
+
     name = fields.Char(required=True)
     active = fields.Boolean(
         'Active', default=True,
@@ -51,7 +54,7 @@ class ResourceResource(models.Model):
         help="This field is used to calculate the expected duration of a work order at this work center. For example, if a work order takes one hour and the efficiency factor is 100%, then the expected duration will be one hour. If the efficiency factor is 200%, however the expected duration will be 30 minutes.")
     calendar_id = fields.Many2one(
         "resource.calendar", string='Working Time', required=True,
-        default=lambda self: self.env.company.resource_calendar_id,
+        default=lambda self: self._default_calendar_id(),
         domain="[('company_id', '=', company_id)]",
         help="Define the working schedule of the resource. Assign a flexible calendar for fully "
              "flexible working hours.")
