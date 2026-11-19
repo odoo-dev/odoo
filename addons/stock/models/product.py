@@ -502,26 +502,77 @@ class ProductProduct(models.Model):
             return [('id', 'in', ids)]
 
         if isinstance(value, Iterable) and not isinstance(value, str):
-            cmp_value = {float(v) for v in value}
+            cmp_value = frozenset(float(v) for v in value)
         else:
             cmp_value = float(value)
+
+        # web_search_read() re-evaluates the exact same domain right after the main search to get
+        # the pager total (search_count), which would otherwise redo this whole quantity computation
+        # for the whole catalog a second time. It flags that pair of calls with
+        # `allow_quantity_search_cache` in the context, so we only reuse the cache there: nothing
+        # here is invalidated by writes, so caching outside of that pair (e.g. a plain search(),
+        # a stock move, then another search() in the same transaction) could return stale ids.
+        use_cache = self.env.context.get('allow_quantity_search_cache')
+        cache_key = (
+            field, operator, cmp_value,
+            self.env.context.get('lot_id'), self.env.context.get('owner_id'), self.env.context.get('package_id'),
+            self.env.context.get('from_date'), self.env.context.get('to_date'),
+        )
+        cache = self.env.cr.cache.setdefault('_search_product_quantity', {})
+        if use_cache and cache_key in cache:
+            ids = cache[cache_key]
+            thread_rss_after = resource.getrusage(resource.RUSAGE_THREAD).ru_maxrss
+            _log_thread_rss(f'_search_product_quantity(field={field}, cache_hit=True)', thread_rss_before, thread_rss_after)
+            return [('id', 'in', ids)]
+
         products = self.with_context(prefetch_fields=False).search([('type', '!=', 'service')])
         quantities = products.with_context(search_all=True)._compute_quantities_dict(
             self.env.context.get('lot_id'), self.env.context.get('owner_id'), self.env.context.get('package_id'),
             self.env.context.get('from_date'), self.env.context.get('to_date'),
         )
         ids = [product_id for product_id, qties in quantities.items() if op(qties[field], cmp_value)]
+        if use_cache:
+            cache[cache_key] = ids
         thread_rss_after = resource.getrusage(resource.RUSAGE_THREAD).ru_maxrss
-        _log_thread_rss(f'_search_product_quantity(field={field})', thread_rss_before, thread_rss_after)
+        _log_thread_rss(f'_search_product_quantity(field={field}, cache_hit=False)', thread_rss_before, thread_rss_after)
         return [('id', 'in', ids)]
 
     # TODO: remove in master. No longer called (superseded by `_search_product_quantity`)
     def _search_qty_available_new(self, operator, value, lot_id=False, owner_id=False, package_id=False):
         thread_rss_before = resource.getrusage(resource.RUSAGE_THREAD).ru_maxrss
+        # See the comment on `_search_product_quantity` above: only cache the pair of calls that
+        # web_search_read() flags with `allow_quantity_search_cache`, never a plain search().
+        use_cache = self.env.context.get('allow_quantity_search_cache') and PY_OPERATORS.get(operator)
+        if not use_cache:
+            result = self._search_field_by_quants(operator, value, lot_id, owner_id, package_id)
+            thread_rss_after = resource.getrusage(resource.RUSAGE_THREAD).ru_maxrss
+            _log_thread_rss('_search_qty_available_new', thread_rss_before, thread_rss_after)
+            return result
+
+        if isinstance(value, Iterable) and not isinstance(value, str):
+            cache_value = frozenset(float(v) for v in value)
+        else:
+            cache_value = float(value)
+        cache_key = (operator, cache_value, lot_id, owner_id, package_id)
+        cache = self.env.cr.cache.setdefault('_search_qty_available_new', {})
+        if cache_key in cache:
+            result = cache[cache_key]
+            thread_rss_after = resource.getrusage(resource.RUSAGE_THREAD).ru_maxrss
+            _log_thread_rss('_search_qty_available_new(cache_hit=True)', thread_rss_before, thread_rss_after)
+            return result
+
         result = self._search_field_by_quants(operator, value, lot_id, owner_id, package_id)
+        cache[cache_key] = result
         thread_rss_after = resource.getrusage(resource.RUSAGE_THREAD).ru_maxrss
-        _log_thread_rss('_search_qty_available_new', thread_rss_before, thread_rss_after)
+        _log_thread_rss('_search_qty_available_new(cache_hit=False)', thread_rss_before, thread_rss_after)
         return result
+
+    def web_search_read(self, *args, **kwargs):
+        # web_search_read() re-evaluates the exact same domain right after the main search to get
+        # the pager total (search_count). Flag that pair of calls so _search_product_quantity()
+        # and _search_qty_available_new() can safely reuse their cached ids for it, without ever
+        # doing so for an unrelated search() elsewhere in the same transaction.
+        return super(ProductProduct, self.with_context(allow_quantity_search_cache=True)).web_search_read(*args, **kwargs)
 
     def _search_field_by_quants(self, operator, value, lot_id=False, owner_id=False, package_id=False, field="qty_available"):
         ''' Optimized method which doesn't search on stock.moves, only on stock.quants. '''
@@ -1033,6 +1084,10 @@ class ProductTemplate(models.Model):
             'view_mode': 'list',
             'domain': domain,
         }
+
+    def web_search_read(self, *args, **kwargs):
+        # See the same override on product.product above.
+        return super(ProductTemplate, self.with_context(allow_quantity_search_cache=True)).web_search_read(*args, **kwargs)
 
     def _search_qty_available(self, operator, value):
         domain = [('qty_available', operator, value)]
