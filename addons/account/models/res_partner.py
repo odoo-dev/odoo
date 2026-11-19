@@ -261,7 +261,7 @@ class ResPartner(models.Model):
     currency_id = fields.Many2one('res.currency',
         compute='_get_company_currency', compute_sql='_get_company_currency_sql', compute_sudo=True,
         readonly=True,
-        string="Currency") # currency of amount currency
+        string="Currency")  # currency of amount currency
     property_account_payable_id = fields.Many2one('account.account', company_dependent=True,
         check_company=True,
         string="Account Payable",
@@ -453,7 +453,7 @@ class ResPartner(models.Model):
 
     @api.model
     def _commercial_fields(self):
-        return super(ResPartner, self)._commercial_fields() + \
+        return super()._commercial_fields() + \
             ['property_account_payable_id', 'property_account_receivable_id', 'property_account_position_id',
              'property_payment_term_id', 'property_supplier_payment_term_id', 'credit_limit']
 
@@ -655,7 +655,7 @@ class ResPartner(models.Model):
 
         # Sometimes, the vat is specified with some whitespaces or dots.
         normalized_vat = vat.replace(' ', '').replace('.', '')
-        country_prefix = re.match('^[a-zA-Z]{2}|^', vat).group()
+        country_prefix = re.match(r'^[a-zA-Z]{2}|^', vat).group()
 
         criteria = []
         if country_code := customer_values.get('country_code'):

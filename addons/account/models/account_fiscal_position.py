@@ -192,7 +192,7 @@ class AccountFiscalPosition(models.Model):
         if zip_from or zip_to:
             for rec in self:
                 vals['zip_from'], vals['zip_to'] = self._convert_zip_values(zip_from or rec.zip_from, zip_to or rec.zip_to)
-        return super(AccountFiscalPosition, self).write(vals)
+        return super().write(vals)
 
     def _get_first_matching_fpos(self, partner):
         sorted_fpos = self.sorted(key=lambda f: (-len(f.company_id.sudo().parent_ids), f.sequence))  # company specific first, then sequence

@@ -170,7 +170,7 @@ class ResCompany(models.Model):
     )
     vat_check_vies = fields.Boolean(string='Verify VAT Numbers with VIES')
 
-    #Fields of the setup step for opening move
+    # Fields of the setup step for opening move
     account_opening_move_id = fields.Many2one(string='Opening Journal Entry', comodel_name='account.move', help="The journal entry containing the initial balance of all this company's accounts.")
     account_opening_journal_id = fields.Many2one(string='Opening Journal', comodel_name='account.journal', related='account_opening_move_id.journal_id', help="Journal where the opening entry of this company's accounting has been posted.", readonly=False)
     account_opening_date = fields.Date(string='Opening Entry', help="That is the date of the opening entry.", default=lambda self: fields.Date.today())
@@ -643,7 +643,7 @@ class ResCompany(models.Model):
 
     def get_new_account_code(self, current_code, old_prefix, new_prefix):
         digits = len(current_code)
-        return new_prefix + current_code.replace(old_prefix, '', 1).lstrip('0').rjust(digits-len(new_prefix), '0')
+        return new_prefix + current_code.replace(old_prefix, '', 1).lstrip('0').rjust(digits - len(new_prefix), '0')
 
     def reflect_code_prefix_change(self, old_code, new_code):
         if not old_code or new_code == old_code:
@@ -694,10 +694,10 @@ class ResCompany(models.Model):
         """Check that the lock date changes are valid.
         * Check that we do not decrease or remove the hard lock dates.
         * Check there are no unreconciled bank statement lines in the period we want to lock.
-        * Check there are no unhashed journal entires in the period we want to lock.
+        * Check there are no unhashed journal entries in the period we want to lock.
         :param vals: The values passed to the write method.
         """
-        new_locks = {field: fields.Date.to_date(values[field])for field in LOCK_DATE_FIELDS if field in values}
+        new_locks = {field: fields.Date.to_date(values[field]) for field in LOCK_DATE_FIELDS if field in values}
 
         fiscalyear_lock_date = new_locks.get('fiscalyear_lock_date')
         hard_lock_date = new_locks.get('hard_lock_date')
@@ -997,7 +997,7 @@ class ResCompany(models.Model):
             code -= 1
         return self.env['account.account']._load_records([
             {
-                'xml_id': f"account.{str(self.id)}_unaffected_earnings_account",
+                'xml_id': f"account.{self.id!s}_unaffected_earnings_account",
                 'values': {
                               'code': str(code),
                               'name': _('Profit or Loss Appropriation'),
@@ -1034,7 +1034,7 @@ class ResCompany(models.Model):
 
         def update_vals(account, side, balance, balancing=False):
             nonlocal open_balance
-            corresponding_lines = corresponding_lines_per_account[(account, side)]
+            corresponding_lines = corresponding_lines_per_account[account, side]
             currency = account.currency_id or self.currency_id
             amount_currency = balance if balancing else self.currency_id._convert(balance, currency, date=conversion_date)
             open_balance += balance
@@ -1050,7 +1050,7 @@ class ResCompany(models.Model):
                 yield from del_lines(corresponding_lines[1:])
             else:
                 yield Command.create({
-                    'name':_("Automatic Balancing Line") if balancing else _("Opening balance"),
+                    'name': _("Automatic Balancing Line") if balancing else _("Opening balance"),
                     'account_id': account.id,
                     'balance': balance,
                     'amount_currency': amount_currency,
@@ -1067,8 +1067,8 @@ class ResCompany(models.Model):
         # Update the opening move's lines.
         balancing_account = self.get_unaffected_earnings_account()
         open_balance = (
-            sum(corresponding_lines_per_account[(balancing_account, 'credit')].mapped('credit'))
-            -sum(corresponding_lines_per_account[(balancing_account, 'debit')].mapped('debit'))
+            sum(corresponding_lines_per_account[balancing_account, 'credit'].mapped('credit'))
+            - sum(corresponding_lines_per_account[balancing_account, 'debit'].mapped('debit'))
         )
         commands = []
         move_values = {'line_ids': commands}
