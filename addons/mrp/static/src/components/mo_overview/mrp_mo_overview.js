@@ -1,8 +1,8 @@
 import { _t } from "@web/core/l10n/translation";
-import { useSubEnv } from "@web/owl2/utils";
-import { Component, EventBus, onWillStart, proxy, useProps } from "@odoo/owl";
+import { Component, onWillStart, proxy, useProps, providePlugins, usePlugin } from "@odoo/owl";
+import { MrpOverviewPlugin } from "../mrp_overview_plugin";
 import { registry } from "@web/core/registry";
-import { useBus, useService } from "@web/core/utils/hooks";
+import { useService } from "@web/core/utils/hooks";
 import { Layout } from "@web/search/layout";
 import { standardActionServiceProps } from "@web/webclient/actions/action_plugin";
 import { MoOverviewLine } from "../mo_overview_line/mrp_mo_overview_line";
@@ -35,13 +35,14 @@ export class MoOverview extends Component {
             allFolded: true,
         });
 
-        useSubEnv({ overviewBus: new EventBus() });
+        providePlugins([MrpOverviewPlugin]);
+        this.overviewPlugin = usePlugin(MrpOverviewPlugin);
 
         onWillStart(async () => {
             await this.getManufacturingData(true);
         });
-        useBus(this.env.overviewBus, "update-folded", (ev) => this.onChangeFolded(ev.detail));
-        useBus(this.env.overviewBus, "reload", () => this.getManufacturingData());
+        this.overviewPlugin.onUpdateFolded((foldInfo) => this.onChangeFolded(foldInfo));
+        this.overviewPlugin.onReload(() => this.getManufacturingData());
     }
 
     async getManufacturingData(shouldInitializeFoldState = false) {
@@ -105,7 +106,7 @@ export class MoOverview extends Component {
     }
 
     clickToggleFold() {
-        this.env.overviewBus.trigger("toggle-fold-all", { isFolded: !this.state.allFolded });
+        this.overviewPlugin.toggleFoldAll(!this.state.allFolded);
     }
 
     //---- Helpers ----
