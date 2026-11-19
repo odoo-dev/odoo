@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import re
+from urllib.parse import urlparse
 from lxml import html
 import chardet
 import requests
@@ -36,6 +37,11 @@ def get_link_preview_from_url(url, request_session=None):
     except LocationParseError:
         return False
     if not response.ok or not response.headers.get('Content-Type'):
+        return False
+    if response.history and (urlparse(response.url).hostname or '').startswith('consent.'):
+        # Redirected to a cookie consent page (e.g. consent.youtube.com for
+        # requests from European servers) instead of the requested page: its
+        # title (e.g. "Before you continue to YouTube") would be misleading.
         return False
     # Content-Type header can return a charset, but we just need the
     # mimetype (eg: image/jpeg;charset=ISO-8859-1)
