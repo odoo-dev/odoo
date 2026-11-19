@@ -749,20 +749,6 @@
             ]"/>
             <value eval="{'date': datetime.now() - timedelta(days=333)}"/>
         </function>
-        <function model="stock.move.line" name="write">
-            <value model="stock.move.line" search="[
-                ('product_id', '=', ref('product.product_product_8')),
-                ('picking_id', '=', ref('purchase_stock.picking_delivery_1')),
-            ]"/>
-            <value eval="{'date': datetime.now() - timedelta(days=333)}"/>
-        </function>
-        <function model="stock.move.line" name="write">
-            <value model="stock.move.line" search="[
-                ('product_id', '=', ref('product.product_delivery_01')),
-                ('picking_id', '=', ref('purchase_stock.picking_delivery_1')),
-            ]"/>
-            <value eval="{'date': datetime.now() - timedelta(days=333)}"/>
-        </function>
 
         <function model="stock.picking" name="write">
             <value model="stock.picking" eval="[obj().env.ref('purchase_stock.picking_delivery_2').id]"/>
@@ -770,10 +756,6 @@
         </function>
         <function model="stock.move" name="write">
             <value model="stock.move" search="[('picking_id', '=', ref('purchase_stock.picking_delivery_2'))]"/>
-            <value eval="{'date': datetime.now() - timedelta(days=75)}"/>
-        </function>
-        <function model="stock.move.line" name="write">
-            <value model="stock.move.line" search="[('picking_id', '=', ref('purchase_stock.picking_delivery_2'))]"/>
             <value eval="{'date': datetime.now() - timedelta(days=75)}"/>
         </function>
 
@@ -802,27 +784,6 @@
             ]"/>
             <value eval="{'date': datetime.now() - timedelta(days=50)}"/>
         </function>
-        <function model="stock.move.line" name="write">
-            <value model="stock.move.line" search="[
-                ('product_id', '=', ref('product.product_product_8')),
-                ('picking_id', '=', ref('purchase_stock.picking_delivery_3')),
-            ]"/>
-            <value eval="{'date': datetime.now() - timedelta(days=50)}"/>
-        </function>
-        <function model="stock.move.line" name="write">
-            <value model="stock.move.line" search="[
-                ('product_id', '=', ref('product.product_product_9')),
-                ('picking_id', '=', ref('purchase_stock.picking_delivery_3')),
-            ]"/>
-            <value eval="{'date': datetime.now() - timedelta(days=50)}"/>
-        </function>
-        <function model="stock.move.line" name="write">
-            <value model="stock.move.line" search="[
-                ('product_id', '=', ref('product.product_delivery_01')),
-                ('picking_id', '=', ref('purchase_stock.picking_delivery_3')),
-            ]"/>
-            <value eval="{'date': datetime.now() - timedelta(days=50)}"/>
-        </function>
 
         <function model="stock.picking" name="write">
             <value model="stock.picking" eval="[obj().env.ref('purchase_stock.picking_delivery_4').id]"/>
@@ -842,20 +803,6 @@
             ]"/>
             <value eval="{'date': datetime.now() - timedelta(days=21)}"/>
         </function>
-        <function model="stock.move.line" name="write">
-            <value model="stock.move.line" search="[
-                ('product_id', '=', ref('product.product_product_8')),
-                ('picking_id', '=', ref('purchase_stock.picking_delivery_4')),
-            ]"/>
-            <value eval="{'date': datetime.now() - timedelta(days=21)}"/>
-        </function>
-        <function model="stock.move.line" name="write">
-            <value model="stock.move.line" search="[
-                ('product_id', '=', ref('product.product_delivery_01')),
-                ('picking_id', '=', ref('purchase_stock.picking_delivery_4')),
-            ]"/>
-            <value eval="{'date': datetime.now() - timedelta(days=21)}"/>
-        </function>
 
         <function model="stock.picking" name="write">
             <value model="stock.picking" eval="[obj().env.ref('purchase_stock.picking_delivery_5').id]"/>
@@ -863,13 +810,6 @@
         </function>
         <function model="stock.move" name="write">
             <value model="stock.move" search="[
-                ('product_id', '=', ref('product.product_product_9')),
-                ('picking_id', '=', ref('purchase_stock.picking_delivery_5')),
-            ]"/>
-            <value eval="{'date': datetime.now() - timedelta(days=7)}"/>
-        </function>
-        <function model="stock.move.line" name="write">
-            <value model="stock.move.line" search="[
                 ('product_id', '=', ref('product.product_product_9')),
                 ('picking_id', '=', ref('purchase_stock.picking_delivery_5')),
             ]"/>
@@ -886,10 +826,6 @@
             ]"/>
             <value eval="{'date': datetime.now() - relativedelta(years=1)}"/>
         </function>
-        <function model="stock.move.line" name="write">
-            <value model="stock.move.line" search="[('picking_id', '=', ref('purchase_stock.picking_delivery_6'))]"/>
-            <value eval="{'date': datetime.now() - relativedelta(years=1)}"/>
-        </function>
         <function model="stock.picking" name="write">
             <value model="stock.picking" eval="[obj().env.ref('purchase_stock.picking_delivery_7').id]"/>
             <value eval="{'date_done': datetime.now() - relativedelta(months=11)}"/>
@@ -899,10 +835,6 @@
                 ('product_id', '=', ref('product.product_product_3')),
                 ('picking_id', '=', ref('purchase_stock.picking_delivery_7')),
             ]"/>
-            <value eval="{'date': datetime.now() - relativedelta(months=11)}"/>
-        </function>
-        <function model="stock.move.line" name="write">
-            <value model="stock.move.line" search="[('picking_id', '=', ref('purchase_stock.picking_delivery_7'))]"/>
             <value eval="{'date': datetime.now() - relativedelta(months=11)}"/>
         </function>
         <function model="stock.picking" name="write">
@@ -916,10 +848,6 @@
             ]"/>
             <value eval="{'date': datetime.now() - relativedelta(months=10)}"/>
         </function>
-        <function model="stock.move.line" name="write">
-            <value model="stock.move.line" search="[('picking_id', '=', ref('purchase_stock.picking_delivery_8'))]"/>
-            <value eval="{'date': datetime.now() - relativedelta(months=10)}"/>
-        </function>
         <function model="stock.picking" name="write">
             <value model="stock.picking" eval="[obj().env.ref('purchase_stock.picking_delivery_9').id]"/>
             <value eval="{'date_done': datetime.now() - relativedelta(months=9)}"/>
@@ -929,10 +857,6 @@
                 ('product_id', '=', ref('product.product_product_3')),
                 ('picking_id', '=', ref('purchase_stock.picking_delivery_9')),
             ]"/>
-            <value eval="{'date': datetime.now() - relativedelta(months=9)}"/>
-        </function>
-        <function model="stock.move.line" name="write">
-            <value model="stock.move.line" search="[('picking_id', '=', ref('purchase_stock.picking_delivery_9'))]"/>
             <value eval="{'date': datetime.now() - relativedelta(months=9)}"/>
         </function>
         <function model="stock.picking" name="write">
@@ -946,10 +870,6 @@
             ]"/>
             <value eval="{'date': datetime.now() - relativedelta(months=8)}"/>
         </function>
-        <function model="stock.move.line" name="write">
-            <value model="stock.move.line" search="[('picking_id', '=', ref('purchase_stock.picking_delivery_10'))]"/>
-            <value eval="{'date': datetime.now() - relativedelta(months=8)}"/>
-        </function>
         <function model="stock.picking" name="write">
             <value model="stock.picking" eval="[obj().env.ref('purchase_stock.picking_delivery_11').id]"/>
             <value eval="{'date_done': datetime.now() - relativedelta(months=7)}"/>
@@ -959,10 +879,6 @@
                 ('product_id', '=', ref('product.product_product_3')),
                 ('picking_id', '=', ref('purchase_stock.picking_delivery_11')),
             ]"/>
-            <value eval="{'date': datetime.now() - relativedelta(months=7)}"/>
-        </function>
-        <function model="stock.move.line" name="write">
-            <value model="stock.move.line" search="[('picking_id', '=', ref('purchase_stock.picking_delivery_11'))]"/>
             <value eval="{'date': datetime.now() - relativedelta(months=7)}"/>
         </function>
         <function model="stock.picking" name="write">
@@ -976,10 +892,6 @@
             ]"/>
             <value eval="{'date': datetime.now() - relativedelta(months=6)}"/>
         </function>
-        <function model="stock.move.line" name="write">
-            <value model="stock.move.line" search="[('picking_id', '=', ref('purchase_stock.picking_delivery_12'))]"/>
-            <value eval="{'date': datetime.now() - relativedelta(months=6)}"/>
-        </function>
         <function model="stock.picking" name="write">
             <value model="stock.picking" eval="[obj().env.ref('purchase_stock.picking_delivery_13').id]"/>
             <value eval="{'date_done': datetime.now() - relativedelta(months=5)}"/>
@@ -989,10 +901,6 @@
                 ('product_id', '=', ref('product.product_product_3')),
                 ('picking_id', '=', ref('purchase_stock.picking_delivery_13')),
             ]"/>
-            <value eval="{'date': datetime.now() - relativedelta(months=5)}"/>
-        </function>
-        <function model="stock.move.line" name="write">
-            <value model="stock.move.line" search="[('picking_id', '=', ref('purchase_stock.picking_delivery_13'))]"/>
             <value eval="{'date': datetime.now() - relativedelta(months=5)}"/>
         </function>
         <function model="stock.picking" name="write">
@@ -1006,10 +914,6 @@
             ]"/>
             <value eval="{'date': datetime.now() - relativedelta(months=4)}"/>
         </function>
-        <function model="stock.move.line" name="write">
-            <value model="stock.move.line" search="[('picking_id', '=', ref('purchase_stock.picking_delivery_14'))]"/>
-            <value eval="{'date': datetime.now() - relativedelta(months=4)}"/>
-        </function>
         <function model="stock.picking" name="write">
             <value model="stock.picking" eval="[obj().env.ref('purchase_stock.picking_delivery_15').id]"/>
             <value eval="{'date_done': datetime.now() - relativedelta(months=3)}"/>
@@ -1019,10 +923,6 @@
                 ('product_id', '=', ref('product.product_product_3')),
                 ('picking_id', '=', ref('purchase_stock.picking_delivery_15')),
             ]"/>
-            <value eval="{'date': datetime.now() - relativedelta(months=3)}"/>
-        </function>
-        <function model="stock.move.line" name="write">
-            <value model="stock.move.line" search="[('picking_id', '=', ref('purchase_stock.picking_delivery_15'))]"/>
             <value eval="{'date': datetime.now() - relativedelta(months=3)}"/>
         </function>
         <function model="stock.picking" name="write">
@@ -1036,10 +936,6 @@
             ]"/>
             <value eval="{'date': datetime.now() - relativedelta(months=2)}"/>
         </function>
-        <function model="stock.move.line" name="write">
-            <value model="stock.move.line" search="[('picking_id', '=', ref('purchase_stock.picking_delivery_16'))]"/>
-            <value eval="{'date': datetime.now() - relativedelta(months=2)}"/>
-        </function>
         <function model="stock.picking" name="write">
             <value model="stock.picking" eval="[obj().env.ref('purchase_stock.picking_delivery_17').id]"/>
             <value eval="{'date_done': datetime.now() - relativedelta(months=1)}"/>
@@ -1049,10 +945,6 @@
                 ('product_id', '=', ref('product.product_product_3')),
                 ('picking_id', '=', ref('purchase_stock.picking_delivery_17')),
             ]"/>
-            <value eval="{'date': datetime.now() - relativedelta(months=1)}"/>
-        </function>
-        <function model="stock.move.line" name="write">
-            <value model="stock.move.line" search="[('picking_id', '=', ref('purchase_stock.picking_delivery_17'))]"/>
             <value eval="{'date': datetime.now() - relativedelta(months=1)}"/>
         </function>
         <function model="stock.picking" name="write">
@@ -1066,10 +958,6 @@
             ]"/>
             <value eval="{'date': datetime.now() - relativedelta(years=2)}"/>
         </function>
-        <function model="stock.move.line" name="write">
-            <value model="stock.move.line" search="[('picking_id', '=', ref('purchase_stock.picking_delivery_18'))]"/>
-            <value eval="{'date': datetime.now() - relativedelta(years=2)}"/>
-        </function>
         <function model="stock.picking" name="write">
             <value model="stock.picking" eval="[obj().env.ref('purchase_stock.picking_delivery_19').id]"/>
             <value eval="{'date_done': datetime.now() - relativedelta(years=1, months=11)}"/>
@@ -1079,10 +967,6 @@
                 ('product_id', '=', ref('product.product_product_3')),
                 ('picking_id', '=', ref('purchase_stock.picking_delivery_19')),
             ]"/>
-            <value eval="{'date': datetime.now() - relativedelta(years=1, months=11)}"/>
-        </function>
-        <function model="stock.move.line" name="write">
-            <value model="stock.move.line" search="[('picking_id', '=', ref('purchase_stock.picking_delivery_19'))]"/>
             <value eval="{'date': datetime.now() - relativedelta(years=1, months=11)}"/>
         </function>
         <function model="stock.picking" name="write">
@@ -1096,10 +980,6 @@
             ]"/>
             <value eval="{'date': datetime.now() - relativedelta(years=1, months=10)}"/>
         </function>
-        <function model="stock.move.line" name="write">
-            <value model="stock.move.line" search="[('picking_id', '=', ref('purchase_stock.picking_delivery_20'))]"/>
-            <value eval="{'date': datetime.now() - relativedelta(years=1, months=10)}"/>
-        </function>
         <function model="stock.picking" name="write">
             <value model="stock.picking" eval="[obj().env.ref('purchase_stock.picking_delivery_21').id]"/>
             <value eval="{'date_done': datetime.now() - relativedelta(years=1, months=9)}"/>
@@ -1109,10 +989,6 @@
                 ('product_id', '=', ref('product.product_product_3')),
                 ('picking_id', '=', ref('purchase_stock.picking_delivery_21')),
             ]"/>
-            <value eval="{'date': datetime.now() - relativedelta(years=1, months=9)}"/>
-        </function>
-        <function model="stock.move.line" name="write">
-            <value model="stock.move.line" search="[('picking_id', '=', ref('purchase_stock.picking_delivery_21'))]"/>
             <value eval="{'date': datetime.now() - relativedelta(years=1, months=9)}"/>
         </function>
         <function model="stock.picking" name="write">
@@ -1126,10 +1002,6 @@
             ]"/>
             <value eval="{'date': datetime.now() - relativedelta(years=1, months=8)}"/>
         </function>
-        <function model="stock.move.line" name="write">
-            <value model="stock.move.line" search="[('picking_id', '=', ref('purchase_stock.picking_delivery_22'))]"/>
-            <value eval="{'date': datetime.now() - relativedelta(years=1, months=8)}"/>
-        </function>
         <function model="stock.picking" name="write">
             <value model="stock.picking" eval="[obj().env.ref('purchase_stock.picking_delivery_23').id]"/>
             <value eval="{'date_done': datetime.now() - relativedelta(years=1, months=7)}"/>
@@ -1139,10 +1011,6 @@
                 ('product_id', '=', ref('product.product_product_3')),
                 ('picking_id', '=', ref('purchase_stock.picking_delivery_23')),
             ]"/>
-            <value eval="{'date': datetime.now() - relativedelta(years=1, months=7)}"/>
-        </function>
-        <function model="stock.move.line" name="write">
-            <value model="stock.move.line" search="[('picking_id', '=', ref('purchase_stock.picking_delivery_23'))]"/>
             <value eval="{'date': datetime.now() - relativedelta(years=1, months=7)}"/>
         </function>
         <function model="stock.picking" name="write">
@@ -1156,10 +1024,6 @@
             ]"/>
             <value eval="{'date': datetime.now() - relativedelta(years=1, months=6)}"/>
         </function>
-        <function model="stock.move.line" name="write">
-            <value model="stock.move.line" search="[('picking_id', '=', ref('purchase_stock.picking_delivery_24'))]"/>
-            <value eval="{'date': datetime.now() - relativedelta(years=1, months=6)}"/>
-        </function>
         <function model="stock.picking" name="write">
             <value model="stock.picking" eval="[obj().env.ref('purchase_stock.picking_delivery_25').id]"/>
             <value eval="{'date_done': datetime.now() - relativedelta(years=1, months=5)}"/>
@@ -1169,10 +1033,6 @@
                 ('product_id', '=', ref('product.product_product_3')),
                 ('picking_id', '=', ref('purchase_stock.picking_delivery_25')),
             ]"/>
-            <value eval="{'date': datetime.now() - relativedelta(years=1, months=5)}"/>
-        </function>
-        <function model="stock.move.line" name="write">
-            <value model="stock.move.line" search="[('picking_id', '=', ref('purchase_stock.picking_delivery_25'))]"/>
             <value eval="{'date': datetime.now() - relativedelta(years=1, months=5)}"/>
         </function>
         <function model="stock.picking" name="write">
@@ -1186,10 +1046,6 @@
             ]"/>
             <value eval="{'date': datetime.now() - relativedelta(years=1, months=4)}"/>
         </function>
-        <function model="stock.move.line" name="write">
-            <value model="stock.move.line" search="[('picking_id', '=', ref('purchase_stock.picking_delivery_26'))]"/>
-            <value eval="{'date': datetime.now() - relativedelta(years=1, months=4)}"/>
-        </function>
         <function model="stock.picking" name="write">
             <value model="stock.picking" eval="[obj().env.ref('purchase_stock.picking_delivery_27').id]"/>
             <value eval="{'date_done': datetime.now() - relativedelta(years=1, months=3)}"/>
@@ -1199,10 +1055,6 @@
                 ('product_id', '=', ref('product.product_product_3')),
                 ('picking_id', '=', ref('purchase_stock.picking_delivery_27')),
             ]"/>
-            <value eval="{'date': datetime.now() - relativedelta(years=1, months=3)}"/>
-        </function>
-        <function model="stock.move.line" name="write">
-            <value model="stock.move.line" search="[('picking_id', '=', ref('purchase_stock.picking_delivery_27'))]"/>
             <value eval="{'date': datetime.now() - relativedelta(years=1, months=3)}"/>
         </function>
         <function model="stock.picking" name="write">
@@ -1216,10 +1068,6 @@
             ]"/>
             <value eval="{'date': datetime.now() - relativedelta(years=1, months=2)}"/>
         </function>
-        <function model="stock.move.line" name="write">
-            <value model="stock.move.line" search="[('picking_id', '=', ref('purchase_stock.picking_delivery_28'))]"/>
-            <value eval="{'date': datetime.now() - relativedelta(years=1, months=2)}"/>
-        </function>
         <function model="stock.picking" name="write">
             <value model="stock.picking" eval="[obj().env.ref('purchase_stock.picking_delivery_29').id]"/>
             <value eval="{'date_done': datetime.now() - relativedelta(years=1, months=1)}"/>
@@ -1231,10 +1079,6 @@
             ]"/>
             <value eval="{'date': datetime.now() - relativedelta(years=1, months=1)}"/>
         </function>
-        <function model="stock.move.line" name="write">
-            <value model="stock.move.line" search="[('picking_id', '=', ref('purchase_stock.picking_delivery_29'))]"/>
-            <value eval="{'date': datetime.now() - relativedelta(years=1, months=1)}"/>
-        </function>
         <function model="stock.picking" name="write">
             <value model="stock.picking" eval="[obj().env.ref('purchase_stock.picking_delivery_32').id]"/>
             <value eval="{'date_done': datetime.now() - relativedelta(days=1)}"/>
@@ -1244,10 +1088,6 @@
                 ('product_id', '=', ref('product.product_product_3')),
                 ('picking_id', '=', ref('purchase_stock.picking_delivery_32')),
             ]"/>
-            <value eval="{'date': datetime.now() - relativedelta(days=1)}"/>
-        </function>
-        <function model="stock.move.line" name="write">
-            <value model="stock.move.line" search="[('picking_id', '=', ref('purchase_stock.picking_delivery_32'))]"/>
             <value eval="{'date': datetime.now() - relativedelta(days=1)}"/>
         </function>
     </data>
