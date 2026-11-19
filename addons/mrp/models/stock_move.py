@@ -213,7 +213,9 @@ class StockMove(models.Model):
     def _onchange_quantity(self):
         if self.raw_material_production_id and self.uom_id and \
             not self.env.context.get('skip_mark_picked') \
-            and self.uom_id.compare(self.product_uom_qty, self.quantity) != 0:
+            # Only compare with the preexisting quantity. If the user sets the quantity to be
+            # the same as demand, it should still be picked.
+            and self.uom_id.compare(self._origin.quantity, self.quantity):
             self.picked = True
 
     @api.constrains('quantity', 'raw_material_production_id')
@@ -279,7 +281,7 @@ class StockMove(models.Model):
     def write(self, vals):
         moves_to_update = False
         if self.env.context.get('force_move_picked') and 'quantity' in vals:
-            moves_to_update = self.filtered(lambda move: move.product_uom_qty != vals['quantity'])
+            moves_to_update = self.filtered(lambda move: move.uom_id.compare(move.quantity, vals['quantity']))
         if 'product_uom_qty' in vals and 'move_line_ids' in vals:
             # first update lines then product_uom_qty as the later will unreserve
             # so possibly unlink lines
