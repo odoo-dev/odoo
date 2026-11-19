@@ -11,6 +11,7 @@ from odoo.exceptions import UserError
 _logger = logging.getLogger(__name__)
 
 DPOPAY_DEFAULT_TIMEOUT = 60
+DPOPAY_TERMINAL_IDLE_TEXT = 'NO TXN / SYSTEM IDLE'
 
 
 class PosPaymentMethod(models.Model):
@@ -42,6 +43,36 @@ class PosPaymentMethod(models.Model):
         if endpoint == 'start-transaction':
             data['transactionType'] = self._get_dpopay_transaction_type()
         return self._execute_dpopay_api_request(data, endpoint)
+
+    def get_dpopay_terminal_status(self):
+        self.ensure_one()
+        response = self._execute_dpopay_api_request({}, 'get-status')
+        if not response or response.get('errorMessage'):
+            return {
+                'status': 'error',
+                'message': (response or {}).get('errorMessage') or _("Unable to reach DPO Pay terminal."),
+            }
+        display_text = response.get('displayText')
+        if display_text == DPOPAY_TERMINAL_IDLE_TEXT:
+            return {'status': 'ready', 'message': _("Connected to DPO Pay. The terminal is ready.")}
+        return {
+            'status': 'busy',
+            'message': _("Connected to DPO Pay, but the terminal is not ready: %s", display_text or _("unknown state")),
+        }
+
+    def action_dpopay_test_terminal(self):
+        self.ensure_one()
+        terminal_status = self.get_dpopay_terminal_status()
+        if terminal_status['status'] == 'error':
+            raise UserError(_("DPO Pay connection failed: %s", terminal_status['message']))
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'message': terminal_status['message'],
+                'type': 'success' if terminal_status['status'] == 'ready' else 'warning',
+            },
+        }
 
     def _get_dpopay_base_url(self, is_token=False):
         self.ensure_one()

@@ -159,18 +159,15 @@ export class PaymentDPOPay extends PaymentInterface {
     }
 
     async _checkTerminalStatus() {
-        const response = await this._callDpoPayMakeRequest({}, "get-status");
-
-        if (!response || response.errorMessage) {
-            this._handleError(response, _t("Unable to reach DPO Pay terminal."));
+        const terminalStatus = await this._callDpoPayMethod("get_dpopay_terminal_status");
+        if (!terminalStatus) {
             return false;
         }
-
-        if (response.displayText === "NO TXN / SYSTEM IDLE") {
-            return true;
+        if (terminalStatus.status !== "ready") {
+            this._handleError(undefined, terminalStatus.message);
+            return false;
         }
-
-        return false;
+        return true;
     }
 
     async _paymentStatusRequestHandler(response, callBack, resolve, reject) {
@@ -262,11 +259,14 @@ export class PaymentDPOPay extends PaymentInterface {
     }
 
     async _callDpoPayMakeRequest(data, action) {
+        return this._callDpoPayMethod("send_dpopay_request", [data, action]);
+    }
+
+    async _callDpoPayMethod(method, args = []) {
         try {
-            return await this.pos.data.call("pos.payment.method", "send_dpopay_request", [
+            return await this.pos.data.call("pos.payment.method", method, [
                 [this.payment_method_id.id],
-                data,
-                action,
+                ...args,
             ]);
         } catch (error) {
             const line = this._pendingDPOPaymentLine();

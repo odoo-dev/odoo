@@ -19,6 +19,7 @@
                             <group>
                                 <field name="dpopay_payment_mode" required="payment_provider == 'dpopay'"/>
                                 <field name="dpopay_test_mode" required="payment_provider == 'dpopay'"/>
+                                <button name="action_dpopay_test_terminal" type="object" string="Test" class="btn-primary"/>
                             </group>
                         </group>
                     </page>
