@@ -99,6 +99,27 @@ class ProductPricelist(models.Model):
             for product_id, res_tuple in self._compute_price_rule(products, *args, **kwargs).items()
         }
 
+    def _get_products_rule(self, products, *args, **kwargs) -> dict[int, int | Literal[False]]:
+        """Compute the pricelist prices for the specified products, quantity & uom.
+
+        Note: self and self.ensure_one()
+
+        :param products: recordset of products (product.product/product.template)
+        :param float quantity: quantity of products requested (in given uom)
+        :param currency: record of currency (res.currency) (optional)
+        :param uom: unit of measure (uom.uom record) (optional)
+            If not specified, prices returned are expressed in product uoms
+        :param date: date to use for price computation and currency conversions (optional)
+        :type date: date or datetime
+
+        :returns: {product_id: pricelist rule id}, considering the current pricelist if any
+        """
+        self and self.ensure_one()  # self is at most one record
+        return {
+            product_id: next(iter(res_tuple[1]), False)
+            for product_id, res_tuple in self._compute_price_rule(products, *args, **kwargs).items()
+        }
+
     def _get_product_price(self, product, *args, **kwargs) -> float:
         """Compute the pricelist price for the specified product, qty & uom.
 
