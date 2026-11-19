@@ -477,7 +477,12 @@ class MrpBom(models.Model):
             product_id = bom_line.product_id
             bom_lines.append((bom_line, product, quantity, False))
             product_ids.add(product_id.id)
-        update_product_boms()
+
+        if self.env.context.get('bom_kits', {}).get(product):
+            product_boms = {product: self.env.context.get('bom_kits')[product]}
+        else:
+            update_product_boms()
+
         product_ids.clear()
         while bom_lines:
             current_line, current_product, current_qty, parent_line = bom_lines[0]

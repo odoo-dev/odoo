@@ -1,10 +1,12 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import collections
+from collections.abc import Iterable
 from datetime import timedelta
 import operator as py_operator
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
+from odoo.tools import float_is_zero, float_round
 
 
 # TODO: remove in master, along with `ProductProduct._search_qty_available_new` below.
@@ -262,14 +264,18 @@ class ProductProduct(models.Model):
         # pre-compute bom lines and identify missing kit components to prefetch
         bom_sub_lines_per_kit = {}
         prefetch_component_ids = set()
+        component_ids = set()
+        product_uom_precision = self.env['decimal.precision'].precision_get('Product Unit')
         bom_kits = self.env['mrp.bom'].sudo()._bom_find(kits, bom_type='phantom', company_id=self.env.company.id)
 
         for product in bom_kits:
-            __, bom_sub_lines = bom_kits[product].explode(product, 1)
+            __, bom_sub_lines = bom_kits[product].with_context(bom_kits=bom_kits).explode(product, 1)
             bom_sub_lines_per_kit[product] = bom_sub_lines
             for bom_line, __ in bom_sub_lines:
+                component_ids.add(bom_line.product_id.id)
                 if bom_line.product_id.id not in qties:
                     prefetch_component_ids.add(bom_line.product_id.id)
+        storable_component_ids = set(self.env['product.product'].search([('id', 'in', list(component_ids)), ('is_storable', '=', True)]).ids) if component_ids else set()
         # compute kit quantities
         for product in bom_kits:
             bom_sub_lines = bom_sub_lines_per_kit[product]
@@ -287,7 +293,7 @@ class ProductProduct(models.Model):
                 component = component.with_context(mrp_compute_quantities=qties).with_prefetch(prefetch_component_ids)
                 qty_per_kit = 0
                 for bom_line, bom_line_data in bom_sub_lines:
-                    if not component.is_storable or bom_line.uom_id.is_zero(bom_line_data['qty']):
+                    if component.id not in storable_component_ids or float_is_zero(bom_line_data['qty'], precision_digits=product_uom_precision):
                         # As BoMs allow components with 0 qty, a.k.a. optionnal components, we simply skip those
                         # to avoid a division by zero. The same logic is applied to non-storable products as those
                         # products have 0 qty available.
@@ -300,25 +306,25 @@ class ProductProduct(models.Model):
                     qties.get(component.id)
                     if component.id in qties
                     else {
-                        "virtual_available": component.uom_id.round(component.virtual_available),
-                        "qty_available": component.uom_id.round(component.qty_available),
-                        "incoming_qty": component.uom_id.round(component.incoming_qty),
-                        "outgoing_qty": component.uom_id.round(component.outgoing_qty),
-                        "free_qty": component.uom_id.round(component.free_qty),
+                        "virtual_available": float_round(component.virtual_available, precision_digits=product_uom_precision),
+                        "qty_available": float_round(component.qty_available, precision_digits=product_uom_precision),
+                        "incoming_qty": float_round(component.incoming_qty, precision_digits=product_uom_precision),
+                        "outgoing_qty": float_round(component.outgoing_qty, precision_digits=product_uom_precision),
+                        "free_qty": float_round(component.free_qty, precision_digits=product_uom_precision),
                     }
                 )
-                ratios_virtual_available.append(component.uom_id.round(component_res["virtual_available"] / qty_per_kit, rounding_method='DOWN'))
-                ratios_qty_available.append(component.uom_id.round(component_res["qty_available"] / qty_per_kit, rounding_method='DOWN'))
-                ratios_incoming_qty.append(component.uom_id.round(component_res["incoming_qty"] / qty_per_kit, rounding_method='DOWN'))
-                ratios_outgoing_qty.append(component.uom_id.round(component_res["outgoing_qty"] / qty_per_kit, rounding_method='DOWN'))
-                ratios_free_qty.append(component.uom_id.round(component_res["free_qty"] / qty_per_kit, rounding_method='DOWN'))
+                ratios_virtual_available.append(float_round(component_res["virtual_available"] / qty_per_kit, precision_digits=product_uom_precision, rounding_method='DOWN'))
+                ratios_qty_available.append(float_round(component_res["qty_available"] / qty_per_kit, precision_digits=product_uom_precision, rounding_method='DOWN'))
+                ratios_incoming_qty.append(float_round(component_res["incoming_qty"] / qty_per_kit, precision_digits=product_uom_precision, rounding_method='DOWN'))
+                ratios_outgoing_qty.append(float_round(component_res["outgoing_qty"] / qty_per_kit, precision_digits=product_uom_precision, rounding_method='DOWN'))
+                ratios_free_qty.append(float_round(component_res["free_qty"] / qty_per_kit, precision_digits=product_uom_precision, rounding_method='DOWN'))
             if bom_sub_lines and ratios_virtual_available:  # Guard against all cnsumable bom: at least one ratio should be present.
                 res[product.id] = {
-                    'virtual_available': component.uom_id.round(min(ratios_virtual_available) * bom_kits[product].product_qty) // 1,
-                    'qty_available': component.uom_id.round(min(ratios_qty_available) * bom_kits[product].product_qty) // 1,
-                    'incoming_qty': component.uom_id.round(min(ratios_incoming_qty) * bom_kits[product].product_qty) // 1,
-                    'outgoing_qty': component.uom_id.round(min(ratios_outgoing_qty) * bom_kits[product].product_qty) // 1,
-                    'free_qty': component.uom_id.round(min(ratios_free_qty) * bom_kits[product].product_qty) // 1,
+                    'virtual_available': float_round(min(ratios_virtual_available) * bom_kits[product].product_qty, precision_digits=product_uom_precision) // 1,
+                    'qty_available': float_round(min(ratios_qty_available) * bom_kits[product].product_qty, precision_digits=product_uom_precision) // 1,
+                    'incoming_qty': float_round(min(ratios_incoming_qty) * bom_kits[product].product_qty, precision_digits=product_uom_precision) // 1,
+                    'outgoing_qty': float_round(min(ratios_outgoing_qty) * bom_kits[product].product_qty, precision_digits=product_uom_precision) // 1,
+                    'free_qty': float_round(min(ratios_free_qty) * bom_kits[product].product_qty, precision_digits=product_uom_precision) // 1,
                 }
             else:
                 res[product.id] = {
@@ -389,19 +395,43 @@ class ProductProduct(models.Model):
         op = PY_OPERATORS.get(operator)
         if not op:
             return NotImplemented
+
+        # The kit expansion below calls with_context() once per (kit, component) pair, which can
+        # number in the tens of thousands. Each of those calls looks up (or registers) an
+        # Environment, and that registry is never cleared for the life of the cursor, so a second,
+        # identical call (as web_search_read()'s search_fetch()+search_count() pair does) pays for
+        # an ever-growing registry scan on top of redoing the same work. So, same as
+        # _search_product_quantity, only cache (read and write) when web_search_read() flags it.
+        use_cache = self.env.context.get('allow_quantity_search_cache')
+        if isinstance(value, Iterable) and not isinstance(value, str):
+            cache_value = frozenset(float(v) for v in value)
+        else:
+            cache_value = float(value)
+        cache_key = (operator, cache_value, lot_id, owner_id, package_id)
+        cache = self.env.cr.cache.setdefault('_search_qty_available_new_kits', {})
+        if use_cache and cache_key in cache:
+            return cache[cache_key]
+
         product_ids = super(ProductProduct, self)._search_qty_available_new(operator, value, lot_id, owner_id, package_id)
         # Callers that never value kits (e.g. stock valuation) can skip the kit BoM expansion.
         if self.env.context.get('skip_kit_qty_available'):
             return product_ids
-        kit_boms = self.env['mrp.bom'].search([('type', "=", 'phantom')])
-        kit_products = kit_boms.mapped(lambda kit: kit.product_id or kit.product_tmpl_id.product_variant_ids)
         product_ids = set(product_ids)
-        for product in kit_products:
-            if op(product.qty_available, value):
-                product_ids.add(product.id)
-            else:
-                product_ids.discard(product.id)
-        return list(product_ids)
+        kit_products = self.env['product.product'].with_context(prefetch_fields=False).search([('is_kits', '=', True)])
+        if kit_products:
+            # Fetch every kit's quantity in a single batched call instead of reading
+            # `qty_available` kit by kit, which would redo the whole (memory-heavy)
+            # kit computation, and its own component prefetch, once per kit.
+            quantities = kit_products.with_context(search_all=True)._compute_quantities_dict(lot_id, owner_id, package_id)
+            for product_id, qties in quantities.items():
+                if op(qties['qty_available'], value):
+                    product_ids.add(product_id)
+                else:
+                    product_ids.discard(product_id)
+        result = list(product_ids)
+        if use_cache:
+            cache[cache_key] = result
+        return result
 
     def action_archive(self):
         filtered_products = self.env['mrp.bom.line'].sudo().search([('product_id', 'in', self.ids), ('bom_id.active', '=', True)]).product_id.mapped('display_name')
