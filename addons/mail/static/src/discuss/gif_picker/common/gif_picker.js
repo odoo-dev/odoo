@@ -136,6 +136,10 @@ export class GifPicker extends Component {
         this.state.searchTerm = value;
     }
 
+    get hasActionService(){
+        Boolean(this.env.services.action);
+    }
+
     async loadCategories() {
         if (!this.store.hasGifPickerFeature) {
             return;
