@@ -248,6 +248,16 @@ class TestStockValuationAVCO(TestStockValuationCommon):
         super().setUpClass()
         cls.product = cls.product_avco
 
+    def test_manual_standard_price_not_rounded_to_currency(self):
+        """ A cost set by hand with more decimals than the currency must keep them. """
+        self.env['decimal.precision'].search([('name', '=', 'Product Price')]).digits = 3
+        self._make_in_move(self.product, 50, unit_cost=3.25)
+        self.product.standard_price = 3.716
+        self.assertEqual(self.product.standard_price, 3.716)
+        last_value = self.env['product.value'].search([('product_id', '=', self.product.id)], order='id desc', limit=1)
+        self.assertEqual(last_value.value, 3.716)
+        self.assertAlmostEqual(self.product.total_value, 185.8, places=2)
+
     def test_normal_1(self):
         self._make_in_move(self.product, 10, unit_cost=10)
         self.assertEqual(self.product.standard_price, 10)
