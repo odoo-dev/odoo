@@ -13,6 +13,7 @@ from odoo.exceptions import UserError
 from odoo.fields import Domain
 from odoo.tools import SQL
 from odoo.tools.barcode import check_barcode_encoding
+from odoo.tools.float_utils import float_round
 
 _logger = logging.getLogger(__name__)
 
@@ -168,6 +169,7 @@ class ProductProduct(models.Model):
             product.with_context(skip_qty_available_update=True).update({key: val for key, val in res[product.id].items() if val})
 
     def _compute_quantities_dict(self, lot_id, owner_id, package_id, from_date=False, to_date=False):
+        search_all = self.env.context.get('search_all')
         domain_quant_loc, domain_move_in_loc, domain_move_out_loc, domain_move_in_loc_done, domain_move_out_loc_done = self._get_domain_locations()
         domain_quant = [('product_id', 'in', self.ids)] + domain_quant_loc
         dates_in_the_past = False
@@ -177,8 +179,8 @@ class ProductProduct(models.Model):
         if to_date and to_date < fields.Datetime.now():
             dates_in_the_past = True
 
-        domain_move_in = [('product_id', 'in', self.ids)] + domain_move_in_loc
-        domain_move_out = [('product_id', 'in', self.ids)] + domain_move_out_loc
+        domain_move_in = domain_move_in_loc if search_all else [('product_id', 'in', self.ids)] + domain_move_in_loc
+        domain_move_out = domain_move_out_loc if search_all else [('product_id', 'in', self.ids)] + domain_move_out_loc
         if lot_id is not None:
             domain_quant += [('lot_id', '=', lot_id)]
             domain_move_in += [('move_line_ids.lot_id', '=', lot_id)]
@@ -201,8 +203,8 @@ class ProductProduct(models.Model):
             domain_quant += [('package_id', '=', package_id)]
         if dates_in_the_past:
             # Use the done location domains (simple location_dest_id) for move lines
-            domain_move_in_done = [('product_id', 'in', self.ids)] + domain_move_in_loc_done
-            domain_move_out_done = [('product_id', 'in', self.ids)] + domain_move_out_loc_done
+            domain_move_in_done = [('product_id', 'in', self.ids)] + domain_move_in_loc_done if search_all else domain_move_in_loc_done
+            domain_move_out_done = [('product_id', 'in', self.ids)] + domain_move_out_loc_done if search_all else domain_move_out_loc_done
             if owner_id is not None:
                 domain_move_in_done += [('owner_id', '=', owner_id)]
                 domain_move_out_done += [('owner_id', '=', owner_id)]
@@ -228,39 +230,30 @@ class ProductProduct(models.Model):
         Quant = self.env['stock.quant'].with_context(active_test=False)
         domain_move_in_todo = [('state', 'in', ('waiting', 'confirmed', 'assigned', 'partially_available'))] + domain_move_in
         domain_move_out_todo = [('state', 'in', ('waiting', 'confirmed', 'assigned', 'partially_available'))] + domain_move_out
-        moves_in_res = {product.id: product_qty for product, product_qty in Move._read_group(domain_move_in_todo, ['product_id'], ['product_qty:sum'])}
-        moves_out_res = {product.id: product_qty for product, product_qty in Move._read_group(domain_move_out_todo, ['product_id'], ['product_qty:sum'])}
-        quants_res = {product.id: (quantity, reserved_quantity) for product, quantity, reserved_quantity in Quant._read_group(domain_quant, ['product_id'], ['quantity:sum', 'reserved_quantity:sum'])}
+        moves_in_res = {product.id: product_qty for product, product_qty in Move._read_group(domain_move_in_todo, ['product_id'], ['product_qty:sum'], having=[('product_qty:sum', '!=', 0)])}
+        moves_out_res = {product.id: product_qty for product, product_qty in Move._read_group(domain_move_out_todo, ['product_id'], ['product_qty:sum'], having=[('product_qty:sum', '!=', 0)])}
+        quants_having = ['|', ('quantity:sum', '!=', 0), ('reserved_quantity:sum', '!=', 0)]
+        quants_res = {product.id: (quantity, reserved_quantity) for product, quantity, reserved_quantity in Quant._read_group(domain_quant, ['product_id'], ['quantity:sum', 'reserved_quantity:sum'], having=quants_having)}
         expired_unreserved_quants_res = {}
         if self.env.context.get('with_expiration'):
             max_date = self.env.context['to_date'] if self.env.context.get('to_date') and self.env.context.get('fresh_qty_forecast') else self.env.context['with_expiration']
             domain_quant += [('removal_date', '<=', max_date)]
-            expired_unreserved_quants_res = {product.id: quantity - reserved_quantity for product, quantity, reserved_quantity in Quant._read_group(domain_quant, ['product_id'], ['quantity:sum', 'reserved_quantity:sum'])}
-        moves_in_res_past = defaultdict(float)
-        moves_out_res_past = defaultdict(float)
+            expired_unreserved_quants_res = {product.id: quantity - reserved_quantity for product, quantity, reserved_quantity in Quant._read_group(domain_quant, ['product_id'], ['quantity:sum', 'reserved_quantity:sum'], having=quants_having)}
         if dates_in_the_past:
             # Calculate the moves that were done before now to calculate back in time (as most questions will be recent ones)
             domain_move_in_done = [('state', '=', 'done'), ('date', '>', to_date)] + domain_move_in_done
             domain_move_out_done = [('state', '=', 'done'), ('date', '>', to_date)] + domain_move_out_done
 
-            for product, quantity in MoveLine._read_group(domain_move_in_done, ['product_id'], ['quantity_product_uom:sum']):
-                moves_in_res_past[product.id] += quantity
+            moves_in_res_past = {product.id: quantity for product, quantity in MoveLine._read_group(domain_move_in_done, ['product_id'], ['quantity_product_uom:sum'], having=[('quantity_product_uom:sum', '!=', 0)])}
+            moves_out_res_past = {product.id: quantity for product, quantity in MoveLine._read_group(domain_move_out_done, ['product_id'], ['quantity_product_uom:sum'], having=[('quantity_product_uom:sum', '!=', 0)])}
 
-            for product, quantity in MoveLine._read_group(domain_move_out_done, ['product_id'], ['quantity_product_uom:sum']):
-                moves_out_res_past[product.id] += quantity
-
+        digits = self.env['decimal.precision'].precision_get('Product Unit')
+        precision_rounding = 10 ** -digits
         res = dict()
-        for product in self.with_context(prefetch_fields=False):
+        for product in self:
             origin_product_id = product._origin.id
             product_id = product.id
-            if not origin_product_id or (
-                origin_product_id not in quants_res
-                and origin_product_id not in moves_in_res
-                and origin_product_id not in moves_out_res
-                and origin_product_id not in moves_in_res_past
-                and origin_product_id not in moves_out_res_past
-                and origin_product_id not in expired_unreserved_quants_res
-            ):
+            if not origin_product_id:
                 res[product_id] = dict.fromkeys(
                     ['qty_available', 'free_qty', 'incoming_qty', 'outgoing_qty', 'virtual_available'],
                     0.0,
@@ -273,14 +266,14 @@ class ProductProduct(models.Model):
                 qty_available = quants_res.get(origin_product_id, [0.0])[0]
             reserved_quantity = quants_res.get(origin_product_id, [False, 0.0])[1]
             expired_unreserved_qty = expired_unreserved_quants_res.get(origin_product_id, 0.0)
-            res[product_id]['qty_available'] = product.uom_id.round(qty_available)
-            res[product_id]['free_qty'] = product.uom_id.round(qty_available - reserved_quantity - expired_unreserved_qty)
-            res[product_id]['incoming_qty'] = product.uom_id.round(moves_in_res.get(origin_product_id, 0.0))
-            res[product_id]['outgoing_qty'] = product.uom_id.round(moves_out_res.get(origin_product_id, 0.0))
-            res[product_id]['virtual_available'] = product.uom_id.round(
+            res[product_id]['qty_available'] = float_round(qty_available, precision_rounding=precision_rounding)
+            res[product_id]['free_qty'] = float_round(qty_available - reserved_quantity - expired_unreserved_qty, precision_rounding=precision_rounding)
+            res[product_id]['incoming_qty'] = float_round(moves_in_res.get(origin_product_id, 0.0), precision_rounding=precision_rounding)
+            res[product_id]['outgoing_qty'] = float_round(moves_out_res.get(origin_product_id, 0.0), precision_rounding=precision_rounding)
+            res[product_id]['virtual_available'] = float_round(
                 qty_available + res[product_id]['incoming_qty'] - res[product_id]['outgoing_qty'] - expired_unreserved_qty,
+                precision_rounding=precision_rounding,
             )
-
         return res
 
     def _inverse_qty_available(self):
@@ -499,11 +492,30 @@ class ProductProduct(models.Model):
 
     def _search_product_quantity(self, operator, value, field):
         thread_rss_before = resource.getrusage(resource.RUSAGE_THREAD).ru_maxrss
-        result = super()._search_product_quantity(operator, value, field)
+        op = PY_OPERATORS.get(operator)
+        if not op:
+            # Order the search on `id` to prevent the default order on the product name which slows
+            # down the search.
+            ids = self.with_context(prefetch_fields=False).search_fetch([], [field], order='id').filtered_domain([(field, operator, value)]).ids
+            thread_rss_after = resource.getrusage(resource.RUSAGE_THREAD).ru_maxrss
+            _log_thread_rss(f'_search_product_quantity(field={field})', thread_rss_before, thread_rss_after)
+            return [('id', 'in', ids)]
+
+        if isinstance(value, Iterable) and not isinstance(value, str):
+            cmp_value = {float(v) for v in value}
+        else:
+            cmp_value = float(value)
+        products = self.with_context(prefetch_fields=False).search([('type', '!=', 'service')])
+        quantities = products.with_context(search_all=True)._compute_quantities_dict(
+            self.env.context.get('lot_id'), self.env.context.get('owner_id'), self.env.context.get('package_id'),
+            self.env.context.get('from_date'), self.env.context.get('to_date'),
+        )
+        ids = [product_id for product_id, qties in quantities.items() if op(qties[field], cmp_value)]
         thread_rss_after = resource.getrusage(resource.RUSAGE_THREAD).ru_maxrss
         _log_thread_rss(f'_search_product_quantity(field={field})', thread_rss_before, thread_rss_after)
-        return result
+        return [('id', 'in', ids)]
 
+    # TODO: remove in master. No longer called (superseded by `_search_product_quantity`)
     def _search_qty_available_new(self, operator, value, lot_id=False, owner_id=False, package_id=False):
         thread_rss_before = resource.getrusage(resource.RUSAGE_THREAD).ru_maxrss
         result = self._search_field_by_quants(operator, value, lot_id, owner_id, package_id)
