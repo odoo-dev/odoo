@@ -197,10 +197,14 @@ class TestImLivechatReport(TestImLivechatCommon):
                 self._create_message(channel, channel_agent, date)
         en_lang = self.env["res.lang"]._activate_lang("en_US")
         report_model = self.env["im_livechat.report.channel"].with_user(agent)
+        channel_model = self.env["discuss.channel"].with_user(agent)
+        channel_domain = [("livechat_channel_id", "=", livechat_channel.id)]
         result = report_model.formatted_read_group(domain=[], groupby=["day_number"])
         expected_order = ["0", "1", "2", "3", "4", "5", "6"]
         actual_order = [group["day_number"] for group in result]
         self.assertEqual(actual_order, expected_order)
+        result = channel_model.formatted_read_group(channel_domain, groupby=["livechat_week_day"])
+        self.assertEqual([group["livechat_week_day"] for group in result], expected_order)
         en_lang.week_start = "6"
         result = report_model.formatted_read_group(domain=[], groupby=["day_number"])
         expected_order = ["6", "0", "1", "2", "3", "4", "5"]
@@ -210,6 +214,8 @@ class TestImLivechatReport(TestImLivechatCommon):
             expected_order,
             f"Days should be ordered starting from Saturday. Got {actual_order}, expected {expected_order}"
         )
+        result = channel_model.formatted_read_group(channel_domain, groupby=["livechat_week_day"])
+        self.assertEqual([group["livechat_week_day"] for group in result], expected_order)
 
     def test_hour_and_day_of_week_in_user_timezone(self):
         alice_user = mail_new_test_user(
@@ -234,6 +240,17 @@ class TestImLivechatReport(TestImLivechatCommon):
         self.assertEqual([group["start_hour"] for group in result], ["00", "01"])
         result = report_model.formatted_read_group(domain, groupby=["day_number"])
         self.assertEqual([group["day_number"] for group in result], ["6"])
+        channel_model = self.env["discuss.channel"].with_user(alice_user)
+        channels = channel_model.search(domain)
+        self.assertEqual(sorted(channels.mapped("livechat_start_hour")), ["00", "01"])
+        self.assertEqual(set(channels.mapped("livechat_week_day")), {"6"})
+        result = channel_model.formatted_read_group(domain, groupby=["livechat_start_hour"])
+        self.assertEqual([group["livechat_start_hour"] for group in result], ["00", "01"])
+        for group in result:
+            self.assertEqual(channel_model.search_count(domain + group["__extra_domain"]), 1)
+        result = channel_model.formatted_read_group(domain, groupby=["livechat_week_day"])
+        self.assertEqual([group["livechat_week_day"] for group in result], ["6"])
+        self.assertEqual(channel_model.search_count(domain + [("livechat_week_day", "=", "6")]), 2)
         history_model = self.env["im_livechat.channel.member.history"].with_user(alice_user)
         domain = [("session_livechat_channel_id", "=", livechat_channel.id)]
         histories = history_model.search(domain)

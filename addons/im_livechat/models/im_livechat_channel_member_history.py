@@ -50,11 +50,15 @@ class ImLivechatChannelMemberHistory(models.Model):
         compute_sudo=True,
     )
     session_week_day = fields.Selection(
-        lambda self: (
-            self.env["discuss.channel"]
-            ._fields["livechat_week_day"]
-            ._description_selection(self.env)
-        ),
+        [
+            ("0", "Monday"),
+            ("1", "Tuesday"),
+            ("2", "Wednesday"),
+            ("3", "Thursday"),
+            ("4", "Friday"),
+            ("5", "Saturday"),
+            ("6", "Sunday"),
+        ],
         string="Day of the Week",
         compute="_compute_session_start",
         compute_sql="_compute_sql_session_week_day",

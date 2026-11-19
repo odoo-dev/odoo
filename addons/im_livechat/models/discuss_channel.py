@@ -9,7 +9,7 @@ from markupsafe import Markup
 from odoo import _, api, fields, models, tools
 from odoo.exceptions import UserError
 from odoo.fields import Domain
-from odoo.tools import email_split, format_list, html2plaintext, is_html_empty
+from odoo.tools import email_split, format_list, get_lang, html2plaintext, is_html_empty
 from odoo.tools.mimetypes import get_extension
 from odoo.tools.sql import SQL
 from odoo.tools.translate import LazyTranslate
@@ -143,24 +143,28 @@ class DiscussChannel(models.Model):
         compute="_compute_livechat_outcome",
         store=True,
     )
-    livechat_start_hour = fields.Float(
-        "Session Start Hour",
-        compute="_compute_livechat_start_hour",
-        store=True,
+    livechat_start_hour = fields.Char(
+        "Start Hour of Session",
+        compute="_compute_livechat_start_values",
+        compute_sql="_compute_sql_livechat_start_hour",
+        compute_sudo=True,
+        groups="im_livechat.im_livechat_group_manager",
     )
     livechat_week_day = fields.Selection(
         [
-            ("0", "Monday"),
-            ("1", "Tuesday"),
-            ("2", "Wednesday"),
-            ("3", "Thursday"),
-            ("4", "Friday"),
-            ("5", "Saturday"),
-            ("6", "Sunday"),
+            ("0", "Sunday"),
+            ("1", "Monday"),
+            ("2", "Tuesday"),
+            ("3", "Wednesday"),
+            ("4", "Thursday"),
+            ("5", "Friday"),
+            ("6", "Saturday"),
         ],
         string="Day of the Week",
-        compute="_compute_livechat_week_day",
-        store=True,
+        compute="_compute_livechat_start_values",
+        compute_sql="_compute_sql_livechat_week_day",
+        compute_sudo=True,
+        groups="im_livechat.im_livechat_group_manager",
     )
     livechat_matches_self_lang = fields.Boolean(
         compute="_compute_livechat_matches_self_lang",
@@ -473,14 +477,66 @@ class DiscussChannel(models.Model):
         return [("livechat_expertise_ids", operator, self.env.user.livechat_expertise_ids.ids)]
 
     @api.depends("create_date")
-    def _compute_livechat_start_hour(self):
-        for channel in self:
-            channel.livechat_start_hour = channel.create_date.hour
+    @api.depends_context("tz", "uid")
+    def _compute_livechat_start_values(self):
+        self.livechat_start_hour = False
+        self.livechat_week_day = False
+        for channel in self.filtered("create_date"):
+            start_dt = fields.Datetime.context_timestamp(channel, channel.create_date)
+            channel.livechat_start_hour = f"{start_dt.hour:02d}"
+            channel.livechat_week_day = str(start_dt.isoweekday() % 7)
 
-    @api.depends("create_date")
-    def _compute_livechat_week_day(self):
-        for channel in self:
-            channel.livechat_week_day = str(channel.create_date.weekday())
+    def _compute_sql_livechat_start_hour(self, table):
+        return SQL("to_char(%s, 'HH24')", self._livechat_start_dt_to_sql(table))
+
+    def _compute_sql_livechat_week_day(self, table):
+        return SQL("EXTRACT(dow FROM %s)::int::text", self._livechat_start_dt_to_sql(table))
+
+    def _livechat_start_dt_to_sql(self, table):
+        return SQL("timezone(%s, timezone('UTC', %s))", str(self.env.tz), table.create_date)
+
+    def _read_group_orderby(self, table, order, groupby_terms):
+        # Order the days of the week starting from the first day of the week
+        # of the user language.
+        if "livechat_week_day" not in groupby_terms:
+            return super()._read_group_orderby(table, order, groupby_terms)
+        if not order:
+            order = ",".join(groupby_terms)
+        order_parts = [part.strip() for part in order.split(",")]
+        week_day_part = next((part for part in order_parts if part.startswith("livechat_week_day")), None)
+        other_parts = [part for part in order_parts if not part.startswith("livechat_week_day")]
+        other_groupby_terms = {k: v for k, v in groupby_terms.items() if k != "livechat_week_day"}
+        other_order = ",".join(other_parts) if other_parts else None
+        other_orderby = None
+        if other_order or other_groupby_terms:
+            other_orderby = super()._read_group_orderby(table, other_order, other_groupby_terms)
+            groupby_terms.update(other_groupby_terms)
+            if table._query._order_groupby:
+                groupby_terms["livechat_week_day"] = SQL(", ").join(
+                    [groupby_terms["livechat_week_day"], *table._query._order_groupby]
+                )
+                table._query._order_groupby.clear()
+        if not week_day_part:
+            return other_orderby
+        parts = [p.upper() for p in week_day_part.split()]
+        direction = next((p for p in parts if p in ("ASC", "DESC")), "ASC")
+        nulls_parts = [p for p in parts if p in ("NULLS", "FIRST", "LAST")]
+        sql_direction = SQL("ASC") if direction == "ASC" else SQL("DESC")
+        if "NULLS" in nulls_parts and "FIRST" in nulls_parts:
+            sql_nulls = SQL("NULLS FIRST")
+        elif "NULLS" in nulls_parts and "LAST" in nulls_parts:
+            sql_nulls = SQL("NULLS LAST")
+        else:
+            sql_nulls = SQL()
+        first_week_day = int(get_lang(self.env).week_start)
+        week_day_orderby = SQL(
+            "mod(7 - %s + (%s)::int, 7) %s %s",
+            first_week_day,
+            groupby_terms["livechat_week_day"],
+            sql_direction,
+            sql_nulls,
+        )
+        return SQL(", ").join([week_day_orderby, other_orderby]) if other_orderby else week_day_orderby
 
     @api.depends("livechat_status")
     def _compute_livechat_looking_for_help_since_dt(self):
