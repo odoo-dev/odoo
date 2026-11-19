@@ -4,6 +4,7 @@ from markupsafe import Markup
 from odoo.addons.mail.tools.discuss import Store
 
 from odoo import api, fields, models, _
+from odoo.tools import SQL
 
 
 class DiscussChannel(models.Model):
@@ -17,12 +18,30 @@ class DiscussChannel(models.Model):
         help="The channel becomes accessible to sales users when leads are set.",
     )
     has_crm_lead = fields.Boolean(compute="_compute_has_crm_lead", store=True)
+    livechat_leads_created = fields.Integer(
+        "Leads created",
+        aggregator="sum",
+        compute="_compute_livechat_leads_created",
+        compute_sql="_compute_sql_livechat_leads_created",
+        compute_sudo=True,
+        groups="im_livechat.im_livechat_group_manager",
+    )
     _has_crm_lead_index = models.Index("(has_crm_lead) WHERE has_crm_lead IS TRUE")
 
     @api.depends("lead_ids")
     def _compute_has_crm_lead(self):
         for channel in self:
             channel.has_crm_lead = bool(channel.lead_ids)
+
+    def _compute_livechat_leads_created(self):
+        self.env["crm.lead"].flush_model(["origin_channel_id"])
+        self._livechat_compute_from_sql(["livechat_leads_created"])
+
+    def _compute_sql_livechat_leads_created(self, table):
+        return SQL(
+            "(SELECT COUNT(*) FROM crm_lead WHERE crm_lead.origin_channel_id = %s)",
+            table.id,
+        )
 
     def execute_command_lead(self, **kwargs):
         key = kwargs['body']
