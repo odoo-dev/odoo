@@ -1,7 +1,7 @@
-import { useBus } from "@web/core/utils/hooks";
 import { BomOverviewLine } from "../bom_overview_line/mrp_bom_overview_line";
 import { BomOverviewSpecialLine } from "../bom_overview_special_line/mrp_bom_overview_special_line";
-import { Component, onWillUnmount, proxy, t, useOnChange, useProps } from "@odoo/owl";
+import { Component, onWillUnmount, proxy, t, useOnChange, useProps, usePlugin } from "@odoo/owl";
+import { MrpOverviewPlugin } from "../mrp_overview_plugin";
 
 export class BomOverviewExtraBlock extends Component {
     static template = "mrp.BomOverviewExtraBlock";
@@ -20,6 +20,7 @@ export class BomOverviewExtraBlock extends Component {
     });
 
     setup() {
+        this.overviewPlugin = usePlugin(MrpOverviewPlugin);
         this.state = proxy({
             isFolded: !this.props.unfoldAll,
         });
@@ -27,9 +28,7 @@ export class BomOverviewExtraBlock extends Component {
             this.props.changeFolded({ ids: [this.identifier], isFolded: false });
         }
 
-        useBus(this.env.overviewBus, "toggle-fold-all", (ev) =>
-            this._onToggleFoldAll(ev.detail.isFolded)
-        );
+        this.overviewPlugin.onToggleFoldAll((isFolded) => this._onToggleFoldAll(isFolded));
 
         useOnChange(
             () => [this.props.data.product_id],
