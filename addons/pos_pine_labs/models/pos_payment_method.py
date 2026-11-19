@@ -1,5 +1,7 @@
+import json
+
 from odoo import api, fields, models,  _
-from odoo.exceptions import UserError
+from odoo.exceptions import AccessDenied, UserError
 
 from .pine_labs_pos_request import call_pine_labs
 
@@ -91,6 +93,47 @@ class PosPaymentMethod(models.Model):
         default_error = _('The expected error code for the Pine Labs POS status request was not included in the response.')
         error = response.get('ResponseMessage') or response.get('errorMessage') or default_error
         return { 'error': error }
+
+    def _get_client_action(self, level, message):
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'type': level,
+                'message': message,
+            },
+        }
+
+    def action_pine_labs_test_creds(self):
+        """ Request the status of a dummy transaction to test the credentials without sending anything to the terminal """
+        self.ensure_one()
+        if not self.env.su and not self.env.user.has_group('point_of_sale.group_pos_manager'):
+            raise AccessDenied()
+        if not self.pine_labs_merchant or not self.pine_labs_store or not self.pine_labs_client or not self.sudo().pine_labs_security_token:
+            raise UserError(_('Please set all of the required fields for Pine Labs first.'))
+
+        # Pine Labs validates the credentials before looking for the transaction
+        response = call_pine_labs(payment_method=self, endpoint='GetCloudBasedTxnStatus', payload={'PlutusTransactionReferenceID': 1})
+        if error := self._pine_labs_get_test_error(response):
+            return self._get_client_action('danger', error)
+        return self._get_client_action('success', _('Successfully connected to Pine Labs with merchant %s.', self.pine_labs_merchant))
+
+    @api.model
+    def _pine_labs_get_test_error(self, response):
+        """ Decode error message from Pine Labs response or return False in case of success """
+        if error := response.get('errorMessage'):
+            # Pine Labs firewall answers with an HTML page, e.g. when called from outside India and Malaysia
+            if isinstance(error, json.JSONDecodeError):
+                return _('Unexpected response from Pine Labs, the request was probably rejected by its firewall. '
+                         'Outside India and Malaysia, the Pine Labs Proxy Endpoint must be set.')
+            return _('Failed to contact Pine Labs API: %s', error)
+        # Success: credentials accepted, only the dummy transaction is unknown
+        message = response.get('ResponseMessage') or ''
+        if response.get('ResponseCode') in [0, 1001] or 'PLUTUS TXN REF' in message:
+            return False
+        # Wrong merchant, store, security token / any other error
+        return _('Pine Labs rejected the credentials: %s. Please check the merchant ID, store ID and security token.',
+                 message or _('unknown error'))
 
     @api.constrains('payment_provider')
     def _check_pine_labs_terminal(self):
