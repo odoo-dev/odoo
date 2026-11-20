@@ -39,7 +39,9 @@
         padding: 0 var(--o-website-sale-comparison-table-column-padding-x);
 
         img {
-            @extend %o-wsale-shop-thumb;
+            object-fit: cover;
+            object-position: center;
+            aspect-ratio: var(--o-wsale-shop-thumb-aspect-ratio, 1);
         }
     }
 
@@ -129,7 +131,9 @@
     .o_wsale_comparison_bottom_bar_image {
         width: 2.5rem;
         height: fit-content;
-        @extend %o-wsale-shop-thumb;
+        object-fit: cover;
+        object-position: center;
+        aspect-ratio: var(--o-wsale-shop-thumb-aspect-ratio, 1);
     }
 }
 
