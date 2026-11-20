@@ -490,3 +490,95 @@ class TestI18nChecks(TestPylintChecks):
         self.assertEqual(len(errors), 6)
         for error in errors:
             self.assertEqual(error["symbol"], "missing-gettext")
+
+
+@unittest.skipUnless(pylint and pylint_bin, "testing lints requires pylint")
+class TestUtcTodayLint(TestPylintChecks):
+    def check_module(self, module, content, path='models/foo.py'):
+        """ Lint ``content`` as the file ``path`` of the addon ``module``. """
+        with tempfile.TemporaryDirectory() as tmp:
+            file_path = os.path.join(tmp, module, path)
+            os.makedirs(os.path.dirname(file_path))
+            with open(os.path.join(tmp, module, '__manifest__.py'), 'w', encoding='utf-8') as f:
+                f.write("{'name': 'Foo'}")
+            with open(file_path, 'w', encoding='utf-8') as f:
+                f.write(dedent(content).strip())
+            res = run(
+                [
+                    pylint_bin,
+                    f"--rcfile={os.devnull}",
+                    "--load-plugins=_odoo_checker_today",
+                    "--disable=all",
+                    "--enable=utc-today,ignored-now-argument",
+                    "--output-format=json",
+                    file_path,
+                ],
+                stdout=PIPE,
+                encoding="utf-8",
+                env={
+                    **os.environ,
+                    "PYTHONPATH": HERE + os.pathsep + os.environ.get("PYTHONPATH", ""),
+                },
+                check=False,
+                shell=False,  # keep False to avoid shell injection
+            )
+        return [(error['line'], error['symbol']) for error in json.loads(res.stdout)]
+
+    def test_utc_today(self):
+        content = """
+            import datetime
+            import time
+            from datetime import date
+            from odoo import fields
+
+            date.today()
+            datetime.date.today()
+            fields.Date.today()
+            fields.Datetime.today()
+            datetime.datetime.now().date()
+            fields.Datetime.now().date()
+            time.strftime('%Y-%m-%d')
+            due = fields.Date(default=fields.Date.today)
+        """
+        self.assertEqual(self.check_module('account_foo', content), [(line, 'utc-today') for line in range(6, 14)])
+
+    def test_utc_today_allowed(self):
+        content = """
+            import time
+            from odoo import fields
+
+            fields.Date.context_today(self)
+            self.company_id._get_company_today()
+            fields.Datetime.now()
+            fields.Datetime.context_timestamp(self, fields.Datetime.now()).date()
+            time.strftime('%Y-%m-%d', time.gmtime(0))
+            due = fields.Date(default=fields.Date.context_today)
+            fields.Date.today()  # pylint: disable=utc-today
+        """
+        self.assertEqual(self.check_module('account_foo', content), [])
+
+    def test_utc_today_scope(self):
+        content = "fields.Date.today()"
+        self.assertEqual(self.check_module('l10n_be_foo', content), [(1, 'utc-today')])
+        self.assertEqual(self.check_module('stock', content), [(1, 'utc-today')])
+        # other modules, and the tests
+        self.assertEqual(self.check_module('hr_holidays', content), [])
+        self.assertEqual(self.check_module('stockholm', content), [])
+        self.assertEqual(self.check_module('account', content, path='tests/test_foo.py'), [])
+
+    def test_ignored_now_argument(self):
+        content = """
+            from datetime import datetime
+            from zoneinfo import ZoneInfo
+            from odoo import fields
+
+            fields.Datetime.now(ZoneInfo('Europe/Zagreb'))
+            fields.Date.today(tz='Europe/Zagreb')
+            datetime.now(ZoneInfo('Europe/Zagreb'))
+            fields.Datetime.now()
+        """
+        # in any module
+        self.assertEqual(self.check_module('hr_holidays', content), [
+            (5, 'ignored-now-argument'),
+            (6, 'ignored-now-argument'),
+        ])
