@@ -59,6 +59,9 @@ export class FieldChangeReplicationPlugin extends Plugin {
         this.mutationsBySource = new Map();
         const touchedEls = new Set();
         for (const sourceEl of mutationsBySource.keys()) {
+            if (!sourceEl.isConnected) {
+                continue;
+            }
             const same = (attribute, quote = '"') =>
                 `[${attribute}=${quote}${sourceEl.getAttribute(attribute)}${quote}]`;
             let selector = "";

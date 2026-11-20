@@ -11,7 +11,7 @@ import { BLOCKQUOTE_PARENT_HANDLERS } from "@html_builder/core/utils";
 
 export class SaveSnippetPlugin extends Plugin {
     static id = "saveSnippet";
-    static dependencies = ["disableSnippets"];
+    static dependencies = ["disableSnippets", "properties"];
 
     /** @type {import("plugins").BuilderResources} */
     resources = {
@@ -19,10 +19,19 @@ export class SaveSnippetPlugin extends Plugin {
             1,
             this.getOptionsContainerTopButtons.bind(this)
         ),
+        properties: [
+            {
+                predicate: `[data-snippet], a.btn, ${BLOCKQUOTE_PARENT_HANDLERS}`,
+                savableAsCustomSnippet: true,
+            },
+            {
+                predicate: (node) => node.matches(this.unsavableSelector),
+                savableAsCustomSnippet: false,
+            },
+        ],
     };
 
     setup() {
-        this.savableSelector = `[data-snippet], a.btn, ${BLOCKQUOTE_PARENT_HANDLERS}`;
         this.unsavableSelector = [
             ".o_no_save",
             ...this.getResource("submit_button_selectors"),
@@ -36,7 +45,7 @@ export class SaveSnippetPlugin extends Plugin {
      * @returns {boolean}
      */
     isSavable(el) {
-        return el.matches(this.savableSelector) && !el.matches(this.unsavableSelector);
+        return this.dependencies.properties.get(el, "savableAsCustomSnippet", false);
     }
 
     getOptionsContainerTopButtons(el) {
