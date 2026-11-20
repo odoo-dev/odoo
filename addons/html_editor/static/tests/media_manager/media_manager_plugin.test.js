@@ -45,7 +45,7 @@ test("the media command opens the media manager on the images of the edited reco
 test("a new record only shows the public images", async () => {
     const { editor } = await openPartnerForm({ resId: false });
     await openMediaManagerFromPowerbox(editor);
-    expect(getCardNames()).toEqual(["banner.png", "logo.png"]);
+    expect(getCardNames()).toEqual(["banner.png", "logo.png", "link.png"]);
 });
 
 test("the media manager follows the record displayed in the form", async () => {
@@ -53,7 +53,7 @@ test("the media manager follows the record displayed in the form", async () => {
     await contains(".o_pager_next").click();
     expect(`${NOTES} p`).toHaveText("Other notes");
     await openMediaManagerFromPowerbox(form.editor);
-    expect(getCardNames()).toEqual(["banner.png", "logo.png", "other_partner.png"]);
+    expect(getCardNames()).toEqual(["banner.png", "logo.png", "other_partner.png", "link.png"]);
 });
 
 test("insert the selected images in the notes, then save them", async () => {

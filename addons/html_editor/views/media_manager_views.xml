@@ -55,8 +55,7 @@
                             <aside class="o_kanban_image">
                                 <div class="o_kanban_image_wrapper">
                                     <t t-set="webimage" t-value="new RegExp('image.*(gif|jpeg|jpg|png|webp)').test(record.mimetype.value)"/>
-                                    <div t-if="record.type.raw_value == 'url'" class="fa fa-link fa-3x text-muted" aria-label="Image is a link"/>
-                                    <img t-elif="webimage"
+                                    <img t-if="webimage"
                                          t-attf-src="#{record.local_url.raw_value}"
                                          t-attf-alt="#{record.description.raw_value or record.name.raw_value or 'Image'}"
                                          t-att-width="record.image_width.value"

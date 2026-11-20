@@ -63,7 +63,7 @@ test("double click on an image: replace it from the public media library", async
     await dblclick(":iframe img.a_nice_img");
     await waitForMediaManager();
     expect(".o_select_media_dialog").toHaveCount(0);
-    expect(getCardNames()).toEqual(["banner.png", "logo.png"]);
+    expect(getCardNames()).toEqual(["banner.png", "logo.png", "link.png"]);
 
     await contains(`${card("logo.png")} .o_kanban_image`).click();
     await waitForNone(".modal");
@@ -81,5 +81,5 @@ test("insert images from the powerbox of the website builder", async () => {
     await waitFor(".o-we-powerbox");
     await contains(".o-we-powerbox .o-we-command-name:contains(/^Media$/)").click();
     await waitForMediaManager();
-    expect(getCardNames()).toEqual(["banner.png", "logo.png"]);
+    expect(getCardNames()).toEqual(["banner.png", "logo.png", "link.png"]);
 });

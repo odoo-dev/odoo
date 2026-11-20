@@ -156,13 +156,13 @@ describe("side panel filters", () => {
     test("the images uploaded last week", async () => {
         await openMediaManager();
         await clickSidePanelFilter("uploaded last week");
-        expect(getCardNames()).toEqual(["logo.png", "partner.jpg"]);
+        expect(getCardNames()).toEqual(["logo.png", "partner.jpg", "link.png"]);
     });
 
     test("the images uploaded by me", async () => {
         await openMediaManager();
         await clickSidePanelFilter("uploaded by me");
-        expect(getCardNames()).toEqual(["banner.png", "logo.png"]);
+        expect(getCardNames()).toEqual(["banner.png", "logo.png", "link.png"]);
     });
 });
 
@@ -189,7 +189,7 @@ describe("card menu", () => {
         expect(getCardNames()).toEqual(PARTNER_IMAGES);
 
         await contains(".modal-footer button:contains(Delete)").click();
-        expect(getCardNames()).toEqual(["logo.png", "partner.jpg"]);
+        expect(getCardNames()).toEqual(["logo.png", "partner.jpg", "link.png"]);
         expect(MockServer.env["ir.attachment"].search([["id", "=", 1]])).toEqual([]);
     });
 });
