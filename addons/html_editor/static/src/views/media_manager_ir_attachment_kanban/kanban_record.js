@@ -19,11 +19,6 @@ export class MediaManagerKanbanRecord extends KanbanRecord {
     props = useProps(MediaManagerkanbanRecordProps);
 
     setup() {
-        console.groupCollapsed("%c MediaManagerKanbanRecord :: setup()", "background: #f99;");
-        console.warn("setup() trace");
-        console.log("this : ", this);
-        console.log("props : ", this.props);
-        console.groupEnd();
         this.state = proxy({
             selected: false,
         });
@@ -48,7 +43,6 @@ export class MediaManagerKanbanRecord extends KanbanRecord {
         if (ev.target.closest(this.constructor.CANCEL_GLOBAL_CLICK)) {
             return;
         }
-        console.warn("MediaManagerKanbanRecord::onGlobalClick", ev);
 
         if (!ev.target.closest(".o_record_interactive")) {
             this.toggleSelected();
