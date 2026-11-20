@@ -340,6 +340,12 @@ class configmanager:
                          "by --test-tags specs and additionally by dynamic specs "
                          "'at_install' and 'post_install' correspondingly. Implies --stop-after-init")
 
+        group.add_option("--test-tz", dest="test_tz", my_default='', file_loadable=False,
+                         metavar='TZ',
+                         help="Timezone set on all users and companies during the tests, and on the "
+                              "browser of the tours. 'hostile' picks a timezone where the current date "
+                              "differs from the UTC date, so that code mixing both dates fails at any time. "
+                              "By default, the timezones of the database are kept.")
         group.add_option("--screencasts", dest="screencasts", type='path', my_default='',
                          metavar='DIR',
                          help="Screencasts will go in DIR/{db_name}/screencasts.")

@@ -35,7 +35,7 @@ from collections import defaultdict, deque
 from concurrent.futures import CancelledError, Future, InvalidStateError, wait
 from contextlib import AbstractContextManager, ExitStack, contextmanager
 from copy import deepcopy
-from datetime import datetime
+from datetime import UTC, date, datetime, time as dt_time, timedelta
 from functools import cache, partial, wraps
 from itertools import islice, zip_longest
 from textwrap import shorten
@@ -43,6 +43,7 @@ from unittest.mock import Mock, _patch, patch
 from urllib.parse import parse_qsl, urlencode, urljoin, urlsplit, urlunsplit
 from uuid import uuid4
 from xmlrpc import client as xmlrpclib
+from zoneinfo import ZoneInfo
 
 import freezegun
 import psutil
@@ -267,6 +268,62 @@ def test_xsd(url=None, path=None, skip=False):
                 _validate_xml(self.env, url, path, xmls)
         return wrapped_f
     return decorator
+
+
+# Timezones whose current date differs from the UTC one, for ``--test-tz=hostile``
+HOSTILE_TZ_AHEAD = 'Pacific/Kiritimati'  # UTC+14: tomorrow, from 10:00 UTC
+HOSTILE_TZ_BEHIND = 'Pacific/Pago_Pago'  # UTC-11: yesterday, until 11:00 UTC
+
+
+@cache
+def get_test_tz() -> str | None:
+    """ Return the timezone of the users and companies during the tests, as
+    given by ``--test-tz``, or ``None`` to keep the timezones of the database.
+
+    ``hostile`` resolves, once per run, to a timezone whose date differs from
+    the UTC date of the server, so that code mixing the server's date with the
+    user's or the company's one fails at any time of the day, not only around
+    midnight. The date stays different until 24:00 UTC for a run started after
+    10:00 UTC, until 11:00 UTC otherwise: long runs should start at 00:00 or
+    10:00 UTC.
+    """
+    test_tz = config['test_tz']
+    if not test_tz:
+        return None
+    if test_tz == 'hostile':
+        # real time, as the first test class may freeze it
+        utc_hour = datetime.fromtimestamp(real_time(), UTC).hour
+        test_tz = HOSTILE_TZ_AHEAD if utc_hour >= 10 else HOSTILE_TZ_BEHIND
+    ZoneInfo(test_tz)  # raise on invalid timezone
+    _logger.info("Running the tests in the timezone %s", test_tz)
+    return test_tz
+
+
+DATE_ONLY = re.compile(r'\d{4}-\d{2}-\d{2}')
+
+
+def _test_tz_day(time_to_freeze):
+    """ Return the UTC datetime at which to freeze the time for the given
+    value of :class:`freeze_time`.
+
+    Without a test timezone, or for a datetime, the value is kept. A date
+    (``'2017-01-12'``) means that day for the users of the tests: in the
+    test timezone, at an hour where the UTC date is another one, so that the
+    tests frozen on a date also catch the code using the UTC date.
+    """
+    if not (test_tz := get_test_tz()):
+        return time_to_freeze
+    if isinstance(time_to_freeze, str) and DATE_ONLY.fullmatch(time_to_freeze.strip()):
+        day = date.fromisoformat(time_to_freeze.strip())
+    elif isinstance(time_to_freeze, date) and not isinstance(time_to_freeze, datetime):
+        day = time_to_freeze
+    else:
+        return time_to_freeze
+    zone = ZoneInfo(test_tz)
+    offset = datetime.combine(day, dt_time(12), zone).utcoffset()
+    # 01:00 is still the previous day in UTC ahead of it, 23:00 already the next one behind it
+    local_time = dt_time(1) if offset > timedelta(0) else dt_time(23) if offset < timedelta(0) else dt_time(0)
+    return datetime.combine(day, local_time, zone).astimezone(UTC).replace(tzinfo=None)
 
 
 def new_test_user(env, login='', groups='base.group_user', context=None, **kwargs):
@@ -1340,6 +1397,33 @@ class TransactionCase(BaseCase):
     savepoint = None
 
     @classmethod
+    def _setup_test_tz(cls, tz):
+        """ Set ``tz`` on all users but the public ones (visitors have no
+        timezone), on all companies, and as the timezone of the new partners
+        (thus users), see :func:`get_test_tz`.
+        """
+        cls.cr.execute(SQL(
+            """
+            UPDATE res_partner SET tz = %s
+             WHERE id IN (SELECT partner_id FROM res_users)
+               AND id NOT IN (
+                   SELECT u.partner_id
+                     FROM res_users u
+                     JOIN res_groups_users_rel r ON r.uid = u.id
+                    WHERE r.gid = %s
+               )
+            """,
+            tz, cls.env.ref('base.group_public').id,
+        ))
+        if (company_tz := cls.env['res.company']._fields.get('tz')) and company_tz.store:
+            cls.cr.execute(SQL("UPDATE res_company SET tz = %s", tz))
+        cls.env.invalidate_all()
+        partner_tz = cls.env['res.partner']._fields['tz']
+        cls.startClassPatcher(patch.object(
+            partner_tz, 'default', lambda partner: partner.env.context.get('tz') or tz,
+        ))
+
+    @classmethod
     def _gc_filestore(cls):
         # attachment can be created or unlink during the tests.
         # they can addup during test and take some disc space.
@@ -1412,6 +1496,9 @@ class TransactionCase(BaseCase):
 
         cls.env = api.Environment(cls.cr, api.SUPERUSER_ID, {})
         cls.env.transaction._wrote__ = True  # isolate tests: avoid propagating cache on rollback
+
+        if test_tz := get_test_tz():
+            cls._setup_test_tz(test_tz)
 
         def guard_create(original_create, model_name, action):
             if action == 'raise':
@@ -1804,12 +1891,15 @@ class ChromeBrowser:
             raise
 
     def _spawn_chrome(self, cmd):
+        env = {**os.environ, 'TMPDIR': self.user_data_dir}
+        if test_tz := get_test_tz():
+            env['TZ'] = test_tz
         # pylint: disable=subprocess-popen-preexec-fn
         proc = subprocess.Popen(
             cmd,
             stderr=subprocess.DEVNULL,
             preexec_fn=_preexec,
-            env={**os.environ, 'TMPDIR': self.user_data_dir},
+            env=env,
         )  # noqa: PLW1509
 
         port_file = pathlib.Path(self.user_data_dir, 'DevToolsActivePort')
@@ -3268,7 +3358,7 @@ class freeze_time:
 
     def __init__(self, time_to_freeze=None, tz_offset=0, tick=False, as_kwarg='', auto_tick_seconds=0):
         self.freezer = self._freeze_time(
-            time_to_freeze=time_to_freeze,
+            time_to_freeze=_test_tz_day(time_to_freeze),
             tz_offset=tz_offset,
             tick=tick,
             as_kwarg=as_kwarg,
