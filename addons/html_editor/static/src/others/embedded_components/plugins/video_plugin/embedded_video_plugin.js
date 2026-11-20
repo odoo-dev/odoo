@@ -1,5 +1,6 @@
 import { VideoPlugin } from "@html_editor/main/media/video/video_plugin";
 import { EmbeddedVideoSelector } from "./video_selector_dialog/embedded_video_selector";
+import { renderToElement } from "@web/core/utils/render";
 
 /**
  * This plugin is meant to replace the Video plugin.
@@ -25,6 +26,22 @@ export class EmbeddedVideoPlugin extends VideoPlugin {
     /** @override */
     get componentForMediaDialog() {
         return EmbeddedVideoSelector;
+    }
+
+    /**
+     * @override
+     */
+    createVideoElement(videoData) {
+        const videoElement = renderToElement("html_editor.EmbeddedVideoBlueprint", {
+            embeddedProps: JSON.stringify({
+                baseUrl: videoData.baseUrl || "",
+                videoId: videoData.videoId,
+                platform: videoData.platform,
+                params: videoData.options || {},
+            }),
+            isVertical: videoData.options?.isVertical || false,
+        });
+        return this.document.importNode(videoElement, true);
     }
 
     /**

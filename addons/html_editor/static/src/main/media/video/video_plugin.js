@@ -1,5 +1,6 @@
 import { Plugin } from "@html_editor/plugin";
-import { VideoSelector, PLATFORMS } from "@html_editor/main/media/media_dialog/video_selector";
+import { VideoSelector } from "@html_editor/main/media/media_dialog/video_selector";
+import { matchPlatformUrl, renderVideoElements } from "./video_providers";
 import { _t } from "@web/core/l10n/translation";
 
 export class VideoPlugin extends Plugin {
@@ -41,16 +42,15 @@ export class VideoPlugin extends Plugin {
      * @returns {Object|undefined}
      */
     getCommandForVideoUrlPaste(url) {
-        for (const platform of Object.values(PLATFORMS)) {
-            const urlMatch = platform.isValidVideoUrl(url);
-            if (urlMatch) {
-                return {
-                    title: _t("Embed %s Video", platform.name),
-                    description: _t("Embed the %s video in the document.", platform.name),
-                    icon: "play_circle",
-                    run: () => this.insertVideoElement(urlMatch, platform),
-                };
-            }
+        const match = matchPlatformUrl(url);
+        if (match) {
+            const { provider, urlMatch } = match;
+            return {
+                title: _t("Embed %s Video", provider.name),
+                description: _t("Embed the %s video in the document.", provider.name),
+                icon: "play_circle",
+                run: () => this.insertVideoElement(urlMatch, provider),
+            };
         }
     }
 
@@ -63,15 +63,15 @@ export class VideoPlugin extends Plugin {
     insertVideoElement(urlMatch, platform) {
         const videoData = platform.getVideoUrlData(urlMatch);
         const videoElement = this.createVideoElement(videoData);
-        videoElement.classList.add(...VideoSelector.mediaSpecificClasses);
-
         this.dependencies.dom.insert(videoElement);
         this.dependencies.history.commit();
     }
 
+    /**
+     * @param {Object} videoData see `getVideoUrlData` of the providers
+     * @returns {HTMLElement} the element to insert in the document
+     */
     createVideoElement(videoData) {
-        return this.componentForMediaDialog.createElements([videoData], {
-            document: this.document,
-        })[0];
+        return renderVideoElements([videoData], { document: this.document })[0];
     }
 }
