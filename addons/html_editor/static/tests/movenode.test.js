@@ -1,5 +1,5 @@
 import { describe, expect, getFixture, queryOne, test } from "@odoo/hoot";
-import { hover, click } from "@odoo/hoot-dom";
+import { hover, click, waitFor } from "@odoo/hoot-dom";
 import { animationFrame, tick } from "@odoo/hoot-mock";
 import { contains } from "@web/../tests/web_test_helpers";
 import { base64Img, setupEditor } from "./_helpers/editor";
@@ -24,7 +24,7 @@ test("should show the hook when hovering a P", async () => {
         styleContent: styles,
     });
     await hover(el.querySelector("p"));
-    expect(".oe-sidewidget-move").toHaveCount(1);
+    await expectElementCount(".oe-sidewidget-move", 1);
     expect(".oe-sidewidget-move").toHaveRect({ top: 0, left: 5 });
 });
 test("should show the hook when hovering the second P", async () => {
@@ -32,7 +32,7 @@ test("should show the hook when hovering the second P", async () => {
         styleContent: styles,
     });
     await hover(el.querySelector("p:last-child"));
-    expect(".oe-sidewidget-move").toHaveCount(1);
+    await expectElementCount(".oe-sidewidget-move", 1);
     expect(".oe-sidewidget-move").toHaveRect({ top: 37, left: 5 });
 });
 test("should show the hook when hovering a figure element", async () => {
@@ -49,13 +49,14 @@ test("should show the hook when hovering a figure element", async () => {
         }
     );
     await hover(el.querySelector("figure"));
-    expect(".oe-sidewidget-move").toHaveCount(1);
+    await expectElementCount(".oe-sidewidget-move", 1);
 });
 test("should not show the hook when hovering a DIV which is not a baseContainer", async () => {
     const { el } = await setupEditor(`<p>a[]</p><div class="oe_unbreakable"><br></div><p>b</p>`, {
         styleContent: styles,
     });
     await hover(el.querySelector("div"));
+    await animationFrame();
     expect(".oe-sidewidget-move").toHaveCount(0);
 });
 describe("drag", () => {
@@ -72,7 +73,7 @@ describe("drag", () => {
         expect(".oe-dropzone-box-side").toHaveCount(0);
         await tick();
         const { drop } = await contains(".oe-sidewidget-move").drag();
-        expect(".oe-dropzone-box-side").toHaveCount(8);
+        await expectElementCount(".oe-dropzone-box-side", 8);
         await drop(".oe-dropzone-box-side:eq(0)");
         expect(getContent(el)).toBe(
             `<p>a[]</p><div class="oe_unbreakable"><br></div><div class="o-paragraph">d</div><p>b</p><p>c</p>`
@@ -91,7 +92,7 @@ describe("drag", () => {
         expect(".oe-dropzone-box-side").toHaveCount(0);
         await tick();
         const { drop } = await contains(".oe-sidewidget-move").drag();
-        expect(".oe-dropzone-box-side").toHaveCount(8);
+        await expectElementCount(".oe-dropzone-box-side", 8);
         await drop(".oe-dropzone-box-side:eq(1)");
         expect(getContent(el)).toBe(
             `<p>a[]</p><div class="oe_unbreakable"><br></div><div class="o-paragraph">d</div><p>b</p><p>c</p>`
@@ -110,7 +111,7 @@ describe("drag", () => {
         expect(".oe-dropzone-box-side").toHaveCount(0);
         await tick();
         const { drop } = await contains(".oe-sidewidget-move").drag();
-        expect(".oe-dropzone-box-side").toHaveCount(8);
+        await expectElementCount(".oe-dropzone-box-side", 8);
         await drop(".oe-dropzone-box-side:eq(2)");
         expect(getContent(el)).toBe(
             `<p data-selection-placeholder=""><br></p><div class="oe_unbreakable"><br></div><p>a[]</p><div class="o-paragraph">d</div><p>b</p><p>c</p>`
@@ -129,7 +130,7 @@ describe("drag", () => {
         expect(".oe-dropzone-box-side").toHaveCount(0);
         await tick();
         const { drop } = await contains(".oe-sidewidget-move").drag();
-        expect(".oe-dropzone-box-side").toHaveCount(8);
+        await expectElementCount(".oe-dropzone-box-side", 8);
         await drop(".oe-dropzone-box-side:eq(3)");
         expect(getContent(el)).toBe(
             `<p data-selection-placeholder=""><br></p><div class="oe_unbreakable"><br></div><div class="o-paragraph">d</div><p>a[]</p><p>b</p><p>c</p>`
@@ -142,13 +143,13 @@ describe("drag", () => {
         await animationFrame();
         const firstLI = el.querySelector("li");
         await hover(firstLI);
-        const moveElement = document.querySelector(".oe-sidewidget-move");
+        const moveElement = await waitFor(".oe-sidewidget-move");
         let dropzones = [...document.querySelectorAll(".oe-dropzone-box-side")];
         expect(dropzones).toHaveLength(0);
         await tick();
         const handle = await contains(moveElement).drag();
+        await expectElementCount(".oe-dropzone-box-side", 8);
         dropzones = [...document.querySelectorAll(".oe-dropzone-box-side")];
-        expect(dropzones).toHaveLength(8);
         await handle.moveTo(dropzones[5]);
         await handle.drop();
         expect(getContent(el)).toBe(`<ol><li>b</li><li>c</li><li>a[]</li><li>d</li></ol>`);
@@ -163,13 +164,13 @@ describe("drag", () => {
         await animationFrame();
         const firstLI = el.querySelector("li");
         await hover(firstLI);
-        const moveElement = document.querySelector(".oe-sidewidget-move");
+        const moveElement = await waitFor(".oe-sidewidget-move");
         let dropzones = [...document.querySelectorAll(".oe-dropzone-box-side")];
         expect(dropzones).toHaveLength(0);
         await tick();
         const handle = await contains(moveElement).drag();
+        await expectElementCount(".oe-dropzone-box-side", 14);
         dropzones = [...document.querySelectorAll(".oe-dropzone-box-side")];
-        expect(dropzones).toHaveLength(14);
         await handle.moveTo(dropzones[11]);
         await handle.drop();
         expect(getContent(el)).toBe(
@@ -186,13 +187,13 @@ describe("drag", () => {
         await animationFrame();
         const firstLI = el.querySelector("li");
         await hover(firstLI);
-        const moveElement = document.querySelector(".oe-sidewidget-move");
+        const moveElement = await waitFor(".oe-sidewidget-move");
         let dropzones = [...document.querySelectorAll(".oe-dropzone-box-side")];
         expect(dropzones).toHaveLength(0);
         await tick();
         const handle = await contains(moveElement).drag();
+        await expectElementCount(".oe-dropzone-box-side", 10);
         dropzones = [...document.querySelectorAll(".oe-dropzone-box-side")];
-        expect(dropzones).toHaveLength(10);
         await handle.moveTo(dropzones[9]);
         await handle.drop();
         expect(getContent(el)).toBe(
@@ -209,13 +210,13 @@ describe("drag", () => {
         await animationFrame();
         const p = el.querySelector("p");
         await hover(p);
-        const moveElement = document.querySelector(".oe-sidewidget-move");
+        const moveElement = await waitFor(".oe-sidewidget-move");
         let dropzones = [...document.querySelectorAll(".oe-dropzone-box-side")];
         expect(dropzones).toHaveLength(0);
         await tick();
         const handle = await contains(moveElement).drag();
+        await expectElementCount(".oe-dropzone-box-side", 10);
         dropzones = [...document.querySelectorAll(".oe-dropzone-box-side")];
-        expect(dropzones).toHaveLength(10);
         await handle.moveTo(dropzones[3]);
         await handle.drop();
         expect(getContent(el)).toBe(
@@ -235,7 +236,7 @@ describe("drag", () => {
         expect(".oe-dropzone-box-side").toHaveCount(0);
         await tick();
         const { drop } = await contains(".oe-sidewidget-move").drag();
-        expect(".oe-dropzone-box-side").toHaveCount(8);
+        await expectElementCount(".oe-dropzone-box-side", 8);
         const outsideArea = document.createElement("div");
         getFixture().appendChild(outsideArea);
         await drop(outsideArea);
@@ -256,7 +257,7 @@ describe("drag", () => {
         expect(".oe-dropzone-box-side").toHaveCount(0);
         await tick();
         const { drop, moveTo } = await contains(".oe-sidewidget-move").drag();
-        expect(".oe-dropzone-box-side").toHaveCount(8);
+        await expectElementCount(".oe-dropzone-box-side", 8);
         await moveTo(".oe-dropzone-box-side:eq(3)");
         const outsideArea = document.createElement("div");
         getFixture().appendChild(outsideArea);
@@ -287,7 +288,7 @@ describe("drag", () => {
         await hover(table);
         expect(".oe-dropzone-box-side").toHaveCount(0);
         const { drop } = await contains(".oe-sidewidget-move").drag();
-        expect(".oe-dropzone-box-side").toHaveCount(6);
+        await expectElementCount(".oe-dropzone-box-side", 6);
         await drop(".oe-dropzone-box-side:eq(3)");
         expect(getContent(el)).toBe(
             unformat(
@@ -326,7 +327,7 @@ describe("drag", () => {
         await hover(table);
         expect(".oe-dropzone-box-side").toHaveCount(0);
         const { drop } = await contains(".oe-sidewidget-move").drag();
-        expect(".oe-dropzone-box-side").toHaveCount(6);
+        await expectElementCount(".oe-dropzone-box-side", 6);
         await drop(".oe-dropzone-box-side:eq(3)");
         expect(getContent(el)).toBe(
             unformat(
@@ -353,7 +354,7 @@ describe("drag", () => {
         expect(".oe-dropzone-box-side").toHaveCount(0);
         await tick();
         const { drop } = await contains(".oe-sidewidget-move").drag();
-        expect(".oe-dropzone-box-side").toHaveCount(6);
+        await expectElementCount(".oe-dropzone-box-side", 6);
         await drop(".oe-dropzone-box-side:eq(5)");
         expect(getContent(el)).toBe("<p>abc</p><ol><li>2</li><li>1[]</li></ol>");
     });
@@ -368,9 +369,9 @@ describe("drag", () => {
             expect(".oe-dropzone-box-side").toHaveCount(0);
             await tick();
             const { drop } = await contains(".oe-sidewidget-move").drag();
-            expect(".oe-dropzone-box-side").toHaveCount(6);
+            await expectElementCount(".oe-dropzone-box-side", 6);
             const hintContainer = queryOne(
-                "div[data-oe-local-overlay-id='oe-movenode-helper-container'] > div"
+                "div[data-oe-local-overlay-id='oe-movenode-helper-container'] > div > div"
             );
             expect(hintContainer).toHaveInnerHTML("<p>a</p><h1>b</h1>");
 
@@ -387,9 +388,9 @@ describe("drag", () => {
             expect(".oe-dropzone-box-side").toHaveCount(0);
             await tick();
             const { drop } = await contains(".oe-sidewidget-move").drag();
-            expect(".oe-dropzone-box-side").toHaveCount(6);
+            await expectElementCount(".oe-dropzone-box-side", 6);
             const hintContainer = queryOne(
-                "div[data-oe-local-overlay-id='oe-movenode-helper-container'] > div"
+                "div[data-oe-local-overlay-id='oe-movenode-helper-container'] > div > div"
             );
             expect(hintContainer).toHaveInnerHTML("<p>c</p>");
 
@@ -409,9 +410,9 @@ describe("drag", () => {
             expect(".oe-dropzone-box-side").toHaveCount(0);
             await tick();
             const { drop } = await contains(".oe-sidewidget-move").drag();
-            expect(".oe-dropzone-box-side").toHaveCount(8);
+            await expectElementCount(".oe-dropzone-box-side", 8);
             const hintContainer = queryOne(
-                "div[data-oe-local-overlay-id='oe-movenode-helper-container'] > div"
+                "div[data-oe-local-overlay-id='oe-movenode-helper-container'] > div > div"
             );
             expect(hintContainer).toHaveInnerHTML('<ol start="2"><li>2</li><li>3</li></ol>');
 
@@ -431,9 +432,9 @@ describe("drag", () => {
             expect(".oe-dropzone-box-side").toHaveCount(0);
             await tick();
             const { drop } = await contains(".oe-sidewidget-move").drag();
-            expect(".oe-dropzone-box-side").toHaveCount(12);
+            await expectElementCount(".oe-dropzone-box-side", 12);
             const hintContainer = queryOne(
-                "div[data-oe-local-overlay-id='oe-movenode-helper-container'] > div"
+                "div[data-oe-local-overlay-id='oe-movenode-helper-container'] > div > div"
             );
             expect(hintContainer).toHaveInnerHTML(
                 '<p>abc</p><ol start="1"><li>1</li><li>2</li></ol>'
@@ -452,7 +453,7 @@ describe("drag", () => {
             config: { direction: "rtl" },
         });
         await hover(el.querySelector("p"));
-        expect(".oe-sidewidget-move").toHaveCount(1);
+        await expectElementCount(".oe-sidewidget-move", 1);
         expect(".oe-sidewidget-move").toHaveRect({ top: 0, left: 135 });
     });
 });

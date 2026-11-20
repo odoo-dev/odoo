@@ -1,0 +1,71 @@
+<templates xml:space="preserve">
+    <t t-name="html_editor.MoveNodeHooksOverlay">
+        <div t-foreach="this.props.hooks" t-as="hook" t-key="hook.id"
+            class="oe-dropzone-hook"
+            t-attf-style="
+                display: {{ hook.display }};
+                z-index: {{ hook.zIndex }};
+                left: {{ hook.left }}px;
+                top: {{ hook.top }}px;
+                width: {{ hook.width }}px;
+                height: {{ hook.height }}px;
+            "
+            t-on-mouseenter="() => this.props.onMouseEnter(hook.element)"/>
+    </t>
+
+    <t t-name="html_editor.MoveNodeWidgetOverlay">
+        <div t-ref="this.widgetContainerRef">
+            <t t-set="moveWidget" t-value="this.props.moveWidget()"/>
+            <div t-if="moveWidget" t-key="moveWidget"
+                class="oe-sidewidget-move oi"
+                t-att-class="{ oe_movewidget_border: moveWidget.sheetBorderOffset }"
+                t-attf-style="
+                    width: {{ moveWidget.size }}px;
+                    height: {{ moveWidget.size }}px;
+                    top: {{ moveWidget.top }}px;
+                    left: {{ moveWidget.left }}px;
+                    --after-element-width: {{ moveWidget.sheetBorderOffset || 0 }}px;
+                "
+                data-icon="drag_indicator"
+                data-tooltip-template="html_editor.MoveNodePluginTooltip"
+                t-on-click="moveWidget.onClick"/>
+        </div>
+    </t>
+
+    <t t-name="html_editor.MoveNodeHelperOverlay">
+        <div t-ref="this.dragHelperContainerRef"/>
+    </t>
+
+    <t t-name="html_editor.MoveNodeDropzonesOverlay">
+        <div t-foreach="this.props.dropzones()" t-as="dropzone" t-key="dropzone_index"
+            class="oe-dropzone-box"
+            t-attf-style="
+                top: {{ dropzone.top }}px;
+                left: {{ dropzone.left }}px;
+                width: {{ dropzone.width }}px;
+                height: {{ dropzone.height }}px;
+            "
+            t-on-mouseleave="this.props.removeDropHint"
+            t-on-pointerleave="this.props.removeDropHint">
+            <div t-foreach="dropzone.directions" t-as="direction" t-key="direction"
+                class="oe-dropzone-box-side"
+                t-attf-class="oe-dropzone-box-side-{{direction}}"
+                t-on-mouseenter="() => this.props.onDropzoneEnter(dropzone, direction)"
+                t-on-pointerenter="() => this.props.onDropzoneEnter(dropzone, direction)"/>
+        </div>
+    </t>
+
+    <t t-name="html_editor.MoveNodeDropzoneHintsOverlay">
+        <t t-set="dropHint" t-value="this.props.dropHint()"/>
+        <div t-if="dropHint"
+            class="oe-dropzone-box"
+            t-attf-style="
+                top: {{ dropHint.dropzone.hint.top }}px;
+                left: {{ dropHint.dropzone.hint.left }}px;
+                width: {{ dropHint.dropzone.hint.width }}px;
+                height: {{ dropHint.dropzone.hint.height }}px;
+            ">
+            <div class="oe-current-drop-hint" t-att-style="this.dropHintStyles[dropHint.direction]"/>
+        </div>
+    </t>
+</templates>
