@@ -10,42 +10,16 @@ import { Plugin, shared } from "../plugin";
  */
 export class LocalOverlayPlugin extends Plugin {
     static id = "localOverlay";
-    static shared = shared(["makeLocalOverlay", "createElement", "addLocalOverlay"]);
+    static shared = shared(["addLocalOverlay"]);
 
     // Mounts the local overlay container of the iframe.
     createRoot = useRootCreator();
 
     setup() {
-        this.localOverlayContainer = this.config.localOverlayContainers?.ref();
-        this.localOverlays = new Set();
         // Keeps the local overlay keys of editors sharing a container apart.
         this.localOverlayPrefix = uniqueId("local_overlay");
         // Lets destroy() remove the local overlays this editor still shows.
         this.localOverlayCleanups = new Set();
-    }
-
-    /**
-     * Make a local container to organise floating elements inside it's own
-     * box and z-index isolation.
-     *
-     * @param {string} containerId An id to add to the container in order to make
-     *              the container more visible in the devtool and potentially
-     *              add css rules for the container and it's children.
-     */
-    makeLocalOverlay(containerId) {
-        const container = this.document.createElement("div");
-        container.className = `oe-local-overlay`;
-        container.setAttribute("data-oe-local-overlay-id", containerId);
-        if (this.localOverlayContainer) {
-            this.localOverlayContainer.append(container);
-            this.localOverlays.add(container);
-        }
-        return container;
-    }
-
-    createElement(tagName, options) {
-        const document = this.localOverlayContainer?.ownerDocument ?? window.document;
-        return document.createElement(tagName, options);
     }
 
     /**
@@ -119,10 +93,6 @@ export class LocalOverlayPlugin extends Plugin {
     }
 
     destroy() {
-        for (const container of this.localOverlays) {
-            container.remove();
-        }
-        this.localOverlays.clear();
         for (const localOverlayCleanup of this.localOverlayCleanups) {
             localOverlayCleanup();
         }

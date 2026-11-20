@@ -1,7 +1,6 @@
 <templates xml:space="preserve">
     <t t-name="html_editor.LocalOverlayContainer">
-        <div class="o-wysiwyg-local-overlay position-relative h-0 w-0" t-ref="this.localOverlayRef"/>
-        <div class="o-wysiwyg-local-overlay position-relative h-0 w-0">
+        <div class="o-wysiwyg-local-overlay position-relative h-0 w-0" t-ref="this.localOverlayRef">
             <t t-foreach="this.props.localOverlays.items()" t-as="localOverlay" t-key="localOverlay.key">
                 <div class="oe-local-overlay" t-att-data-oe-local-overlay-id="localOverlay.localOverlayId">
                     <ErrorHandler onError="error => this.handleComponentError(error, localOverlay)">
