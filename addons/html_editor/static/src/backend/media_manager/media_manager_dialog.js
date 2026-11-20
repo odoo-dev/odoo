@@ -6,7 +6,6 @@ import {
     MY_MEDIA_DOMAIN,
 } from "@html_editor/main/media/media_manager/domain_helper";
 
-import { useService } from "@web/core/utils/hooks";
 import {
     SelectCreateDialog,
     selectCreateDialogProps,
@@ -31,7 +30,6 @@ export class MediaManagerDialog extends SelectCreateDialog {
     setup() {
         super.setup();
         this.state.records = [];
-        this.orm = useService("orm");
 
         this.onSelectionChanged = (resIds, records) => {
             this.superOnSelectionChanged(resIds);
@@ -55,11 +53,6 @@ export class MediaManagerDialog extends SelectCreateDialog {
             onSelectionChanged: this.onSelectionChanged,
         };
         return props;
-    }
-
-    get isNewRecord() {
-        console.error("TODO");
-        return this.props.chatterParams?.isNewRecord;
     }
 
     async select(resIds) {
