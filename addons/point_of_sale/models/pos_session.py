@@ -1174,6 +1174,7 @@ class PosSession(models.Model):
             'pos_session_id': self.id,
             'company_id': self.company_id.id,
             'payment_type': payment_type,
+            **self._get_payment_method_line_vals(payment_method.journal_id, payment_type),
         })
 
         self._ensure_payment_outstanding_account(account_payment, amounts['amount'])
@@ -1226,7 +1227,20 @@ class PosSession(models.Model):
             'pos_payment_method_id': payment_method.id,
             'pos_session_id': self.id,
             'payment_type': payment_type,
+            **self._get_payment_method_line_vals(payment_method.journal_id, payment_type),
         }
+
+    def _get_payment_method_line_vals(self, journal, payment_type):
+        """ PoS payments are already settled at the terminal: they must not use a payment method
+        that requires a (trusted) recipient bank account, e.g. ISO20022 credit transfers.
+        """
+        if payment_type != 'outbound':
+            return {}
+        codes_needing_bank_account = self.env['account.payment']._get_method_codes_needing_bank_account()
+        method_line = journal._get_available_payment_method_lines(payment_type).filtered(
+            lambda line: line.code not in codes_needing_bank_account
+        )[:1]
+        return {'payment_method_line_id': method_line.id} if method_line else {}
 
     def _create_split_account_payments(self, payment_amounts_list):
         vals_list = []
