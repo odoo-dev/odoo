@@ -4,6 +4,7 @@ import {
     getVideoElementData,
     matchPlatformUrl,
     renderVideoElements,
+    VIDEO_CLASS,
 } from "./video_providers";
 import { VideoOptionsDialog } from "./video_options_dialog/video_options_dialog";
 import { _t } from "@web/core/l10n/translation";
@@ -11,6 +12,7 @@ import { _t } from "@web/core/l10n/translation";
 export class VideoPlugin extends Plugin {
     static id = "video";
     static dependencies = ["history", "dom", "dialog"];
+    static shared = ["editVideoElement"];
     static defaultConfig = {
         allowVideo: true,
         allowVideoFile: false,
@@ -74,34 +76,41 @@ export class VideoPlugin extends Plugin {
     }
 
     /**
-     * Build the element of a platform's video chosen in the media manager, or
-     * of the video to edit, once the user has set its options.
+     * Build the element of a platform's video chosen in the media manager,
+     * once the user has set its options.
      *
      * @param {Object} params
-     * @param {string} [params.url] the url of the video to insert
-     * @param {HTMLElement} [params.node] the video to edit
-     * @returns {Promise<HTMLElement|undefined>} undefined if the url or the
-     *      node is not the video of a supported platform, or if the user
-     *      discarded the options
+     * @param {string} params.url
+     * @returns {Promise<HTMLElement|undefined>} undefined if the url is not the
+     *      video of a supported platform, or if the user discarded the options
      */
-    async createMediaManagerVideoElement({ url, node }) {
-        let options;
-        if (node) {
-            const videoElementData = getVideoElementData(node);
-            if (!videoElementData) {
-                return;
-            }
-            ({ url, options } = videoElementData);
-        }
+    async createMediaManagerVideoElement({ url }) {
         if (!matchPlatformUrl(url)) {
             return;
         }
-        const videoData = await this.openVideoOptionsDialog({
-            url,
-            options,
-            confirmLabel: node ? _t("Save") : _t("Insert"),
-        });
+        const videoData = await this.openVideoOptionsDialog({ url });
         return videoData && this.createVideoElement(videoData);
+    }
+
+    /**
+     * Edit the options of a platform's video of the document (built by
+     * `renderVideoElements`, the embedded videos have their own menu).
+     *
+     * @param {HTMLElement} videoEl
+     */
+    async editVideoElement(videoEl) {
+        const videoElementData = getVideoElementData(videoEl);
+        if (!videoElementData) {
+            return;
+        }
+        const videoData = await this.openVideoOptionsDialog({
+            ...videoElementData,
+            confirmLabel: _t("Save"),
+        });
+        if (videoData) {
+            videoEl.closest(`.${VIDEO_CLASS}`).replaceWith(this.createVideoElement(videoData));
+            this.dependencies.history.commit();
+        }
     }
 
     /**

@@ -57,7 +57,9 @@ export class EmbeddedVideoPlugin extends VideoPlugin {
                     this.dependencies.overlay.createOverlay(Component, props, options),
                 focusEditable: () => this.dependencies.selection.focusEditable(),
                 commit: () => this.dependencies.history.commit(),
-                openVideoSelectorDialog: this.openVideoSelectorDialog.bind(this),
+                replaceVideo: (videoBlock) =>
+                    this.dependencies.media.openMediaDialog({ node: videoBlock }),
+                editVideoOptions: this.editVideoOptions.bind(this),
             });
         }
     }
@@ -70,7 +72,7 @@ export class EmbeddedVideoPlugin extends VideoPlugin {
      * @param {string} video.url
      * @param {Object} video.options
      */
-    async openVideoSelectorDialog(save, { url, options }) {
+    async editVideoOptions(save, { url, options }) {
         if (!matchPlatformUrl(url)) {
             return;
         }

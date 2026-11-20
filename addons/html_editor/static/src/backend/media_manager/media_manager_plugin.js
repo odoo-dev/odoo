@@ -3,8 +3,12 @@ import { Domain } from "@web/core/domain";
 import {
     getRecordDomain,
     IMAGES_DOMAIN,
+    VIDEOS_DOMAIN,
 } from "@html_editor/main/media/media_manager/domain_helper";
-import { VIDEO_CLASS, VIDEO_URL_MIMETYPES } from "@html_editor/main/media/video/video_providers";
+import {
+    VIDEO_ELEMENT_SELECTOR,
+    VIDEO_URL_MIMETYPES,
+} from "@html_editor/main/media/video/video_providers";
 import { MAIN_PLUGINS } from "@html_editor/plugin_sets";
 import { loadImage } from "@html_editor/utils/image_processing";
 import {
@@ -14,10 +18,9 @@ import {
 } from "./media_manager_dialog";
 
 /**
- * @typedef {((params: { url?: string, node?: HTMLElement }) => Promise<HTMLElement|undefined>)[]} media_manager_video_element_providers
- * Build the element of a video chosen in the media manager (`url`), or of the
- * edited video (`node`), see VideoPlugin. The videos are only listed when there
- * is a provider.
+ * @typedef {((params: { url: string }) => Promise<HTMLElement|undefined>)[]} media_manager_video_element_providers
+ * Build the element of a video chosen in the media manager (see VideoPlugin).
+ * The videos are only listed when there is a provider.
  */
 
 /**
@@ -47,17 +50,17 @@ export class MediaManagerPlugin extends MediaPlugin {
             return super.openMediaDialog(params, editableEl);
         }
         const videoElementProviders = this.getResource("media_manager_video_element_providers");
-        const videoToEdit = !params.save && params.node?.closest?.(`.${VIDEO_CLASS}`);
-        if (videoToEdit && videoElementProviders.length) {
-            return this.editVideo(videoElementProviders, videoToEdit);
-        }
         const recordInfo = this.getRecordInfo(editableEl);
-        let imageToReplace = params.node || null;
-        // The videos are only inserted: replacing an image or giving the
-        // media to a custom `save` callback (builder options) needs an image.
-        const allowVideos = !!videoElementProviders.length && !imageToReplace && !params.save;
         let domain = this.getDomain(recordInfo, params);
-        if (!allowVideos) {
+        // A custom `save` callback (builder options) needs an image.
+        const canUseVideos = !!videoElementProviders.length && !params.save;
+        // A video is replaced by a video, an image by an image.
+        const videoToReplace = canUseVideos && params.node?.closest?.(VIDEO_ELEMENT_SELECTOR);
+        let mediaToReplace = videoToReplace || params.node || null;
+        const allowVideos = canUseVideos && (!params.node || !!videoToReplace);
+        if (videoToReplace) {
+            domain = Domain.and([domain, VIDEOS_DOMAIN]).toList();
+        } else if (!allowVideos) {
             domain = Domain.and([domain, IMAGES_DOMAIN]).toList();
         }
         return this.dependencies.dialog.addDialog(MediaManagerDialog, {
@@ -85,32 +88,18 @@ export class MediaManagerPlugin extends MediaPlugin {
                 }
                 const promises = [];
                 for (const el of elements) {
-                    promises.push(this.onSaveMediaDialog(el, imageToReplace));
-                    imageToReplace = null;
+                    promises.push(this.onSaveMediaDialog(el, mediaToReplace));
+                    mediaToReplace = null;
                 }
                 await Promise.all(promises);
             },
-            multiSelect: !imageToReplace,
+            multiSelect: !mediaToReplace,
         });
     }
 
     /**
-     * Edit the options of a video of the document, instead of choosing
-     * another media.
-     *
      * @param {media_manager_video_element_providers} providers
-     * @param {HTMLElement} videoEl
-     */
-    async editVideo(providers, videoEl) {
-        const newVideoEl = await this.createVideoElement(providers, { node: videoEl });
-        if (newVideoEl) {
-            await this.onSaveMediaDialog(newVideoEl, videoEl);
-        }
-    }
-
-    /**
-     * @param {media_manager_video_element_providers} providers
-     * @param {{ url?: string, node?: HTMLElement }} params
+     * @param {{ url: string }} params
      * @returns {Promise<HTMLElement|undefined>}
      */
     async createVideoElement(providers, params) {

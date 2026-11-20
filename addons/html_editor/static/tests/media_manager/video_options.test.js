@@ -2,11 +2,14 @@ import { describe, expect, hover, queryOne, test, waitFor, waitForNone } from "@
 import { contains } from "@web/../tests/web_test_helpers";
 import {
     defineMediaManagerModels,
+    getCardNames,
     openMediaManagerFromPowerbox,
     openPartnerForm,
     PARTNER_WITH_EMBEDDED_VIDEO_ID,
     PARTNER_WITH_VIDEO_ID,
+    VIDEO_CARD,
     videoCard,
+    waitForMediaManager,
     YOUTUBE_URL,
 } from "./media_manager_test_helpers";
 
@@ -93,14 +96,20 @@ describe("insert a video", () => {
     });
 });
 
-describe("edit a video", () => {
-    test("an embedded video, from its Replace button", async () => {
+/** Open the menu of the embedded video of the notes. */
+async function openEmbeddedVideoMenu() {
+    await waitFor(`${EMBEDDED_VIDEO} iframe`);
+    await hover(EMBEDDED_VIDEO);
+    await contains("button.video-options-button").click();
+}
+
+describe("embedded video menu", () => {
+    test("edit the video options", async () => {
         await openPartnerForm({ resId: PARTNER_WITH_EMBEDDED_VIDEO_ID });
-        await waitFor(`${EMBEDDED_VIDEO} iframe`);
-        await hover(EMBEDDED_VIDEO);
-        await contains("button.video-options-button").click();
-        await contains(".video-replace-button").click();
+        await openEmbeddedVideoMenu();
+        await contains(".video-edit-options-button").click();
         await waitFor(DIALOG);
+        expect(".media-manager-kanban-view").toHaveCount(0);
         // the current options
         expect(`${option("autoplay")} input[type=checkbox]`).toBeChecked();
         expect(`${option("loop")} input[type=checkbox]`).not.toBeChecked();
@@ -113,13 +122,35 @@ describe("edit a video", () => {
         expect(getEmbeddedVideoProps().params).toMatchObject({ autoplay: false, loop: true });
     });
 
-    test("a video of an editor without the embedded components", async () => {
-        const { editor } = await openPartnerForm({ resId: PARTNER_WITH_VIDEO_ID });
-        const videoEl = queryOne(`${NOTES} .media_iframe_video`);
-        // e.g. the website builder, when double-clicking a video
-        editor.shared.media.openMediaDialog({ node: videoEl });
+    test("replace the video by another one of the media manager", async () => {
+        await openPartnerForm({ resId: PARTNER_WITH_EMBEDDED_VIDEO_ID });
+        await openEmbeddedVideoMenu();
+        await contains(".video-replace-button").click();
+        await waitForMediaManager();
+        // only the videos, a single one is chosen
+        expect(getCardNames()).toEqual([]);
+        expect(VIDEO_CARD).toHaveCount(2);
+        expect(".modal .o_select_button").toHaveCount(0);
+
+        await contains(`${videoCard("YouTube - dQw4w9WgXcQ")} .o_kanban_image`).click();
         await waitFor(DIALOG);
-        expect(".media-manager-kanban-view").toHaveCount(0);
+        await contains(`${DIALOG} .modal-footer .btn-primary`).click();
+        await waitForNone(".modal");
+        // the new video, with the options of its url (no autoplay)
+        expect(EMBEDDED_VIDEO).toHaveCount(1);
+        expect(getEmbeddedVideoProps()).toMatchObject({
+            videoId: "dQw4w9WgXcQ",
+            params: { autoplay: false },
+        });
+    });
+});
+
+describe("video of an editor without the embedded components", () => {
+    test("edit its options", async () => {
+        const { editor } = await openPartnerForm({ resId: PARTNER_WITH_VIDEO_ID });
+        // e.g. from an option of the website builder
+        editor.shared.video.editVideoElement(queryOne(`${NOTES} .media_iframe_video`));
+        await waitFor(DIALOG);
         // the options are read from the video
         expect(`${option("loop")} input[type=checkbox]`).toBeChecked();
 
@@ -129,5 +160,23 @@ describe("edit a video", () => {
         // replaced by the video of the editor (here, an embedded one)
         expect(`${NOTES} .media_iframe_video`).toHaveCount(0);
         expect(getEmbeddedVideoProps().params).toMatchObject({ autoplay: true, loop: true });
+    });
+
+    test("replace it from the media manager", async () => {
+        const { editor } = await openPartnerForm({ resId: PARTNER_WITH_VIDEO_ID });
+        // e.g. the website builder, when double-clicking a video
+        editor.shared.media.openMediaDialog({
+            node: queryOne(`${NOTES} .media_iframe_video iframe`),
+        });
+        await waitForMediaManager();
+        expect(getCardNames()).toEqual([]);
+        expect(VIDEO_CARD).toHaveCount(2);
+
+        await contains(`${videoCard("YouTube - dQw4w9WgXcQ")} .o_kanban_image`).click();
+        await waitFor(DIALOG);
+        await contains(`${DIALOG} .modal-footer .btn-primary`).click();
+        await waitForNone(".modal");
+        expect(`${NOTES} .media_iframe_video`).toHaveCount(0);
+        expect(getEmbeddedVideoProps().params).toMatchObject({ loop: false });
     });
 });
