@@ -13,3 +13,16 @@
     flex-grow: 1;
   }
 }
+
+.o_resource_calendar_attendance_calendar_view .o_calendar_header {
+  container: resourceCalendarHeader / inline-size;
+}
+
+// Not enough room to center the buttons without overlapping the title
+// (e.g. browser zoom > 125%): put them back in the flow, on the right.
+@container resourceCalendarHeader (max-width: 1150px) {
+  .o_multi_selection_buttons {
+    position: static !important;
+    margin-left: auto;
+  }
+}

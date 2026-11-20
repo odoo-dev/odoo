@@ -137,7 +137,9 @@ export class ResourceCalendarAttendanceCalendarCommonRenderer extends CalendarCo
         const start = luxon.DateTime.fromJSDate(info.start);
         const end = luxon.DateTime.fromJSDate(info.end);
         this.popover.open(
-            info.jsEvent?.toElement ?? info.view.calendar.el.querySelector(".fc-event-mirror"),
+            info.jsEvent?.toElement ??
+                info.view.calendar.el.querySelector(".fc-event-mirror") ??
+                this.dateClickTarget,
             {
                 ...this.getPopoverProps(null),
                 context: {
@@ -166,6 +168,8 @@ export class ResourceCalendarAttendanceCalendarCommonRenderer extends CalendarCo
      */
     onDateClick(info) {
         const date = luxon.DateTime.fromJSDate(info.date);
+        // anchor for the popover when the selection has no jsEvent (e.g. touch)
+        this.dateClickTarget = info.dayEl ?? info.jsEvent?.target;
         info?.view?.calendar.select(date.toISO(), date.plus({ hours: 1 }).toISO());
     }
 
