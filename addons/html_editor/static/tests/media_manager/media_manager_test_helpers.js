@@ -25,10 +25,17 @@ import { insertText } from "../_helpers/user_actions";
 export const PNG_DATA_URL =
     "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
 
+export const YOUTUBE_URL = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+const YOUTUBE_LOOP_EMBED_URL = "https://www.youtube.com/embed/dQw4w9WgXcQ?loop=1&playlist=dQw4w9WgXcQ";
+
 export const EDITED_PARTNER_ID = 101;
 export const OTHER_PARTNER_ID = 102;
 /** A partner whose notes contain an image. */
 export const PARTNER_WITH_IMAGE_ID = 103;
+/** A partner whose notes contain an embedded video (autoplay). */
+export const PARTNER_WITH_EMBEDDED_VIDEO_ID = 104;
+/** A partner whose notes contain a video of an editor without the embedded components (loop). */
+export const PARTNER_WITH_VIDEO_ID = 105;
 
 // -----------------------------------------------------------------------------
 // Views: the real ones, as defined by html_editor
@@ -116,10 +123,20 @@ export class ResPartner extends webModels.ResPartner {
             name: "Partner with an image",
             comment: `<p><img class="img-fluid" src="${PNG_DATA_URL}" alt="old"></p>`,
         },
+        {
+            id: PARTNER_WITH_EMBEDDED_VIDEO_ID,
+            name: "Partner with an embedded video",
+            comment: `<p>Notes</p><div data-embedded="video" data-oe-protected="true" contenteditable="false" data-embedded-props='{"baseUrl":"${YOUTUBE_URL}","videoId":"dQw4w9WgXcQ","platform":"youtube","params":{"startFrom":0,"autoplay":true,"muted":true,"loop":false,"hideControls":false,"hideFullscreen":false,"noCookie":false,"enableJsApi":true,"showRelatedVideos":false}}'></div><p>End</p>`,
+        },
+        {
+            id: PARTNER_WITH_VIDEO_ID,
+            name: "Partner with a video",
+            comment: `<p>Notes</p><div class="media_iframe_video" data-platform="youtube" data-base-url="${YOUTUBE_URL}" data-embed-url="${YOUTUBE_LOOP_EMBED_URL}" data-video-id="dQw4w9WgXcQ"><div class="css_editable_mode_display"></div><div class="media_iframe_video_size" contenteditable="false"></div><iframe frameborder="0" contenteditable="false" allowfullscreen="allowfullscreen" src="${YOUTUBE_LOOP_EMBED_URL}"></iframe></div><p>End</p>`,
+        },
     ];
 }
 
-export const YOUTUBE_URL = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+
 export const LOOM_URL = "https://www.loom.com/share/1234abcd";
 
 /**

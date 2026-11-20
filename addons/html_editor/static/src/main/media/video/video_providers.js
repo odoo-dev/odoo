@@ -49,6 +49,40 @@ export function getVideoMimetype(platform) {
 /** The mimetypes of the url attachments of the platforms' videos. */
 export const VIDEO_URL_MIMETYPES = Object.values(PLATFORMS).map(getVideoMimetype);
 
+/**
+ * The url and the options of a platform's video element built by
+ * {@link renderVideoElements} (or by an older version of the editor), to edit
+ * it. The options are encoded in its embed url.
+ *
+ * @param {HTMLElement} el the video element, or an element inside it
+ * @returns {{ url: string, options: Object } | null} null if it is not the
+ *      video of a platform (e.g. a video file)
+ */
+export function getVideoElementData(el) {
+    const videoEl = el.closest(`.${VIDEO_CLASS}`);
+    if (!videoEl) {
+        return null;
+    }
+    let embedUrl =
+        videoEl.dataset.embedUrl ||
+        videoEl.querySelector("iframe")?.getAttribute("src") ||
+        // the iframes of the old versions of the editor
+        videoEl.dataset.oeExpression ||
+        videoEl.dataset.src;
+    if (embedUrl?.startsWith("//")) {
+        embedUrl = "https:" + embedUrl;
+    }
+    const match = embedUrl && matchPlatformUrl(embedUrl);
+    if (!match) {
+        return null;
+    }
+    const { options } = match.provider.getVideoUrlData(match.urlMatch);
+    return {
+        url: videoEl.dataset.baseUrl || embedUrl,
+        options: { ...options, isVertical: videoEl.dataset.isVertical === "true" },
+    };
+}
+
 /** url -> Promise<string>: Vimeo asks its api for each thumbnail */
 const thumbnailUrls = new Map();
 

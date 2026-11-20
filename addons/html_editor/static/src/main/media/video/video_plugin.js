@@ -1,11 +1,16 @@
 import { Plugin } from "@html_editor/plugin";
 import { VideoSelector } from "@html_editor/main/media/media_dialog/video_selector";
-import { matchPlatformUrl, renderVideoElements } from "./video_providers";
+import {
+    getVideoElementData,
+    matchPlatformUrl,
+    renderVideoElements,
+} from "./video_providers";
+import { VideoOptionsDialog } from "./video_options_dialog/video_options_dialog";
 import { _t } from "@web/core/l10n/translation";
 
 export class VideoPlugin extends Plugin {
     static id = "video";
-    static dependencies = ["history", "dom"];
+    static dependencies = ["history", "dom", "dialog"];
     static defaultConfig = {
         allowVideo: true,
         allowVideoFile: false,
@@ -24,7 +29,7 @@ export class VideoPlugin extends Plugin {
                 },
             },
             paste_media_url_command_providers: this.getCommandForVideoUrlPaste.bind(this),
-            media_manager_video_element_providers: this.createVideoElementFromUrl.bind(this),
+            media_manager_video_element_providers: this.createMediaManagerVideoElement.bind(this),
         }),
     };
 
@@ -69,18 +74,55 @@ export class VideoPlugin extends Plugin {
     }
 
     /**
-     * Build the element of a platform's video, chosen in the media manager.
+     * Build the element of a platform's video chosen in the media manager, or
+     * of the video to edit, once the user has set its options.
      *
      * @param {Object} params
-     * @param {string} params.url
-     * @returns {Promise<HTMLElement|undefined>} undefined if the url is not
-     *      the one of a supported platform
+     * @param {string} [params.url] the url of the video to insert
+     * @param {HTMLElement} [params.node] the video to edit
+     * @returns {Promise<HTMLElement|undefined>} undefined if the url or the
+     *      node is not the video of a supported platform, or if the user
+     *      discarded the options
      */
-    async createVideoElementFromUrl({ url }) {
-        const match = matchPlatformUrl(url);
-        if (match) {
-            return this.createVideoElement(match.provider.getVideoUrlData(match.urlMatch));
+    async createMediaManagerVideoElement({ url, node }) {
+        let options;
+        if (node) {
+            const videoElementData = getVideoElementData(node);
+            if (!videoElementData) {
+                return;
+            }
+            ({ url, options } = videoElementData);
         }
+        if (!matchPlatformUrl(url)) {
+            return;
+        }
+        const videoData = await this.openVideoOptionsDialog({
+            url,
+            options,
+            confirmLabel: node ? _t("Save") : _t("Insert"),
+        });
+        return videoData && this.createVideoElement(videoData);
+    }
+
+    /**
+     * Let the user set the options of a platform's video.
+     *
+     * @param {Object} params
+     * @param {string} params.url the url of a platform's video
+     * @param {Object} [params.options] the current options of the video
+     * @param {string} [params.confirmLabel]
+     * @returns {Promise<Object|undefined>} the video data (see `getVideoUrlData`
+     *      of the providers), undefined if the user discarded the options
+     */
+    async openVideoOptionsDialog({ url, options, confirmLabel }) {
+        let videoData;
+        await this.dependencies.dialog.addDialog(VideoOptionsDialog, {
+            url,
+            ...(options && { options }),
+            ...(confirmLabel && { confirmLabel }),
+            confirm: (data) => (videoData = data),
+        });
+        return videoData;
     }
 
     /**

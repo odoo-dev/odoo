@@ -4,7 +4,7 @@ import {
     getRecordDomain,
     IMAGES_DOMAIN,
 } from "@html_editor/main/media/media_manager/domain_helper";
-import { VIDEO_URL_MIMETYPES } from "@html_editor/main/media/video/video_providers";
+import { VIDEO_CLASS, VIDEO_URL_MIMETYPES } from "@html_editor/main/media/video/video_providers";
 import { MAIN_PLUGINS } from "@html_editor/plugin_sets";
 import { loadImage } from "@html_editor/utils/image_processing";
 import {
@@ -14,9 +14,10 @@ import {
 } from "./media_manager_dialog";
 
 /**
- * @typedef {((params: { url: string }) => Promise<HTMLElement|undefined>)[]} media_manager_video_element_providers
- * Build the element of a video chosen in the media manager (see VideoPlugin).
- * The videos are only listed when there is a provider.
+ * @typedef {((params: { url?: string, node?: HTMLElement }) => Promise<HTMLElement|undefined>)[]} media_manager_video_element_providers
+ * Build the element of a video chosen in the media manager (`url`), or of the
+ * edited video (`node`), see VideoPlugin. The videos are only listed when there
+ * is a provider.
  */
 
 /**
@@ -45,9 +46,13 @@ export class MediaManagerPlugin extends MediaPlugin {
         if (params.useOldMediaDialog) {
             return super.openMediaDialog(params, editableEl);
         }
+        const videoElementProviders = this.getResource("media_manager_video_element_providers");
+        const videoToEdit = !params.save && params.node?.closest?.(`.${VIDEO_CLASS}`);
+        if (videoToEdit && videoElementProviders.length) {
+            return this.editVideo(videoElementProviders, videoToEdit);
+        }
         const recordInfo = this.getRecordInfo(editableEl);
         let imageToReplace = params.node || null;
-        const videoElementProviders = this.getResource("media_manager_video_element_providers");
         // The videos are only inserted: replacing an image or giving the
         // media to a custom `save` callback (builder options) needs an image.
         const allowVideos = !!videoElementProviders.length && !imageToReplace && !params.save;
@@ -66,10 +71,9 @@ export class MediaManagerPlugin extends MediaPlugin {
                 const elements = [];
                 for (const record of records) {
                     if (VIDEO_URL_MIMETYPES.includes(record.mimetype)) {
-                        const videoEl = await this.createVideoElement(
-                            videoElementProviders,
-                            record.url
-                        );
+                        const videoEl = await this.createVideoElement(videoElementProviders, {
+                            url: record.url,
+                        });
                         if (videoEl) {
                             elements.push(videoEl);
                         }
@@ -91,13 +95,27 @@ export class MediaManagerPlugin extends MediaPlugin {
     }
 
     /**
+     * Edit the options of a video of the document, instead of choosing
+     * another media.
+     *
      * @param {media_manager_video_element_providers} providers
-     * @param {string} url
+     * @param {HTMLElement} videoEl
+     */
+    async editVideo(providers, videoEl) {
+        const newVideoEl = await this.createVideoElement(providers, { node: videoEl });
+        if (newVideoEl) {
+            await this.onSaveMediaDialog(newVideoEl, videoEl);
+        }
+    }
+
+    /**
+     * @param {media_manager_video_element_providers} providers
+     * @param {{ url?: string, node?: HTMLElement }} params
      * @returns {Promise<HTMLElement|undefined>}
      */
-    async createVideoElement(providers, url) {
+    async createVideoElement(providers, params) {
         for (const provider of providers) {
-            const videoEl = await provider({ url });
+            const videoEl = await provider(params);
             if (videoEl) {
                 return videoEl;
             }

@@ -3,7 +3,6 @@ import {
     expect,
     press,
     queryAll,
-    queryOne,
     test,
     waitFor,
     waitForNone,
@@ -28,7 +27,6 @@ import {
     PARTNER_WITH_IMAGE_ID,
     PNG_DATA_URL,
     VIDEO_CARD,
-    videoCard,
 } from "./media_manager_test_helpers";
 
 describe.current.tags("desktop");
@@ -110,20 +108,6 @@ test("the videos are listed when inserting media, not when replacing an image", 
 
     await openMediaManagerFromImageToolbar("img[alt='old']");
     expect(VIDEO_CARD).toHaveCount(0);
-});
-
-test("insert a video in the notes", async () => {
-    const { editor } = await openPartnerForm();
-    await openMediaManagerFromPowerbox(editor);
-    await contains(`${videoCard("YouTube - dQw4w9WgXcQ")} .o_kanban_image`).click();
-    await contains(".modal .o_select_button:enabled").click();
-    // the html field has the embedded components: the embedded video is inserted
-    await waitFor(`${NOTES} [data-embedded='video']`);
-    expect(".modal").toHaveCount(0);
-    const props = JSON.parse(
-        queryOne(`${NOTES} [data-embedded='video']`).dataset.embeddedProps
-    );
-    expect(props).toMatchObject({ platform: "youtube", videoId: "dQw4w9WgXcQ" });
 });
 
 test("closing the media manager inserts nothing", async () => {

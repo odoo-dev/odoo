@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="html_editor.VideoOptionsDialog">
+        <Dialog title="this.provider.name" size="'lg'" contentClass="'o_video_options_dialog'">
+            <div class="row">
+                <div t-if="this.visibleOptions.length" class="col-md-5 o_video_options">
+                    <div t-foreach="this.visibleOptions" t-as="option" t-key="option.id"
+                        class="mb-2 d-flex align-items-start gap-2" t-att-data-option="option.id">
+                        <Switch value="option.isActive" onChange="(isActive) => this.toggleOption(option, isActive)"
+                            label="option.label" description="option.description"
+                            extraClasses="'d-flex align-items-start cursor-pointer flex-shrink-0'"/>
+                        <input t-if="option.isTime and option.isActive" type="text" placeholder="M:SS"
+                            class="o_input w-auto" t-att-value="option.timestamp"
+                            t-on-change="(ev) => this.setTime(option, ev.target.value)"/>
+                    </div>
+                </div>
+                <div class="col o_video_options_preview">
+                    <div class="media_iframe_video">
+                        <div t-att-class="this.previewSizeClass"/>
+                        <iframe t-att-src="this.videoData.embedUrl" class="shadow"
+                            allowfullscreen="allowfullscreen" frameborder="0"/>
+                    </div>
+                </div>
+            </div>
+            <t t-set-slot="footer">
+                <button class="btn btn-primary" t-on-click="this.confirm" t-out="this.props.confirmLabel"/>
+                <button class="btn btn-secondary" t-on-click="this.props.close">Discard</button>
+            </t>
+        </Dialog>
+    </t>
+</templates>

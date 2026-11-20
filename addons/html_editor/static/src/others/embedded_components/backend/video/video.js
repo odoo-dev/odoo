@@ -70,9 +70,10 @@ export class EmbeddedVideoComponent extends ReadonlyEmbeddedVideoComponent {
                     videoBlock: this.videoBlock,
                     overlay: this.videoSettingsOverlay,
                     replaceVideo: () => {
-                        this.videoEmbedProps.openVideoSelectorDialog((media) => {
-                            this.replaceVideo(media);
-                        }, this.playerRef());
+                        this.videoEmbedProps.openVideoSelectorDialog(
+                            (media) => this.replaceVideo(media),
+                            { url: this.state.baseUrl || this.embedUrl, options: this.state.params }
+                        );
                     },
                     removeVideo: () => {
                         this.videoBlock.remove();

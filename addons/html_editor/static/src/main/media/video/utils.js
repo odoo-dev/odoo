@@ -143,3 +143,70 @@ export function getUrlOptions(url, optionsConfig) {
     }
     return options;
 }
+
+/**
+ * Convert a start time to seconds.
+ *
+ * @param {string} timestamp "H:MM:SS", "M:SS", seconds, or "XmYs" (Vimeo)
+ * @returns {number}
+ */
+export function convertTimestampToSeconds(timestamp) {
+    timestamp = timestamp.trim();
+    // H:MM:SS or M:SS
+    const timeRegex = /^(?:(\d+):)?([0-5]?\d):([0-5]?\d)$/;
+    if (timeRegex.test(timestamp)) {
+        return timestamp.split(":").reduce((acc, time) => acc * 60 + +time, 0);
+    }
+    let seconds = parseInt(timestamp);
+    if (isNaN(seconds)) {
+        seconds = parseInt(parseTimeToSeconds(timestamp));
+    }
+    return isNaN(seconds) ? 0 : seconds;
+}
+
+/**
+ * Convert seconds to a start time.
+ *
+ * @param {string|number} value seconds, possibly as "Xs"
+ * @returns {string} "H:MM:SS" or "M:SS"
+ */
+export function convertSecondsToTimestamp(value) {
+    if (!value) {
+        return "0:00";
+    }
+    let totalSeconds = value;
+    if (typeof value === "string") {
+        const match = value.match(/^\d+s?$/);
+        if (!match) {
+            return "0:00";
+        }
+        totalSeconds = parseInt(match[0], 10);
+    }
+    if (!Number.isFinite(totalSeconds) || totalSeconds <= 0) {
+        return value;
+    }
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    const pad = (n) => String(n).padStart(2, "0");
+    if (hours > 0) {
+        return `${hours}:${pad(minutes)}:${pad(seconds)}`;
+    }
+    return `${minutes}:${pad(seconds)}`;
+}
+
+/**
+ * Convert the Vimeo start times ("XmYs", "Xm", "Ys") to seconds.
+ *
+ * @param {string} value
+ * @returns {string} the seconds, or the value itself if it is not such a time
+ */
+function parseTimeToSeconds(value) {
+    const match = value?.match(/^(?:(\d+)m(\d+)s|(\d+)m|(\d+)s|(\d+))$/);
+    if (!match) {
+        return value;
+    }
+    const minutes = parseInt(match[1] || match[3] || "0", 10);
+    const seconds = parseInt(match[2] || match[4] || match[5] || "0", 10);
+    return String(minutes * 60 + seconds);
+}
