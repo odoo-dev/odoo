@@ -31,6 +31,28 @@
     @media screen and (min-width: 576px), print and (min-width: 100mm) {
         max-height: 70vh !important;
     }
+
+    /* The popover is fullscreen: keep the actions at the bottom of the screen, */
+    /* full width as in the footer of the dialogs. */
+    @media screen and (max-width: 767.98px), print and (max-width: 187.98mm) {
+        height: 100%;
+
+        /* Same label size as the groups of the form view on small screens */
+        .o_inner_group .o_form_label {
+            font-size: calc(var(--o-label-font-size-factor) * var(--o-font-size-base-touch));
+        }
+
+        .o_field_property_definition_footer {
+            position: sticky;
+            bottom: 0;
+            padding-top: var(--o-bs-spacer-3);
+            background-color: var(--o-view-background-color);
+
+            .btn {
+                width: 100%;
+            }
+        }
+    }
 }
 
 .o_field_property_definition {

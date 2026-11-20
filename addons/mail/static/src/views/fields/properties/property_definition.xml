@@ -3,17 +3,21 @@
     <t t-name="mail.PropertyDefinition" t-inherit="web.PropertyDefinition" t-inherit-mode="extension">
         <xpath expr="//div[hasclass('o_field_property_definition_kanban')]" position="after">
             <div t-if="!['separator', 'signature', 'html', 'tags', 'many2many'].includes(this.state.propertyDefinition.type)"
-                class="o_field_property_definition_kanban d-contents mb-3 mb-sm-0">
-                    <label t-att-for="this.getUniqueDomID('tracking')" class="o_form_label align-self-center text-900">
-                        Track in chatter
-                        <sup class="text-info" title="Whether or not this Property Field is tracked on change">?</sup>
-                    </label>
-                    <CheckBox
-                        id="this.getUniqueDomID('tracking')"
-                        value="this.props.propertyDefinition.tracking"
-                        disabled="this.props.readonly"
-                        onChange="(v) => this.onAttributeChange('tracking', v)"
-                    />
+                class="o_field_property_definition_kanban o_wrap_field_inline d-flex d-md-contents align-items-center mb-3 mb-md-0">
+                    <div class="o_cell o_wrap_label align-self-center text-900">
+                        <label t-att-for="this.getUniqueDomID('tracking')" class="o_form_label">
+                            Track in chatter
+                            <sup class="text-info" title="Whether or not this Property Field is tracked on change">?</sup>
+                        </label>
+                    </div>
+                    <div class="o_cell o_wrap_input o_no_box ms-auto ms-md-0">
+                        <CheckBox
+                            id="this.getUniqueDomID('tracking')"
+                            value="this.props.propertyDefinition.tracking"
+                            disabled="this.props.readonly"
+                            onChange="(v) => this.onAttributeChange('tracking', v)"
+                        />
+                    </div>
             </div>
         </xpath>
     </t>

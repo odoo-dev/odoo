@@ -1995,6 +1995,49 @@ test("properties: suffix", async () => {
     );
 });
 
+test.tags("mobile");
+test("properties: definition popover uses the M3 layout on mobile", async () => {
+    onRpc("has_access", () => true);
+
+    await mountView({
+        type: "form",
+        resModel: "partner",
+        resId: 1,
+        arch: /* xml */ `
+            <form>
+                <sheet>
+                    <group>
+                        <field name="company_id"/>
+                        <field name="properties"/>
+                    </group>
+                </sheet>
+            </form>`,
+        actionMenus: {},
+    });
+
+    await toggleActionMenu();
+    await toggleMenuItem("Edit Properties");
+    await click(".o_field_property_add button");
+    await waitFor(".o_property_field_popover");
+
+    // The M3 rules of the form view (form_controller_m3.css) box a widget and
+    // float its label when they are in the cells of a form view group.
+    expect(
+        ".o_inner_group .o_wrap_label:has(.o_form_label) + .o_wrap_input:not(.o_no_box) .o_field_property_definition_header"
+    ).toHaveCount(1);
+    expect(
+        ".o_inner_group .o_wrap_label + .o_wrap_input:not(.o_no_box).o_field_property_definition_type"
+    ).toHaveCount(1);
+    // checkboxes are inline next to their label, without a box
+    expect(
+        ".o_field_property_definition_kanban.o_wrap_field_inline .o_wrap_label + .o_wrap_input.o_no_box input[type=checkbox]"
+    ).not.toHaveCount(0);
+    // the actions are in the footer that sticks to the bottom of the popover
+    expect(
+        ".o_field_property_definition > .o_field_property_definition_footer .o_field_property_definition_add"
+    ).toHaveCount(1);
+});
+
 /**
  * check if property field popover closes when clicking on delete property icon.
  */
