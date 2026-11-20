@@ -143,6 +143,13 @@ export class ControlButtons extends Component {
         );
     }
 
+    openSplitPage() {
+        this.dialog.closeAll();
+        this.pos.navigate("SplitBillScreen", {
+            orderUuid: this.currentOrder.uuid,
+        });
+    }
+
     breakSelectedCombo() {
         const selectedOrderline = this.currentOrder?.getSelectedOrderline();
         return this.pos.isSelectedLineCombo && this.pos.breakCombo(selectedOrderline.parentLine);

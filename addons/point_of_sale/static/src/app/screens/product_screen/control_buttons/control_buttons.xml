@@ -59,6 +59,14 @@
                     </t>
                 </t>
                 <t t-call="point_of_sale.controlButton"
+                    t-if="this.pos.accessRight.canSplitOrder"
+                    name="o_split_button"
+                    icon="'content_copy'"
+                    btnText.translate="Split"
+                    btnClasses="'btn-secondary '"
+                    onClick="this.openSplitPage"
+                    disabled="!this.currentOrder or this.currentOrder.splittableQuantity lt 2"/>
+                <t t-call="point_of_sale.controlButton"
                     t-if="this.pos.accessRight.canAccessPricelist"
                     name="o_pricelist_button"
                     icon="'view_list'"

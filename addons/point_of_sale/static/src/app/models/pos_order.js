@@ -126,6 +126,16 @@ export class PosOrder extends PosOrderAccounting {
         return this.finalized && (!this.isSynced || this.payment_ids.some((p) => !p.isSynced));
     }
 
+    /**
+     * Quantity of goods that can be moved to another order on the split screen.
+     * @returns {number}
+     */
+    get splittableQuantity() {
+        return this.lines
+            .filter((line) => line.canBeSplit() && line.isGlobalDiscountApplicable())
+            .reduce((total, line) => total + line.qty, 0);
+    }
+
     get originalSplittedOrder() {
         return this.models["pos.order"].getBy("uuid", this.uiState.splittedOrderUuid);
     }

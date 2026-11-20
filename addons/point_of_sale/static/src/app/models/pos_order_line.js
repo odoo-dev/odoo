@@ -367,6 +367,24 @@ export class PosOrderline extends PosOrderlineAccounting {
         return this.product_id.standard_price * this.qty;
     }
 
+    /**
+     * Overridden by the modules adding lines that a global discount must not apply to
+     * (discount, gift card, ...).
+     * @returns {boolean}
+     */
+    isGlobalDiscountApplicable() {
+        return true;
+    }
+
+    /**
+     * Whether the line can be moved to another order on the split screen. Computed
+     * lines (global discount, service fee) are recomputed on both orders instead.
+     * @returns {boolean}
+     */
+    canBeSplit() {
+        return !this.isDiscountLine && !this.isServiceFeeLine();
+    }
+
     isTipLine() {
         const tipProduct = this.config.tip_product_id;
         return tipProduct && this.product_id.id === tipProduct.id;

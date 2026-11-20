@@ -16,7 +16,7 @@
                                 </span>
                                 /
                             </t>
-                            <t t-out="vals.unitPart"/>
+                            <t t-out="this.line.uiState.splitQty or vals.unitPart"/>
                             <small t-if="vals.decimalPart" t-out="vals.decimalPart" class="fw-normal" style="font-size: 85%;" />
                         </span>
                         <span class="text-wrap d-inline">

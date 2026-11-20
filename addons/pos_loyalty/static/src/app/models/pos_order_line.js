@@ -113,9 +113,9 @@ patch(PosOrderline.prototype, {
         };
     },
     /**
-     * A gift-card / eWallet reward line is a payment, not goods, so a global discount (from
-     * pos_discount / pos_restaurant) must never apply to it. Other reward lines stay
-     * discountable, deferring to the base behaviour.
+     * A gift-card / eWallet reward line is a payment, not goods, so a global discount must
+     * never apply to it, nor can it be split. Other reward lines stay discountable,
+     * deferring to the base behaviour.
      * @returns {boolean}
      */
     isGlobalDiscountApplicable() {
@@ -123,7 +123,7 @@ patch(PosOrderline.prototype, {
         if (this.is_reward_line && ["gift_card", "ewallet"].includes(programType)) {
             return false;
         }
-        return super.isGlobalDiscountApplicable?.() ?? true;
+        return super.isGlobalDiscountApplicable();
     },
     /**
      * A trigger-product line sells a payment instrument (gift card / eWallet top-up), not

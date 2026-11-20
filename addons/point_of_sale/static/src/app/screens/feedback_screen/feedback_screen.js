@@ -104,6 +104,10 @@ export class FeedbackScreen extends Component {
     }
 
     goNext() {
+        if (this.isContinueSplitting()) {
+            this.continueSplitting();
+            return;
+        }
         this.currentOrder.setScreenData({ name: "" });
         this.pos.searchProductWord = "";
         const { page, params } = this.pos.defaultPage;
@@ -111,6 +115,21 @@ export class FeedbackScreen extends Component {
             page,
             page === "ProductScreen" ? { orderUuid: this.pos.getEmptyOrder().uuid } : params
         );
+    }
+
+    isContinueSplitting() {
+        const splittedOrder = this.currentOrder.originalSplittedOrder;
+        return Boolean(splittedOrder && !splittedOrder.finalized);
+    }
+
+    continueSplitting() {
+        const originalOrderUuid = this.currentOrder.uiState.splittedOrderUuid;
+        this.currentOrder.uiState.screen_data.value = "";
+        this.pos.selectedOrderUuid = originalOrderUuid;
+        const nextOrderScreen = this.pos.getOrder().getCurrentScreenData().name;
+        this.pos.navigate(nextOrderScreen || "ProductScreen", {
+            orderUuid: originalOrderUuid,
+        });
     }
 
     get canPrintReceipt() {
