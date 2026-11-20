@@ -120,10 +120,11 @@ export class ResPartner extends webModels.ResPartner {
 }
 
 export const YOUTUBE_URL = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+export const LOOM_URL = "https://www.loom.com/share/1234abcd";
 
 /**
  * The attachments of the database: the media manager of the edited partner
- * only shows the first four images (see PARTNER_IMAGES) and the video.
+ * only shows the first four images (see PARTNER_IMAGES) and the videos.
  */
 export function getAttachmentRecords() {
     return [
@@ -141,13 +142,21 @@ export function getAttachmentRecords() {
         }),
         // an image added by url
         image(10, "link.png", { public: true, type: "url", url: "https://example.com/link.png" }),
-        // a video of a platform, only listed when inserting media (see VIDEO_CARD)
+        // the videos of the platforms, only listed when inserting media (see VIDEO_CARD)
         image(11, "YouTube - dQw4w9WgXcQ", {
             public: true,
             type: "url",
             mimetype: "video/x-youtube",
             url: YOUTUBE_URL,
             local_url: YOUTUBE_URL,
+        }),
+        // a platform without thumbnail
+        image(12, "Loom - 1234abcd", {
+            public: true,
+            type: "url",
+            mimetype: "video/x-loom",
+            url: LOOM_URL,
+            local_url: LOOM_URL,
         }),
         // Not displayed: images of another record, not images, technical images
         image(4, "other_partner.png", { res_model: "res.partner", res_id: OTHER_PARTNER_ID }),
@@ -284,10 +293,17 @@ export function card(name) {
     return `${CARD}:has(img[alt='${name}'])`;
 }
 
-/** The card of the video (see getAttachmentRecords). */
-export const VIDEO_CARD = `${CARD}:has(.o_image_thumbnail[data-mimetype='video/x-youtube'])`;
+/** The cards of the videos (see getAttachmentRecords). */
+export const VIDEO_CARD = `${CARD}:has(.o_video_thumbnail)`;
 
-/** Names of the displayed images, from the alt of their thumbnail. */
+/** @param {string} name */
+export function videoCard(name) {
+    return `${VIDEO_CARD}:has([title='${name}'])`;
+}
+
+/** Names of the displayed images (not the videos), from the alt of their thumbnail. */
 export function getCardNames() {
-    return [...document.querySelectorAll(`${CARD} .o_kanban_image img`)].map((img) => img.alt);
+    return [
+        ...document.querySelectorAll(`${CARD} .o_kanban_image img:not(.o_video_thumbnail img)`),
+    ].map((img) => img.alt);
 }

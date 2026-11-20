@@ -32,6 +32,7 @@ import {
     PARTNER_IMAGES,
     PNG_DATA_URL,
     TAGS,
+    videoCard,
     YOUTUBE_URL,
 } from "./media_manager_test_helpers";
 
@@ -121,6 +122,28 @@ describe("images", () => {
         await toggleMenuItem("Tags");
         expect(".modal .o_kanban_group").toHaveCount(2);
         expect(".modal .o_kanban_group:contains(Banner) img[alt='banner.png']").toHaveCount(1);
+    });
+});
+
+describe("videos", () => {
+    test("cards show the thumbnail of the platform, with a play icon", async () => {
+        await openMediaManager();
+        const youtube = videoCard("YouTube - dQw4w9WgXcQ");
+        // (hoot replaces the src of the external images)
+        await waitFor(`${youtube} .o_video_thumbnail img`);
+        expect(`${youtube} .o_video_thumbnail img`).toHaveAttribute(
+            "alt",
+            "YouTube - dQw4w9WgXcQ"
+        );
+        expect(`${youtube} .o_video_thumbnail_play`).toHaveCount(1);
+    });
+
+    test("a platform without thumbnail only shows the play icon", async () => {
+        await openMediaManager();
+        const loom = videoCard("Loom - 1234abcd");
+        expect(`${loom} .o_video_thumbnail_play`).toHaveCount(1);
+        await animationFrame();
+        expect(`${loom} .o_video_thumbnail img`).toHaveCount(0);
     });
 });
 

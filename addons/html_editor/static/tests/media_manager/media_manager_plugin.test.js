@@ -28,6 +28,7 @@ import {
     PARTNER_WITH_IMAGE_ID,
     PNG_DATA_URL,
     VIDEO_CARD,
+    videoCard,
 } from "./media_manager_test_helpers";
 
 describe.current.tags("desktop");
@@ -104,7 +105,7 @@ test("replace an image from the toolbar: clicking an image replaces it", async (
 test("the videos are listed when inserting media, not when replacing an image", async () => {
     const { editor } = await openPartnerForm({ resId: PARTNER_WITH_IMAGE_ID });
     await openMediaManagerFromPowerbox(editor);
-    expect(VIDEO_CARD).toHaveCount(1);
+    expect(VIDEO_CARD).toHaveCount(2);
     await contains(".modal .btn-close").click();
 
     await openMediaManagerFromImageToolbar("img[alt='old']");
@@ -114,7 +115,7 @@ test("the videos are listed when inserting media, not when replacing an image", 
 test("insert a video in the notes", async () => {
     const { editor } = await openPartnerForm();
     await openMediaManagerFromPowerbox(editor);
-    await contains(`${VIDEO_CARD} .o_kanban_image`).click();
+    await contains(`${videoCard("YouTube - dQw4w9WgXcQ")} .o_kanban_image`).click();
     await contains(".modal .o_select_button:enabled").click();
     // the html field has the embedded components: the embedded video is inserted
     await waitFor(`${NOTES} [data-embedded='video']`);
