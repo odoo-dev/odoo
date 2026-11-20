@@ -52,3 +52,28 @@ registry.category("web_tour.tours").add("test_self_order_snooze_service", {
             Dialog.confirm("Apply"),
         ].flat(),
 });
+
+registry.category("web_tour.tours").add("test_pos_table_join_request_approval", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            {
+                content: "The table shows the pending join request",
+                trigger: ".floor-table .o_table_join_requests_badge:contains('1')",
+                run: "click",
+            },
+            {
+                content: "The request is listed in the dialog",
+                trigger: ".o_table_join_requests_dialog .o_table_join_request:contains('Guest 1')",
+            },
+            {
+                content: "Approve the guest",
+                trigger: ".o_table_join_request .btn-success",
+                run: "click",
+            },
+            {
+                content: "The badge is removed once the request is answered",
+                trigger: "body:not(:has(.o_table_join_requests_badge))",
+            },
+        ].flat(),
+});

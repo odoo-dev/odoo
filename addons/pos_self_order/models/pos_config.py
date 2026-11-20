@@ -165,6 +165,15 @@ class PosConfig(models.Model):
         expected = hmac(self.env(su=True), 'pos_self_order-table-session', message)
         return consteq(signature.encode(), expected.encode())
 
+    def _get_self_order_table_draft_order(self, table):
+        """Return the ongoing draft order shared by the dining party at ``table``."""
+        self.ensure_one()
+        return self.env['pos.order'].search([
+            ('table_id', '=', table.id),
+            ('config_id', '=', self.id),
+            ('state', '=', 'draft'),
+        ], order='id desc', limit=1)
+
     @api.constrains('self_order_secure_session', 'self_order_session_timeout_minutes')
     def _check_session_timeout_values(self):
         for rec in self:

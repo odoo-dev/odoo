@@ -947,10 +947,24 @@ class TestSelfOrderController(SelfOrderCommonTest):
             headers={'Content-Type': 'application/json'},
         ).json()
 
-    def _place_table_order(self, table_session_token):
+    def _place_table_order(self, table_session_token, guest_token=False, table_order=None):
         order_data = self._create_order_data(product=self.cola, qty=1, preset=self.in_preset)
+        order_data['order']['guest_token'] = guest_token
+        if table_order:
+            order_data['order'].update(id=table_order.id, uuid=table_order.uuid)
         order_data['table_session_token'] = table_session_token
         return self._json_rpc('/pos-self-order/process-order/mobile', order_data)
+
+    def _guest_action(self, action, table_session_token=None, **params):
+        return self._json_rpc('/pos-self-order/table/guest-action', {
+            'config_id': self.pos_config.id,
+            'access_token': self.pos_config.access_token,
+            'table_identifier': self.pos_table_1.identifier,
+            'table_id': self.pos_table_1.id,
+            'table_session_token': table_session_token,
+            'action': action,
+            **params,
+        })
 
     def test_secure_table_session_settings(self):
         self.assertFalse(self.pos_config._is_secure_table_session_enabled())
@@ -1004,6 +1018,147 @@ class TestSelfOrderController(SelfOrderCommonTest):
         self.assertIn(expired_message, res['error']['data']['message'], "Version bump invalidates the token")
 
     @mute_logger('odoo.http')
+    def test_secure_table_session_lead_approval(self):
+        self._enable_secure_table_session()
+        token, _expires_at = self.pos_config._generate_table_session_token(self.pos_table_1.identifier)
+
+        # Person 1 places the first order on the empty table and becomes its lead
+        res = self._place_table_order(token, 'guest_alice')
+        table_order = self.env['pos.order'].browse(res['result']['pos.order'][0]['id'])
+        self.assertEqual(table_order.self_order_guest_data['lead_token'], 'guest_alice')
+        self.assertEqual(res['result']['pos.order'][0]['_table_guest_status'], {
+            'is_lead': True,
+            'is_approved': True,
+            'pending_request_id': False,
+            'pending_request_ids': [],
+        })
+
+        # The table order is not shared with guests outside the dining party: its access token
+        # allows to cancel it. They only get their status, without any guest token.
+        res = self._json_rpc('/pos-self-order/get-user-data', {
+            'access_token': self.pos_config.access_token,
+            'order_access_tokens': [],
+            'table_identifier': self.pos_table_1.identifier,
+            'table_session_token': token,
+            'guest_token': 'guest_bob',
+        })['result']
+        self.assertNotIn('pos.order', res)
+        self.assertNotIn(table_order.access_token, json.dumps(res))
+        self.assertNotIn('guest_alice', json.dumps(res))
+        self.assertFalse(res['table_guest_status']['is_approved'])
+
+        # Person 2 cannot order without approval, nor without guest token
+        for guest_token in ('guest_bob', False):
+            res = self._place_table_order(token, guest_token, table_order=table_order)
+            self.assertIn('Join approval required', res['error']['data']['message'])
+
+        # Person 2 asks to join
+        res = self._guest_action('request', token, guest_token='guest_bob')['result']
+        self.assertEqual(res['status'], 'pending')
+        request_id = res['request_id']
+        self.assertEqual(table_order._get_table_guest_data()['pending_requests'][0]['guest_token'], 'guest_bob')
+
+        # The dining party (lead + approved + pending) is capped by the table seats
+        self.pos_table_1.seats = 2
+        res = self._guest_action('request', token, guest_token='guest_eve')
+        self.assertIn('This table is full', res['error']['data']['message'])
+        res = self._guest_action('request', token, guest_token='guest_bob')['result']
+        self.assertEqual(res['status'], 'pending', "Re-sending a pending request does not count twice")
+        request_id = res['request_id']
+        self.pos_table_1.seats = 4
+
+        # Only the lead can answer
+        res = self._guest_action('approve', token, guest_token='guest_bob', request_id=request_id)
+        self.assertIn('Only the table lead', res['error']['data']['message'])
+        res = self._guest_action('approve', guest_token='guest_alice', request_id=request_id)
+        self.assertIn('Your session has expired', res['error']['data']['message'])
+
+        res = self._guest_action('approve', token, guest_token='guest_alice', request_id=request_id)['result']
+        self.assertEqual(res['status'], 'approved')
+        guest_data = table_order._get_table_guest_data()
+        self.assertIn('guest_bob', guest_data['approved_tokens'])
+        self.assertFalse(guest_data['pending_requests'])
+
+        # Person 2 now gets the shared table order, and orders on it
+        res = self._json_rpc('/pos-self-order/get-user-data', {
+            'access_token': self.pos_config.access_token,
+            'order_access_tokens': [],
+            'table_identifier': self.pos_table_1.identifier,
+            'table_session_token': token,
+            'guest_token': 'guest_bob',
+        })['result']
+        self.assertEqual(res['pos.order'][0]['id'], table_order.id)
+        self.assertNotIn('table_guest_status', res)
+        res = self._place_table_order(token, 'guest_bob', table_order=table_order)
+        self.assertEqual(res['result']['pos.order'][0]['id'], table_order.id)
+        self.assertEqual(len(table_order.lines), 2)
+        self.assertEqual(table_order.self_order_guest_data['lead_token'], 'guest_alice')
+
+        # Guest data cannot be altered through a synced payload (e.g. stale POS order)
+        self.env['pos.order'].sync_from_ui([{
+            **table_order.read(['uuid', 'session_id'], load=False)[0],
+            'state': 'draft',
+            'lines': [],
+            'payment_ids': [],
+            'self_order_guest_data': {},
+        }])
+        self.assertEqual(table_order.self_order_guest_data['lead_token'], 'guest_alice')
+
+    @mute_logger('odoo.http')
+    def test_secure_table_session_staff_approval(self):
+        self._enable_secure_table_session()
+        token, _expires_at = self.pos_config._generate_table_session_token(self.pos_table_1.identifier)
+        res = self._place_table_order(token, 'guest_alice')
+        table_order = self.env['pos.order'].browse(res['result']['pos.order'][0]['id'])
+
+        charlie_request = self._guest_action('request', token, guest_token='guest_charlie')['result']['request_id']
+        david_request = self._guest_action('request', token, guest_token='guest_david')['result']['request_id']
+
+        # Anonymous users cannot use the staff fallback
+        res = self._guest_action('approve', request_id=charlie_request)
+        self.assertIn('error', res)
+
+        self.authenticate(self.pos_user.login, self.pos_user.login)
+        res = self._guest_action('approve', request_id=charlie_request)['result']
+        self.assertEqual(res['status'], 'approved')
+        res = self._guest_action('reject', request_id=david_request)['result']
+        self.assertEqual(res['status'], 'rejected')
+        res = self._guest_action('reject', request_id=david_request)['result']
+        self.assertEqual(res['status'], 'not_found')
+
+        guest_data = table_order._get_table_guest_data()
+        self.assertIn('guest_charlie', guest_data['approved_tokens'])
+        self.assertNotIn('guest_david', guest_data['approved_tokens'])
+        self.assertFalse(guest_data['pending_requests'])
+
+        res = self._place_table_order(token, 'guest_charlie', table_order=table_order)
+        self.assertTrue(res.get('result'))
+        res = self._place_table_order(token, 'guest_david', table_order=table_order)
+        self.assertIn('Join approval required', res['error']['data']['message'])
+
+        # A declined guest cannot flood the lead with new requests
+        self.logout()
+        res = self._guest_action('request', token, guest_token='guest_david')
+        self.assertIn('Your request to join this table was declined', res['error']['data']['message'])
+        self.assertFalse(table_order._get_table_guest_data()['pending_requests'])
+
+    @mute_logger('odoo.http')
+    def test_secure_table_session_staff_opened_order(self):
+        """The first guest scanning a table whose order was opened by a waiter becomes its lead."""
+        self._enable_secure_table_session()
+        token, _expires_at = self.pos_config._generate_table_session_token(self.pos_table_1.identifier)
+        table_order = self.env['pos.order'].create({
+            'session_id': self.pos_config.current_session_id.id,
+            'table_id': self.pos_table_1.id,
+            'amount_tax': 0, 'amount_total': 0, 'amount_paid': 0, 'amount_return': 0,
+        })
+        res = self._place_table_order(token, 'guest_alice', table_order=table_order)
+        self.assertTrue(res.get('result'))
+        self.assertEqual(table_order.self_order_guest_data['lead_token'], 'guest_alice')
+        res = self._place_table_order(token, 'guest_bob', table_order=table_order)
+        self.assertIn('Join approval required', res['error']['data']['message'])
+
+    @mute_logger('odoo.http')
     def test_secure_table_session_create(self):
         def create_session(table_identifier):
             return self._json_rpc('/pos-self/session/create', {
@@ -1048,3 +1203,134 @@ class TestSelfOrderController(SelfOrderCommonTest):
 
         self.pos_config.current_session_id.with_user(self.pos_user).close_session_from_ui()
         self.assertEqual(self.pos_config.self_order_session_version, version + 2)
+
+    @mute_logger('odoo.http')
+    def test_secure_table_session_notifications(self):
+        """Join notifications are broadcast to every device of the config: no guest token."""
+        self._enable_secure_table_session()
+        token, _expires_at = self.pos_config._generate_table_session_token(self.pos_table_1.identifier)
+        self._place_table_order(token, 'guest_alice')
+
+        notifications = []
+        with patch.object(self.env.registry['pos.config'], '_notify', lambda config, *args, **kw: notifications.append(args)):
+            request_id = self._guest_action('request', token, guest_token='guest_bob')['result']['request_id']
+            self._guest_action('approve', token, guest_token='guest_alice', request_id=request_id)
+
+        (request_name, request_payload), (status_name, status_payload) = notifications
+        self.assertEqual(request_name, 'TABLE_JOIN_REQUEST')
+        self.assertEqual(request_payload['table_id'], self.pos_table_1.id)
+        self.assertEqual(request_payload['request_id'], request_id)
+        self.assertEqual(status_name, 'TABLE_JOIN_STATUS')
+        self.assertEqual(status_payload, {'order_id': request_payload['order_id'], 'request_id': request_id, 'status': 'approved'})
+        self.assertNotIn('guest_', json.dumps(notifications))
+        self.assertNotIn(self.pos_table_1.identifier, json.dumps(notifications), "The table identifier is a secret of the QR code")
+
+    @mute_logger('odoo.http')
+    def test_secure_table_session_guest_status(self):
+        self._enable_secure_table_session()
+        token, _expires_at = self.pos_config._generate_table_session_token(self.pos_table_1.identifier)
+        self._place_table_order(token, 'guest_alice')
+        request_id = self._guest_action('request', token, guest_token='guest_bob')['result']['request_id']
+
+        def get_status(guest_token, table_session_token=token):
+            res = self._json_rpc('/pos-self-order/get-user-data', {
+                'access_token': self.pos_config.access_token,
+                'order_access_tokens': [],
+                'table_identifier': self.pos_table_1.identifier,
+                'table_session_token': table_session_token,
+                'guest_token': guest_token,
+            })['result']
+            if 'pos.order' in res:
+                return res['pos.order'][0]['_table_guest_status']
+            return res['table_guest_status']
+
+        self.assertEqual(get_status('guest_alice'), {
+            'is_lead': True, 'is_approved': True, 'pending_request_id': False, 'pending_request_ids': [request_id],
+        })
+        self.assertEqual(get_status('guest_bob'), {
+            'is_lead': False, 'is_approved': False, 'pending_request_id': request_id, 'pending_request_ids': [],
+        })
+        self.assertEqual(get_status(['not', 'a', 'token']), {
+            'is_lead': False, 'is_approved': False, 'pending_request_id': False, 'pending_request_ids': [],
+        })
+        # Without a valid table session, even the lead only gets its status
+        self.assertEqual(get_status('guest_alice', table_session_token=False)['is_lead'], True)
+
+    @mute_logger('odoo.http')
+    def test_secure_table_session_any_preset(self):
+        """Orders sent with a table identifier are merged into the table order, whatever their
+        preset: a takeaway preset does not skip the table session and the lead approval."""
+        self._enable_secure_table_session()
+        self.out_preset.available_in_self = True
+        token, _expires_at = self.pos_config._generate_table_session_token(self.pos_table_1.identifier)
+        res = self._place_table_order(token, 'guest_alice')
+        table_order = self.env['pos.order'].browse(res['result']['pos.order'][0]['id'])
+
+        def place_takeaway_order(table_session_token, guest_token):
+            order_data = self._create_order_data(product=self.cola, qty=1, preset=self.out_preset)
+            order_data['order']['guest_token'] = guest_token
+            order_data['table_session_token'] = table_session_token
+            return self._json_rpc('/pos-self-order/process-order/mobile', order_data)
+
+        res = place_takeaway_order(False, 'guest_mallory')
+        self.assertIn('Your session has expired', res['error']['data']['message'])
+        res = place_takeaway_order(token, 'guest_mallory')
+        self.assertIn('Join approval required', res['error']['data']['message'])
+        self.assertEqual(len(table_order.lines), 1)
+        self.assertEqual(table_order.preset_id, self.in_preset)
+
+        res = place_takeaway_order(token, 'guest_alice')
+        self.assertTrue(res.get('result'), "The lead can still order takeaway")
+
+    @mute_logger('odoo.http')
+    def test_secure_table_session_closed_order(self):
+        """Pending requests are answered when the table order is closed, so that the waiting
+        guests are unlocked and the requests are removed from the POS."""
+        self._enable_secure_table_session()
+        token, _expires_at = self.pos_config._generate_table_session_token(self.pos_table_1.identifier)
+        res = self._place_table_order(token, 'guest_alice')
+        table_order = self.env['pos.order'].browse(res['result']['pos.order'][0]['id'])
+        request_id = self._guest_action('request', token, guest_token='guest_bob')['result']['request_id']
+
+        with patch.object(self.env.registry['pos.config'], '_notify', autospec=True) as notify:
+            table_order.with_context(active_ids=table_order.ids).action_pos_order_cancel()
+        self.assertEqual(table_order.state, 'cancel')
+        join_notifications = [call.args[1:] for call in notify.call_args_list if call.args[1] == 'TABLE_JOIN_STATUS']
+        self.assertEqual(join_notifications, [('TABLE_JOIN_STATUS', {
+            'order_id': table_order.id,
+            'request_id': request_id,
+            'status': 'closed',
+        })])
+        guest_data = table_order._get_table_guest_data()
+        self.assertFalse(guest_data['pending_requests'])
+        self.assertEqual(guest_data['lead_token'], 'guest_alice')
+
+    def test_secure_table_session_pos_data(self):
+        """The POS only loads the pending join requests, not the guest tokens."""
+        self._enable_secure_table_session()
+        token, _expires_at = self.pos_config._generate_table_session_token(self.pos_table_1.identifier)
+        res = self._place_table_order(token, 'guest_alice')
+        table_order = self.env['pos.order'].browse(res['result']['pos.order'][0]['id'])
+        request_id = self._guest_action('request', token, guest_token='guest_bob')['result']['request_id']
+
+        [order_data] = self.env['pos.order']._load_pos_data_read(table_order, self.pos_config)
+        self.assertNotIn('self_order_guest_data', order_data)
+        self.assertNotIn('guest_', json.dumps(order_data, default=str))
+        self.assertEqual([request['id'] for request in order_data['_table_join_requests']], [request_id])
+
+    @mute_logger('odoo.http')
+    def test_secure_table_session_staff_other_config_table(self):
+        self._enable_secure_table_session()
+        token, _expires_at = self.pos_config._generate_table_session_token(self.pos_table_1.identifier)
+        self._place_table_order(token, 'guest_alice')
+        request_id = self._guest_action('request', token, guest_token='guest_bob')['result']['request_id']
+        other_table = self.env['restaurant.table'].create({
+            'table_number': 9,
+            'floor_id': self.env['restaurant.floor'].create({'name': 'Other config floor'}).id,
+        })
+
+        self.authenticate(self.pos_user.login, self.pos_user.login)
+        res = self._guest_action('approve', request_id=request_id, table_id=other_table.id)
+        self.assertIn('Table not found', res['error']['data']['message'])
+        res = self._guest_action('approve', request_id=request_id, table_id=False)
+        self.assertIn('Table not found', res['error']['data']['message'], "Staff cannot use the table identifier")

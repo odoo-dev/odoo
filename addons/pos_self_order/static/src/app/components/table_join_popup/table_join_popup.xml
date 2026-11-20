@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="pos_self_order.TableJoinPopup">
+        <t t-set="content" t-value="this.content"/>
+        <div class="self_order_table_join_popup o_dialog" t-attf-class="o_table_join_{{this.props.mode}}" t-att-id="this.id">
+            <div role="dialog" class="modal d-block" tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-body p-4 overflow-visible text-center">
+                            <div t-attf-class="o_table_join_icon position-absolute top-0 start-50 translate-middle px-4 py-3 rounded-4 border border-white border-5 {{content.color}}">
+                                <i class="oi oi-2x" t-att-data-icon="content.icon" aria-hidden="true"/>
+                            </div>
+
+                            <div class="mt-4 mt-lg-5 d-flex flex-column align-items-center gap-2">
+                                <span t-if="this.props.tableNumber" class="badge rounded-pill text-bg-light border d-inline-flex align-items-center gap-1 px-3 py-2 fs-6">
+                                    <i class="oi" data-icon="group" aria-hidden="true"/>
+                                    Table <t t-out="this.props.tableNumber"/>
+                                </span>
+                                <h2 class="fw-bolder mb-0" t-out="content.title"/>
+                                <p class="text-muted fs-5 mb-0" t-out="content.text"/>
+                            </div>
+
+                            <ol t-if="this.steps.length" class="o_table_join_steps list-unstyled d-flex justify-content-center align-items-start my-4 mx-auto">
+                                <li t-foreach="this.steps" t-as="step" t-key="step_index"
+                                    t-attf-class="o_table_join_step o_table_join_step_{{step.state}} d-flex flex-column align-items-center position-relative">
+                                    <span class="o_table_join_step_icon d-flex align-items-center justify-content-center rounded-circle">
+                                        <i class="oi" t-att-data-icon="step.state === 'active' and this.props.mode === 'waiting' ? 'hourglass_top' : step.icon" aria-hidden="true"/>
+                                    </span>
+                                    <span class="small mt-1" t-out="step.label"/>
+                                </li>
+                            </ol>
+                            <div t-else="" class="my-4"/>
+
+                            <div class="d-grid d-md-flex flex-wrap justify-content-md-center gap-2 gap-md-3">
+                                <button t-if="content.confirmLabel" type="button"
+                                        class="btn btn-primary kiosk-p-btn-lg popup_button d-inline-flex align-items-center justify-content-center gap-2"
+                                        t-on-click="() => this.onConfirm()">
+                                    <i class="oi" t-att-data-icon="content.confirmIcon" aria-hidden="true"/>
+                                    <t t-out="content.confirmLabel"/>
+                                </button>
+                                <button type="button"
+                                        class="btn btn-secondary kiosk-p-btn-lg popup_button d-inline-flex align-items-center justify-content-center gap-2"
+                                        t-on-click="() => this.onCancel()">
+                                    <i t-if="content.cancelIcon" class="oi" t-att-data-icon="content.cancelIcon" aria-hidden="true"/>
+                                    <t t-out="content.cancelLabel"/>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

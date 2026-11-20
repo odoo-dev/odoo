@@ -79,6 +79,11 @@ export class LandingPage extends Component {
     }
 
     start() {
+        if (this.selfOrder._isSessionTimeoutEnabled() && !this.selfOrder.isApproved) {
+            this.selfOrder.promptJoinRequest();
+            return;
+        }
+
         if (
             this.draftOrder.length > 0 &&
             this.selfOrder.config.self_ordering_pay_after === "each"

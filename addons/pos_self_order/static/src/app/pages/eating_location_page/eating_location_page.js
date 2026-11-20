@@ -23,9 +23,10 @@ export class EatingLocationPage extends Component {
     }
 
     selectPreset(preset) {
-        if (preset.service_at === "table" && this.selfOrder._isSessionExpired) {
+        // Whatever the preset, orders sent from a scanned table are put on it
+        if (this.selfOrder.isSessionExpired()) {
             this.selfOrder.notification.add(
-                _t("Your session has expired. Please scan the QR code again to order dine-in."),
+                _t("Your session has expired. Please scan the QR code again to continue ordering."),
                 { type: "danger" }
             );
             return;

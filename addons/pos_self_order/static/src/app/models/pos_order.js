@@ -1,5 +1,6 @@
 import { PosOrder } from "@point_of_sale/app/models/pos_order";
 import { patch } from "@web/core/utils/patch";
+import { getOrCreateGuestToken } from "@pos_self_order/app/utils";
 
 patch(PosOrder.prototype, {
     setup() {
@@ -76,6 +77,10 @@ patch(PosOrder.prototype, {
             data.email = this.email;
         }
         data.partner_id = this.raw.partner_id || false;
+        if (this.config.self_order_secure_session) {
+            // Identifies the guest within the dining party, see `_register_table_lead`
+            data.guest_token = getOrCreateGuestToken();
+        }
         return data;
     },
 });

@@ -1,0 +1,17 @@
+.o_table_join_requests_dialog .o_table_join_requests_table_icon {
+    width: 3rem;
+    height: 3rem;
+}
+
+.o_table_join_requests_dialog .o_table_join_request {
+    transition: background-color 0.2s;
+}
+
+.o_table_join_requests_dialog .o_table_join_request:hover {
+    background-color: var(--o-gray-100);
+}
+
+.o_table_join_requests_dialog .o_table_join_request_avatar {
+    width: 2.5rem;
+    height: 2.5rem;
+}

@@ -16,26 +16,5 @@
 }
 
 .o_pos_self_order_session_expired_banner {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
     z-index: 1050;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    padding: 14px 16px;
-    background-color: #c53030;
-    color: #ffffff;
-    font-size: 15px;
-    font-weight: 600;
-    line-height: 1.4;
-    text-align: center;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
-}
-
-.o_pos_self_order_session_expired_banner .o_pos_self_order_session_expired_icon {
-    font-size: 20px;
-    flex-shrink: 0;
 }

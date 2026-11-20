@@ -10,4 +10,18 @@
         </xpath>
     </t>
 
+    <t t-name="pos_self_order.floor_screen_element" t-inherit="pos_restaurant.floor_screen_element" t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('table-timer-badge')]" position="after">
+            <t t-set="joinRequests" t-value="this.pos.getTableJoinRequests(table)"/>
+            <button t-if="joinRequests.length"
+                    class="o_table_join_requests_badge btn btn-warning d-flex align-items-center gap-1 position-absolute top-0 start-0 rounded-3 smaller fw-bolder z-2 badge"
+                    t-att-style="tableContentStyle"
+                    title="Join requests"
+                    t-on-click.stop="() => this.pos.openTableJoinRequests(table)">
+                <i class="oi" data-icon="person_add" aria-hidden="true"/>
+                <t t-out="joinRequests.length"/>
+            </button>
+        </xpath>
+    </t>
+
 </templates>

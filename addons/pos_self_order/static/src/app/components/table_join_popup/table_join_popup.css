@@ -1,0 +1,91 @@
+/* Draws attention while an answer is expected */
+.self_order_table_join_popup.o_table_join_waiting .o_table_join_icon,
+.self_order_table_join_popup.o_table_join_approve .o_table_join_icon {
+    animation: o_table_join_pulse 1.6s ease-in-out infinite;
+}
+
+.self_order_table_join_popup.o_table_join_waiting .o_table_join_icon .oi {
+    animation: o_table_join_flip 2s ease-in-out infinite;
+}
+
+.self_order_table_join_popup .o_table_join_steps {
+    max-width: 22rem;
+}
+
+.self_order_table_join_popup .o_table_join_step {
+    flex: 1 1 0;
+    color: var(--secondary-color);
+}
+
+/* Line joining a step to the previous one */
+.self_order_table_join_popup .o_table_join_step:not(:first-child)::before {
+    content: "";
+    position: absolute;
+    top: 1.25rem;
+    right: 50%;
+    width: 100%;
+    height: 2px;
+    background-color: var(--border-color);
+}
+
+.self_order_table_join_popup .o_table_join_step_done::before,
+.self_order_table_join_popup .o_table_join_step_active::before {
+    background-color: var(--success) !important;
+}
+
+.self_order_table_join_popup .o_table_join_step_icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    z-index: 1;
+    background-color: var(--tertiary-bg);
+    border: 2px solid var(--border-color);
+}
+
+.self_order_table_join_popup .o_table_join_step_done {
+    color: var(--success);
+}
+
+.self_order_table_join_popup .o_table_join_step_done .o_table_join_step_icon {
+    color: var(--white);
+    background-color: var(--success);
+    border-color: var(--success);
+}
+
+.self_order_table_join_popup .o_table_join_step_active {
+    color: var(--body-color);
+    font-weight: bold;
+}
+
+.self_order_table_join_popup .o_table_join_step_active .o_table_join_step_icon {
+    color: var(--primary);
+    border-color: var(--primary);
+    box-shadow: 0 0 0 0.25rem rgba(var(--primary-rgb), 0.2);
+}
+
+@keyframes o_table_join_pulse {
+    0%,
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+    }
+    50% {
+        transform: translate(-50%, -50%) scale(1.08);
+    }
+}
+
+@keyframes o_table_join_flip {
+    0%,
+    40% {
+        transform: rotate(0deg);
+    }
+    60%,
+    100% {
+        transform: rotate(180deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .self_order_table_join_popup .o_table_join_icon,
+    .self_order_table_join_popup .o_table_join_icon .oi {
+        animation: none !important;
+    }
+}

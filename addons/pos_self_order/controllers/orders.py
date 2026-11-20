@@ -8,7 +8,7 @@ from odoo.http import request
 from odoo.http.stream import content_disposition
 from odoo.service.model import call_kw
 from werkzeug.exceptions import Forbidden, NotFound, BadRequest, Unauthorized
-from odoo.exceptions import MissingError, UserError
+from odoo.exceptions import LockError, MissingError, UserError
 from odoo.tools import consteq
 
 SESSION_EXPIRED_MESSAGE = "Your session has expired. Please scan the QR code again to continue ordering."
@@ -34,7 +34,8 @@ class PosSelfOrderController(http.Controller):
         if not pos_config.self_ordering_mode == device_type:
             raise Unauthorized("Invalid device type")
 
-        self._check_table_session(pos_config, table, order, kwargs.get('table_session_token'))
+        guest_token = self._get_guest_token(order.get('guest_token'))
+        guarded_table = self._check_table_session(pos_config, table, kwargs.get('table_session_token'), guest_token)
 
         # Create a safe copy of the order with only the necessary fields for order creation to
         # avoid potential security issues and to reduce the payload size
@@ -77,30 +78,44 @@ class PosSelfOrderController(http.Controller):
             order_ids._process_saved_order(False)
             order_ids._send_self_order_receipt()
 
+        if guarded_table:
+            for table_order in order_ids.filtered(lambda o: o.state == 'draft' and o.table_id == guarded_table):
+                table_order._register_table_lead(guest_token)
+
         for order in order_ids:
             order._send_order()
 
-        return self._generate_return_values(order_ids, pos_config)
+        return self._generate_return_values(order_ids, pos_config, guest_token=guest_token)
 
-    def _check_table_session(self, pos_config, table, order, table_session_token):
-        """Enforce the secure table session on dine-in mobile orders.
+    def _check_table_session(self, pos_config, table, table_session_token, guest_token):
+        """Enforce the secure table session on mobile orders placed on a table.
 
-        :raise Unauthorized: when the table session is missing, expired or tampered with.
+        Whatever the preset of the order, `_check_pos_order` puts it on the scanned table, where
+        it is merged into the ongoing table order: so it is always checked.
+
+        :return: the (root) table the order is placed on when the check applies, else False.
+        :raise Unauthorized: when the table session is missing/expired or when the caller has
+            not been approved by the lead of the ongoing table order.
         """
         if not table or not pos_config._is_secure_table_session_enabled():
-            return
-        preset = pos_config.env['pos.preset'].browse(order.get('preset_id')) if pos_config.use_presets else False
-        if preset and preset.service_at != 'table':
-            return
+            return False
 
         table = table._get_self_order_root_table()
         if not pos_config._verify_table_session_token(table.identifier, table_session_token):
             raise Unauthorized(SESSION_EXPIRED_MESSAGE)
 
-    def _generate_return_values(self, order, config):
+        draft_order = pos_config._get_self_order_table_draft_order(table)
+        if draft_order and not draft_order._is_guest_approved(guest_token):
+            raise Unauthorized("You are not authorized to place orders on this table. Join approval required.")
+        return table
+
+    def _generate_return_values(self, order, config, guest_token=None):
         orders = self.env['pos.order']._load_pos_self_data_read(order, config)
+        secure_table_session = config._is_secure_table_session_enabled()
 
         for o in orders:
+            if secure_table_session and o.get('table_id') and o.get('state') == 'draft':
+                o['_table_guest_status'] = order.browse(o['id'])._get_table_guest_status(guest_token)
             if config.self_ordering_mode != 'kiosk':
                 # Kiosk needs this data to print the preparation receipt
                 del o['email']
@@ -272,6 +287,50 @@ class PosSelfOrderController(http.Controller):
             'expires_at_ms': expires_at * 1000,
         }
 
+    @http.route("/pos-self-order/table/guest-action", auth="public", type="jsonrpc", website=True)
+    def table_guest_action(self, action, **kwargs):
+        """Join an ongoing table order (``request``), or answer such a request (``approve`` /
+        ``reject``). Answers come either from the table lead (public, identified by its guest
+        token) or from an authenticated POS user, as a fallback.
+
+        Guests send ``access_token``, ``table_identifier``, ``table_session_token`` and
+        ``guest_token``. POS users send ``config_id`` and ``table_id``: the table identifier is
+        a secret of the table QR code, it is never loaded in the POS. Both send ``request_id``
+        to answer a request.
+        """
+        if action not in ('request', 'approve', 'reject'):
+            raise BadRequest("Invalid action")
+        guest_token = self._get_guest_token(kwargs.get('guest_token'))
+
+        is_pos_user = action != 'request' and request.env.user.has_group('point_of_sale.group_pos_user')
+        if is_pos_user:
+            pos_config = request.env['pos.config'].browse(kwargs.get('config_id')).exists()
+            if not pos_config:
+                raise NotFound("Point of sale not found")
+            pos_config.check_access('read')
+        else:
+            pos_config = self._verify_pos_config(kwargs.get('access_token'))
+        if not pos_config._is_secure_table_session_enabled():
+            raise BadRequest("Table join requests are not enabled for this point of sale")
+
+        if is_pos_user:
+            table = self._get_self_order_table(pos_config, [('id', '=', kwargs.get('table_id'))])
+        else:
+            table = self._get_self_order_table(pos_config, [('identifier', '=', kwargs.get('table_identifier'))])
+            if not pos_config._verify_table_session_token(table.identifier, kwargs.get('table_session_token')):
+                raise Unauthorized(SESSION_EXPIRED_MESSAGE)
+
+        draft_order = pos_config._get_self_order_table_draft_order(table)
+        if not draft_order:
+            return {'status': 'no_order'}
+        if not is_pos_user and action != 'request' and not draft_order._is_table_lead(guest_token):
+            raise Unauthorized("Only the table lead can respond to join requests.")
+
+        try:
+            return draft_order._handle_guest_action(action, guest_token=guest_token, request_id=kwargs.get('request_id'))
+        except LockError:
+            raise UserError(self.env._("This table is being updated. Please try again."))
+
     def _get_self_order_table(self, pos_config, domain):
         """Return the root table matching ``domain``, among the tables of ``pos_config``."""
         table = pos_config.env['restaurant.table'].search([
@@ -282,9 +341,16 @@ class PosSelfOrderController(http.Controller):
             raise NotFound("Table not found")
         return table._get_self_order_root_table()
 
+    @staticmethod
+    def _get_guest_token(guest_token):
+        """Guest tokens come from the public JSON payload: ignore anything that is not a string."""
+        return guest_token if isinstance(guest_token, str) else False
+
     @http.route('/pos-self-order/get-user-data', auth='public', type='jsonrpc', website=True)
-    def get_orders_by_access_token(self, access_token, order_access_tokens, table_identifier=None):
+    def get_orders_by_access_token(self, access_token, order_access_tokens, table_identifier=None, **kwargs):
         pos_config = self._verify_pos_config(access_token)
+        guest_token = self._get_guest_token(kwargs.get('guest_token'))
+        table_guest_status = False
         domain = [(False, '=', True)]
 
         for data in order_access_tokens:
@@ -301,6 +367,8 @@ class PosSelfOrderController(http.Controller):
             and pos_config.self_ordering_pay_after == 'meal'
         ):
             table = pos_config.env['restaurant.table'].search([('identifier', '=', table_identifier)], limit=1)
+            if table and pos_config._is_secure_table_session_enabled():
+                table, table_guest_status = self._get_shared_table(pos_config, table, kwargs.get('table_session_token'), guest_token)
             if table:
                 domain = Domain.OR([domain, ['&', ('table_id', '=', table.id), ('state', '=', 'draft')]])
 
@@ -311,7 +379,27 @@ class PosSelfOrderController(http.Controller):
         if deleted_order_tokens := list(access_tokens - set(existing_order_tokens)):
             # Remove orders that no longer exist on the server but are still shown in the self-order UI
             pos_config._notify('REMOVE_ORDERS', {'deleted_order_tokens': deleted_order_tokens})
-        return self._generate_return_values(orders, pos_config) if orders else {}
+        result = self._generate_return_values(orders, pos_config, guest_token=guest_token) if orders else {}
+        if table_guest_status:
+            result['table_guest_status'] = table_guest_status
+        return result
+
+    def _get_shared_table(self, pos_config, table, table_session_token, guest_token):
+        """The ongoing table order (and its access token, which allows to cancel it) is only
+        shared with the guests of the dining party, holding a valid table session. The others
+        only get their own status, to ask the lead to join.
+
+        :return: ``(table, False)`` when the table order can be shared, else
+            ``(False, guest status on the table order)``.
+        """
+        root_table = table._get_self_order_root_table()
+        draft_order = pos_config._get_self_order_table_draft_order(root_table)
+        if not draft_order or (
+            pos_config._verify_table_session_token(root_table.identifier, table_session_token)
+            and draft_order._is_guest_approved(guest_token)
+        ):
+            return table, False
+        return False, draft_order._get_table_guest_status(guest_token)
 
     @http.route('/pos-self-order/kiosk/change-receipt/<int:order_id>', auth='public', type='jsonrpc', website=True)
     def pos_self_order_change_receipt(self, access_token, order_id, order_access_token):

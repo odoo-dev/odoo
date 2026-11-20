@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="pos_self_order.TableJoinRequestsDialog">
+        <Dialog title="this.title" size="'md'" footer="false" contentClass="'o_table_join_requests_dialog'">
+            <div class="d-flex align-items-center gap-3 mb-3">
+                <span class="o_table_join_requests_table_icon d-flex align-items-center justify-content-center rounded-circle text-bg-warning">
+                    <i class="oi oi-lg" data-icon="group" aria-hidden="true"/>
+                </span>
+                <div class="d-flex flex-column">
+                    <span class="fs-4 fw-bolder">Table <t t-out="this.props.table.table_number"/></span>
+                    <span class="text-muted">
+                        <t t-out="this.requests.length"/> guest(s) waiting to join the ongoing order
+                    </span>
+                </div>
+            </div>
+
+            <div class="alert alert-info d-flex align-items-center gap-2 py-2" role="alert">
+                <i class="oi" data-icon="info" aria-hidden="true"/>
+                <span>Approve only guests who are seated at this table.</span>
+            </div>
+
+            <div t-if="!this.requests.length" class="d-flex flex-column align-items-center text-muted py-4">
+                <i class="oi oi-3x text-success mb-2" data-icon="verified" aria-hidden="true"/>
+                <span class="fs-5">All caught up, no pending request.</span>
+            </div>
+            <ul t-else="" class="list-unstyled d-flex flex-column gap-2 mb-0">
+                <li t-foreach="this.requests" t-as="request" t-key="request.request_id"
+                    class="o_table_join_request d-flex align-items-center gap-3 p-2 border rounded-3">
+                    <span class="o_table_join_request_avatar d-flex align-items-center justify-content-center rounded-circle bg-200 flex-shrink-0">
+                        <i class="oi oi-lg" data-icon="person_add" aria-hidden="true"/>
+                    </span>
+                    <div class="d-flex flex-column flex-grow-1 min-w-0">
+                        <span class="fw-bold">Guest <t t-out="request_index + 1"/></span>
+                        <span class="text-muted small d-flex align-items-center gap-1">
+                            <i class="oi oi-sm" data-icon="schedule" aria-hidden="true"/>
+                            <t t-out="this.getRequestAge(request)"/>
+                        </span>
+                    </div>
+                    <button class="btn btn-outline-danger d-flex align-items-center gap-1"
+                            t-att-disabled="this.state.busy"
+                            t-on-click="() => this.answer(request, 'reject')">
+                        <i class="oi" data-icon="close" aria-hidden="true"/>
+                        <span class="d-none d-sm-inline">Reject</span>
+                    </button>
+                    <button class="btn btn-success d-flex align-items-center gap-1"
+                            t-att-disabled="this.state.busy"
+                            t-on-click="() => this.answer(request, 'approve')">
+                        <i class="oi" data-icon="check" aria-hidden="true"/>
+                        <span class="d-none d-sm-inline">Approve</span>
+                    </button>
+                </li>
+            </ul>
+        </Dialog>
+    </t>
+</templates>

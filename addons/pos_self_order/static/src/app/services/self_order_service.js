@@ -21,12 +21,13 @@ import { getOrderLineValues } from "./card_utils";
 import { initLNA } from "@point_of_sale/app/utils/init_lna";
 import { SnoozeTracker } from "@point_of_sale/app/models/utils/snooze_tracker";
 import { InfoPopup } from "@pos_self_order/app/components/info_popup/info_popup";
+import { TableJoinPopup } from "@pos_self_order/app/components/table_join_popup/table_join_popup";
 import { ComboSuggestion } from "@point_of_sale/app/models/utils/combo_suggestion";
 import { session } from "@web/session";
 import { location } from "@web/core/browser/browser";
 import { PosDataPlugin } from "@point_of_sale/app/plugins/pos_data_plugin";
 import { PosTicketPrinterPlugin } from "@point_of_sale/app/plugins/pos_ticket_printer_plugin";
-import { getTableSessionStorageKey } from "@pos_self_order/app/utils";
+import { getTableSessionStorageKey, getOrCreateGuestToken } from "@pos_self_order/app/utils";
 
 const { DateTime } = luxon;
 
@@ -83,6 +84,13 @@ export class SelfOrder {
             formatCurrency: (amount) => this.formatMonetary(amount),
         };
 
+        this.guestToken = getOrCreateGuestToken();
+        // Dining party state of the table order, see `_updateTableGuestStatus`
+        this.isLead = false;
+        this.isApproved = true;
+        this.isWaitingApproval = false;
+        this.pendingJoinRequestId = null;
+
         this._isSessionExpired = false;
         this.tableSession = null; // { token, expiresAt } of the scanned table, see `_initTableSession`
         this.initData();
@@ -102,6 +110,8 @@ export class SelfOrder {
             }
         });
         this.data.connectWebSocket("ORDER_STATE_CHANGED", () => this.getUserDataFromServer());
+        this.data.connectWebSocket("TABLE_JOIN_REQUEST", this.onTableJoinRequest.bind(this));
+        this.data.connectWebSocket("TABLE_JOIN_STATUS", this.onTableJoinStatus.bind(this));
         this.data.connectWebSocket("SNOOZE_CHANGED", async (payload) => {
             const { deleted_ids, records } = payload;
             if (deleted_ids) {
@@ -891,6 +901,10 @@ export class SelfOrder {
                 }
             );
             const syncedOrder = this.models.connectNewData(data)["pos.order"][0];
+            if (this._isSessionTimeoutEnabled()) {
+                // The first guest ordering on a table becomes its lead
+                this._updateTableGuestStatus(syncedOrder);
+            }
             if (syncedOrder.uuid !== order.uuid) {
                 this.orderTakeAwayState[syncedOrder.uuid] = this.orderTakeAwayState[order.uuid];
                 delete this.orderTakeAwayState[order.uuid];
@@ -939,11 +953,19 @@ export class SelfOrder {
         const pendingDeltas = this._computePendingDeltas();
 
         try {
-            const data = await rpc(`/pos-self-order/get-user-data/`, {
+            const { table_guest_status, ...data } = await rpc(`/pos-self-order/get-user-data/`, {
                 access_token: this.access_token,
                 order_access_tokens: accessTokens,
                 table_identifier: tableIdentifier,
+                guest_token: this._isSessionTimeoutEnabled() ? this.guestToken : null,
+                table_session_token: this._isSessionTimeoutEnabled()
+                    ? this._getTableSessionToken()
+                    : false,
             });
+            if (table_guest_status) {
+                // The table order is only shared once this guest has joined the dining party
+                this._applyTableGuestStatus(table_guest_status);
+            }
             const result = this.models.connectNewData(data);
 
             let openOrder = null;
@@ -959,6 +981,9 @@ export class SelfOrder {
                     .find(Boolean);
             }
             if (openOrder) {
+                if (this._isSessionTimeoutEnabled()) {
+                    this._updateTableGuestStatus(openOrder);
+                }
                 if (this.router.activeSlot !== "confirmation") {
                     this.selectedOrderUuid = openOrder.uuid;
 
@@ -1315,9 +1340,9 @@ export class SelfOrder {
         return "none";
     }
 
-    /** Whether the expired table session blocks the current order (only dine-in orders are). */
+    /** Whether the expired table session blocks the current order (see `_isTableOrder`). */
     isSessionExpired() {
-        return this._isSessionExpired && this._isDineInOrder();
+        return this._isSessionExpired && this._isTableOrder();
     }
 
     _isSessionTimeoutEnabled() {
@@ -1361,26 +1386,32 @@ export class SelfOrder {
             this.tableSession = JSON.parse(localStorage.getItem(storageKey) || "null");
         }
 
+        this._scheduleSessionExpiry();
+    }
+
+    _scheduleSessionExpiry() {
         const remaining = (this.tableSession?.expiresAt || 0) - Date.now();
         this._isSessionExpired = !(remaining > 0);
         if (!this._isSessionExpired) {
-            setTimeout(() => (this._isSessionExpired = true), remaining);
+            // Timer delays are capped to 2^31 - 1 ms (~24.8 days), longer ones would fire at once
+            setTimeout(() => this._scheduleSessionExpiry(), Math.min(remaining, 2 ** 31 - 1));
         }
     }
 
-    _isDineInOrder() {
-        const preset = this.config.use_presets && this.currentOrder?.preset_id;
-        return preset
-            ? preset.service_at === "table"
-            : this.config.self_ordering_service_mode === "table";
+    /**
+     * Orders sent with a scanned table are put on it, whatever their preset: they are merged
+     * into the table order, so the server checks them (see `_check_table_session`).
+     */
+    _isTableOrder() {
+        return Boolean(this.currentTableIdentifier);
     }
 
     /**
-     * Client-side check before sending a dine-in order, to ask the guest to scan the table QR
-     * code again. The server enforces the same rule in `_check_table_session`.
+     * Client-side check before sending a dine-in order, to guide the guest (scan again, ask to
+     * join the table). The server enforces the same rules in `_check_table_session`.
      */
     _checkOrderPermission() {
-        if (!this._isDineInOrder()) {
+        if (!this._isTableOrder()) {
             return true;
         }
         if (!(this.tableSession?.expiresAt > Date.now())) {
@@ -1391,11 +1422,159 @@ export class SelfOrder {
             );
             return false;
         }
+        if (!this.isApproved) {
+            this.promptJoinRequest();
+            return false;
+        }
         return true;
     }
 
     _getTableSessionToken() {
         return this.tableSession?.token || false;
+    }
+
+    /**
+     * Apply the guest's role at the table (lead, approved, pending request), computed by the
+     * server for this device's guest token and sent along the table order as
+     * `_table_guest_status`.
+     */
+    _updateTableGuestStatus(order) {
+        // Read from the raw data: the extra field getter is not defined on updated records
+        const status = order?.raw?._table_guest_status ?? order?._table_guest_status;
+        if (status) {
+            this._applyTableGuestStatus(status, order.id);
+        }
+    }
+
+    _applyTableGuestStatus(status, orderId = null) {
+        this.isLead = status.is_lead;
+        this.isApproved = status.is_approved;
+        this.pendingJoinRequestId = status.pending_request_id || null;
+        this.isWaitingApproval = Boolean(this.pendingJoinRequestId);
+        if (this.isLead) {
+            // Requests received while the lead was away (phone locked, page reloaded, ...)
+            for (const requestId of status.pending_request_ids) {
+                this.onTableJoinRequest({ request_id: requestId, order_id: orderId });
+            }
+        } else if (!this.isApproved && !this.isWaitingApproval) {
+            this.promptJoinRequest();
+        }
+    }
+
+    promptJoinRequest() {
+        if (this.isApproved || this._closeJoinPrompt) {
+            return;
+        }
+        this._closeJoinPrompt = this.dialog.add(
+            TableJoinPopup,
+            {
+                mode: this.isWaitingApproval ? "waiting" : "join",
+                tableNumber: this.currentTable?.table_number,
+                confirm: () => this.requestJoinTable(),
+            },
+            { onClose: () => (this._closeJoinPrompt = null) }
+        );
+    }
+
+    async requestJoinTable() {
+        try {
+            const res = await rpc("/pos-self-order/table/guest-action", {
+                access_token: this.access_token,
+                table_identifier: this.currentTableIdentifier,
+                table_session_token: this._getTableSessionToken(),
+                action: "request",
+                guest_token: this.guestToken,
+            });
+            if (res.status === "pending") {
+                this.pendingJoinRequestId = res.request_id;
+                this.isWaitingApproval = true;
+                this.promptJoinRequest();
+            } else {
+                // Already approved, or the table order has been closed in the meantime.
+                this.isApproved = true;
+                await this.getUserDataFromServer();
+            }
+        } catch (err) {
+            this.handleErrorNotification(err);
+        }
+    }
+
+    /**
+     * `TABLE_JOIN_REQUEST` is broadcast to every device of the config: only the lead of the
+     * targeted table order is asked to answer, once per request.
+     */
+    onTableJoinRequest(payload) {
+        this._joinRequestDialogs ??= {};
+        if (
+            !this.isLead ||
+            payload.order_id !== this.currentOrder?.id ||
+            this._joinRequestDialogs[payload.request_id]
+        ) {
+            return;
+        }
+        this._joinRequestDialogs[payload.request_id] = this.dialog.add(
+            TableJoinPopup,
+            {
+                mode: "approve",
+                tableNumber: this.currentTable?.table_number,
+                confirm: () => this.respondJoinRequest(payload.request_id, true),
+                cancel: () => this.respondJoinRequest(payload.request_id, false),
+            },
+            { onClose: () => delete this._joinRequestDialogs[payload.request_id] }
+        );
+    }
+
+    async respondJoinRequest(requestId, approve) {
+        try {
+            const res = await rpc("/pos-self-order/table/guest-action", {
+                access_token: this.access_token,
+                table_identifier: this.currentTableIdentifier,
+                table_session_token: this._getTableSessionToken(),
+                action: approve ? "approve" : "reject",
+                guest_token: this.guestToken,
+                request_id: requestId,
+            });
+            if (res.status === "not_found") {
+                this.notification.add(_t("This request has already been answered."), {
+                    type: "info",
+                });
+            }
+        } catch (err) {
+            this.handleErrorNotification(err);
+        }
+    }
+
+    /**
+     * `TABLE_JOIN_STATUS` is broadcast to every device of the config: it closes the lead's popup
+     * of an answered request, and only unlocks the guest whose pending request it answers.
+     */
+    async onTableJoinStatus(payload) {
+        // Request answered elsewhere (by our staff): close the lead's pending popup.
+        this._joinRequestDialogs?.[payload.request_id]?.();
+        if (!this.pendingJoinRequestId || payload.request_id !== this.pendingJoinRequestId) {
+            return;
+        }
+        this.pendingJoinRequestId = null;
+        this.isWaitingApproval = false;
+        this._closeJoinPrompt?.();
+        if (payload.status === "approved") {
+            this.isApproved = true;
+            this.notification.add(_t("You have been approved to join the table!"), {
+                type: "success",
+            });
+            await this.getUserDataFromServer();
+            this.router.navigate("product_list");
+        } else if (payload.status === "closed") {
+            // The table order was paid or cancelled before the answer: nobody leads the table.
+            this.isApproved = true;
+            this.notification.add(_t("The table order is closed, you can now start a new one."), {
+                type: "info",
+            });
+        } else {
+            this.notification.add(_t("Your request to join the table was declined."), {
+                type: "danger",
+            });
+        }
     }
 }
 

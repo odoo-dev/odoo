@@ -405,3 +405,63 @@ class TestSelfOrderMobile(SelfOrderCommonTest):
             self.assertEqual(event, 'PRODUCT_CHANGED')
             self.assertEqual([p['id'] for p in payload['product.template']], desk_organizer.ids)
             self.assertEqual(payload['product.template'][0]['self_order_available'], available)
+
+    # ---- Secure table sessions: table join flows ----
+
+    def _setup_secure_table_order(self, with_lead_order=True):
+        self.pos_config.write({
+            'self_ordering_mode': 'mobile',
+            'self_ordering_pay_after': 'meal',
+            'self_ordering_service_mode': 'table',
+            'use_presets': False,
+            'self_order_session_timeout_minutes': 10,
+        })
+        self.pos_config.with_user(self.pos_user).open_ui()
+        self.pos_config.current_session_id.set_opening_control(0, "")
+        token, _expires_at = self.pos_config._generate_table_session_token(self.pos_table_1.identifier)
+        table_order = self.env['pos.order']
+        if with_lead_order:
+            order_data = self._create_order_data(product=self.cola, qty=1)
+            order_data['order']['guest_token'] = 'guest_lead'
+            order_data['table_session_token'] = token
+            result = self.make_request_to_controller('/pos-self-order/process-order/mobile', order_data)
+            table_order = self.env['pos.order'].browse(result['pos.order'][0]['id'])
+        return token, table_order
+
+    def test_self_order_table_join_guest(self):
+        """A guest scanning a hosted table asks to join, is approved by the lead and orders."""
+        _token, table_order = self._setup_secure_table_order()
+        self_route = self.pos_config._get_self_order_route(table_id=self.pos_table_1.id)
+        self.assertIn('qr=1', self_route, "A QR scan starts a new table session")
+
+        self.start_tour(self_route, "self_order_table_join_guest")
+
+        guest_data = table_order.self_order_guest_data
+        self.assertEqual(guest_data['lead_token'], 'guest_lead')
+        self.assertEqual(len(guest_data['approved_tokens']), 2, "The guest has been approved")
+        self.assertFalse(guest_data['pending_requests'])
+        self.assertEqual(len(table_order.lines), 2, "The guest ordered on the shared table order")
+
+    def test_self_order_table_join_lead(self):
+        """The first guest ordering on a table becomes its lead and approves the next guests."""
+        self._setup_secure_table_order(with_lead_order=False)
+        self_route = self.pos_config._get_self_order_route(table_id=self.pos_table_1.id)
+
+        self.start_tour(self_route, "self_order_table_join_lead")
+
+        table_order = self.pos_config._get_self_order_table_draft_order(self.pos_table_1)
+        guest_data = table_order.self_order_guest_data
+        self.assertNotEqual(guest_data['lead_token'], 'guest_friend')
+        self.assertIn('guest_friend', guest_data['approved_tokens'])
+        self.assertFalse(guest_data['pending_requests'])
+
+    def test_pos_table_join_request_approval(self):
+        """A waiter approves a join request from the floor plan of the POS."""
+        _token, table_order = self._setup_secure_table_order()
+        table_order._handle_guest_action('request', guest_token='guest_friend')
+
+        self.start_tour('/pos/ui?config_id=%d' % self.pos_config.id, 'test_pos_table_join_request_approval', login='pos_user')
+
+        guest_data = table_order.self_order_guest_data
+        self.assertIn('guest_friend', guest_data['approved_tokens'])
+        self.assertFalse(guest_data['pending_requests'])

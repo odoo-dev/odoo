@@ -35,3 +35,18 @@ export function getTableSessionStorageKey(configId, tableIdentifier) {
     const db = odoo.info?.db || odoo.__session_info__?.db || "";
     return `pos_table_session_${configId}_${tableIdentifier}${db ? `_${db}` : ""}`;
 }
+
+/**
+ * Random secret identifying this device within the dining party of a table (table lead,
+ * approved guests). The server trusts it as a bearer credential, so it must be unguessable:
+ * `crypto.getRandomValues` is used as it is also available outside secure (https) contexts.
+ */
+export function getOrCreateGuestToken() {
+    let token = localStorage.getItem("odoo_pos_self_guest_token");
+    if (!token) {
+        const bytes = crypto.getRandomValues(new Uint8Array(16));
+        token = Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
+        localStorage.setItem("odoo_pos_self_guest_token", token);
+    }
+    return token;
+}
