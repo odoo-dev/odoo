@@ -30,6 +30,14 @@ class RestaurantTable(models.Model):
     def _load_pos_self_data_fields(self, config):
         return ['table_number', 'identifier', 'floor_id']
 
+    def _get_self_order_root_table(self):
+        """Joined tables share the order of their root (parent) table."""
+        self.ensure_one()
+        table = self
+        while table.parent_id:
+            table = table.parent_id
+        return table
+
     @api.model
     def _load_pos_self_data_domain(self, data):
         return [('floor_id', 'in', data['restaurant.floor'].ids)]

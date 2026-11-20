@@ -26,3 +26,12 @@ export const shouldShowMissingDetails = (product, selectedValues) => {
         );
     });
 };
+
+/**
+ * Local storage key of the table session (see `SelfOrder._initTableSession`), suffixed by the
+ * database name so that sessions of different databases served on the same domain don't clash.
+ */
+export function getTableSessionStorageKey(configId, tableIdentifier) {
+    const db = odoo.info?.db || odoo.__session_info__?.db || "";
+    return `pos_table_session_${configId}_${tableIdentifier}${db ? `_${db}` : ""}`;
+}

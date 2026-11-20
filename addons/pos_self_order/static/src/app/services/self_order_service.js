@@ -23,8 +23,10 @@ import { SnoozeTracker } from "@point_of_sale/app/models/utils/snooze_tracker";
 import { InfoPopup } from "@pos_self_order/app/components/info_popup/info_popup";
 import { ComboSuggestion } from "@point_of_sale/app/models/utils/combo_suggestion";
 import { session } from "@web/session";
+import { location } from "@web/core/browser/browser";
 import { PosDataPlugin } from "@point_of_sale/app/plugins/pos_data_plugin";
 import { PosTicketPrinterPlugin } from "@point_of_sale/app/plugins/pos_ticket_printer_plugin";
+import { getTableSessionStorageKey } from "@pos_self_order/app/utils";
 
 const { DateTime } = luxon;
 
@@ -81,11 +83,17 @@ export class SelfOrder {
             formatCurrency: (amount) => this.formatMonetary(amount),
         };
 
+        this._isSessionExpired = false;
+        this.tableSession = null; // { token, expiresAt } of the scanned table, see `_initTableSession`
         this.initData();
         if (this.config.self_ordering_mode === "kiosk") {
             await this.initKioskData();
         } else {
             await this.initMobileData();
+        }
+
+        if (this._isSessionTimeoutEnabled()) {
+            await this._initTableSession();
         }
 
         this.data.connectWebSocket("SESSION_STATE_CHANGED", () => {
@@ -472,6 +480,10 @@ export class SelfOrder {
     }
 
     async confirmOrder() {
+        if (this._isSessionTimeoutEnabled() && !this._checkOrderPermission()) {
+            return;
+        }
+
         const payAfter = this.config.self_ordering_pay_after; // each, meal
         const device = this.config.self_ordering_mode; // kiosk, mobile
         const service = this.selfService; // table, counter, delivery
@@ -850,6 +862,10 @@ export class SelfOrder {
     }
 
     async _sendDraftOrderToServer() {
+        if (this._isSessionTimeoutEnabled() && !this._checkOrderPermission()) {
+            return false;
+        }
+
         const order = this.currentOrder;
         const hasTipLine = this.config.tip_product_id && order.lines.some((l) => l.isTipLine());
         // tip is excluded from `changes`, so a tip-only update still needs a sync
@@ -869,6 +885,9 @@ export class SelfOrder {
                     order: order.serializeForORM(),
                     access_token: this.access_token,
                     table_identifier: tableIdentifier, // Always trust URL one, is the one user scanned
+                    table_session_token: this._isSessionTimeoutEnabled()
+                        ? this._getTableSessionToken()
+                        : false,
                 }
             );
             const syncedOrder = this.models.connectNewData(data)["pos.order"][0];
@@ -1294,6 +1313,89 @@ export class SelfOrder {
             return `url('/web/image/ir.attachment/${imageId}/raw')`;
         }
         return "none";
+    }
+
+    /** Whether the expired table session blocks the current order (only dine-in orders are). */
+    isSessionExpired() {
+        return this._isSessionExpired && this._isDineInOrder();
+    }
+
+    _isSessionTimeoutEnabled() {
+        const { config } = this;
+        return Boolean(
+            config.self_order_secure_session &&
+                config.self_order_session_timeout_minutes > 0 &&
+                config.self_ordering_mode === "mobile" &&
+                config.self_ordering_pay_after === "meal" &&
+                config.self_ordering_service_mode === "table"
+        );
+    }
+
+    /**
+     * A fresh QR scan (``&qr=1``) starts a new table session, otherwise the one stored on
+     * this device is reused. The expiry is then tracked locally, without server polling.
+     */
+    async _initTableSession() {
+        const tableIdentifier = this.currentTableIdentifier;
+        if (!tableIdentifier) {
+            return;
+        }
+        const storageKey = getTableSessionStorageKey(this.config.id, tableIdentifier);
+        const url = new URL(location.href);
+        if (url.searchParams.has("qr")) {
+            url.searchParams.delete("qr");
+            history.replaceState({}, "", url);
+            try {
+                const res = await rpc("/pos-self/session/create", {
+                    access_token: this.access_token,
+                    table_identifier: tableIdentifier,
+                });
+                if (res.status === "open") {
+                    this.tableSession = { token: res.token, expiresAt: res.expires_at_ms };
+                    localStorage.setItem(storageKey, JSON.stringify(this.tableSession));
+                }
+            } catch (error) {
+                this.handleErrorNotification(error);
+            }
+        } else {
+            this.tableSession = JSON.parse(localStorage.getItem(storageKey) || "null");
+        }
+
+        const remaining = (this.tableSession?.expiresAt || 0) - Date.now();
+        this._isSessionExpired = !(remaining > 0);
+        if (!this._isSessionExpired) {
+            setTimeout(() => (this._isSessionExpired = true), remaining);
+        }
+    }
+
+    _isDineInOrder() {
+        const preset = this.config.use_presets && this.currentOrder?.preset_id;
+        return preset
+            ? preset.service_at === "table"
+            : this.config.self_ordering_service_mode === "table";
+    }
+
+    /**
+     * Client-side check before sending a dine-in order, to ask the guest to scan the table QR
+     * code again. The server enforces the same rule in `_check_table_session`.
+     */
+    _checkOrderPermission() {
+        if (!this._isDineInOrder()) {
+            return true;
+        }
+        if (!(this.tableSession?.expiresAt > Date.now())) {
+            this._isSessionExpired = true;
+            this.notification.add(
+                _t("Your session has expired. Please scan the QR code again to continue ordering."),
+                { type: "danger" }
+            );
+            return false;
+        }
+        return true;
+    }
+
+    _getTableSessionToken() {
+        return this.tableSession?.token || false;
     }
 }
 

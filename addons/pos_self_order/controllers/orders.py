@@ -11,6 +11,8 @@ from werkzeug.exceptions import Forbidden, NotFound, BadRequest, Unauthorized
 from odoo.exceptions import MissingError, UserError
 from odoo.tools import consteq
 
+SESSION_EXPIRED_MESSAGE = "Your session has expired. Please scan the QR code again to continue ordering."
+
 
 def _haversine_distance(lat1, long1, lat2, long2):
     """Compute the straight-line distance in km between two lat/long points."""
@@ -27,10 +29,12 @@ def _haversine_distance(lat1, long1, lat2, long2):
 
 class PosSelfOrderController(http.Controller):
     @http.route("/pos-self-order/process-order/<device_type>/", auth="public", type="jsonrpc", website=True)
-    def process_order(self, order, access_token, table_identifier, device_type):
+    def process_order(self, order, access_token, table_identifier, device_type, **kwargs):
         pos_config, table = self._verify_authorization(access_token, table_identifier, order)
         if not pos_config.self_ordering_mode == device_type:
             raise Unauthorized("Invalid device type")
+
+        self._check_table_session(pos_config, table, order, kwargs.get('table_session_token'))
 
         # Create a safe copy of the order with only the necessary fields for order creation to
         # avoid potential security issues and to reduce the payload size
@@ -77,6 +81,21 @@ class PosSelfOrderController(http.Controller):
             order._send_order()
 
         return self._generate_return_values(order_ids, pos_config)
+
+    def _check_table_session(self, pos_config, table, order, table_session_token):
+        """Enforce the secure table session on dine-in mobile orders.
+
+        :raise Unauthorized: when the table session is missing, expired or tampered with.
+        """
+        if not table or not pos_config._is_secure_table_session_enabled():
+            return
+        preset = pos_config.env['pos.preset'].browse(order.get('preset_id')) if pos_config.use_presets else False
+        if preset and preset.service_at != 'table':
+            return
+
+        table = table._get_self_order_root_table()
+        if not pos_config._verify_table_session_token(table.identifier, table_session_token):
+            raise Unauthorized(SESSION_EXPIRED_MESSAGE)
 
     def _generate_return_values(self, order, config):
         orders = self.env['pos.order']._load_pos_self_data_read(order, config)
@@ -237,6 +256,31 @@ class PosSelfOrderController(http.Controller):
             raise Unauthorized(self.env._("You are not authorized to remove this order"))
 
         pos_order.remove_from_ui([pos_order.id])
+
+    @http.route("/pos-self/session/create", auth="public", type="jsonrpc", website=True)
+    def create_table_session(self, access_token, table_identifier, **kwargs):
+        """Start a time-limited table session when a guest scans the table QR code."""
+        pos_config = self._verify_pos_config(access_token)
+        if not pos_config._is_secure_table_session_enabled():
+            return {'status': 'disabled'}
+        table = self._get_self_order_table(pos_config, [('identifier', '=', table_identifier)])
+        token, expires_at = pos_config._generate_table_session_token(table.identifier)
+        return {
+            'status': 'open',
+            'token': token,
+            'timeout_minutes': pos_config.self_order_session_timeout_minutes,
+            'expires_at_ms': expires_at * 1000,
+        }
+
+    def _get_self_order_table(self, pos_config, domain):
+        """Return the root table matching ``domain``, among the tables of ``pos_config``."""
+        table = pos_config.env['restaurant.table'].search([
+            *domain,
+            ('floor_id.pos_config_ids', 'in', pos_config.id),
+        ], limit=1)
+        if not table:
+            raise NotFound("Table not found")
+        return table._get_self_order_root_table()
 
     @http.route('/pos-self-order/get-user-data', auth='public', type='jsonrpc', website=True)
     def get_orders_by_access_token(self, access_token, order_access_tokens, table_identifier=None):

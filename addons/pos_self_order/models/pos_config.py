@@ -1,5 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 import base64
+import time
 import uuid
 import zipfile
 from io import BytesIO
@@ -9,8 +10,9 @@ import qrcode
 import qrcode.image.svg
 
 from odoo import _, api, fields, models, release
-from odoo.exceptions import AccessError, UserError
+from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.fields import Domain
+from odoo.tools import consteq, hmac
 
 
 class PosConfig(models.Model):
@@ -99,6 +101,75 @@ class PosConfig(models.Model):
     )
     has_paper = fields.Boolean("Has paper", default=True)
     self_ordering_primary_color = fields.Char(string="Color", default=lambda self: self.env.company.email_secondary_color)
+    self_order_secure_session = fields.Boolean(
+        "Secure Table Sessions",
+        default=False,
+        help=(
+            "Enable HMAC-secured table sessions for mobile self-order with pay-after-meal. "
+            "Requires both mobile mode and pay-after-meal to take effect."
+        ),
+    )
+    self_order_session_timeout_minutes = fields.Integer(
+        "Session Timeout (min)",
+        default=0,
+        help="After this many minutes from scanning the QR code, the session expires and the customer must scan the QR code again.",
+    )
+    self_order_session_version = fields.Integer(
+        "Session Secret Version",
+        default=1,
+        help="Incremented to invalidate all active table tokens at once (e.g. on config change or POS session close).",
+    )
+
+    def _is_secure_table_session_enabled(self):
+        """Secure table sessions only apply to mobile self-ordering at the table with payment
+        after the meal: the only flow where several guests share an open order that can be
+        reached remotely through the static table QR code."""
+        self.ensure_one()
+        return bool(
+            self.self_order_secure_session
+            and self.self_order_session_timeout_minutes > 0
+            and self.self_ordering_mode == 'mobile'
+            and self.self_ordering_pay_after == 'meal'
+            and self.self_ordering_service_mode == 'table'
+        )
+
+    # ---- HMAC Token Management ----
+
+    def _get_table_session_message(self, table_identifier, expires_at):
+        # The access token and session version are part of the signed message so that
+        # regenerating the QR codes or bumping the version invalidates every token.
+        return f"{self.id}:{self.access_token}:{self.self_order_session_version}:{table_identifier}:{expires_at}"
+
+    def _generate_table_session_token(self, table_identifier):
+        """Return a stateless table session token ``<expires_at>.<signature>``, given to the
+        guest when scanning the table QR code, and its expiry timestamp.
+
+        Nothing is stored server side: the token is valid as long as its HMAC signature
+        matches and it is not expired. Bumping ``self_order_session_version`` or regenerating
+        the access token changes the signed message, which invalidates all tokens at once.
+        """
+        self.ensure_one()
+        expires_at = int(time.time()) + self.self_order_session_timeout_minutes * 60
+        message = self._get_table_session_message(table_identifier, expires_at)
+        signature = hmac(self.env(su=True), 'pos_self_order-table-session', message)
+        return f"{expires_at}.{signature}", expires_at
+
+    def _verify_table_session_token(self, table_identifier, token):
+        self.ensure_one()
+        if not isinstance(token, str) or '.' not in token:
+            return False
+        expires_at, signature = token.split('.', 1)
+        if not expires_at.isdigit() or int(expires_at) < time.time():
+            return False
+        message = self._get_table_session_message(table_identifier, int(expires_at))
+        expected = hmac(self.env(su=True), 'pos_self_order-table-session', message)
+        return consteq(signature.encode(), expected.encode())
+
+    @api.constrains('self_order_secure_session', 'self_order_session_timeout_minutes')
+    def _check_session_timeout_values(self):
+        for rec in self:
+            if rec.self_order_secure_session and rec.self_order_session_timeout_minutes <= 0:
+                raise ValidationError(_("Session timeout must be greater than 0 minutes."))
 
     @api.model
     def _load_pos_self_data_fields(self, pos_config_id):
@@ -114,7 +185,7 @@ class PosConfig(models.Model):
             'status', 'self_ordering_image_background_ids', 'preparation_printer_ids',
             'receipt_printer_ids', 'use_order_printer', 'other_devices', 'pos_snooze_ids', 'self_ordering_primary_color',
             'logo', 'receipt_address', 'phone', 'email', 'website', 'tip_product_id', 'module_pos_discount',
-            'iface_group_by_categ',
+            'iface_group_by_categ', 'self_order_secure_session', 'self_order_session_timeout_minutes',
         ]
 
     def _update_access_token(self):
@@ -123,6 +194,9 @@ class PosConfig(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
+        for vals in vals_list:
+            if 'self_order_session_timeout_minutes' in vals and 'self_order_secure_session' not in vals:
+                vals['self_order_secure_session'] = bool(vals['self_order_session_timeout_minutes'] > 0)
         self._prepare_self_order_splash_screen(vals_list, is_new=True)
         pos_config_ids = super().create(vals_list)
         pos_config_ids._ensure_public_attachments()
@@ -167,7 +241,15 @@ class PosConfig(models.Model):
                     'pos_config_ids': [(4, record.id)],
                 })
 
+    def _bump_self_order_session_version(self):
+        """Invalidate every table session token of the config (see `_generate_table_session_token`)."""
+        # sudo: also called when a POS user, who cannot write on the config, closes the session
+        for config in self.sudo():
+            config.self_order_session_version += 1
+
     def write(self, vals):
+        if 'self_order_session_timeout_minutes' in vals and 'self_order_secure_session' not in vals:
+            vals['self_order_secure_session'] = bool(vals['self_order_session_timeout_minutes'] > 0)
         self._prepare_self_order_splash_screen([vals])
         product_delivery_template = self.env.ref('pos_self_order.product_delivery_template', raise_if_not_found=False)
         if (
@@ -206,7 +288,15 @@ class PosConfig(models.Model):
             elif mode == 'mobile' and vals.get('self_ordering_pay_after') == 'meal':
                 vals['self_ordering_service_mode'] = 'table'
 
+        # Changing how the tables are secured invalidates every table session token
+        session_fields = vals.keys() & {
+            'self_ordering_mode', 'self_ordering_pay_after', 'self_ordering_service_mode',
+            'self_order_secure_session', 'self_order_session_timeout_minutes',
+        }
+        configs_to_bump = self.filtered(lambda config: any(config[f] != vals[f] for f in session_fields))
+
         res = super().write(vals)
+        configs_to_bump._bump_self_order_session_version()
         self._ensure_public_attachments()
         self._prepare_self_order_custom_btn()
         if vals.keys() & self._get_kiosk_reload_fields():
@@ -309,6 +399,8 @@ class PosConfig(models.Model):
                 table = self.env["restaurant.table"].search([("active", "=", True), ("id", "=", table_id)], limit=1)
                 if table:
                     extra_params += f"&table_identifier={table.identifier}"
+                    if self._is_secure_table_session_enabled():
+                        extra_params += "&qr=1"
 
         return f"{base_route}?access_token={self.access_token}{extra_params}"
 

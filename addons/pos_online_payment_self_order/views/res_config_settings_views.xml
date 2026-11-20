@@ -5,7 +5,7 @@
         <field name="model">res.config.settings</field>
         <field name="inherit_id" ref="point_of_sale.res_config_settings_view_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//div[@id='self-payment-after']" position="after">
+            <xpath expr="//div[@id='self-order-session-timeout']" position="after">
                 <div class="content-group row" invisible="not pos_self_ordering_mode == 'mobile'">
                     <label string="Online Payment" for="pos_self_order_online_payment_method_id" class="col-lg-4" />
                     <field name="pos_self_order_online_payment_method_id" placeholder="Pay at cashier if empty" />

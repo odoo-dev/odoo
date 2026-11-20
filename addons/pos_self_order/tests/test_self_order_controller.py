@@ -1,12 +1,14 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 import json
+import time
 import uuid
 from datetime import datetime, timedelta
 from unittest.mock import patch
 
 import odoo.tests
 from odoo import Command, fields
+from odoo.tools import mute_logger
 
 from odoo.addons.pos_self_order.tests.self_order_common_test import SelfOrderCommonTest
 
@@ -926,3 +928,123 @@ class TestSelfOrderController(SelfOrderCommonTest):
         self.assertEqual(order.tracking_number, tracking_number)
         self.assertEqual(order.floating_order_name, floating_order_name)
         self.assertEqual(order.pos_reference, pos_reference)
+
+    def _enable_secure_table_session(self):
+        self.pos_config.write({
+            'self_ordering_mode': 'mobile',
+            'self_ordering_pay_after': 'meal',
+            'self_ordering_service_mode': 'table',
+            'self_order_session_timeout_minutes': 10,
+        })
+        self.pos_config.with_user(self.pos_user).open_ui()
+        self.pos_config.current_session_id.set_opening_control(0, '')
+
+    def _json_rpc(self, url, params):
+        return self.url_open(
+            url,
+            json.dumps({'jsonrpc': '2.0', 'params': params}),
+            method='POST',
+            headers={'Content-Type': 'application/json'},
+        ).json()
+
+    def _place_table_order(self, table_session_token):
+        order_data = self._create_order_data(product=self.cola, qty=1, preset=self.in_preset)
+        order_data['table_session_token'] = table_session_token
+        return self._json_rpc('/pos-self-order/process-order/mobile', order_data)
+
+    def test_secure_table_session_settings(self):
+        self.assertFalse(self.pos_config._is_secure_table_session_enabled())
+        self._enable_secure_table_session()
+        self.assertTrue(self.pos_config.self_order_secure_session, "A timeout enables the secure session")
+        self.assertTrue(self.pos_config._is_secure_table_session_enabled())
+        self.pos_config.self_order_session_timeout_minutes = 0
+        self.assertFalse(self.pos_config.self_order_secure_session)
+        self.assertFalse(self.pos_config._is_secure_table_session_enabled())
+
+    @mute_logger('odoo.http')
+    def test_secure_table_session_token(self):
+        self._enable_secure_table_session()
+        expired_message = 'Your session has expired'
+
+        res = self._json_rpc('/pos-self/session/create', {
+            'table_identifier': self.pos_table_1.identifier,
+            'access_token': self.pos_config.access_token,
+        })['result']
+        self.assertEqual(res['status'], 'open')
+        token = res['token']
+
+        res = self._place_table_order(False)
+        self.assertIn(expired_message, res['error']['data']['message'], "Missing token is rejected")
+
+        res = self._place_table_order(token[:-1] + ('0' if token[-1] != '0' else '1'))
+        self.assertIn(expired_message, res['error']['data']['message'], "Tampered signature is rejected")
+
+        res = self._place_table_order(f"{int(time.time()) + 3600}.{token.split('.')[1]}")
+        self.assertIn(expired_message, res['error']['data']['message'], "Tampered expiry is rejected")
+
+        with patch('odoo.addons.pos_self_order.models.pos_config.time.time', return_value=time.time() - 3600):
+            old_token, _expires_at = self.pos_config._generate_table_session_token(self.pos_table_1.identifier)
+        res = self._place_table_order(old_token)
+        self.assertIn(expired_message, res['error']['data']['message'], "Expired token is rejected")
+
+        pos_table_2 = self.env['restaurant.table'].create({
+            'table_number': 2,
+            'floor_id': self.pos_table_1.floor_id.id,
+            'seats': 4,
+        })
+        token_table_2, _expires_at = self.pos_config._generate_table_session_token(pos_table_2.identifier)
+        res = self._place_table_order(token_table_2)
+        self.assertIn(expired_message, res['error']['data']['message'], "Token of another table is rejected")
+
+        res = self._place_table_order(token)
+        self.assertTrue(res.get('result'), "Valid token is accepted")
+
+        self.pos_config._bump_self_order_session_version()
+        res = self._place_table_order(token)
+        self.assertIn(expired_message, res['error']['data']['message'], "Version bump invalidates the token")
+
+    @mute_logger('odoo.http')
+    def test_secure_table_session_create(self):
+        def create_session(table_identifier):
+            return self._json_rpc('/pos-self/session/create', {
+                'access_token': self.pos_config.access_token,
+                'table_identifier': table_identifier,
+            })
+
+        self.pos_config.write({'self_ordering_mode': 'mobile', 'self_ordering_pay_after': 'meal'})
+        self.assertEqual(create_session(self.pos_table_1.identifier)['result'], {'status': 'disabled'})
+
+        self._enable_secure_table_session()
+        self.assertIn('Table not found', create_session('unknown')['error']['data']['message'])
+        other_floor_table = self.env['restaurant.table'].create({
+            'table_number': 9,
+            'floor_id': self.env['restaurant.floor'].create({'name': 'Other config floor'}).id,
+        })
+        res = create_session(other_floor_table.identifier)
+        self.assertIn('Table not found', res['error']['data']['message'], "Tables of other configs are refused")
+
+        # A joined table shares the session of its root table
+        child_table = self.env['restaurant.table'].create({
+            'table_number': 10,
+            'floor_id': self.pos_table_1.floor_id.id,
+            'parent_id': self.pos_table_1.id,
+        })
+        res = create_session(child_table.identifier)['result']
+        self.assertEqual(res['status'], 'open')
+        self.assertEqual(res['timeout_minutes'], 10)
+        self.assertTrue(self.pos_config._verify_table_session_token(self.pos_table_1.identifier, res['token']))
+        self.assertFalse(self.pos_config._verify_table_session_token(child_table.identifier, res['token']))
+
+    def test_secure_table_session_version_bump(self):
+        self._enable_secure_table_session()
+        version = self.pos_config.self_order_session_version
+
+        # Saving the settings without changing the session configuration keeps the tokens valid
+        self.pos_config.write({'self_order_session_timeout_minutes': 10, 'self_ordering_pay_after': 'meal'})
+        self.assertEqual(self.pos_config.self_order_session_version, version)
+
+        self.pos_config.self_order_session_timeout_minutes = 20
+        self.assertEqual(self.pos_config.self_order_session_version, version + 1)
+
+        self.pos_config.current_session_id.with_user(self.pos_user).close_session_from_ui()
+        self.assertEqual(self.pos_config.self_order_session_version, version + 2)

@@ -31,6 +31,10 @@
                             <label string="Pay after" for="pos_self_ordering_pay_after" class="col-lg-4"/>
                             <field name="pos_self_ordering_pay_after" readonly="pos_self_ordering_mode == 'kiosk' or (pos_self_ordering_service_mode in ('counter', 'dynamic_qr') and pos_self_ordering_mode == 'mobile')" widget="upgrade_selection"/>
                         </div>
+                        <div id="self-order-session-timeout" class="content-group row" invisible="pos_self_ordering_mode != 'mobile' or pos_self_ordering_pay_after != 'meal'">
+                            <label string="Session Timeout" for="pos_self_order_session_timeout_minutes" class="col-lg-4"/>
+                            <field name="pos_self_order_session_timeout_minutes" placeholder="minutes"/>
+                        </div>
                     </setting>
                     <setting string="Splash screens" help="Personalize your splash screen by adding one or multiple media items to create a slideshow" invisible="pos_self_ordering_mode == 'nothing'">
                         <field name="pos_self_ordering_image_home_ids" class="w-100" widget="many2many_binary" />
