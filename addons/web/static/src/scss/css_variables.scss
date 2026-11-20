@@ -32,6 +32,15 @@
     --o-btn-outline-secondary-border: #{map-get(map-get($o-btns-bs-outline-override, 'secondary') or (), 'border')};
     --o-btn-primary-background: #{map-get(map-get($o-btns-bs-override, 'primary') or (), 'background')};
     --o-btn-primary-color: #{map-get(map-get($o-btns-bs-override, 'primary') or (), 'color')};
+    --o-btn-secondary-background: #{map-get(map-get($o-btns-bs-override, 'secondary') or (), 'background')};
+    --o-btn-secondary-border: #{map-get(map-get($o-btns-bs-override, 'secondary') or (), 'border')};
+    --o-btn-secondary-color: #{map-get(map-get($o-btns-bs-override, 'secondary') or (), 'color')};
+    --o-btn-secondary-hover-background: #{map-get(map-get($o-btns-bs-override, 'secondary') or (), 'hover-background')};
+    --o-btn-secondary-hover-border: #{map-get(map-get($o-btns-bs-override, 'secondary') or (), 'hover-border')};
+    --o-btn-secondary-hover-color: #{map-get(map-get($o-btns-bs-override, 'secondary') or (), 'hover-color')};
+    @if map-get(map-get($o-btns-bs-override, 'secondary') or (), 'color') and map-get(map-get($o-btns-bs-override, 'secondary') or (), 'border') {
+        --o-btn-secondary-focus-shadow-rgb: #{to-rgb(mix(map-get(map-get($o-btns-bs-override, 'secondary') or (), 'color'), map-get(map-get($o-btns-bs-override, 'secondary') or (), 'border'), 15%))};
+    }
     --o-btn-secondary-active-background: #{map-get(map-get($o-btns-bs-override, 'secondary') or (), 'active-background')};
     --o-btn-secondary-active-border: #{map-get(map-get($o-btns-bs-override, 'secondary') or (), 'active-border')};
     --o-btn-secondary-active-color: #{map-get(map-get($o-btns-bs-override, 'secondary') or (), 'active-color')};
@@ -42,6 +51,12 @@
     --o-burger-topbar-color: #{$o-burger-topbar-color};
     --o-calendar-today-background-color: #{$o-calendar-today-background-color};
     --o-calendar-today-color: #{$o-calendar-today-color};
+    --o-card-body-bg-opacity: #{$o-card-body-bg-opacity};
+    /* The muted text color that stays readable on cards, white on the dark ones (bundles
+       where these are colors: the PDF exports keep the var() of Bootstrap) */
+    @if type-of($text-muted) == color and type-of($card-bg) == color {
+        --o-card-text-muted: #{adjust-color-to-background($text-muted, $card-bg, mute-color($color-contrast-light), mute-color($color-contrast-dark))};
+    }
     --o-caret-down: #{$o-caret-down};
     --o-component-active-bg: #{$o-component-active-bg};
     --o-component-active-border: #{$o-component-active-border};
@@ -54,9 +69,11 @@
     --o-dropdown-max-height: #{$o-dropdown-max-height};
     --o-dropdown-vpadding: #{$o-dropdown-vpadding};
     --o-easing-enter: #{$o-easing-enter};
+    --o-easing-exit: #{$o-easing-exit};
     --o-enterprise-action-color: #{$o-enterprise-action-color};
     --o-enterprise-color: #{$o-enterprise-color};
     --o-field-translate-padding: #{$o-field-translate-padding};
+    --o-font-family-monospace: #{inspect($o-font-family-monospace)};
     --o-font-family-sans-serif: #{inspect($o-font-family-sans-serif)};
     --o-font-size-base: #{$o-font-size-base};
     --o-font-size-base-small: #{$o-font-size-base-small};
@@ -143,15 +160,12 @@
     --o-search-panel-font-size: #{$o-search-panel-font-size};
     --o-search-panel-width: #{$o-search-panel-width};
     --o-shadow-color: #{$o-shadow-color};
+    --o-sheet-cancel-hpadding: #{$o-sheet-cancel-hpadding};
     --o-sheet-vpadding: #{$o-sheet-vpadding};
     --o-spacer: #{$o-spacer};
     --o-statusbar-arrow-width: #{$o-statusbar-arrow-width};
     --o-success: #{$o-success};
     --o-system-fonts: #{inspect($o-system-fonts)};
-    --o-text-color-danger: #{map-get(map-merge($theme-colors, $o-theme-text-colors), 'danger')};
-    --o-text-color-primary: #{map-get(map-merge($theme-colors, $o-theme-text-colors), 'primary')};
-    --o-text-color-success: #{map-get(map-merge($theme-colors, $o-theme-text-colors), 'success')};
-    --o-text-color-warning: #{map-get(map-merge($theme-colors, $o-theme-text-colors), 'warning')};
     --o-view-background-color: #{$o-view-background-color};
     --o-warning: #{$o-warning};
     --o-webclient-background-color: #{$o-webclient-background-color};
@@ -211,8 +225,11 @@
     --o-bs-container-max-width-sm: #{map-get($container-max-widths, sm)};
     --o-bs-container-max-width-xxl: #{map-get($container-max-widths, xxl)};
     --o-bs-container-padding-x: #{$container-padding-x};
+    --o-bs-cyan-100: #{$cyan-100};
     --o-bs-cyan-200: #{$cyan-200};
     --o-bs-cyan-300: #{$cyan-300};
+    --o-bs-cyan-700: #{$cyan-700};
+    --o-bs-cyan-800: #{$cyan-800};
     --o-bs-danger-bg-subtle: #{$danger-bg-subtle};
     --o-bs-display-font-weight: #{$display-font-weight};
     --o-bs-display-line-height: #{$display-line-height};
@@ -241,14 +258,17 @@
     --o-bs-font-weight-normal: #{$font-weight-normal};
     --o-bs-font-weight-semibold: #{$font-weight-semibold};
     --o-bs-form-check-input-checked-bg-color: #{$form-check-input-checked-bg-color};
+    --o-bs-form-check-input-checked-border-color: #{$form-check-input-checked-border-color};
     --o-bs-form-check-padding-start: #{$form-check-padding-start};
     --o-bs-form-feedback-invalid-color: #{$form-feedback-invalid-color};
+    --o-bs-form-switch-bg-image-dark: #{escape-svg($form-switch-bg-image-dark)};
     --o-bs-form-switch-width: #{$form-switch-width};
     --o-bs-grid-columns: #{$grid-columns};
     --o-bs-grid-gutter-width: #{$grid-gutter-width};
     --o-bs-h1-font-size: #{$h1-font-size};
     --o-bs-h2-font-size: #{$h2-font-size};
     --o-bs-h3-font-size: #{$h3-font-size};
+    --o-bs-h3-font-size-fluid: #{rfs-fluid-value($h3-font-size)};
     --o-bs-h4-font-size: #{$h4-font-size};
     --o-bs-h5-font-size: #{$h5-font-size};
     --o-bs-h6-font-size: #{$h6-font-size};
@@ -279,6 +299,7 @@
     --o-bs-input-transition: #{$input-transition};
     --o-bs-lead-font-size: #{$lead-font-size};
     --o-bs-lead-font-weight: #{$lead-font-weight};
+    --o-bs-line-height-base: #{$line-height-base};
     --o-bs-line-height-lg: #{$line-height-lg};
     --o-bs-line-height-sm: #{$line-height-sm};
     --o-bs-link-shade-percentage: #{o-strip-unit($link-shade-percentage)};
@@ -288,6 +309,8 @@
     --o-bs-list-group-hover-bg: #{$list-group-hover-bg};
     --o-bs-list-group-item-padding-x: #{$list-group-item-padding-x};
     --o-bs-list-group-item-padding-y: #{$list-group-item-padding-y};
+    --o-bs-modal-backdrop-bg: #{$modal-backdrop-bg};
+    --o-bs-modal-backdrop-opacity: #{$modal-backdrop-opacity};
     --o-bs-modal-content-bg: #{$modal-content-bg};
     --o-bs-modal-dialog-margin: #{$modal-dialog-margin};
     --o-bs-modal-dialog-margin-y-sm-up: #{$modal-dialog-margin-y-sm-up};
@@ -302,20 +325,31 @@
     --o-bs-navbar-nav-link-padding-x: #{$navbar-nav-link-padding-x};
     --o-bs-navbar-padding-y: #{$navbar-padding-y};
     --o-bs-offcanvas-padding-x: #{$offcanvas-padding-x};
+    --o-bs-orange-100: #{$orange-100};
     --o-bs-orange-200: #{$orange-200};
     --o-bs-orange-300: #{$orange-300};
+    --o-bs-orange-700: #{$orange-700};
+    --o-bs-orange-800: #{$orange-800};
+    --o-bs-pink-100: #{$pink-100};
     --o-bs-pink-200: #{$pink-200};
     --o-bs-pink-300: #{$pink-300};
+    --o-bs-pink-700: #{$pink-700};
+    --o-bs-pink-800: #{$pink-800};
     --o-bs-popover-bg: #{$popover-bg};
     --o-bs-popover-border-color: #{$popover-border-color};
     --o-bs-popover-inner-border-radius: #{$popover-inner-border-radius};
     --o-bs-primary-bg-subtle: #{$primary-bg-subtle};
     --o-bs-primary-text-emphasis: #{$primary-text-emphasis};
+    --o-bs-purple-100: #{$purple-100};
     --o-bs-purple-200: #{$purple-200};
     --o-bs-purple-300: #{$purple-300};
+    --o-bs-purple-700: #{$purple-700};
+    --o-bs-purple-800: #{$purple-800};
     --o-bs-red-100: #{$red-100};
     --o-bs-red-200: #{$red-200};
     --o-bs-red-300: #{$red-300};
+    --o-bs-red-700: #{$red-700};
+    --o-bs-red-800: #{$red-800};
     --o-bs-small-font-size: #{$small-font-size};
     --o-bs-spacer: #{$spacer};
     --o-bs-spacer-0: #{map-get($spacers, 0)};
@@ -327,10 +361,15 @@
     --o-bs-success-text-emphasis: #{$success-text-emphasis};
     --o-bs-table-bg: #{$table-bg};
     --o-bs-table-cell-padding-x-sm: #{$table-cell-padding-x-sm};
+    --o-bs-table-cell-padding-y: #{$table-cell-padding-y};
     --o-bs-table-cell-padding-y-sm: #{$table-cell-padding-y-sm};
     --o-bs-table-hover-bg: #{$table-hover-bg};
     --o-bs-table-hover-bg-factor: #{$table-hover-bg-factor};
     --o-bs-text-muted: #{$text-muted};
+    --o-bs-tooltip-bg: #{$tooltip-bg};
+    --o-bs-tooltip-border-radius: #{$tooltip-border-radius};
+    --o-bs-tooltip-color: #{$tooltip-color};
+    --o-bs-tooltip-font-size: #{$tooltip-font-size};
     --o-bs-tooltip-max-width: #{$tooltip-max-width};
     --o-bs-tooltip-padding-x: #{$tooltip-padding-x};
     --o-bs-tooltip-padding-y: #{$tooltip-padding-y};
@@ -340,8 +379,11 @@
     --o-bs-transition-fade: #{$transition-fade};
     --o-bs-warning-bg-subtle: #{$warning-bg-subtle};
     --o-bs-warning-text-emphasis: #{$warning-text-emphasis};
+    --o-bs-yellow-100: #{$yellow-100};
     --o-bs-yellow-200: #{$yellow-200};
     --o-bs-yellow-300: #{$yellow-300};
+    --o-bs-yellow-800: #{$yellow-800};
+    --o-bs-yellow-900: #{$yellow-900};
     --o-bs-zindex-dropdown: #{$zindex-dropdown};
     --o-bs-zindex-fixed: #{$zindex-fixed};
     --o-bs-zindex-modal: #{$zindex-modal};
@@ -364,6 +406,7 @@
     /* Variables whose value reads another custom property in some bundles */
     --o-bs-btn-link-hover-color: #{$btn-link-hover-color};
     --o-bs-card-border-color: #{$card-border-color};
+    --o-bs-card-border-width: #{$card-border-width};
     --o-bs-dropdown-bg: #{$dropdown-bg};
     --o-bs-font-family-base: #{$font-family-base};
     --o-bs-form-range-track-bg: #{$form-range-track-bg};
@@ -378,7 +421,11 @@
     --o-bs-component-active-bg-contrast: #{color-contrast($component-active-bg)};
     --o-bs-gray-100-contrast: #{color-contrast($gray-100)};
     --o-bs-gray-200-contrast: #{color-contrast($gray-200)};
+    --o-bs-info-contrast: #{color-contrast($info)};
     --o-bs-light-contrast: #{color-contrast($light)};
+    @if type-of($list-group-bg) == color {
+        --o-bs-list-group-bg-contrast: #{color-contrast($list-group-bg)};
+    }
     --o-bs-primary-contrast: #{color-contrast($primary)};
     --o-bs-success-contrast: #{color-contrast($success)};
     --o-bs-warning-contrast: #{color-contrast($warning)};
@@ -388,10 +435,16 @@
     --o-view-background-color-contrast: #{color-contrast($o-view-background-color)};
 
     /* Images that Sass draws with a color of the theme */
+    --o-bs-accordion-button-icon: #{escape-svg($accordion-button-icon)};
     --o-check-mark-black-image: #{o-check-mark-image($black)};
     --o-check-mark-danger-image: #{o-check-mark-image($danger)};
     --o-check-mark-form-check-checked-image: #{o-check-mark-image($form-check-input-checked-bg-color)};
     --o-crossed-out-image: #{str-replace(url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='39' height='39'><line y2='0' x2='39' y1='39' x1='0' style='stroke:#{map-get($theme-colors, 'danger')};stroke-width:2'/><line y2='1' x2='40' y1='40' x1='1' style='stroke:rgb(255,255,255);stroke-width:1'/></svg>"), "#", "%23")};
+
+    /* Text colors of the theme colors */
+    @each $-name, $-color in map-merge($theme-colors, $o-theme-text-colors) {
+        --o-text-color-#{$-name}: #{$-color};
+    }
 
     /* Colors of the palettes, indexed like the classes that use them */
     @for $i from 1 through length($o-colors-complete) {
