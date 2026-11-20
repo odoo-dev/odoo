@@ -39,6 +39,7 @@ import { MonetaryFieldPlugin } from "@html_builder/plugins/monetary_field_plugin
 import { DateTimeFieldPlugin } from "@html_builder/plugins/date_time_field_plugin";
 import { Many2OneOptionPlugin } from "@html_builder/plugins/many2one_option_plugin";
 import { VersionErrorPlugin } from "./version_error_plugin";
+import { FieldPlugin } from "./field_plugin";
 
 const mainEditorPluginsToRemove = [
     "PowerButtonsPlugin",
@@ -78,6 +79,7 @@ export const MAIN_PLUGINS = [
     DropZonePlugin,
     DropZoneSelectorPlugin,
     FieldChangeReplicationPlugin,
+    FieldPlugin,
     ImageFieldPlugin,
     ImageShapeOptionPlugin,
     Many2OneOptionPlugin,
