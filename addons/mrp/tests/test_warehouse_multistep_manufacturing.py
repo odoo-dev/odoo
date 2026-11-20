@@ -553,7 +553,7 @@ class TestMultistepManufacturingWarehouse(TestMrpCommon):
         backorder = Form(self.env['mrp.production.backorder'].with_context(**action['context']))
         backorder.save().action_backorder()
 
-        self.assertEqual(mo.mrp_production_child_count, 0, "Children MOs counted as existing where there should be none")
+        self.assertEqual(mo.mrp_production_all_child_count, 0, "Children MOs counted as existing where there should be none")
         self.assertEqual(mo.mrp_production_source_count, 0, "Source MOs counted as existing where there should be none")
         self.assertEqual(mo.mrp_production_backorder_count, 2)
 

@@ -288,7 +288,7 @@ class TestSaleMrpFlow(TestSaleMrpFlowCommon):
 
         # Verify buttons are working as expected
         self.assertEqual(order.mrp_production_count, 1, "Only the top-level MO for product A is linked to the SO")
-        self.assertEqual(order.mrp_production_ids.mrp_production_child_count, 1, "The top-level MO generates one child MO to manufacture the component product D")
+        self.assertEqual(order.mrp_production_ids.mrp_production_all_child_count, 1, "The top-level MO generates one child MO to manufacture the component product D")
 
         # ===============================================================================
         #  Sales order of 10 Dozen product A should create production order
@@ -2729,8 +2729,8 @@ class TestSaleMrpFlow(TestSaleMrpFlowCommon):
         })
         so.action_confirm()
         self.assertEqual(so.mrp_production_count, 2)
-        self.assertEqual(so.mrp_production_ids[0].mrp_production_child_count, 1)
-        self.assertEqual(so.mrp_production_ids[1].mrp_production_child_count, 1)
+        self.assertEqual(so.mrp_production_ids[0].mrp_production_all_child_count, 1)
+        self.assertEqual(so.mrp_production_ids[1].mrp_production_all_child_count, 1)
 
     def test_sale_mto_manufacture_quantity_update_propagation(self):
         """

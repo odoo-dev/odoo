@@ -40,6 +40,6 @@ class TestMtoReplenishment(TransactionCase):
                 })
                 production.action_confirm()
 
-                child = production._get_children()
+                child = production._get_all_children()
                 self.assertEqual(child.product_id, component)
                 self.assertEqual(child.project_id, project)
