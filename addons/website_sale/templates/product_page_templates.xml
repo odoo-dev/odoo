@@ -487,6 +487,26 @@
         <div
             t-attf-class="o_wsale_product_details_content_section o_wsale_product_details_content_section_title {{'mb-3' if not product.description_ecommerce else ''}}"
         >
+            <div class="oe_structure">
+                <section>
+                    <h1
+                        class="h3"
+                        t-field="product.name"
+                    >
+                        Product Name
+                    </h1>
+                </section>
+                <section>
+                    <p>That's the product: <span t-field="product.name">Product Name</span>, wesh!</p>
+                </section>
+                <section>
+                    <div
+                        t-field="product.description_ecommerce"
+                        class="oe_structure mb-3 text-muted"
+                        placeholder="A detailed, formatted description to promote your product on this page. Use '/' to discover more features."
+                    />
+                </section>
+            </div>
             <h1
                 t-attf-class="h3 {{'mb-3' if not product.description_ecommerce and not is_view_active('website_sale.product_comment') else ''}}"
                 t-field="product.name"
