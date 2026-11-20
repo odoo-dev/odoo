@@ -3,7 +3,6 @@
 from datetime import date
 import calendar
 from dateutil.relativedelta import relativedelta
-from requests import codes
 
 from odoo import models, api, _
 from odoo.fields import Domain
