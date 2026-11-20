@@ -9,7 +9,7 @@ import werkzeug
 
 from ast import literal_eval
 from contextlib import contextmanager
-from datetime import timedelta
+from datetime import datetime, timedelta
 from functools import partial
 from lxml import html
 from markupsafe import Markup
@@ -1281,6 +1281,8 @@ class MockEmail(common.BaseCase, MockSmtplibCase):
             old_value = old_value or 'None'
             new_value = new_value or 'None'
         elif value_type == 'date':
+            # dates are tracked as datetimes at midnight: format their date, not their local time
+            old_value, new_value = (value.date() if isinstance(value, datetime) else value for value in (old_value, new_value))
             old_value = TrackingMixin._format_tracking_date(old_value) if old_value else 'None'
             new_value = TrackingMixin._format_tracking_date(new_value) if new_value is not False else 'None'
         elif value_type == 'datetime':
