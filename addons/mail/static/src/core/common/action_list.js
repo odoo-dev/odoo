@@ -204,6 +204,7 @@ export class BaseAction extends Component {
             "btn-primary": tags.includes(ACTION_TAGS.PRIMARY),
             "btn-danger": tags.includes(ACTION_TAGS.DANGER),
             "btn-success": tags.includes(ACTION_TAGS.SUCCESS),
+            o_btn_success_dark: this.hasBtnBg && tags.includes(ACTION_TAGS.SUCCESS),
         };
     }
 

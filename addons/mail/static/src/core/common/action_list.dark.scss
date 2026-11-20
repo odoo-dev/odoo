@@ -4,7 +4,6 @@
     --o-mail-ActionList-primaryNoBgColor: #{lighten($primary, 10%)};
 
     .o-hasBtnBg.o-tag-SUCCESS {
-        @include button-variant(darken($success, 10%), darken($success, 10%));
         --btn-color: white;
         --btn-active-color: white;
 

@@ -102,6 +102,28 @@
     }
 }
 
+/* Button variants that templates give to buttons of their own: the Bootstrap
+   primary variant, without the override above, the colors of the navbar
+   entries, the danger variant on hover, and a darker success variant in dark
+   mode. */
+.o_btn_bs_primary {
+    @include button-variant($primary, $primary);
+}
+
+.o_btn_navbar {
+    @include button-variant(darken($o-navbar-background, 5%), darken($o-navbar-background, 5%), $o-navbar-entry-color, darken($o-navbar-background, 10%));
+}
+
+.o_btn_hover_danger:hover {
+    @include button-variant($danger, $danger);
+}
+
+@if $o-webclient-color-scheme == dark {
+    .o_btn_success_dark {
+        @include button-variant(darken($success, 10%), darken($success, 10%));
+    }
+}
+
 /* 4. Space out the buttons of a '.btn-group' instead of letting them overlap */
 /* their borders, making each of them individually recognizable. */
 .btn-group {
