@@ -23,12 +23,13 @@
                        t-att-accept="this.props.accept"
                        t-att-multiple="this.props.multiUpload and 'multiple'"
                 />
-                <div class="media-manager-side-panel-buttons">
-                    <button class="btn btn-secondary text-nowrap w-100 mb-2" t-on-click="this.uploadFileClicked.bind(this)">Upload</button>
+                <!-- the url input is displayed above the button of the imported kind of link (see `order`) -->
+                <div class="media-manager-side-panel-buttons d-flex flex-column">
+                    <button class="btn btn-secondary text-nowrap w-100 mb-2 order-0" t-on-click="this.uploadFileClicked.bind(this)">Upload</button>
                     <div class="col justify-content-end flex-nowrap input-group has-validation"
-                         t-att-class="{ 'd-none': !this.state.showUrlInput}">
+                         t-att-class="{ 'd-none': !this.state.showUrlInput, 'order-1': this.state.urlImportType === 'image', 'order-3': this.state.urlImportType === 'video' }">
                         <input type="text" class="form-control o_input o_we_url_input o_we_transition_ease flex-grow-0 w-auto"
-                               name="url" placeholder="Image url..."
+                               name="url" t-att-placeholder="this.urlPlaceholder"
                                t-model.proxy="this.state.urlInput"
                                t-on-input="this.onUrlInputInputed"
                                t-ref="this.urlInputRef"/>
@@ -40,10 +41,16 @@
                         </div>
                     </div>
                     <button type="button"
-                            class="btn btn-import-url text-nowrap w-100 mb-2"
-                            t-att-class="{ 'btn-primary': this.state.showUrlInput, 'btn-secondary': !this.state.showUrlInput}"
-                            t-on-click="this.importLinkClicked">
+                            class="btn btn-import-url text-nowrap w-100 mb-2 order-2"
+                            t-att-class="this.isImportingUrl('image') ? 'btn-primary' : 'btn-secondary'"
+                            t-on-click="() => this.importLinkClicked('image')">
                         Import image link
+                    </button>
+                    <button t-if="this.props.allowVideos" type="button"
+                            class="btn btn-import-video-url text-nowrap w-100 mb-2 order-4"
+                            t-att-class="this.isImportingUrl('video') ? 'btn-primary' : 'btn-secondary'"
+                            t-on-click="() => this.importLinkClicked('video')">
+                        Import video link
                     </button>
                 </div>
 
