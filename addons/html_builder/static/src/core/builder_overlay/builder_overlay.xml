@@ -2,45 +2,87 @@
 <templates xml:space="preserve">
 
 <t t-name="html_builder.BuilderOverlay">
-    <div class="oe_overlay o_handlers_idle">
-        <div class="o_handles">
+    <t t-set="state" t-value="overlay.state"/>
+    <t t-set="handles" t-value="state.handles"/>
+    <div class="oe_overlay"
+        t-att-class="{
+            oe_active: state.isActive,
+            o_we_overlay_preview: state.isPreview,
+            o_hover_overlay: state.isHover,
+            o_overlay_hidden: state.isHidden,
+            o_handlers_idle: state.isIdle,
+        }"
+        t-att-style="state.overlayRect and `
+            width: ${state.overlayRect.width}px;
+            height: ${state.overlayRect.height}px;
+            top: ${state.overlayRect.top}px;
+            left: ${state.overlayRect.left}px;
+        `"
+        t-on-wheel.passive="this.props.onWheel">
+        <div class="o_handles" t-att-style="state.overlayRect and `height: ${state.overlayRect.height}px;`">
             <!-- Visible overlay borders + allow to resize when not readonly -->
-            <div class="o_handle o_column_handle o_side o_side_y n readonly">
-                <span class="o_handle_indicator"></span>
+            <div class="o_handle o_column_handle o_side o_side_y n"
+                t-att-class="{ readonly: handles.n.readonly, 'd-none': handles.n.hidden }"
+                t-att-style="handles.n.height and `height: ${handles.n.height};`"
+                t-on-pointerdown="(ev) => this.onSizingStart(ev, overlay)">
+                <span class="o_handle_indicator"/>
             </div>
-            <div class="o_handle o_column_handle o_side o_side_y s readonly">
-                <span class="o_handle_indicator"></span>
+            <div class="o_handle o_column_handle o_side o_side_y s"
+                t-att-class="{ readonly: handles.s.readonly, 'd-none': handles.s.hidden }"
+                t-att-style="handles.s.height and `height: ${handles.s.height};`"
+                t-on-pointerdown="(ev) => this.onSizingStart(ev, overlay)">
+                <span class="o_handle_indicator"/>
             </div>
-            <div class="o_handle o_column_handle o_side o_side_x e readonly" >
-                <span class="o_handle_indicator"></span>
+            <div class="o_handle o_column_handle o_side o_side_x e"
+                t-att-class="{ readonly: handles.e.readonly, 'd-none': handles.e.hidden }"
+                t-on-pointerdown="(ev) => this.onSizingStart(ev, overlay)">
+                <span class="o_handle_indicator"/>
             </div>
-            <div class="o_handle o_column_handle o_side o_side_x w readonly">
-                <span class="o_handle_indicator"></span>
+            <div class="o_handle o_column_handle o_side o_side_x w"
+                t-att-class="{ readonly: handles.w.readonly, 'd-none': handles.w.hidden }"
+                t-on-pointerdown="(ev) => this.onSizingStart(ev, overlay)">
+                <span class="o_handle_indicator"/>
             </div>
 
-             <!-- Grid resize handles -->
-             <div class="o_handle o_grid_handle o_side o_side_y n d-none">
+            <!-- Grid resize handles -->
+            <div class="o_handle o_grid_handle o_side o_side_y n"
+                t-att-class="{ readonly: handles.gridN.readonly, 'd-none': handles.gridN.hidden }"
+                t-on-pointerdown="(ev) => this.onSizingStart(ev, overlay)">
                 <span class="o_handle_indicator"/>
             </div>
-             <div class="o_handle o_grid_handle o_side o_side_x e d-none">
+            <div class="o_handle o_grid_handle o_side o_side_x e"
+                t-att-class="{ readonly: handles.gridE.readonly, 'd-none': handles.gridE.hidden }"
+                t-on-pointerdown="(ev) => this.onSizingStart(ev, overlay)">
                 <span class="o_handle_indicator"/>
             </div>
-             <div class="o_handle o_grid_handle o_side o_side_x w d-none">
+            <div class="o_handle o_grid_handle o_side o_side_x w"
+                t-att-class="{ readonly: handles.gridW.readonly, 'd-none': handles.gridW.hidden }"
+                t-on-pointerdown="(ev) => this.onSizingStart(ev, overlay)">
                 <span class="o_handle_indicator"/>
             </div>
-             <div class="o_handle o_grid_handle o_side o_side_y s d-none">
+            <div class="o_handle o_grid_handle o_side o_side_y s"
+                t-att-class="{ readonly: handles.gridS.readonly, 'd-none': handles.gridS.hidden }"
+                t-on-pointerdown="(ev) => this.onSizingStart(ev, overlay)">
                 <span class="o_handle_indicator"/>
             </div>
-             <div class="o_handle o_grid_handle o_corner_handle ne d-none">
+            <div class="o_handle o_grid_handle o_corner_handle ne"
+                t-att-class="{ readonly: handles.ne.readonly, 'd-none': handles.ne.hidden }"
+                t-on-pointerdown="(ev) => this.onSizingStart(ev, overlay)">
                 <span class="o_handle_indicator"/>
             </div>
-             <div class="o_handle o_grid_handle o_corner_handle nw d-none">
+            <div class="o_handle o_grid_handle o_corner_handle nw"
+                t-att-class="{ readonly: handles.nw.readonly, 'd-none': handles.nw.hidden }"
+                t-on-pointerdown="(ev) => this.onSizingStart(ev, overlay)">
                 <span class="o_handle_indicator"/>
             </div>
-             <div class="o_handle o_grid_handle o_corner_handle se d-none">
+            <div class="o_handle o_grid_handle o_corner_handle se"
+                t-att-class="{ readonly: handles.se.readonly, 'd-none': handles.se.hidden }"
+                t-on-pointerdown="(ev) => this.onSizingStart(ev, overlay)">
                 <span class="o_handle_indicator"/>
             </div>
-             <div class="o_handle o_grid_handle o_corner_handle sw d-none">
+            <div class="o_handle o_grid_handle o_corner_handle sw"
+                t-att-class="{ readonly: handles.sw.readonly, 'd-none': handles.sw.hidden }"
+                t-on-pointerdown="(ev) => this.onSizingStart(ev, overlay)">
                 <span class="o_handle_indicator"/>
             </div>
         </div>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+<t t-name="html_builder.BuilderOverlayContainer">
+    <t t-foreach="this.props.overlays" t-as="overlay" t-key="overlay.id">
+        <t t-call="html_builder.BuilderOverlay"/>
+    </t>
+    <t t-set="hoverOverlay" t-value="this.props.hoverOverlay()"/>
+    <t t-if="hoverOverlay" t-key="hoverOverlay">
+        <t t-call="html_builder.BuilderOverlay" overlay="hoverOverlay"/>
+    </t>
+</t>
+
+</templates>

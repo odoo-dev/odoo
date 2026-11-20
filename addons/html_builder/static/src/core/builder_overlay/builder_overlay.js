@@ -1,4 +1,5 @@
-import { renderToElement } from "@web/core/utils/render";
+import { proxy } from "@odoo/owl";
+import { uniqueId } from "@web/core/utils/functions";
 import {
     addBackgroundGrid,
     getGridProperties,
@@ -22,12 +23,17 @@ export const sizingGrid = {
     exclude: ".s_col_no_resize.row > div, .s_col_no_resize",
 };
 
+const Y_HANDLES = ["n", "s"];
+const X_HANDLES = ["e", "w"];
+const GRID_HANDLES = ["gridN", "gridE", "gridW", "gridS", "ne", "nw", "se", "sw"];
+const VERTICAL_HANDLES = ["n", "s", "gridN", "gridS"];
+
 export class BuilderOverlay {
     constructor(
         overlayTarget,
         {
             iframe,
-            overlayContainer,
+            getLocalOverlayContainerRect,
             history,
             hasOverlayOptions,
             next,
@@ -41,27 +47,32 @@ export class BuilderOverlay {
         this.next = next;
         this.hasOverlayOptions = hasOverlayOptions;
         this.iframe = iframe;
-        this.overlayContainer = overlayContainer;
-        this.overlayElement = renderToElement("html_builder.BuilderOverlay");
+        this.getLocalOverlayContainerRect = getLocalOverlayContainerRect;
         this.overlayTarget = overlayTarget;
         this.hasSizingHandles = this.hasSizingHandles();
-        this.handlesWrapperEl = this.overlayElement.querySelector(".o_handles");
-        this.handleEls = this.overlayElement.querySelectorAll(".o_handle");
-        // Avoid "querySelectoring" the handles every time.
-        this.yHandles = this.handlesWrapperEl.querySelectorAll(
-            `.n:not(.o_grid_handle), .s:not(.o_grid_handle)`
-        );
-        this.xHandles = this.handlesWrapperEl.querySelectorAll(
-            `.e:not(.o_grid_handle), .w:not(.o_grid_handle)`
-        );
-        this.gridHandles = this.handlesWrapperEl.querySelectorAll(".o_grid_handle");
         this.isMobileView = isMobileView;
         this.mobileBreakpoint = mobileBreakpoint;
         this.isRtl = isRtl;
 
-        this.overlayElement.classList.toggle("o_hover_overlay", isHoverOverlay);
+        // Rendered by BuilderOverlayContainer, with a new element for each overlay.
+        this.id = uniqueId("builder-overlay");
+        const handles = {};
+        for (const handleKey of [...Y_HANDLES, ...X_HANDLES]) {
+            handles[handleKey] = { readonly: true, hidden: false, height: undefined };
+        }
+        for (const handleKey of GRID_HANDLES) {
+            handles[handleKey] = { readonly: false, hidden: true, height: undefined };
+        }
+        this.state = proxy({
+            isActive: false,
+            isPreview: false,
+            isHover: isHoverOverlay,
+            isHidden: false,
+            isIdle: true,
+            overlayRect: undefined,
+            handles,
+        });
         this.initHandles();
-        this.initSizing();
         this.refreshHandles();
     }
 
@@ -81,7 +92,7 @@ export class BuilderOverlay {
 
     isActive() {
         // TODO active still necessary ? (check when we have preview mode)
-        return this.overlayElement.matches(".oe_active, .o_we_overlay_preview, .o_hover_overlay");
+        return this.state.isActive || this.state.isPreview || this.state.isHover;
     }
 
     refreshPosition() {
@@ -93,23 +104,26 @@ export class BuilderOverlay {
         const overlayTarget = openModalEl ? openModalEl : this.overlayTarget;
         // TODO transform
         const iframeRect = this.iframe.getBoundingClientRect();
-        const overlayContainerRect = this.overlayContainer.getBoundingClientRect();
+        const localOverlayContainerRect = this.getLocalOverlayContainerRect();
         const targetRect = overlayTarget.getBoundingClientRect();
         const isMobile = this.isMobileView(overlayTarget);
         const iframeScaleX = isMobile ? iframeRect.width / this.iframe.offsetWidth : 1;
         const iframeScaleY = isMobile ? iframeRect.height / this.iframe.offsetHeight : 1;
 
-        Object.assign(this.overlayElement.style, {
-            width: `${targetRect.width * iframeScaleX}px`,
-            height: `${targetRect.height * iframeScaleY}px`,
-            top: `${
-                iframeRect.y - overlayContainerRect.y + window.scrollY + targetRect.y * iframeScaleY
-            }px`,
-            left: `${
-                iframeRect.x - overlayContainerRect.x + window.scrollX + targetRect.x * iframeScaleX
-            }px`,
-        });
-        this.handlesWrapperEl.style.height = `${targetRect.height * iframeScaleY}px`;
+        this.state.overlayRect = {
+            width: targetRect.width * iframeScaleX,
+            height: targetRect.height * iframeScaleY,
+            top:
+                iframeRect.y -
+                localOverlayContainerRect.y +
+                window.scrollY +
+                targetRect.y * iframeScaleY,
+            left:
+                iframeRect.x -
+                localOverlayContainerRect.x +
+                window.scrollX +
+                targetRect.x * iframeScaleX,
+        };
     }
 
     refreshHandles() {
@@ -123,26 +137,26 @@ export class BuilderOverlay {
             const isGrid = !isMobile && isGridOn;
             // Hiding/showing the correct resize handles if we are in grid mode
             // or not.
-            this.handleEls.forEach((handleEl) => {
-                const isGridHandle = handleEl.classList.contains("o_grid_handle");
-                handleEl.classList.toggle("d-none", isGrid ^ isGridHandle);
+            for (const [handleKey, handle] of Object.entries(this.state.handles)) {
+                const isGridHandle = GRID_HANDLES.includes(handleKey);
+                handle.hidden = Boolean(isGrid ^ isGridHandle);
                 // Disabling the vertical resize if we are in mobile view.
-                const isVerticalSizing = handleEl.matches(".n, .s");
-                handleEl.classList.toggle("readonly", isMobile && isVerticalSizing && isGridOn);
-            });
+                const isVerticalSizing = VERTICAL_HANDLES.includes(handleKey);
+                handle.readonly = isMobile && isVerticalSizing && isGridOn;
+            }
         }
 
         this.updateHandleY();
     }
 
     toggleOverlay(show) {
-        this.overlayElement.classList.toggle("oe_active", show);
+        this.state.isActive = show;
         this.refreshPosition();
         this.refreshHandles();
     }
 
     toggleOverlayPreview(show) {
-        this.overlayElement.classList.toggle("o_we_overlay_preview", show);
+        this.state.isPreview = show;
         this.refreshPosition();
         this.refreshHandles();
     }
@@ -151,17 +165,7 @@ export class BuilderOverlay {
         if (!this.isActive()) {
             return;
         }
-        this.overlayElement.classList.toggle("o_overlay_hidden", !show);
-    }
-
-    destroy() {
-        if (!this.hasSizingHandles) {
-            return;
-        }
-
-        this.handleEls.forEach((handleEl) =>
-            handleEl.removeEventListener("pointerdown", this._onSizingStart)
-        );
+        this.state.isHidden = !show;
     }
 
     //--------------------------------------------------------------------------
@@ -194,25 +198,14 @@ export class BuilderOverlay {
             return;
         }
         if (this.isResizableY()) {
-            this.yHandles.forEach((handleEl) => handleEl.classList.remove("readonly"));
+            Y_HANDLES.forEach((handleKey) => (this.state.handles[handleKey].readonly = false));
         }
         if (this.isResizableX()) {
-            this.xHandles.forEach((handleEl) => handleEl.classList.remove("readonly"));
+            X_HANDLES.forEach((handleKey) => (this.state.handles[handleKey].readonly = false));
         }
         if (this.isResizableGrid()) {
-            this.gridHandles.forEach((handleEl) => handleEl.classList.remove("readonly"));
+            GRID_HANDLES.forEach((handleKey) => (this.state.handles[handleKey].readonly = false));
         }
-    }
-
-    initSizing() {
-        if (!this.hasSizingHandles) {
-            return;
-        }
-
-        this._onSizingStart = this.onSizingStart.bind(this);
-        this.handleEls.forEach((handleEl) =>
-            handleEl.addEventListener("pointerdown", this._onSizingStart)
-        );
     }
 
     replaceSizingClass(classRegex, newClass) {
@@ -244,10 +237,10 @@ export class BuilderOverlay {
     }
 
     updateHandleY() {
-        this.yHandles.forEach((handleEl) => {
-            const topOrBottom = handleEl.matches(".n") ? "top" : "bottom";
+        Y_HANDLES.forEach((handleKey) => {
+            const topOrBottom = handleKey === "n" ? "top" : "bottom";
             const padding = window.getComputedStyle(this.overlayTarget)[`padding-${topOrBottom}`];
-            handleEl.style.height = padding; // TODO outerHeight (deduce borders ?)
+            this.state.handles[handleKey].height = padding; // TODO outerHeight (deduce borders ?)
         });
     }
 
@@ -548,7 +541,7 @@ export class BuilderOverlay {
         const iframeEl = this.overlayTarget.ownerDocument.defaultView.frameElement;
         iframeEl.classList.add("o_resizing");
 
-        this.overlayElement.classList.remove("o_handlers_idle");
+        this.state.isIdle = false;
 
         const onSizingMove = (ev) => {
             for (const dir of directions) {
@@ -619,7 +612,7 @@ export class BuilderOverlay {
             window.removeEventListener("pointerup", onSizingStop);
             window.document.body.classList.remove(cursorClass);
             iframeEl.classList.remove("o_resizing");
-            this.overlayElement.classList.add("o_handlers_idle");
+            this.state.isIdle = true;
 
             // If we are in grid mode, removes the background grid.
             // Also sync the col-* class with the g-col-* class so the
@@ -661,7 +654,7 @@ export class BuilderOverlay {
                     // Check if it has native JS `click` function
                     const toBeClickedEl = sameCoordinatesEls.find(
                         (el) =>
-                            !this.overlayContainer.contains(el) &&
+                            !el.closest(".oe_overlay") &&
                             !el.matches(".o_loading_screen") &&
                             typeof el.click === "function"
                     );

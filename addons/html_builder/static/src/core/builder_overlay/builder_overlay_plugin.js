@@ -1,7 +1,9 @@
+import { proxy, signal } from "@odoo/owl";
 import { Plugin, shared } from "@html_editor/plugin";
 import { throttleForAnimation } from "@web/core/utils/timing";
 import { getScrollingElement, getScrollingTarget } from "@web/core/utils/scrolling";
 import { BuilderOverlay, sizingY, sizingX, sizingGrid } from "./builder_overlay";
+import { BuilderOverlayContainer } from "./builder_overlay_container";
 
 function isResizable(el) {
     const isResizableY = el.matches(sizingY.selector) && !el.matches(sizingY.exclude);
@@ -26,22 +28,23 @@ export class BuilderOverlayPlugin extends Plugin {
     };
 
     setup() {
-        this.hoverOverlay = null;
+        this.hoverOverlay = signal(null);
         // TODO find how to not overflow the mobile preview.
         this.iframe = this.editable.ownerDocument.defaultView.frameElement;
-        this.overlayContainer = this.dependencies.localOverlay.makeLocalOverlay(
-            "builder-overlay-container"
-        );
-        // If the user scrolls the mouse wheel while hovering overlayContainer,
-        // no scroll will happen to the page. We need to manually process
-        // wheel events happening on overlayContainer.
-        this.overlayContainer.addEventListener(
-            "wheel",
-            (ev) => (this.document.documentElement.scrollTop += ev.deltaY),
-            { passive: true }
-        );
         /** @type {[BuilderOverlay]} */
-        this.overlays = [];
+        this.overlays = proxy([]);
+        this.builderOverlayContainer = this.dependencies.localOverlay.addLocalOverlay(
+            "builder-overlay-container",
+            BuilderOverlayContainer,
+            {
+                overlays: this.overlays,
+                hoverOverlay: this.hoverOverlay,
+                // If the user scrolls the mouse wheel while hovering an
+                // overlay, no scroll will happen to the page. We need to
+                // manually process wheel events happening on the overlays.
+                onWheel: (ev) => (this.document.documentElement.scrollTop += ev.deltaY),
+            }
+        );
         // Refresh the overlays position everytime their target size changes.
         this.resizeObserver = new ResizeObserver(() => this.refreshPositions());
 
@@ -112,7 +115,8 @@ export class BuilderOverlayPlugin extends Plugin {
             }
             const overlay = new BuilderOverlay(option.element, {
                 iframe: this.iframe,
-                overlayContainer: this.overlayContainer,
+                getLocalOverlayContainerRect:
+                    this.builderOverlayContainer.getLocalOverlayContainerRect,
                 history: this.dependencies.history,
                 hasOverlayOptions: option.hasOverlayOptions,
                 next: this.dependencies.operation.next,
@@ -121,7 +125,6 @@ export class BuilderOverlayPlugin extends Plugin {
                 isRtl: this.config.isEditableRTL,
             });
             this.overlays.push(overlay);
-            this.overlayContainer.append(overlay.overlayElement);
             this.resizeObserver.observe(overlay.overlayTarget, { box: "border-box" });
         });
 
@@ -146,28 +149,25 @@ export class BuilderOverlayPlugin extends Plugin {
     }
 
     removeHoverOverlay() {
-        if (this.hoverOverlay) {
-            if (!this.overlays.find((o) => o.overlayTarget === this.hoverOverlay.overlayTarget)) {
-                this.resizeObserver.unobserve(this.hoverOverlay.overlayTarget);
+        const hoverOverlay = this.hoverOverlay();
+        if (hoverOverlay) {
+            if (!this.overlays.find((o) => o.overlayTarget === hoverOverlay.overlayTarget)) {
+                this.resizeObserver.unobserve(hoverOverlay.overlayTarget);
             }
-            this.hoverOverlay.destroy();
-            this.hoverOverlay.overlayElement.remove();
-            this.hoverOverlay = null;
+            this.hoverOverlay.set(null);
         }
     }
 
     removeBuilderOverlays() {
         this.removeHoverOverlay();
         this.overlays.forEach((overlay) => {
-            overlay.destroy();
-            overlay.overlayElement.remove();
             this.resizeObserver.unobserve(overlay.overlayTarget);
         });
-        this.overlays = [];
+        this.overlays.splice(0);
     }
 
     refreshOverlays() {
-        this.hoverOverlay?.refreshPosition();
+        this.hoverOverlay()?.refreshPosition();
         this.overlays.forEach((overlay) => {
             overlay.refreshPosition();
             overlay.refreshHandles();
@@ -175,7 +175,7 @@ export class BuilderOverlayPlugin extends Plugin {
     }
 
     refreshPositions() {
-        this.hoverOverlay?.refreshPosition();
+        this.hoverOverlay()?.refreshPosition();
         this.overlays.forEach((overlay) => {
             overlay.refreshPosition();
         });
@@ -191,7 +191,7 @@ export class BuilderOverlayPlugin extends Plugin {
     }
 
     showHoverOverlay(el) {
-        if (this.hoverOverlay && this.hoverOverlay?.overlayTarget === el) {
+        if (this.hoverOverlay()?.overlayTarget === el) {
             return;
         }
         this.removeHoverOverlay();
@@ -200,7 +200,7 @@ export class BuilderOverlayPlugin extends Plugin {
         }
         const overlay = new BuilderOverlay(el, {
             iframe: this.iframe,
-            overlayContainer: this.overlayContainer,
+            getLocalOverlayContainerRect: this.builderOverlayContainer.getLocalOverlayContainerRect,
             history: this.dependencies.history,
             hasOverlayOptions: false,
             next: this.dependencies.operation.next,
@@ -209,11 +209,10 @@ export class BuilderOverlayPlugin extends Plugin {
             isRtl: this.config.isEditableRTL,
             isHoverOverlay: true,
         });
-        this.hoverOverlay = overlay;
-        this.overlayContainer.append(overlay.overlayElement);
+        this.hoverOverlay.set(overlay);
         this.resizeObserver.observe(overlay.overlayTarget, { box: "border-box" });
         // `refreshPosition` won't be called by the resize observer if the element was already observed
-        this.hoverOverlay.refreshPosition();
+        overlay.refreshPosition();
     }
 
     showOverlayPreview(el) {
