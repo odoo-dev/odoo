@@ -27,9 +27,11 @@ import {
     defineMediaManagerModels,
     EDITED_PARTNER_ID,
     getCardNames,
+    openMediaManagerFromImageToolbar,
     openMediaManagerFromPowerbox,
     openPartnerForm,
     PARTNER_IMAGES,
+    PARTNER_WITH_IMAGE_ID,
     PNG_DATA_URL,
     TAGS,
     videoCard,
@@ -330,10 +332,33 @@ describe("upload", () => {
             return {};
         });
         await openMediaManager();
-        await contains(`${SIDE_PANEL} .btn-import-url`).click();
+        await contains(`${SIDE_PANEL} .btn-import-video-url`).click();
+        expect(`${SIDE_PANEL} input[name=url]`).toHaveAttribute("placeholder", "Video url...");
+        expect(`${SIDE_PANEL} .btn-import-video-url`).toHaveClass("btn-primary");
+        expect(`${SIDE_PANEL} .btn-import-url`).toHaveClass("btn-secondary");
         await contains(`${SIDE_PANEL} input[name=url]`).edit(YOUTUBE_URL, { confirm: false });
         await waitFor(`${SIDE_PANEL} .o_we_url_success`);
-        await contains(`${SIDE_PANEL} .btn-import-url`).click();
+        await contains(`${SIDE_PANEL} .btn-import-video-url`).click();
         expect.verifySteps(["add_url"]);
+    });
+
+    test("switch the url input from an image link to a video link", async () => {
+        onRpc("/html_editor/attachment/add_url", () => expect.step("add_url"));
+        await openMediaManager();
+        await contains(`${SIDE_PANEL} .btn-import-url`).click();
+        expect(`${SIDE_PANEL} input[name=url]`).toHaveAttribute("placeholder", "Image url...");
+        await contains(`${SIDE_PANEL} input[name=url]`).edit(YOUTUBE_URL, { confirm: false });
+        // the other button switches the input, it does not import the link
+        await contains(`${SIDE_PANEL} .btn-import-video-url`).click();
+        expect(`${SIDE_PANEL} input[name=url]`).toHaveAttribute("placeholder", "Video url...");
+        expect(`${SIDE_PANEL} input[name=url]`).toHaveValue(YOUTUBE_URL);
+        expect.verifySteps([]);
+    });
+
+    test("no video link to import when replacing an image", async () => {
+        await openPartnerForm({ resId: PARTNER_WITH_IMAGE_ID });
+        await openMediaManagerFromImageToolbar("img[alt='old']");
+        expect(`${SIDE_PANEL} .btn-import-url`).toHaveCount(1);
+        expect(`${SIDE_PANEL} .btn-import-video-url`).toHaveCount(0);
     });
 });

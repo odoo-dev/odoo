@@ -40,20 +40,8 @@ export class MediaManagerKanbanRenderer extends KanbanRenderer {
         this.state.isDraggingFile = false;
 
         this.debouncedValidateUrl = useDebounced(this.validateUrl, 500);
-        this.urlWarningTitle = this.props.allowVideos
-            ? _t(
-                  "The URL does not seem to be a supported image or video. Try with an image (%(extensions)s) or a video from %(platforms)s.",
-                  {
-                      extensions: IMAGE_EXTENSIONS.join(", "),
-                      platforms: Object.values(PLATFORMS)
-                          .map((platform) => platform.name)
-                          .join(", "),
-                  }
-              )
-            : _t(
-                  "The URL does not seem to be a supported image. Try with: %s",
-                  IMAGE_EXTENSIONS.join(", ")
-              );
+        // the kind of link imported by the url input: "image" or "video"
+        this.state.urlImportType = "image";
         this.initialDomain = [...this.env.model.config.domain];
         // the url input is hidden until the next render, it can only be
         // focused once displayed
@@ -106,9 +94,42 @@ export class MediaManagerKanbanRenderer extends KanbanRenderer {
     // Import from URL :
     // -----------------
 
-    async importLinkClicked() {
+    get urlPlaceholder() {
+        return this.state.urlImportType === "video" ? _t("Video url...") : _t("Image url...");
+    }
+
+    get urlWarningTitle() {
+        if (this.state.urlImportType === "video") {
+            return _t(
+                "The URL does not seem to be a video of a supported platform: %s",
+                Object.values(PLATFORMS)
+                    .map((platform) => platform.name)
+                    .join(", ")
+            );
+        }
+        return _t(
+            "The URL does not seem to be a supported image. Try with: %s",
+            IMAGE_EXTENSIONS.join(", ")
+        );
+    }
+
+    /**
+     * @param {"image"|"video"} type
+     * @returns {boolean} whether the url input is displayed to import this kind of link
+     */
+    isImportingUrl(type) {
+        return this.state.showUrlInput && this.state.urlImportType === type;
+    }
+
+    /**
+     * Display the url input, or import its link. Both kinds of link are
+     * accepted whatever the button: the type only adapts the input.
+     *
+     * @param {"image"|"video"} [type]
+     */
+    async importLinkClicked(type = "image") {
         const inputEl = this.urlInputRef();
-        if (this.state.showUrlInput) {
+        if (this.isImportingUrl(type)) {
             inputEl.disabled = true;
             const url = inputEl.value;
             const { isValidUrl, isValidImageFormat, videoMatch } = await this.validateUrl(url);
@@ -129,6 +150,7 @@ export class MediaManagerKanbanRenderer extends KanbanRenderer {
             }
         } else {
             this.state.showUrlInput = true;
+            this.state.urlImportType = type;
             inputEl.disabled = false;
             this.focusUrlInput = true;
         }
