@@ -31,11 +31,11 @@ function matches(domain, values = {}) {
 }
 
 describe("in every context", () => {
-    test("only binary images are listed", () => {
+    test("only images are listed, uploaded or added by url", () => {
         expect(matches(MEDIA_MANAGER_BASE_DOMAIN)).toBe(true);
         expect(matches(MEDIA_MANAGER_BASE_DOMAIN, { public: false })).toBe(true);
         expect(matches(MEDIA_MANAGER_BASE_DOMAIN, { mimetype: "application/pdf" })).toBe(false);
-        expect(matches(MEDIA_MANAGER_BASE_DOMAIN, { type: "url" })).toBe(false);
+        expect(matches(MEDIA_MANAGER_BASE_DOMAIN, { type: "url" })).toBe(true);
     });
 
     test("technical attachments are hidden", () => {

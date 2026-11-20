@@ -90,7 +90,6 @@ export function getMediaManagertDialogProps(recordInfo) {
             { label: "favorites", domain: [["is_favorite", "=", true]] },
         ],
         noCreate: true,
-        // todo : BINARY_DOMAIN prevents webp url to be shown, should we change that ?
         domain: getRecordDomain(recordInfo.resModel, getBaseResId(recordInfo.resId)),
         context: {
             kanban_view_ref: "html_editor.mediamanager_media_kanban",

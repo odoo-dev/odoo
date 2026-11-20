@@ -17,8 +17,6 @@ import { IMAGE_MIMETYPES } from "@html_editor/main/media/media_manager/helpers";
 
 export const IMAGES_DOMAIN = [["mimetype", "in", IMAGE_MIMETYPES]];
 
-export const BINARY_DOMAIN = [["type", "=", "binary"]];
-
 export const PUBLIC_DOMAIN = [["public", "=", true]];
 
 /**
@@ -52,10 +50,13 @@ export const MY_MEDIA_DOMAIN = [["create_uid", "=", user.userId]];
 // Base domains
 // -----------------------------------------------------------------------------
 
-/** Every image the media manager can display, whatever the context. */
+/**
+ * Every image the media manager can display, whatever the context: the
+ * uploaded images and the images added by url (`type` "url", see
+ * `attachment_create`).
+ */
 export const MEDIA_MANAGER_BASE_DOMAIN = Domain.and([
     IMAGES_DOMAIN,
-    BINARY_DOMAIN,
     HIDE_TECHNICAL_DOMAIN,
 ]).toList();
 

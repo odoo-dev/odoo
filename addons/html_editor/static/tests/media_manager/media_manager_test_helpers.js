@@ -121,7 +121,7 @@ export class ResPartner extends webModels.ResPartner {
 
 /**
  * The attachments of the database: the media manager of the edited partner
- * only shows the first three ones.
+ * only shows the first four ones (see PARTNER_IMAGES).
  */
 export function getAttachmentRecords() {
     return [
@@ -137,6 +137,8 @@ export function getAttachmentRecords() {
             res_id: EDITED_PARTNER_ID,
             create_uid: serverState.odoobotUid,
         }),
+        // an image added by url
+        image(10, "link.png", { public: true, type: "url", url: "https://example.com/link.png" }),
         // Not displayed: images of another record, not images, technical images
         image(4, "other_partner.png", { res_model: "res.partner", res_id: OTHER_PARTNER_ID }),
         image(5, "document.pdf", { public: true, mimetype: "application/pdf" }),
@@ -148,12 +150,11 @@ export function getAttachmentRecords() {
             mimetype: "image/svg+xml",
             url: "/html_editor/shape/brushes/01.svg",
         }),
-        image(10, "link.png", { public: true, type: "url", url: "https://example.com/link.png" }),
     ];
 }
 
 /** Names of the images shown to the edited partner, in the default order. */
-export const PARTNER_IMAGES = ["banner.png", "logo.png", "partner.jpg"];
+export const PARTNER_IMAGES = ["banner.png", "logo.png", "partner.jpg", "link.png"];
 
 function image(id, name, values = {}) {
     return {

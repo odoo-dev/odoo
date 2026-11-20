@@ -51,7 +51,7 @@ export class MediaManagerKanbanRenderer extends KanbanRenderer {
 
     async validateUrl(url) {
         const path = url.split("?")[0];
-        const isValidUrl = /^.+\..+$/.test(path); // TODO improve
+        const isValidUrl = isHttpUrl(path);
 
         const isValidImageFormat =
             isValidUrl &&
@@ -210,4 +210,17 @@ export class MediaManagerKanbanRenderer extends KanbanRenderer {
     _fileUploaded(_attachment) {
         return this.env.model.load();
     }
+}
+
+/**
+ * Whether the url is an http(s) url, or a path on the current domain.
+ *
+ * @param {string} url
+ * @returns {boolean}
+ */
+function isHttpUrl(url) {
+    if (url.startsWith("/") && !url.startsWith("//")) {
+        return url.length > 1;
+    }
+    return URL.canParse(url) && ["http:", "https:"].includes(new URL(url).protocol);
 }

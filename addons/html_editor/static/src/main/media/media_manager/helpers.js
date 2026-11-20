@@ -46,7 +46,7 @@ export class QueryHelper {
     }
 
     search(query) {
-        return ["name", "ilike", query || ""]; // todo need to be in another array ?
+        return [["name", "ilike", query || ""]];
     }
 
     get recordDomain() {
