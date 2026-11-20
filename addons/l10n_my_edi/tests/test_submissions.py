@@ -7,7 +7,7 @@ from freezegun import freeze_time
 
 from odoo import Command
 from odoo.exceptions import UserError
-from odoo.tests import tagged
+from odoo.tests import Form, tagged
 
 from odoo.addons.account.tests.common import AccountTestInvoicingCommon
 from odoo.addons.account.tests.test_account_move_send import TestAccountMoveSendCommon
@@ -493,6 +493,31 @@ class L10nMyEDITestNewSubmission(TestAccountMoveSendCommon):
         with patch(CONTACT_PROXY_METHOD, new=self._test_16_mock), \
              self.assertRaisesRegex(UserError, r'This document is too large to be sent to MyInvois \(350 KB, the maximum is 250 KB\)'):
             self.basic_invoice.action_l10n_my_edi_send_invoice()
+
+    @freeze_time('2024-07-15 10:00:00')
+    def test_17_invoice_form_without_accounting_access(self):
+        """ A user reading invoices without any accounting group, as Sales and Purchase users do, can open the invoice form. """
+        invoice_reader_group = self.env['res.groups'].create({'name': 'Invoice Reader'})
+        self.env['ir.model.access'].create([{
+            'name': f'{model} invoice reader',
+            'model_id': self.env['ir.model']._get_id(model),
+            'group_id': invoice_reader_group.id,
+            'perm_read': True,
+        } for model in ('account.journal', 'account.move', 'account.move.line')])
+        invoice_reader = self._create_new_internal_user(
+            login='invoice_reader',
+            group_ids=(self.env.ref('base.group_user') | invoice_reader_group).ids,
+        )
+        draft_invoice = self.init_invoice('out_invoice', products=self.product_a)
+        with patch(CONTACT_PROXY_METHOD, new=self._test_01_mock):
+            self.basic_invoice.action_l10n_my_edi_send_invoice()
+
+        self.env.invalidate_all()
+        Form(draft_invoice.with_user(invoice_reader))
+        self.env.invalidate_all()
+        form = Form(self.basic_invoice.with_user(invoice_reader))
+        self.assertTrue(form.need_cancel_request)
+        self.assertFalse(form.show_reset_to_draft_button)
 
     # -------------------------------------------------------------------------
     # Patched methods
