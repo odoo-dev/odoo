@@ -7,10 +7,14 @@ export const IMAGE_MIMETYPES = [
     "image/gif",
     "image/webp",
 ];
+
+// Unused for now: the media manager only handles images. Kept for the support
+// of other media types (videos, documents, ...) in the media manager.
 export const VIDEO_MIMETYPES = ["video/mp4", "video/webm", "video/ogg"]; // todo : to validate
 
 export const IMAGE_EXTENSIONS = [".jpg", ".jpeg", ".jpe", ".png", ".svg", ".gif", ".webp"];
 
+// Unused for now, see VIDEO_MIMETYPES.
 export const ATTACHMENT_FIELDS = [
     "id",
     "name",
@@ -29,11 +33,13 @@ export const ATTACHMENT_FIELDS = [
     "original_id",
 ];
 
+// Unused for now, see VIDEO_MIMETYPES.
 export const QUERRY_ORDERS_BY = {
     recent: "id desc",
     oldest: "id asc",
 };
 
+// Unused for now, see VIDEO_MIMETYPES.
 export class QueryHelper {
     constructor(props) {
         this.props = props;

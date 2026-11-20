@@ -80,8 +80,7 @@ export function getMediaManagertDialogProps(recordInfo) {
     const lastWeekDate = serializeDateTime(luxon.DateTime.now().minus({ weeks: 1 }));
     return {
         title: _t("Select a media"),
-        resModel: "ir.attachment", // todo we probably don't need this
-        // searchViewId: "mediamanager_media_search", // todo doesn't work, need id, how ?
+        resModel: "ir.attachment",
         baseResModel: recordInfo.resModel ?? "ir.attachment",
         baseResId: getBaseResId(recordInfo.resId),
         filters: [

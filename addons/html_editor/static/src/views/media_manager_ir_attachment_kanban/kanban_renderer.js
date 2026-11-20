@@ -1,7 +1,10 @@
 import { KanbanRenderer, kanbanRendererProps } from "@web/views/kanban/kanban_renderer";
 import { MediaManagerKanbanRecord } from "./kanban_record";
 import { useService } from "@web/core/utils/hooks";
-import { IMAGE_MIMETYPES } from "@html_editor/main/media/media_manager/helpers";
+import {
+    IMAGE_EXTENSIONS,
+    IMAGE_MIMETYPES,
+} from "@html_editor/main/media/media_manager/helpers";
 import { onPatched, signal, t, useProps } from "@odoo/owl";
 import { useDebounced } from "@web/core/utils/timing";
 import { _t } from "@web/core/l10n/translation";
@@ -30,6 +33,10 @@ export class MediaManagerKanbanRenderer extends KanbanRenderer {
         this.state.isDraggingFile = false;
 
         this.debouncedValidateUrl = useDebounced(this.validateUrl, 500);
+        this.urlWarningTitle = _t(
+            "The URL does not seem to be a supported image. Try with: %s",
+            IMAGE_EXTENSIONS.join(", ")
+        );
         this.initialDomain = [...this.env.model.config.domain];
         // the url input is hidden until the next render, it can only be
         // focused once displayed
@@ -125,7 +132,7 @@ export class MediaManagerKanbanRenderer extends KanbanRenderer {
                         resolve();
                     };
                     imageEl.onload = async () => {
-                        await this.onLoadUploadedUrl(url);
+                        await this.uploadUrl(url);
                         resolve();
                     };
                     imageEl.src = url;
@@ -145,8 +152,8 @@ export class MediaManagerKanbanRenderer extends KanbanRenderer {
 
     async onUrlInputInputed(ev) {
         this.state.isValidatingUrl = true;
-        const { isValidUrl, isValidFileFormat } = await this.debouncedValidateUrl(ev.target.value);
-        this.state.isValidImageFormat = isValidFileFormat;
+        const { isValidUrl, isValidImageFormat } = await this.debouncedValidateUrl(ev.target.value);
+        this.state.isValidImageFormat = isValidImageFormat;
         this.state.isValidUrl = isValidUrl;
         this.state.isValidatingUrl = false;
     }
