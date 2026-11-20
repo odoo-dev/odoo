@@ -853,10 +853,12 @@ class ReportMoOverview(models.AbstractModel):
             product_lines = []
             product = component_move.product_id
             required_qty = component_move.product_uom_qty
+            origins_used_qty = self._get_origins_used_qty(component_move)
             for move_origin in self.env['stock.move'].browse(component_move._rollup_move_origs()):
                 doc_origin = self._get_origin(move_origin)
-                if doc_origin:
-                    to_uom_qty = move_origin.product_uom._compute_quantity(move_origin.product_uom_qty, component_move.product_uom)
+                available_qty = move_origin.product_qty - origins_used_qty[move_origin]
+                if doc_origin and float_compare(available_qty, 0, precision_rounding=product.uom_id.rounding) > 0:
+                    to_uom_qty = product.uom_id._compute_quantity(available_qty, component_move.product_uom)
                     used_qty = min(required_qty, to_uom_qty)
                     required_qty -= used_qty
                     # Create a fake "forecast line" so it will be processed as normal afterwards with only the required info
@@ -873,6 +875,26 @@ class ReportMoOverview(models.AbstractModel):
             replenish_data = self._set_replenish_data(product_lines, product, replenish_data)
 
         return replenish_data
+
+    def _get_origins_used_qty(self, component_move):
+        """ An origin can be shared by several component moves (e.g. the backorders of a MO are linked
+        to all the origins of the initial MO). Returns the quantity of each origin, in the product UoM,
+        already used by the done component moves created before `component_move`.
+        """
+        origins_used_qty = defaultdict(float)
+        origins = self.env['stock.move'].browse(component_move._rollup_move_origs())
+        previous_moves = self.env['stock.move'].browse(origins._rollup_move_dests()).filtered_domain([
+            ('raw_material_production_id', '!=', False), ('state', '=', 'done'),
+            ('product_id', '=', component_move.product_id.id), ('id', '<', component_move.id),
+        ])
+        for previous_move in previous_moves.sorted('id'):
+            required_qty = previous_move.product_qty
+            for move_origin in self.env['stock.move'].browse(previous_move._rollup_move_origs()):
+                if self._get_origin(move_origin):
+                    used_qty = min(required_qty, move_origin.product_qty - origins_used_qty[move_origin])
+                    origins_used_qty[move_origin] += used_qty
+                    required_qty -= used_qty
+        return origins_used_qty
 
     def _set_replenish_data(self, new_lines, product, replenish_data):
         if product.id not in replenish_data['products']:
