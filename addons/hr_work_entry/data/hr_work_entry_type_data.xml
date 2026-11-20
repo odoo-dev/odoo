@@ -5827,11 +5827,21 @@
     </record>
 
     <record id="uz_work_entry_type_sick_leave" model="hr.work.entry.type">
-        <field name="name">Guaranteed monthly wage illness</field>
+        <field name="name">Sick Leave</field>
         <field name="display_code">STO</field>
         <field name="code">013.00</field>
         <field name="color">9</field>
         <field name="count_as">absence</field>
+        <field name="country_id" ref="base.uz"/>
+    </record>
+
+    <record id="l10n_uz_work_entry_type_fund_paid_sick_leave" model="hr.work.entry.type">
+        <field name="name">Fund-paid Sick Leave</field>
+        <field name="display_code">FSL</field>
+        <field name="code">UZSICKFUND</field>
+        <field name="color">9</field>
+        <field name="count_as">absence</field>
+        <field name="amount_rate">0.0</field>
         <field name="country_id" ref="base.uz"/>
     </record>
 

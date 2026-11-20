@@ -1017,7 +1017,11 @@ class HrLeave(models.Model):
                             )
                         weekend_dates = total_dates - working_dates - public_holiday_dates
 
-                        if weekend_dates:
+                        if weekend_dates and leave.work_entry_type_request_unit == 'half_day':
+                            weekend_days = sum(leave._get_calendar_day_weight(day) for day in weekend_dates)
+                            days += weekend_days
+                            hours += weekend_days * calendar.hours_per_day
+                        elif weekend_dates and leave.work_entry_type_request_unit == 'hour':
                             if start_date == end_date:
                                 # Count only the hours within the calendar working range
                                 day_hours = min(day_end, leave.request_hour_to) - max(day_start, leave.request_hour_from)
@@ -1026,11 +1030,11 @@ class HrLeave(models.Model):
                                 weekend_dates.remove(start_date)
                             else:
                                 if start_date in weekend_dates:
-                                    days += 0.5 if leave.request_date_from_period == 'pm' else 1
+                                    days += 1
                                     hours += max(0, day_end - max(day_start, leave.request_hour_from))
                                     weekend_dates.remove(start_date)
                                 if end_date in weekend_dates:
-                                    days += 1 if leave.request_date_to_period == 'pm' else 0.5
+                                    days += 1
                                     hours += max(0, min(day_end, leave.request_hour_to) - day_start)
                                     weekend_dates.remove(end_date)
 
@@ -2949,6 +2953,24 @@ class HrLeave(models.Model):
                 return days - 1
         return days
 
+    def _get_calendar_day_weight(self, day):
+        """Return what ``day`` weighs in the calendar days of the request.
+
+        A day weighs 1, less half a day when a request by half day starts on it in the
+        afternoon, and less half a day when it ends on it in the morning.
+
+        :param date day: a day of the request
+        :rtype: float
+        """
+        self.ensure_one()
+        weight = 1
+        if self.work_entry_type_request_unit == 'half_day':
+            if day == self.request_date_from and self.request_date_from_period == 'pm':
+                weight -= 0.5
+            if day == self.request_date_to and self.request_date_to_period == 'am':
+                weight -= 0.5
+        return weight
+
     def _create_leaves_from_split(self, leave_split, use_worked_days=False):
         """Split the request into consecutive requests of the given types and durations.
 
@@ -2997,8 +3019,12 @@ class HrLeave(models.Model):
 
             remaining_days -= nbr_days
 
-            if use_worked_days:
-                if half_days:
+            if not remaining_days:
+                # the last piece ends as the request does, with its days off
+                new_request_date_to = current_leave.request_date_to
+                new_request_date_to_period = current_leave.request_date_to_period
+            elif use_worked_days:
+                if half_days or current_leave.request_date_from_period == 'pm':
                     new_request_date_to, new_request_date_to_period = current_leave._get_request_date_to_with_period(nbr_days, work_intervals)
                 else:
                     new_request_date_to = current_leave._get_request_date_to(nbr_days, days_data)
@@ -3077,7 +3103,8 @@ class HrLeave(models.Model):
         """
         self.ensure_one()
         for interval in work_intervals:
-            if interval[1].date() < self.request_date_from:
+            # the morning of a request that starts in the afternoon is not part of it
+            if interval[1] <= self.date_from.replace(tzinfo=UTC):
                 continue
             interval_days = self.resource_calendar_id._get_attendance_intervals_days_data([interval])['days']
             if number_of_days < interval_days:
