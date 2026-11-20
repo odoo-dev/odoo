@@ -18,6 +18,7 @@ export const mediaManagerDialogProps = {
     baseResModel: t.string(),
     baseResId: t.number(),
     filters: t.array().optional(),
+    allowVideos: t.boolean().optional(),
     domain: t.array().optional(),
     context: t.object().optional(),
 };
@@ -50,6 +51,7 @@ export class MediaManagerDialog extends SelectCreateDialog {
             baseResModel: this.props.baseResModel,
             baseResId: this.props.baseResId,
             filters: this.props.filters,
+            allowVideos: !!this.props.allowVideos,
             onSelectionChanged: this.onSelectionChanged,
         };
         return props;

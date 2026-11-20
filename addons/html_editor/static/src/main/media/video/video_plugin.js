@@ -24,6 +24,7 @@ export class VideoPlugin extends Plugin {
                 },
             },
             paste_media_url_command_providers: this.getCommandForVideoUrlPaste.bind(this),
+            media_manager_video_element_providers: this.createVideoElementFromUrl.bind(this),
         }),
     };
 
@@ -65,6 +66,21 @@ export class VideoPlugin extends Plugin {
         const videoElement = this.createVideoElement(videoData);
         this.dependencies.dom.insert(videoElement);
         this.dependencies.history.commit();
+    }
+
+    /**
+     * Build the element of a platform's video, chosen in the media manager.
+     *
+     * @param {Object} params
+     * @param {string} params.url
+     * @returns {Promise<HTMLElement|undefined>} undefined if the url is not
+     *      the one of a supported platform
+     */
+    async createVideoElementFromUrl({ url }) {
+        const match = matchPlatformUrl(url);
+        if (match) {
+            return this.createVideoElement(match.provider.getVideoUrlData(match.urlMatch));
+        }
     }
 
     /**

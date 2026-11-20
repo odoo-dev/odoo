@@ -35,6 +35,20 @@ export const VIDEO_PROVIDERS = {
     [VideoFile.id]: VideoFile,
 };
 
+/**
+ * The mimetype of the url attachments of a platform's videos (see
+ * SUPPORTED_VIDEO_URL_MIMETYPES on the server).
+ *
+ * @param {typeof PLATFORMS[string]} platform
+ * @returns {string}
+ */
+export function getVideoMimetype(platform) {
+    return `video/x-${platform.id.toLowerCase()}`;
+}
+
+/** The mimetypes of the url attachments of the platforms' videos. */
+export const VIDEO_URL_MIMETYPES = Object.values(PLATFORMS).map(getVideoMimetype);
+
 /** The class of the video elements built by {@link renderVideoElements}. */
 export const VIDEO_CLASS = "media_iframe_video";
 

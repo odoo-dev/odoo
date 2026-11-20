@@ -44,6 +44,7 @@ declare module "plugins" {
     import { delete_image_overrides, image_name_providers, ImagePlugin } from "@html_editor/main/media/image_plugin";
     import { ImagePostProcessPlugin, on_image_updated_handlers, on_image_processed_handlers, on_will_process_image_handlers } from "@html_editor/main/media/image_post_process_plugin";
     import { closest_savable_providers, ImageSavePlugin, on_image_saved_handlers } from "@html_editor/main/media/image_save_plugin";
+    import { media_manager_video_element_providers } from "@html_editor/backend/media_manager/media_manager_plugin";
     import { media_dialog_extra_tabs, MediaPlugin, on_media_added_handlers, on_media_dialog_saved_handlers, on_will_save_media_dialog_handlers, on_media_replaced_handlers } from "@html_editor/main/media/media_plugin";
     import { move_node_whitelist_selectors, move_widget_position_processors, on_movable_element_set_handlers, on_will_unset_movable_element_handlers } from "@html_editor/main/movenode_plugin";
     import { on_layout_geometry_change_handlers } from "@html_editor/main/position_plugin";
@@ -286,6 +287,7 @@ declare module "plugins" {
         history_commit_data_properties: history_commit_data_properties;
         link_popovers: link_popovers;
         media_dialog_extra_tabs: media_dialog_extra_tabs;
+        media_manager_video_element_providers: media_manager_video_element_providers;
         move_node_whitelist_selectors: move_node_whitelist_selectors;
         power_buttons: power_buttons;
         powerbox_categories: powerbox_categories;
