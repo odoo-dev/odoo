@@ -84,11 +84,13 @@ export const uploadService = {
             incrementId() {
                 fileId++;
             },
-            uploadUrl: async (url, { resModel, resId }, onUploaded) => {
+            uploadUrl: async (url, { resModel, resId, name, mimetype }, onUploaded) => {
                 const attachment = await rpc("/html_editor/attachment/add_url", {
                     url,
                     res_model: resModel,
                     res_id: resId,
+                    ...(name && { name }),
+                    ...(mimetype && { mimetype }),
                 });
                 await onUploaded(attachment);
             },

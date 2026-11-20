@@ -17,6 +17,20 @@ SUPPORTED_IMAGE_MIMETYPES = {
     'image/webp': '.webp',
 }
 
+# The videos of third party platforms are stored as url attachments, their
+# mimetype tells the platform. It has to match the platform ids of the video
+# providers (see static/src/main/media/video/video_providers.js).
+SUPPORTED_VIDEO_URL_MIMETYPES = {
+    'video/x-dailymotion',
+    'video/x-facebook',
+    'video/x-gdrive',
+    'video/x-instagram',
+    'video/x-loom',
+    'video/x-twitch',
+    'video/x-vimeo',
+    'video/x-youtube',
+}
+
 
 class IrAttachment(models.Model):
     _inherit = "ir.attachment"

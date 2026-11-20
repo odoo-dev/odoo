@@ -5,6 +5,11 @@ import {
     IMAGE_EXTENSIONS,
     IMAGE_MIMETYPES,
 } from "@html_editor/main/media/media_manager/helpers";
+import {
+    getVideoMimetype,
+    matchPlatformUrl,
+    PLATFORMS,
+} from "@html_editor/main/media/video/video_providers";
 import { onPatched, signal, t, useProps } from "@odoo/owl";
 import { useDebounced } from "@web/core/utils/timing";
 import { _t } from "@web/core/l10n/translation";
@@ -14,6 +19,8 @@ export const MediaManagerKanbanRendererProps = {
     baseResModel: t.string(),
     baseResId: t.number().optional(),
     filters: t.array().optional(),
+    // the videos of the third party platforms can be imported by url
+    allowVideos: t.boolean().optional(),
 };
 
 export class MediaManagerKanbanRenderer extends KanbanRenderer {
@@ -33,10 +40,20 @@ export class MediaManagerKanbanRenderer extends KanbanRenderer {
         this.state.isDraggingFile = false;
 
         this.debouncedValidateUrl = useDebounced(this.validateUrl, 500);
-        this.urlWarningTitle = _t(
-            "The URL does not seem to be a supported image. Try with: %s",
-            IMAGE_EXTENSIONS.join(", ")
-        );
+        this.urlWarningTitle = this.props.allowVideos
+            ? _t(
+                  "The URL does not seem to be a supported image or video. Try with an image (%(extensions)s) or a video from %(platforms)s.",
+                  {
+                      extensions: IMAGE_EXTENSIONS.join(", "),
+                      platforms: Object.values(PLATFORMS)
+                          .map((platform) => platform.name)
+                          .join(", "),
+                  }
+              )
+            : _t(
+                  "The URL does not seem to be a supported image. Try with: %s",
+                  IMAGE_EXTENSIONS.join(", ")
+              );
         this.initialDomain = [...this.env.model.config.domain];
         // the url input is hidden until the next render, it can only be
         // focused once displayed
@@ -49,19 +66,28 @@ export class MediaManagerKanbanRenderer extends KanbanRenderer {
         });
     }
 
+    /**
+     * @param {string} url
+     * @returns {Promise<{ isValidUrl: boolean, isValidImageFormat: boolean, videoMatch: Object|null }>}
+     *      `videoMatch` is the platform of a video url (see `matchPlatformUrl`),
+     *      when the videos are allowed
+     */
     async validateUrl(url) {
         const path = url.split("?")[0];
         const isValidUrl = isHttpUrl(path);
+        // the video platforms urls are pages, not images
+        const videoMatch = (isValidUrl && this.props.allowVideos && matchPlatformUrl(url)) || null;
 
         const isValidImageFormat =
             isValidUrl &&
+            !videoMatch &&
             (await new Promise((resolve) => {
                 const img = new Image();
                 img.src = path;
                 img.onload = () => resolve(true);
                 img.onerror = () => resolve(false);
             }));
-        return { isValidUrl, isValidImageFormat };
+        return { isValidUrl, isValidImageFormat, videoMatch };
     }
 
     // ----------------
@@ -85,8 +111,12 @@ export class MediaManagerKanbanRenderer extends KanbanRenderer {
         if (this.state.showUrlInput) {
             inputEl.disabled = true;
             const url = inputEl.value;
-            const { isValidUrl, isValidImageFormat } = await this.validateUrl(url);
-            if (isValidImageFormat && isValidUrl) {
+            const { isValidUrl, isValidImageFormat, videoMatch } = await this.validateUrl(url);
+            if (videoMatch) {
+                await this.uploadVideoUrl(url, videoMatch);
+                this.state.showUrlInput = false;
+                inputEl.value = "";
+            } else if (isValidImageFormat && isValidUrl) {
                 await this.uploadFileFromUrl(url);
                 this.state.showUrlInput = false;
                 inputEl.value = "";
@@ -150,10 +180,30 @@ export class MediaManagerKanbanRenderer extends KanbanRenderer {
         await this.uploadService.uploadUrl(url, uploadData, this._fileUploaded.bind(this));
     }
 
+    /**
+     * Store the url of a platform's video, the platform being given by the
+     * mimetype.
+     *
+     * @param {string} url
+     * @param {{ provider: typeof PLATFORMS[string], urlMatch: Array }} videoMatch
+     */
+    async uploadVideoUrl(url, { provider, urlMatch }) {
+        const { videoId } = provider.getVideoUrlData(urlMatch);
+        const uploadData = {
+            resModel: this.props.baseResModel,
+            resId: this.props.baseResId,
+            name: videoId ? `${provider.name} - ${videoId}` : provider.name,
+            mimetype: getVideoMimetype(provider),
+        };
+        await this.uploadService.uploadUrl(url, uploadData, this._fileUploaded.bind(this));
+    }
+
     async onUrlInputInputed(ev) {
         this.state.isValidatingUrl = true;
-        const { isValidUrl, isValidImageFormat } = await this.debouncedValidateUrl(ev.target.value);
-        this.state.isValidImageFormat = isValidImageFormat;
+        const { isValidUrl, isValidImageFormat, videoMatch } = await this.debouncedValidateUrl(
+            ev.target.value
+        );
+        this.state.isValidMedia = isValidImageFormat || !!videoMatch;
         this.state.isValidUrl = isValidUrl;
         this.state.isValidatingUrl = false;
     }

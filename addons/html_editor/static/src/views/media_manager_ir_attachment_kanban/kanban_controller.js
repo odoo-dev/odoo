@@ -6,6 +6,7 @@ export const MediaManagerKanbanControllerProps = {
     baseResModel: t.string(),
     baseResId: t.number().optional(),
     filters: t.array().optional(),
+    allowVideos: t.boolean().optional(),
 };
 export class MediaManagerKanbanController extends KanbanController {
     static template = "ir.attachment.MediaManagerKanbanView";

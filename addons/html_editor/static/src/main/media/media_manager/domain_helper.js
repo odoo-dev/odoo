@@ -1,6 +1,7 @@
 import { Domain } from "@web/core/domain";
 import { user } from "@web/core/user";
 import { IMAGE_MIMETYPES } from "@html_editor/main/media/media_manager/helpers";
+import { VIDEO_URL_MIMETYPES } from "@html_editor/main/media/video/video_providers";
 
 /**
  * Domains used to open the media manager (ir.attachment) depending on the
@@ -16,6 +17,12 @@ import { IMAGE_MIMETYPES } from "@html_editor/main/media/media_manager/helpers";
 // -----------------------------------------------------------------------------
 
 export const IMAGES_DOMAIN = [["mimetype", "in", IMAGE_MIMETYPES]];
+
+/** The videos of the third party platforms, added by url. */
+export const VIDEOS_DOMAIN = [
+    ["type", "=", "url"],
+    ["mimetype", "in", VIDEO_URL_MIMETYPES],
+];
 
 export const PUBLIC_DOMAIN = [["public", "=", true]];
 
@@ -51,12 +58,14 @@ export const MY_MEDIA_DOMAIN = [["create_uid", "=", user.userId]];
 // -----------------------------------------------------------------------------
 
 /**
- * Every image the media manager can display, whatever the context: the
- * uploaded images and the images added by url (`type` "url", see
- * `attachment_create`).
+ * Every media the media manager can display, whatever the context: the
+ * uploaded images, the images added by url (`type` "url", see
+ * `attachment_create`) and the videos of the third party platforms. Where only
+ * images can be used (replacing an image, ...), it is restricted with
+ * `IMAGES_DOMAIN`.
  */
 export const MEDIA_MANAGER_BASE_DOMAIN = Domain.and([
-    IMAGES_DOMAIN,
+    Domain.or([IMAGES_DOMAIN, VIDEOS_DOMAIN]),
     HIDE_TECHNICAL_DOMAIN,
 ]).toList();
 

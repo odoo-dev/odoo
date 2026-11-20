@@ -4,6 +4,7 @@ import { user } from "@web/core/user";
 import {
     getMailComposerDomain,
     getRecordDomain,
+    IMAGES_DOMAIN,
     MEDIA_MANAGER_BASE_DOMAIN,
     WEBSITE_DOMAIN,
 } from "@html_editor/main/media/media_manager/domain_helper";
@@ -36,6 +37,29 @@ describe("in every context", () => {
         expect(matches(MEDIA_MANAGER_BASE_DOMAIN, { public: false })).toBe(true);
         expect(matches(MEDIA_MANAGER_BASE_DOMAIN, { mimetype: "application/pdf" })).toBe(false);
         expect(matches(MEDIA_MANAGER_BASE_DOMAIN, { type: "url" })).toBe(true);
+    });
+
+    test("and the videos of the platforms, added by url", () => {
+        const video = {
+            name: "YouTube - dQw4w9WgXcQ",
+            type: "url",
+            url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+        };
+        expect(matches(MEDIA_MANAGER_BASE_DOMAIN, { ...video, mimetype: "video/x-youtube" })).toBe(
+            true
+        );
+        expect(matches(MEDIA_MANAGER_BASE_DOMAIN, { ...video, mimetype: "video/x-unknown" })).toBe(
+            false
+        );
+        expect(
+            matches(MEDIA_MANAGER_BASE_DOMAIN, { mimetype: "video/x-youtube", type: "binary" })
+        ).toBe(false, { message: "a platform video is an url" });
+        expect(
+            matches(Domain.and([MEDIA_MANAGER_BASE_DOMAIN, IMAGES_DOMAIN]).toList(), {
+                ...video,
+                mimetype: "video/x-youtube",
+            })
+        ).toBe(false, { message: "restricted to the images (e.g. replacing an image)" });
     });
 
     test("technical attachments are hidden", () => {

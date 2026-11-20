@@ -1,8 +1,12 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo.exceptions import AccessError
+from unittest.mock import patch
+
+from odoo.exceptions import AccessError, UserError
 from odoo.fields import Command
 from odoo.tests.common import TransactionCase, new_test_user, tagged
+
+from odoo.addons.html_editor.controllers.main import attachment_create
 
 
 @tagged('post_install', '-at_install')
@@ -87,3 +91,31 @@ class TestMediaManager(TransactionCase):
 
         with self.assertRaises(AccessError):
             self.company_image.with_user(self.user_a).write({'name': 'renamed.png', 'is_favorite': True})
+
+    # -------------------------------------------------------------------------
+    # Videos: the urls of the video platforms, their mimetype tells the platform
+    # -------------------------------------------------------------------------
+
+    def test_add_video_url(self):
+        url = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'
+        with patch('odoo.addons.html_editor.controllers.main.requests.head') as head:
+            video = attachment_create(
+                self.env['ir.attachment'], name='YouTube - dQw4w9WgXcQ', url=url, mimetype='video/x-youtube',
+            )
+        head.assert_not_called()  # a platform page, there is nothing to check
+        self.assertRecordValues(video, [{
+            'name': 'YouTube - dQw4w9WgXcQ',
+            'type': 'url',
+            'url': url,
+            'mimetype': 'video/x-youtube',
+        }])
+
+    def test_add_url_mimetype_restricted_to_video_platforms(self):
+        Attachment = self.env['ir.attachment']
+        url = 'https://www.example.com/page.html'
+        with self.assertRaises(UserError):
+            attachment_create(Attachment, url=url, mimetype='text/html')
+        with self.assertRaises(UserError):
+            attachment_create(Attachment, url=url, mimetype='image/png')
+        with self.assertRaises(UserError):
+            attachment_create(Attachment, name='video', data=b'data', mimetype='video/x-youtube')

@@ -32,6 +32,7 @@ import {
     PARTNER_IMAGES,
     PNG_DATA_URL,
     TAGS,
+    YOUTUBE_URL,
 } from "./media_manager_test_helpers";
 
 describe.current.tags("desktop");
@@ -290,5 +291,26 @@ describe("upload", () => {
         await contains(`${SIDE_PANEL} .btn-import-url`).click();
         await waitFor(".o_notification:contains(The provided URL is not valid.)");
         expect.verifySteps([]);
+    });
+
+    test("import a video from the url of a platform", async () => {
+        onRpc("/html_editor/attachment/add_url", async (request) => {
+            const { params } = await request.json();
+            expect.step("add_url");
+            expect(params).toEqual({
+                url: YOUTUBE_URL,
+                res_model: "res.partner",
+                res_id: EDITED_PARTNER_ID,
+                name: "YouTube - dQw4w9WgXcQ",
+                mimetype: "video/x-youtube",
+            });
+            return {};
+        });
+        await openMediaManager();
+        await contains(`${SIDE_PANEL} .btn-import-url`).click();
+        await contains(`${SIDE_PANEL} input[name=url]`).edit(YOUTUBE_URL, { confirm: false });
+        await waitFor(`${SIDE_PANEL} .o_we_url_success`);
+        await contains(`${SIDE_PANEL} .btn-import-url`).click();
+        expect.verifySteps(["add_url"]);
     });
 });

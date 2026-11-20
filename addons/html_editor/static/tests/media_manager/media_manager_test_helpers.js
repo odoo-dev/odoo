@@ -119,9 +119,11 @@ export class ResPartner extends webModels.ResPartner {
     ];
 }
 
+export const YOUTUBE_URL = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+
 /**
  * The attachments of the database: the media manager of the edited partner
- * only shows the first four ones (see PARTNER_IMAGES).
+ * only shows the first four images (see PARTNER_IMAGES) and the video.
  */
 export function getAttachmentRecords() {
     return [
@@ -139,6 +141,14 @@ export function getAttachmentRecords() {
         }),
         // an image added by url
         image(10, "link.png", { public: true, type: "url", url: "https://example.com/link.png" }),
+        // a video of a platform, only listed when inserting media (see VIDEO_CARD)
+        image(11, "YouTube - dQw4w9WgXcQ", {
+            public: true,
+            type: "url",
+            mimetype: "video/x-youtube",
+            url: YOUTUBE_URL,
+            local_url: YOUTUBE_URL,
+        }),
         // Not displayed: images of another record, not images, technical images
         image(4, "other_partner.png", { res_model: "res.partner", res_id: OTHER_PARTNER_ID }),
         image(5, "document.pdf", { public: true, mimetype: "application/pdf" }),
@@ -273,6 +283,9 @@ export const CARD = ".modal .o_kanban_record:not(.o_kanban_ghost)";
 export function card(name) {
     return `${CARD}:has(img[alt='${name}'])`;
 }
+
+/** The card of the video (see getAttachmentRecords). */
+export const VIDEO_CARD = `${CARD}:has(.o_image_thumbnail[data-mimetype='video/x-youtube'])`;
 
 /** Names of the displayed images, from the alt of their thumbnail. */
 export function getCardNames() {

@@ -18,7 +18,7 @@ from odoo.http.stream import STATIC_CACHE_LONG
 from odoo.tools.image import image_process
 from odoo.tools.mimetypes import guess_mimetype
 
-from ..models.ir_attachment import SUPPORTED_IMAGE_MIMETYPES
+from ..models.ir_attachment import SUPPORTED_IMAGE_MIMETYPES, SUPPORTED_VIDEO_URL_MIMETYPES
 from ..tools import search_icons
 from .svg_utils import get_shape_svg, make_shaped_image, update_svg_colors
 from odoo.addons.iap.tools import iap_tools
@@ -75,8 +75,15 @@ def get_existing_attachment(IrAttachment, vals):
     return IrAttachment.search(domain, limit=1) or None
 
 
-def attachment_create(IrAttachment, name='', data=False, url=False, res_id=False, res_model='ir.ui.view'):
-    """Create and return a new attachment."""
+def attachment_create(IrAttachment, name='', data=False, url=False, res_id=False, res_model='ir.ui.view', mimetype=None):
+    """Create and return a new attachment.
+
+    :param mimetype: only for an url attachment: the mimetype of a third party
+        video platform (see SUPPORTED_VIDEO_URL_MIMETYPES).
+    """
+    if mimetype and (data or not url or mimetype not in SUPPORTED_VIDEO_URL_MIMETYPES):
+        raise UserError(_("Only the url of a video platform can be given a mimetype."))
+
     if name.lower().endswith('.bmp'):
         # Avoid mismatch between content type and mimetype, see commit msg
         name = name[:-4]
@@ -105,15 +112,19 @@ def attachment_create(IrAttachment, name='', data=False, url=False, res_id=False
             'type': 'url',
             'url': url,
         })
-        # The code issues a HEAD request to retrieve headers from the URL.
-        # This approach is beneficial when the URL doesn't conclude with an
-        # image extension. By verifying the MIME type, the code ensures that
-        # only supported image types are incorporated into the data.
-        response = requests.head(url, timeout=10)
-        if response.status_code == 200:
-            mime_type = response.headers.get('content-type')
-            if mime_type in SUPPORTED_IMAGE_MIMETYPES:
-                attachment_data['mimetype'] = mime_type
+        if mimetype:
+            # A video platform page, there is no content type to check.
+            attachment_data['mimetype'] = mimetype
+        else:
+            # The code issues a HEAD request to retrieve headers from the URL.
+            # This approach is beneficial when the URL doesn't conclude with an
+            # image extension. By verifying the MIME type, the code ensures that
+            # only supported image types are incorporated into the data.
+            response = requests.head(url, timeout=10)
+            if response.status_code == 200:
+                mime_type = response.headers.get('content-type')
+                if mime_type in SUPPORTED_IMAGE_MIMETYPES:
+                    attachment_data['mimetype'] = mime_type
     else:
         raise UserError(_("You need to specify either data or url to create an attachment."))
 
@@ -389,9 +400,9 @@ class HTML_Editor(Controller):
         return attachment._get_media_info()
 
     @route(['/web_editor/attachment/add_url', '/html_editor/attachment/add_url'], type='jsonrpc', auth='user', methods=['POST'], website=True)
-    def add_url(self, url, res_id=False, res_model='ir.ui.view', **kwargs):
+    def add_url(self, url, res_id=False, res_model='ir.ui.view', name='', mimetype=None, **kwargs):
         self._clean_context()
-        attachment = attachment_create(request.env['ir.attachment'], url=url, res_id=res_id, res_model=res_model)
+        attachment = attachment_create(request.env['ir.attachment'], name=name, url=url, res_id=res_id, res_model=res_model, mimetype=mimetype)
         return attachment._get_media_info()
 
     @route(['/web_editor/modify_image/<model("ir.attachment"):attachment>', '/html_editor/modify_image/<model("ir.attachment"):attachment>'], type="jsonrpc", auth="user", website=True)

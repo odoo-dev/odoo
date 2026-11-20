@@ -1,4 +1,13 @@
-import { describe, expect, press, queryAll, test, waitFor, waitForNone } from "@odoo/hoot";
+import {
+    describe,
+    expect,
+    press,
+    queryAll,
+    queryOne,
+    test,
+    waitFor,
+    waitForNone,
+} from "@odoo/hoot";
 import { clickSave, contains, onRpc } from "@web/../tests/web_test_helpers";
 import { MediaManagerPlugin } from "@html_editor/backend/media_manager/media_manager_plugin";
 import { MediaPlugin } from "@html_editor/main/media/media_plugin";
@@ -18,6 +27,7 @@ import {
     PARTNER_IMAGES,
     PARTNER_WITH_IMAGE_ID,
     PNG_DATA_URL,
+    VIDEO_CARD,
 } from "./media_manager_test_helpers";
 
 describe.current.tags("desktop");
@@ -89,6 +99,30 @@ test("replace an image from the toolbar: clicking an image replaces it", async (
     await clickCard("logo.png");
     await waitForNone(".modal");
     expect(queryAll(`${NOTES} img`).map((img) => img.alt)).toEqual(["logo.png"]);
+});
+
+test("the videos are listed when inserting media, not when replacing an image", async () => {
+    const { editor } = await openPartnerForm({ resId: PARTNER_WITH_IMAGE_ID });
+    await openMediaManagerFromPowerbox(editor);
+    expect(VIDEO_CARD).toHaveCount(1);
+    await contains(".modal .btn-close").click();
+
+    await openMediaManagerFromImageToolbar("img[alt='old']");
+    expect(VIDEO_CARD).toHaveCount(0);
+});
+
+test("insert a video in the notes", async () => {
+    const { editor } = await openPartnerForm();
+    await openMediaManagerFromPowerbox(editor);
+    await contains(`${VIDEO_CARD} .o_kanban_image`).click();
+    await contains(".modal .o_select_button:enabled").click();
+    // the html field has the embedded components: the embedded video is inserted
+    await waitFor(`${NOTES} [data-embedded='video']`);
+    expect(".modal").toHaveCount(0);
+    const props = JSON.parse(
+        queryOne(`${NOTES} [data-embedded='video']`).dataset.embeddedProps
+    );
+    expect(props).toMatchObject({ platform: "youtube", videoId: "dQw4w9WgXcQ" });
 });
 
 test("closing the media manager inserts nothing", async () => {
