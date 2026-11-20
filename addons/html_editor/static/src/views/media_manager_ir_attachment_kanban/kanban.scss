@@ -29,6 +29,16 @@
                     transition: scale 0.3s ease-out;
                 }
             }
+            // the play icon over the thumbnail of a video
+            .o_video_thumbnail {
+                place-items: center;
+                > * {
+                    grid-area: 1 / 1;
+                }
+                .o_video_thumbnail_play {
+                    z-index: 1;
+                }
+            }
         }
         .o_kanban_details_wrapper {
             display: flex;

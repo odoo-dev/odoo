@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+    <t t-name="html_editor.VideoThumbnailField">
+        <div class="o_video_thumbnail position-relative d-grid">
+            <img t-if="this.thumbnailUrl()" t-att-src="this.thumbnailUrl()" t-att-alt="this.props.record.data.display_name"/>
+            <span class="o_video_thumbnail_play oi oi-2x oi-filled text-white bg-black-50 rounded-circle" data-icon="play_circle"/>
+        </div>
+    </t>
+</templates>

@@ -60,7 +60,11 @@
                                          t-attf-alt="#{record.description.raw_value or record.name.raw_value or 'Image'}"
                                          t-att-width="record.image_width.value"
                                          t-att-height="record.image_height.value"/>
-                                    <div t-else="!webimage" class="o_image o_image_thumbnail" t-att-data-mimetype="record.mimetype.value"/>
+                                    <!-- the videos of the platforms (see SUPPORTED_VIDEO_URL_MIMETYPES) -->
+                                    <t t-elif="record.type.raw_value == 'url' and record.mimetype.value.startsWith('video/x-')">
+                                        <field name="url" widget="media_manager_video_thumbnail"/>
+                                    </t>
+                                    <div t-else="" class="o_image o_image_thumbnail" t-att-data-mimetype="record.mimetype.value"/>
                                 </div>
                             </aside>
                             <main class="position-absolute" >

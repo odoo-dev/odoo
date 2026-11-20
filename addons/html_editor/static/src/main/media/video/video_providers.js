@@ -49,6 +49,36 @@ export function getVideoMimetype(platform) {
 /** The mimetypes of the url attachments of the platforms' videos. */
 export const VIDEO_URL_MIMETYPES = Object.values(PLATFORMS).map(getVideoMimetype);
 
+/** url -> Promise<string>: Vimeo asks its api for each thumbnail */
+const thumbnailUrls = new Map();
+
+/**
+ * The thumbnail of a platform's video, "" if the platform has none (Google
+ * Drive, Facebook, ...) or if it could not be fetched.
+ *
+ * @param {string} url the url of the video
+ * @returns {Promise<string>}
+ */
+export function getVideoThumbnailUrl(url) {
+    if (!thumbnailUrls.has(url)) {
+        thumbnailUrls.set(url, fetchVideoThumbnailUrl(url));
+    }
+    return thumbnailUrls.get(url);
+}
+
+async function fetchVideoThumbnailUrl(url) {
+    const match = matchPlatformUrl(url);
+    if (!match?.provider.getThumbnailUrl) {
+        return "";
+    }
+    const { provider, urlMatch } = match;
+    try {
+        return (await provider.getThumbnailUrl(provider.getVideoUrlData(urlMatch).videoId)) || "";
+    } catch {
+        return ""; // e.g. the Vimeo api is not reachable
+    }
+}
+
 /** The class of the video elements built by {@link renderVideoElements}. */
 export const VIDEO_CLASS = "media_iframe_video";
 
