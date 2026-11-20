@@ -436,13 +436,6 @@ class MrpWorkorder(models.Model):
         for wo in self:
             wo.is_planned = bool(wo.date_start and wo.date_finished)
 
-    def _search_is_planned(self, operator, value):
-        if (operator == '=' and value) or (operator == '!=' and not value):
-            return ['&', ('date_start', '!=', False), ('date_finished', '!=', False)]
-        if (operator == '=' and not value) or (operator == '!=' and value):
-            return ['|', ('date_start', '=', False), ('date_finished', '=', False)]
-        return NotImplemented
-
     @api.onchange('operation_id')
     def _onchange_operation_id(self):
         if self.operation_id:
@@ -791,11 +784,6 @@ class MrpWorkorder(models.Model):
 
     def button_pending(self):
         self.end_previous()
-
-    def button_unblock(self):
-        for order in self:
-            order.workcenter_id.unblock()
-        return True
 
     def action_cancel(self):
         self.leave_id.unlink()

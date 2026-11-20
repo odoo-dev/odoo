@@ -3199,19 +3199,19 @@ class TestMrpOrder(TestMrpCommon, MailCase):
             grandparent_production.action_confirm()
 
             child_production, parent_production = self.env['mrp.production'].search([('product_id', 'in', (parent + child).ids)], order='id desc', limit=2)
-
-            for source_mo, mo, product, child_mo in [(none_production, grandparent_production, grandparent, parent_production),
+            for source_mo, mo, product, child_mos in [(none_production, grandparent_production, grandparent, parent_production | child_production),
                                                      (grandparent_production, parent_production, parent, child_production),
                                                      (parent_production, child_production, child, none_production)]:
 
                 self.assertEqual(mo.product_id, product, '[%s] There should be a MO for product %s' % (case_description, product.display_name))
                 self.assertEqual(mo.mrp_production_source_count, len(source_mo), '[%s] Incorrect value for product %s' % (case_description, product.display_name))
-                self.assertEqual(mo.mrp_production_child_count, len(child_mo), '[%s] Incorrect value for product %s' % (case_description, product.display_name))
+                self.assertEqual(mo.mrp_production_all_child_count, len(child_mos), '[%s] Incorrect value for product %s' % (case_description, product.display_name))
 
                 source_action = mo.action_view_mrp_production_sources()
-                child_action = mo.action_view_mrp_production_childs()
+                child_action = mo.action_view_mrp_production_all_childs()
+                child_action_res_ids = [child_action['res_id']] if child_action.get('res_id') else child_action['domain'][0][2]
                 self.assertEqual(source_action.get('res_id', False), source_mo.id, '[%s] Incorrect value for product %s' % (case_description, product.display_name))
-                self.assertEqual(child_action.get('res_id', False), child_mo.id, '[%s] Incorrect value for product %s' % (case_description, product.display_name))
+                self.assertEqual(child_action_res_ids, child_mos.ids, '[%s] Incorrect value for product %s' % (case_description, product.display_name))
 
     @freeze_time('2022-06-28 08:00')
     def test_replan_workorders01(self):
@@ -4864,8 +4864,8 @@ class TestMrpOrder(TestMrpCommon, MailCase):
         })
         grandparent_production.action_confirm()
         child_production, parent_production = self.env['mrp.production'].search([('product_id', 'in', (parent + child).ids)], order='id desc', limit=2)
-        self.assertTrue(grandparent_production._get_children(), parent_production)
-        self.assertTrue(parent_production._get_children(), child_production)
+        self.assertTrue(grandparent_production._get_all_children(), parent_production | child_production)
+        self.assertTrue(parent_production._get_all_children(), child_production)
         update_quantity_wizard = self.env['change.production.qty'].create({
             'mo_id': grandparent_production.id,
             'product_qty': 2,

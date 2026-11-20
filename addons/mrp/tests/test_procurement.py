@@ -289,8 +289,7 @@ class TestProcurement(TestMrpCommon):
             raw_move.product_id = component
             raw_move.product_uom_qty = 1.0
         mo = mo_form.save()
-        child_mo = mo._get_children()
-        grand_child_mo = child_mo._get_children()
+        child_mo, grand_child_mo = mo._get_all_children()
 
         self.assertRecordValues(mo.move_raw_ids, [{'product_id': component.id, 'product_qty': 1}])
         self.assertEqual(child_mo.product_id, component)
@@ -430,8 +429,7 @@ class TestProcurement(TestMrpCommon):
         })
         self.assertEqual(self.product_4.free_qty, 2)
         mo.action_confirm()
-        child_mo_stick, child_mo_B = mo._get_children()
-        grand_child_mo_stick = child_mo_B._get_children()
+        child_mo_stick, child_mo_B, grand_child_mo_stick = mo._get_all_children()
 
         self.assertEqual(self.product_4.free_qty, 0)
         self.assertRecordValues(child_mo_B, [{'product_id': self.productB.id, 'product_uom_qty': 5}])
@@ -514,13 +512,13 @@ class TestProcurement(TestMrpCommon):
         mo.action_confirm()
 
         self.assertEqual(component.free_qty, 0)
-        child_mo_C, child_mo_D = mo._get_children()
+        child_mo_C, child_mo_D, _ = mo._get_all_children()
         self.assertRecordValues(child_mo_C | child_mo_D, [
             {'product_id': self.productC.id, 'product_uom_qty': 2.0},
             {'product_id': self.productD.id, 'product_uom_qty': 2.0},
         ])
-        self.assertFalse(child_mo_C._get_children())
-        self.assertRecordValues(child_mo_D._get_children(), [
+        self.assertFalse(child_mo_C._get_all_children())
+        self.assertRecordValues(child_mo_D._get_all_children(), [
             {'product_id': component.id, 'product_uom_qty': 1.0},
         ])
 
@@ -1322,7 +1320,7 @@ class TestProcurement(TestMrpCommon):
         })
         update_quantity_wizard.change_prod_qty()
         self.assertEqual(mo.move_raw_ids.quantity, 10)
-        child_mo = mo._get_children()
+        child_mo = mo._get_all_children()
         self.assertEqual(len(child_mo), 1)
         self.assertEqual(child_mo.product_qty, 1)
 
@@ -1360,7 +1358,7 @@ class TestProcurement(TestMrpCommon):
             'product_qty': 1,
         })
         mo.action_confirm()
-        mo_child = mo._get_children()
+        mo_child = mo._get_all_children()
 
         self.assertEqual(mo.move_raw_ids.uom_id, self.uom_unit)
         self.assertEqual(mo_child.uom_id, self.uom_dozen)
@@ -1402,7 +1400,7 @@ class TestProcurement(TestMrpCommon):
         self.assertRecordValues(main_mo.move_raw_ids, [{
             'product_id': component.id, 'quantity': 0.0, 'product_uom_qty': 3.0, 'uom_id': self.uom_dunit.id,  # Requires 30 units
         }])
-        child_mos = main_mo._get_children()
+        child_mos = main_mo._get_all_children()
         self.assertEqual(len(child_mos), 6)
         self.assertTrue(all(mo.move_finished_ids.move_dest_ids == main_mo.move_raw_ids for mo in child_mos))
         # Split the main MO
@@ -1587,7 +1585,7 @@ class TestProcurement(TestMrpCommon):
         mo.action_confirm()
 
         # Split the child MO in 3 and validate the first one
-        child_mo = mo._get_children()
+        child_mo = mo._get_all_children()
         wizard = Form.from_action(self.env, child_mo.action_split())
         wizard.max_batch_size = 1
         wizard.save().action_split()
@@ -1657,7 +1655,7 @@ class TestProcurement(TestMrpCommon):
 
         parent_mo = self.env['mrp.production'].create({'bom_id': parent_bom.id})
         parent_mo.action_confirm()
-        mo = parent_mo._get_children()
+        mo = parent_mo._get_all_children()
         self.assertEqual(mo.product_id, finished)
         self.assertEqual(self.env['stock.move'].search([('product_id', '=', component.id)]), mo.move_raw_ids)
 
@@ -1684,7 +1682,7 @@ class TestProcurement(TestMrpCommon):
 
         mo = self.env['mrp.production'].create({'bom_id': bom_a.id})
         mo.action_confirm()
-        child_mo = mo._get_children()
+        child_mo = mo._get_all_children()
         self.assertEqual(child_mo.product_id, self.productB)
         self.assertEqual(mo.picking_ids.move_ids.product_id, self.productB | self.productC)
         self.assertEqual(child_mo.picking_ids.move_ids.product_id, self.productD)

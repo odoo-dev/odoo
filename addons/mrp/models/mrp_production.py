@@ -263,7 +263,6 @@ class MrpProduction(models.Model):
     picking_ids = fields.Many2many('stock.picking', compute='_compute_picking_ids', string='Picking associated to this manufacturing order')
     delivery_count = fields.Integer(string='Delivery Orders', compute='_compute_picking_ids')
 
-    mrp_production_child_count = fields.Integer("Number of generated MO", compute='_compute_mrp_production_child_count')
     mrp_production_all_child_count = fields.Integer("Number of all generated MO", compute='_compute_mrp_production_all_child_count')
     mrp_production_all_child_done_count = fields.Integer("Number of done all generated MO", compute='_compute_mrp_production_all_child_count')
     mrp_production_source_count = fields.Integer("Number of source MO", compute='_compute_mrp_production_source_count')
@@ -320,11 +319,6 @@ class MrpProduction(models.Model):
             ('secondary', 'Secondary'),
             ('invisible', 'Invisible'),
         ], compute='_compute_validate_button_style')
-
-    @api.depends('production_group_id.child_ids.production_ids')
-    def _compute_mrp_production_child_count(self):
-        for production in self:
-            production.mrp_production_child_count = len(production._get_children())
 
     @api.depends('production_group_id.child_ids.production_ids')
     def _compute_mrp_production_all_child_count(self):
@@ -1630,10 +1624,6 @@ class MrpProduction(models.Model):
 
         self.workorder_ids.filtered(lambda w: w.state not in ['done', 'cancel'])._action_confirm()
 
-    def _get_children(self):
-        self.ensure_one()
-        return self.production_group_id.child_ids.production_ids
-
     def _get_all_children(self):
         direct_children = self.production_group_id.child_ids.production_ids
         indirect_children = direct_children._get_all_children() if direct_children else self.env['mrp.production']
@@ -1646,26 +1636,6 @@ class MrpProduction(models.Model):
     def set_qty_producing(self):
         self.ensure_one()
         self._set_qty_producing(False)
-
-    def action_view_mrp_production_childs(self):
-        self.ensure_one()
-        mrp_production_ids = self._get_children().ids
-        action = {
-            'res_model': 'mrp.production',
-            'type': 'ir.actions.act_window',
-        }
-        if len(mrp_production_ids) == 1:
-            action.update({
-                'view_mode': 'form',
-                'res_id': mrp_production_ids[0],
-            })
-        else:
-            action.update({
-                'name': _("%s Child MO's", self.name),
-                'domain': [('id', 'in', mrp_production_ids)],
-                'view_mode': 'list,form',
-            })
-        return action
 
     def action_view_mrp_production_all_childs(self):
         self.ensure_one()
