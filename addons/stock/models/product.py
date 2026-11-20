@@ -1,6 +1,8 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+import logging
 import operator as py_operator
+import resource
 from ast import literal_eval
 from collections import defaultdict
 from collections.abc import Iterable
@@ -11,6 +13,19 @@ from odoo.exceptions import UserError
 from odoo.fields import Domain
 from odoo.tools import SQL
 from odoo.tools.barcode import check_barcode_encoding
+
+_logger = logging.getLogger(__name__)
+
+
+def _log_thread_rss(method_name, rss_before, rss_after):
+    # Debug-only instrumentation: RUSAGE_THREAD isolates the memory
+    # attributable to the calling thread's own work, as opposed to the whole
+    # process (which would also reflect concurrent requests on other
+    # threads/workers).
+    _logger.info(
+        "[MEMDBG] %s: calling thread max RSS before=%.1f MB after=%.1f MB (delta=%.1f MB)",
+        method_name, rss_before / 1024, rss_after / 1024, (rss_after - rss_before) / 1024,
+    )
 
 PY_OPERATORS = {
     '<': py_operator.lt,
@@ -482,8 +497,19 @@ class ProductProduct(models.Model):
             return [('id', 'in', product_ids)]
         return self._search_product_quantity(operator, value, 'free_qty')
 
+    def _search_product_quantity(self, operator, value, field):
+        thread_rss_before = resource.getrusage(resource.RUSAGE_THREAD).ru_maxrss
+        result = super()._search_product_quantity(operator, value, field)
+        thread_rss_after = resource.getrusage(resource.RUSAGE_THREAD).ru_maxrss
+        _log_thread_rss(f'_search_product_quantity(field={field})', thread_rss_before, thread_rss_after)
+        return result
+
     def _search_qty_available_new(self, operator, value, lot_id=False, owner_id=False, package_id=False):
-        return self._search_field_by_quants(operator, value, lot_id, owner_id, package_id)
+        thread_rss_before = resource.getrusage(resource.RUSAGE_THREAD).ru_maxrss
+        result = self._search_field_by_quants(operator, value, lot_id, owner_id, package_id)
+        thread_rss_after = resource.getrusage(resource.RUSAGE_THREAD).ru_maxrss
+        _log_thread_rss('_search_qty_available_new', thread_rss_before, thread_rss_after)
+        return result
 
     def _search_field_by_quants(self, operator, value, lot_id=False, owner_id=False, package_id=False, field="qty_available"):
         ''' Optimized method which doesn't search on stock.moves, only on stock.quants. '''
