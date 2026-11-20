@@ -29,11 +29,6 @@ export class MediaManagerDialog extends SelectCreateDialog {
     document = document;
 
     setup() {
-        console.groupCollapsed("%c MediaManagerDialog :: setup()", "background: #f9f;");
-        console.warn("setup() trace");
-        console.log("this : ", this);
-        console.log("props : ", this.props);
-        console.groupEnd();
         super.setup();
         this.state.records = [];
         this.orm = useService("orm");
@@ -59,7 +54,6 @@ export class MediaManagerDialog extends SelectCreateDialog {
             filters: this.props.filters,
             onSelectionChanged: this.onSelectionChanged,
         };
-        console.warn("get viewProps", { ...props });
         return props;
     }
 
@@ -69,7 +63,6 @@ export class MediaManagerDialog extends SelectCreateDialog {
     }
 
     async select(resIds) {
-        console.warn("select", resIds);
         const records = this.state.records.filter((rec) => resIds.includes(rec.id));
         if (this.props.onSelected) {
             this.executeOnceAndClose(() => this.props.onSelected(resIds, records));

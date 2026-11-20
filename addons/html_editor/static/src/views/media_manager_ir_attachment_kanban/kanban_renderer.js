@@ -24,11 +24,6 @@ export class MediaManagerKanbanRenderer extends KanbanRenderer {
     urlInputRef = signal.ref();
 
     setup() {
-        console.groupCollapsed("%c MediaManagerKanbanRenderer :: setup()", "background: #9f9;");
-        console.warn("setup() trace");
-        console.log("this : ", this);
-        console.log("props : ", this.props);
-        console.groupEnd();
         super.setup();
         this.uploadService = useService("upload");
         this.notificationService = useService("notification");
@@ -48,7 +43,6 @@ export class MediaManagerKanbanRenderer extends KanbanRenderer {
     }
 
     async validateUrl(url) {
-        console.warn("validateUrl", url);
         const path = url.split("?")[0];
         const isValidUrl = /^.+\..+$/.test(path); // TODO improve
 
@@ -68,7 +62,6 @@ export class MediaManagerKanbanRenderer extends KanbanRenderer {
     // ----------------
 
     filterRecords(domain) {
-        console.log("filterRecords", domain);
         if (domain) {
             this.env.model.env.searchModel.splitAndAddDomain(domain);
         } else {
