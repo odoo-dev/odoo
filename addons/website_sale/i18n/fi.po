@@ -32,7 +32,7 @@ msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-11-06 17:39+0000\n"
-"PO-Revision-Date: 2026-11-10 11:09+0000\n"
+"PO-Revision-Date: 2026-11-19 19:36+0000\n"
 "Last-Translator: Saara Hakanen <sahak@odoo.com>\n"
 "Language-Team: Finnish <https://translate.odoo.com/projects/odoo-s19-1/"
 "website_sale/fi/>\n"
@@ -41,7 +41,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 2026.8.1\n"
+"X-Generator: Weblate 2026.11.2\n"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.products
@@ -184,7 +184,7 @@ msgstr ""
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.snippets
 msgid "/shop"
-msgstr ""
+msgstr "/shop"
 
 #. module: website_sale
 #. odoo-javascript
@@ -400,7 +400,7 @@ msgstr "<span class=\"align-middle\">Onko sinulla jo tili?</span>"
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.confirmation
 msgid "<span class=\"align-middle\">to follow your order.</span>"
-msgstr ""
+msgstr "<span class=\"align-middle\">seurataksesi tilaustasi.</span>"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.s_dynamic_snippet_products_preview_data
@@ -1323,6 +1323,8 @@ msgstr ""
 msgid ""
 "A detailed, formatted description to promote your product on your eCommerce."
 msgstr ""
+"Yksityiskohtainen, muotoiltu kuvaus tuotteesi markkinoimiseksi "
+"verkkokaupassasi."
 
 #. module: website_sale
 #: model_terms:ir.actions.act_window,help:website_sale.product_template_action_website
@@ -1678,7 +1680,7 @@ msgstr "Automaattinen"
 #: model:ir.model.fields,field_description:website_sale.field_product_template__publish_on
 #: model:ir.model.fields,field_description:website_sale.field_website_checkout_step__publish_on
 msgid "Auto publish on"
-msgstr ""
+msgstr "Automaattinen julkaisu"
 
 #. module: website_sale
 #. odoo-javascript
@@ -1697,7 +1699,7 @@ msgstr "Automatisoi sähköpostit kesken jääneille ostoille"
 #: model:ir.model.fields,help:website_sale.field_product_template__publish_on
 #: model:ir.model.fields,help:website_sale.field_website_checkout_step__publish_on
 msgid "Automatically publish the page on the chosen date and time."
-msgstr ""
+msgstr "Julkaise sivu automaattisesti valittuna päivänä ja kellonaikana."
 
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_product_template__rating_avg
@@ -1800,7 +1802,7 @@ msgstr "Benelux"
 #. odoo-javascript
 #: code:addons/website_sale/static/src/website_builder/products_design_panel.xml:0
 msgid "Bento"
-msgstr ""
+msgstr "Bento"
 
 #. module: website_sale
 #. odoo-javascript
@@ -1876,7 +1878,7 @@ msgstr "Reunustettu"
 #. odoo-javascript
 #: code:addons/website_sale/static/src/website_builder/product_page_option.xml:0
 msgid "Bottom"
-msgstr ""
+msgstr "Alhaalla"
 
 #. module: website_sale
 #. odoo-python
@@ -2300,7 +2302,7 @@ msgstr ""
 #. module: website_sale
 #: model:ir.model,name:website_sale.model_res_company
 msgid "Company"
-msgstr ""
+msgstr "Yritys"
 
 #. module: website_sale
 #. odoo-javascript
@@ -2701,7 +2703,7 @@ msgstr "Toimitusmäärä"
 #. module: website_sale
 #: model:ir.model,name:website_sale.model_delivery_carrier
 msgid "Delivery Method"
-msgstr ""
+msgstr "Toimitustapa"
 
 #. module: website_sale
 #: model:ir.ui.menu,name:website_sale.menu_ecommerce_delivery
@@ -2753,7 +2755,7 @@ msgstr "Verkkosivun kuvaus"
 #. odoo-javascript
 #: code:addons/website_sale/static/src/website_builder/products_design_panel.xml:0
 msgid "Design"
-msgstr ""
+msgstr "Suunnittelu"
 
 #. module: website_sale
 #: model:product.public.category,name:website_sale.public_category_services_design_and_planning
@@ -3175,7 +3177,7 @@ msgstr "Arkistolaatikot"
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.product_attribute_view_form
 msgid "Filter"
-msgstr ""
+msgstr "Suodatin"
 
 #. module: website_sale
 #. odoo-javascript
@@ -3752,7 +3754,7 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/website_sale/static/src/website_builder/product_ribbon_options_plugin.js:0
 msgid "It will be removed from all products. Are you sure?"
-msgstr ""
+msgstr "Se poistetaan kaikista tuotteista. Oletko varma?"
 
 #. module: website_sale
 #: model:ir.model,name:website_sale.model_account_move
@@ -3936,7 +3938,7 @@ msgstr "Linkin väri"
 #. odoo-python
 #: code:addons/website_sale/controllers/cart.py:0
 msgid "Linked lines must be added to the cart with their parent."
-msgstr ""
+msgstr "Linkitetyt rivit on lisättävä ostoskoriin päärivinsä kanssa."
 
 #. module: website_sale
 #. odoo-javascript
@@ -3963,7 +3965,7 @@ msgstr "Kirjaudu sisään tilataksesi uudelleen"
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.product_template_form_view
 msgid "Long Description"
-msgstr ""
+msgstr "Pitkä kuvaus"
 
 #. module: website_sale
 #: model:product.public.category,name:website_sale.public_category_boxes_luxury
@@ -4224,7 +4226,7 @@ msgstr ""
 #. odoo-python
 #: code:addons/website_sale/models/sale_order.py:0
 msgid "No delivery method is selected."
-msgstr ""
+msgstr "Toimitustapaa ei ole valittu."
 
 #. module: website_sale
 #. odoo-javascript
@@ -4437,7 +4439,7 @@ msgstr "Avoimet myyntitilaukset"
 #. module: website_sale
 #: model:ir.actions.act_url,name:website_sale.action_open_shop_page
 msgid "Open Shop Page"
-msgstr ""
+msgstr "Avaa kauppasivu"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.brand_promotion
@@ -5081,7 +5083,7 @@ msgstr "Julkaisupäivä"
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.product_template_form_view
 msgid "Publish on"
-msgstr ""
+msgstr "Julkaise kohteessa"
 
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_product_document__shown_on_product_page
@@ -5100,7 +5102,7 @@ msgstr "Julkaistu"
 #: model:ir.model.fields,field_description:website_sale.field_product_template__published_date
 #: model:ir.model.fields,field_description:website_sale.field_website_checkout_step__published_date
 msgid "Published date"
-msgstr ""
+msgstr "Julkaisupäivä"
 
 #. module: website_sale
 #. odoo-javascript
@@ -5377,7 +5379,7 @@ msgstr "Nauhan nimi"
 #. module: website_sale
 #: model:ir.ui.menu,name:website_sale.product_catalog_product_ribbons
 msgid "Ribbons"
-msgstr ""
+msgstr "Nauhat"
 
 #. module: website_sale
 #. odoo-javascript
@@ -5513,12 +5515,12 @@ msgstr "Hae yleisesti"
 #: model_terms:ir.ui.view,arch_db:website_sale.product_search
 #: model_terms:ir.ui.view,arch_db:website_sale.products
 msgid "Search in {{0}}"
-msgstr ""
+msgstr "Hae kohteesta {{0}}"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.filter_radio_and_multi_attributes
 msgid "Search {{0}} ({{1}})"
-msgstr ""
+msgstr "Hae {{0}} ({{1}})"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.products
@@ -5772,7 +5774,7 @@ msgstr "Näytä filmstrip-navigointi ylhäällä"
 #. odoo-javascript
 #: code:addons/website_sale/static/src/website_builder/products_design_panel.xml:0
 msgid "Show description"
-msgstr ""
+msgstr "Näytä kuvaus"
 
 #. module: website_sale
 #. odoo-javascript
@@ -5820,7 +5822,7 @@ msgstr "Sivupalkki"
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.confirmation
 msgid "Sign Up"
-msgstr ""
+msgstr "Liity"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.address
@@ -5884,6 +5886,8 @@ msgid ""
 "Some products in your cart are not available for purchase in your country. "
 "Please remove them or contact us."
 msgstr ""
+"Jotkin ostoskorissasi olevat tuotteet eivät ole saatavilla maassasi. Poista "
+"ne tai ota meihin yhteyttä."
 
 #. module: website_sale
 #. odoo-python
@@ -6052,7 +6056,7 @@ msgstr "Verot"
 #. odoo-python
 #: code:addons/website_sale/models/product_template.py:0
 msgid "Taxes calculated at checkout."
-msgstr ""
+msgstr "Verot lasketaan kassalla."
 
 #. module: website_sale
 #: model:ir.model.fields,help:website_sale.field_product_product__variants_default_code
@@ -6215,6 +6219,8 @@ msgid ""
 "The number of selected combo items must match the number of available combo "
 "choices."
 msgstr ""
+"Valittujen yhdistelmäkohteiden määrän on vastattava käytettävissä olevien "
+"yhdistelmävaihtoehtojen määrää."
 
 #. module: website_sale
 #. odoo-python
@@ -6323,6 +6329,8 @@ msgid ""
 "This note is added to sales orders, invoices, eCommerce listing and SEO "
 "descriptions."
 msgstr ""
+"Tämä huomautus lisätään myyntitilauksiin, laskuihin, verkkokauppaluetteloon "
+"ja SEO-kuvauksiin."
 
 #. module: website_sale
 #. odoo-python
@@ -6350,19 +6358,19 @@ msgstr "Tuotetta ei ole enää saatavilla."
 #. odoo-python
 #: code:addons/website_sale/models/sale_order.py:0
 msgid "This product is not available (anymore) in this unit of measure."
-msgstr ""
+msgstr "Tätä tuotetta ei ole (enää) saatavilla tässä mittayksikössä."
 
 #. module: website_sale
 #. odoo-python
 #: code:addons/website_sale/controllers/main.py:0
 msgid "This product is not available for purchase in your country."
-msgstr ""
+msgstr "Tämä tuote ei ole saatavilla maassasi."
 
 #. module: website_sale
 #. odoo-python
 #: code:addons/website_sale/controllers/cart.py:0
 msgid "This product is part of a combo and can't be updated individually."
-msgstr ""
+msgstr "Tämä tuote on osa yhdistelmää, eikä sitä voi päivittää erikseen."
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.products_item
@@ -6514,7 +6522,7 @@ msgstr "Julkaisematon"
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.product_template_form_view
 msgid "Unschedule"
-msgstr ""
+msgstr "Poista aikataulutus"
 
 #. module: website_sale
 #: model:ir.model.fields.selection,name:website_sale.selection__website__product_page_container__unset
@@ -6585,7 +6593,7 @@ msgstr "Videon URL-osoite"
 #. odoo-javascript
 #: code:addons/website_sale/static/src/interactions/shop_page.js:0
 msgid "View Less"
-msgstr ""
+msgstr "Näytä vähemmän"
 
 #. module: website_sale
 #. odoo-javascript
@@ -6637,7 +6645,7 @@ msgstr "Näkyvissä nykysellä verkkosivulla"
 #. module: website_sale
 #: model:ir.model,name:website_sale.model_website_track
 msgid "Visited Page"
-msgstr ""
+msgstr "Vierailtu sivu"
 
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_website_visitor__product_ids
@@ -6919,7 +6927,7 @@ msgstr "Et voi käyttää videota tuotteen pääkuvana."
 #. odoo-python
 #: code:addons/website_sale/controllers/cart.py:0
 msgid "You cannot add a combo item separately from its combo."
-msgstr ""
+msgstr "Et voi lisätä yhdistelmätuotteen osaa erillään sen yhdistelmästä."
 
 #. module: website_sale
 #: model_terms:ir.actions.act_window,help:website_sale.sale_report_action_carts
@@ -6981,7 +6989,7 @@ msgstr "Ostoskorisi ei ole valmis maksettavaksi, tarkista edelliset vaiheet."
 #. module: website_sale
 #: model:mail.template,subject:website_sale.mail_template_sale_cart_recovery
 msgid "Your cart is waiting"
-msgstr ""
+msgstr "Ostoskorisi odottaa"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.payment_confirmation_status
@@ -7222,6 +7230,13 @@ msgid ""
 "            o_wsale_products_opt_has_wishlist "
 "o_wsale_products_opt_has_comparison"
 msgstr ""
+"o_wsale_products_opt_name_color_regular o_wsale_products_opt_thumb_2_3\n"
+"            o_wsale_products_opt_thumb_cover "
+"o_wsale_products_opt_img_secondary_show\n"
+"            o_wsale_products_opt_img_hover_zoom_out_light "
+"o_wsale_products_opt_has_cta\n"
+"            o_wsale_products_opt_has_wishlist "
+"o_wsale_products_opt_has_comparison"
 
 #. module: website_sale
 #. odoo-javascript
@@ -7251,7 +7266,7 @@ msgstr "käyttöehdot"
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.cart_combo_item_line
 msgid "x"
-msgstr ""
+msgstr "x"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.dynamic_filter_template_product_product_products_item

@@ -7,7 +7,7 @@
 # Foldi Robert <foldirobert@nexterp.ro>, 2022
 # Martin Trigaux, 2022
 # Cozmin Candea <office@terrabit.ro>, 2023
-# Dorin Hongu <dhongu@gmail.com>, 2023, 2025.
+# Dorin Hongu <dhongu@gmail.com>, 2023, 2025, 2026.
 # "Tiffany Chang (tic)" <tic@odoo.com>, 2025.
 # Weblate <noreply-mt-weblate@weblate.org>, 2025, 2026.
 # Ciocoiu Beatrice-Flavia <ciocoiuflavia008@gmail.com>, 2025.
@@ -18,8 +18,8 @@ msgstr ""
 "Project-Id-Version: Odoo Server 16.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-11-06 17:39+0000\n"
-"PO-Revision-Date: 2026-08-11 00:19+0000\n"
-"Last-Translator: Odoo Translation Bot <c3p@odoo.com>\n"
+"PO-Revision-Date: 2026-11-20 11:02+0000\n"
+"Last-Translator: Dorin Hongu <dhongu@gmail.com>\n"
 "Language-Team: Romanian <https://translate.odoo.com/projects/odoo-s19-1/hr/"
 "ro/>\n"
 "Language: ro\n"
@@ -28,7 +28,7 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=3; plural=n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < "
 "20)) ? 1 : 2;\n"
-"X-Generator: Weblate 2026.6.1\n"
+"X-Generator: Weblate 2026.11.2\n"
 
 #. module: hr
 #. odoo-python
@@ -447,6 +447,8 @@ msgid ""
 "<span class=\"text-uppercase fw-bolder\" style=\"font-size: "
 "13px\">Organization Chart</span>"
 msgstr ""
+"<span class=\"text-uppercase fw-bolder\" style=\"font-size: 13px\">"
+"Organigramă</span>"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_form
@@ -489,7 +491,7 @@ msgstr "<span>Vizualizează</span>"
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.view_hr_job_form
 msgid "<span>employees</span>"
-msgstr ""
+msgstr "<span>angajați</span>"
 
 #. module: hr
 #: model_terms:hr.job,website_description:hr.job_trainee
@@ -727,7 +729,6 @@ msgstr "Angajat activ"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.hr_version_search_view
-#, fuzzy
 msgid "Active Employees"
 msgstr "Angajați activi"
 
@@ -759,7 +760,6 @@ msgstr "Plan de activitate"
 #: model:ir.model.fields,field_description:hr.field_hr_department__activity_plans_ids
 #: model:ir.model.fields,field_description:hr.field_hr_employee__activity_plans_ids
 #: model:ir.model.fields,field_description:hr.field_hr_version__activity_plans_ids
-#, fuzzy
 msgid "Activity Plans"
 msgstr "Planuri de activitate"
 
@@ -1431,7 +1431,7 @@ msgstr "Data nașterii"
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__birthday_month
 msgid "Birthday Month"
-msgstr ""
+msgstr "Luna nașterii"
 
 #. module: hr
 #. odoo-javascript
@@ -1451,7 +1451,7 @@ msgstr "Anulează"
 #. odoo-python
 #: code:addons/hr/models/hr_version.py:0
 msgid "Cannot archive all the active versions of an employee."
-msgstr ""
+msgstr "Nu se pot arhiva toate versiunile active ale unui angajat."
 
 #. module: hr
 #. odoo-python
@@ -1468,12 +1468,13 @@ msgstr ""
 #: code:addons/hr/models/hr_employee.py:0
 msgid "Cannot search or group by hr_presence state: too many employees (%s)"
 msgstr ""
+"Nu se poate căuta sau grupa după starea hr_presence: prea mulți angajați (%s)"
 
 #. module: hr
 #. odoo-python
 #: code:addons/hr/models/hr_version.py:0
 msgid "Cannot unassign all the active versions of an employee."
-msgstr ""
+msgstr "Nu se pot dezasocia toate versiunile active ale unui angajat."
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__certificate
@@ -1504,12 +1505,12 @@ msgstr "Director Tehnic"
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee_public__child_all_count
 msgid "Child All Count"
-msgstr ""
+msgstr "Număr total subordonați"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee_public__child_count
 msgid "Child Count"
-msgstr ""
+msgstr "Număr subordonați"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_department__child_ids
@@ -1694,7 +1695,7 @@ msgstr "Contract"
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_filter
 msgid "Contract End"
-msgstr ""
+msgstr "Sfârșit contract"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_departure_wizard__departure_date
@@ -1723,7 +1724,7 @@ msgstr "Prezentare generală a contractului"
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_filter
 msgid "Contract Start"
-msgstr ""
+msgstr "Început contract"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__contract_date_start
@@ -1875,7 +1876,7 @@ msgstr "Creează un plan de activitate"
 #: model_terms:ir.actions.act_window,help:hr.action_hr_employee_org_chart
 #: model_terms:ir.actions.act_window,help:hr.action_hr_employee_public_org_chart
 msgid "Create an employee."
-msgstr ""
+msgstr "Creați un angajat."
 
 #. module: hr
 #: model_terms:hr.job,website_description:hr.job_consultant
@@ -1945,12 +1946,12 @@ msgstr "Semnul monedei, care va fi folosit la imprimarea sumelor."
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__current_date_version
 msgid "Current Date Employee Record"
-msgstr ""
+msgstr "Fișa angajatului la data curentă"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__current_version_id
 msgid "Current Employee Record"
-msgstr ""
+msgstr "Fișa curentă a angajatului"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_job__no_of_employee
@@ -1981,7 +1982,6 @@ msgstr "Depanați și rezolvați problemele software"
 
 #. module: hr
 #: model:ir.model.fields.selection,name:hr.selection__hr_employee__birthday_month__12
-#, fuzzy
 msgid "December"
 msgstr "Decembrie"
 
@@ -2047,7 +2047,6 @@ msgstr "Departament asignabil"
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__department_color
 #: model:ir.model.fields,field_description:hr.field_hr_employee_public__department_color
-#, fuzzy
 msgid "Department Color"
 msgstr "Culoare departament"
 
@@ -2143,14 +2142,12 @@ msgstr "Dezvoltare"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__child_count
-#, fuzzy
 msgid "Direct Subordinates Count"
-msgstr "Număr de subordonați direcți"
+msgstr "Număr subordonați direcți"
 
 #. module: hr
 #: model:ir.model.fields,help:hr.field_hr_employee__subordinate_ids
 #: model:ir.model.fields,help:hr.field_hr_employee_public__subordinate_ids
-#, fuzzy
 msgid "Direct and indirect subordinates"
 msgstr "Subordonați direcți și indirecți"
 
@@ -2248,7 +2245,6 @@ msgstr "Document"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_form
-#, fuzzy
 msgid "Documents"
 msgstr "Documente"
 
@@ -2345,9 +2341,8 @@ msgstr "Email"
 
 #. module: hr
 #: model:ir.model,name:hr.model_mail_alias
-#, fuzzy
 msgid "Email Alias"
-msgstr "Email Alias"
+msgstr "Alias de e-mail"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__emergency_contact
@@ -2434,7 +2429,6 @@ msgstr "Proprietățile angajaților"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__version_id
-#, fuzzy
 msgid "Employee Record"
 msgstr "Dosarul angajatului"
 
@@ -2449,7 +2443,7 @@ msgstr "Înregistrările angajaților"
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__versions_count
 msgid "Employee Records Count"
-msgstr ""
+msgstr "Număr fișe de angajat"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_account_setup_bank_manual_config__employee_salary_amount_is_percentage
@@ -2608,7 +2602,7 @@ msgstr "Îmbogățiți profilurile angajaților cu abilități și CV-uri"
 #. module: hr
 #: model_terms:hr.job,website_description:hr.job_hrm
 msgid "Ensure compliance with labor laws"
-msgstr ""
+msgstr "Asigurați conformitatea cu legislația muncii"
 
 #. module: hr
 #: model:ir.model.fields,help:hr.field_hr_employee__identification_id
@@ -2692,7 +2686,7 @@ msgstr "Expirat"
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.hr_version_search_view
 msgid "Expired Contracts"
-msgstr ""
+msgstr "Contracte expirate"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_form
@@ -2702,12 +2696,12 @@ msgstr "Expiră la"
 #. module: hr
 #: model:ir.model.fields.selection,name:hr.selection__mail_activity__technical_usage__hr_expiring_contract
 msgid "Expiring Contract"
-msgstr ""
+msgstr "Contract care expiră"
 
 #. module: hr
 #: model:ir.model.fields.selection,name:hr.selection__mail_activity__technical_usage__hr_expiring_work_permit
 msgid "Expiring Work Permit"
-msgstr ""
+msgstr "Permis de muncă care expiră"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_export_employee_mixin__export_id
@@ -2789,7 +2783,6 @@ msgstr "Familie"
 
 #. module: hr
 #: model:ir.model.fields.selection,name:hr.selection__hr_employee__birthday_month__2
-#, fuzzy
 msgid "February"
 msgstr "Februarie"
 
@@ -2813,7 +2806,7 @@ msgstr "Domeniu de Studiu"
 #: model_terms:ir.actions.act_window,help:hr.action_hr_employee_org_chart
 #: model_terms:ir.actions.act_window,help:hr.action_hr_employee_public_org_chart
 msgid "Find all the information on employees."
-msgstr ""
+msgstr "Găsiți toate informațiile despre angajați."
 
 #. module: hr
 #: model:hr.departure.reason,name:hr.departure_fired
@@ -2867,7 +2860,7 @@ msgstr "Promovați culturi pozitive la locul de muncă"
 #. module: hr
 #: model_terms:hr.job,website_description:hr.job_cto
 msgid "Foster innovation and new solutions"
-msgstr ""
+msgstr "Încurajați inovația și soluțiile noi"
 
 #. module: hr
 #: model:ir.model.fields.selection,name:hr.selection__hr_version__employee_type__freelance
@@ -3065,7 +3058,6 @@ msgstr "Unitate distanță Acasă-Serviciu"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__hourly_cost
-#, fuzzy
 msgid "Hourly Cost"
 msgstr "Cost orar"
 
@@ -3266,14 +3258,12 @@ msgstr "Nedefinit"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__child_all_count
-#, fuzzy
 msgid "Indirect Subordinates Count"
-msgstr "Număr de subordonați indirecți"
+msgstr "Număr subordonați indirecți"
 
 #. module: hr
 #. odoo-javascript
 #: code:addons/hr/static/src/fields/hr_org_chart.xml:0
-#, fuzzy
 msgid "Indirect subordinates"
 msgstr "Subordonați indirecți"
 
@@ -3350,7 +3340,6 @@ msgstr "Este trecut"
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__is_subordinate
 #: model:ir.model.fields,field_description:hr.field_hr_employee_public__is_subordinate
-#, fuzzy
 msgid "Is Subordinate"
 msgstr "Este subordonat"
 
@@ -3372,7 +3361,7 @@ msgstr "Este utilizator"
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_form
 msgid "Issued by Government"
-msgstr ""
+msgstr "Emis de autorități"
 
 #. module: hr
 #: model_terms:hr.job,website_description:hr.job_cto
@@ -3381,7 +3370,6 @@ msgstr "Prioritizează luarea deciziilor bazate pe date"
 
 #. module: hr
 #: model:ir.model.fields.selection,name:hr.selection__hr_employee__birthday_month__1
-#, fuzzy
 msgid "January"
 msgstr "Ianuarie"
 
@@ -3435,13 +3423,11 @@ msgstr "Locuri de munca"
 
 #. module: hr
 #: model:ir.model.fields.selection,name:hr.selection__hr_employee__birthday_month__7
-#, fuzzy
 msgid "July"
 msgstr "Iulie"
 
 #. module: hr
 #: model:ir.model.fields.selection,name:hr.selection__hr_employee__birthday_month__6
-#, fuzzy
 msgid "June"
 msgstr "Iunie"
 
@@ -3579,7 +3565,7 @@ msgstr "Legați un element cu valoarea booleană Adevărat."
 #. odoo-javascript
 #: code:addons/hr/static/src/xml/contract_template_button.xml:0
 msgid "Load Contract Template"
-msgstr ""
+msgstr "Încarcă șablonul de contract"
 
 #. module: hr
 #: model:ir.actions.server,name:hr.action_hr_employee_load_demo_data
@@ -3589,7 +3575,6 @@ msgstr "Încărcați datele de probă"
 #. module: hr
 #. odoo-javascript
 #: code:addons/hr/static/src/xml/contract_template_button.xml:0
-#, fuzzy
 msgid "Load Template"
 msgstr "Încarcă șablon"
 
@@ -3629,7 +3614,7 @@ msgstr "Atașament principal"
 #: model_terms:ir.ui.view,arch_db:hr.res_users_view_form
 #: model_terms:ir.ui.view,arch_db:hr.res_users_view_form_preferences
 msgid "Main Work Location"
-msgstr ""
+msgstr "Locul de muncă principal"
 
 #. module: hr
 #: model_terms:hr.job,website_description:hr.job_developer
@@ -3674,7 +3659,6 @@ msgstr "Managager Angajat %s nu este setat."
 
 #. module: hr
 #: model:ir.model.fields.selection,name:hr.selection__hr_employee__birthday_month__3
-#, fuzzy
 msgid "March"
 msgstr "Martie"
 
@@ -3714,7 +3698,6 @@ msgstr "Demonstrații Master ale software-ului nostru"
 
 #. module: hr
 #: model:ir.model.fields.selection,name:hr.selection__hr_employee__birthday_month__5
-#, fuzzy
 msgid "May"
 msgstr "Mai"
 
@@ -3726,7 +3709,7 @@ msgstr "Membru al departamentului"
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__member_of_department
 msgid "Member of Department"
-msgstr ""
+msgstr "Membru al departamentului"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_version__member_of_department
@@ -3773,7 +3756,6 @@ msgstr ""
 #. module: hr
 #. odoo-javascript
 #: code:addons/hr/static/src/fields/hr_org_chart.xml:0
-#, fuzzy
 msgid "More managers"
 msgstr "Mai mulți manageri"
 
@@ -3826,7 +3808,6 @@ msgstr "Nume"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__nationality_country_code
-#, fuzzy
 msgid "Nationality"
 msgstr "Naționalitate"
 
@@ -3935,7 +3916,7 @@ msgstr ""
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_form
 msgid "No user linked"
-msgstr ""
+msgstr "Niciun utilizator asociat"
 
 #. module: hr
 #: model_terms:hr.job,website_description:hr.job_consultant
@@ -3956,7 +3937,6 @@ msgstr "Neangajat"
 
 #. module: hr
 #: model:ir.model.fields.selection,name:hr.selection__hr_employee__birthday_month__0
-#, fuzzy
 msgid "Not specified"
 msgstr "Nespecificat(ă)"
 
@@ -3969,7 +3949,6 @@ msgstr "Notă"
 
 #. module: hr
 #: model:ir.model.fields.selection,name:hr.selection__hr_employee__birthday_month__11
-#, fuzzy
 msgid "November"
 msgstr "Noiembrie"
 
@@ -4040,7 +4019,6 @@ msgstr "Numărul angajatilor noi pe care planuiti sa ii recrutati."
 
 #. module: hr
 #: model:ir.model.fields.selection,name:hr.selection__hr_employee__birthday_month__10
-#, fuzzy
 msgid "October"
 msgstr "Octombrie"
 
@@ -4093,13 +4071,13 @@ msgstr ""
 #. odoo-javascript
 #: code:addons/hr/static/src/components/avatar_card/avatar_card_popover_patch.xml:0
 msgid "Open Contact Profile"
-msgstr ""
+msgstr "Deschide profilul contactului"
 
 #. module: hr
 #. odoo-javascript
 #: code:addons/hr/static/src/components/avatar_card/avatar_card_popover_patch.xml:0
 msgid "Open Employee Profile (activates company)"
-msgstr ""
+msgstr "Deschide profilul angajatului (activează compania)"
 
 #. module: hr
 #. odoo-javascript
@@ -4116,13 +4094,11 @@ msgstr "Operațiune nesuportată."
 #. module: hr
 #: model:ir.actions.act_window,name:hr.action_hr_employee_org_chart
 #: model:ir.actions.act_window,name:hr.action_hr_employee_public_org_chart
-#, fuzzy
 msgid "Org Chart"
-msgstr "Org Chart"
+msgstr "Organigramă"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_form
-#, fuzzy
 msgid "Organization Chart"
 msgstr "Schema de organizare"
 
@@ -4153,7 +4129,7 @@ msgstr "În afara contractului"
 #. module: hr
 #: model_terms:hr.job,website_description:hr.job_hrm
 msgid "Oversee recruitment and hiring processes"
-msgstr ""
+msgstr "Supervizează procesele de recrutare și angajare"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__pin
@@ -4674,7 +4650,7 @@ msgstr "Angajat aferent"
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_res_users__employee_public_ids
 msgid "Related employee (public)"
-msgstr ""
+msgstr "Angajat asociat (public)"
 
 #. module: hr
 #: model:ir.model.fields,help:hr.field_res_partner__employee_ids
@@ -4827,7 +4803,6 @@ msgstr "Sezonier"
 #. module: hr
 #. odoo-javascript
 #: code:addons/hr/static/src/fields/hr_org_chart.xml:0
-#, fuzzy
 msgid "See All"
 msgstr "Vezi tot"
 
@@ -4852,7 +4827,6 @@ msgstr ""
 
 #. module: hr
 #: model:ir.model.fields.selection,name:hr.selection__hr_employee__birthday_month__9
-#, fuzzy
 msgid "September"
 msgstr "Septembrie"
 
@@ -4873,7 +4847,7 @@ msgstr "Setare Dată Încheiere Contract"
 #. odoo-javascript
 #: code:addons/hr/static/src/fields/hr_org_chart.xml:0
 msgid "Set a manager or reports to show in org chart."
-msgstr ""
+msgstr "Setați un manager sau subordonați pentru a-i afișa în organigramă."
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.res_config_settings_view_form
@@ -4948,6 +4922,8 @@ msgid ""
 "Some employees are present in a loop.\n"
 "                Click"
 msgstr ""
+"Unii angajați formează o buclă în ierarhie.\n"
+"                Faceți clic"
 
 #. module: hr
 #: model_terms:hr.job,website_description:hr.job_consultant
@@ -4987,6 +4963,8 @@ msgstr "Data de început"
 msgid ""
 "Start date (%(start)s) must be earlier than contract end date (%(end)s)."
 msgstr ""
+"Data de început (%(start)s) trebuie să fie anterioară datei de încheiere a "
+"contractului (%(end)s)."
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.res_users_view_form_preferences
@@ -5072,7 +5050,6 @@ msgstr "Student"
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__subordinate_ids
 #: model:ir.model.fields,field_description:hr.field_hr_employee_public__subordinate_ids
-#, fuzzy
 msgid "Subordinates"
 msgstr "Subordonati"
 
@@ -5113,7 +5090,6 @@ msgstr "Țintă"
 #. module: hr
 #. odoo-javascript
 #: code:addons/hr/static/src/fields/hooks.js:0
-#, fuzzy
 msgid "Team"
 msgstr "Echipă"
 
@@ -5125,7 +5101,7 @@ msgstr "Mentalitate orientată spre echipă"
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_mail_activity__technical_usage
 msgid "Technical Usage"
-msgstr ""
+msgstr "Utilizare tehnică"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_res_users__create_employee_id
@@ -5140,7 +5116,7 @@ msgstr "Câmp tehnic, dacă să creeați un angajat"
 #. module: hr
 #: model:ir.model.fields,help:hr.field_mail_activity__technical_usage
 msgid "Technical identifier"
-msgstr ""
+msgstr "Identificator tehnic"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.hr_contract_template_form_view
@@ -5168,6 +5144,8 @@ msgid ""
 "The Badge ID must contain only printable ASCII characters, without spaces, "
 "and be no longer than 18 characters."
 msgstr ""
+"ID-ul de ecuson trebuie să conțină doar caractere ASCII imprimabile, fără "
+"spații, și să nu depășească 18 caractere."
 
 #. module: hr
 #: model:ir.model.fields,help:hr.field_hr_departure_reason__country_code
@@ -5228,7 +5206,7 @@ msgstr "Contractul trebuie să aibă o dată de început."
 #. odoo-python
 #: code:addons/hr/models/hr_employee.py:0
 msgid "The contract of %(employee_name)s is about to expire."
-msgstr ""
+msgstr "Contractul lui %(employee_name)s este pe cale să expire."
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.hr_contract_template_form_view
@@ -5331,13 +5309,13 @@ msgstr ""
 #. module: hr
 #: model:ir.model.constraint,message:hr.constraint_hr_version_check_wage_positive
 msgid "The wage must be a positive value."
-msgstr ""
+msgstr "Salariul trebuie să fie o valoare pozitivă."
 
 #. module: hr
 #. odoo-python
 #: code:addons/hr/models/hr_employee.py:0
 msgid "The work permit of %(employee_name)s is about to expire."
-msgstr ""
+msgstr "Permisul de muncă al lui %(employee_name)s este pe cale să expire."
 
 #. module: hr
 #: model:hr.contract.type,name:hr.contract_type_thesis
@@ -5354,7 +5332,7 @@ msgstr "Acest angajat are deja un utilizator."
 #. odoo-python
 #: code:addons/hr/models/hr_employee.py:0
 msgid "This field %(field_name)s doesn't exist on this model (hr.version)."
-msgstr ""
+msgstr "Câmpul %(field_name)s nu există în acest model (hr.version)."
 
 #. module: hr
 #: model:ir.model.fields,help:hr.field_hr_employee__tz
@@ -5560,7 +5538,7 @@ msgstr ""
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_form
 msgid "User Timezone"
-msgstr ""
+msgstr "Fusul orar al utilizatorului"
 
 #. module: hr
 #. odoo-python
@@ -5615,29 +5593,29 @@ msgstr "Permis de muncă valabil pentru Belgia"
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__version_revision
 msgid "Version Revision"
-msgstr ""
+msgstr "Revizie versiune"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.hr_version_list_view
 msgid "View"
-msgstr ""
+msgstr "Afișare"
 
 #. module: hr
 #. odoo-javascript
 #: code:addons/hr/static/src/components/avatar_card/avatar_card_popover_patch.xml:0
 msgid "View Profile"
-msgstr ""
+msgstr "Vezi profilul"
 
 #. module: hr
 #. odoo-javascript
 #: code:addons/hr/static/src/fields/hr_org_chart.xml:0
 msgid "View employee"
-msgstr ""
+msgstr "Vezi angajatul"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_form
 msgid "Visa & Work Permit"
-msgstr ""
+msgstr "Viză și permis de muncă"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__visa_expire
@@ -5916,6 +5894,8 @@ msgid ""
 "You are not allowed to access \"Employee\" (hr.employee) records.\n"
 "    We can redirect you to the public employee list."
 msgstr ""
+"Nu aveți acces la înregistrările „Angajat” (hr.employee).\n"
+"    Vă putem redirecționa către lista publică a angajaților."
 
 #. module: hr
 #. odoo-python
@@ -5976,7 +5956,7 @@ msgstr "Nu aveți acces la acest document."
 #. odoo-python
 #: code:addons/hr/wizard/hr_bank_account_allocation_wizard_line.py:0
 msgid "You do not have the rights to trust or un-trust accounts."
-msgstr ""
+msgstr "Nu ai drepturile necesare pentru a certifica sau decertifica conturi."
 
 #. module: hr
 #. odoo-python
@@ -6105,13 +6085,13 @@ msgstr "adresele asociate angajaților înregistrați"
 #. odoo-python
 #: code:addons/hr/models/hr_employee.py:0
 msgid "bachelor"
-msgstr ""
+msgstr "licență"
 
 #. module: hr
 #. odoo-python
 #: code:addons/hr/models/hr_version.py:0
 msgid "cohabitant"
-msgstr ""
+msgstr "coabitant(ă)"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.view_department_form
@@ -6122,7 +6102,7 @@ msgstr "departament"
 #. odoo-python
 #: code:addons/hr/models/hr_version.py:0
 msgid "divorced"
-msgstr ""
+msgstr "divorțat(ă)"
 
 #. module: hr
 #. odoo-python
@@ -6133,7 +6113,7 @@ msgstr "doctor"
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_form
 msgid "e.g. 1234"
-msgstr ""
+msgstr "de ex. 1234"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_form
@@ -6143,12 +6123,12 @@ msgstr "ex. Clădirea 2, Remote, etc."
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_form
 msgid "e.g. Engineering, Commerce, Business Administration, ..."
-msgstr ""
+msgstr "de ex. Inginerie, Comerț, Administrarea afacerilor, ..."
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_form
 msgid "e.g. Founder, Motorized, Building B, ..."
-msgstr ""
+msgstr "de ex. Fondator, Motorizat, Clădirea B, ..."
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.res_users_view_form_preferences
@@ -6181,7 +6161,6 @@ msgstr "ex. myprivateemail@example.com"
 #. module: hr
 #. odoo-javascript
 #: code:addons/hr/static/src/views/hr_employee_hierarchy/hr_employee_hierarchy_renderer.xml:0
-#, fuzzy
 msgid "here"
 msgstr "aici"
 
@@ -6205,13 +6184,13 @@ msgstr "km"
 #. odoo-python
 #: code:addons/hr/models/hr_version.py:0
 msgid "married"
-msgstr ""
+msgstr "căsătorit(ă)"
 
 #. module: hr
 #. odoo-python
 #: code:addons/hr/models/hr_employee.py:0
 msgid "master"
-msgstr ""
+msgstr "principal"
 
 #. module: hr
 #: model:ir.model.fields.selection,name:hr.selection__hr_version__distance_home_work_unit__miles
@@ -6222,14 +6201,13 @@ msgstr "mi"
 #. odoo-python
 #: code:addons/hr/models/hr_employee.py:0
 msgid "other"
-msgstr ""
+msgstr "altul"
 
 #. module: hr
 #. odoo-javascript
 #: code:addons/hr/static/src/views/hr_employee_hierarchy/hr_employee_hierarchy_card.xml:0
-#, fuzzy
 msgid "people"
-msgstr "persoane"
+msgstr "oameni"
 
 #. module: hr
 #. odoo-python
@@ -6241,19 +6219,19 @@ msgstr "limitat la angajați"
 #. odoo-javascript
 #: code:addons/hr/static/src/views/hr_employee_hierarchy/hr_employee_hierarchy_renderer.xml:0
 msgid "to see those employees."
-msgstr ""
+msgstr "pentru a vedea acești angajați."
 
 #. module: hr
 #. odoo-python
 #: code:addons/hr/models/hr_version.py:0
 msgid "widower"
-msgstr ""
+msgstr "văduv(ă)"
 
 #. module: hr
 #: model_terms:ir.ui.view,arch_db:hr.hr_employee_public_view_form
 #: model_terms:ir.ui.view,arch_db:hr.view_employee_form
 msgid "work"
-msgstr ""
+msgstr "serviciu"
 
 #. module: hr
 #: model:ir.model.fields,field_description:hr.field_hr_employee__work_permit_name

@@ -5,7 +5,7 @@
 # Translators:
 # Hongu Cosmin <cosmin513@gmail.com>, 2022
 # Martin Trigaux, 2022
-# Dorin Hongu <dhongu@gmail.com>, 2022
+# Dorin Hongu <dhongu@gmail.com>, 2022, 2026.
 # Foldi Robert <foldirobert@nexterp.ro>, 2022
 # Odoo Translation Bot <c3p@odoo.com>, 2026.
 # Weblate <noreply-mt-weblate@weblate.org>, 2026.
@@ -14,8 +14,8 @@ msgstr ""
 "Project-Id-Version: Odoo Server saas~14.4\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-01-30 18:36+0000\n"
-"PO-Revision-Date: 2026-08-13 00:52+0000\n"
-"Last-Translator: Odoo Translation Bot <c3p@odoo.com>\n"
+"PO-Revision-Date: 2026-11-20 11:02+0000\n"
+"Last-Translator: Dorin Hongu <dhongu@gmail.com>\n"
 "Language-Team: Romanian <https://translate.odoo.com/projects/odoo-s19-1/"
 "link_tracker/ro/>\n"
 "Language: ro\n"
@@ -24,11 +24,10 @@ msgstr ""
 "Content-Transfer-Encoding: \n"
 "Plural-Forms: nplurals=3; plural=n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < "
 "20)) ? 1 : 2;\n"
-"X-Generator: Weblate 2026.6.1\n"
+"X-Generator: Weblate 2026.11.2\n"
 
 #. module: link_tracker
 #: model_terms:ir.ui.view,arch_db:link_tracker.link_tracker_view_tree
-#, fuzzy
 msgid "# Clicks"
 msgstr "# Clicuri"
 
@@ -42,9 +41,8 @@ msgstr ""
 
 #. module: link_tracker
 #: model_terms:ir.ui.view,arch_db:link_tracker.link_tracker_view_form
-#, fuzzy
 msgid "<span class=\"o_stat_text\">Visit Page</span>"
-msgstr "<span class=\"o_stat_text\">Vizitați pagina</span>"
+msgstr "<span class=\"o_stat_text\">Vizitează pagina</span>"
 
 #. module: link_tracker
 #: model:ir.model.fields,field_description:link_tracker.field_link_tracker__absolute_url
@@ -53,7 +51,6 @@ msgstr "URL Absolut"
 
 #. module: link_tracker
 #: model:ir.model.fields,field_description:link_tracker.field_link_tracker__label
-#, fuzzy
 msgid "Button label"
 msgstr "Etichetă buton"
 
@@ -110,7 +107,6 @@ msgstr "Țară"
 
 #. module: link_tracker
 #: model_terms:ir.ui.view,arch_db:link_tracker.link_tracker_view_tree
-#, fuzzy
 msgid "Create Date"
 msgstr "Data creării"
 
@@ -137,9 +133,8 @@ msgstr "Creat în"
 #. module: link_tracker
 #. odoo-python
 #: code:addons/link_tracker/models/link_tracker.py:0
-#, fuzzy
 msgid "Creating a Link Tracker without URL is not possible"
-msgstr "Crearea unui Link Tracker fără URL nu este posibilă"
+msgstr "Nu se poate crea un Link Tracker fără URL"
 
 #. module: link_tracker
 #: model:ir.model.fields,field_description:link_tracker.field_link_tracker__display_name
@@ -153,7 +148,7 @@ msgstr "Nume afișat"
 #. module: link_tracker
 #: model_terms:ir.ui.view,arch_db:link_tracker.link_tracker_view_form
 msgid "Download QR Code"
-msgstr ""
+msgstr "Descarcă codul QR"
 
 #. module: link_tracker
 #: model:ir.model.fields,field_description:link_tracker.field_link_tracker__short_url_host
@@ -252,7 +247,7 @@ msgstr "Mediu"
 #. module: link_tracker
 #: model_terms:ir.ui.view,arch_db:link_tracker.link_tracker_view_form
 msgid "New Link Tracker"
-msgstr ""
+msgstr "Link Tracker nou"
 
 #. module: link_tracker
 #: model_terms:ir.actions.act_window,help:link_tracker.link_tracker_click_action_statistics
@@ -278,7 +273,7 @@ msgstr "Titlul pagină"
 #. odoo-python
 #: code:addons/link_tracker/models/link_tracker.py:0
 msgid "Please enter valid short URL code."
-msgstr ""
+msgstr "Introduceți un cod URL scurt valid."
 
 #. module: link_tracker
 #: model:ir.model.fields,field_description:link_tracker.field_link_tracker__redirected_url
@@ -308,7 +303,6 @@ msgstr "Statistici ale clicurilor"
 
 #. module: link_tracker
 #: model_terms:ir.ui.view,arch_db:link_tracker.link_tracker_view_form
-#, fuzzy
 msgid "Target Link"
 msgstr "Link țintă"
 
@@ -386,8 +380,7 @@ msgstr "Website Link"
 #. module: link_tracker
 #. odoo-python
 #: code:addons/link_tracker/models/link_tracker.py:0
-#, fuzzy
 msgid "“%s” is not a valid link, links cannot redirect to the current page."
 msgstr ""
-"„%s” nu este un link valid, linkurile nu pot redirecționa către pagina "
+"„%s” nu este un link valid; linkurile nu pot redirecționa către pagina "
 "curentă."
