@@ -8,6 +8,19 @@ class ReportMrpReport_Bom_Structure(models.AbstractModel):
     _inherit = 'report.mrp.report_bom_structure'
 
     @api.model
+    def _get_report_data(self, bom_id, searchQty=0, searchVariant=False):
+        res = super()._get_report_data(bom_id, searchQty, searchVariant)
+        lines = res['lines']
+        bom, product = lines['bom'], lines['product']
+        if bom.type == 'phantom' and product and self.env.user.has_group('purchase.group_purchase_user') and (sellers := product._prepare_sellers()):
+            seller = product._select_seller(quantity=lines['quantity'], uom_id=bom.uom_id) or product._select_seller(quantity=None, uom_id=bom.uom_id)
+            partner = seller['partner_id'] if seller else sellers[:1].partner_id
+            lines.update({
+                'partner_id': partner.id,
+            })
+        return res
+
+    @api.model
     def _format_route_info(self, rules, rules_delay, warehouse, product, bom, quantity):
         res = super()._format_route_info(rules, rules_delay, warehouse, product, bom, quantity)
         if self._is_buy_route(rules, product, bom):

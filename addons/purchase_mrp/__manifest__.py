@@ -22,6 +22,11 @@ from purchase order.
         'data/purchase_mrp_demo.xml',
     ],
     'depends': ['mrp', 'purchase_stock'],
+    'assets': {
+        'web.assets_backend': [
+            'purchase_mrp/static/src/**/*',
+        ],
+    },
     'auto_install': True,
     'author': 'Odoo S.A.',
     'license': 'LGPL-3',
