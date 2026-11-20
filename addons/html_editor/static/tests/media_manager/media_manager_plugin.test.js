@@ -1,4 +1,4 @@
-import { describe, expect, press, queryAll, test, waitFor } from "@odoo/hoot";
+import { describe, expect, press, queryAll, test, waitFor, waitForNone } from "@odoo/hoot";
 import { clickSave, contains, onRpc } from "@web/../tests/web_test_helpers";
 import { MediaManagerPlugin } from "@html_editor/backend/media_manager/media_manager_plugin";
 import { MediaPlugin } from "@html_editor/main/media/media_plugin";
@@ -87,8 +87,7 @@ test("replace an image from the toolbar: clicking an image replaces it", async (
     expect(".modal .o_select_button").toHaveCount(0, { message: "a single image is selected" });
 
     await clickCard("logo.png");
-    await waitFor(`${NOTES} img[alt='logo.png']`);
-    expect(".modal").toHaveCount(0);
+    await waitForNone(".modal");
     expect(queryAll(`${NOTES} img`).map((img) => img.alt)).toEqual(["logo.png"]);
 });
 
