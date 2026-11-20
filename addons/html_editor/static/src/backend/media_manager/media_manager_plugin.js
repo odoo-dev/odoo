@@ -2,7 +2,11 @@ import { MediaPlugin } from "@html_editor/main/media/media_plugin";
 import { getRecordDomain } from "@html_editor/main/media/media_manager/domain_helper";
 import { MAIN_PLUGINS } from "@html_editor/plugin_sets";
 import { loadImage } from "@html_editor/utils/image_processing";
-import { getMediaManagertDialogProps, MediaManagerDialog } from "./media_manager_dialog";
+import {
+    getBaseResId,
+    getMediaManagertDialogProps,
+    MediaManagerDialog,
+} from "./media_manager_dialog";
 
 /**
  * Opens the media manager instead of the media dialog. The media manager relies
@@ -20,7 +24,7 @@ export class MediaManagerPlugin extends MediaPlugin {
      * @returns {Array}
      */
     getDomain(recordInfo, params) {
-        return getRecordDomain(recordInfo.resModel, recordInfo.resId);
+        return getRecordDomain(recordInfo.resModel, getBaseResId(recordInfo.resId));
     }
 
     /**

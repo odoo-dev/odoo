@@ -84,7 +84,9 @@ function mockUploadRoute() {
             mimetype: "image/png",
             type: "binary",
             res_model: params.res_model,
-            res_id: params.res_id,
+            // the server keeps the -1 of a new record, the mock server only
+            // accepts the ids of existing records
+            res_id: params.res_id > 0 ? params.res_id : false,
             local_url: PNG_DATA_URL,
             image_src: PNG_DATA_URL,
         });

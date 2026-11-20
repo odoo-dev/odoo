@@ -67,7 +67,7 @@ export class MediaManagerKanbanRecord extends KanbanRecord {
         const fileModel = {
             isImage: true,
             isViewable: true,
-            name: this.props.record.data.displayName,
+            name: this.props.record.data.display_name,
             defaultSource: src,
             downloadUrl: src,
         };

@@ -2,6 +2,7 @@ import { animationFrame, before, click, press, queryOne, tick, waitFor } from "@
 import { unmockedOrm } from "@web/../tests/_framework/module_set.hoot";
 import {
     defineModels,
+    fields,
     models,
     mountView,
     patchWithCleanup,
@@ -90,6 +91,10 @@ export const TAGS = { banner: 1, logo: 2 };
 
 export class MediaTag extends models.ServerModel {
     _name = "html_editor.media.tag";
+
+    // the server gives a random color to the new tags (a tag without color is
+    // hidden on the cards), the mock server does not run python defaults
+    color = fields.Integer({ default: 4 });
 
     _records = [
         { id: TAGS.banner, name: "Banner", color: 1 },

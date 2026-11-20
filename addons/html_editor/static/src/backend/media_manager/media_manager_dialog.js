@@ -77,6 +77,18 @@ export class MediaManagerDialog extends SelectCreateDialog {
     }
 }
 
+/**
+ * The id of the edited record, -1 when there is none: the html fields give
+ * `false` for a new record, the website builder gives the `data-oe-id`
+ * attribute (a string).
+ *
+ * @param {number|string|false} [resId]
+ * @returns {number}
+ */
+export function getBaseResId(resId) {
+    return parseInt(resId) || -1;
+}
+
 export function getMediaManagertDialogProps(recordInfo) {
     // domains on datetime fields are in UTC
     const lastWeekDate = serializeDateTime(luxon.DateTime.now().minus({ weeks: 1 }));
@@ -85,7 +97,7 @@ export function getMediaManagertDialogProps(recordInfo) {
         resModel: "ir.attachment", // todo we probably don't need this
         // searchViewId: "mediamanager_media_search", // todo doesn't work, need id, how ?
         baseResModel: recordInfo.resModel ?? "ir.attachment",
-        baseResId: recordInfo.resId ?? -1,
+        baseResId: getBaseResId(recordInfo.resId),
         filters: [
             // todo link this to the search bar filters somehow
             { label: "uploaded last week", domain: [["create_date", ">", lastWeekDate]] },
@@ -94,7 +106,7 @@ export function getMediaManagertDialogProps(recordInfo) {
         ],
         noCreate: true,
         // todo : BINARY_DOMAIN prevents webp url to be shown, should we change that ?
-        domain: getRecordDomain(recordInfo.resModel, recordInfo.resId),
+        domain: getRecordDomain(recordInfo.resModel, getBaseResId(recordInfo.resId)),
         context: {
             kanban_view_ref: "html_editor.mediamanager_media_kanban",
             search_view_ref: "html_editor.mediamanager_media_search",

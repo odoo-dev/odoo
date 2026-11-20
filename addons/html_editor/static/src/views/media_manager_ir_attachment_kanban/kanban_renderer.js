@@ -2,7 +2,7 @@ import { KanbanRenderer, kanbanRendererProps } from "@web/views/kanban/kanban_re
 import { MediaManagerKanbanRecord } from "./kanban_record";
 import { useService } from "@web/core/utils/hooks";
 import { IMAGE_MIMETYPES } from "@html_editor/main/media/media_manager/helpers";
-import { signal, t, useProps } from "@odoo/owl";
+import { onPatched, signal, t, useProps } from "@odoo/owl";
 import { useDebounced } from "@web/core/utils/timing";
 import { _t } from "@web/core/l10n/translation";
 
@@ -36,6 +36,15 @@ export class MediaManagerKanbanRenderer extends KanbanRenderer {
 
         this.debouncedValidateUrl = useDebounced(this.validateUrl, 500);
         this.initialDomain = [...this.env.model.config.domain];
+        // the url input is hidden until the next render, it can only be
+        // focused once displayed
+        this.focusUrlInput = false;
+        onPatched(() => {
+            if (this.focusUrlInput) {
+                this.focusUrlInput = false;
+                this.urlInputRef()?.focus();
+            }
+        });
     }
 
     async validateUrl(url) {
@@ -63,7 +72,7 @@ export class MediaManagerKanbanRenderer extends KanbanRenderer {
         if (domain) {
             this.env.model.env.searchModel.splitAndAddDomain(domain);
         } else {
-            this.env.model.env.searchModel.clearFilters();
+            this.env.model.env.searchModel.clearQuery();
         }
     }
 
@@ -86,11 +95,12 @@ export class MediaManagerKanbanRenderer extends KanbanRenderer {
                     type: "danger",
                     sticky: true,
                 });
+                inputEl.disabled = false;
             }
         } else {
             this.state.showUrlInput = true;
             inputEl.disabled = false;
-            inputEl.focus();
+            this.focusUrlInput = true;
         }
     }
 
