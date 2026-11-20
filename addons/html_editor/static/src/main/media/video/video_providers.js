@@ -116,6 +116,9 @@ async function fetchVideoThumbnailUrl(url) {
 /** The class of the video elements built by {@link renderVideoElements}. */
 export const VIDEO_CLASS = "media_iframe_video";
 
+/** The videos of the document: built by {@link renderVideoElements} or embedded. */
+export const VIDEO_ELEMENT_SELECTOR = `.${VIDEO_CLASS}, [data-embedded='video']`;
+
 /**
  * Find the platform of a video url.
  *

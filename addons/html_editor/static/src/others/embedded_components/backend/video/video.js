@@ -27,7 +27,8 @@ export class EmbeddedVideoComponent extends ReadonlyEmbeddedVideoComponent {
         createOverlay: t.function().optional(),
         focusEditable: t.function().optional(),
         commit: t.function().optional(),
-        openVideoSelectorDialog: t.function().optional(),
+        replaceVideo: t.function().optional(),
+        editVideoOptions: t.function().optional(),
     });
 
     playerRef = signal.ref();
@@ -69,11 +70,12 @@ export class EmbeddedVideoComponent extends ReadonlyEmbeddedVideoComponent {
                 props: {
                     videoBlock: this.videoBlock,
                     overlay: this.videoSettingsOverlay,
-                    replaceVideo: () => {
-                        this.videoEmbedProps.openVideoSelectorDialog(
-                            (media) => this.replaceVideo(media),
-                            { url: this.state.baseUrl || this.embedUrl, options: this.state.params }
-                        );
+                    replaceVideo: () => this.videoEmbedProps.replaceVideo(this.videoBlock),
+                    editVideoOptions: () => {
+                        this.videoEmbedProps.editVideoOptions((media) => this.replaceVideo(media), {
+                            url: this.state.baseUrl || this.embedUrl,
+                            options: this.state.params,
+                        });
                     },
                     removeVideo: () => {
                         this.videoBlock.remove();
@@ -137,6 +139,7 @@ export class VideoSettings extends Component {
         videoBlock: t.instanceOf(HTMLElement),
         overlay: t.object(),
         replaceVideo: t.function(),
+        editVideoOptions: t.function(),
         removeVideo: t.function(),
         focusEditable: t.function(),
         dropdown: t.object(),
