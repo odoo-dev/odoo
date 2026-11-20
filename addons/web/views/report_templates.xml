@@ -397,6 +397,15 @@
         </ul>
     </template>
 
+    <!-- Company block of the layout headers, given as t-call content. Localizations
+         print their own header instead by adding a t-elif branch after the default. -->
+    <template id="external_layout_company_header">
+        <t t-if="not custom_header" t-out="0"/>
+    </template>
+
+    <!-- Localizations add document notices after the logo by inheritance -->
+    <template id="external_layout_document_header_after_logo"/>
+
     <template id="external_layout_footer_content">
         <div t-attf-class="o_footer_content {{footer_content_classes}}">
             <table class="table-borderless w-100">
@@ -472,16 +481,19 @@
 
     <template id="external_layout_standard">
         <div t-attf-class="o_company_#{company.id}_layout header">
-            <table class="table-borderless w-100">
-                <tr>
-                    <td t-if="company.logo" class="align-top pe-3">
-                        <img class="o_company_logo_big" t-att-src="image_data_uri(company.logo)" alt="Logo"/>
-                    </td>
-                    <td class="align-top text-start w-100">
-                        <t t-call="web.company_address_list"/>
-                    </td>
-                </tr>
-            </table>
+            <t t-call="web.external_layout_company_header">
+                <table class="table-borderless w-100">
+                    <tr>
+                        <td t-if="company.logo" class="align-top pe-3">
+                            <img class="o_company_logo_big" t-att-src="image_data_uri(company.logo)" alt="Logo"/>
+                            <t t-call="web.external_layout_document_header_after_logo"/>
+                        </td>
+                        <td class="align-top text-start w-100">
+                            <t t-call="web.company_address_list"/>
+                        </td>
+                    </tr>
+                </table>
+            </t>
         </div>
         <t t-call="web.external_layout_body" snail_mail_compatible="True">
             <t t-out="0"/>
@@ -504,15 +516,18 @@
                 <path d="M1000 230.734C937.384 240.621 803.83 250.266 562.185 220.602C311.343 189.809 104.626 201.375 0 211.598V0.5H1000V230.734Z" t-att-fill="company.primary_color" fill-opacity=".1"/>
             </svg>
 
-            <div class="d-flex justify-content-between">
-                <div class="w-50">
-                    <img t-if="company.logo" class="o_company_logo mb-2" t-att-src="image_data_uri(company.logo)" alt="Logo"/>
-                    <div t-if="company.report_header" t-field="company.report_header" class="o_company_tagline fw-bold">Company tagline</div>
+            <t t-call="web.external_layout_company_header">
+                <div class="d-flex justify-content-between">
+                    <div class="w-50">
+                        <img t-if="company.logo" class="o_company_logo mb-2" t-att-src="image_data_uri(company.logo)" alt="Logo"/>
+                        <t t-call="web.external_layout_document_header_after_logo"/>
+                        <div t-if="company.report_header" t-field="company.report_header" class="o_company_tagline fw-bold">Company tagline</div>
+                    </div>
+                    <div name="company_address" class="w-50 text-end">
+                        <t t-call="web.company_address_list"/>
+                    </div>
                 </div>
-                <div name="company_address" class="w-50 text-end">
-                    <t t-call="web.company_address_list"/>
-                </div>
-            </div>
+            </t>
         </div>
         <t t-call="web.external_layout_body" custom_layout_address="True">
             <t t-out="0"/>
@@ -534,23 +549,26 @@
             <svg xmlns="http://www.w3.org/2000/svg" t-attf-class="o_shape_bubble_1 z-n1 {{report_type == 'pdf' and 'position-fixed' or 'position-absolute'}}" width="1100" height="1100">
                 <circle cx="550" cy="550" r="550" t-att-fill="company.primary_color" fill-opacity=".1"/>
             </svg>
-            <table class="o_ignore_layout_styling table table-borderless mb-0">
-                <tbody>
-                    <tr>
-                        <td t-if="company.report_header" class="o_company_tagline fw-bold p-0 pe-2">
-                            <span t-field="company.report_header">
-                                Company tagline
-                            </span>
-                        </td>
-                        <td class="p-0 text-end">
-                            <img t-if="company.logo" class="o_company_logo_xs mb-1" t-att-src="image_data_uri(company.logo)" alt="Logo"/>
-                            <div name="company_address" class="w-50 ms-auto">
-                                <t t-call="web.company_address_list"/>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+            <t t-call="web.external_layout_company_header">
+                <table class="o_ignore_layout_styling table table-borderless mb-0">
+                    <tbody>
+                        <tr>
+                            <td t-if="company.report_header" class="o_company_tagline fw-bold p-0 pe-2">
+                                <span t-field="company.report_header">
+                                    Company tagline
+                                </span>
+                            </td>
+                            <td class="p-0 text-end">
+                                <img t-if="company.logo" class="o_company_logo_xs mb-1" t-att-src="image_data_uri(company.logo)" alt="Logo"/>
+                                <t t-call="web.external_layout_document_header_after_logo"/>
+                                <div name="company_address" class="w-50 ms-auto">
+                                    <t t-call="web.company_address_list"/>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </t>
         </div>
         <t t-set="customized_address_layout">
             <table class="o_ignore_layout_styling table table-borderless mb-0">
@@ -610,15 +628,18 @@
                     </h2>
                 </div>
             </div>
-            <div class="o_folder_company_info d-flex justify-content-between">
-                <div class="w-50">
-                    <img t-if="company.logo" class="o_company_logo_big mb-2" t-att-src="image_data_uri(company.logo)" alt="Logo"/>
-                    <div t-if="company.report_header" t-field="company.report_header" class="o_company_tagline fw-bold">Company tagline</div>
+            <t t-call="web.external_layout_company_header">
+                <div class="o_folder_company_info d-flex justify-content-between">
+                    <div class="w-50">
+                        <img t-if="company.logo" class="o_company_logo_big mb-2" t-att-src="image_data_uri(company.logo)" alt="Logo"/>
+                        <t t-call="web.external_layout_document_header_after_logo"/>
+                        <div t-if="company.report_header" t-field="company.report_header" class="o_company_tagline fw-bold">Company tagline</div>
+                    </div>
+                    <div name="company_address" class="w-50 text-end">
+                        <t t-call="web.company_address_list"/>
+                    </div>
                 </div>
-                <div name="company_address" class="w-50 text-end">
-                    <t t-call="web.company_address_list"/>
-                </div>
-            </div>
+            </t>
         </div>
         <t t-set="customized_address_layout">
             <div class="pt-2">
@@ -638,20 +659,23 @@
     <template id="external_layout_center">
         <div t-attf-class="o_company_#{company.id}_layout header">
             <div class="o_layout_center_header">
-                <table class="w-100 table-borderless">
-                    <tr>
-                        <td class="align-top" style="width: 33.33%;">
-                            <t t-call="web.company_address_list"/>
-                        </td>
-                        <td class="align-top text-center" style="width: 33.33%;">
-                            <img t-if="company.logo" class="o_company_logo_mid mb-2" t-att-src="image_data_uri(company.logo)" alt="Logo"/>
-                            <div t-if="company.report_header" t-field="company.report_header" class="o_company_tagline fw-bold">Company tagline</div>
-                        </td>
-                        <td class="align-top text-end" style="width: 33.33%;">
-                            <t t-call="web.address_layout" custom_layout_address="True" information_block="False" custom_address_spacing="'mb-0'"/>
-                        </td>
-                    </tr>
-                </table>
+                <t t-call="web.external_layout_company_header">
+                    <table class="w-100 table-borderless">
+                        <tr>
+                            <td class="align-top" style="width: 33.33%;">
+                                <t t-call="web.company_address_list"/>
+                            </td>
+                            <td class="align-top text-center" style="width: 33.33%;">
+                                <img t-if="company.logo" class="o_company_logo_mid mb-2" t-att-src="image_data_uri(company.logo)" alt="Logo"/>
+                                <t t-call="web.external_layout_document_header_after_logo"/>
+                                <div t-if="company.report_header" t-field="company.report_header" class="o_company_tagline fw-bold">Company tagline</div>
+                            </td>
+                            <td class="align-top text-end" style="width: 33.33%;">
+                                <t t-call="web.address_layout" custom_layout_address="True" information_block="False" custom_address_spacing="'mb-0'"/>
+                            </td>
+                        </tr>
+                    </table>
+                </t>
             </div>
         </div>
         <t t-call="web.external_layout_body" hide_recipient_address="True" hide_title="True">
@@ -673,16 +697,19 @@
             <svg xmlns="http://www.w3.org/2000/svg" class="position-absolute start-0 top-0 z-n1" width="70" height="140" preserveAspectRatio="none" viewBox="0 0 80 160" fill="none">
                 <path d="M0 0h80L0 160z" t-att-fill="company.secondary_color" fill-opacity=".15"/>
             </svg>
-            <table class="w-100 table-borderless">
-                <tr>
-                    <td class="align-top pe-2">
-                        <img t-if="company.logo" class="o_company_logo_big" t-att-src="image_data_uri(company.logo)" alt="Logo"/>
-                    </td>
-                    <td class="align-top ps-2 text-end">
-                        <t t-call="web.company_address_list"/>
-                    </td>
-                </tr>
-            </table>
+            <t t-call="web.external_layout_company_header">
+                <table class="w-100 table-borderless">
+                    <tr>
+                        <td class="align-top pe-2">
+                            <img t-if="company.logo" class="o_company_logo_big" t-att-src="image_data_uri(company.logo)" alt="Logo"/>
+                            <t t-call="web.external_layout_document_header_after_logo"/>
+                        </td>
+                        <td class="align-top ps-2 text-end">
+                            <t t-call="web.company_address_list"/>
+                        </td>
+                    </tr>
+                </table>
+            </t>
         </div>
         <t t-call="web.external_layout_body" custom_layout_address="True">
             <t t-out="0"/>
@@ -716,16 +743,19 @@
                 <path class="o_lines_path_9" d="M1224.28 1043.44h-210c-168.647-9.07-185.424-238.296-199.003-381.996s-153.305-269-356.5-269c-119.89 0-341.721-.532-405.5-111-8.833-15-28-52.5-28-145"/>
                 <path class="o_lines_path_10" d="M1199.5 1060.5h-210c-168.645-9.08-185.421-238.3-199-382s-153.305-269-356.5-269c-119.89 0-341.721-.532-405.5-111-8.833-15-28-52.5-28-145"/>
             </svg>
-            <table class="w-100 table-borderless">
-                <tr>
-                    <td class="align-top text-start">
-                        <t t-call="web.company_address_list"/>
-                    </td>
-                    <td class="align-top text-end">
-                        <img t-if="company.logo" class="o_company_logo_big" t-att-src="image_data_uri(company.logo)" alt="Logo"/>
-                    </td>
-                </tr>
-            </table>
+            <t t-call="web.external_layout_company_header">
+                <table class="w-100 table-borderless">
+                    <tr>
+                        <td class="align-top text-start">
+                            <t t-call="web.company_address_list"/>
+                        </td>
+                        <td class="align-top text-end">
+                            <img t-if="company.logo" class="o_company_logo_big" t-att-src="image_data_uri(company.logo)" alt="Logo"/>
+                            <t t-call="web.external_layout_document_header_after_logo"/>
+                        </td>
+                    </tr>
+                </table>
+            </t>
         </div>
         <t t-call="web.external_layout_body" hide_recipient_address="True" hide_title="True">
             <h2 t-attf-class="text-center {{'mb-4' if information_block else ''}}" t-out="layout_document_title"/>
@@ -753,20 +783,23 @@
 
     <template id="external_layout_compact">
         <div t-attf-class="o_company_#{company.id}_layout header">
-            <table class="w-100 table-borderless">
-                <tr>
-                    <td class="align-top" style="width: 33.33%;">
-                        <t t-call="web.company_address_list"/>
-                    </td>
-                    <td class="align-top text-center" style="width: 33.33%;">
-                        <img t-if="company.logo" class="o_company_logo_mid mb-2" t-att-src="image_data_uri(company.logo)" alt="Logo"/>
-                        <div t-if="company.report_header" t-field="company.report_header" class="o_company_tagline fw-bold">Company tagline</div>
-                    </td>
-                    <td class="align-top text-end" style="width: 33.33%;">
-                        <t t-call="web.address_layout" custom_layout_address="True" information_block="False" custom_address_spacing="'mb-0'"/>
-                    </td>
-                </tr>
-            </table>
+            <t t-call="web.external_layout_company_header">
+                <table class="w-100 table-borderless">
+                    <tr>
+                        <td class="align-top" style="width: 33.33%;">
+                            <t t-call="web.company_address_list"/>
+                        </td>
+                        <td class="align-top text-center" style="width: 33.33%;">
+                            <img t-if="company.logo" class="o_company_logo_mid mb-2" t-att-src="image_data_uri(company.logo)" alt="Logo"/>
+                            <t t-call="web.external_layout_document_header_after_logo"/>
+                            <div t-if="company.report_header" t-field="company.report_header" class="o_company_tagline fw-bold">Company tagline</div>
+                        </td>
+                        <td class="align-top text-end" style="width: 33.33%;">
+                            <t t-call="web.address_layout" custom_layout_address="True" information_block="False" custom_address_spacing="'mb-0'"/>
+                        </td>
+                    </tr>
+                </table>
+            </t>
         </div>
         <t t-call="web.external_layout_body" hide_recipient_address="True" hide_title="True">
             <div class="mb-2" t-if="information_block" t-out="information_block"/>

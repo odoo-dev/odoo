@@ -53,7 +53,7 @@
     </template>
 
     <template id="layout_invoices_generated_by_odoo" inherit_id="web.external_layout_standard" primary="True">
-        <xpath expr="//div[contains(@t-attf-class, 'header')]/table" position="replace">
+        <xpath expr="//t[@t-call='web.external_layout_company_header']" position="replace">
             <div class="mb-2" style="height: 50px" />
             <div class="row">
                 <div name="company_address"/>

@@ -11,6 +11,12 @@
             </xpath>
         </template>
 
+        <template id="external_layout_company_header" inherit_id="web.external_layout_company_header">
+            <xpath expr="//t[@t-out='0']" position="after">
+                <t t-elif="custom_header == 'l10n_ar_stock.custom_header'" t-call="l10n_ar_stock.custom_header"/>
+            </xpath>
+        </template>
+
         <template id="report_delivery_document" inherit_id="stock.report_delivery_document" primary="True">
             <xpath expr="//t[@t-set='address']" position="after">
                 <t t-set="pre_printed_report" t-value="False"/>

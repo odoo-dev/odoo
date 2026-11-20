@@ -133,4 +133,10 @@
             </div>
         </div>
     </template>
+
+    <template id="external_layout_company_header" inherit_id="web.external_layout_company_header">
+        <xpath expr="//t[@t-out='0']" position="after">
+            <t t-elif="custom_header == 'l10n_hu_edi.custom_header'" t-call="l10n_hu_edi.custom_header"/>
+        </xpath>
+    </template>
 </odoo>

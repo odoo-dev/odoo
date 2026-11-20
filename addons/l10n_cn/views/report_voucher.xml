@@ -3,7 +3,7 @@
     <data>
         <!-- TODO test if it's the intended result -->
         <template id="external_layout_standard" inherit_id="web.external_layout_standard" primary="True">
-            <xpath expr="//div[contains(@t-attf-class, 'header')]/table" position="replace">
+            <xpath expr="//t[@t-call='web.external_layout_company_header']" position="replace">
                 <div class="row mb8">
                     <div class="col-3 mb4">
                         <img t-if="company.logo" t-att-src="image_data_uri(company.logo)" style="max-height: 45px;" alt="Logo"/>
