@@ -1034,3 +1034,42 @@ class SpreadsheetAccountingFunctionsTest(AccountTestInvoicingCommon):
                 "name": "Cell Audit",
             },
         )
+
+ def test_many_codes(self):
+        """ODOO.ACCOUNT.GROUP can expand to thousands of codes, e.g. with one
+        receivable account per partner."""
+        accounts = self.env["account.account"].create([
+            {
+                "name": f"spreadsheet receivable {i}",
+                "account_type": "asset_receivable",
+                "code": f"spmany{i:04d}",
+                "reconcile": True,
+            }
+            for i in range(300)
+        ])
+        self.env["account.move"].create({
+            "move_type": "entry",
+            "date": "2022-04-02",
+            "line_ids": [
+                Command.create({"account_id": accounts[0].id, "debit": 100}),
+                Command.create({"account_id": accounts[150].id, "debit": 200}),
+                Command.create({"account_id": accounts[299].id, "credit": 300}),
+            ],
+        })
+        [codes] = self.env["account.account"].get_account_group(["asset_receivable"])
+        self.assertTrue(set(accounts.mapped("code")) <= set(codes))
+        args = {
+            "date_range": {"range_type": "year", "year": 2022},
+            "company_id": None,
+            "include_unposted": True,
+        }
+        self.assertEqual(
+            self.env["account.account"].spreadsheet_fetch_debit_credit([
+                {**args, "codes": accounts.mapped("code")},
+                {**args, "codes": [*accounts[:200].mapped("code"), "sp1234", "spnomatch"]},
+            ]),
+            [
+                {"credit": 300.0, "debit": 300.0},
+                {"credit": 500.0, "debit": 800.0},
+            ],
+        )

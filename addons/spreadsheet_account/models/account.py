@@ -3,6 +3,7 @@
 from datetime import date
 import calendar
 from dateutil.relativedelta import relativedelta
+from requests import codes
 
 from odoo import models, api, _
 from odoo.fields import Domain
@@ -69,14 +70,12 @@ class AccountAccount(models.Model):
                     return default_domain
                 default_domain = Domain('account_type', 'in', ['liability_payable', 'asset_receivable'])
 
-            # It is more optimized to (like) search for code directly in account.account than in account_move_line
-            code_domain = Domain.OR(
-                Domain("code", "=like", f"{code}%")
-                for code in codes
+            Account = self.env["account.account"].with_company(company_id)
+            prefixes = tuple(codes)
+            accounts = Account.search(default_domain) | Account.search([]).filtered(
+                lambda account: account.code and account.code.startswith(prefixes)
             )
-            account_domain = code_domain | default_domain
-            account_ids = self.env["account.account"].with_company(company_id).search(account_domain).ids
-            account_id_domain = [("account_id", "in", account_ids)]
+            account_id_domain = [("account_id", "in", accounts.ids)]
         else:
             account_id_domain = Domain.FALSE
 
