@@ -1,6 +1,8 @@
 import { VideoPlugin } from "@html_editor/main/media/video/video_plugin";
 import { EmbeddedVideoSelector } from "./video_selector_dialog/embedded_video_selector";
 import { renderToElement } from "@web/core/utils/render";
+import { _t } from "@web/core/l10n/translation";
+import { matchPlatformUrl } from "@html_editor/main/media/video/video_providers";
 
 /**
  * This plugin is meant to replace the Video plugin.
@@ -14,6 +16,7 @@ export class EmbeddedVideoPlugin extends VideoPlugin {
         "media",
         "history",
         "dom",
+        "dialog",
     ];
 
     // Extends the base class resources
@@ -60,22 +63,26 @@ export class EmbeddedVideoPlugin extends VideoPlugin {
     }
 
     /**
-     * Open media dialog allowing the user to insert a video
-     * @param {function} save
-     * @param {HTMLIFrameElement} iframe
+     * Let the user edit the options of an embedded video.
+     *
+     * @param {function} save called with the new video data
+     * @param {Object} video
+     * @param {string} video.url
+     * @param {Object} video.options
      */
-    openVideoSelectorDialog(save, iframe) {
-        this.dependencies.media.openMediaDialog({
-            node: iframe,
-            save: (elements, [media]) => {
-                if (media.embedUrl) {
-                    // we need to replace embedUrl by src in order to stay retro compatible with the existing embed video component
-                    media.src = media.embedUrl;
-                    delete media.embedUrl;
-                    save(media);
-                }
-            },
-            visibleTabs: ["VIDEOS"],
+    async openVideoSelectorDialog(save, { url, options }) {
+        if (!matchPlatformUrl(url)) {
+            return;
+        }
+        const videoData = await this.openVideoOptionsDialog({
+            url,
+            options,
+            confirmLabel: _t("Save"),
         });
+        if (videoData) {
+            // the embedded video component expects `src` instead of `embedUrl`
+            const { embedUrl, ...media } = videoData;
+            save({ ...media, src: embedUrl });
+        }
     }
 }
