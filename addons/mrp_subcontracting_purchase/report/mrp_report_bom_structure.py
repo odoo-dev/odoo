@@ -8,6 +8,16 @@ class ReportMrpReport_Bom_Structure(models.AbstractModel):
     _inherit = 'report.mrp.report_bom_structure'
 
     @api.model
+    def _get_report_data(self, bom_id, searchQty=0, searchVariant=False):
+        res = super()._get_report_data(bom_id, searchQty, searchVariant)
+        lines = res['lines']
+        if lines['bom'].type == 'subcontract':
+            lines.update({
+                'partner_id': lines.get('subcontractor_id') or lines.get('subcontracting', {}).get('partner_id'),
+            })
+        return res
+
+    @api.model
     def _is_buy_route(self, rules, product, bom):
         return super()._is_buy_route(rules, product, bom) and (not bom or bom.type != 'subcontract')
 

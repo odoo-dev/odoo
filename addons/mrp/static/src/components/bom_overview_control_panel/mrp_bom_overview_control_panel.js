@@ -72,7 +72,7 @@ export class BomOverviewControlPanel extends Component {
         return [["id", "in", keys]];
     }
 
-    async manufactureFromBoM() {
+    async actionFromBoM() {
         const action = {
             res_model: "mrp.production",
             name: "Manufacture Orders",

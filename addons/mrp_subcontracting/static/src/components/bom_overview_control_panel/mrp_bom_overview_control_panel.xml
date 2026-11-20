@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="mrp_subcontracting.BomOverviewControlPanel" t-inherit="mrp.BomOverviewControlPanel" t-inherit-mode="extension">
+        <xpath expr="//input[@id='bom_quantity']/.." position="after">
+            <div t-if="this.props.data.subcontractors" class="input-group align-items-center flex-nowrap">
+                <div class="col-4 col-md-auto px-2 fw-bold">Subcontractor</div>
+                <Dropdown items="this.subcontractorItems">
+                    <button type="button" class="btn btn-light o-dropdown-caret" t-out="this.currentSubcontractorName"/>
+                </Dropdown>
+            </div>
+        </xpath>
+    </t>
+
+</templates>

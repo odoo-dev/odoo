@@ -7,6 +7,37 @@ from odoo import api, models, _
 class ReportMrpReport_Bom_Structure(models.AbstractModel):
     _inherit = 'report.mrp.report_bom_structure'
 
+    @api.model
+    def _get_report_values(self, docids, data=None):
+        if data and data.get('subcontractor_id'):
+            self = self.with_context(bom_overview_subcontractor_id=int(data['subcontractor_id']))  # noqa: PLW0642
+        return super()._get_report_values(docids, data)
+
+    @api.model
+    def _get_report_data(self, bom_id, searchQty=0, searchVariant=False):
+        res = super()._get_report_data(bom_id, searchQty, searchVariant)
+        bom = self.env['mrp.bom'].browse(bom_id)
+        if bom.type == 'subcontract' and len(bom.subcontractor_ids) > 1:
+            lines = res['lines']
+            lines['subcontractors'] = [{'id': partner.id, 'name': partner.display_name} for partner in bom.subcontractor_ids]
+            lines['subcontractor_id'] = self._get_selected_subcontractor(bom).id or lines.get('subcontracting', {}).get('partner_id', False)
+        return res
+
+    @api.model
+    def _get_selected_subcontractor(self, bom):
+        """ Subcontractor selected in the BoM overview, if it is one of the BoM's subcontractors.
+        Without selection, default to the first subcontractor when none of them has a vendor pricelist. """
+        partner = self.env['res.partner'].browse(self.env.context.get('bom_overview_subcontractor_id'))
+        if partner in bom.subcontractor_ids:
+            return partner
+        if not bom.product_tmpl_id.seller_ids.filtered(lambda s: s.partner_id in bom.subcontractor_ids):
+            return bom.subcontractor_ids[:1]
+        return self.env['res.partner']
+
+    @api.model
+    def _get_subcontractors(self, bom):
+        return self._get_selected_subcontractor(bom) or bom.subcontractor_ids
+
     def _get_subcontracting_line(self, bom, seller_info, level, bom_quantity):
         ratio_uom_seller = seller_info['uom_id'].factor / bom.uom_id.factor
         price = seller_info['currency_id']._convert(seller_info['price'], self.env.company.currency_id, (bom.company_id or self.env.company))
@@ -43,12 +74,12 @@ class ReportMrpReport_Bom_Structure(models.AbstractModel):
         if (bom.type == 'subcontract' or (parent_bom and parent_bom.type == 'subcontract')) and not self.env.context.get('minimized', False):
             seller_info = {}
             if not res['product']:
-                seller_info = bom.product_tmpl_id.seller_ids.filtered(lambda s: s.partner_id in bom.subcontractor_ids)[:1]._get_seller_info()
+                seller_info = bom.product_tmpl_id.seller_ids.filtered(lambda s: s.partner_id in self._get_subcontractors(bom))[:1]._get_seller_info()
             elif bom.type == 'subcontract':
-                seller_info = res['product']._select_seller(quantity=res['quantity'], uom_id=bom.uom_id, params={'subcontractor_ids': bom.subcontractor_ids})
+                seller_info = res['product']._select_seller(quantity=res['quantity'], uom_id=bom.uom_id, params={'subcontractor_ids': self._get_subcontractors(bom)})
                 if not seller_info:
                     # If no vendor found for the right quantity, we still want to display the vendor in red
-                    seller_info = res['product']._select_seller(quantity=None, uom_id=bom.uom_id, params={'subcontractor_ids': bom.subcontractor_ids})
+                    seller_info = res['product']._select_seller(quantity=None, uom_id=bom.uom_id, params={'subcontractor_ids': self._get_subcontractors(bom)})
                     res['text_danger'] = True
             if seller_info:
                 res['subcontracting'] = self._get_subcontracting_line(bom, seller_info, level + 1, res['quantity'])
@@ -125,7 +156,7 @@ class ReportMrpReport_Bom_Structure(models.AbstractModel):
         parent_info = product_info.get(parent_product.id, {}).get(parent_bom.id, {})
         if parent_info and parent_info.get('route_type') == 'subcontract':
             # Since the product is subcontracted, check the subcontracted location for rules instead of the warehouse.
-            subcontracting_loc = parent_info['supplier'].partner_id.property_stock_subcontractor
+            subcontracting_loc = parent_info['subcontractor'].property_stock_subcontractor
             found_rules = product._get_rules_from_location(subcontracting_loc)
             if found_rules and self._is_resupply_rules(found_rules, current_bom):
                 # We only want to show the effective resupply (i.e. a form of manufacture or buy)
@@ -137,19 +168,22 @@ class ReportMrpReport_Bom_Structure(models.AbstractModel):
         res = super()._format_route_info(rules, rules_delay, warehouse, product, bom, quantity)
         subcontract_rules = [rule for rule in rules if rule.action == 'buy' and bom and bom.type == 'subcontract']
         if subcontract_rules:
-            seller_info = product._select_seller(quantity=quantity, uom_id=product.uom_id, params={'subcontractor_ids': bom.subcontractor_ids})
+            seller_info = product._select_seller(quantity=quantity, uom_id=product.uom_id, params={'subcontractor_ids': self._get_subcontractors(bom)})
             if not seller_info:
                 # If no vendor found for the right quantity, we still want to display a vendor for the lead times
-                seller_info = product._select_seller(quantity=None, uom_id=product.uom_id, params={'subcontractor_ids': bom.subcontractor_ids})
+                seller_info = product._select_seller(quantity=None, uom_id=product.uom_id, params={'subcontractor_ids': self._get_subcontractors(bom)})
             # for subcontracting, we can't decide the lead time without component's resupply availability
             # we only return necessary info and calculate the lead time late when we have component's data
-            if seller_info:
+            # A subcontractor selected in the overview is kept even without vendor pricelist.
+            subcontractor = seller_info['partner_id'] if seller_info else self._get_selected_subcontractor(bom)
+            if subcontractor:
                 return {
                     'route_type': 'subcontract',
                     'route_name': subcontract_rules[0].route_id.display_name,
-                    'route_detail': seller_info['partner_id'].display_name,
+                    'route_detail': subcontractor.display_name,
                     'lead_time': rules_delay,
-                    'supplier': seller_info['supplierinfo'],
+                    'supplier': seller_info['supplierinfo'] if seller_info else self.env['product.supplierinfo'],
+                    'subcontractor': subcontractor,
                     'qty_checked': quantity,
                     'bom': bom,
                 }
@@ -161,9 +195,12 @@ class ReportMrpReport_Bom_Structure(models.AbstractModel):
         quantities_info = super()._get_quantities_info(product, bom_uom, product_info, bom, parent_bom, parent_product)
         is_parent_subcontract = parent_bom and parent_bom.type == 'subcontract'
         if ((bom and bom.type == 'subcontract') or is_parent_subcontract) and product.is_storable:
-            route_info = product_info.get(parent_product.id, {}).get(parent_bom.id, {}) if is_parent_subcontract else {}
+            if is_parent_subcontract:
+                route_info = product_info.get(parent_product.id, {}).get(parent_bom.id, {})
+            else:
+                route_info = (product_info or {}).get(product.id, {}).get(bom.id, {})
             subcontracting_loc = (
-                route_info['supplier'].partner_id.property_stock_subcontractor
+                route_info['subcontractor'].property_stock_subcontractor
                 if route_info.get('route_type') == 'subcontract'
                 else self.env['stock.warehouse'].browse(self.env.context.get('warehouse_id'))._get_subcontracting_location()
             )
