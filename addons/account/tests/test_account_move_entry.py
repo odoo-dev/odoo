@@ -90,7 +90,7 @@ class TestAccountMove(AccountTestInvoicingCommon):
 
     def test_posting_future_invoice_fails(self):
         # Create auto-posted, recurring entry, attempt manually posting it
-        self.test_move.date = fields.Date.today() + relativedelta(days=1)
+        self.test_move.date = self.test_move._get_company_today() + relativedelta(days=1)
         self.test_move.auto_post = 'quarterly'
         self.test_move._post()  # default soft=True parameter filters out future moves
         self.assertEqual(self.test_move.state, 'draft')

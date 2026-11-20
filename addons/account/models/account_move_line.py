@@ -878,7 +878,7 @@ class AccountMoveLine(models.Model):
                     from_currency=line.company_currency_id,
                     to_currency=line.currency_id,
                     company=line.company_id,
-                    date=line.move_id.invoice_date or line.move_id.date or fields.Date.context_today(line),
+                    date=line.move_id.invoice_date or line.move_id.date or line.company_id._get_company_today(),
                 )
             else:
                 line.currency_rate = 1
@@ -1654,7 +1654,8 @@ class AccountMoveLine(models.Model):
     @api.depends('discount_date', 'date_maturity')
     def _compute_payment_date(self):
         for line in self:
-            line.payment_date = line.discount_date if line.discount_date and date.today() <= line.discount_date else line.date_maturity
+            today = line.company_id._get_company_today()
+            line.payment_date = line.discount_date if line.discount_date and today <= line.discount_date else line.date_maturity
 
     @api.depends('matched_debit_ids', 'matched_credit_ids')
     def _compute_exchange_move(self):
@@ -1667,7 +1668,7 @@ class AccountMoveLine(models.Model):
                 WHEN %(discount_date)s IS NOT NULL AND %(today)s <= %(discount_date)s THEN %(discount_date)s
                 ELSE %(date_maturity)s
             END""",
-            today=fields.Date.context_today(self),
+            today=self.env.company._get_company_today(),
             discount_date=table.discount_date,
             date_maturity=table.date_maturity,
         )
@@ -1737,11 +1738,12 @@ class AccountMoveLine(models.Model):
             return NotImplemented
         if operator == '=':
             operator = '<='
+        today = self.env.company._get_company_today()
         return [
                 '|',
                 '|',
-                '&', ('discount_date', '>=', str(date.today())), ('discount_date', operator, value),
-                '&', ('discount_date', '<', str(date.today())), ('date_maturity', operator, value),
+                '&', ('discount_date', '>=', today), ('discount_date', operator, value),
+                '&', ('discount_date', '<', today), ('date_maturity', operator, value),
                 '&', ('discount_date', '=', False), ('date_maturity', operator, value),
             ]
 
@@ -3699,7 +3701,7 @@ class AccountMoveLine(models.Model):
         move = self.move_id
         move.ensure_one()
 
-        payment_date = payment_date or fields.Date.context_today(self)
+        payment_date = payment_date or move._get_company_today()
 
         term_lines = self.sorted(key=lambda line: (line.date_maturity or date.max, line.date))
         sign = move.direction_sign

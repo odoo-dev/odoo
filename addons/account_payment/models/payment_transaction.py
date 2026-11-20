@@ -197,6 +197,8 @@ class PaymentTransaction(models.Model):
             'partner_type': 'customer',
             'journal_id': self.provider_id.journal_id.id,
             'company_id': self.provider_id.company_id.id,
+            # processed as the public user or by a cron, both without timezone
+            'date': self.provider_id.company_id._get_company_today(),
             'payment_method_line_id': payment_method_line.id,
             'payment_token_id': self.token_id.id,
             'payment_transaction_id': self.id,

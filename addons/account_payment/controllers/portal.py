@@ -1,6 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import _, fields, http
+from odoo import _, http
 from odoo.exceptions import AccessError, MissingError, ValidationError
 from odoo.http import request
 
@@ -85,7 +85,7 @@ class PortalAccount(portal.PortalAccount, PaymentPortal):
         batch_name = company.get_next_batch_payment_communication() if len(overdue_invoices) > 1 else first_invoice.name
         values.update({
             'payment': {
-                'date': fields.Date.context_today(request.env.user),
+                'date': company._get_company_today(),
                 'reference': batch_name,
                 'amount': total_amount,
                 'currency': currency,

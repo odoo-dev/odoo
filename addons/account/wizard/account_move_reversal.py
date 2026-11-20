@@ -14,7 +14,7 @@ class AccountMoveReversal(models.TransientModel):
 
     move_ids = fields.Many2many('account.move', 'account_move_reversal_move', 'reversal_id', 'move_id', domain=[('state', '=', 'posted')])
     new_move_ids = fields.Many2many('account.move', 'account_move_reversal_new_move', 'reversal_id', 'new_move_id')
-    date = fields.Date(string='Reversal date', default=fields.Date.context_today)
+    date = fields.Date(string='Reversal date', default=lambda self: self.env.company._get_company_today())
     reason = fields.Char(string='Reason displayed on Credit Note')
     journal_id = fields.Many2one(
         comodel_name='account.journal',
@@ -107,7 +107,7 @@ class AccountMoveReversal(models.TransientModel):
             'journal_id': self.journal_id.id,
             'invoice_payment_term_id': mixed_payment_term,
             'invoice_user_id': move.invoice_user_id.id,
-            'auto_post': 'at_date' if reverse_date > fields.Date.context_today(self) else 'no',
+            'auto_post': 'at_date' if reverse_date > move._get_company_today() else 'no',
             'invoice_origin': move.invoice_origin,
             'invoice_currency_rate': move.invoice_currency_rate,
         }

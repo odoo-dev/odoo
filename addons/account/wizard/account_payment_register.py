@@ -16,7 +16,7 @@ class AccountPaymentRegister(models.TransientModel):
 
     # == Business fields ==
     payment_date = fields.Date(string="Payment Date", required=True,
-        default=fields.Date.context_today)
+        default=lambda self: self.env.company._get_company_today())
     amount = fields.Monetary(currency_field='currency_id', store=True, readonly=False,
         compute='_compute_amount')
     hide_writeoff_section = fields.Boolean(compute="_compute_hide_writeoff_section")

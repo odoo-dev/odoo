@@ -61,12 +61,12 @@ class AccountSecureEntriesWizard(models.TransientModel):
     def _compute_hash_date(self):
         for wizard in self:
             if not wizard.hash_date:
-                wizard.hash_date = wizard.max_hash_date or fields.Date.context_today(self)
+                wizard.hash_date = wizard.max_hash_date or wizard.company_id._get_company_today()
 
     @api.depends('company_id', 'company_id.user_hard_lock_date')
     def _compute_max_hash_date(self):
-        today = fields.Date.context_today(self)
         for wizard in self:
+            today = wizard.company_id._get_company_today()
             chains_to_hash = wizard.with_context(chain_info_warnings=False)._get_chains_to_hash(wizard.company_id, today)
             moves = self.env['account.move'].concat(
                 [chain['moves'] for chain in chains_to_hash]

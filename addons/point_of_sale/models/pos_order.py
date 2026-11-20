@@ -446,7 +446,7 @@ class PosOrder(models.Model):
     @api.depends('date_order', 'company_id', 'currency_id', 'company_id.currency_id')
     def _compute_currency_rate(self):
         for order in self:
-            order.currency_rate = self.env['res.currency']._get_conversion_rate(order.company_id.currency_id, order.currency_id, order.company_id, order.date_order.date())
+            order.currency_rate = self.env['res.currency']._get_conversion_rate(order.company_id.currency_id, order.currency_id, order.company_id, order.company_id._get_company_today(order.date_order))
 
     @api.depends('lines.is_total_cost_computed')
     def _compute_is_total_cost_computed(self):
@@ -1530,7 +1530,7 @@ class PosOrder(models.Model):
         """
         combined_currency = {}  # (pm, foreign currency) -> total signed amounts
         session = self.session_id  # Always single record in this context
-        today = fields.Date.context_today(self)
+        today = self.company_id._get_company_today()
 
         for payment in self.payment_ids:
             pm = payment.payment_method_id
@@ -1642,7 +1642,7 @@ class PosOrder(models.Model):
         fiscal_positions so it won't make any issue when we access user,
         partner, bank or similar directly.
         """
-        invoice_date = fields.Date.context_today(self)
+        invoice_date = self.company_id._get_company_today()
         pos_refunded_invoice_ids = []
         is_single_order = len(self) == 1
 

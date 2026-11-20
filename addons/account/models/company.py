@@ -174,7 +174,7 @@ class ResCompany(models.Model):
     #Fields of the setup step for opening move
     account_opening_move_id = fields.Many2one(string='Opening Journal Entry', comodel_name='account.move', help="The journal entry containing the initial balance of all this company's accounts.")
     account_opening_journal_id = fields.Many2one(string='Opening Journal', comodel_name='account.journal', related='account_opening_move_id.journal_id', help="Journal where the opening entry of this company's accounting has been posted.", readonly=False)
-    account_opening_date = fields.Date(string='Opening Entry', help="That is the date of the opening entry.", default=lambda self: fields.Date.today())
+    account_opening_date = fields.Date(string='Opening Entry', help="That is the date of the opening entry.", default=lambda self: self.env.company._get_company_today())
 
     invoice_terms = fields.Html(string='Default Terms and Conditions', translate=True)
     terms_type = fields.Selection([('plain', 'Add a Note'), ('html', 'Add a link to a Web Page')],
@@ -970,7 +970,7 @@ class ResCompany(models.Model):
             'ref': _('Opening Journal Entry'),
             'company_id': self.id,
             'journal_id': default_journal.id,
-            'date': (self.account_opening_date or fields.Date.start_of(fields.Date.context_today(self), 'year')) - timedelta(days=1),
+            'date': (self.account_opening_date or fields.Date.start_of(self._get_company_today(), 'year')) - timedelta(days=1),
         }
 
     def opening_move_posted(self):
@@ -1344,7 +1344,7 @@ class ResCompany(models.Model):
         :return: dict mapping each accrual section to {'move', 'cogs_vals', 'inventory_vals', 'accrual_vals'}.
         """
         self.ensure_one()
-        accrual_entry_date = date or fields.Date.context_today(self)
+        accrual_entry_date = date or self._get_company_today()
         accrual_data = {}
         for accrual_type, candidate_lines in self._get_accrual_candidate_lines(date=date).items():
             if not candidate_lines:

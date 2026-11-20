@@ -3,7 +3,6 @@ from contextlib import contextmanager
 
 from odoo import api, fields, models, _, Command
 from odoo.exceptions import UserError, ValidationError
-from odoo.fields import Datetime
 from odoo.tools.misc import formatLang
 
 
@@ -420,7 +419,7 @@ class AccountBankStatement(models.Model):
         # When creating a statement from the view outside the bank rec widget, we want to start with a draft statement
         if self.env.context.get('from_statement_view'):
             defaults['is_statement_posted'] = False
-            defaults['date'] = Datetime.now()
+            defaults['date'] = self.env.company._get_company_today()
 
         return defaults
 

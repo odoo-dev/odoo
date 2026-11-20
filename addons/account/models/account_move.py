@@ -887,7 +887,7 @@ class AccountMove(models.Model):
             accounting_date = move._get_accounting_date_source()
             if not accounting_date or not move.is_invoice(include_receipts=True):
                 if not move.date:
-                    move.date = fields.Date.context_today(self)
+                    move.date = move._get_company_today()
                 continue
             if not move.is_sale_document(include_receipts=True):
                 accounting_date = move._get_accounting_date(accounting_date, move._affect_tax_report())
@@ -909,7 +909,7 @@ class AccountMove(models.Model):
         for record in self:
             record.hide_post_button = record.state != 'draft' \
                 or record.auto_post != 'no' and \
-                record.date and record.date > fields.Date.context_today(record)
+                record.date and record.date > record._get_company_today()
 
     @api.depends('journal_id')
     def _compute_company_id(self):
@@ -1142,11 +1142,11 @@ class AccountMove(models.Model):
 
     def _get_invoice_currency_rate_date(self):
         self.ensure_one()
-        return self.invoice_date or fields.Date.context_today(self)
+        return self.invoice_date or self._get_company_today()
 
     def _get_default_currency_rate_date(self):
         self.ensure_one()
-        return self.invoice_date or self.create_date.date()
+        return self.invoice_date or self._get_company_today(self.create_date)
 
     def _get_expected_currency_rate_at(self, date):
         self.ensure_one()
@@ -1432,7 +1432,7 @@ class AccountMove(models.Model):
                         untaxed_amount_currency = invoice.amount_untaxed * sign
                         untaxed_amount = invoice.amount_untaxed_signed
                     invoice_payment_terms = invoice.invoice_payment_term_id._compute_terms(
-                        date_ref=invoice.invoice_date or invoice.date or fields.Date.context_today(invoice),
+                        date_ref=invoice.invoice_date or invoice.date or invoice._get_company_today(),
                         currency=invoice.currency_id or invoice.journal_id.currency_id or invoice.company_currency_id,
                         tax_amount_currency=tax_amount_currency,
                         tax_amount=tax_amount,
@@ -2015,7 +2015,7 @@ class AccountMove(models.Model):
                  'invoice_line_ids.debit', 'invoice_line_ids.credit', 'invoice_line_ids.tax_line_id', 'invoice_line_ids.tax_ids', 'invoice_line_ids.tax_tag_ids')
     def _compute_tax_lock_date_message(self):
         for move in self:
-            accounting_date = move.date or fields.Date.context_today(move)
+            accounting_date = move.date or move._get_company_today()
             affects_tax_report = move._affect_tax_report()
             move.tax_lock_date_message = move._get_lock_date_message(accounting_date, affects_tax_report)
 
@@ -2365,7 +2365,7 @@ class AccountMove(models.Model):
         if not draft_invoices:
             return
         draft_invoices.flush_recordset(['invoice_date', 'date', 'amount_total', 'partner_id', 'move_type', 'company_id'])
-        today = fields.Date.context_today(self)
+        today = self.env.company._get_company_today()
         self.env.cr.execute("""
             WITH previous_invoices AS (
                   SELECT this.id,
@@ -2400,7 +2400,7 @@ class AccountMove(models.Model):
         })
         result = {invoice: vals for invoice, *vals in self.env.cr.fetchall()}
         for move in draft_invoices:
-            invoice_date = move.invoice_date or today
+            invoice_date = move.invoice_date or move._get_company_today()
             (
                 last_invoice_date, date_diff_mean, date_diff_deviation,
                 amount_mean, amount_deviation,
@@ -4364,7 +4364,7 @@ class AccountMove(models.Model):
 
     def _get_sequence_date_info(self):
         self.ensure_one()
-        move_date = self.date or self.invoice_date or fields.Date.context_today(self)
+        move_date = self.date or self.invoice_date or self._get_company_today()
         year_part = "%04d" % move_date.year
         fiscalyear_dates = self.env.company.compute_fiscalyear_dates(self.date)
         date_from = fiscalyear_dates['date_from']
@@ -4614,7 +4614,7 @@ class AccountMove(models.Model):
         """Suggest the Customer Invoice/Vendor Bill date based on previous invoice and lock dates"""
         for record in self:
             if record.quick_edit_mode and not record.invoice_date:
-                invoice_date = fields.Date.context_today(self)
+                invoice_date = record._get_company_today()
                 prev_move = self.search([('state', '=', 'posted'),
                                          ('journal_id', '=', record.journal_id.id),
                                          ('company_id', '=', record.company_id.id),
@@ -6215,7 +6215,7 @@ class AccountMove(models.Model):
                         precision_digits=9
                     )
                     with self.env.protecting([self._fields['invoice_currency_rate']], invoice) if is_manual_rate else nullcontext():
-                        invoice.invoice_date = fields.Date.context_today(self)
+                        invoice.invoice_date = invoice._get_company_today()
                 elif invoice.is_purchase_document(include_receipts=True):
                     validation_msgs.add(_("The Bill/Refund date is required to validate this document."))
 
@@ -6225,7 +6225,7 @@ class AccountMove(models.Model):
                 validation_msgs.add(_('The entry %(name)s (id %(id)s) must be in draft.', name=move.name, id=move.id))
             if not move.line_ids.filtered(lambda line: line.display_type not in ('line_section', 'line_subsection', 'line_note')):
                 validation_msgs.add(_("Even magicians can't post nothing!"))
-            if not soft and move.auto_post != 'no' and move.date > fields.Date.context_today(self):
+            if not soft and move.auto_post != 'no' and move.date > move._get_company_today():
                 date_msg = move.date.strftime(get_lang(self.env).date_format)
                 validation_msgs.add(_("This move is configured to be auto-posted on %(date)s", date=date_msg))
             if not move.journal_id.active:
@@ -6269,7 +6269,7 @@ class AccountMove(models.Model):
             ))
 
         if soft:
-            future_moves, to_post = self.partitioned(lambda move: move.date > fields.Date.context_today(self))
+            future_moves, to_post = self.partitioned(lambda move: move.date > move._get_company_today())
             for move in future_moves:
                 if move.auto_post == 'no':
                     move.auto_post = 'at_date'
@@ -6911,7 +6911,7 @@ class AccountMove(models.Model):
     def _get_moves_requiring_confirmation(self):
         """Return the subset of moves that require confirmation before validation."""
         return self.filtered(
-            lambda move: (move.date or move.invoice_date) > fields.Date.context_today(self)
+            lambda move: (move.date or move.invoice_date) > move._get_company_today()
             or move.restrict_mode_hash_table,
         )
 
@@ -7256,11 +7256,17 @@ class AccountMove(models.Model):
         It is used to post entries such as those created by the module
         account_asset and recurring entries created in _post().
         '''
-        domain = [
+        # post the entries of each company once its own date is reached
+        company_ids_by_today = defaultdict(list)
+        for company in self.env['res.company'].search([]):
+            company_ids_by_today[company._get_company_today()].append(company.id)
+        domain = Domain([
             ('state', '=', 'draft'),
-            ('date', '<=', fields.Date.context_today(self)),
             ('auto_post', '!=', 'no'),
-        ]
+        ]) & Domain.OR(
+            Domain([('company_id', 'in', company_ids), ('date', '<=', today)])
+            for today, company_ids in company_ids_by_today.items()
+        )
         moves = self.search(domain, limit=batch_size)
         remaining = len(moves) if len(moves) < batch_size else self.search_count(domain)
         self.env['ir.cron']._commit_progress(remaining=remaining)
@@ -7470,9 +7476,10 @@ class AccountMove(models.Model):
             next_amount_to_pay = self.amount_residual
             next_payment_reference = self.name
             next_due_date = epd_installment['date_maturity']
-            discount_date = epd_installment['line'].discount_date or fields.Date.context_today(self)
+            today = self._get_company_today()
+            discount_date = epd_installment['line'].discount_date or today
             discount_amount_currency = epd_installment['discount_amount_currency']
-            days_left = max(0, (discount_date - fields.Date.context_today(self)).days)  # should never be lower than 0 since epd is valid
+            days_left = max(0, (discount_date - today).days)  # should never be lower than 0 since epd is valid
             if days_left > 0:
                 discount_msg = _(
                     "Discount of %(amount)s if paid within %(days)s days",
@@ -7532,6 +7539,14 @@ class AccountMove(models.Model):
             **self._get_invoice_next_payment_values(custom_amount=custom_amount),
         }
 
+    def _get_company_today(self, timestamp=None):
+        """ Date of the company of the move today, or at the given UTC
+        ``timestamp``: the date of its documents, whoever and wherever the
+        user, see :meth:`res.company._get_company_tz`.
+        """
+        self.ensure_one()
+        return (self.company_id or self.env.company)._get_company_today(timestamp)
+
     def _get_accounting_date(self, invoice_date, has_tax, lock_dates=None):
         """Get correct accounting date for previous periods, taking tax lock date and affected journal into account.
         When registering an invoice in the past, we still want the sequence to be increasing.
@@ -7547,7 +7562,7 @@ class AccountMove(models.Model):
         """
         self.ensure_one()
         lock_dates = lock_dates or self._get_violated_lock_dates(invoice_date, has_tax)
-        today = fields.Date.context_today(self)
+        today = self._get_company_today()
         highest_name = self.highest_name or self._get_last_sequence(relaxed=True)
         number_reset = self._deduce_sequence_number_reset(highest_name)
         if lock_dates:
@@ -7871,7 +7886,7 @@ class AccountMove(models.Model):
             and not self.highlight_send_button
             and self.env.user.has_group('account.group_account_basic')
             and self.amount_residual > 0
-            and self.invoice_date_due < fields.Date.context_today(self)
+            and self.invoice_date_due < self._get_company_today()
         )
 
     def _create_opening_balance_bank_statements(self):

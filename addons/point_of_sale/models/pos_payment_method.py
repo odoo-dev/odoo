@@ -487,7 +487,7 @@ class PosPaymentMethod(models.Model):
             'move_type': 'entry',
             'company_id': session.company_id.id,
             'journal_id': session.config_id.closing_journal_id.id,
-            'date': fields.Date.context_today(self),
+            'date': session.company_id._get_company_today(),
             'ref': message or _(
                 '%(payment_method)s POS session %(session)s',
                 payment_method=self.name,
@@ -619,7 +619,7 @@ class PosPaymentMethod(models.Model):
             'foreign_currency_id': foreign_currency if foreign_amount else False,
             'company_id': session.company_id.id,
             'journal_id': self.journal_id.id,
-            'date': fields.Date.context_today(self),
+            'date': session.company_id._get_company_today(),
             'partner_id': partner.id if partner else None,
             'statement_id': session.bank_statement_id.id,
             'pos_session_id': session.id,

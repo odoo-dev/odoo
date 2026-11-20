@@ -96,7 +96,7 @@ class ResCurrency(models.Model):
 
         currency_translation = self.env.context.get('currency_translation', 'current')
         date_from = date_from and fields.Date.to_date(date_from)
-        date_to = fields.Date.to_date(date_to) if date_to else fields.Date.context_today(self)
+        date_to = fields.Date.to_date(date_to) if date_to else self.env.company._get_company_today()
         current_date = fields.Date.to_date(current_date) if current_date else date_to
         first_date = currency_translation == 'cta' and self.env['account.move']._first_date()
 

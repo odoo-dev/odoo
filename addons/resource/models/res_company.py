@@ -15,6 +15,7 @@ class ResCompany(models.Model):
     tz = fields.Selection(
         _tz_get, string='Timezone',
         compute='_compute_tz', store=True, readonly=False)
+    tz_outside_country = fields.Boolean(compute='_compute_tz_outside_country')
 
     @api.depends('country_id')
     def _compute_tz(self):
@@ -25,6 +26,12 @@ class ResCompany(models.Model):
                 country_timezones = country_tz.get(company.country_id.code, [])
                 if len(country_timezones) == 1:
                     company.tz = country_timezones[0]
+
+    @api.depends('tz', 'country_id')
+    def _compute_tz_outside_country(self):
+        country_tz = _country_timezones()
+        for company in self:
+            company.tz_outside_country = bool(company.country_id) and company.tz not in country_tz.get(company.country_id.code, [])
 
     @api.model
     def _init_data_resource_calendar(self):
@@ -63,10 +70,20 @@ class ResCompany(models.Model):
         return companies
 
     def _get_company_tz(self):
-        """ Timezone of the company, else of the user, else UTC. """
-        self.ensure_one()
-        return self.tz or self.env.user.tz or 'UTC'
+        """ Timezone in which the company dates its documents: its own if it
+        is one of its country's, else the user's, else UTC.
 
-    def _get_company_today(self):
-        """ Today's date in the timezone of the company. """
-        return fields.Date.context_today(self.with_context(tz=self._get_company_tz()))
+        A timezone outside the country is not trusted: in countries with
+        several timezones, it is the one of the user who created the company
+        (or its working schedule), not a choice.
+        """
+        self.ensure_one()
+        if self.tz and not self.tz_outside_country:
+            return self.tz
+        return self.env.context.get('tz') or self.env.user.tz or 'UTC'
+
+    def _get_company_today(self, timestamp=None):
+        """ Date of the company (see :meth:`_get_company_tz`) today, or at
+        the given UTC ``timestamp``.
+        """
+        return fields.Date.context_today(self.with_context(tz=self._get_company_tz()), timestamp)

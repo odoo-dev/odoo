@@ -521,10 +521,10 @@ class AccountJournal(models.Model):
     @api.depends('company_id')
     @api.depends_context('move_date', 'has_tax')
     def _compute_accounting_date(self):
-        move_date = self.env.context.get('move_date') or fields.Date.context_today(self)
         has_tax = self.env.context.get('has_tax') or False
         for journal in self:
             temp_move = self.env['account.move'].new({'journal_id': journal.id})
+            move_date = self.env.context.get('move_date') or temp_move._get_company_today()
             journal.accounting_date = temp_move._get_accounting_date(move_date, has_tax)
 
     @api.depends('type')

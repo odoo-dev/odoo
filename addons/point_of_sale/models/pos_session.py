@@ -388,7 +388,7 @@ class PosSession(models.Model):
         for record in self:
             journal = record.config_id.journal_id
             company = journal.company_id
-            start_date = record.start_at.date()
+            start_date = company._get_company_today(record.start_at)
             violated_lock_dates = company._get_violated_lock_dates(start_date, True, journal)
             if violated_lock_dates:
                 raise ValidationError(_("You cannot create a session starting before: %(lock_date_info)s",
@@ -894,7 +894,7 @@ class PosSession(models.Model):
             )
             move = move_ctx.create({
                 'journal_id': journal.id,
-                'date': fields.Date.context_today(self),
+                'date': self.company_id._get_company_today(),
                 'ref': _(
                     'Bank difference for %(pm)s in %(session)s',
                     pm=pm.name,
@@ -1006,7 +1006,7 @@ class PosSession(models.Model):
 
     def _prepare_session_move_vals(self, orders):
         self.ensure_one()
-        today = fields.Date.context_today(self)
+        today = self.company_id._get_company_today()
         # All orders are refunds or not
         move_type = 'out_refund' if orders[0].is_refund_or_negative() else 'out_invoice'
 
@@ -1309,7 +1309,7 @@ class PosSession(models.Model):
         reference = _("Partial reversal of %s for PoS Order invoicing", original_move.name)
         move = move_ctx.with_context(check_move_validity=False).create({
             'invoice_cash_rounding_id': original_move.invoice_cash_rounding_id.id,
-            'date': fields.Date.today(),
+            'date': self.company_id._get_company_today(),
             'ref': reference,
             'reversed_pos_order_id': orders.id if len(orders) == 1 else None,  # In case of invoice consolidation, order reversal isn't linked to a single order
             'line_ids': reverse_move_lines,

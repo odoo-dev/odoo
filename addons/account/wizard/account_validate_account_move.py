@@ -19,9 +19,10 @@ class ValidateAccountMove(models.TransientModel):
 
     @api.depends('move_ids')
     def _compute_display_force_post(self):
-        today = fields.Date.context_today(self)
         for wizard in self:
-            wizard.display_force_post = wizard.move_ids.filtered(lambda m: (m.date or m.invoice_date or today) > today)
+            wizard.display_force_post = wizard.move_ids.filtered(
+                lambda m: (m.date or m.invoice_date or m._get_company_today()) > m._get_company_today()
+            )
 
     @api.depends('move_ids')
     def _compute_display_force_hash(self):

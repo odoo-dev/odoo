@@ -7,6 +7,10 @@
         <field name="arch" type="xml">
             <field name="currency_id" position="after">
                 <field name="tz"/>
+                <div colspan="2" class="alert alert-warning mb-0" role="alert" invisible="not tz_outside_country">
+                    This timezone is not one of the country of the company: its invoices, payments and
+                    other documents are dated in the timezone of the user who creates them.
+                </div>
             </field>
         </field>
     </record>

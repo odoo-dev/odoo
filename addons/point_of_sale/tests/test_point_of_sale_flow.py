@@ -4,10 +4,10 @@ import odoo
 from unittest.mock import patch
 from odoo import fields
 from odoo.fields import Command
-from datetime import datetime, timedelta
+from datetime import timedelta
 from odoo.addons.point_of_sale.tests.common import CommonPosTest
 from odoo.exceptions import ValidationError
-from odoo.tests import Form
+from odoo.tests import Form, freeze_time
 
 
 @odoo.tests.tagged('post_install', '-at_install')
@@ -252,7 +252,40 @@ class TestPointOfSaleFlow(CommonPosTest):
         })
         order_payment.with_context(**payment_context).check()
 
-        self.assertEqual(order.account_move.invoice_date_due, (datetime.now() + timedelta(days=30)).date())
+        self.assertEqual(order.account_move.invoice_date_due, self.env.company._get_company_today() + timedelta(days=30))
+
+    @freeze_time('2026-01-14 23:00:00')
+    def test_pos_order_invoice_date_company_day(self):
+        """ The invoice of an order is dated on the day of the company, whatever
+        the timezone of the cashier: 18:00 in New York is 08:00 the next day in Tokyo.
+        """
+        self.env.company.country_id = self.env.ref('base.us')
+        self.env.company.tz = 'America/New_York'
+        self.env.user.tz = 'Asia/Tokyo'
+        self.pos_config_usd.open_ui()
+        order = self.env['pos.order'].create({
+            'company_id': self.env.company.id,
+            'session_id': self.pos_config_usd.current_session_id.id,
+            'partner_id': self.partner_a.id,
+            'lines': [Command.create({
+                'product_id': self.product_a.id,
+                'price_unit': 10,
+                'qty': 1,
+                'price_subtotal': 10,
+                'price_subtotal_incl': 10,
+            })],
+            'amount_paid': 10.0,
+            'amount_total': 10.0,
+            'amount_tax': 0.0,
+            'amount_return': 0.0,
+            'to_invoice': True,
+        })
+        payment_context = {"active_ids": order.ids, "active_id": order.id}
+        self.env['pos.make.payment'].with_context(**payment_context).create({
+            'amount': 10.0,
+            'payment_method_id': self.bank_payment_method.id,
+        }).with_context(**payment_context).check()
+        self.assertEqual(order.account_move.invoice_date, fields.Date.to_date('2026-01-14'))
 
     def test_order_with_different_payments_and_refund(self):
         """

@@ -25,7 +25,7 @@ class AccountAccruedOrdersWizard(models.TransientModel):
         return orders and orders[0].company_id.id
 
     def _get_default_date(self):
-        return date_utils.get_month(fields.Date.context_today(self))[0] - relativedelta(days=1)
+        return date_utils.get_month(self.env.company._get_company_today())[0] - relativedelta(days=1)
 
     accrual_type = fields.Selection(
         string="Accrual Type",

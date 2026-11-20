@@ -21,7 +21,7 @@ class AccountAutomaticEntryWizard(models.TransientModel):
     move_data = fields.Text(compute="_compute_move_data") # JSON value of the moves to be created
     preview_move_data = fields.Text(compute="_compute_preview_move_data") # JSON value of the data to be displayed in the previewer
     move_line_ids = fields.Many2many('account.move.line')
-    date = fields.Date(required=True, default=lambda self: fields.Date.context_today(self))
+    date = fields.Date(required=True, default=lambda self: self.env.company._get_company_today())
     company_id = fields.Many2one('res.company', required=True, readonly=True)
     company_currency_id = fields.Many2one('res.currency', related='company_id.currency_id')
     percentage = fields.Float("Percentage", compute='_compute_percentage', readonly=False, store=True, help="Percentage of each line to execute the action on.")
