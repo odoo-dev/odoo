@@ -4368,7 +4368,11 @@ class BaseModel(metaclass=MetaModel):
                     data['stored'][parent_name] = parent.id
 
         # create records with stored fields
-        records = self._create(data_list)
+        try:
+            records = self._create(data_list)
+        except ValidationError as e:
+            e.add_note(f"in {self}.create({vals_list})")
+            raise
 
         # protect fields being written against recomputation
         protected_fields = [(data['protected'], data['record']) for data in data_list]
@@ -4536,6 +4540,15 @@ class BaseModel(metaclass=MetaModel):
 
         for data_sublist in split_every(INSERT_BATCH_SIZE, data_list):
             stored_list = [data['stored'] for data in data_sublist]
+
+            if notset := next((
+                fname
+                for fname, field in self._fields.items()
+                if field.store and field.column_type and field.required and field.type != 'float'
+                if any(not stored.get(fname) for stored in stored_list)
+            ), None):
+                raise ValidationError(f"No value for required field {notset!r}")
+
             fnames = sorted({name for stored in stored_list for name in stored})
 
             columns: list[str] = []
