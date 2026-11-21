@@ -5126,6 +5126,13 @@ class TestFieldParametersValidation(TransactionCase):
             self.registry._setup_models__(self.env.cr, [])  # incremental setup
         self.assertFalse([str(w.message) for w in caught if Foo._name in str(w.message)])
 
+    def test_copy_not_stored(self):
+        self.assertSetupWarning(
+            "copy attribute has no effect",
+            name=fields.Char(compute='_compute_name', copy=True),
+            _compute_name=lambda self: self.update({'name': False}),
+        )
+
 
 def select(model, *fnames):
     """ Return the expected query string to SELECT the given columns. """

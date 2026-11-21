@@ -596,6 +596,11 @@ class Field[T, C]:
                     setup_warning(self, "compute_sudo attribute makes sense only for a computed field")
                 if self.recursive:
                     setup_warning(self, "recursive attribute makes sense only for a computed field")
+        if (
+            self.copy and (self.compute or self.related) and not self.store
+            and self.readonly and not self.inverse and not self.inherited
+        ):
+            setup_warning(self, "copy attribute has no effect on a readonly non-stored field without inverse")
 
     def setup(self, model: BaseModel) -> None:
         """ Perform the complete setup of a field. """
