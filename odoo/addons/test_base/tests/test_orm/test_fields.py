@@ -5133,6 +5133,12 @@ class TestFieldParametersValidation(TransactionCase):
             _compute_name=lambda self: self.update({'name': False}),
         )
 
+    def test_default_export_compatible_not_exportable(self):
+        self.assertSetupWarning(
+            "default_export_compatible attribute makes no sense on a non-exportable field",
+            name=fields.Char(default_export_compatible=True, exportable=False),
+        )
+
 
 def select(model, *fnames):
     """ Return the expected query string to SELECT the given columns. """
