@@ -8,7 +8,7 @@ from odoo.tools import float_compare, float_is_zero, float_repr, float_round
 from odoo.tools.misc import SENTINEL, Sentinel
 
 from .fields import Field
-from .utils import RegistrySetupError
+from .utils import RegistrySetupError, setup_warning
 
 if typing.TYPE_CHECKING:
     from .types import BaseModel, Environment
@@ -232,8 +232,13 @@ class Monetary(Field[float, float]):
         if self.related and self.inherited:
             self.currency_field = self.related_field.get_currency_field(model.env[self.related_field.model_name])
 
-        if (cur_field := self.get_currency_field(model)) not in model._fields:
+        cur_field = self.get_currency_field(model)
+        currency_field = model._fields.get(cur_field)
+        if currency_field is None:
             raise RegistrySetupError(f"{self}: unknown currency_field {cur_field!r}")
+        currency_field.setup(model)
+        if currency_field.type != 'many2one' or currency_field.comodel_name != 'res.currency':
+            setup_warning(self, f"currency_field {cur_field!r} should be a many2one to res.currency")
 
     def convert_to_column_insert(self, value, record, values=None, validate=True) -> float | str:
         # retrieve currency from values or record

@@ -5139,6 +5139,13 @@ class TestFieldParametersValidation(TransactionCase):
             name=fields.Char(default_export_compatible=True, exportable=False),
         )
 
+    def test_monetary_currency_field_type(self):
+        self.assertSetupWarning(
+            "currency_field 'partner_id' should be a many2one to res.currency",
+            partner_id=fields.Many2one('res.partner'),
+            amount=fields.Monetary(currency_field='partner_id'),
+        )
+
 
 def select(model, *fnames):
     """ Return the expected query string to SELECT the given columns. """
