@@ -1363,6 +1363,11 @@ class Many2many(_RelationalMulti):
             **kwargs
         )
 
+    def _check_attrs(self, model):
+        super()._check_attrs(model)
+        if not self.store and 'ondelete' in self.__dict__:
+            setup_warning(self, "unexpected ondelete on non-stored field")
+
     def _setup(self, model):
         super()._setup(model)
 

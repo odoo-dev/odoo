@@ -5060,6 +5060,13 @@ class TestFieldParametersValidation(TransactionCase):
             _compute_partner_id=lambda self: self.update({'partner_id': False}),
         )
 
+    def test_many2many_ondelete_not_stored(self):
+        self.assertSetupWarning(
+            "unexpected ondelete on non-stored field",
+            partner_ids=fields.Many2many('res.partner', compute='_compute_partner_ids', ondelete='restrict'),
+            _compute_partner_ids=lambda self: self.update({'partner_ids': False}),
+        )
+
 
 def select(model, *fnames):
     """ Return the expected query string to SELECT the given columns. """
