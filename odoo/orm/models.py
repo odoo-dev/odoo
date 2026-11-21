@@ -3718,15 +3718,26 @@ class BaseModel(metaclass=MetaModel):
         # process ondelete methods of all the deleted records
         post_delete_hooks = []
         for records in all_deleted_records:
+            delete_self_without_sudo = records._name == self._name and not self.env.su
             for func in records._ondelete_methods:
-                # func._ondelete is True => should be called during uninstallation
-                # func._ondelete is False => should be called unless its module is being uninstalled
                 if (
-                    func._ondelete
+                    func._ondelete.get('at_uninstall')
                     or not self.pool.uninstalling_modules
                     or func.__module__.split('.')[2] not in self.pool.uninstalling_modules
                 ):
-                    post_delete = func(records)
+                    su = self.env.su or func._ondelete.get('sudo_cascade')
+                    if delete_self_without_sudo:
+                        assert self <= records
+                        post_delete = func(self)
+                        if post_delete is not None:
+                            assert callable(post_delete), f"ondelete {func} should return a Callable or None"
+                            post_delete_hooks.append(post_delete)
+                        post_delete = func((records - self).sudo()) if self < records else None
+                        if post_delete is not None:
+                            assert callable(post_delete), f"ondelete {func} should return a Callable or None"
+                            post_delete_hooks.append(post_delete)
+                        continue
+                    post_delete = func(records.sudo(su))
                     if post_delete is not None:
                         assert callable(post_delete), f"ondelete {func} should return a Callable or None"
                         post_delete_hooks.append(post_delete)
