@@ -9,10 +9,13 @@ import typing
 from collections.abc import Mapping
 from functools import wraps
 
+from odoo.tools import frozendict
+
 from .utils import RegistrySetupError
 
 if typing.TYPE_CHECKING:
     from collections.abc import Callable, Collection
+
     from .types import BaseModel, ValuesType
 
     type Decorator[C: Callable] = Callable[[C], C]
@@ -27,7 +30,7 @@ _logger = logging.getLogger('odoo.api')
 #  - method._constrains: set by @constrains, specifies constraint dependencies
 #  - method._depends: set by @depends, specifies compute dependencies
 #  - method._onchange: set by @onchange, specifies onchange fields
-#  - method._ondelete: set by @ondelete, used to raise errors for unlink operations
+#  - method._ondelete: set by @ondelete, dict with keys 'at_uninstall' and 'cascade_sudo'
 #
 # On wrapping method only:
 #  - method._api_*: decorator function, used for re-applying decorator
@@ -90,7 +93,7 @@ def constrains(*args) -> Decorator:
     return attrsetter('_constrains', args)
 
 
-def ondelete(*, at_uninstall: bool) -> Decorator:
+def ondelete(*, at_uninstall: bool, cascade_sudo: bool = False) -> Decorator:
     """
     Mark a method to be executed during :meth:`~odoo.models.BaseModel.unlink`.
 
@@ -154,8 +157,27 @@ def ondelete(*, at_uninstall: bool) -> Decorator:
         if no other languages are installed, since deleting the default language
         will break a lot of basic behavior. In this case, ``at_uninstall``
         should be set to ``True``.
+
+    :param bool cascade_sudo: Whether the decorated method should run as
+        superuser on the records that are deleted as a consequence of the
+        deletion, i.e., records cascade-deleted by the database or returned by
+        :meth:`~odoo.models.BaseModel._delete_extra`. The records explicitly
+        being ``unlinked`` are always processed with the caller's environment.
+
+    .. note::
+        Access rights are only checked on the records explicitly being
+        deleted. Cascaded records are deleted regardless of the user's access
+        rights, but by default the decorated method runs in the caller's
+        environment on them too. Set ``cascade_sudo=True`` when the method
+        reads or writes data the user may not access (configuration, other
+        documents...), so that deleting a record does not fail because of
+        records the user does not even see. The user stays the same, so
+        checks based on ``self.env.user`` keep working.
     """
-    return attrsetter('_ondelete', at_uninstall)
+    return attrsetter('_ondelete', frozendict({
+        'at_uninstall': bool(at_uninstall),
+        'cascade_sudo': bool(cascade_sudo),
+    }))
 
 
 def onchange(*args: str) -> Decorator:
