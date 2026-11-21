@@ -600,6 +600,9 @@ class Field[T, C]:
                 e.add_note(f"Field setup failed: {self}")
                 raise
 
+            if self.index and not (self.store and self.column_type) and not self.manual:
+                setup_warning(self, "index is ignored on a field without a database column")
+
             self._setup_done = True
             # column_type might be changed during Field.setup
             reset_cached_properties(self)

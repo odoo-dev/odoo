@@ -99,19 +99,16 @@ class PosSession(models.Model):
         'account.move',
         'pos_session_sales_id',
         string='Sales Entry',
-        index=True,
     )
     refund_move_ids = fields.One2many(
         'account.move',
         'pos_session_refunds_id',
         string='Refunds Entry',
-        index=True,
     )
     correction_move_ids = fields.One2many(
         'account.move',
         'pos_session_correction_id',
         string='Correction Entries',
-        index=True,
     )
     move_ids = fields.Many2many(
         'account.move',

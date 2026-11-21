@@ -49,6 +49,7 @@ class ProductProduct(models.Model):
     qty_available = fields.Float(
         'Quantity On Hand', compute='_compute_quantities', search='_search_qty_available',
         inverse='_inverse_qty_available', digits='Product Unit', compute_sudo=False, store=False,
+        company_dependent=False,
         help="Current quantity of products.\n"
              "In a context with a single Stock Location, this includes "
              "goods stored at this Location, or any of its children.\n"

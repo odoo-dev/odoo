@@ -20,8 +20,8 @@ class RepairServiceLine(models.Model):
     quantity = fields.Float(
         'Quantity', digits='Product Unit', required=True, default=1.0)
     company_id = fields.Many2one(related='repair_id.company_id')
-    sale_line_id = fields.One2many('sale.order.line', 'repair_service_line_id', 'Sale Line', index='btree_not_null')
-    invoice_line_ids = fields.One2many('account.move.line', 'repair_service_line_id', string='Invoice Line', index='btree_not_null')
+    sale_line_id = fields.One2many('sale.order.line', 'repair_service_line_id', 'Sale Line')
+    invoice_line_ids = fields.One2many('account.move.line', 'repair_service_line_id', string='Invoice Line')
     sequence = fields.Integer('Sequence', default=0)
     description = fields.Text(string="Description", translate=True)
 

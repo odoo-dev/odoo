@@ -5074,6 +5074,17 @@ class TestFieldParametersValidation(TransactionCase):
             _compute_partner_ids=lambda self: self.update({'partner_ids': False}),
         )
 
+    def test_index_without_column(self):
+        self.assertSetupWarning(
+            "index is ignored on a field without a database column",
+            name=fields.Char(compute='_compute_name', index=True),
+            _compute_name=lambda self: self.update({'name': False}),
+        )
+        self.assertSetupWarning(
+            "index is ignored on a field without a database column",
+            data=fields.Binary(index=True),
+        )
+
 
 def select(model, *fnames):
     """ Return the expected query string to SELECT the given columns. """

@@ -31,7 +31,7 @@ class ProductPublicCategory(models.Model):
     cover_image = fields.Image(
         string="Cover Image", help="Displayed only in the Category List Snippet."
     )
-    is_published = fields.Boolean(compute="_compute_is_published")
+    is_published = fields.Boolean(compute="_compute_is_published", index=False)
     not_in_shop = fields.Boolean(
         string="Not in Shop",
         help="If checked, the category will not be displayed in the main catalog page",

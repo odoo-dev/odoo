@@ -15,7 +15,7 @@ class StockPicking(models.Model):
         string="Purchase Orders", readonly=True)
 
     days_to_arrive = fields.Datetime(compute='_compute_effective_date', search="_search_days_to_arrive", copy=False)
-    delay_pass = fields.Datetime(compute='_compute_date_order', search="_search_delay_pass", index=True, copy=False)
+    delay_pass = fields.Datetime(compute='_compute_date_order', search="_search_delay_pass", copy=False)
 
     @api.depends('state', 'location_dest_id.usage', 'date_done')
     def _compute_effective_date(self):

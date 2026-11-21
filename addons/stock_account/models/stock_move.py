@@ -60,8 +60,8 @@ class StockMove(models.Model):
                                       help="If the move originates from a document from another company, contains that company's partner, otherwise the move's partner.")
     analytic_account_line_ids = fields.Many2many('account.analytic.line', copy=False)
     account_move_id = fields.Many2one('account.move', 'stock_move_id', copy=False, index="btree_not_null")
-    invoice_line_ids = fields.One2many('account.move.line', 'stock_move_id', 'Invoice Line', index='btree_not_null')
-    product_value_ids = fields.One2many('product.value', 'move_id', 'Product Value', index='btree_not_null')
+    invoice_line_ids = fields.One2many('account.move.line', 'stock_move_id', 'Invoice Line')
+    product_value_ids = fields.One2many('product.value', 'move_id', 'Product Value')
 
     def search_remaining_qty(self, operator, value):
         if operator != '=' or not isinstance(value, bool) or value is not True:
