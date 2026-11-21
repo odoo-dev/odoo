@@ -89,6 +89,17 @@ class _Relational[C](Field[BaseModel, C]):
             raise RegistrySetupError(f"Field {self} with unknown comodel_name {self.comodel_name or '???'!r}")
         if isinstance(self.domain, str):
             setup_warning(self, "string is not accepted as domain, use ui_domain")
+        if self.check_company:
+            comodel_cls = model.pool[self.comodel_name]
+            if (
+                'company_id' not in comodel_cls._fields
+                and comodel_cls._check_company_domain is BaseModel._check_company_domain
+            ):
+                setup_warning(
+                    self,
+                    f"check_company attribute makes no sense: {self.comodel_name} has no company_id field "
+                    "and does not override _check_company_domain"
+                )
 
     def setup_inverses(self, registry: Registry, inverses: Collector[Field, Field]):
         """ Populate ``inverses`` with ``self`` and its inverse fields. """

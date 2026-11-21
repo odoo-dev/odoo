@@ -5156,6 +5156,12 @@ class TestFieldParametersValidation(TransactionCase):
             body=fields.Html(sanitize=False, sanitize_overridable=True),
         )
 
+    def test_check_company_without_company(self):
+        self.assertSetupWarning(
+            "check_company attribute makes no sense: res.country has no company_id field",
+            country_id=fields.Many2one('res.country', check_company=True),
+        )
+
 
 def select(model, *fnames):
     """ Return the expected query string to SELECT the given columns. """
