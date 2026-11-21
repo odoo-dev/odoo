@@ -642,6 +642,18 @@ class Html(BaseString):
             attrs['translate'] = html_translate
         return attrs
 
+    def _check_attrs(self, model):
+        super()._check_attrs(model)
+        if not self.sanitize and not self.manual:
+            # sanitize_tags is still used by the web client
+            if ignored := [key for key in (
+                'sanitize_attributes', 'sanitize_style', 'sanitize_form', 'sanitize_conditional_comments',
+                'sanitize_output_method', 'strip_style', 'strip_classes',
+            ) if key in self.__dict__]:
+                setup_warning(self, f"{', '.join(ignored)} ignored on a field with sanitize=False")
+            if self.sanitize_overridable:
+                setup_warning(self, "sanitize_overridable makes no sense on a field with sanitize=False")
+
     _related_sanitize = property(attrgetter('sanitize'))
     _related_sanitize_tags = property(attrgetter('sanitize_tags'))
     _related_sanitize_attributes = property(attrgetter('sanitize_attributes'))

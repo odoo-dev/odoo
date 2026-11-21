@@ -5146,6 +5146,16 @@ class TestFieldParametersValidation(TransactionCase):
             amount=fields.Monetary(currency_field='partner_id'),
         )
 
+    def test_html_sanitize_options_without_sanitize(self):
+        self.assertSetupWarning(
+            "strip_style ignored on a field with sanitize=False",
+            body=fields.Html(sanitize=False, strip_style=True),
+        )
+        self.assertSetupWarning(
+            "sanitize_overridable makes no sense on a field with sanitize=False",
+            body=fields.Html(sanitize=False, sanitize_overridable=True),
+        )
+
 
 def select(model, *fnames):
     """ Return the expected query string to SELECT the given columns. """
