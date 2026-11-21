@@ -588,6 +588,14 @@ class Field[T, C]:
                 setup_warning(self, f'property {key} should be a boolean or None ({value})')
         if self.groups and ' ' in self.groups:
             setup_warning(self, 'groups must not contain spaces')
+        if not self.related:
+            if 'related_sudo' in self.__dict__:
+                setup_warning(self, "related_sudo attribute makes sense only for a related field")
+            if not self.compute:
+                if 'compute_sudo' in self.__dict__:
+                    setup_warning(self, "compute_sudo attribute makes sense only for a computed field")
+                if self.recursive:
+                    setup_warning(self, "recursive attribute makes sense only for a computed field")
 
     def setup(self, model: BaseModel) -> None:
         """ Perform the complete setup of a field. """

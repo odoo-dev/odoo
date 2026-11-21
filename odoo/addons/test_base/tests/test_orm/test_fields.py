@@ -1,5 +1,6 @@
 import base64
 import io
+import warnings
 from collections import OrderedDict
 from contextlib import contextmanager
 from datetime import date, datetime
@@ -5084,6 +5085,46 @@ class TestFieldParametersValidation(TransactionCase):
             "index is ignored on a field without a database column",
             data=fields.Binary(index=True),
         )
+
+    def test_compute_attributes_without_compute(self):
+        self.assertSetupWarning(
+            "compute_sudo attribute makes sense only for a computed field",
+            name=fields.Char(compute_sudo=True),
+        )
+        self.assertSetupWarning(
+            "recursive attribute makes sense only for a computed field",
+            name=fields.Char(recursive=True),
+        )
+        self.assertSetupWarning(
+            "related_sudo attribute makes sense only for a related field",
+            name=fields.Char(compute='_compute_name', related_sudo=False),
+            _compute_name=lambda self: self.update({'name': False}),
+        )
+
+    def test_setup_warning_override(self):
+        """ Parameters given by an override are checked on the merged field. """
+        from odoo.orm.model_classes import add_to_registry  # noqa: PLC0415
+
+        class Foo(models.Model):
+            _module = None
+            _name = _description = 'test_orm.field_setup_warning'
+            name = fields.Char(compute='_compute_name')
+
+            def _compute_name(self):
+                self.name = False
+
+        class Foo2(models.Model):
+            _module = None
+            _inherit = 'test_orm.field_setup_warning'
+            name = fields.Char(recursive=True, compute_sudo=True)
+
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter('always')
+            add_to_registry(self.registry, Foo)
+            self.addCleanup(self.registry.__delitem__, Foo._name)
+            add_to_registry(self.registry, Foo2)
+            self.registry._setup_models__(self.env.cr, [])  # incremental setup
+        self.assertFalse([str(w.message) for w in caught if Foo._name in str(w.message)])
 
 
 def select(model, *fnames):
