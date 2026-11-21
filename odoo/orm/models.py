@@ -4368,7 +4368,11 @@ class BaseModel(metaclass=MetaModel):
                     data['stored'][parent_name] = parent.id
 
         # create records with stored fields
-        records = self._create(data_list)
+        try:
+            records = self._create(data_list)
+        except psycopg2.errors.IntegrityError as exc:
+            exc.add_note(f"in {self}.create({vals_list})")
+            raise
 
         # protect fields being written against recomputation
         protected_fields = [(data['protected'], data['record']) for data in data_list]
