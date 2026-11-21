@@ -5,7 +5,7 @@ from odoo.exceptions import UserError
 class IrSequence(models.Model):
     _inherit = 'ir.sequence'
 
-    @api.ondelete(at_uninstall=False)
+    @api.ondelete(at_uninstall=False, sudo_cascade=True)
     def _unlink_sequence(self):
         configs = self.env['pos.config'].search(domain=[
             '|', '|', '|',
