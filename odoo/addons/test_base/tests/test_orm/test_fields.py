@@ -5067,6 +5067,13 @@ class TestFieldParametersValidation(TransactionCase):
             _compute_partner_ids=lambda self: self.update({'partner_ids': False}),
         )
 
+    def test_many2many_relation_not_stored(self):
+        self.assertSetupWarning(
+            "relation, column1 and column2 are ignored on non-stored field",
+            partner_ids=fields.Many2many('res.partner', 'foo_partner_rel', compute='_compute_partner_ids'),
+            _compute_partner_ids=lambda self: self.update({'partner_ids': False}),
+        )
+
 
 def select(model, *fnames):
     """ Return the expected query string to SELECT the given columns. """

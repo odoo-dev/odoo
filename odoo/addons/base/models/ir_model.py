@@ -1583,10 +1583,11 @@ class IrModelFields(models.Model):
             if not self.pool.loaded and field_data['relation'] not in self.env:
                 return
             attrs['comodel_name'] = field_data['relation']
-            rel, col1, col2 = self._custom_many2many_names(field_data['model'], field_data['relation'])
-            attrs['relation'] = field_data['relation_table'] or rel
-            attrs['column1'] = field_data['column1'] or col1
-            attrs['column2'] = field_data['column2'] or col2
+            if field_data['store']:
+                rel, col1, col2 = self._custom_many2many_names(field_data['model'], field_data['relation'])
+                attrs['relation'] = field_data['relation_table'] or rel
+                attrs['column1'] = field_data['column1'] or col1
+                attrs['column2'] = field_data['column2'] or col2
             attrs['domain'] = expr_eval(field_data['domain'] or '[]')
         elif field_data['ttype'] == 'monetary':
             # be sure that custom monetary field are always instanciated

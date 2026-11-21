@@ -243,7 +243,6 @@ class HrTimeRule(models.Model):
     )
     country_work_entry_type_ids = fields.Many2many(
         'hr.work.entry.type',
-        'hr_time_rule_allowed_work_entry_type_rel',
         compute='_compute_country_work_entry_type_ids',
     )
     amount_rate = fields.Float(

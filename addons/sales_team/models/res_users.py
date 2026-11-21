@@ -7,7 +7,7 @@ class ResUsers(models.Model):
     _inherit = 'res.users'
 
     crm_team_ids = fields.Many2many(
-        'crm.team', 'crm_team_member', 'user_id', 'crm_team_id', string='Sales Teams',
+        'crm.team', string='Sales Teams',
         check_company=True, copy=False, readonly=True,
         compute='_compute_crm_team_ids', search='_search_crm_team_ids')
     crm_team_member_ids = fields.One2many('crm.team.member', 'user_id', string='Sales Team Members')

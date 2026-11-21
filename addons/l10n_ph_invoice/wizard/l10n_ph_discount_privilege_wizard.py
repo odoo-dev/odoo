@@ -48,7 +48,6 @@ class L10nPhDiscountPrivilegeWizard(models.TransientModel):
     )
     available_product_ids = fields.Many2many(
         "product.product",
-        relation="l10n_ph_discount_privilege_wizard_available_product_rel",
         compute="_compute_available_filters",
     )
     available_category_ids = fields.Many2many(

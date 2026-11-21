@@ -1367,6 +1367,8 @@ class Many2many(_RelationalMulti):
         super()._check_attrs(model)
         if not self.store and 'ondelete' in self.__dict__:
             setup_warning(self, "unexpected ondelete on non-stored field")
+        if not self.store and (self.relation or self.column1 or self.column2):
+            setup_warning(self, "relation, column1 and column2 are ignored on non-stored field")
 
     def _setup(self, model):
         super()._setup(model)

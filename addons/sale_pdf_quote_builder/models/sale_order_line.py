@@ -11,7 +11,6 @@ class SaleOrderLine(models.Model):
     available_product_document_ids = fields.Many2many(
         string="Available Product Documents",
         comodel_name="product.document",
-        relation="available_sale_order_line_product_document_rel",
         compute="_compute_available_product_document_ids",
         compute_sudo=True,  # To access attached_on_sale
     )
