@@ -603,6 +603,11 @@ class Field[T, C]:
             setup_warning(self, "copy attribute has no effect on a readonly non-stored field without inverse")
         if self.default_export_compatible and not self.exportable:
             setup_warning(self, "default_export_compatible attribute makes no sense on a non-exportable field")
+        if self.company_dependent:
+            if not self.store:
+                setup_warning(self, "company_dependent field must be stored")
+            if self.compute or self.related:
+                setup_warning(self, "computed company-dependent field is not supported")
 
     def setup(self, model: BaseModel) -> None:
         """ Perform the complete setup of a field. """

@@ -5162,6 +5162,20 @@ class TestFieldParametersValidation(TransactionCase):
             country_id=fields.Many2one('res.country', check_company=True),
         )
 
+    def test_company_dependent_not_stored(self):
+        self.assertSetupWarning(
+            "company_dependent field must be stored",
+            name=fields.Char(company_dependent=True, compute='_compute_name'),
+            _compute_name=lambda self: self.update({'name': False}),
+        )
+
+    def test_company_dependent_computed(self):
+        self.assertSetupWarning(
+            "computed company-dependent field is not supported",
+            name=fields.Char(company_dependent=True, compute='_compute_name', store=True),
+            _compute_name=lambda self: self.update({'name': False}),
+        )
+
 
 def select(model, *fnames):
     """ Return the expected query string to SELECT the given columns. """
