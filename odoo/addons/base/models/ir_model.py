@@ -1565,7 +1565,8 @@ class IrModelFields(models.Model):
             if not self.pool.loaded and field_data['relation'] not in self.env:
                 return
             attrs['comodel_name'] = field_data['relation']
-            attrs['ondelete'] = field_data['on_delete']
+            if field_data['store']:
+                attrs['ondelete'] = field_data['on_delete']
             attrs['domain'] = expr_eval(field_data['domain'] or '[]')
             attrs['group_expand'] = '_read_group_expand_full' if field_data['group_expand'] else None
         elif field_data['ttype'] == 'one2many':

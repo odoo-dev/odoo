@@ -274,6 +274,12 @@ class Many2one(_Relational['IdType']):
 
     def _setup(self, model):
         super()._setup(model)
+        if not self.store and not self.delegate:
+            # no foreign key, hence no ondelete; delegate fields must declare
+            # their ondelete, even when not stored
+            if self.ondelete:
+                setup_warning(self, "unexpected ondelete on non-stored field")
+            return
         if self.related:
             return
         # 3 cases:
