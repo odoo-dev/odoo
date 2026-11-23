@@ -135,7 +135,7 @@ user_session,Users can read only their own sessions,res.session,base.group_user,
 user_session_admin,Administrators can read all sessions,res.session,base.group_system,r,
 user_device,Users can read only their own devices,res.device,base.group_user,r,"[('user_id', '=', user.id)]"
 user_device_admin,Administrators can read all devices,res.device,base.group_system,r,
-user_device_logs,Users can read only their own device logs,res.device.log,base.group_user,r,"[('user_id', '=', user.id)]"
+user_device_logs,Users can read only their own device logs,res.device.log,base.group_user,r,"[('user_id', 'in.expr', 'user.ids')]"
 user_device_logs_admin,Administrators can read all device logs,res.device.log,base.group_system,r,
 properties_base_definition_rule_admin,properties.base.definition: system all access,properties.base.definition,base.group_system,crud,
 access_website_public_public,website.public,website,base.group_everyone,r,
