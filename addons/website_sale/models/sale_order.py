@@ -45,7 +45,7 @@ class SaleOrder(models.Model):
     cart_recovery_email_sent = fields.Boolean(string="Cart recovery email already sent")
 
     # Computed fields
-    website_order_line = fields.One2many(
+    website_order_line = fields.Many2many(
         string="Order Lines displayed on Website",
         comodel_name="sale.order.line",
         compute="_compute_website_order_line",
