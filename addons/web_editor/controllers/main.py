@@ -16,7 +16,7 @@ from math import floor
 from odoo.http import request
 from odoo import http, tools, _, SUPERUSER_ID
 from odoo.addons.http_routing.models.ir_http import slug, unslug
-from odoo.exceptions import UserError, ValidationError
+from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.modules.module import get_resource_path
 from odoo.tools.mimetypes import guess_mimetype
 from odoo.tools.image import image_data_uri, base64_to_image
@@ -692,6 +692,8 @@ class Web_Editor(http.Controller):
 
     @http.route(['/web_editor/media_library_search'], type='json', auth="user", website=True)
     def media_library_search(self, **params):
+        if not request.env.user._is_internal():
+            raise AccessError(_("Only internal users can search the media library."))
         ICP = request.env['ir.config_parameter'].sudo()
         endpoint = ICP.get_param('web_editor.media_library_endpoint', DEFAULT_LIBRARY_ENDPOINT)
         params['dbuuid'] = ICP.get_param('database.uuid')
@@ -714,6 +716,8 @@ class Web_Editor(http.Controller):
                 }, ...
             }
         """
+        if not request.env.user._is_internal():
+            raise AccessError(_("Only internal users can save media library attachments."))
         attachments = []
         ICP = request.env['ir.config_parameter'].sudo()
         library_endpoint = ICP.get_param('web_editor.media_library_endpoint', DEFAULT_LIBRARY_ENDPOINT)
