@@ -1,0 +1,5 @@
+id,name,model_id,group_id/id,operation,domain
+access_stock_card_report_stock_manager,access_stock_card_report_stock_manager,stock.card.report,stock.group_stock_manager,r,
+access_stock_card_report_account_readonly,access_stock_card_report_account_readonly,stock.card.report,account.group_account_readonly,r,
+access_stock_card_wizard_stock_manager,access_stock_card_wizard_stock_manager,stock.card.wizard,stock.group_stock_manager,crud,
+access_stock_card_wizard_account_readonly,access_stock_card_wizard_account_readonly,stock.card.wizard,account.group_account_readonly,crud,

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="stock_card_report_view_list" model="ir.ui.view">
+        <field name="name">stock.card.report.view.list</field>
+        <field name="model">stock.card.report</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="date"/>
+                <field name="operation_type"/>
+                <field name="reference"/>
+                <field name="origin" optional="hide"/>
+                <field name="owner_id" optional="hide"/>
+                <field name="default_code" optional="hide"/>
+                <field name="product_id"/>
+                <field name="removal_date" optional="hide"/>
+                <field name="lot_id" optional="hide"/>
+                <field name="location_id"/>
+                <field name="location_dest_id"/>
+                <field name="quantity"/>
+                <field name="uom_id" optional="hide"/>
+                <field name="qty_start"/>
+                <field name="qty_in"/>
+                <field name="unit_price" optional="hide"/>
+                <field name="qty_out"/>
+                <field name="qty_balance"/>
+                <field name="unit_cost"/>
+                <field name="value_start"/>
+                <field name="value_in"/>
+                <field name="value_out"/>
+                <field name="value_ending"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="stock_card_report_view_search" model="ir.ui.view">
+        <field name="name">stock.card.report.view.search</field>
+        <field name="model">stock.card.report</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="product_id"/>
+                <field name="operation_type"/>
+                <field name="reference"/>
+                <field name="lot_id"/>
+                <field name="date"/>
+                <field name="location_id"/>
+                <field name="location_dest_id"/>
+                <filter name="show_archived" string="Show Archived" domain="[('product_id.active', '=', False)]"/>
+                <filter name="hide_out_of_stock" string="Hide Out of Stock" domain="[('product_id.qty_available', '>', 0)]"/>
+                <separator/>
+                <filter name="filter_date" date="date"/>
+                <group>
+                    <filter name="product" string="Product" context="{'group_by':'product_id'}"/>
+                    <separator/>
+                    <filter name="source_location" string="Source Location" context="{'group_by':'location_id'}"/>
+                    <filter name="destination_location" string="Destination Location" context="{'group_by':'location_dest_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_stock_card_report" model="ir.actions.act_window">
+        <field name="name">Stock Card</field>
+        <field name="res_model">stock.card.report</field>
+        <field name="view_mode">list</field>
+        <!-- Without the wizard, only the lines since the beginning of the current month are computed. -->
+        <field name="context">{'stock_card_date_from': (context_today() - datetime.timedelta(days=context_today().day - 1)).strftime('%Y-%m-%d 00:00:00')}</field>
+    </record>
+
+    <menuitem
+        id="menu_stock_card_report"
+        name="Stock Card"
+        parent="stock.menu_warehouse_report"
+        action="action_stock_card_wizard"
+        sequence="30"/>
+
+</odoo>
