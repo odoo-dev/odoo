@@ -51,6 +51,15 @@ class HrEmployee(models.Model):
     _inherits = {'hr.version': 'version_id'}
     _check_inherits_access = False
 
+    # Notes on inherited fields
+    # -------------------------
+    # Redefine a version field on the employee only if it needs some attributes (groups, domain, tracking...) to differ
+    # from hr.version. The new field replaces the inherited field, so it must be explicitly related to the version, e.g.
+    #
+    #   some_field = fields.Char(related='version_id.some_field', inherited=True, readonly=False, groups='hr.group_hr_manager')
+    #
+    # readonly=False is the default behavior for non-computed inherited fields, leave it out for a computed version field.
+
     # versions
     version_id = fields.Many2one(
         'hr.version',
@@ -255,32 +264,8 @@ class HrEmployee(models.Model):
         ("office", "Office"),
         ("other", "Other")], compute="_compute_work_location_type", tracking=True)
 
-    # Since groups don't naturally propagate to related fields (see _add_inherited_fields in model_classes.py),
-    # we explicitly redefine some version fields on the employee model to enforce access rights.
-    #
-    # However, redefining them bypasses the standard _inherits mapping.
-    # This causes the ORM to update them via inverse methods after creation, which breaks database constraints.
-    # Adding inherited=True solves this by simulating the standard _inherits behavior.
-    # It ensures these fields are injected directly into the version's create dictionary (vals),
-    # so constraints pass right away without having to hack the employee methods.
-    #
-    # This change did cause a side effect: an AccessError.
-    # When fetching missing default values for the version,
-    # the ORM blindly included these restricted fields without checking user groups.
-    # The extra fix just strips those restricted fields out of the vals before the create method crashes,
-    # keeping everything safe and working.
     first_contract_date = fields.Date(compute='_compute_first_contract_date', groups="hr.group_hr_user", store=True,
                                     help="The date of the first contract of the employee in the company.")
-    contract_date_start = fields.Date(readonly=False, related="version_id.contract_date_start", inherited=True, groups="hr.group_hr_user")
-    contract_date_end = fields.Date(readonly=False, related="version_id.contract_date_end", inherited=True, groups="hr.group_hr_user")
-    fixed_term = fields.Boolean(readonly=False, related="version_id.fixed_term", inherited=True, groups="hr.group_hr_user")
-    trial_date_end = fields.Date(readonly=False, related="version_id.trial_date_end", inherited=True, groups="hr.group_hr_user")
-    date_start = fields.Date(related='version_id.date_start', inherited=True, groups="hr.group_hr_user")
-    date_end = fields.Date(related='version_id.date_end', inherited=True, groups="hr.group_hr_user")
-    is_current = fields.Boolean(related='version_id.is_current', inherited=True, groups="hr.group_hr_user")
-    is_past = fields.Boolean(related='version_id.is_past', inherited=True, groups="hr.group_hr_user")
-    is_future = fields.Boolean(related='version_id.is_future', inherited=True, groups="hr.group_hr_user")
-    is_in_contract = fields.Boolean(related='version_id.is_in_contract', inherited=True, groups="hr.group_hr_user")
     employee_type_id = fields.Many2one(readonly=False, related='version_id.employee_type_id', inherited=True, groups="hr.group_hr_manager")
     hourly_cost = fields.Monetary('Hourly Cost', groups="hr.group_hr_user", tracking=True)
     nationality_country_code = fields.Char(
