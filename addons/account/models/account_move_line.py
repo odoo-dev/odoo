@@ -666,7 +666,12 @@ class AccountMoveLine(models.Model):
                 values.append(product.description_purchase)
             return '\n'.join(values) if values else False
 
-        term_by_move = (self.move_id.line_ids | self).filtered(lambda l: l.display_type == 'payment_term').sorted(lambda l: l.date_maturity or date.max).grouped('move_id')
+        lines = self.move_id.line_ids
+        if any(self._ids) == any(lines._ids):
+            lines |= self
+        else:
+            lines = self.browse().concat(self.new(origin=line) for line in lines) | self
+        term_by_move = lines.filtered(lambda l: l.display_type == 'payment_term').sorted(lambda l: l.date_maturity or date.max).grouped('move_id')
         for line in self.filtered(lambda l: l.move_id.inalterable_hash is False):
             if line.display_type == 'payment_term':
                 term_lines = term_by_move.get(line.move_id, self.env['account.move.line'])
