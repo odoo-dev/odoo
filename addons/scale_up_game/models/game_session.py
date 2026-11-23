@@ -361,6 +361,10 @@ class ScaleUpGameSession(models.Model):
         current = progress['picking'].sudo()
         return {
             **self._get_texts(level),
+            # Keys shared with the scenario payload; the POC has no story to replay.
+            'chat': [],
+            'group_name': level.parent_id.name or '',
+            'scene_key': level.scene,
             'newly_completed': newly_completed,
             'stage': progress['stage'],
             'steps': progress['steps'],
