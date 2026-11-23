@@ -25,8 +25,8 @@
         <field name="model_id" ref="base.model_ir_cache"/>
         <field name="state">code</field>
         <field name="code">model._gc_cache()</field>
-        <field name='interval_number'>1</field>
-        <field name='interval_type'>days</field>
+        <field name="interval_number">7</field>
+        <field name="interval_type">days</field>
         <field name="priority">1</field>
     </record>
 </odoo>

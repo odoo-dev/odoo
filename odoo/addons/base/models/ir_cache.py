@@ -33,7 +33,7 @@ def _get_ir_cache_secret(env: api.Environment) -> bytes:
     return hkdf_expand(hashlib.sha256, config.server_secret, info, 32)
 
 
-_KIND_RE = re.compile(r'\w[\w.]*')
+_KIND_RE = re.compile(r'\w+')
 
 
 def _get_ir_cache_filename(kind: str, create_date: datetime, signature: bytes) -> str:
@@ -118,7 +118,7 @@ class IrCache(models.Model):
         :return: whether the canary is valid, i.e. the entries are signed with
             the current key
         """
-        return self._lookup('ir.cache', 'ir.cache') == b'0'
+        return self._lookup('ir_cache', 'ir.cache') == b'0'
 
     @api.private
     def _lookup(self, kind: str, key: str, version: SQL | str = '') -> bytes | None:
@@ -206,7 +206,7 @@ class IrCache(models.Model):
                 invalid.append(key)
             else:
                 result[key] = data
-        if invalid and kind != 'ir.cache' and self._check_secret():
+        if invalid and kind != 'ir_cache' and self._check_secret():
             _logger.info("ir.cache: invalid signature of the %s entries %r, ignored", kind, invalid)
         return tuple(result.get(key) for key in keys)
 
@@ -268,7 +268,7 @@ class IrCache(models.Model):
 
         row = (create_date, kind, key, version_data_json, version_value, signature)
 
-        if kind == 'ir.cache':
+        if kind == 'ir_cache':
             _logger.info("ir.cache: new canary created")
 
         if not self.env.cr.readonly:
@@ -317,13 +317,13 @@ class IrCache(models.Model):
             self.env.cr.execute("TRUNCATE ir_cache")
             shutil.rmtree(directory, ignore_errors=True)
             _logger.info("ir.cache: all entries deleted")
-            self._set__('ir.cache', 'ir.cache', b'0')
+            self._set__('ir_cache', 'ir.cache', b'0')
             return
 
         self.env.cr.execute(SQL("""
             DELETE FROM ir_cache c
               WHERE c.create_date < NOW() AT TIME ZONE 'UTC' - make_interval(hours => %s)
-                AND kind != 'ir.cache'
+                AND kind != 'ir_cache'
         """, self._cache_max_hours))
         _logger.info("ir.cache: %s entries deleted", self.env.cr.rowcount)
 
@@ -334,7 +334,7 @@ class IrCache(models.Model):
         for path in directory.iterdir():
             try:
                 parts = path.name.rsplit('-', 2)
-                if len(parts) == 3 and parts[1] < time_str and parts[0] != 'ir.cache':
+                if len(parts) == 3 and parts[1] < time_str and parts[0] != 'ir_cache':
                     path.unlink()
                     count += 1
             except OSError:

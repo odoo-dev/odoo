@@ -1011,7 +1011,7 @@ class IrQweb(models.AbstractModel):
         # inheriting from them, see `ir.cache._lookup_multi`; the entries share most of their views,
         # each view is read and hashed only once
         return SQL("""
-            WITH v AS MATERIALIZED (
+            WITH all_views AS MATERIALIZED (
                 SELECT id, inherit_id,
                        concat_ws('|', id, inherit_id, active, write_date, md5(arch_db::text)) AS part
                   FROM ir_ui_view
@@ -1020,20 +1020,20 @@ class IrQweb(models.AbstractModel):
             )
             SELECT entry.key, md5(concat_ws('|', %s)) AS version
               FROM entry
-        """, SQL(", ").join([
-            SQL("""(
-                SELECT string_agg(v.part, ',' ORDER BY v.id)
-                  FROM v
-                 WHERE v.id IN (SELECT jsonb_array_elements_text(entry.version_data->'view_ids')::int)
-                    OR v.inherit_id IN (SELECT jsonb_array_elements_text(entry.version_data->'view_ids')::int)
-            )"""),
-            *self._get_template_cache_version_sql_parts(),
-        ]), to_flush=[IrUiView._fields[f] for f in ('inherit_id', 'active', 'arch_db', 'write_date')])
+        """, SQL(", ").join(self._get_template_cache_version_sql_parts()),
+        to_flush=[IrUiView._fields[f] for f in ('inherit_id', 'active', 'arch_db', 'write_date')])
 
     def _get_template_cache_version_sql_parts(self):
         """ Return the SQL expressions, on the row ``entry`` of `ir.cache`,
         of the other sources of the compiled code, hashed with its views. """
-        return []
+        return [
+            SQL("""(
+                SELECT string_agg(all_views.part, ',' ORDER BY all_views.id)
+                    FROM all_views
+                    WHERE all_views.id IN (SELECT jsonb_array_elements_text(entry.version_data->'view_ids')::int)
+                    OR all_views.inherit_id IN (SELECT jsonb_array_elements_text(entry.version_data->'view_ids')::int)
+            )""")
+        ]
 
     def _get_template_cache_version_data(self, views):
         """ Return the ``version_data`` of the `ir.cache` entry of a template,
