@@ -77,14 +77,17 @@
             <!-- Everything attached to the inventory terminal -->
             <div t-if="this.state.game and !this.state.error" class="o_su_anchor" t-ref="this.anchorTRef">
                 <div t-if="this.showTip" class="o_su_tip">
-                    <span class="o_su_tip_hand">👆</span>
+                    <span class="o_su_tip_hand">👇</span>
                     <span>Click the <strong>computer</strong> to work in Odoo</span>
                 </div>
                 <div t-if="this.state.hoverId === 'office_terminal_01' and !this.state.menu and !this.showTip" class="o_su_hint o_su_hint--active">
                     Open Odoo
                 </div>
+            </div>
+
+            <!-- Terminal menu: beside the monitor, so it never hides the screen -->
+            <div t-if="this.state.game and !this.state.error" class="o_su_anchor" t-ref="this.anchorMRef">
                 <div t-if="this.state.menu === 'terminal'" class="o_su_menu">
-                    <div class="o_su_menu_title" t-out="this.state.game.scenario ? 'Office' : 'Inventory'"/>
                     <button t-foreach="this.menuItems" t-as="item" t-key="item_index" type="button"
                             t-att-class="'o_su_menu_btn' + (item.alt ? ' o_su_menu_btn--alt' : '')"
                             t-on-click="() => this.openDocument(item.action)">

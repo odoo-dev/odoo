@@ -8,7 +8,7 @@ import { animateActor } from "@scale_up_game/three/kit/characters";
  *
  * Contract used by GameRoot and the interaction layer:
  *   interactives, camera, renderer, setHover(id), setTerminalPulse(on),
- *   getScreenPosition("worker"|"terminal"), startWorking(), applyState(game),
+ *   getScreenPosition("worker"|"terminal"|"terminalSide"), startWorking(), applyState(game),
  *   celebrate(game), dispose().
  */
 export class BaseScene {
@@ -101,14 +101,21 @@ export class BaseScene {
     }
 
     getScreenPosition(name) {
-        const character = this.worker?.group.position || this.ceo?.group.position || this.anchors.terminal;
-        const p = name === "terminal" ? this.anchors.terminal : character;
-        const v = new this.THREE.Vector3(p.x, name === "terminal" ? p.y : p.y + 1.55, p.z);
+        const anchor = this.anchors?.[name];
+        const p = anchor || this.worker?.group.position || this.ceo?.group.position || this.anchors.terminal;
+        const v = new this.THREE.Vector3(p.x, anchor ? p.y : p.y + 1.55, p.z);
         v.project(this.camera);
         return {
             x: (v.x * 0.5 + 0.5) * this.container.clientWidth,
             y: (-v.y * 0.5 + 0.5) * this.container.clientHeight,
         };
+    }
+
+    /** Overlay anchors of the desk's monitor, in world space (call once the desk is placed). */
+    _anchorDesk() {
+        this.desk.group.updateMatrixWorld(true);
+        const world = (v) => this.desk.group.localToWorld(v.clone());
+        this.anchors = { terminal: world(this.desk.anchors.top), terminalSide: world(this.desk.anchors.side) };
     }
 
     burstConfetti(center = [0, 3.5, 0], spread = [7, 5]) {

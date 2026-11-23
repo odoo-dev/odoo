@@ -2,7 +2,7 @@ import { Aborted, faceTowards, walkTo } from "@scale_up_game/three/animations";
 import { SCENE_OBJECT_IDS } from "@scale_up_game/three/scene";
 import { BaseScene } from "@scale_up_game/three/kit/base_scene";
 import { makeNameTag, makePerson } from "@scale_up_game/three/kit/characters";
-import { makeBoard, makeDesk, makeHazardStrip, makePallet, makeRack, makeTruck } from "@scale_up_game/three/kit/props";
+import { makeBoard, makeDesk, makeHazardStrip, makePallet, makeRack, makeTruck, updateDeskGlow } from "@scale_up_game/three/kit/props";
 
 /** Warehouse + loading dock: the sub-levels where goods physically move. */
 const DOCK_X = 6.4; // parked truck (lane z = DOCK_Z)
@@ -129,7 +129,7 @@ export class DockScene extends BaseScene {
         this.desk.group.rotation.y = 0.25;
         this.desk.group.userData.interactiveId = SCENE_OBJECT_IDS.terminal;
         this.scene.add(this.desk.group);
-        this.anchors = { terminal: new this.THREE.Vector3(-5.4, 1.8, -3.3) };
+        this._anchorDesk();
 
         // Racks stand away from the wall that carries the board, so nothing hides it.
         for (const x of [0.6, 3.6]) {
@@ -294,8 +294,7 @@ export class DockScene extends BaseScene {
 
     _frame(dt, t) {
         const hover = this._hoverId === SCENE_OBJECT_IDS.terminal;
-        const opacity = hover ? 0.45 : this._pulse ? 0.15 + 0.3 * (0.5 + 0.5 * Math.sin(t * 4)) : 0;
-        this.desk.glow.material.opacity = opacity;
-        this.desk.glow.visible = opacity > 0;
+        updateDeskGlow(this.desk, dt, t, { hover, pulse: this._pulse });
+        this.desk.tick(t);
     }
 }

@@ -297,9 +297,12 @@ export class WarehouseScene {
     getScreenPosition(name) {
         const { THREE } = this;
         const p = this.worker.group.position;
+        // monitor anchors: just above the bezel, or just right of it
         const v =
             name === "terminal"
-                ? new THREE.Vector3(DESK.x, 1.75, DESK.z)
+                ? new THREE.Vector3(DESK.x, 1.635, DESK.z - 0.15)
+                : name === "terminalSide"
+                ? new THREE.Vector3(DESK.x + 0.535, 1.3, DESK.z - 0.15)
                 : new THREE.Vector3(p.x, p.y + 1.55, p.z);
         v.project(this.camera);
         return {

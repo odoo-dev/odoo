@@ -28,6 +28,7 @@ export class GameRoot extends Component {
         this.containerRef = signal.ref();
         this.anchorWRef = signal.ref();
         this.anchorTRef = signal.ref();
+        this.anchorMRef = signal.ref();
         this.answerRef = signal.ref();
         this.state = proxy({
             loading: true,
@@ -531,7 +532,9 @@ export class GameRoot extends Component {
         if (!this.scene) {
             return;
         }
-        for (const [ref, name] of [[this.anchorWRef, "worker"], [this.anchorTRef, "terminal"]]) {
+        for (const [ref, name] of [
+            [this.anchorWRef, "worker"], [this.anchorTRef, "terminal"], [this.anchorMRef, "terminalSide"],
+        ]) {
             const el = ref();
             if (el) {
                 const { x, y } = this.scene.getScreenPosition(name);

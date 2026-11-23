@@ -1,7 +1,7 @@
 import { SCENE_OBJECT_IDS } from "@scale_up_game/three/scene";
 import { BaseScene } from "@scale_up_game/three/kit/base_scene";
 import { makeNameTag, makePerson } from "@scale_up_game/three/kit/characters";
-import { makeBoard, makeCabinet, makeChair, makeDesk, makePapers, makePlant, makeWindow } from "@scale_up_game/three/kit/props";
+import { makeBoard, makeCabinet, makeChair, makeDesk, makePapers, makePlant, makeWindow, updateDeskGlow } from "@scale_up_game/three/kit/props";
 
 /**
  * Office corner: the player (CEO) and the colleague of the sub-level talk next
@@ -68,8 +68,10 @@ export class OfficeScene extends BaseScene {
         this.papers.visible = (game.scene || {}).papers === true;
     }
 
-    async celebrate() {
+    async celebrate(game) {
         this.setSpeaker(null);
+        // The scene still shows the state before the final save: show the completed one.
+        this.applyState(game);
         for (const rig of Object.values(this.people)) {
             if (rig.group.visible) {
                 rig.state = "celebrate";
@@ -103,12 +105,12 @@ export class OfficeScene extends BaseScene {
         this.desk.group.position.set(0.1, 0, -1.9);
         this.desk.group.userData.interactiveId = SCENE_OBJECT_IDS.terminal;
         this.scene.add(this.desk.group);
-        this.anchors = { terminal: new this.THREE.Vector3(0.1, 1.8, -1.9) };
+        this._anchorDesk();
 
-        const chair = makeChair(this);
-        chair.position.set(0.1, 0, -2.45);
-        chair.rotation.y = Math.PI;
-        this.scene.add(chair);
+        this.chair = makeChair(this);
+        this.chair.position.set(0.1, 0, -2.45);
+        this.chair.rotation.y = Math.PI;
+        this.scene.add(this.chair);
 
         this.papers = makePapers(this);
         this.papers.position.set(0.72, 0.82, -1.75);
@@ -172,17 +174,28 @@ export class OfficeScene extends BaseScene {
     _drawBoard(game) {
         const { ctx, canvas, texture } = this.board.screen;
         const w = canvas.width;
-        ctx.fillStyle = "#f6f4f7";
-        ctx.fillRect(0, 0, w, canvas.height);
-        ctx.fillStyle = "#714b67";
+        // Warm paper pinned in a wooden frame, not a glowing screen.
+        const h = canvas.height;
+        ctx.fillStyle = "#efe6d6";
+        ctx.fillRect(0, 0, w, h);
+        const vignette = ctx.createRadialGradient(w / 2, h / 2, h * 0.3, w / 2, h / 2, w * 0.7);
+        vignette.addColorStop(0, "rgba(255, 252, 244, 0)");
+        vignette.addColorStop(1, "rgba(150, 120, 85, 0.18)");
+        ctx.fillStyle = vignette;
+        ctx.fillRect(0, 0, w, h);
+        ctx.fillStyle = "rgba(120, 95, 70, 0.12)"; // faint ruled lines
+        for (let y = 100; y < h; y += 40) {
+            ctx.fillRect(16, y + 8, w - 32, 1);
+        }
+        ctx.fillStyle = "#6e5266";
         ctx.fillRect(0, 0, w, 62);
-        ctx.fillStyle = "#fff";
+        ctx.fillStyle = "#f7efe6";
         ctx.font = "bold 34px sans-serif";
         ctx.textAlign = "left";
         ctx.fillText(game.group_name || "Level", 20, 43);
         ctx.font = "21px sans-serif";
         game.steps.slice(0, 5).forEach((step, i) => {
-            ctx.fillStyle = step.done ? "#017e84" : "#8a8f99";
+            ctx.fillStyle = step.done ? "#2f7a6c" : "#7d7368";
             ctx.fillText(`${step.done ? "✔" : "○"} ${step.label}`.slice(0, 42), 20, 108 + i * 40);
         });
         texture.needsUpdate = true;
@@ -190,9 +203,10 @@ export class OfficeScene extends BaseScene {
 
     _frame(dt, t) {
         const hover = this._hoverId === SCENE_OBJECT_IDS.terminal;
-        const opacity = hover ? 0.45 : this._pulse ? 0.15 + 0.3 * (0.5 + 0.5 * Math.sin(t * 4)) : 0;
-        this.desk.glow.material.opacity = opacity;
-        this.desk.glow.visible = opacity > 0;
+        updateDeskGlow(this.desk, dt, t, { hover, pulse: this._pulse });
+        this.window.userData.tick(dt, t);
+        this.plant.userData.tick(t);
+        this.desk.tick(t);
         // the camera leans towards whoever is speaking
         this._camShift += (this._camShiftTarget - this._camShift) * Math.min(1, dt * 2.5);
         if (Math.abs(this._camShiftTarget - this._camShift) > 0.001) {
