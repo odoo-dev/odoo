@@ -8,7 +8,7 @@
                 <sheet>
                     <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
                     <field name="active" invisible="1"/> <!-- drives invisible of the Archived web_ribbon widget -->
-                    <field name="type" invisible="1"/> <!-- drives invisible/required of the journal and account fields and of the blocks added by pos_online_payment and pos_sale_planning -->
+                    <field name="type" invisible="1"/> <!-- drives invisible/required of the journal and account fields and of the blocks added by pos_online_payment and pos_sale_renting -->
                     <field name="all_providers_installed" invisible="1"/> <!-- drives invisible of the pos_payment_provider_cards widget -->
                     <div class="d-flex justify-content-between">
                         <div class="oe_title">
