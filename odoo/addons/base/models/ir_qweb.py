@@ -1093,7 +1093,7 @@ class IrQweb(models.AbstractModel):
         if data := self.env['ir.cache']._lookup('qweb', key, self._get_template_cache_version_sql()):
             result = self.__load_code(*marshal.loads(data))
         else:
-            result = self._generate_code_uncached(ref, key)
+            result = self._generate_code_uncached(ref, store=True)
         self._preload_code_cached(result[2].get('calls', ()))
         return result
 
@@ -1127,13 +1127,15 @@ class IrQweb(models.AbstractModel):
             calls = OrderedSet()
             for (key, ref), value in zip(keys.items(), values):
                 if value is None:
-                    result = self._generate_code_uncached(ref, key)
+                    result = self._generate_code_uncached(ref, store=True)
                 else:
                     result = self.__load_code(*marshal.loads(value))
                 ormcache.add_value(self, ref, cache_value=result)
                 calls.update(result[2].get('calls', ()))
 
-    def _generate_code_uncached(self, template: int | str | etree._Element, ir_cache_key=None):
+    def _generate_code_uncached(self, template: int | str | etree._Element, store=False):
+        """ Compile the template; with ``store``, add the compiled code of a
+        template of the database (``int`` or ``str``) in `ir.cache`."""
         assert isinstance(self, IrQweb)
         ref = self._get_template_info(template)['id'] if isinstance(template, (int, str)) else None
 
@@ -1158,10 +1160,10 @@ class IrQweb(models.AbstractModel):
             "    return template_functions",
         ])
         compiled = compile(wrap_code, f"<{ref}>", 'exec')
-        if ir_cache_key:
+        if store and ref:
             # the views combined in the template, loaded in batch with its tree
             views = self.env['ir.ui.view'].sudo().browse(self._preload_trees([ref])[ref]['view_ids'])
-            self.env['ir.cache']._set__('qweb', ir_cache_key,
+            self.env['ir.cache']._set__('qweb', repr(self._get_cache_key(ref)),
                     marshal.dumps((code, options, def_name, compiled)),
                     self._get_template_cache_version_data(views), self._get_template_cache_version_sql(),
                 )
@@ -1200,6 +1202,10 @@ class IrQweb(models.AbstractModel):
         # technical information useful for generating the function. This
         # dictionary is only used when compiling the template.
         compile_context = self.env.context.copy()
+        # from the configuration, like `_prepare_environment`: not part of the
+        # key of the compiled code (see `_get_cache_key`), the context of the
+        # caller must not decide it (e.g. `t-debug` in the shared code)
+        compile_context['dev_mode'] = 'qweb' in tools.config['dev_mode']
 
         try:
             element, document, ref = self._get_template(template)

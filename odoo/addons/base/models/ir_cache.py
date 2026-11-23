@@ -33,6 +33,13 @@ def _get_ir_cache_secret(env: api.Environment) -> bytes:
     return hkdf_expand(hashlib.sha256, config.server_secret, info, 32)
 
 
+class IrCachePending:
+    """ The entries waiting for the commit of a read-only cursor. ``rows__``
+    is out of reach of `safe_eval` (server actions, QWeb expressions). """
+    def __init__(self):
+        self.rows__ = []
+
+
 _KIND_RE = re.compile(r'\w+')
 
 
@@ -105,7 +112,7 @@ class IrCache(models.Model):
         super()._register_hook()
 
         if not self._check_secret():
-            if self.env.execute_query(SQL("SELECT id FROM ir_cache WHERE kind = 'ir.cache'")):
+            if self.env.execute_query(SQL("SELECT id FROM ir_cache WHERE kind = 'ir_cache'")):
                 _logger.info("ir.cache: the key of the signatures changed")
             if cron := self.env.ref('base.ir_cron_ir_cache_gc', raise_if_not_found=False):
                 # the cron does not exist yet if the code is deployed before the update of base
@@ -170,11 +177,11 @@ class IrCache(models.Model):
         """, kind, list(keys), version))
 
         # the entries added by this transaction with a read-only cursor (see
-        # `_set__`); `cr.postcommit.data` is not more trustworthy than the
-        # table (a server action can reach it): check them like the rows,
-        # the signature against forged values, the version recomputed from the
-        # version_data against replayed old entries
-        pending = self.env.cr.postcommit.data.get('ir.cache.pending', ())
+        # `_set__`): not more trustworthy than the table, check them like the
+        # rows, the signature against forged values, the version recomputed
+        # from the version_data against replayed old entries
+        postcommit_data = self.env.cr.postcommit.data
+        pending = postcommit_data['ir.cache.pending'].rows__ if 'ir.cache.pending' in postcommit_data else ()
 
         pending_sql = [
             SQL("(%s, %s::jsonb, %s, %s::timestamp, %s::bytea)", key, version_data, version_, create_date, signature)
@@ -285,7 +292,8 @@ class IrCache(models.Model):
         # is the one of the source seen by the transaction that produced the
         # value: if the source changed in the meantime, the entry is simply
         # not used.
-        rows = self.env.cr.postcommit.data.setdefault('ir.cache.pending', [])
+        # in the data of the postcommit: cleared with it on commit and rollback
+        rows = self.env.cr.postcommit.data.setdefault('ir.cache.pending', IrCachePending()).rows__
         if not rows:
             registry = self.env.registry
 

@@ -96,7 +96,7 @@ class TestIrCache(IrCacheCase):
             self.assertEqual(IrCache._lookup_multi('test', ['other', 'k', 'none'], version='v1'), (b'other', b'value 1', None))
 
         # what the post-commit does, without a new cursor (it would commit)
-        pending = self.env.cr.postcommit.data['ir.cache.pending']
+        pending = self.env.cr.postcommit.data['ir.cache.pending'].rows__
         self.assertEqual(len(pending), 2)
         self.env.cr.postcommit.clear()
         self.env.cr.execute(SQL(
@@ -211,7 +211,7 @@ class TestQWebCodeCache(IrCacheCase):
             self.render(self.caller, '<div><span>callee</span></div>', generated=[])
 
         # what the post-commit does, without a new cursor (it would commit)
-        pending = self.env.cr.postcommit.data['ir.cache.pending']
+        pending = self.env.cr.postcommit.data['ir.cache.pending'].rows__
         self.assertEqual(len(pending), 2, "generated once")
         self.env.cr.postcommit.clear()
         self.env.cr.execute(SQL(
@@ -277,10 +277,10 @@ class TestQWebCodeCache(IrCacheCase):
 
         self.assertTrue(all(os.path.exists(self.path(row)) for row in old_rows))
         old_paths = [aged('qweb', row) for row in old_rows]
-        [canary] = self.env.execute_query_dict(SQL("SELECT id, create_date, signature FROM ir_cache WHERE kind = 'ir.cache'"))
-        canary_path = aged('ir.cache', canary)
+        [canary] = self.env.execute_query_dict(SQL("SELECT id, create_date, signature FROM ir_cache WHERE kind = 'ir_cache'"))
+        canary_path = aged('ir_cache', canary)
         # the row is rolled back, not the file (shared by the class)
-        self.addCleanup(os.rename, canary_path, os.path.join(self.directory, _get_ir_cache_filename('ir.cache', canary['create_date'], bytes(canary['signature']))))
+        self.addCleanup(os.rename, canary_path, os.path.join(self.directory, _get_ir_cache_filename('ir_cache', canary['create_date'], bytes(canary['signature']))))
         self.env.cr.execute(SQL("UPDATE ir_cache SET create_date = create_date - interval '8 days' WHERE id = %s", canary['id']))
         self.env['ir.cache']._gc_cache()
         self.assertTrue(os.path.exists(canary_path))
@@ -288,6 +288,39 @@ class TestQWebCodeCache(IrCacheCase):
         self.assertTrue(all(map(os.path.exists, map(self.path, self.rows(self.caller) + self.rows(self.callee)))))
         self.assertTrue(self.env['ir.cache']._check_secret(), "the canary does not expire")
         self.render(self.caller, '<div><span>callee</span></div>', generated=[])
+
+    def test_key_of_the_template(self):
+        """ The code of a template is never stored under the key of another
+        template: the caller of `_generate_code_uncached` (e.g. a server
+        action) does not give the key, else that code would be rendered
+        instead of the other template, even after a change of the latter. """
+        other = self.env['ir.ui.view'].create({
+            'name': 'other', 'type': 'qweb', 'key': 'base.test_code_cache_other',
+            'arch': '<i>other</i>',
+        })
+        IrQweb = self.env['ir.qweb']
+        self.render(self.callee, '<span>callee</span>', generated=self.callee)
+        # the second argument used to be the key of the entry
+        IrQweb._generate_code_uncached(other.id, repr(IrQweb._get_cache_key(self.callee.id)))
+        self.assertEqual(len(self.rows(self.callee)), 1)
+        self.assertEqual(len(self.rows(other)), 1, "stored under its own key")
+        self.render(self.callee, '<span>callee</span>', generated=[])
+        self.callee.arch = '<span>callee 2</span>'
+        self.render(self.callee, '<span>callee 2</span>', generated=self.callee)
+
+    def test_dev_mode_from_config(self):
+        """ The compiled code is shared by the callers with the same key: what
+        is not in the key (e.g. `dev_mode`, for `t-debug`) does not come from
+        the context of the caller. """
+        debug = self.env['ir.ui.view'].create({
+            'name': 'debug', 'type': 'qweb', 'key': 'base.test_code_cache_debug',
+            'arch': '<span t-debug="">debug</span>',
+        })
+        with patch.object(self.env.registry['ir.qweb'], '_debug_trace') as debug_trace, \
+                self.assertLogs('odoo.addons.base.models.ir_qweb', 'WARNING'):
+            self.env['ir.qweb'].with_context(dev_mode=True)._generate_code_cached(debug.id)
+            self.render(debug, '<span>debug</span>', generated=[])
+        debug_trace.assert_not_called()
 
     def test_signature(self):
         """ The bytecode of the table is executed: whoever writes in the table,
@@ -354,7 +387,7 @@ class TestQWebCodeCache(IrCacheCase):
         self.render(self.caller, '<div><span>callee</span></div>', generated=self.caller + self.callee)
 
         def canaries():
-            return [id_ for [id_] in self.env.execute_query(SQL("SELECT id FROM ir_cache WHERE kind = 'ir.cache' AND key = 'ir.cache'"))]
+            return [id_ for [id_] in self.env.execute_query(SQL("SELECT id FROM ir_cache WHERE kind = 'ir_cache' AND key = 'ir.cache'"))]
 
         def triggers():
             """ Number of triggers of the cron added by the test. """
