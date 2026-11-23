@@ -2,7 +2,7 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import api, fields, models
-from odoo.fields import Domain
+from odoo.fields import Command, Domain
 
 
 class ProductReplenish(models.TransientModel):
@@ -12,7 +12,7 @@ class ProductReplenish(models.TransientModel):
     def _compute_allowed_uom_ids(self):
         super()._compute_allowed_uom_ids()
         for rec in self:
-            rec.allowed_uom_ids |= rec.product_id.bom_ids.uom_id
+            rec.allowed_uom_ids = [Command.link(bom.uom_id.id) for bom in rec.product_id.bom_ids]
 
     @api.depends('route_id')
     def _compute_date_planned(self):
