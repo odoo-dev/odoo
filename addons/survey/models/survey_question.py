@@ -350,7 +350,7 @@ class SurveyQuestion(models.Model):
         ])
         # Using the sequence stored in db is necessary for existing questions that are passed as
         # NewIds because the sequence provided by the JS client can be incorrect.
-        (self | possible_trigger_questions).flush_recordset()
+        (self._origin | possible_trigger_questions).flush_recordset()
         self.env.cr.execute(
             "SELECT id, sequence FROM survey_question WHERE id =ANY(%s)",
             [self.ids]
