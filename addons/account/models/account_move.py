@@ -7856,7 +7856,7 @@ class AccountMove(models.Model):
         """
         Helper to get available invoice template pdf reports
         """
-        moves = self
+        moves = self.browse().concat(self.new(origin=move) for move in self)
 
         for move_type in ['out_invoice', 'out_refund', 'out_receipt']:
             moves += self.new({'move_type': move_type})
