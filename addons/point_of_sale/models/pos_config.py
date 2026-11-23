@@ -206,7 +206,6 @@ class PosConfig(models.Model):
     use_closing_entry_by_product = fields.Boolean(
         string='Closing Entry by product',
         help="Display the breakdown of sales lines by product in the automatically generated closing entry.")
-    last_data_change = fields.Datetime(string='Last Write Date', readonly=True, compute='_compute_local_data_integrity', store=True)
     fallback_nomenclature_id = fields.Many2one('barcode.nomenclature', string="Fallback Nomenclature")
     use_custom_receipt_info = fields.Boolean(string="Customize info", default=False, help="Fill in if your shop does not have the same info as your company")
     custom_email = fields.Char(string="Email", readonly=False)
@@ -783,12 +782,6 @@ class PosConfig(models.Model):
     def _can_use_cash_payment_method(self, cash_method):
         self.ensure_one()
         return not cash_method.config_ids.filtered(lambda config: config != self)
-
-    @api.depends('use_pricelist', 'pricelist_id', 'available_pricelist_ids', 'payment_method_ids', 'limit_categories',
-        'iface_available_categ_ids', 'module_pos_hr', 'module_pos_discount', 'iface_tipproduct', 'default_preset_id',
-        'module_pos_appointment', 'set_tip_after_payment', 'cash_rounding', 'rounding_method', 'only_round_cash_method')
-    def _compute_local_data_integrity(self):
-        self.last_data_change = self.env.cr.now()
 
     def write(self, vals):
         if 'iface_tipproduct' in vals and not vals['iface_tipproduct']:
