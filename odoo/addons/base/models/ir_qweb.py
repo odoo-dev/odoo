@@ -375,6 +375,7 @@ from markupsafe import Markup, escape
 from collections import defaultdict
 from collections.abc import Buffer, Callable, Sized, Mapping, Sequence, Iterator
 from copy import deepcopy
+from importlib.util import MAGIC_NUMBER
 from itertools import count, chain
 from lxml import etree
 from dateutil.relativedelta import relativedelta
@@ -1002,7 +1003,11 @@ class IrQweb(models.AbstractModel):
         """ Key of the compiled code of the template in `ir.cache`. """
         # the namespaces of the caller (t-call) change the compiled code too
         nsmap = tuple(sorted((self.env.context.get('nsmap') or {}).items(), key=lambda item: (item[0] or '', item[1])))
-        return (ref, tuple(self.env.context.get(k) or False for k in self._get_template_cache_keys()), nsmap)
+        # marshalled code objects are not portable between versions of
+        # python: the entries of another version are simply not read (and
+        # do not replace the entries of this version, e.g. two servers
+        # sharing the database during a deployment)
+        return (ref, tuple(self.env.context.get(k) or False for k in self._get_template_cache_keys()), nsmap, MAGIC_NUMBER.hex())
 
     def _get_template_cache_version_sql(self):
         IrUiView = self.env['ir.ui.view']

@@ -1,11 +1,9 @@
 import hashlib
 import hmac as hmac_lib
-import importlib.util
 import json
 import logging
 import re
 import shutil
-import sys
 from collections.abc import Collection, Buffer
 from datetime import datetime, timezone
 from dateutil.relativedelta import relativedelta
@@ -26,10 +24,11 @@ def _get_ir_cache_secret(env: api.Environment) -> bytes:
     db_secret = env['ir.config_parameter'].sudo().get_str('database.secret')
     # A key per database: a valid entry can not be replayed in another
     # database. Its secret rather than its name: the cache survives a renaming,
-    # and a duplicated database gets a new secret. A key per version of Odoo
-    # and of python: the marshalled code objects are not portable, the
-    # entries of another version are simply not read.
-    info = f'odoo ir.cache {db_secret} {release.version} {sys.version} '.encode() + importlib.util.MAGIC_NUMBER
+    # and a duplicated database gets a new secret. A key per version of Odoo:
+    # the data derived from the database depends on its code. Not per version
+    # of python: only some kinds depend on it (e.g. marshalled code objects),
+    # they put it in their keys, see `ir.qweb._get_cache_key`.
+    info = f'odoo ir.cache {db_secret} {release.version}'.encode()
     return hkdf_expand(hashlib.sha256, config.server_secret, info, 32)
 
 
@@ -73,9 +72,15 @@ class IrCache(models.Model):
     computes the versions of all the entries at once, e.g.
     ``ir.qweb._get_template_cache_version_sql``.
 
-    When the key changes (server secret, database secret, version of Odoo
-    or python), all the entries are deleted at once by the cron triggered
-    at the start of the server (until then, they are rejected one by one),
+    The entries do not depend on the version of python: a kind whose values
+    do (e.g. code objects stored with :mod:`marshal`, loading those of
+    another version may crash the interpreter) must put
+    ``importlib.util.MAGIC_NUMBER`` in its keys, see ``ir.qweb._get_cache_key``.
+
+    When the key of the signatures changes (server secret, database secret,
+    version of Odoo), all the entries are deleted at once by the cron
+    triggered at the start of the server (until then, they are rejected one
+    by one),
     see :meth:`_check_secret` and :meth:`_gc_cache`.
 
     The entries and the files older than ``_cache_max_hours`` are deleted by

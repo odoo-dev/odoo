@@ -308,6 +308,17 @@ class TestQWebCodeCache(IrCacheCase):
         self.callee.arch = '<span>callee 2</span>'
         self.render(self.callee, '<span>callee 2</span>', generated=self.callee)
 
+    def test_python_version(self):
+        """ The code objects are not portable between versions of python: the
+        version is in the key, the entries of each version are kept side by
+        side (e.g. two servers sharing the database during a deployment). """
+        self.render(self.callee, '<span>callee</span>', generated=self.callee)
+        with patch('odoo.addons.base.models.ir_qweb.MAGIC_NUMBER', b'\xff\xff\r\n'):
+            self.render(self.callee, '<span>callee</span>', generated=self.callee)
+            self.render(self.callee, '<span>callee</span>', generated=[])
+        self.assertEqual(len(self.rows(self.callee)), 2)
+        self.render(self.callee, '<span>callee</span>', generated=[])
+
     def test_dev_mode_from_config(self):
         """ The compiled code is shared by the callers with the same key: what
         is not in the key (e.g. `dev_mode`, for `t-debug`) does not come from
