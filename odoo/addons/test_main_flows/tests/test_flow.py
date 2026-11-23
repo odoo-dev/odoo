@@ -118,7 +118,7 @@ class TestUi(BaseTestUi):
             "name": "multiCompany rule",
             "model_id": self.env["ir.model"]._get("test.model_multicompany").id,
             'operation': 'crud',
-            "domain": '["|", ("company_id", "=", False), ("company_id", "in", company_ids)]',
+            "domain": '["|", ("company_id", "=", False), ("company_id", "in.expr", "companies")]',
         })
 
         self.env["test.model_multicompany"].create({"name": "p1"})
@@ -149,7 +149,7 @@ class TestUi(BaseTestUi):
             "name": "multiCompany rule",
             "model_id": self.env["ir.model"]._get("test.model_multicompany").id,
             'operation': 'crud',
-            "domain": '["|", ("company_id", "=", False), ("company_id", "in", company_ids)]',
+            "domain": '["|", ("company_id", "=", False), ("company_id", "in.expr", "companies")]',
         })
 
         self.env["test.model_multicompany"].create({"name": "p1"})
@@ -181,7 +181,7 @@ class TestUi(BaseTestUi):
             "name": "multiCompany rule",
             "model_id": self.env["ir.model"]._get("test.model_multicompany").id,
             'operation': 'crud',
-            "domain": '["|", ("company_id", "=", False), ("company_id", "in", company_ids)]',
+            "domain": '["|", ("company_id", "=", False), ("company_id", "in.expr", "companies")]',
         })
 
         self.env["test.model_multicompany"].create({"name": "p1"})

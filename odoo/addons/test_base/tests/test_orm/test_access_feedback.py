@@ -323,7 +323,7 @@ If you really, really need access, perhaps you can win over your friendly admini
         this might be a multi-company issue, but the user doesn't access to this company
         then no information about the company is shown.
         """
-        self._make_rule('rule 0', "[('company_id', '=', user.company_id.id)]")
+        self._make_rule('rule 0', "[('company_id', 'in.expr', 'user.company_id')]")
         self._make_rule('rule 1', '[("val", "=", 0)]', global_=True)
         with self.debug_mode(), self.assertRaises(AccessError) as ctx:
             self.record.write({'val': 1})
@@ -350,7 +350,7 @@ If you really, really need access, perhaps you can win over your friendly admini
             'name': 'rule 0',
             'model_id': self.env['ir.model']._get(ChildModel._name).id,
             'operation': 'crud',
-            'domain': '[("parent_id.company_id", "=", user.company_id.id)]',
+            'domain': '[("parent_id.company_id", "in.expr", "user.company_id")]',
         })
         self.record.sudo().company_id = self.env['res.company'].create({'name': 'Brosse Inc.'})
         self.user.sudo().company_ids = [Command.link(self.record.company_id.id)]
@@ -376,7 +376,7 @@ If you really, really need access, perhaps you can win over your friendly admini
         """
         self.record.sudo().company_id = self.env['res.company'].create({'name': 'Brosse Inc.'})
         self.user.sudo().company_ids = [Command.link(self.record.company_id.id)]
-        self._make_rule('rule 0', "[('company_id', '=', user.company_id.id)]", attr='read')
+        self._make_rule('rule 0', "[('company_id', 'in.expr', 'user.company_id')]", attr='read')
         with self.debug_mode(), self.assertRaises(AccessError) as ctx:
             _ = self.record.val
         self.assertEqual(
@@ -436,7 +436,7 @@ Note: this might be a multi-company issue. Switching company may help - in Odoo,
     def test_access_error_reports_correct_rules_with_archived_record(self):
         """ Ensure archived records do not cause unrelated rules to be reported as failing
         """
-        self._make_rule('rule 0', '[("company_id", "in", company_ids + [False])]', global_=True, attr='read')
+        self._make_rule('rule 0', '[("company_id", "in.expr", "companies.ids + [False]")]', global_=True, attr='read')
         self._make_rule('rule 1', '[("val", "=", 1)]', global_=False, attr='read')
         self.record.sudo().active = False
         with self.debug_mode(), self.assertRaises(AccessError) as ctx:

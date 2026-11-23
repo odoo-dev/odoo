@@ -236,7 +236,7 @@ class TestActivityRights(TestActivityCommon):
             'name': 'Hop hop hop Ernest',
             'model_id': self.env['ir.model']._get('mail.activity').id,
             'operation': 'crud',
-            'domain': '[("user_id", "=", user.id)]',
+            'domain': '[("user_id", "in.expr", "user")]',
         })
 
         # cannot _search activities if no access to the document

@@ -217,7 +217,7 @@ class TestActivityMixin(TestActivityCommon):
             'name': 'mail.test.activity company',
             'model_id': self.env.ref('test_mail.model_mail_test_activity').id,
             'operation': 'crud',
-            'domain': "[('company_id', 'in', company_ids)]",
+            'domain': "[('company_id', 'in.expr', 'companies')]",
         })
         self.test_record.activity_schedule(user_id=user_employee_c2.id)
         user_employee_c2.with_user(user_admin).with_context(

@@ -2626,7 +2626,7 @@ class TestLeaveRequests(TestHrHolidaysCommon):
                 'model_id': self.env.ref('mail.model_mail_activity').id,
                 'group_id': self.env.ref('base.group_portal').id,
                 'operation': 'r',
-                'domain': "['|', ('user_id', '=', user.id), ('create_uid', '=', user.id)]",
+                'domain': "['|', ('user_id', 'in.expr', 'user'), ('create_uid', 'in.expr', 'user')]",
             },
             # Read and create acess on `calendar.event` for portal required for
             # https://github.com/odoo/odoo/blob/cc0060e889603eb2e47fa44a8a22a70d7d784185/addons/hr_holidays/models/hr_leave.py#L894-L898
@@ -2638,7 +2638,7 @@ class TestLeaveRequests(TestHrHolidaysCommon):
                 'model_id': self.env.ref('calendar.model_calendar_event').id,
                 'group_id': self.env.ref('base.group_portal').id,
                 'operation': 'crud',
-                'domain': "[('partner_ids', 'in', user.partner_id.id)]",
+                'domain': "[('partner_ids', 'in.expr', 'user.partner_id')]",
             },
             # Read and create acess on `calendar.event` for portal required for
             # https://github.com/odoo/odoo/blob/cc0060e889603eb2e47fa44a8a22a70d7d784185/addons/calendar/models/calendar_event.py#L760-L768
@@ -2650,7 +2650,7 @@ class TestLeaveRequests(TestHrHolidaysCommon):
                 'model_id': self.env.ref('calendar.model_calendar_attendee').id,
                 'group_id': self.env.ref('base.group_portal').id,
                 'operation': 'crud',
-                'domain': "[('partner_id', '=', user.partner_id.id)]",
+                'domain': "[('partner_id', 'in.expr', 'user.partner_id')]",
             }])
 
         # Create a portal user and assign it to the employee

@@ -200,11 +200,21 @@ class IrAccess(models.Model):
                 return Domain(condition.field_expr, condition.operator, subdomain)
             return condition
 
-        eval_context = self._eval_context()
+        eval_context = None
         for access in self:
             if access.active and access.domain:
                 try:
-                    domain = safe_eval(access.domain, eval_context)
+                    try:
+                        domain = ast.literal_eval(access.domain.strip())
+                    except (ValueError, SyntaxError):
+                        if eval_context is None:
+                            eval_context = self._eval_context()
+                        domain = safe_eval(access.domain, eval_context)
+                        _logger.warning(
+                            "Deprecated domain for ir.access %r: dynamic values must use the "
+                            "'in.expr' operator, safe_eval will be removed: %s",
+                            access.name, access.domain,
+                        )
                     model = self.env[access.model_id.model].sudo()
                     Domain(domain).map_conditions(skip_access).validate(model)
                 except Exception as e:  # noqa: BLE001
@@ -298,9 +308,18 @@ class IrAccess(models.Model):
             domain = (access.domain or "").strip()
             try:
                 domain = Domain(ast.literal_eval(domain)) if domain else Domain.TRUE
-                domain = domain.optimize(env[model_name])
-            except ValueError:
-                _logger.debug("_get_all_access: failed to evaluate domain", exc_info=True)
+            except (ValueError, SyntaxError):
+                # fallback: evaluated with safe_eval when used
+                _logger.warning(
+                    "Deprecated domain for ir.access(%s): dynamic values must use the "
+                    "'in.expr' operator, safe_eval will be removed: %s",
+                    access.id, access.domain,
+                )
+            else:
+                try:
+                    domain = domain.optimize(env[model_name])
+                except ValueError:
+                    _logger.debug("_get_all_access: failed to evaluate domain", exc_info=True)
             info = AccessInfo(access.id, access.group_id.id, access.operation, domain)
             result[model_name].append(info)
 

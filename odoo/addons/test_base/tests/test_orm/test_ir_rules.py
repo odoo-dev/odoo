@@ -26,12 +26,12 @@ class TestRules(TransactionCase):
             'domain': "[('val', '>', 0)]",
         })
         # create a global rule that forbid access to records without
-        # categories, the search is part of the test
+        # categories, the subquery is part of the test
         cls.env['ir.access'].create({
             'name': 'See all categories',
             'model_id': cls.env.ref('test_base.model_test_access_right_some_obj').id,
             'operation': 'crud',
-            'domain': "[('categ_id', 'in', user.env['test_access_right.obj_categ'].search([]).ids)]",
+            'domain': "[('categ_id', 'any', [('id', '!=', False)])]",
         })
 
     @mute_logger('odoo.addons.base.models.ir_access')
