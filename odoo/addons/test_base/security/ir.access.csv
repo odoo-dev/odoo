@@ -83,7 +83,7 @@ access_test_orm_payment,access_test_orm_payment,test_orm.payment,base.group_syst
 access_test_orm_order,access_test_orm_order,test_orm.order,base.group_system,crud,
 access_test_orm_order_line,access_test_orm_order_line,test_orm.order.line,base.group_system,crud,
 access_test_orm_model_shared_cache_compute_parent,access_test_orm.model_shared_cache_compute_parent,test_orm.model_shared_cache_compute_parent,base.group_user,crud,
-ir_rule_test_orm_model_shared_cache_compute_line,model_shared_cache_compute_line: See own lines,test_orm.model_shared_cache_compute_line,base.group_user,crud,"[('user_id', '=', user.id)]"
+ir_rule_test_orm_model_shared_cache_compute_line,model_shared_cache_compute_line: See own lines,test_orm.model_shared_cache_compute_line,base.group_user,crud,"[('user_id', 'in.expr', 'user')]"
 access_test_orm_compute_container,access_test_orm_compute_container,test_orm.compute.container,base.group_system,crud,
 access_test_orm_compute_member,access_test_orm_compute_member,test_orm.compute.member,base.group_system,crud,
 access_test_orm_compute_creator,access_test_orm_compute_creator,test_orm.compute.creator,base.group_system,crud,
@@ -167,8 +167,8 @@ access_test_access_right_child_employee,access_test_access_right_child,test_acce
 access_test_access_right_obj_categ,access_test_access_right_obj_categ,test_access_right.obj_categ,base.group_user,crud,
 test_access_right_fake_ticket,Fake Ticket: portal or following,test_access_right.ticket,base.group_portal,r,"[
                 '|',
-                    ('message_partner_ids', 'child_of', [user.partner_id.commercial_partner_id.id]),
-                    ('message_partner_ids', 'in', [user.partner_id.id])
+                    ('message_partner_ids', 'child_of.expr', 'user.partner_id.commercial_partner_id.ids'),
+                    ('message_partner_ids', 'in.expr', 'user.partner_id.ids')
             ]"
 access_test_ticket_user,access_test_ticket_user,test_access_right.ticket,base.group_user,crud,
 access_tab_a,access_tab_a,tab.a,base.group_user,crud,

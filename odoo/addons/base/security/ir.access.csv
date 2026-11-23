@@ -30,12 +30,12 @@ access_ir_ui_menu_group_system,ir_ui_menu group_system,ir.ui.menu,base.group_sys
 ir_ui_view_rule_system,Views: Administrator has full access,ir.ui.view,base.group_system,crud,
 access_reset_view_arch_wizard,access.reset.view.arch.wizard,reset.view.arch.wizard,base.group_erp_manager,cru,
 access_ir_ui_view_custom_group_user,ir_ui_view_custom_group_user,ir.ui.view.custom,base.group_system,crud,
-ir_ui_view_custom_personal,ir.ui.view_custom rule,ir.ui.view.custom,,crud,"[('user_id','=',user.id)]"
+ir_ui_view_custom_personal,ir.ui.view_custom rule,ir.ui.view.custom,,crud,"[('user_id','in.expr','user')]"
 access_ir_default_group_user,ir_default group_user,ir.default,base.group_user,r,
-ir_default_user_rule,Defaults: alter personal defaults,ir.default,base.group_user,cud,"[('user_id','=',user.id)]"
+ir_default_user_rule,Defaults: alter personal defaults,ir.default,base.group_user,cud,"[('user_id','in.expr','user')]"
 ir_default_system_rule,Defaults: alter all defaults,ir.default,base.group_system,cud,
 res_company_rule_erp_manager,company rule erp manager,res.company,base.group_erp_manager,crud,
-res_company_rule_public,company rule public,res.company,base.group_everyone,r,"[('id','in', company_ids)]"
+res_company_rule_public,company rule public,res.company,base.group_everyone,r,"[('id','in.expr', 'companies')]"
 access_res_country_public,res_country group_user_all,res.country,base.group_everyone,r,
 access_res_country_group_system,res_country_group_system,res.country,base.group_system,crud,
 access_res_country_state_public,res_country_state group_user_all,res.country.state,base.group_everyone,r,
@@ -46,45 +46,45 @@ access_res_currency_public,res_currency group_all,res.currency,base.group_everyo
 access_res_currency_group_system,res_currency group_system,res.currency,base.group_system,crud,
 access_res_currency_rate_public,res_currency_rate group_all,res.currency.rate,base.group_everyone,r,
 access_res_currency_rate_group_system,res_currency_rate group_system,res.currency.rate,base.group_system,crud,
-res_currency_rate_rule,multi-company currency rate rule,res.currency.rate,,crud,"['|', ('company_id', 'parent_of', company_ids), ('company_id', '=', False)]"
+res_currency_rate_rule,multi-company currency rate rule,res.currency.rate,,crud,"['|', ('company_id', 'parent_of.expr', 'companies'), ('company_id', '=', False)]"
 access_res_groups_group_erp_manager,res_groups group_erp_manager,res.groups,base.group_erp_manager,crud,
 access_res_groups_group_user,res_groups group_user,res.groups,base.group_user,r,
 access_res_lang_public,res_lang group_all,res.lang,base.group_everyone,r,
 access_res_lang_group_system,res_lang group_user,res.lang,base.group_system,ru,
 res_partner_rule_user,user read access,res.partner,base.group_user,r,
-res_partner_portal_public_rule,res_partner: portal/public: read access on my commercial partner,res.partner,base.group_everyone,r,"[('id', 'child_of', user.commercial_partner_id.id)]"
+res_partner_portal_public_rule,res_partner: portal/public: read access on my commercial partner,res.partner,base.group_everyone,r,"[('id', 'child_of.expr', 'user.commercial_partner_id')]"
 access_res_partner_group_partner_manager,res_partner group_partner_manager,res.partner,base.group_partner_manager,cd,
 res_partner_rule_edit_all,edit all,res.partner,base.group_partner_manager,u,
-res_partner_rule_write_self,self user write access,res.partner,base.group_user,u,"[('id', '=', user.partner_id.id)]"
-res_partner_rule,res.partner company,res.partner,,crud,"['|', '|', ('partner_share', '=', False), ('company_id', 'parent_of', company_ids), ('company_id', '=', False)]"
+res_partner_rule_write_self,self user write access,res.partner,base.group_user,u,"[('id', 'in.expr', 'user.partner_id')]"
+res_partner_rule,res.partner company,res.partner,,crud,"['|', '|', ('partner_share', '=', False), ('company_id', 'parent_of.expr', 'companies'), ('company_id', '=', False)]"
 access_clearing_label_group_everyone,clearing_label_group_everyone,clearing.label,base.group_everyone,r,
 res_partner_bank_rule_user,Partner bank user rule,res.partner.bank,base.group_user,r,
 res_partner_bank_rule_user_1,Partner bank user rule,res.partner.bank,base.group_partner_manager,cru,
-res_partner_bank_rule,Partner bank company rule,res.partner.bank,,crud,"['|', ('company_id', 'parent_of', company_ids), ('company_id', '=', False)]"
+res_partner_bank_rule,Partner bank company rule,res.partner.bank,,crud,"['|', ('company_id', 'parent_of.expr', 'companies'), ('company_id', '=', False)]"
 access_res_partner_category_group_user,res_partner_category group_user,res.partner.category,base.group_user,r,
 access_res_partner_category_group_partner_manager,res_partner_category group_partner_manager,res.partner.category,base.group_partner_manager,crud,
 access_res_partner_industry_group_user,res_partner_industry group_user,res.partner.industry,base.group_user,r,
 access_res_partner_industry_group_system,res_partner_industry group_system,res.partner.industry,base.group_system,crud,
-access_res_users_public,res_users all,res.users,base.group_everyone,r,"[('id', '=', user.id)]"
-res_users_rule_portal,portal user access,res.users,base.group_portal,r,"[('commercial_partner_id', '=', user.commercial_partner_id.id)]"
+access_res_users_public,res_users all,res.users,base.group_everyone,r,"[('id', 'in.expr', 'user')]"
+res_users_rule_portal,portal user access,res.users,base.group_portal,r,"[('commercial_partner_id', 'in.expr', 'user.commercial_partner_id')]"
 res_users_rule_read_all,read all,res.users,base.group_user,r,
-res_users_rule_write_self,self user write access,res.users,base.group_user,u,"[('id', '=', user.id)]"
+res_users_rule_write_self,self user write access,res.users,base.group_user,u,"[('id', 'in.expr', 'user')]"
 res_users_rule_edit_all,edit all,res.users,base.group_erp_manager,crud,
-res_users_rule,user rule,res.users,,crud,"['|', ('share', '=', False), ('company_ids', 'in', company_ids)]"
+res_users_rule,user rule,res.users,,crud,"['|', ('share', '=', False), ('company_ids', 'in.expr', 'companies')]"
 access_res_users_deletion_group_erp_manager,res_users_deletion group_erp_manager,res.users.deletion,base.group_erp_manager,crud,
 access_res_users_log_system,res_users_log_all,res.users.log,base.group_system,cr,
-res_users_log_rule,res.users.log per user,res.users.log,,cud,"[('create_uid','=', user.id)]"
+res_users_log_rule,res.users.log per user,res.users.log,,cud,"[('create_uid','in.expr', 'user')]"
 access_res_users_identitycheck_employee,id check employees,res.users.identitycheck,base.group_user,cru,
 access_res_users_identitycheck_portal,id check portal,res.users.identitycheck,base.group_portal,cru,
-res_users_identity_check,users can only access their own id check,res.users.identitycheck,,crud,"[('create_uid', '=', user.id)]"
-api_key_user,Users can read and delete their own keys,res.users.apikeys,base.group_user,r,"[('user_id', '=', user.id)]"
+res_users_identity_check,users can only access their own id check,res.users.identitycheck,,crud,"[('create_uid', 'in.expr', 'user')]"
+api_key_user,Users can read and delete their own keys,res.users.apikeys,base.group_user,r,"[('user_id', 'in.expr', 'user')]"
 api_key_admin,Administrators can view user keys to revoke them,res.users.apikeys,base.group_system,r,
-api_key_user_1,Users can read and delete their own keys,res.users.apikeys,base.group_portal,r,"[('user_id', '=', user.id)]"
+api_key_user_1,Users can read and delete their own keys,res.users.apikeys,base.group_portal,r,"[('user_id', 'in.expr', 'user')]"
 access_res_users_apikeys_description_employee,API key wizard employees,res.users.apikeys.description,base.group_user,cr,
 access_res_users_apikeys_description_portal,API key wizard,res.users.apikeys.description,base.group_portal,cr,
 access_res_users_apikeys_show_employee,API key result employees,res.users.apikeys.show,base.group_user,cr,
 res_users_settings_rule_admin,Administrators can access all User Settings.,res.users.settings,base.group_system,crud,
-res_users_settings_rule_user,res.users.settings: access their own entries,res.users.settings,base.group_user,crud,"[('user_id', '=', user.id)]"
+res_users_settings_rule_user,res.users.settings: access their own entries,res.users.settings,base.group_user,crud,"[('user_id', 'in.expr', 'user')]"
 access_ir_asset_group_system,ir_asset_group_system,ir.asset,base.group_system,crud,
 access_ir_actions_group_system,ir_actions_group_system,ir.actions.actions,base.group_system,crud,
 access_ir_actions_act_window_system,ir_actions_act_window_system,ir.actions.act_window,base.group_system,crud,
@@ -96,12 +96,12 @@ access_ir_actions_act_url_group_system,ir_actions_act_url_group_system,ir.action
 access_ir_actions_server_group_system,ir_actions_server_group_system,ir.actions.server,base.group_system,crud,
 access_ir_actions_server_history_group_system,ir_actions_server_history_group_system,ir.actions.server.history,base.group_system,cru,
 access_ir_embedded_actions_group_user,ir_embedded_actions_group_user,ir.embedded.actions,base.group_user,cr,
-embedded_action_user_delete_rule,Users can modify or delete embedded actions that they have created or that are shared,ir.embedded.actions,base.group_user,ud,"[('user_id', 'in', [user.id, False])]"
+embedded_action_user_delete_rule,Users can modify or delete embedded actions that they have created or that are shared,ir.embedded.actions,base.group_user,ud,"[('user_id', 'in.expr', 'user.ids + [False]')]"
 embedded_action_admin_delete_rule,Admins have all the rights on embedded actions,ir.embedded.actions,base.group_system,ud,
 access_ir_actions_client,ir_actions_client all,ir.actions.client,base.group_system,crud,
 ir_filters_admin_all_rights_rule,ir.filters.admin.all.rights,ir.filters,base.group_erp_manager,crud,
-ir_filters_employee_rule,ir.filter: owner or global,ir.filters,base.group_user,crud,"[('user_ids','in',[False,user.id])]"
-ir_filters_portal_public_rule,ir.filter: portal/public,ir.filters,base.group_everyone,crud,"[('user_ids', 'in', user.ids)]"
+ir_filters_employee_rule,ir.filter: owner or global,ir.filters,base.group_user,crud,"[('user_ids','in.expr','user.ids + [False]')]"
+ir_filters_portal_public_rule,ir.filter: portal/public,ir.filters,base.group_everyone,crud,"[('user_ids', 'in.expr', 'user.ids')]"
 access_ir_config_parameter_system,ir_config_parameter_system,ir.config_parameter,base.group_system,crud,
 access_ir_mail_server,ir_mail_server,ir.mail_server,base.group_system,crud,
 access_ir_logging,ir_logging admin,ir.logging,base.group_erp_manager,crud,
@@ -117,9 +117,9 @@ access_res_config,access.res.config,res.config,base.group_system,cru,
 access_res_config_settings,access.res.config.settings,res.config.settings,base.group_system,cru,
 access_change_password_wizard,access.change.password.wizard,change.password.wizard,base.group_erp_manager,cru,
 access_change_password_user,access.change.password.user,change.password.user,base.group_erp_manager,cru,
-change_password_rule,change user password rule,change.password.user,,crud,"[('create_uid', '=', user.id)]"
+change_password_rule,change user password rule,change.password.user,,crud,"[('create_uid', 'in.expr', 'user')]"
 access_change_password_own,access.change.password.own,change.password.own,base.group_user,crud,
-change_password_own_rule,change own password,change.password.own,,crud,"[('create_uid', '=', user.id)]"
+change_password_own_rule,change own password,change.password.own,,crud,"[('create_uid', 'in.expr', 'user')]"
 access_base_module_update,access.base.module.update,base.module.update,base.group_system,cru,
 access_base_language_install,access.base.language.install,base.language.install,base.group_system,cru,
 access_base_language_import,access.base.language.import,base.language.import,base.group_system,cru,
@@ -131,9 +131,9 @@ access_base_partner_merge_automatic_wizard,access.base.partner.merge.automatic.w
 access_ir_profile,ir_profile,ir.profile,base.group_system,crud,
 access_ir_profile_query,ir_profile_query,ir.profile.query,base.group_system,r,
 access_base_enable_profiling_wizard,access.base.enable.profiling.wizard,base.enable.profiling.wizard,base.group_system,cru,
-user_session,Users can read only their own sessions,res.session,base.group_user,r,"[('user_id', '=', user.id)]"
+user_session,Users can read only their own sessions,res.session,base.group_user,r,"[('user_id', 'in.expr', 'user')]"
 user_session_admin,Administrators can read all sessions,res.session,base.group_system,r,
-user_device,Users can read only their own devices,res.device,base.group_user,r,"[('user_id', '=', user.id)]"
+user_device,Users can read only their own devices,res.device,base.group_user,r,"[('user_id', 'in.expr', 'user')]"
 user_device_admin,Administrators can read all devices,res.device,base.group_system,r,
 user_device_logs,Users can read only their own device logs,res.device.log,base.group_user,r,"[('user_id', 'in.expr', 'user.ids')]"
 user_device_logs_admin,Administrators can read all device logs,res.device.log,base.group_system,r,

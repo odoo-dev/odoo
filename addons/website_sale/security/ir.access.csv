@@ -8,15 +8,15 @@ access_product_public_category_designer,product.public.category designer,product
 empty_public_categories_rule,Hide empty eCommerce categories to public/portal users,product.public.category,base.group_everyone,r,"[('has_published_products', '=', True)]"
 access_product_public_category_public_employee,product.category.public,product.public.category,base.group_user,r,
 access_product_pricelist_public_public,product.pricelist.public,product.pricelist,base.group_everyone,r,
-product_pricelist_comp_rule,product pricelist company rule,product.pricelist,,crud,"['|', ('company_id', 'in', [False, website.company_id.id]), ('company_id', 'in', company_ids)]"
+product_pricelist_comp_rule,product pricelist company rule,product.pricelist,,crud,"['|', ('company_id', 'in.expr', 'website.company_id.ids + [False]'), ('company_id', 'in.expr', 'companies')]"
 access_product_pricelist_item_public_public,product.pricelist.item.public,product.pricelist.item,base.group_everyone,r,
-product_pricelist_item_comp_rule,product pricelist item company rule,product.pricelist.item,,crud,"['|', ('company_id', 'in', [False, website.company_id.id]), ('company_id', 'in', company_ids)]"
+product_pricelist_item_comp_rule,product pricelist item company rule,product.pricelist.item,,crud,"['|', ('company_id', 'in.expr', 'website.company_id.ids + [False]'), ('company_id', 'in.expr', 'companies')]"
 access_product_ribbon_public_public,product.ribbon.public,product.ribbon,base.group_everyone,r,
 access_product_ribbon_sale_manager,product.ribbon.sale_manager,product.ribbon,sales_team.group_sale_manager,crud,
 access_product_attribute_public_public,product.attribute public,product.attribute,base.group_everyone,r,
 access_product_attribute_value_public_public,product.attribute value public,product.attribute.value,base.group_everyone,r,
 access_product_product_attribute_public,product.template.attribute value public,product.template.attribute.value,base.group_everyone,r,
-access_product_product_attribute_custom_value_public,product.attribute.custom value,product.attribute.custom.value,base.group_everyone,r,"[('create_uid', '=', user.id)]"
+access_product_product_attribute_custom_value_public,product.attribute.custom value,product.attribute.custom.value,base.group_everyone,r,"[('create_uid', 'in.expr', 'user')]"
 access_product_template_attribute_line_public_public,product.template.attribute line public,product.template.attribute.line,base.group_everyone,r,
 access_fiscal_position_public,fiscal position public,account.fiscal.position,base.group_portal,r,
 access_payment_term,payment term public,account.payment.term,base.group_portal,r,
@@ -30,9 +30,9 @@ access_website_checkout_step_website_designer,access_website_checkout_step websi
 access_product_base_unit_public_public,product.base.unit public public,product.base.unit,base.group_everyone,r,
 access_product_base_unit_sale_manager,product.base.unit sale manager,product.base.unit,sales_team.group_sale_manager,crud,
 access_product_feed_website_group_website_designer,access_product_feed website_group_website_designer,product.feed,website.group_website_designer,crud,
-product_feed_comp_rule,Product feed (company rule),product.feed,,crud,"[('website_id.company_id', 'in', company_ids)]"
-product_wishlist_rule,See own wishlists,product.wishlist,base.group_portal,crud,"[('partner_id','=', user.partner_id.id)]"
-product_wishlist_rule_1,See own wishlists,product.wishlist,base.group_user,crud,"[('partner_id','=', user.partner_id.id)]"
+product_feed_comp_rule,Product feed (company rule),product.feed,,crud,"[('website_id.company_id', 'in.expr', 'companies')]"
+product_wishlist_rule,See own wishlists,product.wishlist,base.group_portal,crud,"[('partner_id','in.expr', 'user.partner_id')]"
+product_wishlist_rule_1,See own wishlists,product.wishlist,base.group_user,crud,"[('partner_id','in.expr', 'user.partner_id')]"
 all_product_wishlist_rule,See all wishlists,product.wishlist,sales_team.group_sale_manager,crud,
 access_product_attribute_category_public_public,product.attribute.category public,product.attribute.category,base.group_everyone,r,
 access_product_attribute_category_public_saleman,product.attribute.category sale manager,product.attribute.category,sales_team.group_sale_manager,crud,

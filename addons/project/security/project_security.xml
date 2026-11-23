@@ -52,7 +52,7 @@
             ('has_template_ancestor', '=', False),
             ('active', '=', True),
             ('project_id.collaborator_ids', 'any', [
-                ('partner_id', '=', user.partner_id.id),
+                ('partner_id', 'in.expr', 'user.partner_id'),
                 ('access_mode', 'in', ['edit', 'advanced_edit'])
             ]),
         ]</field>

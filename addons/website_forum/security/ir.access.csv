@@ -11,8 +11,8 @@ access_forum_post_comment_public,forum.post.comment.public,forum.post.comment,ba
 access_forum_post_comment_portal,forum.post.comment.portal,forum.post.comment,base.group_portal,crud,
 access_forum_post_comment_user,forum.post.comment.user,forum.post.comment,base.group_user,crud,
 website_forum_post_comment,Website forum post comment,forum.post.comment,,crud,"[('post_id.forum_id.can_access', '=', True)]"
-website_forum_post_vote_own,Website forum vote: own votes only,forum.post.vote,base.group_portal,cru,"[('user_id', '=', user.id)]"
-website_forum_post_vote_own_1,Website forum vote: own votes only,forum.post.vote,base.group_user,crud,"[('user_id', '=', user.id)]"
+website_forum_post_vote_own,Website forum vote: own votes only,forum.post.vote,base.group_portal,cru,"[('user_id', 'in.expr', 'user')]"
+website_forum_post_vote_own_1,Website forum vote: own votes only,forum.post.vote,base.group_user,crud,"[('user_id', 'in.expr', 'user')]"
 website_forum_post_vote_all,Website forum vote: all votes,forum.post.vote,base.group_erp_manager,crud,
 access_forum_post_reason_public,forum.post.reason.public,forum.post.reason,base.group_everyone,r,
 access_forum_post_reason_website_designer,forum.post.reason.website.designer,forum.post.reason,website.group_website_designer,crud,

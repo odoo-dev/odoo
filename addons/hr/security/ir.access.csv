@@ -3,7 +3,7 @@ access_hr_employee_category_user,hr.employee.category.user,hr.employee.category,
 access_hr_employee_category_emp,hr.employee.category.emp,hr.employee.category,base.group_user,r,
 access_hr_employee_user,hr.employee user,hr.employee,hr.group_hr_user,crud,
 access_hr_employee_system_user,hr.employee system user,hr.employee,base.group_system,r,
-hr_employee_comp_rule,Employee multi company rule,hr.employee,,crud,"[('company_id', 'in', company_ids + [False])]"
+hr_employee_comp_rule,Employee multi company rule,hr.employee,,crud,"[('company_id', 'in.expr', 'companies.ids + [False]')]"
 access_hr_employee_public_user,hr.employee_public,hr.employee.public,base.group_user,r,
 access_hr_employee_resource_user,resource.resource.user,resource.resource,hr.group_hr_user,crud,
 access_hr_department_user,hr.department.user,hr.department,hr.group_hr_user,crd,
@@ -11,16 +11,16 @@ hr_dept_hr_officer_access_rule,Department Access For HR Officers,hr.department,h
 access_hr_department_employee,hr.department.employee,hr.department,base.group_user,r,
 hr_dept_manager_access_rule,Department Access For Managers,hr.department,base.group_user,u,"[
             '|',
-            ('manager_id', 'in', user.employee_id.ids),
+            ('manager_id', 'in.expr', 'user.employee_id.ids'),
             ('manager_id.is_subordinate', '=', True)
         ]"
-hr_dept_comp_rule,Department multi company rule,hr.department,,crud,"[('company_id', 'in', company_ids + [False])]"
+hr_dept_comp_rule,Department multi company rule,hr.department,,crud,"[('company_id', 'in.expr', 'companies.ids + [False]')]"
 access_hr_job_user,hr.job user,hr.job,hr.group_hr_user,crud,
 access_hr_job_employee,hr.job.employee,hr.job,base.group_user,r,
-hr_job_comp_rule,Job multi company rule,hr.job,,crud,"[('company_id', 'in', company_ids + [False])]"
+hr_job_comp_rule,Job multi company rule,hr.job,,crud,"[('company_id', 'in.expr', 'companies.ids + [False]')]"
 access_hr_employee_departure,access.hr.employee.departure,hr.employee.departure,hr.group_hr_user,crud,
-ir_rule_hr_employee_departure_multi_company,HR Employee Departure: Multi Company,hr.employee.departure,,crud,"[('employee_id.company_id', 'in', company_ids)]"
-ir_rule_hr_employee_departure_company,HR Departure: Multi Company,hr.employee.departure,,crud,"[('employee_id.company_id', 'in', company_ids)]"
+ir_rule_hr_employee_departure_multi_company,HR Employee Departure: Multi Company,hr.employee.departure,,crud,"[('employee_id.company_id', 'in.expr', 'companies')]"
+ir_rule_hr_employee_departure_company,HR Departure: Multi Company,hr.employee.departure,,crud,"[('employee_id.company_id', 'in.expr', 'companies')]"
 access_hr_bank_account_allocation_wizard,access.hr.bank.account.allocation.wizard,hr.bank.account.allocation.wizard,hr.group_hr_user,cru,
 access_hr_bank_account_allocation_wizard_line,access.hr.bank.account.allocation.wizard.line,hr.bank.account.allocation.wizard.line,hr.group_hr_user,crud,
 access_hr_work_location_user,access_hr_work_location_user,hr.work.location,base.group_user,r,
@@ -28,24 +28,24 @@ access_hr_work_location_manager,access_hr_work_location_manager,hr.work.location
 access_hr_departure_reason,access_hr_departure_reason_user,hr.departure.reason,hr.group_hr_user,crud,
 ir_rule_hr_departure_reason_multi_company,Departure Reason: multi company,hr.departure.reason,,crud,"['|', ('country_id', 'in.expr', 'companies.country_id'), ('country_id', '=', False)]"
 access_hr_contract_type_manager,hr.employee.type.manager,hr.employee.type,hr.group_hr_user,crud,
-ir_rule_hr_contract_type_multi_company,HR Contract Type: Multi Company,hr.employee.type,,crud,"['|', ('country_id', '=', False), ('country_id', 'in', user.env.companies.country_id.ids)]"
+ir_rule_hr_contract_type_multi_company,HR Contract Type: Multi Company,hr.employee.type,,crud,"['|', ('country_id', '=', False), ('country_id', 'in.expr', 'companies.country_id.ids')]"
 access_hr_version_user,hr.version.user,hr.version,hr.group_hr_user,crud,
-ir_rule_hr_contract_multi_company,HR Contract: Multi Company,hr.version,,crud,"[('company_id', 'in', company_ids)]"
+ir_rule_hr_contract_multi_company,HR Contract: Multi Company,hr.version,,crud,"[('company_id', 'in.expr', 'companies')]"
 access_mail_activity_plan_hr_manager,mail.activity.plan.hr.manager,mail.activity.plan,hr.group_hr_manager,r,
 mail_plan_rule_group_hr_manager,Manager can edit employee plan,mail.activity.plan,hr.group_hr_manager,cud,"[('res_model', '=', 'hr.employee')]"
 access_mail_activity_plan_template_hr_manager,mail.activity.plan.template.hr.manager,mail.activity.plan.template,hr.group_hr_manager,r,
 mail_plan_templates_rule_group_hr_manager,Manager can edit employee plan template,mail.activity.plan.template,hr.group_hr_manager,cud,"[('plan_id.res_model', '=', 'hr.employee')]"
 access_hr_resource_calendar_user,hr.employee.resource.calendar.user,resource.calendar,hr.group_hr_user,crud,
 access_resource_calendar_rule_multi_company,resource.calendar.rule.multi.company,resource.calendar,hr.group_hr_user,crud,"[
-            '|', ('company_id', '=', False), ('company_id', 'in', company_ids)
+            '|', ('company_id', '=', False), ('company_id', 'in.expr', 'companies')
         ]"
 access_resource_calendar_rule_multi_company_parents,resource.calendar.rule.multi.company.parents,resource.calendar,hr.group_hr_user,r,"[
-            '&', ('company_id', 'not in', company_ids), ('company_id', 'parent_of', company_ids)
+            '&', '!', ('company_id', 'in.expr', 'companies'), ('company_id', 'parent_of.expr', 'companies')
         ]"
 access_hr_resource_calendar_attendance_user,hr.employee.resource.calendar.attendance.user,resource.calendar.attendance,hr.group_hr_user,crud,
 homeworking_admin_rule,homeworking: admin,hr.employee.location,hr.group_hr_user,crud,
 homeworking_own_rule,homeworking: own,hr.employee.location,base.group_user,crud,"[
-            ('employee_id', '=', user.employee_id.id)
+            ('employee_id', 'in.expr', 'user.employee_id')
         ]"
 ir_rule_res_partner_bank_internal_users,HR: Prevent non HR officers from accessing employee bank accounts,res.partner.bank,base.group_user,r,"[('partner_id.employee_ids', '=', False)]"
 ir_rule_res_partner_bank_internal_users_1,HR: Prevent non HR officers from accessing employee bank accounts,res.partner.bank,base.group_partner_manager,cru,"[('partner_id.employee_ids', '=', False)]"
@@ -53,29 +53,29 @@ ir_rule_res_partner_bank_employees,HR: Allow HR officers from accessing employee
 access_hr_employee_create_version_wizard,HR: Allow HR officers to access create employee records wizard,hr.employee.create.version.wizard,hr.group_hr_user,crud,
 hr_resume_rule_employee_hr_user,Resume: HR user: all,hr.resume.line,hr.group_hr_user,crud,
 hr_resume_rule_employee,Resume: employee: read all,hr.resume.line,base.group_user,r,
-hr_skills_rule_employee_update,Resume: employee: create/write/unlink own,hr.resume.line,base.group_user,cud,"[('employee_id.user_id','=',user.id)]"
+hr_skills_rule_employee_update,Resume: employee: create/write/unlink own,hr.resume.line,base.group_user,cud,"[('employee_id.user_id','in.expr','user')]"
 access_hr_resume_line_type,hr.resume.line.type,hr.resume.line.type,hr.group_hr_user,crud,
 access_hr_resume_line_type_employee,hr.resume.line.type.employee,hr.resume.line.type,base.group_user,r,
-access_hr_skill_type,hr.skill.type,hr.skill.type,hr.group_hr_user,crud,"[('company_id', 'in', company_ids + [False])]"
-access_hr_skill_type_employee,hr.skill.type.employee,hr.skill.type,base.group_user,r,"[('company_id', 'in', company_ids + [False])]"
-access_hr_skill_level,hr.skill.level,hr.skill.level,hr.group_hr_user,crud,"[('skill_type_id.company_id', 'in', company_ids + [False])]"
-access_hr_skill_level_employee,hr.skill.level.employee,hr.skill.level,base.group_user,r,"[('skill_type_id.company_id', 'in', company_ids + [False])]"
-access_hr_skill,hr.skill,hr.skill,hr.group_hr_user,crud,"[('skill_type_id.company_id', 'in', company_ids + [False])]"
-access_hr_skill_employee,hr.skill.employee,hr.skill,base.group_user,cr,"[('skill_type_id.company_id', 'in', company_ids + [False])]"
+access_hr_skill_type,hr.skill.type,hr.skill.type,hr.group_hr_user,crud,"[('company_id', 'in.expr', 'companies.ids + [False]')]"
+access_hr_skill_type_employee,hr.skill.type.employee,hr.skill.type,base.group_user,r,"[('company_id', 'in.expr', 'companies.ids + [False]')]"
+access_hr_skill_level,hr.skill.level,hr.skill.level,hr.group_hr_user,crud,"[('skill_type_id.company_id', 'in.expr', 'companies.ids + [False]')]"
+access_hr_skill_level_employee,hr.skill.level.employee,hr.skill.level,base.group_user,r,"[('skill_type_id.company_id', 'in.expr', 'companies.ids + [False]')]"
+access_hr_skill,hr.skill,hr.skill,hr.group_hr_user,crud,"[('skill_type_id.company_id', 'in.expr', 'companies.ids + [False]')]"
+access_hr_skill_employee,hr.skill.employee,hr.skill,base.group_user,cr,"[('skill_type_id.company_id', 'in.expr', 'companies.ids + [False]')]"
 hr_skill_rule_hr_user,Employee skill: HR user: read all,hr.employee.skill,hr.group_hr_user,crud,
 hr_skill_rule_employee,Employee skill: employee: read all,hr.employee.skill,base.group_user,r,
-hr_skill_rule_employee_update,Employee skill: employee: create/write/unlink own,hr.employee.skill,base.group_user,cud,"[('employee_id.user_id','=',user.id),('employee_id.company_id.hr_skills_self_edit','=',True)]"
+hr_skill_rule_employee_update,Employee skill: employee: create/write/unlink own,hr.employee.skill,base.group_user,cud,"[('employee_id.user_id','in.expr','user'),('employee_id.company_id.hr_skills_self_edit','=',True)]"
 hr_employee_skill_report_hr_user,Employee Skill Report: HR user,hr.employee.skill.report,hr.group_hr_user,r,
 hr_employee_skill_report_manager,Employee Skill Report: employee's manager,hr.employee.skill.report,base.group_user,r,"[('has_department_manager_access', '=', True)]"
-hr_employee_skill_report_multicompany,Employee Skill Report: Multi-Company Rule,hr.employee.skill.report,,crud,"[('company_id', 'in', company_ids + [False])]"
+hr_employee_skill_report_multicompany,Employee Skill Report: Multi-Company Rule,hr.employee.skill.report,,crud,"[('company_id', 'in.expr', 'companies.ids + [False]')]"
 hr_employee_skill_history_report_hr_user,Employee Skill History Report: HR user,hr.employee.skill.history.report,hr.group_hr_user,r,
-hr_employee_skill_history_report_manager,Employee Skill History Report: employee's manager,hr.employee.skill.history.report,base.group_user,r,"[('employee_id', 'child_of', user.employee_ids.ids)]"
+hr_employee_skill_history_report_manager,Employee Skill History Report: employee's manager,hr.employee.skill.history.report,base.group_user,r,"[('employee_id', 'child_of.expr', 'user.employee_ids.ids')]"
 access_hr_job_skill,hr.job.skill,hr.job.skill,hr.group_hr_user,crud,
 access_hr_job_skill_employee,hr.job.skill.employee,hr.job.skill,base.group_user,r,
 access_hr_employee_cv_wizard,access_hr_employee_cv_wizard,hr.employee.cv.wizard,base.group_user,cru,
 access_hr_resource_calendar_clear_wizard,hr.resource.calendar.clear.wizard,hr.resource.calendar.clear.wizard,hr.group_hr_user,crud,
 access_hr_headcount,access_hr_headcount,hr.headcount,hr.group_hr_user,crud,
-ir_rule_hr_headcount_multi_company,HR Headcount: Multi Company,hr.headcount,,crud,"[('company_id', 'in', company_ids)]"
+ir_rule_hr_headcount_multi_company,HR Headcount: Multi Company,hr.headcount,,crud,"[('company_id', 'in.expr', 'companies')]"
 access_hr_headcount_line,access_hr_headcount_line,hr.headcount.line,hr.group_hr_user,crud,
-ir_rule_hr_headcount_line_multi_company,HR Headcount Line: Multi Company,hr.headcount.line,,crud,"[('headcount_id.company_id', 'in', company_ids)]"
+ir_rule_hr_headcount_line_multi_company,HR Headcount Line: Multi Company,hr.headcount.line,,crud,"[('headcount_id.company_id', 'in.expr', 'companies')]"
 access_hr_headcount_working_rate,access_hr_headcount_working_rate,hr.headcount.working.rate,hr.group_hr_user,crd,

@@ -1,13 +1,13 @@
 id,name,model_id,group_id/id,operation,domain
 goal_user_visibility,User can only see his/her goals or goal from the same challenge in board visibility,gamification.goal,base.group_user,ru,"[
                 '|',
-                    ('user_id','=',user.id),
+                    ('user_id','in.expr','user'),
                     '&',
-                        ('challenge_id.user_ids','in',user.id),
+                        ('challenge_id.user_ids','in.expr','user'),
                         ('challenge_id.visibility_mode','=','ranking')]"
 goal_gamification_manager_visibility,Manager can see any goal,gamification.goal,base.group_erp_manager,ru,
 goal_manager,Goal Manager,gamification.goal,base.group_erp_manager,cd,
-goal_global_multicompany,Multicompany rule on challenges,gamification.goal,,crud,"[('user_id.company_id', 'in', company_ids)]"
+goal_global_multicompany,Multicompany rule on challenges,gamification.goal,,crud,"[('user_id.company_id', 'in.expr', 'companies')]"
 goal_definition_employee,Goal Definition Employee,gamification.goal.definition,base.group_user,r,
 goal_definition_manager,Goal Definition Manager,gamification.goal.definition,base.group_erp_manager,crud,
 challenge_employee,Goal Challenge Employee,gamification.challenge,base.group_user,r,

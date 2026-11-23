@@ -2,12 +2,12 @@ id,name,model_id,group_id/id,operation,domain
 purchase_order_user_rule,Purchase User Purchase Orders,purchase.order,purchase.group_purchase_user,crud,
 purchase_order_invoicing_readonly_rule,Invoicing Readonly User Purchase Orders,purchase.order,account.group_account_readonly,r,
 purchase_order_invoicing_rule,Invoicing User Purchase Orders,purchase.order,account.group_account_invoice,ru,
-portal_purchase_order_user_rule,Portal Purchase Orders,purchase.order,base.group_portal,r,"[('partner_id', 'child_of', [user.commercial_partner_id.id])]"
-purchase_order_comp_rule,Purchase Order multi-company,purchase.order,,crud,"[('company_id', 'in', company_ids)]"
+portal_purchase_order_user_rule,Portal Purchase Orders,purchase.order,base.group_portal,r,"[('partner_id', 'child_of.expr', 'user.commercial_partner_id.ids')]"
+purchase_order_comp_rule,Purchase Order multi-company,purchase.order,,crud,"[('company_id', 'in.expr', 'companies')]"
 purchase_order_line_user_rule,Purchase User Purchase Order Lines,purchase.order.line,purchase.group_purchase_user,cud,"[('order_id', 'access', 'write')]"
 purchase_order_line_invoicing_rule,Invoicing User Purchase Order Lines,purchase.order.line,account.group_account_invoice,u,
 purchase_order_line_rule,Purchase Order Lines,purchase.order.line,base.group_everyone,r,"[('order_id','access','read')]"
-purchase_order_line_comp_rule,Purchase Order Line multi-company,purchase.order.line,,crud,"[('company_id', 'in', company_ids)]"
+purchase_order_line_comp_rule,Purchase Order Line multi-company,purchase.order.line,,crud,"[('company_id', 'in.expr', 'companies')]"
 access_purchase_bill_line_match,purchase.bill.line.match user,purchase.bill.line.match,purchase.group_purchase_user,r,
 access_purchase_bill_line_match_readonly,purchase.bill.line.match readonly,purchase.bill.line.match,account.group_account_readonly,r,
 access_purchase_bill_line_match_invoicing_payments,purchase.bill.line.match invoice,purchase.bill.line.match,account.group_account_invoice,ru,
@@ -30,6 +30,6 @@ access_product_supplierinfo_purchase_manager,product.supplierinfo purchase_manag
 access_product_pricelist_item_purchase_manager,product.pricelist.item purchase_manager,product.pricelist.item,purchase.group_purchase_manager,crud,
 access_account_account_purchase_manager,account.account purchase manager,account.account,purchase.group_purchase_manager,r,
 access_purchase_bill_union,access_purchase_bill_union,purchase.bill.union,purchase.group_purchase_user,r,
-purchase_bill_union_comp_rule,Purchases & Bills Union multi-company,purchase.bill.union,,crud,"[('company_id', 'in', company_ids + [False])]"
+purchase_bill_union_comp_rule,Purchases & Bills Union multi-company,purchase.bill.union,,crud,"[('company_id', 'in.expr', 'companies.ids + [False]')]"
 access_report_purchase_order_user,purchase.stock.report user,purchase.report,purchase.group_purchase_user,r,
-purchase_order_report_comp_rule,Purchase Order Report multi-company,purchase.report,,crud,"[('company_id', 'in', company_ids)]"
+purchase_order_report_comp_rule,Purchase Order Report multi-company,purchase.report,,crud,"[('company_id', 'in.expr', 'companies')]"
