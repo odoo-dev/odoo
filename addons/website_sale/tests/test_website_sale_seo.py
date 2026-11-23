@@ -58,3 +58,23 @@ class WebsiteSaleSEO(HttpCase, WebsiteSaleCommon):
         root = html.fromstring(res.content)
         canonical = root.xpath('//link[@rel="canonical"]')[0].attrib["href"]
         self.assertEqual(canonical, self.base_url() + "/fr" + self.product.website_url)
+
+    def test_product_page_preloads_the_srcset_of_its_first_image(self):
+        website = self.env.ref("base.default_website")
+        lang_fr = self.env["res.lang"].sudo()._activate_lang("fr_FR")
+        website.language_ids = self.env.ref("base.lang_en") + lang_fr
+        self.product.write({
+            "image_1920": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVQYV2NgYAAAAAMAAWgmWQ0AAAAASUVORK5CYII=",
+        })
+        self.product.with_context(lang="fr_FR").name = "Produit"
+
+        for path in (self.product.website_url, f"/fr{self.product.website_url}"):
+            root = html.fromstring(self.url_open(path).content)
+            srcset = root.xpath('//img[hasclass("product_detail_img")]')[0].get("srcset")
+            preloads = root.xpath('//head/link[@rel="preload"][@as="image"]')
+            self.assertTrue(srcset, path)
+            self.assertEqual(
+                {preload.get("media"): preload.get("imagesrcset") for preload in preloads},
+                {"(max-width: 991.98px)": srcset, "(min-width: 992px)": srcset},
+                path,
+            )

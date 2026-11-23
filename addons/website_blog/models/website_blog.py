@@ -314,6 +314,9 @@ class BlogPost(models.Model):
         res['default_meta_description'] = self.subtitle
         return res
 
+    def _get_default_lcp_image(self):
+        return self._get_image_url() or False
+
     def _mail_get_operation_for_mail_message_operation(self, message_operation):
         if (
             message_operation == 'create'

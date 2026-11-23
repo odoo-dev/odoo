@@ -98,6 +98,26 @@ class WebsiteSeoMetadata(models.AbstractModel):
             'default_meta_description': default_meta.get('default_meta_description'),
         }
 
+    def _get_lcp_image_hints(self, default_image=False):
+        """Return the `srcset` of the image to preload on the page of the
+        record, keyed by device (`mobile`, `desktop`).
+
+        The images measured from the SEO dialog win over the image the page
+        is known to display first: `default_image` when the page provides it,
+        else `_get_default_lcp_image()`.
+        """
+        self.ensure_one()
+        default_image = default_image or self._get_default_lcp_image()
+        return {
+            'mobile': self.website_lcp_image_mobile or default_image,
+            'desktop': self.website_lcp_image_desktop or default_image,
+        }
+
+    def _get_default_lcp_image(self):
+        """Return the `srcset` of the image the page of the record displays
+        first, or False when it is unknown. Meant to be overridden."""
+        return False
+
     def _get_website_meta_translations(self):
         """Return raw stored translations for meta fields with per-request caching."""
         self.ensure_one()

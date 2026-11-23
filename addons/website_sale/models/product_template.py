@@ -1440,6 +1440,24 @@ class ProductTemplate(models.Model):
         self.ensure_one()
         return self.product_template_image_ids.sorted("sequence") or self
 
+    def _get_lcp_image_srcset(self, variant):
+        """Return the `srcset` of the first image of the product page, as
+        rendered by `website_sale.shop_product_image`, or False when it is a
+        video.
+
+        It is computed at render time because its URLs depend on the variant
+        displayed, the language and the `write_date` of the image record.
+
+        :param variant: the `product.product` displayed on the page, if any
+        """
+        self.ensure_one()
+        image = (variant or self)._get_images()[:1]
+        if image._name == 'product.image' and image.video_url:
+            return False
+        return self.env['ir.qweb.field.image']._get_srcset(
+            image, 'image_1920', {'preview_image': 'image_1024'}
+        )
+
     def _get_product_page_documents(self, variant=None):
         self.ensure_one()
         docs = self.sudo().product_document_ids

@@ -22,6 +22,7 @@
             t-value="website.product_page_image_width in ['none', '100_pc']"
         />
         <t t-set="is_50_pc" t-value="website.product_page_image_width == '50_pc'"/>
+        <t t-set="lcp_image_default" t-value="product._get_lcp_image_srcset(product_variant)"/>
 
         <t t-call="website.layout" additional_title="product.name">
             <div

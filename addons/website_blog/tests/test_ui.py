@@ -3,6 +3,9 @@
 
 import odoo.tests
 import re
+
+from lxml import html
+
 from odoo.addons.http_routing.tests.common import MockRequest
 from odoo.addons.website_blog.controllers.main import WebsiteBlog
 from odoo.addons.website_blog.tests.common import TestWebsiteBlogCommon
@@ -242,3 +245,26 @@ class TestWebsiteBlogUi(odoo.tests.HttpCase, TestWebsiteBlogCommon):
                     blog1.with_env(mock_request.env),
                     current_post.with_env(mock_request.env),
                 )
+
+    def test_blog_post_preloads_its_cover(self):
+        cover_url = '/website_blog/static/src/img/cover_1.webp'
+
+        def preloads():
+            root = html.fromstring(self.url_open(self.blog_post.website_url).content)
+            self.assertIn(cover_url, root.xpath('//div[hasclass("o_record_cover_image")]')[0].get('style'))
+            return {
+                preload.get('media'): preload.get('imagesrcset')
+                for preload in root.xpath('//head/link[@rel="preload"][@as="image"]')
+            }
+
+        self.assertEqual(preloads(), {
+            '(max-width: 991.98px)': cover_url,
+            '(min-width: 992px)': cover_url,
+        })
+
+        # an image measured from the SEO dialog wins over the cover
+        self.blog_post.website_lcp_image_desktop = '/web/image/website.s_banner_default_image'
+        self.assertEqual(preloads(), {
+            '(max-width: 991.98px)': cover_url,
+            '(min-width: 992px)': '/web/image/website.s_banner_default_image',
+        })

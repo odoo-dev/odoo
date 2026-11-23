@@ -276,6 +276,10 @@ class WebsitePage(models.Model):
         self.ensure_one()
         return self.view_id.get_website_meta()
 
+    def _get_lcp_image_hints(self, default_image=False):
+        self.ensure_one()
+        return self.view_id._get_lcp_image_hints(default_image)
+
     @api.model
     def _search_get_detail(self, website, order, options):
         # Read access on website.page requires sudo.

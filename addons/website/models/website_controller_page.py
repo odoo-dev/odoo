@@ -132,3 +132,7 @@ class WebsiteControllerPage(models.Model):
             "type": "ir.actions.act_url",
             "url": url
         }
+
+    def _get_lcp_image_hints(self, default_image=False):
+        self.ensure_one()
+        return self.view_id._get_lcp_image_hints(default_image)

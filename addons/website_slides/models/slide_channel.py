@@ -1113,6 +1113,9 @@ class SlideChannel(models.Model):
             return self.website_default_background_image_url
         return super()._get_placeholder_filename(field)
 
+    def _get_default_lcp_image(self):
+        return self._get_image_url() or False
+
     @api.model
     def _allow_publish_rating_stats(self):
         return True

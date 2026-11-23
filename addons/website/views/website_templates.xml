@@ -125,19 +125,20 @@
     <xpath expr="//head/*[last()]" position="after">
         <t t-set="record" t-value="(seo_object or main_object).sudo()"/>
         <t t-if="record and 'website_lcp_image_desktop' in record._fields">
+            <t t-set="lcp_images" t-value="record._get_lcp_image_hints(lcp_image_default)"/>
             <link
-                t-if="record.website_lcp_image_mobile"
+                t-if="lcp_images['mobile']"
                 rel="preload"
                 as="image"
                 fetchpriority="high"
-                t-att-imagesrcset="record.website_lcp_image_mobile"
+                t-att-imagesrcset="lcp_images['mobile']"
                 media="(max-width: 991.98px)"/>
             <link
-                t-if="record.website_lcp_image_desktop"
+                t-if="lcp_images['desktop']"
                 rel="preload"
                 as="image"
                 fetchpriority="high"
-                t-att-imagesrcset="record.website_lcp_image_desktop"
+                t-att-imagesrcset="lcp_images['desktop']"
                 media="(min-width: 992px)"/>
         </t>
     </xpath>

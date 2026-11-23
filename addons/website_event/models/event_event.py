@@ -537,6 +537,9 @@ class EventEvent(models.Model):
         res['default_meta_description'] = self.subtitle
         return res
 
+    def _get_default_lcp_image(self):
+        return self._get_image_url() or False
+
     def get_backend_menu_id(self):
         return self.env.ref('event.event_main_menu').id
 
