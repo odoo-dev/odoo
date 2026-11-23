@@ -2,25 +2,15 @@
 <odoo noupdate="1">
     <!-- Fixtures of the "Buy & Sell" level. The player never gets the product
          from here when creating it (sub-level 1), later sub-levels use it. -->
-    <record id="partner_wood_corner" model="res.partner">
-        <field name="name">Wood Corner</field>
-        <field name="is_company" eval="True"/>
-        <field name="email">accounting@wood-corner.com</field>
-    </record>
 
-    <record id="partner_azure_interior" model="res.partner">
-        <field name="name">Azure Interior</field>
-        <field name="is_company" eval="True"/>
-    </record>
+    <!-- Wood Corner, Azure Interior and Brandon: reuse the partners of the same
+         name when they already exist (e.g. demo data), so the player never has
+         to choose between two of them. -->
+    <function model="scale.up.game.scenario" name="_ensure_partner_fixtures"/>
 
-    <record id="partner_azure_brandon" model="res.partner">
-        <field name="name">Brandon</field>
-        <field name="parent_id" ref="partner_azure_interior"/>
-        <field name="email">brandon@game.odoo.com</field>
-    </record>
-
-    <record id="product_large_desk" model="product.template">
-        <field name="name">Large Desk</field>
+    <!-- "Standing Desk" does not exist in Odoo's demo data, so it can't be mixed up -->
+    <record id="product_standing_desk" model="product.template">
+        <field name="name">Standing Desk</field>
         <field name="type">consu</field>
         <field name="is_storable" eval="True"/>
         <field name="list_price">220.0</field>
@@ -29,9 +19,9 @@
         <field name="invoice_policy">order</field>
     </record>
 
-    <record id="supplierinfo_large_desk" model="product.supplierinfo">
+    <record id="supplierinfo_standing_desk" model="product.supplierinfo">
         <field name="partner_id" ref="partner_wood_corner"/>
-        <field name="product_tmpl_id" ref="product_large_desk"/>
+        <field name="product_tmpl_id" ref="product_standing_desk"/>
         <field name="min_qty">10</field>
         <field name="price">100.0</field>
     </record>

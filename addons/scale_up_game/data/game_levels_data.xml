@@ -21,11 +21,11 @@
         <field name="scenario">bs_create_product</field>
         <field name="scene">office_pov</field>
         <field name="sequence">10</field>
-        <field name="description">Put the Large Desk of a new vendor in your catalog.</field>
+        <field name="description">Put the Standing Desk of a new vendor in your catalog.</field>
     </record>
     <record id="level_bs_purchase" model="scale.up.game.level">
         <field name="parent_id" ref="level_group_buy_sell"/>
-        <field name="name">Purchase large desks</field>
+        <field name="name">Purchase standing desks</field>
         <field name="code">bs_purchase</field>
         <field name="scenario">bs_purchase</field>
         <field name="scene">office_pov</field>

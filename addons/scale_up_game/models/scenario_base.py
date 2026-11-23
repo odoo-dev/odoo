@@ -1,6 +1,11 @@
+import psycopg2
+
 from odoo import SUPERUSER_ID, Command, _, api, fields, models
 from odoo.exceptions import UserError
 from odoo.tools import float_compare
+
+# Product the Buy & Sell level is about (not in Odoo's demo data).
+DESK_NAME = "Standing Desk"
 
 
 # Cast members that exist as 3D characters (see static/src/three/kit/people.js).
@@ -21,6 +26,7 @@ class ScaleUpGameScenario(models.AbstractModel):
     _description = 'Scale-Up Scenario (base)'
 
     answer_label = None  # set to ask the player to type an answer
+    hide_desk = False  # True when the player must create the Standing Desk
 
     # ------------------------------------------------------------------
     # To override
@@ -184,12 +190,63 @@ class ScaleUpGameScenario(models.AbstractModel):
         customer = self._customer()
         return partner in (customer, customer.commercial_partner_id) or partner.commercial_partner_id == customer.commercial_partner_id
 
+    @api.model
+    def _ensure_partner_fixtures(self):
+        """Give the game's xmlids to existing partners of the same name (demo data)
+        instead of creating look-alikes; create the partners that are missing."""
+        Partner = self.env['res.partner'].sudo()
+        IrModelData = self.env['ir.model.data'].sudo()
+
+        def ensure(xmlid, vals, domain):
+            partner = self.env.ref(xmlid, raise_if_not_found=False)
+            if partner:
+                return partner
+            partner = Partner.search(domain, order='id', limit=1)
+            if not partner:
+                partner = Partner.create(vals)
+            elif not partner.email and vals.get('email'):
+                partner.email = vals['email']  # quotations and bills are sent by email
+            IrModelData._update_xmlids([{'xml_id': xmlid, 'record': partner, 'noupdate': True}])
+            return partner
+
+        ensure('scale_up_game.partner_wood_corner',
+               {'name': "Wood Corner", 'is_company': True, 'email': "accounting@wood-corner.com"},
+               [('name', '=ilike', "Wood Corner"), ('is_company', '=', True)])
+        azure = ensure('scale_up_game.partner_azure_interior',
+                       {'name': "Azure Interior", 'is_company': True},
+                       [('name', '=ilike', "Azure Interior"), ('is_company', '=', True)])
+        ensure('scale_up_game.partner_azure_brandon',
+               {'name': "Brandon", 'parent_id': azure.id, 'email': "brandon@game.odoo.com"},
+               [('name', '=ilike', "Brandon%"), ('parent_id', '=', azure.id)])
+
+    def _desk_template(self):
+        return self.env.ref('scale_up_game.product_standing_desk').sudo()
+
     def _desk(self):
-        return self.env.ref('scale_up_game.product_large_desk').sudo().product_variant_id
+        return self._desk_template().product_variant_id
 
     @staticmethod
-    def _is_desk(product):
-        return 'desk' in (product.name or '').lower()
+    def _is_desk_name(name):
+        return (name or '').strip().lower() == DESK_NAME.lower()
+
+    def _is_desk(self, product):
+        return product == self._desk()
+
+    def _prepare_catalog(self):
+        """Keep a single active Standing Desk: the game's own one, or none at all
+        when the sub-level is about creating it (``hide_desk``). Copies made by
+        players are deleted, or archived when a document of theirs still uses them."""
+        fixture = self._desk_template()
+        copies = self.env['product.template'].sudo().search([
+            ('name', '=ilike', DESK_NAME), ('id', '!=', fixture.id)])
+        for copy in copies:
+            try:
+                with self.env.cr.savepoint():
+                    copy.unlink()
+            except (UserError, psycopg2.Error):
+                copy.action_archive()
+        if fixture.active == self.hide_desk:
+            fixture.active = not self.hide_desk
 
     # --- seeding (superuser: records are owned by OdooBot, never by the player) ---
     def _seed_purchase(self, receive=False, bill=False):

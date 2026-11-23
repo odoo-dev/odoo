@@ -11,6 +11,8 @@ class BsCreateProduct(models.AbstractModel):
     _inherit = 'scale.up.game.scenario'
     _description = 'Buy & Sell 1: Create a product'
 
+    hide_desk = True
+
     def _steps(self):
         return [
             ('create', _("Create the product")),
@@ -20,8 +22,8 @@ class BsCreateProduct(models.AbstractModel):
 
     def _check(self, tmpl):
         issues = []
-        if not self._is_desk(tmpl):
-            issues.append(_("The product should be the Large Desk."))
+        if not self._is_desk_name(tmpl.name):
+            issues.append(_("The product should be named Standing Desk."))
         if tmpl.type != 'consu' or not tmpl.is_storable:
             issues.append(_("A desk is something you keep in stock: Goods with Track Inventory."))
         if not self._eq(tmpl.list_price, 220.0):
@@ -56,11 +58,11 @@ class BsCreateProduct(models.AbstractModel):
 
     def _texts(self, session):
         return {
-            'objective': _("Purchasing found a new vendor, Wood Corner, for office furniture. Put their Large Desk "
+            'objective': _("Purchasing found a new vendor, Wood Corner, for office furniture. Put their Standing Desk "
                            "in our catalog so we can buy and sell it."),
-            'briefing': _("Boss, purchasing found a new vendor. Can you add their Large Desk to our catalog?"),
+            'briefing': _("Boss, purchasing found a new vendor. Can you add their Standing Desk to our catalog?"),
             'chat': [
-                {'who': 'bot', 'text': _("Hi boss! I'm OdooBot. Purchasing just visited Wood Corner, a new vendor of office furniture. Here is their Large Desk.")},
+                {'who': 'bot', 'text': _("Hi boss! I'm OdooBot. Purchasing just visited Wood Corner, a new vendor of office furniture. Here is their Standing Desk.")},
                 {'who': 'ceo', 'text': _("How much do they cost?")},
                 {'who': 'bot', 'text': _("$140 each, but $100 if we order a minimum of 10 desks. We can sell them at $220.")},
                 {'who': 'ceo', 'text': _("Sounds good! I'll create the product in our catalog.")},
@@ -68,7 +70,7 @@ class BsCreateProduct(models.AbstractModel):
             'hints': {
                 'create': [
                     _("Where does Odoo keep everything you buy and sell?"),
-                    _("Click the computer on your desk and create a new product named Large Desk."),
+                    _("Click the computer on your desk and create a new product named Standing Desk."),
                 ],
                 'details': [
                     _("A desk is a physical thing you keep in stock. What are its price and cost?"),
@@ -89,7 +91,7 @@ class BsCreateProduct(models.AbstractModel):
 class BsPurchase(models.AbstractModel):
     _name = 'scale.up.game.scenario.bs_purchase'
     _inherit = 'scale.up.game.scenario'
-    _description = 'Buy & Sell 2: Purchase large desks'
+    _description = 'Buy & Sell 2: Purchase standing desks'
 
     def _steps(self):
         return [
@@ -104,7 +106,7 @@ class BsPurchase(models.AbstractModel):
             issues.append(_("The vendor should be Wood Corner."))
         lines = po.order_line.filtered(lambda l: self._is_desk(l.product_id))
         if not lines:
-            issues.append(_("The order has no Large Desk line."))
+            issues.append(_("The order has no Standing Desk line."))
         else:
             if not any(self._eq(l.product_qty, 10.0) for l in lines):
                 issues.append(_("The sales team expects 9 to 12 sales a month: order 10 desks."))
@@ -130,11 +132,11 @@ class BsPurchase(models.AbstractModel):
 
     def _texts(self, session):
         return {
-            'objective': _("The Large Desk is in the catalog. Order the first batch from Wood Corner "
+            'objective': _("The Standing Desk is in the catalog. Order the first batch from Wood Corner "
                            "with a real purchase order."),
-            'briefing': _("Boss, we should stock up on Large Desks. Can you order them from Wood Corner?"),
+            'briefing': _("Boss, we should stock up on Standing Desks. Can you order them from Wood Corner?"),
             'chat': [
-                {'who': 'bot', 'text': _("Boss, the Large Desk is in the catalog. How many should we order from Wood Corner?")},
+                {'who': 'bot', 'text': _("Boss, the Standing Desk is in the catalog. How many should we order from Wood Corner?")},
                 {'who': 'ceo', 'text': _("OdooBot, what are the monthly sales estimates?")},
                 {'who': 'bot', 'text': _("The sales team expects between 9 and 12 a month.")},
                 {'who': 'ceo', 'text': _("Ok, I'll purchase 10 desks to start with.")},
@@ -146,7 +148,7 @@ class BsPurchase(models.AbstractModel):
                 ],
                 'details': [
                     _("Who are we buying from, what, how many, at what agreed price?"),
-                    _("Vendor Wood Corner, Large Desk x 10, unit price $100."),
+                    _("Vendor Wood Corner, Standing Desk x 10, unit price $100."),
                 ],
                 'confirm': [
                     _("A quotation request is not an order yet. Which button commits?"),
@@ -294,7 +296,7 @@ class BsBill(models.AbstractModel):
             'chat': [
                 {'who': 'paul', 'text': _("Hi! We've received a bill from the vendor today.")},
                 {'who': 'paul', 'text': _("I've put it on your desk, can you create, check and validate it? No need to pay it right now, the due date is in 2 months.")},
-                {'who': 'doc', 'text': _("Large Desk, 10 x $110.00 = $1,100.00 + tax 15% $165.00. Total $1,265.00.")},
+                {'who': 'doc', 'text': _("Standing Desk, 10 x $110.00 = $1,100.00 + tax 15% $165.00. Total $1,265.00.")},
             ],
             'hints': {
                 'create': [
@@ -337,7 +339,7 @@ class BsSell(models.AbstractModel):
             issues.append(_("The quotation is for Brandon from Azure Interior."))
         lines = so.order_line.filtered(lambda l: self._is_desk(l.product_id))
         if not lines:
-            issues.append(_("The quotation has no Large Desk line."))
+            issues.append(_("The quotation has no Standing Desk line."))
         else:
             if not any(self._eq(l.product_uom_qty, 3.0) for l in lines):
                 issues.append(_("Brandon asked for 3 desks."))
@@ -383,7 +385,7 @@ class BsSell(models.AbstractModel):
                 ],
                 'details': [
                     _("Who is the customer, what does he want and at which price?"),
-                    _("Customer Azure Interior, Brandon; Large Desk x 3 at $220."),
+                    _("Customer Azure Interior, Brandon; Standing Desk x 3 at $220."),
                 ],
                 'send': [
                     _("The customer must receive the quotation. Which button sends it?"),
@@ -574,7 +576,7 @@ class BsPayment(models.AbstractModel):
             'objective': _("Azure Interior's bank transfer just arrived. Record the payment on their invoice."),
             'briefing': _("Boss, a payment notification just came in!"),
             'chat': [
-                {'who': 'mail', 'text': _("PAYMENT NOTIFICATION: $%(total).2f from Azure Interior. Communication: %(name)s - 3 large desks", total=inv.amount_total, name=inv.name or '')},
+                {'who': 'mail', 'text': _("PAYMENT NOTIFICATION: $%(total).2f from Azure Interior. Communication: %(name)s - 3 standing desks", total=inv.amount_total, name=inv.name or '')},
                 {'who': 'ceo', 'text': _("Let's register this payment on the invoice.")},
             ],
             'hints': {

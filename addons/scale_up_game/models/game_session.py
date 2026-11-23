@@ -69,6 +69,7 @@ class ScaleUpGameSession(models.Model):
         self.ensure_one()
         scenario = self._scenario()
         if scenario is not None:
+            scenario.sudo()._prepare_catalog()
             self.sudo().data = scenario.sudo()._setup(self)
         else:  # Restock the Shelf (POC): put the stock back for the new attempt
             level = self.level_id.sudo()
