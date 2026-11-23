@@ -26,7 +26,7 @@ access_hr_bank_account_allocation_wizard_line,access.hr.bank.account.allocation.
 access_hr_work_location_user,access_hr_work_location_user,hr.work.location,base.group_user,r,
 access_hr_work_location_manager,access_hr_work_location_manager,hr.work.location,hr.group_hr_manager,crud,
 access_hr_departure_reason,access_hr_departure_reason_user,hr.departure.reason,hr.group_hr_user,crud,
-ir_rule_hr_departure_reason_multi_company,Departure Reason: multi company,hr.departure.reason,,crud,"[('country_code', 'in', user.env.companies.mapped('country_code') + [False])]"
+ir_rule_hr_departure_reason_multi_company,Departure Reason: multi company,hr.departure.reason,,crud,"['|', ('country_id', 'in.expr', 'companies.country_id'), ('country_id', '=', False)]"
 access_hr_contract_type_manager,hr.employee.type.manager,hr.employee.type,hr.group_hr_user,crud,
 ir_rule_hr_contract_type_multi_company,HR Contract Type: Multi Company,hr.employee.type,,crud,"['|', ('country_id', '=', False), ('country_id', 'in', user.env.companies.country_id.ids)]"
 access_hr_version_user,hr.version.user,hr.version,hr.group_hr_user,crud,
