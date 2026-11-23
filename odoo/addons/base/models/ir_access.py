@@ -208,7 +208,8 @@ class IrAccess(models.Model):
                     model = self.env[access.model_id.model].sudo()
                     Domain(domain).map_conditions(skip_access).validate(model)
                 except Exception as e:  # noqa: BLE001
-                    raise ValidationError(self.env._('Invalid domain %(domain)s: %(error)s', domain=access.domain, error=e))
+                    raise ValidationError(self.env._('Invalid domain on %(model)s %(domain)s: %(error)s',
+                        model=access.model_id.model, domain=access.domain, error=e))
 
     #
     # access cache invalidation
