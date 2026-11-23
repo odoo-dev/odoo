@@ -22,7 +22,7 @@ access_mailing_mailing_test,access.mailing.mailing.test,mailing.mailing.test,mas
 access_mailing_contact_to_list,access.mailing.contact.to.list,mailing.contact.to.list,mass_mailing.group_mass_mailing_user,crud,
 access_mailing_schedule_date,access.mailing.schedule.date,mailing.mailing.schedule.date,mass_mailing.group_mass_mailing_user,crud,
 access_mailing_filter_mailing_user,access.mailing.filter.mailing.user,mailing.filter,mass_mailing.group_mass_mailing_user,crud,
-properties_base_definition_rule_mailing_user,properties.base.definition: mailing user,properties.base.definition,mass_mailing.group_mass_mailing_user,crud,"[('properties_field_id', '=', user.env.ref('mass_mailing.field_mailing_contact__properties').id)]"
+properties_base_definition_rule_mailing_user,properties.base.definition: mailing user,properties.base.definition,mass_mailing.group_mass_mailing_user,crud,"[('is_mailing_contact_properties', '=', True)]"
 ir_ui_view_rule_system,ir.ui.view: system CRUD all,ir.ui.view,base.group_system,crud,
 ir_ui_view_mass_mailing_user_read_access,ir.ui.view: mailing user,ir.ui.view,mass_mailing.group_mass_mailing_user,r,"['|', ('technical_usage', '=', 'mass_mailing'), ('key', '=', 'mass_mailing.email_designer_snippets')]"
 ir_ui_view_mass_mailing_user_edit_access,ir.ui.view technical_usage: mailing user,ir.ui.view,mass_mailing.group_mass_mailing_user,cud,"[('technical_usage', '=', 'mass_mailing')]"
