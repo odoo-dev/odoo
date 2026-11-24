@@ -2,6 +2,7 @@
 
 from odoo import api, fields, models
 from odoo.fields import Domain
+from collections import defaultdict
 
 
 class LoyaltyRule(models.Model):
@@ -31,19 +32,36 @@ class LoyaltyRule(models.Model):
 
     @api.depends('product_ids', 'product_category_id', 'product_tag_id', 'product_domain')  # TODO later: product tags
     def _compute_valid_product_ids(self):
+        rules_by_tag = {}
         for key, rules in self.grouped(lambda rule: (
             tuple(rule.product_ids.ids),
             rule.product_category_id.id,
             rule.product_tag_id.id,
             '' if rule.product_domain in ('[]', "[['sale_ok', '=', True]]") else rule.product_domain,
         )).items():
-            if any(key):
+            product_ids, category_id, tag_id, product_domain = key
+            if tag_id and not (product_ids or category_id or product_domain):
+                rules_by_tag[tag_id] = rules
+            elif any(key):
                 domain = Domain.AND([[('available_in_pos', '=', True)], rules[:1]._get_valid_product_domain()])
                 rules.valid_product_ids = self.env['product.product'].search(domain, order="id")
                 rules.any_product = False
             else:
                 rules.valid_product_ids = self.env['product.product']
                 rules.any_product = True
+        if rules_by_tag:
+            products_by_tag = defaultdict(list)
+            for product in self.env['product.product'].search([
+                ('available_in_pos', '=', True),
+                ('all_product_tag_ids', 'in', list(rules_by_tag)),
+            ], order="id"):
+                tag_ids = set(product.product_tmpl_id.product_tag_ids.ids)
+                tag_ids.update(product.additional_product_tag_ids.ids)
+                for tag_id in tag_ids:
+                    products_by_tag[tag_id].append(product.id)
+            for tag_id, rules in rules_by_tag.items():
+                rules.valid_product_ids = self.env['product.product'].browse(products_by_tag[tag_id])
+                rules.any_product = False
 
     @api.depends('code')
     def _compute_promo_barcode(self):

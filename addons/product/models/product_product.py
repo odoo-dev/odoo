@@ -385,6 +385,8 @@ class ProductProduct(models.Model):
 
     @api.depends('product_tag_ids', 'additional_product_tag_ids')
     def _compute_all_product_tag_ids(self):
+        # fetch the sequence of all tags at once, sorted() then reads it from cache
+        (self.product_tag_ids | self.additional_product_tag_ids).fetch(['sequence'])
         for product in self:
             product.all_product_tag_ids = (
                 product.product_tag_ids | product.additional_product_tag_ids
