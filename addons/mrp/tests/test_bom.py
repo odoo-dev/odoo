@@ -2280,6 +2280,101 @@ class TestBoM(TestMrpCommon):
             ],
         })
 
+    def test_cycle_check_groups_variant_applicability(self):
+        from unittest.mock import patch
+
+        attributes = self.env['product.attribute'].create([
+            {'name': 'Cycle color', 'value_ids': [Command.create({'name': name}) for name in ('Red', 'Blue', 'Green')]},
+            {'name': 'Cycle size', 'value_ids': [Command.create({'name': name}) for name in ('Small', 'Large')]},
+            {'name': 'Cycle finish', 'create_variant': 'no_variant',
+             'value_ids': [Command.create({'name': 'Gloss'})]},
+        ])
+        template = self.env['product.template'].create({
+            'name': 'Cycle grouping test',
+            'attribute_line_ids': [Command.create({
+                'attribute_id': attribute.id,
+                'value_ids': [Command.set(attribute.value_ids.ids)],
+            }) for attribute in attributes],
+        })
+        values = template.attribute_line_ids.product_template_value_ids
+        colors = values.filtered(lambda value: value.attribute_id == attributes[0])
+        sizes = values.filtered(lambda value: value.attribute_id == attributes[1])
+        finish = values.filtered(lambda value: value.attribute_id == attributes[2])
+        components = self.env['product.product'].create([
+            {'name': 'Cycle component %s' % index} for index in range(5)
+        ])
+        restrictions = [values.browse(), colors[:1], colors[:2], colors[1:2] | sizes[:1], finish, sizes[:1]]
+        bom = self.env['mrp.bom'].create({
+            'product_tmpl_id': template.id,
+            'bom_line_ids': [Command.create({
+                'product_id': component.id,
+                'product_qty': 1,
+                'sequence': sequence,
+                'bom_product_template_attribute_value_ids': [Command.set(restriction.ids)],
+            }) for component, restriction, sequence in zip(components + components[:1], restrictions, (50, 20, 10, 30, 40, 5))],
+        })
+
+        def assert_matches_original(products, all_variants=False):
+            expected = {
+                product.id: bom.bom_line_ids.filtered(lambda line: not line._skip_bom_line(product)).product_id.ids
+                for product in products
+            }
+            actual = {
+                product.id: group_components.ids
+                for group_components, group_products in bom._get_cycle_check_groups(products, all_variants=all_variants)
+                for product in group_products
+            }
+            self.assertEqual(actual, expected)
+
+        assert_matches_original(template.product_variant_ids)
+        assert_matches_original(template.product_variant_ids[:1])
+        assert_matches_original(self.env['product.product'])
+        variants = template.product_variant_ids
+        variants[-1].active = False
+        assert_matches_original(template.product_variant_ids)
+        assert_matches_original(variants.with_context(active_test=False))
+
+        original_skip = type(bom.bom_line_ids)._skip_bom_line
+
+        def custom_skip(line, product, never_attribute_values=False):
+            return line.product_id == components[0] or original_skip(line, product, never_attribute_values)
+
+        with patch.object(type(bom.bom_line_ids), '_skip_bom_line', custom_skip):
+            assert_matches_original(template.product_variant_ids)
+            assert_matches_original(template.product_variant_ids[:1], all_variants=True)
+        with patch.object(type(bom), '_skip_for_no_variant', lambda *args: False):
+            assert_matches_original(template.product_variant_ids)
+            assert_matches_original(template.product_variant_ids[:1], all_variants=True)
+        with patch.object(type(variants), '_match_all_variant_values', lambda *args: True):
+            assert_matches_original(template.product_variant_ids)
+            assert_matches_original(template.product_variant_ids[:1], all_variants=True)
+
+        # A virtual attribute value must not match its persisted origin.
+        product = variants.filtered(lambda variant: colors[0] in variant.product_template_attribute_value_ids)[:1]
+        virtual_bom = self.env['mrp.bom'].new({'product_tmpl_id': template.id})
+        virtual_line = self.env['mrp.bom.line'].new({'product_id': components[0].id})
+        virtual_line.bom_product_template_attribute_value_ids = colors[:1].new({}, origin=colors[:1])
+        virtual_bom.bom_line_ids = virtual_line
+        expected = virtual_bom.bom_line_ids.filtered(lambda line: not line._skip_bom_line(product)).product_id
+        self.assertEqual(virtual_bom._get_cycle_check_groups(product)[0][0], expected)
+
+        virtual_line.bom_product_template_attribute_value_ids = colors[:1] + colors[:1]
+        virtual_product = product.new({}, origin=product)
+        expected = virtual_bom.bom_line_ids.filtered(lambda line: not line._skip_bom_line(virtual_product)).product_id
+        groups = virtual_bom._get_cycle_check_groups(virtual_product)
+        self.assertEqual(groups[0][0], expected)
+        self.assertEqual(groups[0][1], virtual_product)
+
+        virtual_line.product_id = False
+        expected = virtual_bom.bom_line_ids.filtered(lambda line: not line._skip_bom_line(product)).product_id
+        self.assertEqual(virtual_bom._get_cycle_check_groups(product)[0][0], expected)
+
+        bom.bom_line_ids.write({'bom_product_template_attribute_value_ids': [Command.clear()]})
+        assert_matches_original(template.product_variant_ids)
+        assert_matches_original(template.product_variant_ids[:1])
+        bom.bom_line_ids.unlink()
+        assert_matches_original(template.product_variant_ids)
+
     def test_component_when_bom_change(self):
         """
         Checks that the component of the previous BoM is removed when another BoM is set on the MO:

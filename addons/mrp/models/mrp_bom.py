@@ -127,6 +127,16 @@ class MrpBom(models.Model):
     def _check_bom_cycle(self):
         subcomponents_dict = dict()
 
+        components_by_bom = {}
+
+        def _group_components(bom, products, all_variants=False):
+            groups = bom._get_cycle_check_groups(products, all_variants=all_variants)
+            cached = components_by_bom.setdefault(bom, {})
+            for components, variants in groups:
+                for variant in variants:
+                    cached[variant.id] = components
+            return groups
+
         def _check_cycle(components, finished_products):
             """
             Check whether the components are part of the finished products (-> cycle). Then, if
@@ -148,7 +158,11 @@ class MrpBom(models.Model):
             for component in components:
                 if component not in subcomponents_dict:
                     bom = bom_find_result[component]
-                    subcomponents = bom.bom_line_ids.filtered(lambda l: not l._skip_bom_line(component)).product_id
+                    subcomponents = self.env['product.product']
+                    if bom:
+                        if component.id not in components_by_bom.get(bom, {}):
+                            _group_components(bom, component, all_variants=True)
+                        subcomponents = components_by_bom[bom][component.id]
                     subcomponents_dict[component] = subcomponents
                 subcomponents = subcomponents_dict[component]
                 if subcomponents:
@@ -166,14 +180,87 @@ class MrpBom(models.Model):
                 continue
             finished_products = bom.product_id or bom.product_tmpl_id.product_variant_ids
             if bom.bom_line_ids.bom_product_template_attribute_value_ids:
-                grouped_by_components = defaultdict(lambda: self.env['product.product'])
-                for finished in finished_products:
-                    components = bom.bom_line_ids.filtered(lambda l: not l._skip_bom_line(finished)).product_id
-                    grouped_by_components[components] |= finished
-                for components, finished in grouped_by_components.items():
+                for components, finished in _group_components(bom, finished_products):
                     _check_cycle(components, finished)
             else:
                 _check_cycle(bom.bom_line_ids.product_id, finished_products)
+
+    def _get_cycle_check_groups(self, finished_products, all_variants=False):
+        """Group variants by components without scanning every line per variant."""
+        self.ensure_one()
+        if not finished_products:
+            return []
+        from .product import ProductProduct
+
+        # Custom applicability rules must keep using their original hooks.
+        if (self.env['mrp.bom.line']._skip_bom_line.__func__ is not MrpBomLine._skip_bom_line
+                or self._skip_for_no_variant.__func__ is not MrpBom._skip_for_no_variant
+                or finished_products._match_all_variant_values.__func__ is not ProductProduct._match_all_variant_values):
+            grouped = defaultdict(lambda: self.env['product.product'])
+            for finished in finished_products:
+                components = self.bom_line_ids.filtered(lambda line: not line._skip_bom_line(finished)).product_id
+                grouped[components] |= finished
+            return list(grouped.items())
+
+        finished_products = finished_products.browse(dict.fromkeys(finished_products._ids))
+        if not self.bom_line_ids.bom_product_template_attribute_value_ids:
+            return [(self.bom_line_ids.product_id, finished_products)]
+
+        if all_variants:
+            # Only precompute other variants for standard, side-effect-free
+            # matching. Custom hooks above see exactly the requested products.
+            finished_products |= self.product_id or self.product_tmpl_id.with_context(active_test=False).product_variant_ids
+
+        # Each bit represents one finished variant. Bit operations avoid
+        # enumerating thousands of candidates for every individual value.
+        product_ids = list(finished_products._ids)
+        products_by_value = defaultdict(int)
+        for index, product in enumerate(finished_products):
+            for value in product.product_template_attribute_value_ids:
+                products_by_value[value.id] |= 1 << index
+        all_products = (1 << len(product_ids)) - 1
+
+        components_by_product = defaultdict(list)
+        for line in self.bom_line_ids:
+            if not line.product_id:
+                continue
+            values = line.bom_product_template_attribute_value_ids
+            values = values.browse(dict.fromkeys(values._ids))
+            if not values:
+                matching_products = all_products
+            # The cycle check passes no never_attribute_values, so a line with
+            # a no_variant restriction is skipped by _skip_for_no_variant.
+            elif any(value.attribute_id.create_variant == 'no_variant' for value in values):
+                continue
+            else:
+                # Match the exact cardinality rule of _match_all_variant_values,
+                # including alternative values belonging to the same attribute.
+                attribute_count = len(values.attribute_id)
+                # matches[n] contains variants matching exactly n selected values.
+                # Counts greater than attribute_count cannot satisfy the rule.
+                matches = [all_products] + [0] * attribute_count
+                for value in values:
+                    matching_products = products_by_value[value.id]
+                    for count in range(attribute_count, 0, -1):
+                        matches[count] = ((matches[count] & ~matching_products)
+                                          | (matches[count - 1] & matching_products))
+                    matches[0] &= ~matching_products
+                matching_products = matches[attribute_count]
+            component_id = line.product_id.id
+            while matching_products:
+                bit = matching_products & -matching_products
+                components_by_product[product_ids[bit.bit_length() - 1]].append(component_id)
+                matching_products ^= bit
+
+        grouped_ids = defaultdict(list)
+        for product in finished_products:
+            components = tuple(dict.fromkeys(components_by_product[product.id]))
+            grouped_ids[components].append(product.id)
+        Product = self.env['product.product']
+        return [
+            (Product.browse(components), Product.browse(product_ids))
+            for components, product_ids in grouped_ids.items()
+        ]
 
     @api.constrains('product_id', 'product_tmpl_id', 'bom_line_ids', 'byproduct_ids', 'operation_ids')
     def _check_bom_lines(self):
