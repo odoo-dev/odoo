@@ -140,6 +140,39 @@ class WebsiteSale(payment_portal.PaymentPortal):
         order = post.get("order") or self.env.website.shop_default_sort
         return "is_published desc, %s, id desc" % order
 
+    def _get_shop_visible_categories_domain(self):
+        """Domain of the products shown on the main shop page: products without category
+        or with at least one category displayed in the shop.
+
+        Written as "not only in hidden categories" so that PostgreSQL can use an anti-join
+        on the (usually few) products of hidden categories, rather than checking the
+        categories of every product of the catalogue. The categories are not filtered by
+        the access rules, which are redundant here.
+        """
+        Category = request.env["product.public.category"]
+        relation = request.env["product.template"]._fields["public_categ_ids"]
+
+        def to_sql(table):
+            return SQL(
+                """NOT EXISTS (
+                    SELECT 1 FROM %(rel)s rel JOIN %(categ)s categ ON categ.id = rel.%(categ_id)s
+                     WHERE rel.%(product_id)s = %(id)s AND categ.not_in_shop
+                       AND NOT EXISTS (
+                            SELECT 1 FROM %(rel)s rel2
+                              JOIN %(categ)s categ2 ON categ2.id = rel2.%(categ_id)s
+                             WHERE rel2.%(product_id)s = rel.%(product_id)s
+                               AND categ2.not_in_shop IS NOT TRUE
+                       )
+                )""",
+                rel=SQL.identifier(relation.relation),
+                categ=SQL.identifier(Category._table),
+                categ_id=SQL.identifier(relation.column2),
+                product_id=SQL.identifier(relation.column1),
+                id=table.id,
+            )
+
+        return Domain.custom(to_sql=to_sql)
+
     def _add_search_subdomains_hook(self, _search):
         return []
 
@@ -448,12 +481,7 @@ class WebsiteSale(payment_portal.PaymentPortal):
             max_price=max_price_tax_excluded,
             conversion_rate=conversion_rate,
             display_currency=website.currency_id,
-            extra_domain=Domain.OR([
-                Domain("public_categ_ids", "=", False),
-                # Use "any!" to bypass `empty_public_categories_rule` which is
-                # redundant in this context and costly with a lot of products.
-                Domain("public_categ_ids", "any!", Domain("not_in_shop", "=", False)),
-            ])
+            extra_domain=self._get_shop_visible_categories_domain()
             if not (category or search)
             else None,
             **post,
