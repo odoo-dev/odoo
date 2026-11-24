@@ -29,8 +29,7 @@ export class ImStatusMixin extends Record {
                 if (this.notEq(this.store.self_user) && this.notEq(this.store.self_guest)) {
                     return [false];
                 }
-                const isOnline =
-                    this.store.env.services.presence.getInactivityPeriod() < AWAY_DELAY;
+                const isOnline = this.store.presence.getInactivityPeriod() < AWAY_DELAY;
                 return [
                     (this.presence_status === "away" && isOnline) ||
                         this.presence_status === "offline",

@@ -318,7 +318,7 @@ export class ChannelMember extends Record {
         ) {
             return false;
         }
-        if (!this.store.env.services.presence.isOdooFocused()) {
+        if (!this.store.presence.isOdooFocused()) {
             return true;
         }
         const delay = ChannelMember.NEW_MESSAGE_SEPARATOR_STALE_DELAY;

@@ -11,6 +11,8 @@ import {
 
 import { Plugin, proxy, usePlugin } from "@odoo/owl";
 
+import { PresencePlugin } from "@bus/services/presence_plugin";
+
 import { location } from "@web/core/browser/browser";
 import { cookie } from "@web/core/browser/cookie";
 import { isMobileOS } from "@web/core/browser/feature_detection";
@@ -206,6 +208,8 @@ export class Store extends BaseStore {
     soundEffects;
     /** @type {ImStatusPlugin} */
     imStatus;
+    /** @type {PresencePlugin} */
+    presence;
 
     /** @param {Readonly<Record<string, any>>} [ancestors] @see useAncestors */
     discussDropdownMenuClass(ancestors) {
@@ -942,6 +946,7 @@ export class StorePlugin extends Plugin {
     orm = usePlugin(ORM);
     soundEffects = usePlugin(SoundEffectsPlugin);
     imStatus = usePlugin(ImStatusPlugin);
+    presence = usePlugin(PresencePlugin);
 
     setup() {
         /** @type {import("models").Store} */
@@ -951,6 +956,7 @@ export class StorePlugin extends Plugin {
         this.store.orm = this.orm;
         this.store.soundEffects = this.soundEffects;
         this.store.imStatus = this.imStatus;
+        this.store.presence = this.presence;
         this.store.insert(session.storeData);
         /**
          * Add a default for `self` because in livechat there could be no user and no guest yet

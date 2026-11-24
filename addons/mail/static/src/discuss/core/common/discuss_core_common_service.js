@@ -1,6 +1,8 @@
 import { ChannelMember } from "@mail/discuss/core/common/channel_member_model";
 
-import { proxy } from "@odoo/owl";
+import { PresencePlugin } from "@bus/services/presence_plugin";
+
+import { proxy, usePlugin } from "@odoo/owl";
 
 import { registry } from "@web/core/registry";
 
@@ -12,7 +14,7 @@ export class DiscussCoreCommon {
     constructor(env, services) {
         this.busService = services.bus_service;
         this.env = env;
-        this.presence = services.presence;
+        this.presence = usePlugin(PresencePlugin);
         this.store = services["mail.store"];
     }
 
@@ -142,7 +144,7 @@ export class DiscussCoreCommon {
 }
 
 export const discussCoreCommon = {
-    dependencies: ["bus_service", "mail.out_of_focus", "mail.store", "presence"],
+    dependencies: ["bus_service", "mail.out_of_focus", "mail.store"],
     /**
      * @param {import("@web/env").OdooEnv} env
      * @param {import("services").ServiceFactories} services

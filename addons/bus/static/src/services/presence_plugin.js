@@ -1,7 +1,6 @@
 import { EventBus, Plugin, signal, useListener, usePlugin } from "@odoo/owl";
 import { browser } from "@web/core/browser/browser";
 import { GlobalBusPlugin } from "@web/core/global_bus_plugin";
-import { registry } from "@web/core/registry";
 import { services } from "@web/core/services";
 
 const LOCAL_STORAGE_PREFIX = "presence";
@@ -68,22 +67,3 @@ export class PresencePlugin extends Plugin {
 }
 
 services.add(PresencePlugin);
-
-/**
- * -----------------------------------------------------------------------------
- * @todo owl3 migration
- * temporary - to remove when all use of the presence service are removed
- * -----------------------------------------------------------------------------
- */
-export const presenceService = {
-    start() {
-        const presencePlugin = usePlugin(PresencePlugin);
-        const presenceService = Object.create(presencePlugin);
-        presenceService.getLastPresence = presencePlugin.getLastPresence.bind(presencePlugin);
-        presenceService.getInactivityPeriod =
-            presencePlugin.getInactivityPeriod.bind(presencePlugin);
-        return presenceService;
-    },
-};
-
-registry.category("services").add("presence", presenceService);
