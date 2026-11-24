@@ -38,6 +38,26 @@ class AccountEdiXmlPintAe(models.AbstractModel):
         """ The transaction type flags (BTAE-02), exported as cbc:ProfileExecutionID. """
         vals = super()._init_invoice_export_values(invoice)
         vals['l10n_ae_transaction_type_code'] = vals['invoice'].l10n_ae_transaction_type_ids._get_flags_code()
+
+        # The advance payments a final invoice deducts are its paid amount (IBT-113), with a reference
+        # to their invoices (IBG-03): they are not lines of the supply, which is invoiced at its full value.
+        # https://mof.gov.ae/wp-content/uploads/2026/10/UAE-Electronic-Invoicing-Guidelines_En.pdf
+        vals['l10n_ae_down_payment_base_lines'] = []
+        vals['l10n_ae_down_payment_invoices'] = invoice.browse()
+        if self._is_document(vals, 'invoice', 'self_invoice'):
+            for base_line in vals['base_lines']:
+                record = base_line['record']
+                if not record or record._name != 'account.move.line':
+                    continue
+                down_payment_invoices = (record._get_downpayment_lines().move_id - invoice).filtered(
+                    lambda move: move.state == 'posted' and move.move_type == invoice.move_type)
+                if down_payment_invoices:
+                    vals['l10n_ae_down_payment_base_lines'].append(base_line)
+                    vals['l10n_ae_down_payment_invoices'] |= down_payment_invoices
+            vals['base_lines'] = [
+                base_line for base_line in vals['base_lines']
+                if base_line not in vals['l10n_ae_down_payment_base_lines']
+            ]
         return vals
 
     def _get_customization_id(self, process_type='billing'):
@@ -217,6 +237,11 @@ class AccountEdiXmlPintAe(models.AbstractModel):
         # EXTENDS account.edi.ubl_pint
         super()._ubl_add_billing_reference_nodes(vals)
         if not self._is_document(vals, 'credit_note', 'self_credit_note'):
+            # A final invoice references the invoices of the advance payments it deducts.
+            vals['document_node']['cac:BillingReference'] = [
+                {'cac:InvoiceDocumentReference': {'cbc:ID': {'_text': down_payment_invoice.name}}}
+                for down_payment_invoice in vals['l10n_ae_down_payment_invoices']
+            ]
             return
         credit_note = vals['invoice']
         if credit_note.l10n_ae_credit_note_reason == 'VD':
@@ -380,6 +405,7 @@ class AccountEdiXmlPintAe(models.AbstractModel):
         super()._fill_document_values_invoice(vals)
         vals['document_node']['cbc:UUID'] = {'_text': vals['invoice']._l10n_ae_get_uuid()}
         vals['document_node']['cbc:ProfileExecutionID'] = {'_text': vals['l10n_ae_transaction_type_code'] or '00000000'}
+        self._ubl_add_billing_reference_nodes(vals)
         self._ubl_add_invoice_period_nodes(vals)  # No such hook in the base on 18.0.
         self._ubl_add_ae_buyer_customer_party_node(vals)
         self._ubl_add_ae_seller_supplier_party_node(vals)
@@ -617,17 +643,29 @@ class AccountEdiXmlPintAe(models.AbstractModel):
             vals['line_node']['cbc:ID'] = {'_text': record.id}
 
     def _ubl_add_legal_monetary_total_prepaid_payable_amount_node(self, vals, in_foreign_currency=True):
-        """ The full amount due (IBT-115), the payments already reconciled are
-        not deducted as a paid amount (IBT-113).
+        """ The paid amount (IBT-113) is the advance payments the invoice deducts, VAT included, and
+        the amount due (IBT-115) what is left of its full value. The payments already reconciled are
+        not a paid amount.
         """
         # EXTENDS account.edi.ubl_pint
         super()._ubl_add_legal_monetary_total_prepaid_payable_amount_node(vals, in_foreign_currency=in_foreign_currency)
         currency = vals['currency_id'] if in_foreign_currency else vals['company_currency']
+        suffix = '_currency' if in_foreign_currency else ''
         node = vals['legal_monetary_total_node']
         payable_rounding_amount = (node['cbc:PayableRoundingAmount'] or {}).get('_text') or 0.0
-        node['cbc:PrepaidAmount'] = None
+        # The deductions are negative.
+        prepaid_amount = -sum(
+            base_line['tax_details'][f'total_excluded{suffix}']
+            + base_line['tax_details'][f'delta_total_excluded{suffix}']
+            + sum(tax_data[f'tax_amount{suffix}'] for tax_data in base_line['tax_details']['taxes_data'])
+            for base_line in vals['l10n_ae_down_payment_base_lines']
+        )
+        if vals['l10n_ae_down_payment_base_lines']:
+            node['cbc:PrepaidAmount']['_text'] = FloatFmt(prepaid_amount, min_dp=currency.decimal_places)
+        else:
+            node['cbc:PrepaidAmount'] = None
         node['cbc:PayableAmount']['_text'] = FloatFmt(
-            node['cbc:TaxInclusiveAmount']['_text'] + payable_rounding_amount,
+            node['cbc:TaxInclusiveAmount']['_text'] - prepaid_amount + payable_rounding_amount,
             min_dp=currency.decimal_places,
         )
 

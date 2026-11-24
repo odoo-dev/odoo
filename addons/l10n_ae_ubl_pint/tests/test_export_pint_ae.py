@@ -506,6 +506,27 @@ class TestExportPintAe(TestUblCiiCommon):
         self._generate_invoice_ubl_file(invoice)
         self._assert_invoice_ubl_file(invoice, 'line_discount')
 
+    def test_export_final_invoice_of_down_payment(self):
+        """ The advance payment a final invoice deducts is its paid amount, not a line: the invoice is at
+        the full value of the supply, due for what is left of it, and references the advance invoice.
+        """
+        self.ensure_installed('sale')
+        self.env.user.groups_id |= self.env.ref('sales_team.group_sale_salesman')
+        sale_order = self._create_sale_order_one_line(partner_id=self.partner_ae.id, product_id=self.product_a, price_unit=2000.0)
+        down_payment_invoice = self._create_down_payment_invoice(sale_order, 'fixed', 630.0, post=True)
+        invoice = self._create_final_invoice(sale_order, post=True)
+        self.assertRecordValues(invoice, [{'amount_untaxed': 1400.0, 'amount_total': 1470.0}])
+        self._generate_invoice_ubl_file(invoice)
+
+        self._assert_invoice_ubl_file(invoice, 'final_invoice_of_down_payment')
+
+        # The advance invoice itself is an invoice like another.
+        self._generate_invoice_ubl_file(down_payment_invoice)
+        tree = etree.fromstring(down_payment_invoice.ubl_cii_xml_id.raw)
+        self.assertIsNone(tree.find('{*}BillingReference'))
+        self.assertIsNone(tree.find('{*}LegalMonetaryTotal/{*}PrepaidAmount'))
+        self.assertEqual(tree.findtext('{*}LegalMonetaryTotal/{*}PayableAmount'), '630.00')
+
     def test_export_global_discount(self):
         """ A global discount is exported as document level allowance, not as a line with a negative price (ibr-027). """
         self.ensure_installed('sale')
