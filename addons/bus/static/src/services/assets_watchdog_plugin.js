@@ -1,6 +1,5 @@
 import { _t } from "@web/core/l10n/translation";
 import { location, browser } from "@web/core/browser/browser";
-import { registry } from "@web/core/registry";
 import { session } from "@web/session";
 import { Plugin, usePlugin } from "@odoo/owl";
 import { BusPlugin } from "@bus/services/bus_plugin";
@@ -68,15 +67,3 @@ export class AssetsWatchdogPlugin extends Plugin {
 }
 
 services.add(AssetsWatchdogPlugin);
-
-/**
- * -----------------------------------------------------------------------------
- * @todo owl3 migration
- * temporary - to remove when all use of the assetsWatchdog service are removed
- * -----------------------------------------------------------------------------
- */
-registry.category("services").add("assetsWatchdog", {
-    start() {
-        return usePlugin(AssetsWatchdogPlugin);
-    },
-});
