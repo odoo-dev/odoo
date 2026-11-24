@@ -166,8 +166,32 @@ _INVERSE_INEQUALITY = {
 """ Dict to find the inverse of inequality operators.
 Handled differently because of null values."""
 
+_SIMPLE_VALUE_TYPES = frozenset((str, int, bool, float, list, tuple))
+
+
+@functools.cache
+def _base_model():
+    from .models import BaseModel  # noqa: PLC0415
+    return BaseModel
+
+
 _TRUE_LEAF = (1, '=', 1)
 _FALSE_LEAF = (0, '=', 1)
+
+
+class _NaryBuilder(collections.deque):
+    """Children of an n-ary node being parsed (avoids intermediate nodes)."""
+    __slots__ = ('op',)
+
+    def __init__(self, op, children):
+        super().__init__(children)
+        self.op = op
+
+
+def _build(item):
+    if item.__class__ is _NaryBuilder:
+        return (DomainAnd if item.op == '&' else DomainOr).apply(item)
+    return item
 
 
 class OptimizationLevel(enum.IntEnum):
@@ -242,7 +266,8 @@ class Domain:
         # a Domain which would call implicitly __init__
         if not isinstance(arg, (list, tuple)):
             raise TypeError(f"Domain() invalid argument type for domain: {arg!r}")
-        stack: list[Domain] = []
+        # stack items are Domain or _NaryBuilder
+        stack: list = []
         try:
             for item in reversed(arg):
                 if isinstance(item, (tuple, list)) and len(item) == 3:
@@ -253,21 +278,34 @@ class Domain:
                     elif item[1] in INTERNAL_CONDITION_OPERATORS:
                         # internal operators are not accepted
                         raise ValueError(f"Domain() invalid item in domain: {item!r}")
-                    stack.append(Domain(*item))
-                elif item == DomainAnd.OPERATOR:
-                    stack.append(stack.pop() & stack.pop())
-                elif item == DomainOr.OPERATOR:
-                    stack.append(stack.pop() | stack.pop())
+                    if isinstance(item[0], str):
+                        stack.append(DomainCondition(*item).checked())
+                    else:
+                        stack.append(Domain(*item))
+                elif item == '&' or item == '|':
+                    left = stack.pop()
+                    right = stack.pop()
+                    if left.__class__ is _NaryBuilder and left.op == item:
+                        if right.__class__ is _NaryBuilder and right.op == item:
+                            left.extend(right)
+                        else:
+                            left.append(_build(right))
+                        stack.append(left)
+                    elif right.__class__ is _NaryBuilder and right.op == item:
+                        right.appendleft(_build(left))
+                        stack.append(right)
+                    else:
+                        stack.append(_NaryBuilder(item, (_build(left), _build(right))))
                 elif item == DomainNot.OPERATOR:
-                    stack.append(~stack.pop())
+                    stack.append(~_build(stack.pop()))
                 elif isinstance(item, Domain):
                     stack.append(item)
                 else:
                     raise ValueError(f"Domain() invalid item in domain: {item!r}")
             # keep the order and simplify already
             if len(stack) == 1:
-                return stack[0]
-            return Domain.AND(reversed(stack))
+                return _build(stack[0])
+            return DomainAnd.apply([_build(d) for d in reversed(stack)])
         except IndexError:
             raise ValueError(f"Domain() malformed domain {arg!r}")
 
@@ -301,12 +339,12 @@ class Domain:
     @staticmethod
     def AND(items: Iterable) -> Domain:
         """Build the conjuction of domains: (item1 AND item2 AND ...)"""
-        return DomainAnd.apply(Domain(item) for item in items)
+        return DomainAnd.apply(item if isinstance(item, Domain) else Domain(item) for item in items)
 
     @staticmethod
     def OR(items: Iterable) -> Domain:
         """Build the disjuction of domains: (item1 OR item2 OR ...)"""
-        return DomainOr.apply(Domain(item) for item in items)
+        return DomainOr.apply(item if isinstance(item, Domain) else Domain(item) for item in items)
 
     def __setattr__(self, name, value):
         raise TypeError("Domain objects are immutable")
@@ -489,7 +527,7 @@ class Domain:
             next_level = domain._opt_level.next_level
             previous, domain = domain, domain._optimize_step(model, next_level)
             # set the optimization level if necessary (unlike DomainBool, for instance)
-            if domain == previous and domain._opt_level < next_level:
+            if (domain is previous or domain == previous) and domain._opt_level < next_level:
                 object.__setattr__(domain, '_opt_level', next_level)  # noqa: PLC2801
         return domain
 
@@ -671,7 +709,10 @@ class DomainNary(Domain):
 
     def _optimize_step(self, model: BaseModel, level: OptimizationLevel) -> Domain:
         # optimize children
-        children = self._flatten(child._optimize(model, level) for child in self.children)
+        children = self._flatten([
+            child if child._opt_level >= level else child._optimize(model, level)
+            for child in self.children
+        ])
         size = len(children)
         if size > 1:
             # nary-optimizations are independent of the level, so if BASIC was
@@ -695,6 +736,12 @@ class DomainNary(Domain):
                 # if no change, skip creation of a new object
                 if len(self.children) == len(children) and all(map(operator.is_, self.children, children)):
                     return self
+                # children are optimized, sorted and cannot be merged: this
+                # is a fixed point, avoid running this step again
+                result = self.apply(children)
+                if result._opt_level < level and all(child._opt_level >= level for child in children):
+                    object.__setattr__(result, '_opt_level', level)  # noqa: PLC2801
+                return result
         return self.apply(children)
 
     def _to_sql(self, table: TableSQL) -> SQL:
@@ -864,13 +911,15 @@ class DomainCondition(Domain):
         operator = self.operator
         if operator not in CONDITION_OPERATORS:
             self._raise("Invalid operator")
+        value = self.value
+        if value.__class__ in _SIMPLE_VALUE_TYPES:
+            return self
         # check already the consistency for domain manipulation
         # these are common mistakes and optimizations, do them here to avoid recreating the domain
         # - NewId is not a value
         # - records are not accepted, use values
         # - Query and Domain values should be using a relational operator
-        from .models import BaseModel  # noqa: PLC0415
-        value = self.value
+        BaseModel = _base_model()
         if value is None:
             value = False
         elif isinstance(value, NewId):
@@ -1026,11 +1075,11 @@ class DomainCondition(Domain):
         optimizations = _OPTIMIZATIONS_FOR[level]
         for opt in optimizations.get(self.operator, ()):
             domain = opt(self, model)
-            if domain != self:
+            if domain is not self and domain != self:
                 return domain
         for opt in optimizations.get(field.type, ()):
             domain = opt(self, model)
-            if domain != self:
+            if domain is not self and domain != self:
                 return domain
 
         # final checks
@@ -1442,6 +1491,7 @@ def _optimize_in_required(condition, model):
             (field.required and field in model.env.registry.not_null_fields)
             or field.name == 'id'
         )
+        and False in value
         # only optimize if there are no NewId's
         and all(model._ids)
     ):

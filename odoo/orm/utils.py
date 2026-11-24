@@ -8,7 +8,7 @@ from collections.abc import Set as AbstractSet
 import dateutil.relativedelta
 
 from odoo.exceptions import ValidationError
-from odoo.tools import SQL, unique
+from odoo.tools import SQL, OrderedSet, unique
 from odoo.tools.misc import freehash
 
 regex_alphanumeric = re.compile(r'^[a-z0-9_]+$', re.IGNORECASE)
@@ -17,8 +17,8 @@ regex_pg_name = re.compile(r'^[a-z_][a-z0-9_$]*$', re.IGNORECASE)
 # match private methods, to prevent their remote invocation
 regex_private = re.compile(r'^(_.*|init)$')
 
-# types handled as collections
-COLLECTION_TYPES = (list, tuple, AbstractSet)
+# types handled as collections (concrete types first, to avoid slow ABC checks)
+COLLECTION_TYPES = (list, tuple, OrderedSet, set, frozenset, AbstractSet)
 # The hard-coded super-user id (a.k.a. root user, or OdooBot).
 SUPERUSER_ID = 1
 
