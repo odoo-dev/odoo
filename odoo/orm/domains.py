@@ -68,7 +68,7 @@ from odoo.tools import SQL, OrderedSet, classproperty, partition, str2bool
 from odoo.tools.date_utils import parse_date, parse_iso_date
 from .identifiers import NewId
 from .query import Query, TableSQL
-from .utils import COLLECTION_TYPES, parse_field_expr
+from .utils import COLLECTION_TYPES
 
 if typing.TYPE_CHECKING:
     from collections.abc import Callable, Collection, Iterable
@@ -166,7 +166,8 @@ _INVERSE_INEQUALITY = {
 """ Dict to find the inverse of inequality operators.
 Handled differently because of null values."""
 
-_SIMPLE_VALUE_TYPES = frozenset((str, int, bool, float, list, tuple))
+_SCALAR_VALUE_TYPES = frozenset((str, int, bool, float))
+_SIMPLE_VALUE_TYPES = _SCALAR_VALUE_TYPES | {list, tuple}
 
 
 @functools.cache
@@ -305,7 +306,10 @@ class Domain:
             # keep the order and simplify already
             if len(stack) == 1:
                 return _build(stack[0])
-            return DomainAnd.apply([_build(d) for d in reversed(stack)])
+            return DomainAnd.apply([
+                d if d.__class__ is not _NaryBuilder else _build(d)
+                for d in reversed(stack)
+            ])
         except IndexError:
             raise ValueError(f"Domain() malformed domain {arg!r}")
 
@@ -527,7 +531,7 @@ class Domain:
             next_level = domain._opt_level.next_level
             previous, domain = domain, domain._optimize_step(model, next_level)
             # set the optimization level if necessary (unlike DomainBool, for instance)
-            if (domain is previous or domain == previous) and domain._opt_level < next_level:
+            if domain._opt_level < next_level and (domain is previous or domain == previous):
                 object.__setattr__(domain, '_opt_level', next_level)  # noqa: PLC2801
         return domain
 
@@ -738,8 +742,9 @@ class DomainNary(Domain):
                     return self
                 # children are optimized, sorted and cannot be merged: this
                 # is a fixed point, avoid running this step again
-                result = self.apply(children)
-                if result._opt_level < level and all(child._opt_level >= level for child in children):
+                # (children are already flattened)
+                result = type(self)(tuple(children))
+                if all(child._opt_level >= level for child in children):
                     object.__setattr__(result, '_opt_level', level)  # noqa: PLC2801
                 return result
         return self.apply(children)
@@ -1012,14 +1017,14 @@ class DomainCondition(Domain):
 
     def __get_field(self, model: BaseModel) -> tuple[Field, str]:
         """Get the field or raise an exception"""
-        field_name, property_name = parse_field_expr(self.field_expr)
+        field_name, _, property_name = self.field_expr.partition('.')
         try:
             field = model._fields[field_name]
         except KeyError:
             self._raise("Invalid field %s.%s", model._name, field_name)
         # cache field value, with this hack to bypass immutability
         object.__setattr__(self, '_field_instance', field)
-        return field, property_name or ''
+        return field, property_name
 
     def _optimize_step(self, model: BaseModel, level: OptimizationLevel) -> Domain:
         """Optimization step.
@@ -1073,20 +1078,35 @@ class DomainCondition(Domain):
 
         # apply optimizations of the level for operator and type
         optimizations = _OPTIMIZATIONS_FOR[level]
-        for opt in optimizations.get(self.operator, ()):
-            domain = opt(self, model)
-            if domain is not self and domain != self:
+        condition = self
+        while True:
+            for opt in itertools.chain(optimizations.get(condition.operator, ()), optimizations.get(field.type, ())):
+                domain = opt(condition, model)
+                if domain is not condition and domain != condition:
+                    break
+            else:
+                break
+            # At BASIC level, a new condition on the same field (like '='
+            # rewritten as 'in') is optimized right away, instead of going
+            # through another optimization step.
+            if not (
+                level == OptimizationLevel.BASIC
+                and domain.__class__ is DomainCondition
+                and domain._opt_level < level
+                and domain.field_expr == condition.field_expr
+            ):
                 return domain
-        for opt in optimizations.get(field.type, ()):
-            domain = opt(self, model)
-            if domain is not self and domain != self:
-                return domain
+            object.__setattr__(domain, '_field_instance', field)  # noqa: PLC2801
+            condition = domain
 
         # final checks
-        if self.operator not in STANDARD_CONDITION_OPERATORS and level == OptimizationLevel.FULL:
-            self._raise("Not standard operator left")
+        if condition.operator not in STANDARD_CONDITION_OPERATORS and level == OptimizationLevel.FULL:
+            condition._raise("Not standard operator left")
 
-        return self
+        if condition is not self:
+            # fixed point reached for this level
+            object.__setattr__(condition, '_opt_level', level)  # noqa: PLC2801
+        return condition
 
     def _optimize_field_search_method(self, model: BaseModel) -> Domain:
         field = self._field(model)
@@ -1446,7 +1466,10 @@ def _operator_equal_as_in(condition, _):
     """
     value = condition.value
     operator = 'in' if condition.operator == '=' else 'not in'
-    if isinstance(value, COLLECTION_TYPES):
+    if value.__class__ in _SCALAR_VALUE_TYPES:
+        # fast path, avoid slow isinstance() checks
+        value = OrderedSet((value,))
+    elif isinstance(value, COLLECTION_TYPES):
         if not value:  # views sometimes use ('user_ids', '!=', []) to indicate the user is set
             _logger.warning("The domain condition %r should compare with False.", condition)
             value = OrderedSet([False])
@@ -1462,11 +1485,15 @@ def _operator_equal_as_in(condition, _):
 
 
 @operator_optimization(['in', 'not in'])
-def _optimize_in_set(condition, _model):
-    """Make sure the value is an OrderedSet or use 'any' operator"""
+def _optimize_in_set(condition, model):
+    """Make sure the value is an OrderedSet or use 'any' operator.
+    Remove checks against a null value for required fields.
+    """
     value = condition.value
     if isinstance(value, OrderedSet) and value:
         # very common case, just skip creation of a new Domain instance
+        if False in value:
+            return _optimize_in_required(condition, model)
         return condition
     if isinstance(value, ANY_TYPES):
         operator = 'any' if condition.operator == 'in' else 'not any'
@@ -1480,7 +1507,6 @@ def _optimize_in_set(condition, _model):
     return DomainCondition(condition.field_expr, condition.operator, OrderedSet(value))
 
 
-@operator_optimization(['in', 'not in'])
 def _optimize_in_required(condition, model):
     """Remove checks against a null value for required fields."""
     value = condition.value
@@ -1491,14 +1517,13 @@ def _optimize_in_required(condition, model):
             (field.required and field in model.env.registry.not_null_fields)
             or field.name == 'id'
         )
-        and False in value
         # only optimize if there are no NewId's
         and all(model._ids)
     ):
         value = OrderedSet(v for v in value if v is not False)
-    if len(value) == len(condition.value):
-        return condition
-    return DomainCondition(condition.field_expr, condition.operator, value)
+        if len(value) != len(condition.value):
+            return DomainCondition(condition.field_expr, condition.operator, value)
+    return condition
 
 
 @operator_optimization(['any', 'not any', 'any!', 'not any!'])
@@ -1635,9 +1660,10 @@ def _optimize_relational_name_search(condition, model):
     # Handle equality with str values
     if positive_operator != 'in' or not isinstance(value, COLLECTION_TYPES):
         return condition
-    str_values, other_values = partition(lambda v: isinstance(v, str), value)
+    str_values = [v for v in value if isinstance(v, str)]
     if not str_values:
         return condition
+    other_values = [v for v in value if not isinstance(v, str)]
     domain = DomainCondition(
         condition.field_expr,
         any_operator,
