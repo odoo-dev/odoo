@@ -264,18 +264,27 @@ class WebsiteSale(payment_portal.PaymentPortal):
         }
 
     def _shop_lookup_products(self, options, post, search, website):
-        # No limit because attributes are obtained from complete product list
+        # Only the products of the current page when the options contain `shop_limit`, see
+        # `_shop_can_paginate_in_db`. The count is always the total number of products.
         product_count, details, fuzzy_search_term = website._search_with_fuzzy(
             "product_template",
             search,
-            offset=0,
-            limit=None,
+            offset=options.get("shop_offset", 0),
+            limit=options.get("shop_limit"),
             order=self._get_search_order(post),
             options=options,
         )
         search_result = details[0].get("results", self.env["product.template"])
 
         return fuzzy_search_term, product_count, search_result
+
+    def _shop_can_paginate_in_db(self, options):  # noqa: PLR6301, ARG002
+        """Whether `_shop_lookup_products` may only fetch the products of the current page.
+
+        Override to return False when the found products are filtered in Python, as the
+        whole list of products is then needed to compute the count and the pages.
+        """
+        return True
 
     def _shop_get_query_url_kwargs(
         self,
@@ -486,6 +495,25 @@ class WebsiteSale(payment_portal.PaymentPortal):
             else None,
             **post,
         )
+        # Dynamic ribbon filters ("On sale" / "In stock")
+        on_sale_active = on_sale == "1"
+        in_stock_active = in_stock == "1"
+        auto_assign_ribbons = self.env["product.ribbon"].sudo().search([("assign", "!=", "manual")])
+        ribbon_assign_values = set(auto_assign_ribbons.mapped("assign"))
+
+        # Fetch the products of the current page only, as fetching and sorting a whole catalogue
+        # is costly. Unless they are filtered in Python below (the ribbons), or matched with a
+        # search term: matching the term is what costs, and counting would match it twice.
+        paginate_in_db = (
+            not search
+            and not on_sale_active
+            and not in_stock_active
+            and not ribbon_assign_values & {"sale", "out_of_stock"}
+            and self._shop_can_paginate_in_db(options)
+        )
+        if paginate_in_db:
+            requested_page = max(1, int(page) if str(page).isdigit() else 1)
+            options.update(shop_offset=(requested_page - 1) * ppg, shop_limit=ppg)
         fuzzy_search_term, product_count, search_product = self._shop_lookup_products(
             options, post, search, website
         )
@@ -565,12 +593,6 @@ class WebsiteSale(payment_portal.PaymentPortal):
             filters_query = request.env["product.template"]._search(
                 Domain.AND([filters_domain, price_domain])
             )
-
-        # Dynamic ribbon filters ("On sale" / "In stock")
-        on_sale_active = on_sale == "1"
-        in_stock_active = in_stock == "1"
-        auto_assign_ribbons = self.env["product.ribbon"].sudo().search([("assign", "!=", "manual")])
-        ribbon_assign_values = set(auto_assign_ribbons.mapped("assign"))
 
         on_sale_ids = set()
         sold_out_ids = set()
@@ -665,7 +687,14 @@ class WebsiteSale(payment_portal.PaymentPortal):
             url=url, total=product_count, page=page, step=ppg, scope=5, url_args=post
         )
         offset = pager["offset"]
-        products = search_product[offset : offset + ppg].with_prefetch()
+        if not paginate_in_db:
+            products = search_product[offset : offset + ppg].with_prefetch()
+        elif offset == options["shop_offset"]:
+            products = search_product
+        else:
+            # the requested page is beyond the last one, the pager shows the last one
+            options["shop_offset"] = offset
+            products = self._shop_lookup_products(options, post, search, website)[2]
         products.fetch()
 
         # map each product to its variant, and prefetch the variants

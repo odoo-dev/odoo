@@ -981,7 +981,11 @@ class WebsiteSearchableMixin(models.AbstractModel):
             limit=limit,
             order=search_detail.get('order', order)
         )
-        count = model.search_count(domain) if limit and limit == len(results) else len(results)
+        if not limit or (len(results) < limit and (results or not offset)):
+            # all the results from offset on were found
+            count = (offset or 0) + len(results)
+        else:
+            count = model.search_count(domain)
         return results, count
 
     def _search_render_results(self, fetch_fields, mapping, icon, limit):

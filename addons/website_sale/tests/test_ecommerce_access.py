@@ -96,6 +96,23 @@ class TestEcommerceAccess(HttpCaseWithUserDemo, WebsiteSaleCommon):
         html = self.url_open("/shop?search=Hidden Nested Product").text
         self.assertIn("Hidden Nested Product", html)
 
+    def test_shop_pages(self):
+        self.env["product.template"].search([("website_published", "=", True)]).website_published = False
+        self.website.shop_ppg = 2
+        for name in "ABCDE":
+            self._create_product(name=f"Pager Product {name}")
+
+        def shown_products(url):
+            html = self.url_open(url).text
+            return [name for name in "ABCDE" if f"Pager Product {name}" in html]
+
+        self.assertEqual(shown_products("/shop?order=name+asc"), ["A", "B"])
+        self.assertEqual(shown_products("/shop/page/2?order=name+asc"), ["C", "D"])
+        self.assertEqual(shown_products("/shop/page/3?order=name+asc"), ["E"])
+        # beyond the last page, the last page is shown
+        self.assertEqual(shown_products("/shop/page/9?order=name+asc"), ["E"])
+        self.assertEqual(shown_products("/shop?order=name+desc"), ["D", "E"])
+
     def test_ecommerce_access_logged_user(self):
         # By default, everyone has access to the ecommerce
         self.assertTrue(self.website.has_ecommerce_access())
