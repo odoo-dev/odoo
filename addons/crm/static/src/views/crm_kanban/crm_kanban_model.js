@@ -1,10 +1,12 @@
+import { usePlugin } from "@odoo/owl";
 import { checkRainbowmanMessage } from "@crm/views/check_rainbowman_message";
+import { EffectPlugin } from "@web/core/effects/effect_plugin";
 import { RelationalModel } from "@web/model/relational_model/relational_model";
 
 export class CrmKanbanModel extends RelationalModel {
-    setup(params, { effect }) {
+    setup() {
         super.setup(...arguments);
-        this.effect = effect;
+        this.effect = usePlugin(EffectPlugin);
     }
 }
 
@@ -32,4 +34,3 @@ export class CrmKanbanDynamicGroupList extends RelationalModel.DynamicGroupList 
 }
 
 CrmKanbanModel.DynamicGroupList = CrmKanbanDynamicGroupList;
-CrmKanbanModel.services = [...RelationalModel.services, "effect"];

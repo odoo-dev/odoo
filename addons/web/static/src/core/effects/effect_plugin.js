@@ -87,18 +87,3 @@ export class EffectPlugin extends Plugin {
 }
 
 services.add(EffectPlugin);
-
-/**
- * -----------------------------------------------------------------------------
- * @todo owl3 migration
- * temporary - to remove when all use of the effect service are removed
- * -----------------------------------------------------------------------------
- */
-export const effectService = {
-    dependencies: ["overlay"],
-    start() {
-        return usePlugin(EffectPlugin);
-    },
-};
-
-registry.category("services").add("effect", effectService);

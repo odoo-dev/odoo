@@ -343,7 +343,7 @@ services.add(TourPlugin);
  */
 export const tourService = {
     // localization dependency to make sure translations used by tours are loaded
-    dependencies: ["orm", "effect", "overlay", "localization"],
+    dependencies: ["orm", "overlay", "localization"],
     start() {
         const service = usePlugin(TourPlugin);
         odoo.startTour = service.startTour.bind(service);

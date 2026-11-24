@@ -1,4 +1,6 @@
+import { usePlugin } from "@odoo/owl";
 import { checkRainbowmanMessage } from "@crm/views/check_rainbowman_message";
+import { EffectPlugin } from "@web/core/effects/effect_plugin";
 import { registry } from "@web/core/registry";
 import { formView } from "@web/views/form/form_view";
 
@@ -56,11 +58,10 @@ class CrmFormRecord extends formView.Model.Record {
 
 class CrmFormModel extends formView.Model {
     static Record = CrmFormRecord;
-    static services = [...formView.Model.services, "effect"];
 
-    setup(params, services) {
+    setup() {
         super.setup(...arguments);
-        this.effect = services.effect;
+        this.effect = usePlugin(EffectPlugin);
     }
 }
 

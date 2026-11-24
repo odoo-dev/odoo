@@ -4,7 +4,6 @@ declare module "services" {
     import { commandService } from "@web/core/commands/command_service";
     import { datetimePickerService } from "@web/core/datetime/datetimepicker_service";
     import { dialogService } from "@web/core/dialog/dialog_plugin";
-    import { effectService } from "@web/core/effects/effect_plugin";
     import { fieldService } from "@web/core/field_service";
     import { fileUploadService } from "@web/core/file_upload/file_upload_service";
     import { hotkeyService } from "@web/core/hotkeys/hotkey_plugin";
@@ -36,7 +35,6 @@ declare module "services" {
         command: typeof commandService;
         datetime_picker: typeof datetimePickerService;
         dialog: typeof dialogService;
-        effect: typeof effectService;
         field: typeof fieldService;
         file_upload: typeof fileUploadService;
         hotkey: typeof hotkeyService;

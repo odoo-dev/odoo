@@ -12,6 +12,7 @@ import {
     webModels,
 } from "@web/../tests/web_test_helpers";
 
+import { EffectPlugin } from "@web/core/effects/effect_plugin";
 import { user } from "@web/core/user";
 import { WebClient } from "@web/webclient/webclient";
 
@@ -86,14 +87,14 @@ test("rainbowman integrated to webClient", async () => {
     await getService("action").doAction(1);
     expect(".o_kanban_view").toHaveCount(1);
     expect(".o_reward").toHaveCount(0);
-    getService("effect").add({ type: "rainbow_man", message: "", fadeout: "no" });
+    getService(EffectPlugin).add({ type: "rainbow_man", message: "", fadeout: "no" });
     await animationFrame();
     expect(".o_reward").toHaveCount(1);
     expect(".o_kanban_view").toHaveCount(1);
     await contains(".o_reward").click();
     expect(".o_reward").toHaveCount(0);
     expect(".o_kanban_view").toHaveCount(1);
-    getService("effect").add({ type: "rainbow_man", message: "", fadeout: "no" });
+    getService(EffectPlugin).add({ type: "rainbow_man", message: "", fadeout: "no" });
     await animationFrame();
     expect(".o_reward").toHaveCount(1);
     expect(".o_kanban_view").toHaveCount(1);
