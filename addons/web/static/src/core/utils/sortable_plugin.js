@@ -1,7 +1,6 @@
-import { registry } from "../registry";
 import { useSortable } from "@web/core/utils/sortable";
 import { throttleForAnimation } from "@web/core/utils/timing";
-import { Plugin, proxy, usePlugin } from "@odoo/owl";
+import { Plugin, proxy } from "@odoo/owl";
 import { services } from "@web/core/services";
 
 /**
@@ -91,17 +90,3 @@ export class SortablePlugin extends Plugin {
 }
 
 services.add(SortablePlugin);
-
-/**
- * -----------------------------------------------------------------------------
- * @todo owl3 migration
- * temporary - to remove when all use of the sortable service are removed
- * -----------------------------------------------------------------------------
- */
-export const sortableService = {
-    start() {
-        return usePlugin(SortablePlugin);
-    },
-};
-
-registry.category("services").add("sortable", sortableService);

@@ -1,5 +1,7 @@
+import { usePlugin } from "@odoo/owl";
 import { Interaction } from "@web/public/interaction";
 import { registry } from "@web/core/registry";
+import { SortablePlugin } from "@web/core/utils/sortable_plugin";
 
 export class WebsiteSlidesSort extends Interaction {
     static selector = ".o_wslides_slides_list";
@@ -18,7 +20,7 @@ export class WebsiteSlidesSort extends Interaction {
     setup() {
         super.setup();
         this.orm = this.services.orm;
-        this.sortable = this.services.sortable;
+        this.sortable = usePlugin(SortablePlugin);
         this.bindedSortable = [];
         this.bindSortable();
     }

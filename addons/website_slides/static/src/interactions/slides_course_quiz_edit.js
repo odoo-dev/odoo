@@ -4,7 +4,8 @@ import { registry } from "@web/core/registry";
 import { insertHtmlContent } from "@website_slides/js/utils";
 import { WebsiteSlidesCourseQuizQuestionForm } from "@website_slides/js/public/components/slides_course_quiz_question_form/slides_course_quiz_question_form";
 import { _t } from "@web/core/l10n/translation";
-import { markup } from "@odoo/owl";
+import { SortablePlugin } from "@web/core/utils/sortable_plugin";
+import { markup, usePlugin } from "@odoo/owl";
 
 export class WebsiteSlidesQuizEdit extends Interaction {
     static selector = ".o_wslides_js_lesson_quiz";
@@ -31,7 +32,7 @@ export class WebsiteSlidesQuizEdit extends Interaction {
     setup() {
         this.dialog = this.services.dialog;
         this.orm = this.services.orm;
-        this.sortable = this.services.sortable;
+        this.sortable = usePlugin(SortablePlugin);
 
         this.slidesService = this.services.website_slides;
         this.bus = this.slidesService.bus;

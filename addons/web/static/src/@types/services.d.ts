@@ -15,7 +15,6 @@ declare module "services" {
     import { popoverService } from "@web/core/popover/popover_plugin";
     import { tooltipService } from "@web/core/tooltip/tooltip_plugin";
     import { uiService } from "@web/core/ui/ui_plugin";
-    import { sortableService } from "@web/core/utils/sortable_plugin";
     import { publicInteractionService } from "@web/public/interaction_service";
     import { viewService } from "@web/views/view_plugin";
     import { actionService } from "@web/webclient/actions/action_plugin";
@@ -46,7 +45,6 @@ declare module "services" {
         popover: typeof popoverService;
         profiling: typeof profilingService;
         share_target: typeof shareTargetService;
-        sortable: typeof sortableService;
         tooltip: typeof tooltipService;
         ui: typeof uiService;
         view: typeof viewService;
