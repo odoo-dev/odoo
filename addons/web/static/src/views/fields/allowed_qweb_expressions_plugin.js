@@ -1,5 +1,4 @@
 import { Plugin, usePlugin } from "@odoo/owl";
-import { registry } from "@web/core/registry";
 import { services } from "@web/core/services";
 import { ORM } from "@web/core/orm_plugin";
 
@@ -21,18 +20,3 @@ export class AllowedQwebExpressionsPlugin extends Plugin {
 }
 
 services.add(AllowedQwebExpressionsPlugin);
-
-/**
- * -----------------------------------------------------------------------------
- * @todo owl3 migration
- * temporary - to remove when all use of the allowed_qweb_expressions service are removed
- * -----------------------------------------------------------------------------
- */
-export const allowedQwebExpressionsService = {
-    dependencies: ["orm"],
-    start() {
-        const plugin = usePlugin(AllowedQwebExpressionsPlugin);
-        return plugin.getAllowedQwebExpressions.bind(plugin);
-    },
-};
-registry.category("services").add("allowed_qweb_expressions", allowedQwebExpressionsService);
