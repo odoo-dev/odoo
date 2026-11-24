@@ -1,5 +1,4 @@
 import { rpcBus } from "@web/core/network/rpc";
-import { registry } from "@web/core/registry";
 import { currencies } from "@web/core/currency";
 import { ORM, UPDATE_METHODS } from "@web/core/orm_plugin";
 import { Plugin, useListener, usePlugin } from "@odoo/owl";
@@ -31,16 +30,3 @@ export class CurrencyPlugin extends Plugin {
 }
 
 services.add(CurrencyPlugin);
-
-/**
- * -----------------------------------------------------------------------------
- * @todo owl3 migration
- * temporary - to remove when all use of the currency service are removed
- * -----------------------------------------------------------------------------
- */
-registry.category("services").add("currency", {
-    dependencies: ["orm"],
-    start() {
-        return usePlugin(CurrencyPlugin);
-    },
-});
