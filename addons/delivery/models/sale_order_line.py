@@ -16,6 +16,54 @@ class SaleOrderLine(models.Model):
     def _can_be_invoiced_alone(self):
         return super()._can_be_invoiced_alone() and not self.is_delivery
 
+    def _is_productless_delivery(self):
+        self.ensure_one()
+        return self.is_delivery and not self.product_id and not self.display_type
+
+    def _compute_invoice_policy(self):
+        """Override of `sale` to always invoice delivery lines without product on the ordered
+        quantities, as delivery costs are never "delivered"."""
+        productless_delivery_lines = self.filtered(lambda line: line._is_productless_delivery())
+        super(SaleOrderLine, self - productless_delivery_lines)._compute_invoice_policy()
+        productless_delivery_lines.invoice_policy = "order"
+
+    def _search_invoice_policy(self, operator, value):
+        domain = super()._search_invoice_policy(operator, value)
+        if operator not in ("in", "not in"):
+            return domain
+        productless_delivery_domain = (
+            Domain("is_delivery", "=", True)
+            & Domain("product_id", "=", False)
+            & Domain("display_type", "=", False)
+        )
+        if ("order" in value) == (operator == "in"):
+            return domain | productless_delivery_domain
+        return domain & ~productless_delivery_domain
+
+    def _compute_tax_ids(self):
+        """Override of `sale` to compute the taxes of delivery lines without product from their
+        delivery method."""
+        delivery_lines = self.filtered(
+            lambda line: line._is_productless_delivery() and line.order_id.carrier_id
+        )
+        super(SaleOrderLine, self - delivery_lines)._compute_tax_ids()
+        for line in delivery_lines:
+            order = line.order_id
+            line.tax_ids = order.carrier_id._get_taxes(
+                line.company_id, fiscal_position=order.partner_id and order.fiscal_position_id
+            )
+
+    def _prepare_invoice_line(self, **optional_values):
+        """Override of `sale` to use the income account of the delivery method on the invoice
+        lines of delivery lines without product."""
+        res = super()._prepare_invoice_line(**optional_values)
+        carrier = self.order_id.carrier_id
+        if self._is_productless_delivery() and carrier and "account_id" not in optional_values:
+            account = carrier._get_accounts(self.company_id)["income"]
+            if account:
+                res["account_id"] = self.order_id.fiscal_position_id.map_account(account).id
+        return res
+
     @api.depends("product_id", "product_uom_id", "product_uom_qty")
     def _compute_product_qty(self):
         for line in self:

@@ -59,7 +59,6 @@ class TestClickAndCollectFlow(HttpCase, ClickAndCollectCommon):
             "name": "Test Carrier",
             "allow_cash_on_delivery": True,
             "delivery_type": "fixed",
-            "product_id": self.storable_product.id,
         })
         carrier.delivery_type = "in_store"
         self.assertEqual(carrier.allow_cash_on_delivery, False)

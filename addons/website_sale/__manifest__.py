@@ -6,7 +6,7 @@
     "sequence": 50,
     "summary": "Sell your products online",
     "website": "https://www.odoo.com/app/ecommerce",
-    "version": "1.1",
+    "version": "1.2",
     "depends": [
         "website",
         "sale",

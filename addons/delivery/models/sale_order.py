@@ -83,7 +83,7 @@ class SaleOrder(models.Model):
             delivery_lines_text = "\n".join([
                 "- %s: %s x %s"
                 % (
-                    line.product_id.with_context(display_default_code=False).display_name,
+                    line.name,
                     line.qty_invoiced,
                     line.price_unit,
                 )
@@ -92,7 +92,7 @@ class SaleOrder(models.Model):
             raise UserError(
                 self.env._(
                     "You can not update the shipping costs on an order where it was already"
-                    " invoiced!\n\nThe following delivery lines (product, invoiced quantity and"
+                    " invoiced!\n\nThe following delivery lines (description, invoiced quantity and"
                     " price) have already been processed:\n\n%s",
                     delivery_lines_text,
                 )
@@ -162,25 +162,18 @@ class SaleOrder(models.Model):
             carrier = carrier.with_context(lang=self.partner_id.lang)
 
         # Apply fiscal position
-        taxes = carrier.product_id.taxes_id._filter_taxes_by_company(self.company_id)
-        taxes_ids = taxes.ids
-        if self.partner_id and self.fiscal_position_id:
-            taxes_ids = self.fiscal_position_id.map_tax(taxes).ids
+        taxes = carrier._get_taxes(
+            self.company_id, fiscal_position=self.partner_id and self.fiscal_position_id
+        )
 
         # Create the sales order line
-
-        if carrier.product_id.description_sale:
-            so_description = "%s: %s" % (carrier.name, carrier.product_id.description_sale)
-        else:
-            so_description = carrier.name
         values = {
             "order_id": self.id,
-            "name": so_description,
+            "name": carrier.name,
             "price_unit": price_unit,
             "product_uom_qty": 1,
-            "product_id": carrier.product_id.id,
-            "product_uom_id": carrier.product_id.uom_id.id,
-            "tax_ids": [(6, 0, taxes_ids)],
+            "product_uom_id": self.env["product.template"]._default_uom_id().id,
+            "tax_ids": [Command.set(taxes.ids)],
             "is_delivery": True,
         }
         if carrier.free_over and self.currency_id.is_zero(price_unit):

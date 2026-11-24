@@ -132,18 +132,31 @@ class PoSSaleSyncCommon:
             down_payment_lines, partner=sale_order.partner_id, to_invoice=to_invoice)
 
     def _settle_in_pos(self, sale_order):
-        pos_order_id = self._sync_paid_pos_order(
-            [{
-                'product': line.product_id,
+        """Sync the paid PoS order settling SALE_ORDER, as the frontend does.
+
+        Sections and notes are not sent as PoS lines, and the lines without a
+        product (e.g. delivery lines) use the default product of the PoS config.
+        """
+        config = self.main_pos_config
+        lines = []
+        for line in sale_order.order_line:
+            if line.display_type:
+                continue
+            if line.is_downpayment:
+                product = config.down_payment_product_id
+            else:
+                product = line.product_id or config.default_product_id
+            lines.append({
+                'product': product,
                 'qty': line.product_uom_qty,
                 'price_unit': line.price_unit,
+                'taxes': line.tax_ids,
                 'extra_values': {
                     'sale_order_line_id': line.id,
                     'sale_order_origin_id': sale_order.id,
                 },
-            } for line in sale_order.order_line],
-            partner=sale_order.partner_id,
-        )
+            })
+        pos_order_id = self._sync_paid_pos_order(lines, partner=sale_order.partner_id)
         return self.env['pos.order'].browse(pos_order_id)
 
 

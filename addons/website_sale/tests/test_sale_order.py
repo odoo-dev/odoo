@@ -21,21 +21,17 @@ class TestSaleOrder(WebsiteSaleCommon):
         company_1 = self.env["res.company"].sudo().create({"name": "Test Company 1"})
         company_2 = self.env["res.company"].sudo().create({"name": "Test Company 2"})
         self.env.user.sudo().company_ids |= company_1 | company_2
-        product_delivery_1, product_delivery_2 = self.env["product.product"].create([
-            {"name": "Delivery Product 1", "type": "service", "company_id": company_1.id},
-            {"name": "Delivery Product 2", "type": "service", "company_id": company_2.id},
-        ])
         delivery_1, delivery_2 = self.env["delivery.carrier"].create([
             {
                 "name": "Delivery 1",
                 "delivery_type": "fixed",
-                "product_id": product_delivery_1.id,
+                "company_id": company_1.id,
                 "is_published": True,
             },
             {
                 "name": "Delivery 2",
                 "delivery_type": "fixed",
-                "product_id": product_delivery_2.id,
+                "company_id": company_2.id,
                 "is_published": True,
             },
         ])

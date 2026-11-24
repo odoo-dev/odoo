@@ -271,17 +271,14 @@ class Delivery(WebsiteSale):
             order.with_context(express_checkout_partial_delivery_address=is_express_checkout_flow)
         )
         if rate.get("success"):
-            tax_ids = delivery_method.product_id.taxes_id.filtered(
-                lambda t: t.company_id == order.company_id
+            tax_ids = delivery_method._get_taxes(
+                order.company_id, fiscal_position=order.fiscal_position_id
             )
             if tax_ids:
-                fpos = order.fiscal_position_id
-                tax_ids = fpos.map_tax(tax_ids)
                 taxes = tax_ids.compute_all(
                     rate["price"],
                     currency=order.currency_id,
                     quantity=1.0,
-                    product=delivery_method.product_id,
                     partner=order.partner_shipping_id,
                 )
                 if (

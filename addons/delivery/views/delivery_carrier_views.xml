@@ -15,6 +15,9 @@
                 <field name="max_volume" optional="hide"/>
                 <field name="must_have_tag_ids" widget="many2many_tags" optional="hide"/>
                 <field name="excluded_tag_ids" widget="many2many_tags" optional="hide"/>
+                <field name="tax_ids" widget="many2many_tax_tags" optional="hide"/>
+                <field name="property_account_income_id" optional="hide" groups="account.group_account_readonly"/>
+                <field name="property_account_expense_id" optional="hide" groups="account.group_account_readonly"/>
             </list>
         </field>
     </record>
@@ -143,12 +146,9 @@
                                         invisible="not free_over"
                                         required="free_over"/>
                             </div>
-                            <field name="product_id" context="{
-                                'default_type': 'service',
-                                'default_sale_ok': False,
-                                'default_purchase_ok': False,
-                                'default_invoice_policy': 'order',
-                            }"/>
+                            <field name="tax_ids"
+                                    widget="many2many_tax_tags"
+                                    context="{'search_default_domestictax': True, 'append_fields': ['company_id']}"/>
                             <field name="tracking_url" placeholder="i.e. https://ekartlogistics.com/shipmenttrack/&lt;shipmenttrackingnumber&gt;" invisible="delivery_type not in ('fixed', 'base_on_rule')"/>
                             <field name="invoice_policy" widget="radio" invisible="delivery_type in ('fixed', 'base_on_rule') or integration_level == 'rate'"/>
                             <field name="supports_shipping_insurance" invisible="1"/> <!-- drives invisible of the label, the block -->
@@ -212,6 +212,14 @@
                         </page>
                         <page string="Description" name="description">
                             <field name="carrier_description" placeholder="Delivery method details to be included at bottom sales orders and their confirmation emails. E.g. Instructions for customers to follow."/>
+                        </page>
+                        <page string="Accounting" name="accounting" groups="account.group_account_readonly">
+                            <group name="accounting">
+                                <group name="accounts" string="Cost and Revenue">
+                                    <field name="property_account_income_id" placeholder="From Company"/>
+                                    <field name="property_account_expense_id" placeholder="From Company"/>
+                                </group>
+                            </group>
                         </page>
                     </notebook>
                 </sheet>

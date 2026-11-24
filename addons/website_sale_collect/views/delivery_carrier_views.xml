@@ -12,6 +12,9 @@
             <field name="integration_level" position="attributes">
                 <attribute name="invisible" add="delivery_type == 'in_store'" separator=" or "/>
             </field>
+            <field name="fixed_price" position="attributes">
+                <attribute name="invisible" add="delivery_type != 'in_store'" separator=" and "/>
+            </field>
             <field name="invoice_policy" position="attributes">
                 <attribute name="invisible" add="delivery_type == 'in_store'" separator=" or "/>
             </field>

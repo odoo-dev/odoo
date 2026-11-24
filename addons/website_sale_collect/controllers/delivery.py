@@ -19,7 +19,7 @@ class InStoreDelivery(LocationSelector):
                 return {}
             order_sudo = request.cart
             if order_sudo and order_sudo.carrier_id.delivery_type != "in_store":
-                order_sudo.set_delivery_line(in_store_dm, in_store_dm.product_id.list_price)
+                order_sudo.set_delivery_line(in_store_dm, in_store_dm.fixed_price)
             else:  # No cart yet: get the locations of in-store delivery method directly
                 return in_store_dm._get_pickup_locations(**kwargs)
         return super().website_sale_get_pickup_locations(**kwargs)
@@ -44,7 +44,7 @@ class InStoreDelivery(LocationSelector):
             return
         if order_sudo.carrier_id.delivery_type != "in_store":
             in_store_dm = self.env.website.sudo().in_store_dm_id
-            order_sudo.set_delivery_line(in_store_dm, in_store_dm.product_id.list_price)
+            order_sudo.set_delivery_line(in_store_dm, in_store_dm.fixed_price)
         order_sudo.set_pickup_location(pickup_location_data)
 
     @route()

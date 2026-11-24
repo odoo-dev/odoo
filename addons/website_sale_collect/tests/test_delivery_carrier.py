@@ -37,7 +37,6 @@ class TestDeliveryCarrier(ClickAndCollectCommon, WebsiteSaleStockCommon):
         new_in_store_carrier = self.env["delivery.carrier"].create({
             "name": "Test Carrier",
             "delivery_type": "in_store",
-            "product_id": self.dm_product.id,
         })
         self.assertEqual(new_in_store_carrier.integration_level, "rate")
 

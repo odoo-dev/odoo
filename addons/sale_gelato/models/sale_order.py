@@ -104,8 +104,10 @@ class SaleOrder(models.Model):
 
         :return: None
         """
-        delivery_line = self.order_line.filtered(
-            lambda line: line.is_delivery and line.product_id.default_code in ("normal", "express")
+        shipment_method = (
+            self.carrier_id.gelato_shipping_service_type
+            if self.carrier_id.delivery_type == "gelato" and self.order_line.filtered("is_delivery")
+            else False
         )
         payload = {
             "orderType": "draft",  # The order is confirmed/deleted later, see @post_commit hooks.
@@ -113,7 +115,7 @@ class SaleOrder(models.Model):
             "customerReferenceId": f"Odoo Partner #{self.partner_id.id}",
             "currency": self.currency_id.name,
             "items": self._gelato_prepare_items_payload(),
-            "shipmentMethodUid": delivery_line.product_id.default_code or "cheapest",
+            "shipmentMethodUid": shipment_method or "cheapest",
             "shippingAddress": self.partner_shipping_id._gelato_prepare_address_payload(),
         }
         try:

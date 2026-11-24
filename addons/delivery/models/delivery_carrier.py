@@ -10,6 +10,8 @@ from odoo.exceptions import UserError
 from odoo.modules.registry import Registry
 from odoo.tools.safe_eval import expr_eval
 
+from odoo.addons.account.models.product import ACCOUNT_DOMAIN
+
 
 class DeliveryCarrier(models.Model):
     _name = "delivery.carrier"
@@ -60,21 +62,50 @@ class DeliveryCarrier(models.Model):
     debug_logging = fields.Boolean(
         string="Debug logging", help="Log requests in order to ease debugging"
     )
-    company_id = fields.Many2one(
-        comodel_name="res.company", related="product_id.company_id", store=True, readonly=False
-    )
-    product_id = fields.Many2one(
-        string="Delivery Product",
-        comodel_name="product.product",
-        ondelete="restrict",
-        required=True,
-    )
+    company_id = fields.Many2one(comodel_name="res.company")
     tracking_url = fields.Char(
         string="Tracking Link",
         help="This option adds a link for the customer in the portal to track their package easily."
         " Use <shipmenttrackingnumber> as a placeholder in your URL.",
     )
-    currency_id = fields.Many2one(related="product_id.currency_id")
+    currency_id = fields.Many2one(comodel_name="res.currency", compute="_compute_currency_id")
+
+    # Accounting
+    tax_ids = fields.Many2many(
+        string="Taxes",
+        help="Default taxes applied on the delivery line of sales orders.",
+        comodel_name="account.tax",
+        relation="delivery_carrier_account_tax_rel",
+        column1="carrier_id",
+        column2="tax_id",
+        domain=[("type_tax_use", "=", "sale")],
+        default=lambda self: (
+            self.env.companies.account_sale_tax_id
+            or self.env.companies.root_id.sudo().account_sale_tax_id
+        ),
+    )
+    property_account_income_id = fields.Many2one(
+        string="Income Account",
+        help="Account used on the invoice lines of the delivery costs. Keep this field empty to"
+        " use the default income account of the company.",
+        comodel_name="account.account",
+        company_dependent=True,
+        copy=True,
+        domain=ACCOUNT_DOMAIN,
+        ondelete="restrict",
+        default=lambda self: self.env.company.income_account_id,
+    )
+    property_account_expense_id = fields.Many2one(
+        string="Expense Account",
+        help="Account used to record the delivery costs. Keep this field empty to use the default"
+        " expense account of the company.",
+        comodel_name="account.account",
+        company_dependent=True,
+        copy=True,
+        domain=ACCOUNT_DOMAIN,
+        ondelete="restrict",
+        default=lambda self: self.env.company.expense_account_id,
+    )
 
     invoice_policy = fields.Selection(
         string="Invoicing Policy",
@@ -214,6 +245,12 @@ class DeliveryCarrier(models.Model):
     def _compute_prod_environment(self):
         for carrier in self:
             carrier.prod_environment = not carrier.support_test_environment
+
+    @api.depends("company_id")
+    def _compute_currency_id(self):
+        main_company = self.env["res.company"]._get_main_company()
+        for carrier in self:
+            carrier.currency_id = carrier.company_id.sudo().currency_id or main_company.currency_id
 
     def _compute_weight_uom_name(self):
         self.weight_uom_name = self.env[
@@ -396,6 +433,38 @@ class DeliveryCarrier(models.Model):
         self.ensure_one()
         return self.delivery_type
 
+    def _get_accounts(self, company):
+        """Return the income and expense accounts to use for this delivery method.
+
+        The accounts set on the delivery method for the given company take precedence over the
+        default income and expense accounts of the company.
+
+        :param company: The company for which to get the accounts, as a `res.company` record.
+        :return: The accounts, as a dict with the keys `income` and `expense`.
+        :rtype: dict
+        """
+        self.ensure_one()
+        carrier = self.with_company(company)
+        return {
+            "income": carrier.property_account_income_id or company.income_account_id,
+            "expense": carrier.property_account_expense_id or company.expense_account_id,
+        }
+
+    def _get_taxes(self, company, fiscal_position=None):
+        """Return the taxes of this delivery method applicable for the given company.
+
+        :param company: The company to filter the taxes on, as a `res.company` record.
+        :param fiscal_position: The fiscal position to map the taxes with, if any, as an
+                                `account.fiscal.position` record.
+        :return: The taxes.
+        :rtype: account.tax
+        """
+        self.ensure_one()
+        taxes = self.tax_ids._filter_taxes_by_company(company)
+        if fiscal_position:
+            taxes = fiscal_position.map_tax(taxes)
+        return taxes
+
     def _apply_margins(self, price, order=False):
         self.ensure_one()
         if self.delivery_type == "fixed":
@@ -431,14 +500,10 @@ class DeliveryCarrier(models.Model):
             res = getattr(self, shipment_method_name)(order)
             # apply fiscal position
             company = self.company_id or order.company_id or self.env.company
-            res["price"] = self.product_id._get_tax_included_unit_price(
-                company,
-                company.currency_id,
-                order.date_order,
-                "sale",
+            res["price"] = self.env["product.product"]._get_tax_included_unit_price_from_price(
+                res["price"],
+                self._get_taxes(company),
                 fiscal_position=order.fiscal_position_id,
-                product_price_unit=res["price"],
-                product_currency=company.currency_id,
             )
             # apply margin on computed price
             res["price"] = order.currency_id.round(self._apply_margins(res["price"], order))
@@ -499,21 +564,7 @@ class DeliveryCarrier(models.Model):
     # Fixed price shipping, aka a very simple provider #
     # ------------------------------------------------ #
 
-    fixed_price = fields.Float(
-        string="Fixed Price",
-        compute="_compute_fixed_price",
-        inverse="_set_product_fixed_price",
-        store=True,
-    )
-
-    @api.depends("product_id.list_price", "product_id.product_tmpl_id.list_price")
-    def _compute_fixed_price(self):
-        for carrier in self:
-            carrier.fixed_price = carrier.product_id.list_price
-
-    def _set_product_fixed_price(self):
-        for carrier in self:
-            carrier.product_id.list_price = carrier.fixed_price
+    fixed_price = fields.Float(string="Fixed Price")
 
     def fixed_rate_shipment(self, order):
         carrier = self._match_address(order.partner_shipping_id)
@@ -526,7 +577,7 @@ class DeliveryCarrier(models.Model):
                 ),
                 "warning_message": False,
             }
-        price = order.pricelist_id._get_product_price(self.product_id, 1.0)
+        price = self._compute_currency(order, self.fixed_price, "company_to_pricelist")
         return {"success": True, "price": price, "error_message": False, "warning_message": False}
 
     # ----------------------------------- #
