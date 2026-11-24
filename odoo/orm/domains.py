@@ -1078,11 +1078,12 @@ class DomainCondition(Domain):
 
         # apply optimizations of the level for operator and type
         optimizations = _OPTIMIZATIONS_FOR[level]
+        # optimizations return the condition itself when they don't change it
         condition = self
-        while True:
+        for _count in range(MAX_OPTIMIZE_ITERATIONS):
             for opt in itertools.chain(optimizations.get(condition.operator, ()), optimizations.get(field.type, ())):
                 domain = opt(condition, model)
-                if domain is not condition and domain != condition:
+                if domain is not condition:
                     break
             else:
                 break
@@ -1098,6 +1099,8 @@ class DomainCondition(Domain):
                 return domain
             object.__setattr__(domain, '_field_instance', field)  # noqa: PLC2801
             condition = domain
+        else:
+            raise RecursionError("Domain.optimize: too many loops")  # noqa: EM101
 
         # final checks
         if condition.operator not in STANDARD_CONDITION_OPERATORS and level == OptimizationLevel.FULL:
@@ -1269,7 +1272,10 @@ _MERGE_CONDITIONS: dict[tuple[str, str, str | None], MergeConditions] = {}
 
 
 def operator_optimization(operators: Collection[str], level: OptimizationLevel = OptimizationLevel.BASIC):
-    """Register a condition operator optimization for (condition, model)"""
+    """Register a condition operator optimization for (condition, model)
+
+    The optimization must return the condition itself when it does not change it.
+    """
     assert operators, "Missing operator to register"
     CONDITION_OPERATORS.update(operators)
 
@@ -1283,7 +1289,10 @@ def operator_optimization(operators: Collection[str], level: OptimizationLevel =
 
 
 def field_type_optimization(field_types: Collection[str], level: OptimizationLevel = OptimizationLevel.BASIC):
-    """Register a condition optimization by field type for (condition, model)"""
+    """Register a condition optimization by field type for (condition, model)
+
+    The optimization must return the condition itself when it does not change it.
+    """
     def register(optimization: ConditionOptimization):
         mapping = _OPTIMIZATIONS_FOR[level]
         for field_type in field_types:
@@ -1687,15 +1696,17 @@ def _optimize_boolean_in(condition, model):
     if not all(isinstance(v, bool) for v in value):
         # parse the values
         warnings.warn(f"Since 20.0, compare booleans only with booleans in {condition!r}", DeprecationWarning)
-        value = {
+        value = OrderedSet(
             str2bool(v.lower(), False) if isinstance(v, str) else bool(v)
             for v in value
-        }
+        )
     if len(value) == 1 and not any(value):
         # when comparing boolean values, always compare to [True] if possible
         # it eases the implementation of search methods
         operator = _INVERSE_OPERATOR[operator]
-        value = [True]
+        value = OrderedSet([True])
+    if value is condition.value:
+        return condition
     return DomainCondition(condition.field_expr, operator, value)
 
 
@@ -1768,6 +1779,11 @@ def _optimize_type_date(condition, model):
     if value is False and operator[0] in ('<', '>'):
         # comparison to False results in an empty domain
         return _FALSE_DOMAIN
+    if operator == condition.operator and (
+        value is condition.value
+        or (isinstance(value, OrderedSet) and value == condition.value)
+    ):
+        return condition
     return DomainCondition(condition.field_expr, operator, value)
 
 
@@ -1777,10 +1793,12 @@ def _optimize_type_date_relative(condition, model):
     if (
         operator not in ('in', 'not in', '>', '<', '<=', '>=')
         or "." in condition.field_expr
-        or not isinstance(condition.value, (str, OrderedSet))
+        or not isinstance(value := condition.value, (str, OrderedSet))
+        # only strings are converted, other values are already dates
+        or (isinstance(value, OrderedSet) and not any(isinstance(v, str) for v in value))
     ):
         return condition
-    value = _value_to_date(condition.value, model.env)
+    value = _value_to_date(value, model.env)
     return DomainCondition(condition.field_expr, operator, value)
 
 
@@ -1878,6 +1896,10 @@ def _optimize_type_datetime(condition, model):
             domain = ~domain
         return domain
 
+    if value is condition.value or operator in ('in', 'not in'):
+        # inequalities: the value is a new object when it is changed
+        # (and so is the operator); 'in' values without datetime are unchanged
+        return condition
     return DomainCondition(field_expr, operator, value)
 
 
@@ -1887,10 +1909,12 @@ def _optimize_type_datetime_relative(condition, model):
     if (
         operator not in ('in', 'not in', '>', '<', '<=', '>=')
         or "." in condition.field_expr
-        or not isinstance(condition.value, (str, OrderedSet))
+        or not isinstance(value := condition.value, (str, OrderedSet))
+        # only strings are converted, other values are already datetimes
+        or (isinstance(value, OrderedSet) and not any(isinstance(v, str) for v in value))
     ):
         return condition
-    value, _ = _value_to_datetime(condition.value, model.env)
+    value, _ = _value_to_datetime(value, model.env)
     return DomainCondition(condition.field_expr, operator, value)
 
 
@@ -1921,6 +1945,9 @@ def _optimize_properties_date_datetime(condition, model):
     elif isinstance(value, (date, datetime)):
         value = str(value)
 
+    if value == condition.value:
+        # same type: str or OrderedSet
+        return condition
     return DomainCondition(condition.field_expr, operator, value)
 
 
