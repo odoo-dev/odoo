@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="calendar.MessageDateLink">
+        <span class="o-calendar-MessageDateLink text-primary text-decoration-underline cursor-pointer"
+            role="button" t-att-title="title" t-att-data-start="start" t-att-data-stop="stop" t-out="text"/>
+        <span t-if="readerTime" class="text-muted"> (<t t-out="readerTime"/> your time)</span>
+    </t>
+
+</templates>
