@@ -1,3 +1,4 @@
+import { localization } from "@web/core/l10n/localization";
 import { _t } from "@web/core/l10n/translation";
 import { registry } from "@web/core/registry";
 import { useOwnedDialogs, useService } from "@web/core/utils/hooks";
@@ -81,7 +82,7 @@ export class PaymentScreen extends Component {
 
     getNumpadButtons() {
         const colorClassMap = {
-            [this.env.services.localization.decimalPoint]: "o_colorlist_numpad o_colorlist_color_6",
+            [localization.decimalPoint]: "o_colorlist_numpad o_colorlist_color_6",
             Backspace: "o_colorlist_numpad o_colorlist_color_1",
             "+10": "o_colorlist_numpad o_colorlist_color_10",
             "+20": "o_colorlist_numpad o_colorlist_color_10",

@@ -4,6 +4,7 @@ import { useService } from "@web/core/utils/hooks";
 import { useTrackedAsync } from "@point_of_sale/app/hooks/hooks";
 import { useLongPress } from "@point_of_sale/app/hooks/long_press_hook";
 import { useBarcodeReader } from "@point_of_sale/app/hooks/barcode_reader_hook";
+import { localization } from "@web/core/l10n/localization";
 import { _t } from "@web/core/l10n/translation";
 import { usePos } from "@point_of_sale/app/hooks/pos_hook";
 import {
@@ -217,7 +218,7 @@ export class ProductScreen extends Component {
 
     getNumpadButtons() {
         const colorClassMap = {
-            [this.env.services.localization.decimalPoint]: "o_colorlist_numpad o_colorlist_color_6",
+            [localization.decimalPoint]: "o_colorlist_numpad o_colorlist_color_6",
             Backspace: "o_colorlist_numpad o_colorlist_color_1",
             "-": "o_colorlist_numpad o_colorlist_color_3",
         };

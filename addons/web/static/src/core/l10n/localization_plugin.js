@@ -1,4 +1,4 @@
-import { onWillDestroy, onWillStart, usePlugin, Plugin, useListener } from "@odoo/owl";
+import { onWillDestroy, onWillStart, Plugin, useListener } from "@odoo/owl";
 import { session } from "@web/session";
 import { jsToPyLocale } from "@web/core/l10n/utils";
 import { user } from "@web/core/user";
@@ -15,7 +15,6 @@ import {
 } from "./translation";
 import { objectToUrlEncodedString } from "@web/core/utils/urls";
 import { IndexedDB } from "@web/core/utils/indexed_db";
-import { registry } from "@web/core/registry";
 
 const { Settings } = luxon;
 
@@ -152,16 +151,3 @@ export class LocalizationPlugin extends Plugin {
 }
 
 services.add(LocalizationPlugin);
-
-/**
- * -----------------------------------------------------------------------------
- * @todo owl3 migration
- * temporary - to remove when all use of localization services are removed
- * -----------------------------------------------------------------------------
- */
-registry.category("services").add("localization", {
-    start() {
-        const localizationPlugin = usePlugin(LocalizationPlugin);
-        return localizationPlugin.localization;
-    },
-});

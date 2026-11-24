@@ -252,7 +252,7 @@ services.add(BusPlugin);
  * -----------------------------------------------------------------------------
  */
 export const busService = {
-    dependencies: ["bus.parameters", "localization", "multi_tab", "worker_service"],
+    dependencies: ["bus.parameters", "multi_tab", "worker_service"],
     start() {
         const busPlugin = usePlugin(BusPlugin);
         const busServiceWrapper = Object.create(busPlugin);

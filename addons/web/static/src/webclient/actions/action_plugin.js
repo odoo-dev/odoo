@@ -2034,7 +2034,7 @@ services.add(ActionPlugin);
  * -----------------------------------------------------------------------------
  */
 export const actionService = {
-    dependencies: ["dialog", "localization", "notification", "title", "ui"],
+    dependencies: ["dialog", "notification", "title", "ui"],
     start() {
         return usePlugin(ActionPlugin);
     },

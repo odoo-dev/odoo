@@ -4,6 +4,7 @@ import { animationFrame } from "@odoo/hoot-mock";
 
 import { Component, xml } from "@odoo/owl";
 import { getService, makeTestApp } from "@web/../tests/web_test_helpers";
+import { translatedTerms, translationLoaded } from "@web/core/l10n/translation";
 import { Interaction } from "@web/public/interaction";
 import { startInteraction } from "./helpers";
 
@@ -19,7 +20,7 @@ test("wait for translation before starting interactions", async () => {
         static selector = ".test";
 
         setup() {
-            expect("localization" in this.services).toBe(true);
+            expect(translatedTerms[translationLoaded]).toBe(true);
         }
     }
     await startInteraction(Test, `<div class="test"></div>`);
