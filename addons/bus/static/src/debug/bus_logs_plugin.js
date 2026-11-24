@@ -1,7 +1,6 @@
 import { Plugin, signal, useListener, usePlugin } from "@odoo/owl";
 
 import { browser } from "@web/core/browser/browser";
-import { registry } from "@web/core/registry";
 import { services } from "@web/core/services";
 import { BusPlugin } from "@bus/services/bus_plugin";
 import { WorkerPlugin } from "@bus/services/worker_plugin";
@@ -55,15 +54,3 @@ export class BusLogsPlugin extends Plugin {
 }
 
 services.add(BusLogsPlugin);
-
-/**
- * -----------------------------------------------------------------------------
- * @todo owl3 migration
- * temporary - to remove when all use of the bus.logs_service service are removed
- * -----------------------------------------------------------------------------
- */
-registry.category("services").add("bus.logs_service", {
-    start() {
-        return usePlugin(BusLogsPlugin);
-    },
-});
