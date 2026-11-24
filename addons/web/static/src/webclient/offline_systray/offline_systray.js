@@ -1,6 +1,7 @@
 import { Component, computed, usePlugin } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { OfflinePlugin } from "@web/core/offline/offline_plugin";
+import { DebugModePlugin } from "@web/core/debug_mode_plugin";
 import { useService } from "@web/core/utils/hooks";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
@@ -24,6 +25,7 @@ class OfflineSystray extends Component {
 
     setup() {
         this.offlinePlugin = usePlugin(OfflinePlugin);
+        this.debugMode = usePlugin(DebugModePlugin);
         this.actionService = useService("action");
         this.dialogService = useService("dialog");
         this.uiService = useService("ui");
@@ -47,10 +49,11 @@ class OfflineSystray extends Component {
             };
             if (value.method === "web_save_offline") {
                 item.status = value.args[0].length ? STATUS.EDITED : STATUS.CREATED;
-                item.tooltip.changes = Object.entries(value.extras.changes).map(([k, v]) => [
-                    k,
-                    v?.display_name ?? v,
-                ]);
+                const htmlFields = this.debugMode.isActive() ? [] : value.extras.htmlFields || [];
+                item.tooltip.changes = Object.entries(value.extras.changes)
+                    // html field changes are only displayed in debug mode
+                    .filter(([k]) => !htmlFields.includes(k))
+                    .map(([k, v]) => [k, v?.display_name ?? v]);
                 if (value.args[0].length) {
                     item.tooltip.changes = item.tooltip.changes.map((c) => [
                         c[0],

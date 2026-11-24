@@ -1482,6 +1482,9 @@ export class Record extends DataPoint {
                         pick(this._values, ...Object.keys(this._offlineChanges)),
                         { changes: false }
                     ),
+                    htmlFields: Object.keys(this._offlineChanges).filter(
+                        (fieldName) => this.fields[fieldName]?.type === "html"
+                    ),
                     timeStamp: this._offlineTimeStamp,
                 },
             }
