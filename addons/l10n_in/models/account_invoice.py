@@ -1,4 +1,3 @@
-import logging
 import copy
 import re
 
@@ -18,7 +17,6 @@ EDI_CANCEL_REASON = {
     '3': "Order Cancelled",
     '4': "Others",
 }
-_logger = logging.getLogger(__name__)
 
 
 class AccountMove(models.Model):
@@ -40,7 +38,8 @@ class AccountMove(models.Model):
         store=True,
         readonly=False,
         copy=True,
-        precompute=True
+        precompute=True,
+        help="Determines the applicable GST taxes, GSTIN requirement and GSTR reporting section.",
     )
     l10n_in_state_id = fields.Many2one(
         comodel_name='res.country.state',
@@ -49,7 +48,8 @@ class AccountMove(models.Model):
         store=True,
         copy=True,
         readonly=False,
-        precompute=True
+        precompute=True,
+        help="State where the supply is made; decides whether IGST or CGST+SGST applies.",
     )
     l10n_in_gstin = fields.Char(string="GSTIN")
     # For Export invoice this data is need in GSTR report
@@ -69,10 +69,6 @@ class AccountMove(models.Model):
 
     # self - invoice related field
     l10n_in_is_self_invoice = fields.Boolean(related='journal_id.l10n_in_self_invoice')
-
-    # withholding related fields
-    l10n_in_tds_feature_enabled = fields.Boolean(related='company_id.l10n_in_tds_feature')
-    l10n_in_tcs_feature_enabled = fields.Boolean(related='company_id.l10n_in_tcs_feature')
 
     # gstin_status related field
     l10n_in_partner_gstin_status = fields.Boolean(
@@ -133,6 +129,7 @@ class AccountMove(models.Model):
 
     @api.depends('l10n_in_state_id', 'l10n_in_gst_treatment')
     def _compute_fiscal_position_id(self):
+        """ Override to choose the GST fiscal position based on the Place of Supply instead of the partner address. """
         foreign_country = self.env['res.country'].new({'name': 'Not India', 'code': '!!'})
         foreign_state = self.env['res.country.state'].new({'country_id': foreign_country})
 
@@ -190,6 +187,7 @@ class AccountMove(models.Model):
 
     @api.onchange('name')
     def _onchange_name_warning(self):
+        """ Override to warn when the invoice number does not follow GST Rule 46(b). """
         if (
             self.country_code == 'IN'
             and self.company_id.l10n_in_gst_registration_type
@@ -305,13 +303,7 @@ class AccountMove(models.Model):
                 and move.state == 'posted'
                 and move.move_type != 'entry'
                 and move.payment_state not in ['paid', 'reversed']
-                and move.l10n_in_gst_treatment in [
-                    'regular',
-                    'composition',
-                    'special_economic_zone',
-                    'deemed_export',
-                    'uin_holders'
-                ]
+                and move.l10n_in_gst_treatment in self._l10n_in_get_b2b_gst_treatments()
             )
 
     @api.depends('partner_id')
@@ -414,13 +406,14 @@ class AccountMove(models.Model):
         return self.with_company(self.company_id).partner_id.action_l10n_in_verify_gstin_status()
 
     def _get_name_invoice_report(self):
+        """ Override to use the GST invoice layout for Indian moves. """
         self.ensure_one()
         if self.country_code == 'IN':
             return 'l10n_in.l10n_in_report_invoice_document_inherit'
         return super()._get_name_invoice_report()
 
     def _post(self, soft=True):
-        """Use journal type to define document type because not miss state in any entry including POS entry"""
+        """ Override to validate mandatory GST data and store the partner GSTIN on Indian sale documents. """
         posted = super()._post(soft)
         gst_treatment_name_mapping = {k: v for k, v in
                              self._fields['l10n_in_gst_treatment']._description_selection(self.env)}
@@ -441,12 +434,7 @@ class AccountMove(models.Model):
             move.l10n_in_gstin = move.partner_id.vat
             if (
                 not move.l10n_in_gstin
-                and move.l10n_in_gst_treatment in [
-                    'regular',
-                    'composition',
-                    'special_economic_zone',
-                    'deemed_export'
-                ]
+                and move.l10n_in_gst_treatment in self._l10n_in_get_b2b_gst_treatments()
             ):
                 raise ValidationError(_(
                     "Partner %(partner_name)s (%(partner_id)s) GSTIN is required under GST Treatment %(name)s",
@@ -463,6 +451,7 @@ class AccountMove(models.Model):
         return False
 
     def _generate_qr_code(self, silent_errors=False):
+        """ Override to print a UPI payment QR code when the company has a UPI ID. """
         self.ensure_one()
         if (
             self.company_id.l10n_in_upi_id
@@ -604,6 +593,7 @@ class AccountMove(models.Model):
         )
 
     def _get_sync_stack(self, container):
+        """ Override to recompute the GSTR section of the lines after they are synchronized. """
         stack, update_containers = super()._get_sync_stack(container)
         if all(move.country_code != 'IN' for move in self):
             return stack, update_containers
@@ -620,6 +610,7 @@ class AccountMove(models.Model):
         moves.line_ids._set_l10n_in_gstr_section(tax_tags_dict)
 
     def _get_base_document_title(self):
+        """ Override to use the GST document titles (Tax Invoice, Bill of Supply, etc.). """
         self.ensure_one()
 
         if (

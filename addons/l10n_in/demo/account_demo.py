@@ -564,7 +564,7 @@ class AccountChartTemplate(models.AbstractModel):
                             'name': self.env._('Fire Wood'),
                             'quantity': 1,
                             'price_unit': 32000.0,
-                            'tax_ids': [Command.set(['exempt_sale'])],
+                            'tax_ids': [Command.set(['exempt_purchase'])],
                         }),
                     ]
                 },
@@ -579,7 +579,7 @@ class AccountChartTemplate(models.AbstractModel):
                             'name': self.env._('Clay Lamps'),
                             'quantity': 1,
                             'price_unit': 30000.0,
-                            'tax_ids': [Command.set(['nil_rated_sale'])],
+                            'tax_ids': [Command.set(['nil_rated_purchase'])],
                         }),
                     ]
                 },

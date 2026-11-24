@@ -28,10 +28,6 @@ class AccountTax(models.Model):
         string="Indian Tax Type",
     )
 
-    # withholding related fields
-    l10n_in_tds_feature_enabled = fields.Boolean(related='company_id.l10n_in_tds_feature')
-    l10n_in_tcs_feature_enabled = fields.Boolean(related='company_id.l10n_in_tcs_feature')
-
     @api.depends('country_code', 'invoice_repartition_line_ids.tag_ids')
     def _compute_l10n_in_gst_tax_type(self):
         self.l10n_in_gst_tax_type = False
