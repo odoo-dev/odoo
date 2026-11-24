@@ -160,7 +160,6 @@ services.add(WorkerPlugin);
  * -----------------------------------------------------------------------------
  */
 registry.category("services").add("worker_service", {
-    dependencies: ["bus.parameters"],
     start() {
         return usePlugin(WorkerPlugin);
     },
