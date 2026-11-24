@@ -136,6 +136,38 @@ def test_all_l10n(env):
                     if ((potential_domestic_fps[0].country_id == potential_domestic_fps[1].country_id) and
                         (potential_domestic_fps[0].sequence == potential_domestic_fps[1].sequence)):
                         _logger.warning("Several fiscal positions fitting for being tagged as domestic were found in fiscal data for %s %s.", company.country_id.name, template_code)
+
+            # Check the tax mappings of the fiscal positions
+            fiscal_positions = company.fiscal_position_ids.with_context(active_test=False)
+            tax_mappings = [
+                (fiscal_position, original_tax, tax)
+                for fiscal_position in fiscal_positions
+                for tax in fiscal_position.tax_ids
+                for original_tax in tax.original_tax_ids - tax
+            ]
+            mapping_checks = {
+                # The domestic fiscal position may replace taxes of other positions, never a domestic one
+                "the domestic fiscal position replaces a domestic tax":
+                    lambda fiscal_position, original_tax, tax: fiscal_position.is_domestic and original_tax.is_domestic,
+                # Only domestic taxes are set by default on lines, so they are the only ones worth replacing
+                "a non-domestic fiscal position replaces a non-domestic tax":
+                    lambda fiscal_position, original_tax, tax: not fiscal_position.is_domestic and not original_tax.is_domestic,
+                "a tax is replaced by a tax of another type":
+                    lambda fiscal_position, original_tax, tax: original_tax.type_tax_use != tax.type_tax_use,
+                "an active tax is replaced by an archived tax":
+                    lambda fiscal_position, original_tax, tax: original_tax.active and not tax.active,
+                "a tax is replaced by a tax of another scope":
+                    lambda fiscal_position, original_tax, tax: original_tax.tax_scope != tax.tax_scope,
+            }
+            fiscal_position_xmlids = fiscal_positions.get_external_id()
+            tax_xmlids = (fiscal_positions.tax_ids | fiscal_positions.tax_ids.original_tax_ids).get_external_id()
+            for message, check in mapping_checks.items():
+                if errors := [
+                    f"{fiscal_position_xmlids[fiscal_position.id]}: {tax_xmlids[original_tax.id]} -> {tax_xmlids[tax.id]}"
+                    for fiscal_position, original_tax, tax in tax_mappings
+                    if check(fiscal_position, original_tax, tax)
+                ]:
+                    _logger.warning("In fiscal data for %s %s, %s: %s", company.country_id.name, template_code, message, ", ".join(errors))
         except Exception:
             _logger.error("Error when creating COA %s", template_code, exc_info=True)
             env.cr.rollback()
