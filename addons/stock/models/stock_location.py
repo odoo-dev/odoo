@@ -101,6 +101,13 @@ class StockLocation(models.Model):
     )
     _parent_path_id_idx = models.Index("(parent_path, id)")
 
+    @api.onchange('usage', 'location_id')
+    def _onchange_usage(self):
+        if self.usage == 'internal':
+            if self.location_id and self.location_id.usage == 'internal':
+                if len(self.location_id.child_ids) == 0 or self == self.location_id.child_ids:
+                    return {'warning': {'title': _('Warning'), 'message': _('You are about to create a storage child location under an internal location. You may want to consider using the parent location instead or change the type of %s to "view".') % self.location_id.complete_name}}
+
     @api.depends('name', 'location_id.complete_name', 'usage')
     @api.depends_context('formatted_display_name', 'show_empty')
     def _compute_display_name(self):
