@@ -154,16 +154,6 @@
     --Card__image--fill-width: var(--o-kanban-image-fill-width);
     --Card-Footer-gap: 4px;
 
-    /* ---------------------------------------------------------------------------- */
-    /* Inner components contextual adaptations */
-    .o_kanban_record {
-        --Ribbon-font-size: var(--o-bs-font-size-sm);
-        --Ribbon-wrapper-width: 6.5rem;
-        --Ribbon-height:  calc(var(--Ribbon-font-size) * 2);
-    }
-
-    /* ---------------------------------------------------------------------------- */
-
     border-top: var(--border-width) solid var(--Kanban-background);
     background: var(--Kanban-background);
     padding: var(--Kanban-padding);

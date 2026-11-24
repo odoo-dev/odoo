@@ -14,8 +14,8 @@ import { Component, t, useProps } from "@odoo/owl";
  *        (bg-primary, bg-secondary, bg-success, bg-danger, bg-warning, bg-info,
  *        bg-light, bg-dark, bg-white)
  *
- *        If you don't specify the bg_color prop the bg-success class will be used
- *        by default.
+ *        If you don't specify the bg_color prop the text-bg-success class will be
+ *        used by default.
  */
 export class RibbonWidget extends Component {
     static template = "web.Ribbon";
@@ -26,16 +26,6 @@ export class RibbonWidget extends Component {
         title: t.string().optional(""),
         bgClass: t.string().optional("text-bg-success"),
     });
-
-    get classes() {
-        let classes = this.props.bgClass;
-        if (this.props.text.length > 15) {
-            classes += " o_small";
-        } else if (this.props.text.length > 10) {
-            classes += " o_medium";
-        }
-        return classes;
-    }
 }
 
 export const ribbonWidget = {

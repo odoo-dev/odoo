@@ -4,10 +4,6 @@
             .oe_title {
                 max-width: initial;
             }
-
-            .o_widget_todo_archived > .ribbon {
-                margin-top: 0px;
-            }
         }
     }
     .o_task_state_widget {

@@ -25,10 +25,6 @@
     .o_kanban_ungrouped .o_kanban_record {
         display: flex;
         align-items: center;
-
-        .o_widget_web_ribbon {
-            align-self: flex-start;
-        }
     }
 }
 

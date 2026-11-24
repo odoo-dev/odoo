@@ -14,7 +14,4 @@
     .o_kanban_group:not(.o_column_folded) {
         min-height: 100px;
     }
-    .ribbon {
-        --Ribbon-wrapper-width: 6rem;
-    }
 }

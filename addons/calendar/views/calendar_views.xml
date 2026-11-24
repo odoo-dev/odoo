@@ -142,7 +142,7 @@
                     <field name="invalid_email_partner_ids" widget="many2many_tags"/>
                 </div>
                 <sheet>
-                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" class="o_calendar_archived_web_ribbon" invisible="active"/>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
                     <widget name="web_ribbon" title="Draft" bg_color="text-bg-500" invisible="not active or not is_draft"/>
                     <field name="active" invisible="1"/> <!-- drives invisible of the Archived and Cancelled web_ribbon widgets -->
                     <field name="is_draft" invisible="1"/> <!--Required to compute the names of the activities.-->

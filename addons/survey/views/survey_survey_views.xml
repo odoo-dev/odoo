@@ -268,7 +268,7 @@
                     </div>
                     <div t-name="card"
                         t-attf-class="o_survey_kanban_card #{record.certification.raw_value ? 'o_survey_kanban_card_certification' : ''} #{isGrouped ? 'd-flex flex-column gap-3' : 'grid me-md-3 my-auto'}">
-                        <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active" class="d-contents"/>
+                        <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
                         <div class="g-col-12 g-col-md-4 g-col-lg-3">
                             <div class="d-flex flex-grow-1 flex-column">
                                 <div class="d-flex gap-1 align-items-center">

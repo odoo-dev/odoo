@@ -13,7 +13,7 @@
                             <a type="open" class="dropdown-item" role="menuitem">Advanced Settings</a>
                         </t>
                         <t t-name="card">
-                            <widget name="web_ribbon" class="d-flex" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                            <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
                             <main>
                                 <div class="d-flex gap-2 mb-2">
                                     <field name="avatar_128" widget="image" options="{'size': [25, 25], 'img_class': 'rounded bg-transparent'}" alt="Channel"/>

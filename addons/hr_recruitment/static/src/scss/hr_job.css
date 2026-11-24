@@ -4,9 +4,6 @@
             .o_kanban_record {
                 --Card-padding-v: var(--o-bs-spacer-2) !important;
                 --Card-padding-h: 0px !important;
-                --Ribbon-font-size: 0.6rem;
-                --Ribbon-wrapper-width: 5rem;
-                --Ribbon-height: 1.9;
 
                 @media screen and (min-width: 768px) and (max-width: 1399.98px), print and (min-width: 188mm) and (max-width: 249.98mm) {
                     min-width: calc(100vw - (var(--o-bs-btn-font-size-sm) + var(--o-bs-btn-padding-x-sm) * 2 + var(--o-bs-spacer-1) * 4)); /* cscreen size reduced by the size of the closed search panel */

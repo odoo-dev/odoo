@@ -4,11 +4,6 @@
             padding-right: 0;
             min-height: 160px;
             overflow: hidden;
-            .ribbon {
-                & span {
-                    --ribbon-font-size: 14px !important;
-                }
-            }
             .o_form_statusbar {
                 padding-right: 16px;
             }
@@ -90,9 +85,6 @@
 
 .o_holidays_view_kanban .o_kanban_renderer {
     .o_kanban_record:not(.o_kanban_ghost) {
-        --Ribbon-wrapper-height: 5.5rem;
-        --Ribbon-font-size: .72rem;
-
         min-height: auto;
         overflow: hidden;
     }

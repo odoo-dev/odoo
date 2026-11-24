@@ -24,10 +24,6 @@
     word-break: break-word;
     break-inside: avoid;
 
-    &:has(.ribbon) {
-        min-height: var(--Ribbon-wrapper-width);
-    }
-
     /* do not break wrap inside buttons */
     button {
         word-wrap: normal;
