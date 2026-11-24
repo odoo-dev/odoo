@@ -980,7 +980,7 @@ services.add(StorePlugin);
  * -----------------------------------------------------------------------------
  */
 export const storeService = {
-    dependencies: ["bus_service", "discuss.upgrade"],
+    dependencies: ["bus_service"],
     /**
      * @returns {import("models").Store}
      */
