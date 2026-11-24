@@ -2,11 +2,12 @@ import {
     QRPopup,
     qrPopupProps,
 } from "@point_of_sale/app/components/popups/qr_code_popup/qr_code_popup";
-import { t } from "@odoo/owl";
+import { onWillUnmount, t } from "@odoo/owl";
 import { patch } from "@web/core/utils/patch";
 import { AlertDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { useService } from "@web/core/utils/hooks";
 import { _t } from "@web/core/l10n/translation";
+import { usePos } from "@point_of_sale/app/hooks/pos_hook";
 
 Object.assign(qrPopupProps, {
     paymentMethod: t.object().optional(),
@@ -17,6 +18,18 @@ patch(QRPopup.prototype, {
     setup() {
         super.setup(...arguments);
         this.orm = useService("orm");
+
+        // Confirm the payment popup when the server notifies that its order is paid
+        if (this.props.confirm) {
+            const pos = usePos();
+            const onQrisPaid = (uuid) => {
+                if (uuid === this.props.order.uuid) {
+                    this.confirm();
+                }
+            };
+            pos.l10nIdQrisPaidCallbacks.add(onQrisPaid);
+            onWillUnmount(() => pos.l10nIdQrisPaidCallbacks.delete(onQrisPaid));
+        }
     },
 
     async confirm() {

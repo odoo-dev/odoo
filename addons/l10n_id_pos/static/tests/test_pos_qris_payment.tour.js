@@ -85,3 +85,51 @@ registry.category("web_tour.tours").add("PayementScreenQRISChangeAmount", {
             isQRDisplayedinDialog(),
         ].flat(),
 });
+
+// Call the QRIS webhook as QRIS does when the QR code is paid (token accepted by the test)
+function mockQrisWebhook() {
+    return [
+        {
+            content: "Notify the QRIS payment through the webhook",
+            trigger: "body",
+            run: async () => {
+                const response = await fetch("/l10n_id/qris/webhook/test_token", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ invoice: "413255111", qris_status: "success" }),
+                });
+                if (!response.ok) {
+                    throw new Error("Failed to notify the QRIS webhook");
+                }
+            },
+        },
+    ];
+}
+
+registry.category("web_tour.tours").add("PaymentScreenQRISWebhookPayment", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+            addProductandPay(),
+            isQRDisplayedinDialog(),
+            mockQrisWebhook(),
+            FeedbackScreen.isShown(),
+            FeedbackScreen.clickNextOrder(),
+        ].flat(),
+});
+
+registry.category("web_tour.tours").add("PaymentScreenQRISPaidAfterDiscard", {
+    steps: () =>
+        [
+            Chrome.startPoS(),
+            Dialog.confirm("Open Register"),
+            addProductandPay(),
+            isQRDisplayedinDialog(),
+            Dialog.discard(),
+            mockQrisWebhook(),
+            PaymentScreen.clickRetryButton(),
+            FeedbackScreen.isShown(),
+            FeedbackScreen.clickNextOrder(),
+        ].flat(),
+});

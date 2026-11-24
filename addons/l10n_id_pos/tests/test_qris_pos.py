@@ -1,3 +1,6 @@
+from datetime import timedelta
+
+from odoo import fields
 from odoo.exceptions import ValidationError
 from odoo.tests import tagged
 from odoo.addons.point_of_sale.tests.test_frontend import TestPointOfSaleHttpCommon
@@ -259,3 +262,83 @@ class TestPosQris(TestPointOfSaleHttpCommon):
         with patch('odoo.addons.l10n_id.models.res_bank._l10n_id_make_qris_request', side_effect=_patched_make_qris_request) as patched:
             self.start_tour("/pos/ui/%d" % self.main_pos_config.id, 'PayementScreenQRISChangeAmount', login="qris_pos_user")
             self.assertEqual(patched.call_count, 3)
+
+    def _create_pos_qris_transaction(self, order_uuid, amount, paid=False, qris_invoice_id='413255111'):
+        return self.env['l10n_id.qris.transaction'].create({
+            'model': 'pos.order',
+            'model_id': order_uuid,
+            'qris_invoice_id': qris_invoice_id,
+            'qris_amount': amount,
+            'qris_content': 'Test Content',
+            'qris_creation_datetime': fields.Datetime.now(),
+            'bank_id': self.acc_qris_id.id,
+            'paid': paid,
+        })
+
+    def test_qris_webhook_notify_pos(self):
+        """ Webhook payment of a pos.order should notify the open PoS using the QRIS bank account """
+        self.main_pos_config.with_user(self.qris_pos_user).open_ui()
+        # Config without open session
+        self.env['pos.config'].create({
+            'name': 'Closed Shop',
+            'payment_method_ids': [(4, self.qris_pm.id)],
+        })
+        transaction = self._create_pos_qris_transaction('1234512345', 1000)
+
+        with patch.object(self.registry['pos.config'], '_notify', autospec=True) as notify:
+            self.acc_qris_id.sudo()._l10n_id_qris_process_webhook({'invoice': '413255111', 'qris_status': 'success'})
+
+        self.assertTrue(transaction.paid)
+        notify.assert_called_once_with(self.main_pos_config, 'L10N_ID_QRIS_PAID', {'uuid': '1234512345'})
+
+    def test_qris_is_paid(self):
+        """ Only the latest QR code of the order, paid for the same amount, is considered paid """
+        transaction = self._create_pos_qris_transaction('1234512345', 1000, paid=True)
+        self.assertTrue(self.qris_pm.l10n_id_qris_is_paid('1234512345', 1000))
+        self.assertFalse(self.qris_pm.l10n_id_qris_is_paid('1234512345', 2000))
+        self.assertFalse(self.qris_pm.l10n_id_qris_is_paid('5432154321', 1000))
+
+        # A newer unpaid QR code
+        new_transaction = self._create_pos_qris_transaction('1234512345', 1000, qris_invoice_id='413255112')
+        new_transaction.qris_creation_datetime = transaction.qris_creation_datetime + timedelta(minutes=1)
+        self.assertFalse(self.qris_pm.l10n_id_qris_is_paid('1234512345', 1000))
+
+    def test_qris_verify_status_paid_transaction(self):
+        """ A transaction already paid should not be checked with the QRIS API """
+        self._create_pos_qris_transaction('1234512345', 1000, paid=True)
+        with patch('odoo.addons.l10n_id.models.res_bank._l10n_id_make_qris_request') as patched:
+            self.assertTrue(self.qris_pm.l10n_id_verify_qris_status('1234512345'))
+            self.assertEqual(patched.call_count, 0)
+
+    def _start_qris_webhook_tour(self, tour_name):
+        """ Run a tour that pays the QR code through the webhook """
+        def _patched_make_qris_request(endpoint, params):
+            # Only QR code generation is expected, no status check
+            self.assertEqual(endpoint, 'show_qris.php')
+            return {
+                "status": "success",
+                "data": {
+                    "qris_content": "Test Content",
+                    "qris_request_date": "2024-02-27 11:13:42",
+                    "qris_invoiceid": "413255111",
+                    "qris_nmid": "ID1020021181745"
+                }
+            }
+
+        def _patched_get_bank_from_token(bank, token):
+            return bank.browse(self.acc_qris_id.id if token == 'test_token' else [])
+
+        self.main_pos_config.with_user(self.qris_pos_user).open_ui()
+        with (
+            patch('odoo.addons.l10n_id.models.res_bank._l10n_id_make_qris_request', side_effect=_patched_make_qris_request),
+            patch.object(self.registry['res.partner.bank'], '_l10n_id_get_bank_from_qris_webhook_token', _patched_get_bank_from_token),
+        ):
+            self.start_tour("/pos/ui/%d" % self.main_pos_config.id, tour_name, login="qris_pos_user")
+
+    def test_tour_qris_webhook_payment(self):
+        """ Webhook payment should close the QR popup and validate the order """
+        self._start_qris_webhook_tour('PaymentScreenQRISWebhookPayment')
+
+    def test_tour_qris_paid_after_discard(self):
+        """ Retrying after the discarded QR code was paid should validate the order without a new QR code """
+        self._start_qris_webhook_tour('PaymentScreenQRISPaidAfterDiscard')
