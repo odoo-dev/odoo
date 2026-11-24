@@ -84,9 +84,11 @@ $body-tertiary-bg: mix(color-contrast($body-bg), $body-bg, 10%) !default;
 $-link-color: o-color('o-cc1-link');
 $-link-color: if($-link-color, $-link-color, o-color('primary'));
 $link-color: auto-contrast($-link-color, $body-bg, 'o-cc1-link') !default;
-$link-hover-color: auto-contrast(darken($link-color, 15%), $body-bg, 'o-cc1-link') !default;
-$link-decoration: if(o-website-value('link-underline') == 'always', underline, none) !default;
-$link-hover-decoration: if(o-website-value('link-underline') != 'never', underline, none) !default;
+$-link-hover-effect: o-website-value('link-hover-effect');
+$-link-hover-color: if($-link-hover-effect == 'none', $link-color, if($-link-hover-effect == 'lighter', lighten($link-color, 15%), darken($link-color, 15%)));
+$link-hover-color: auto-contrast($-link-hover-color, $body-bg, 'o-cc1-link') !default;
+$link-decoration: if(index(('always', 'not-hover'), o-website-value('link-underline')), underline, none) !default;
+$link-hover-decoration: if(index(('hover', 'always'), o-website-value('link-underline')), underline, none) !default;
 
 // Emphasis
 //
@@ -328,15 +330,11 @@ $blockquote-margin-y: 0 !default;
 
 $o-btn-flat-defaults: () !default;
 $o-btn-outline-defaults: () !default;
-$o-btn-outline-border-width-defaults: () !default;
 @each $color in ('primary', 'secondary') {
     @if o-website-value('btn-#{$color}-flat') {
         $o-btn-flat-defaults: append($o-btn-flat-defaults, $color);
     } @else if o-website-value('btn-#{$color}-outline') {
         $o-btn-outline-defaults: append($o-btn-outline-defaults, $color);
-        $o-btn-outline-border-width-defaults: map-merge($o-btn-outline-border-width-defaults, (
-            $color: o-website-value('btn-#{$color}-outline-border-width'),
-        ));
     }
 }
 

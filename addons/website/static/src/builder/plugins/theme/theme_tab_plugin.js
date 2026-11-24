@@ -5,6 +5,7 @@ import { withSequence } from "@html_editor/utils/resource";
 import { ThemeAdvancedOption } from "./theme_advanced_option";
 import { ThemeShadowOption } from "./theme_shadow_option";
 import { ThemeButtonOption } from "./theme_button_option";
+import { RippleEffectAction, ThemeEffectOption } from "./theme_effect_option";
 import { ThemeColorsOption } from "./theme_colors_option";
 import { ThemeHeadingsOption } from "./theme_headings_option";
 import { CustomizeWebsiteFontFamilyAction } from "./theme_fontfamily_option";
@@ -110,6 +111,7 @@ export class ThemeTabPlugin extends Plugin {
             CustomizeWebsiteFontWeightAction,
             EditCustomCodeAction,
             ConfigureApiKeyAction,
+            RippleEffectAction,
         },
         theme_options: [
             withSequence(
@@ -154,6 +156,7 @@ export class ThemeTabPlugin extends Plugin {
                     _t("Link"),
                     class ThemeLinkOption extends BaseOptionComponent {
                         static template = "website.ThemeLinkOption";
+                        static components = { ThemeEffectOption };
                     }
                 )
             ),

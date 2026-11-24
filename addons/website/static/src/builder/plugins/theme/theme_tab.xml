@@ -128,8 +128,10 @@
                 <BuilderSelectItem actionValue="'never'">No Underline</BuilderSelectItem>
                 <BuilderSelectItem actionValue="'hover'">Underline On Hover</BuilderSelectItem>
                 <BuilderSelectItem actionValue="'always'">Always Underline</BuilderSelectItem>
+                <BuilderSelectItem actionValue="'not-hover'">Underline Except On Hover</BuilderSelectItem>
             </BuilderSelect>
         </BuilderRow>
+        <ThemeEffectOption target="'link'"/>
     </BuilderContext>
 </t>
 

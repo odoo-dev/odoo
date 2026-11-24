@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+<t t-name="website.ThemeEffectOption">
+    <BuilderRow label.translate="Hover Effect" tooltip="this.tooltip">
+        <BuilderSelect action="'customizeWebsiteVariable'" actionParam="`${this.props.target}-hover-effect`">
+            <t t-foreach="this.hoverEffects" t-as="effect" t-key="effect.value">
+                <BuilderSelectItem actionValue="effect.value"><t t-out="effect.label"/></BuilderSelectItem>
+            </t>
+        </BuilderSelect>
+    </BuilderRow>
+    <BuilderRow label.translate="On Click Effect" tooltip="this.tooltip">
+        <BuilderSelect action="'rippleEffect'">
+            <t t-foreach="this.clickEffects" t-as="effect" t-key="effect.value">
+                <BuilderSelectItem actionParam="effect.actionParam"><t t-out="effect.label"/></BuilderSelectItem>
+            </t>
+        </BuilderSelect>
+    </BuilderRow>
+</t>
+
+</templates>

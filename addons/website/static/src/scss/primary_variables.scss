@@ -2165,10 +2165,19 @@ $o-base-website-values-palette: (
     'btn-secondary-outline': false,
     'btn-primary-flat': false,
     'btn-secondary-flat': false,
-    'btn-primary-outline-border-width': 1px,
-    'btn-secondary-outline-border-width': 1px,
-    'link-underline': 'hover', // 'never' / 'hover' / 'always'
+    // Border, per style: width null = Bootstrap's, color null = follows the
+    // style (Fill: text color, Outline: button color).
+    'btn-primary-border-width': null,
+    'btn-primary-border-style': 'solid',
+    'btn-primary-border-color': null,
+    'btn-secondary-border-width': null,
+    'btn-secondary-border-style': 'solid',
+    'btn-secondary-border-color': null,
+    'link-underline': 'hover', // 'never' / 'hover' / 'always' / 'not-hover'
+    'link-hover-effect': 'darken', // 'none' / 'darken' / 'lighter' / 'lift'
+    'link-ripple': false,
     'btn-ripple': false,
+    'btn-hover-effect': 'darken', // 'none' / 'darken' / 'lighter' / 'lift'
 
     'btn-padding-y': null, // Default to BS
     'btn-padding-x': null, // Default to BS
@@ -2183,6 +2192,32 @@ $o-base-website-values-palette: (
     'btn-border-radius': null, // Default to BS
     'btn-border-radius-sm': null, // Default to BS
     'btn-border-radius-lg': null, // Default to BS
+
+    // Primary buttons: null = the shared value above.
+    'btn-primary-padding': null, // CSS shorthand, 1 to 4 values
+    'btn-primary-font-size': null,
+    'btn-primary-padding-sm': null,
+    'btn-primary-font-size-sm': null,
+    'btn-primary-padding-lg': null,
+    'btn-primary-font-size-lg': null,
+    'btn-primary-border-radius': null,
+    'btn-primary-border-radius-sm': null,
+    'btn-primary-border-radius-lg': null,
+    'btn-primary-text-transform': 'none', // 'none' / 'uppercase'
+    'btn-primary-margin': null, // CSS shorthand, 1 to 4 values; null = no margin
+
+    // Secondary buttons: null = the shared value above.
+    'btn-secondary-padding': null, // CSS shorthand, 1 to 4 values
+    'btn-secondary-font-size': null,
+    'btn-secondary-padding-sm': null,
+    'btn-secondary-font-size-sm': null,
+    'btn-secondary-padding-lg': null,
+    'btn-secondary-font-size-lg': null,
+    'btn-secondary-border-radius': null,
+    'btn-secondary-border-radius-sm': null,
+    'btn-secondary-border-radius-lg': null,
+    'btn-secondary-text-transform': 'none', // 'none' / 'uppercase'
+    'btn-secondary-margin': null, // CSS shorthand, 1 to 4 values; null = no margin
 
     'input-padding-y': null, // Default to BS
     'input-padding-x': null, // Default to BS
@@ -2208,6 +2243,8 @@ $o-base-website-values-palette: (
     'headings-font': null,
     'navbar-font': null,
     'buttons-font': null,
+    'buttons-primary-font': null, // Default to 'buttons-font'
+    'buttons-secondary-font': null, // Default to 'buttons-font'
 
     // Font weight mappings by context.
     'font-weight-normal': null, // Default to BS
@@ -2219,6 +2256,10 @@ $o-base-website-values-palette: (
     'display-font-weight-bold': null,
     'btn-font-weight': null, // Default to BS
     'btn-font-weight-bold': null,
+    'btn-primary-font-weight': null, // Default to 'btn-font-weight'
+    'btn-primary-font-weight-bold': null,
+    'btn-secondary-font-weight': null, // Default to 'btn-font-weight'
+    'btn-secondary-font-weight-bold': null,
 
     // Gradients
     'menu-gradient': null,
@@ -2284,6 +2325,8 @@ $o-font-aliases-to-keys: (
     'display-4': 'display-4-font',
     'navbar': 'navbar-font',
     'buttons': 'buttons-font',
+    'buttons-primary': 'buttons-primary-font',
+    'buttons-secondary': 'buttons-secondary-font',
 );
 $o-website-default-headings-font: 'Inter Tight';
 $o-website-values-palettes: (

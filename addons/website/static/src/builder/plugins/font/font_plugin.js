@@ -13,12 +13,18 @@ export const FONT_VARIABLES_TO_RESET = {
         "display-font-weight-bold",
     ],
     "buttons-font": ["btn-font-weight", "btn-font-weight-bold"],
+    "buttons-primary-font": ["btn-primary-font-weight", "btn-primary-font-weight-bold"],
+    "buttons-secondary-font": ["btn-secondary-font-weight", "btn-secondary-font-weight-bold"],
 };
 
 export class WebsiteFontPlugin extends Plugin {
     static id = "websiteFont";
     static shared = shared(["addFont", "deleteFont"]);
     static dependencies = ["savePlugin", "builderFont", "customizeWebsite"];
+    /** @type {import("plugins").WebsiteResources} */
+    resources = {
+        fontCssVariables: ["buttons-primary-font", "buttons-secondary-font"],
+    };
 
     async addFont(variable) {
         const fontsData = await this.dependencies.builderFont.getFontsData();

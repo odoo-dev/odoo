@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+<t t-name="website.LinkCustomOption">
+    <BuilderRow label.translate="Type">
+        <BuilderSelect>
+            <BuilderSelectItem classAction="''">Theme</BuilderSelectItem>
+            <BuilderSelectItem id="'link_custom_opt'" action="'linkCustom'">Custom</BuilderSelectItem>
+        </BuilderSelect>
+    </BuilderRow>
+    <t t-if="this.isActiveItem('link_custom_opt')">
+        <BuilderRow label.translate="Link Style" level="1">
+            <BuilderSelect>
+                <BuilderSelectItem classAction="'o_link_underline_never'">Never</BuilderSelectItem>
+                <BuilderSelectItem classAction="'o_link_underline_hover'">On Hover</BuilderSelectItem>
+                <BuilderSelectItem classAction="'o_link_underline_always'">Always</BuilderSelectItem>
+                <BuilderSelectItem classAction="'o_link_underline_not_hover'">Underline except on hover</BuilderSelectItem>
+            </BuilderSelect>
+        </BuilderRow>
+        <BuilderRow label.translate="Hover Effect" level="1">
+            <BuilderSelect>
+                <BuilderSelectItem classAction="'o_link_hover_none'">None</BuilderSelectItem>
+                <BuilderSelectItem classAction="'o_link_hover_darken'">Darken</BuilderSelectItem>
+                <BuilderSelectItem classAction="'o_link_hover_lighter'">Lighter</BuilderSelectItem>
+                <BuilderSelectItem classAction="'o_link_hover_lift'">Lift and Shadow</BuilderSelectItem>
+            </BuilderSelect>
+        </BuilderRow>
+        <BuilderRow label.translate="Color" level="1">
+            <BuilderColorPicker styleAction="'color'" enabledTabs="['solid', 'custom']"/>
+        </BuilderRow>
+    </t>
+</t>
+
+<t t-inherit="website.BuilderOptions" t-inherit-mode="extension">
+    <xpath expr="//t[@id='snippet_specific_options']" position="after">
+        <link_custom_option selector="main a:not(.btn)"/>
+    </xpath>
+</t>
+
+</templates>

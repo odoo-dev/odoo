@@ -1,5 +1,19 @@
 /* This file regroups the website design rules. */
 
+// The shared button values (Bootstrap's, after the website's), by key.
+$o-btn-shared-values: (
+    'padding': $btn-padding-y $btn-padding-x,
+    'font-size': $btn-font-size,
+    'border-radius': $btn-border-radius,
+    'padding-sm': $btn-padding-y-sm $btn-padding-x-sm,
+    'font-size-sm': $btn-font-size-sm,
+    'border-radius-sm': $btn-border-radius-sm,
+    'padding-lg': $btn-padding-y-lg $btn-padding-x-lg,
+    'font-size-lg': $btn-font-size-lg,
+    'border-radius-lg': $btn-border-radius-lg,
+    'border-width': $btn-border-width,
+);
+
 :root {
     /* Border color
        Let borders color adapt according to body and CCs. Also, set a fallback
@@ -141,6 +155,18 @@
     @include print-variable('btn-border-radius', $btn-border-radius);
     @include print-variable('btn-border-radius-sm', $btn-border-radius-sm);
     @include print-variable('btn-border-radius-lg', $btn-border-radius-lg);
+    // Per-style values: when unset, print the shared one the buttons use.
+    @each $-style in ('primary', 'secondary') {
+        @each $-key, $-shared-value in $o-btn-shared-values {
+            @include print-variable('btn-#{$-style}-#{$-key}', o-website-value('btn-#{$-style}-#{$-key}') or $-shared-value);
+        }
+        @include print-variable('btn-#{$-style}-text-transform', o-website-value('btn-#{$-style}-text-transform'));
+        @include print-variable('btn-#{$-style}-margin', o-website-value('btn-#{$-style}-margin'));
+        @include print-variable('btn-#{$-style}-border-style', o-website-value('btn-#{$-style}-border-style'));
+        @include print-variable('btn-#{$-style}-border-color', o-website-value('btn-#{$-style}-border-color'));
+        @include print-variable('buttons-#{$-style}-font', o-website-value('buttons-#{$-style}-font') or o-website-value('buttons-font') or o-website-value('font'));
+        @include print-variable('set-buttons-#{$-style}-font', o-get-font-info('buttons-#{$-style}'));
+    }
 
     @include print-variable('box-shadow-color', $box-shadow-color);
     @include print-variable('box-shadow-offset-x', $box-shadow-offset-x);
@@ -835,6 +861,111 @@ font[class*='bg-'] {
 }
 
 /* Buttons */
+$-btn-hover-effect: o-website-value('btn-hover-effect');
+@if $-btn-hover-effect and $-btn-hover-effect != 'darken' {
+    @each $-color in ('primary', 'secondary') {
+        // Outline buttons have no background: their hover fill is the base color.
+        $-is-outline: o-website-value('btn-#{$-color}-outline') and not o-website-value('btn-#{$-color}-flat');
+        $-base-bg: if($-is-outline, var(--#{$prefix}btn-hover-bg), var(--#{$prefix}btn-bg));
+        $-base-border: if($-is-outline, var(--#{$prefix}btn-hover-border-color), var(--#{$prefix}btn-border-color));
+        .btn-#{$-color} {
+            @if $-btn-hover-effect == 'none' {
+                &:hover {
+                    color: var(--#{$prefix}btn-color);
+                    background-color: var(--#{$prefix}btn-bg);
+                    border-color: var(--#{$prefix}btn-border-color);
+                }
+            } @else if $-btn-hover-effect == 'lighter' {
+                &:hover {
+                    background-color: color-mix(in srgb, #{$-base-bg} #{100% - $btn-hover-bg-shade-amount}, white);
+                    border-color: color-mix(in srgb, #{$-base-border} #{100% - $btn-hover-bg-shade-amount}, white);
+                }
+            } @else if $-btn-hover-effect == 'lift' {
+                transition: $btn-transition, transform .15s ease-in-out;
+                &:hover,
+                &:focus-visible {
+                    transform: translateY(-4px);
+                }
+                &:hover {
+                    box-shadow: $box-shadow;
+                }
+            }
+        }
+    }
+}
+
+/* Links */
+// Text up 4px with a soft shadow. `top` rather than `transform`: a transform
+// needs an inline-block link, which no longer wraps with the text.
+@mixin -o-link-lift {
+    position: relative;
+    top: 0;
+    transition: top .15s ease-in-out, text-shadow .15s ease-in-out;
+    &:where(:hover, :focus-visible) {
+        top: -4px;
+    }
+    &:where(:hover) {
+        text-shadow: 0 4px 6px rgba($black, .2);
+    }
+}
+$-link-hover-effect: o-website-value('link-hover-effect');
+@if $-link-hover-effect == 'none' or $-link-hover-effect == 'lighter' {
+    @for $index from 1 through length($o-color-combinations) {
+        $-link: map-get($colors, 'o-cc#{$index}-link');
+        .o_cc#{$index} {
+            $-bg-color: o-color(map-get($colors, 'o-cc#{$index}-bg'));
+            $-link-color: if($-link, o-color($-link), map-get($theme-colors, 'primary'));
+            $-link-hover-color: if($-link-hover-effect == 'none', $-link-color, lighten($-link-color, 15%));
+            #{$o-color-extras-nesting-selector} {
+                a:not(.btn):where(:not(.o_cc)), .btn-link:where(:not(.o_cc)) {
+                    &:hover {
+                        color: auto-contrast($-link-hover-color, $-bg-color, 'o-cc#{$index}-link');
+                    }
+                }
+            }
+        }
+    }
+} @else if $-link-hover-effect == 'lift' {
+    :where(main a:not(.btn, .stretched-link, .nav-link, .dropdown-item, .page-link, .list-group-item, .badge, :has(img))) {
+        @include -o-link-lift;
+    }
+}
+// A custom link (builder Type select): its own underline, hover effect and
+// color (inline), whatever the Theme tab sets.
+.o_link_custom {
+    &.o_link_underline_never {
+        &, &:hover {
+            text-decoration: none;
+        }
+    }
+    &.o_link_underline_hover {
+        text-decoration: none;
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+    &.o_link_underline_always {
+        &, &:hover {
+            text-decoration: underline;
+        }
+    }
+    &.o_link_underline_not_hover {
+        text-decoration: underline;
+        &:hover {
+            text-decoration: none;
+        }
+    }
+    &.o_link_hover_darken:hover {
+        filter: brightness(.85);
+    }
+    &.o_link_hover_lighter:hover {
+        filter: brightness(1.15);
+    }
+    &.o_link_hover_lift {
+        @include -o-link-lift;
+    }
+}
+
 .btn {
     &.flat {
         border: 0;
@@ -851,6 +982,89 @@ font[class*='bg-'] {
         &.btn-lg { @include button-size(.6rem, 1.8rem, $font-size-lg, 30px); }
         &.btn-sm { @include button-size(.3rem, .9rem, $font-size-sm, 30px); }
         &.btn-xs { @include button-size(.15rem, .45rem, ($font-size-base * .75), 30px); }
+    }
+}
+// Primary and secondary buttons: their own values, when set, override the
+// shared ones. Nothing is output for an unset value.
+@mixin -o-btn-style-size($style, $size) {
+    @each $-prop in ('padding', 'font-size', 'border-radius') {
+        $-value: o-website-value('btn-#{$style}-#{$-prop}#{$size}');
+        // `.btn-<style>` comes after `.btn-sm` / `.btn-lg` with the same
+        // specificity: once the medium value is set, a size must set its own.
+        @if $size != '' and not $-value and o-website-value('btn-#{$style}-#{$-prop}') {
+            $-value: map-get($o-btn-shared-values, '#{$-prop}#{$size}');
+        }
+        @if $-value {
+            @if $-prop == 'font-size' {
+                @include rfs($-value, --#{$prefix}btn-font-size);
+            } @else if $-prop == 'padding' {
+                padding: $-value;
+            } @else {
+                --#{$prefix}btn-#{$-prop}: #{$-value};
+            }
+        }
+    }
+}
+@mixin -o-btn-style-border($style) {
+    $-width: o-website-value('btn-#{$style}-border-width');
+    $-border-style: o-website-value('btn-#{$style}-border-style');
+    $-color: o-website-value('btn-#{$style}-border-color');
+    $-is-outline: o-website-value('btn-#{$style}-outline');
+    @if $-width {
+        --#{$prefix}btn-border-width: #{$-width};
+    }
+    @if $-border-style and $-border-style != 'solid' {
+        border-style: unquote($-border-style);
+    }
+    // A Fill button has an invisible border (its background color): it
+    // follows the text color, in each state, once the user sets a width or a
+    // line style, so untouched buttons keep their look.
+    $-follows-text: not $-color and not $-is-outline and ($-width or ($-border-style and $-border-style != 'solid'));
+    @if $-color or $-follows-text {
+        @each $-state in ('', 'hover-', 'active-', 'disabled-') {
+            --#{$prefix}btn-#{$-state}border-color: #{if($-color, $-color, var(--#{$prefix}btn-#{$-state}color))} !important;
+        }
+    }
+}
+@each $-style in ('primary', 'secondary') {
+    .btn-#{$-style} {
+        // Flat forces its own padding, font size and corners.
+        @if not o-website-value('btn-#{$-style}-flat') {
+            @include -o-btn-style-size($-style, '');
+            &.btn-sm {
+                @include -o-btn-style-size($-style, '-sm');
+            }
+            &.btn-lg {
+                @include -o-btn-style-size($-style, '-lg');
+            }
+            $-text-transform: o-website-value('btn-#{$-style}-text-transform');
+            @if $-text-transform and $-text-transform != 'none' {
+                text-transform: $-text-transform;
+            }
+            @include -o-btn-style-border($-style);
+        }
+        $-font: o-get-font-info('buttons-#{$-style}');
+        @if $-font and $-font != $o-theme-buttons-font {
+            font-family: $-font;
+        }
+        $-font-weight: o-website-value('btn-#{$-style}-font-weight');
+        @if $-font-weight {
+            --#{$prefix}btn-font-weight: #{$-font-weight};
+        }
+        $-font-weight-bold: o-website-value('btn-#{$-style}-font-weight-bold');
+        @if $-font-weight-bold {
+            b, strong {
+                font-weight: $-font-weight-bold !important;
+            }
+        }
+    }
+    // Per-style margin: only buttons in the page content, not the ones a
+    // component lays out itself.
+    $-margin: o-website-value('btn-#{$-style}-margin');
+    @if $-margin and not o-website-value('btn-#{$-style}-flat') {
+        main .btn-#{$-style}:not(:is(.navbar, form, .input-group, .btn-group, .card, .dropdown-menu, .modal) *) {
+            margin: $-margin;
+        }
     }
 }
 
