@@ -1,5 +1,4 @@
-import { registry } from "@web/core/registry";
-import { computed, Plugin, signal, useListener, usePlugin } from "@odoo/owl";
+import { computed, Plugin, signal, useListener } from "@odoo/owl";
 import { services } from "@web/core/services";
 
 const STORAGE_KEY = "web.emoji.frequent";
@@ -34,15 +33,3 @@ export class FrequentEmojiPlugin extends Plugin {
 }
 
 services.add(FrequentEmojiPlugin);
-
-/**
- * -----------------------------------------------------------------------------
- * @todo owl3 migration
- * temporary - to remove when all use of the frequent_emoji service are removed
- * -----------------------------------------------------------------------------
- */
-registry.category("services").add("frequent_emoji", {
-    start() {
-        return usePlugin(FrequentEmojiPlugin);
-    },
-});
