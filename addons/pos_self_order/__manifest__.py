@@ -49,7 +49,6 @@
             'pos_self_order/static/tests/unit/**/*',
         ],
         'point_of_sale._assets_pos': [
-            'pos_self_order/static/src/app/models/utils/snooze_tracker.js',
             'pos_self_order/static/src/backend/qr_order_button/*',
             'pos_self_order/static/src/overrides/**/*',
         ],
@@ -116,6 +115,8 @@
             'point_of_sale/static/src/app/plugins/pos_number_buffer_plugin.js',
             'mail/static/src/core/common/sound_effects_plugin.js',  # Needed by pos_number_buffer_plugin
             'point_of_sale/static/src/app/plugins/pos_ticket_printer_plugin.js',
+            'point_of_sale/static/src/app/plugins/pos_snooze_plugin.js',
+            'point_of_sale/static/src/app/components/popups/product_info_popup/snooze_dialog/*',
             'point_of_sale/static/src/app/components/popups/retry_print_popup/**',
             'point_of_sale/static/src/app/components/popups/text_input_popup/**',
             "pos_self_order/static/src/app/**/*",

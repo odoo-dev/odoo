@@ -34,14 +34,13 @@ import { localeCompare, normalize } from "@web/core/l10n/utils";
 import { WithLazyGetterTrap } from "@point_of_sale/lazy_getter";
 import { debounce } from "@web/core/utils/timing";
 import DevicesSynchronisation from "../utils/devices_synchronisation";
-import { formatDate, serializeDateTime } from "@web/core/l10n/dates";
+import { formatDate } from "@web/core/l10n/dates";
 import { ProductInfoPopup } from "@point_of_sale/app/components/popups/product_info_popup/product_info_popup";
 import { PresetSlotsPopup } from "@point_of_sale/app/components/popups/preset_slots_popup/preset_slots_popup";
 import { DebugWidget } from "../utils/debug/debug_widget";
 import OrderPaymentValidation from "../utils/order_payment_validation";
 import { logPosMessage } from "../utils/pretty_console_log";
 import { initLNA } from "../utils/init_lna";
-import { SnoozeTracker } from "@point_of_sale/app/models/utils/snooze_tracker";
 import { ScaleScreen } from "@point_of_sale/app/screens/scale_screen/scale_screen";
 import { Domain } from "@web/core/domain";
 import { PosOrderAccounting } from "@point_of_sale/app/models/accounting/pos_order_accounting";
@@ -52,7 +51,6 @@ import { PosRouterPlugin } from "@point_of_sale/app/plugins/pos_router_plugin";
 import { CustomerDisplayTerminalPlugin } from "@point_of_sale/app/plugins/customer_display_terminal_plugin";
 import { SIZES } from "@web/core/ui/ui_utils";
 import { PosAccessRightPlugin } from "@point_of_sale/app/plugins/access_right_plugin";
-import { SnoozeDialog } from "@point_of_sale/app/components/popups/product_info_popup/snooze_dialog/snooze_dialog";
 import { formatCurrency } from "@web/core/currency";
 import { parseFloat } from "@web/views/fields/parsers";
 import { localization } from "@web/core/l10n/localization";
@@ -656,7 +654,6 @@ export class PosStore extends WithLazyGetterTrap {
             this.company,
             this.config
         );
-        await this.initSnoozedProducts();
     }
 
     async cashMove() {
@@ -3091,67 +3088,6 @@ export class PosStore extends WithLazyGetterTrap {
         }
     }
 
-    async initSnoozedProducts() {
-        this.snoozeTracker = new SnoozeTracker(this.config.pos_snooze_ids);
-        this.models["pos.config"].addEventListener("update", (data) => {
-            if (data.fields?.includes("pos_snooze_ids")) {
-                this.snoozeTracker.setSnoozes(this.config.pos_snooze_ids);
-            }
-        });
-        if (this.data.dataLoadedFromCache()) {
-            try {
-                const snoozes = await this.data.searchRead("pos.snooze", [
-                    ["pos_config_id", "=", this.config.id],
-                ]);
-                const snoozedIds = new Set(snoozes.map((s) => s.id));
-                const snoozeModel = this.models["pos.snooze"];
-                const snoozetoDelete = snoozeModel
-                    .getAll()
-                    .filter((snooze) => !snoozedIds.has(snooze.id));
-                snoozeModel.deleteMany(snoozetoDelete);
-            } catch (error) {
-                logPosMessage(
-                    "Store",
-                    "initSnoozedProducts",
-                    `Error reading snoozes from server: ${error.message}`,
-                    CONSOLE_COLOR,
-                    [error]
-                );
-            }
-        }
-    }
-
-    getActiveSnooze(type, data) {
-        return this.snoozeTracker.getActiveSnooze(type, data);
-    }
-
-    isProductSnoozed(product) {
-        return this.snoozeTracker.isProductSnoozed(product);
-    }
-
-    async canAddProductToCurrentOrder(product) {
-        if (!this.isProductSnoozed(product)) {
-            return true;
-        }
-        const alreadyAdded = this.getOrder().lines.some(
-            (line) => line.product_id.product_tmpl_id.id === product.id
-        );
-
-        if (alreadyAdded) {
-            return true;
-        }
-
-        return new Promise((resolve) => {
-            this.dialog.add(AlertDialog, {
-                title: _t("Warning"),
-                body: _t("You are trying to add a snoozed product. Would you like to continue?"),
-                confirmLabel: _t("Continue"),
-                confirm: () => resolve(true),
-                cancel: () => resolve(false),
-            });
-        });
-    }
-
     async initCustomerDisplay() {
         this.customerDisplay.init({
             identifier: this.device.identifier,
@@ -3218,56 +3154,6 @@ export class PosStore extends WithLazyGetterTrap {
         return payment?.isProcessing() && payment.qr_code
             ? { title: _t("Scan the QR for payment"), ...payment.getQrPopupProps() }
             : null;
-    }
-
-    getSnoozeCountdown(activeSnooze) {
-        // This function will calculate and return [countdown, activeSoozeRecord]
-        const now = DateTime.now();
-        const endTime = activeSnooze.end_time;
-        if (!endTime) {
-            return [_t("Next session"), activeSnooze];
-        }
-        const diff = endTime.diff(now, ["hours", "minutes", "seconds"]);
-        if (diff.as("seconds") <= 0) {
-            return ["", undefined];
-        }
-        return [diff.toFormat("hh:mm:ss"), activeSnooze];
-    }
-    snoozeItem(serviceType, onCreation, extraPayload = {}) {
-        this.dialog.add(SnoozeDialog, {
-            name: serviceType,
-            onSave: async (hours) => {
-                const start_time = DateTime.now();
-                const end_time = hours
-                    ? serializeDateTime(start_time.plus({ hours: hours }))
-                    : null;
-                const payload = {
-                    start_time: serializeDateTime(start_time),
-                    end_time: end_time,
-                    pos_config_id: this.config.id,
-                    type: serviceType,
-                    ...extraPayload,
-                };
-                const snoozedRecord = (await this.data.create("pos.snooze", [payload]))[0];
-                await onCreation?.(snoozedRecord);
-            },
-        });
-    }
-    unSnoozeItem(snoozedItem, onUnsnooze) {
-        this.dialog.add(ConfirmationDialog, {
-            title: _t("Stop Snooze"),
-            body: _t(
-                "Do you want to stop the snooze early and make the %s available again immediately?",
-                snoozedItem.type
-            ),
-            confirmLabel: _t("Yes"),
-            confirm: async () => {
-                this.data.delete("pos.snooze", [snoozedItem.id]);
-                await onUnsnooze?.();
-            },
-            cancelLabel: _t("Cancel"),
-            cancel: () => {},
-        });
     }
 
     toggleScanning() {

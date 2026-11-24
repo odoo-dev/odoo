@@ -1,5 +1,6 @@
 import { Dialog } from "@web/core/dialog/dialog";
-import { Component, onWillStart, proxy, useProps, t } from "@odoo/owl";
+import { Component, onWillStart, proxy, useProps, t, usePlugin } from "@odoo/owl";
+import { PosSnoozePlugin } from "@point_of_sale/app/plugins/pos_snooze_plugin";
 import { usePos } from "@point_of_sale/app/hooks/pos_hook";
 import { ProductCard } from "@point_of_sale/app/components/product_card/product_card";
 import { QuantityButtons } from "@point_of_sale/app/components/buttons/quantity_buttons/quantity_buttons";
@@ -22,6 +23,7 @@ export class ComboConfiguratorPopup extends Component {
 
     setup() {
         this.pos = usePos();
+        this.snooze = usePlugin(PosSnoozePlugin);
         this.ui = useService("ui");
 
         let combo = {};
@@ -271,8 +273,8 @@ export class ComboConfiguratorPopup extends Component {
         const combo = combo_item.combo_id;
         if (
             !this.state.qty[combo.id][combo_item.id] &&
-            this.pos.isProductSnoozed(productTmpl) &&
-            !(await this.pos.canAddProductToCurrentOrder(productTmpl))
+            this.snooze.isProductSnoozed(productTmpl) &&
+            !(await this.snooze.canAddProductToOrder(productTmpl, this.pos.getOrder()))
         ) {
             return;
         }

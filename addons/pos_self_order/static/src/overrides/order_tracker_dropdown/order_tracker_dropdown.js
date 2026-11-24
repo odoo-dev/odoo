@@ -1,14 +1,16 @@
-import { useEffect, signal, t } from "@odoo/owl";
+import { useEffect, signal, t, usePlugin } from "@odoo/owl";
 import { patch } from "@web/core/utils/patch";
 import { OrderTrackerDropdown } from "@point_of_sale/app/components/order_tracker_dropdown/order_tracker_dropdown";
+import { PosSnoozePlugin } from "@point_of_sale/app/plugins/pos_snooze_plugin";
 
 patch(OrderTrackerDropdown.prototype, {
     setup() {
         super.setup();
+        this.snooze = usePlugin(PosSnoozePlugin);
         this.selfSnoozeCountdown = signal("", { type: t.string().optional("") });
 
         useEffect(() => {
-            const activeSnooze = this.pos.getActiveSnooze("self-ordering");
+            const activeSnooze = this.snooze.getActiveSnooze("self-ordering");
             if (activeSnooze) {
                 this.updateSelfCountdown();
                 const interval = setInterval(() => this.updateSelfCountdown(), 60000);
@@ -30,7 +32,7 @@ patch(OrderTrackerDropdown.prototype, {
     get externalOrderSummary() {
         const externalOrderSummary = super.externalOrderSummary;
         if (this.pos.config.self_ordering_mode === "mobile") {
-            const activeSnooze = this.pos.getActiveSnooze("self-ordering");
+            const activeSnooze = this.snooze.getActiveSnooze("self-ordering");
             return [
                 {
                     type: "SOURCE",
@@ -53,16 +55,16 @@ patch(OrderTrackerDropdown.prototype, {
         return externalOrderSummary;
     },
     updateSelfCountdown() {
-        const activeSnooze = this.pos.getActiveSnooze("self-ordering");
+        const activeSnooze = this.snooze.getActiveSnooze("self-ordering");
         if (activeSnooze) {
-            const [countdown] = this.pos.getSnoozeCountdown(activeSnooze);
+            const [countdown] = this.snooze.getSnoozeCountdown(activeSnooze);
             this.selfSnoozeCountdown.set(countdown.split(":").slice(0, 2).join(":"));
         }
     },
     async snoozeSelfOrdering() {
-        const activeSnooze = this.pos.getActiveSnooze("self-ordering");
+        const activeSnooze = this.snooze.getActiveSnooze("self-ordering");
         if (activeSnooze) {
-            this.pos.unSnoozeItem(activeSnooze, async () => {
+            this.snooze.unSnoozeItem(activeSnooze, async () => {
                 this.selfSnoozeCountdown.set("");
                 await this.pos.data.call("pos.config", "notify_session_state_changed", [
                     this.pos.config.id,
@@ -70,7 +72,7 @@ patch(OrderTrackerDropdown.prototype, {
             });
             return;
         }
-        this.pos.snoozeItem("self-ordering", async () => {
+        this.snooze.snoozeItem("self-ordering", async () => {
             await this.pos.data.call("pos.config", "notify_session_state_changed", [
                 this.pos.config.id,
             ]);

@@ -3,7 +3,8 @@ import { _t } from "@web/core/l10n/translation";
 import { Dialog } from "@web/core/dialog/dialog";
 import { usePos } from "@point_of_sale/app/hooks/pos_hook";
 import { useService } from "@web/core/utils/hooks";
-import { Component, proxy, useProps, t } from "@odoo/owl";
+import { Component, proxy, useProps, t, usePlugin } from "@odoo/owl";
+import { PosSnoozePlugin } from "@point_of_sale/app/plugins/pos_snooze_plugin";
 import { SnoozeDialog } from "./snooze_dialog/snooze_dialog";
 import { ProductTemplate } from "@point_of_sale/app/models/product_template";
 
@@ -18,11 +19,12 @@ export class ProductInfoPopup extends Component {
 
     setup() {
         this.pos = usePos();
+        this.snooze = usePlugin(PosSnoozePlugin);
         this.ui = useService("ui");
         this.dialog = useService("dialog");
         this.state = proxy({
             countdown: "",
-            activeSnooze: this.pos.getActiveSnooze("product", {
+            activeSnooze: this.snooze.getActiveSnooze("product", {
                 product: this.props.productTemplate,
             }),
         });
@@ -42,7 +44,7 @@ export class ProductInfoPopup extends Component {
         );
     }
     updateSnoozeCountdown() {
-        [this.state.countdown, this.state.activeSnooze] = this.pos.getSnoozeCountdown(
+        [this.state.countdown, this.state.activeSnooze] = this.snooze.getSnoozeCountdown(
             this.state.activeSnooze
         );
         if (!this.ui.isSmall) {
@@ -77,13 +79,13 @@ export class ProductInfoPopup extends Component {
     }
     openSnoozeDialog() {
         if (this.state.activeSnooze) {
-            this.pos.unSnoozeItem(this.state.activeSnooze, () => {
+            this.snooze.unSnoozeItem(this.state.activeSnooze, () => {
                 this.state.activeSnooze = undefined;
                 this.state.countdown = "";
             });
             return;
         }
-        this.pos.snoozeItem(
+        this.snooze.snoozeItem(
             "product",
             (record) => {
                 this.state.activeSnooze = record;

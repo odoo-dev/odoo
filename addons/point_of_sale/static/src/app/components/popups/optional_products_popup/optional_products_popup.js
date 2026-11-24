@@ -1,5 +1,6 @@
 import { Dialog } from "@web/core/dialog/dialog";
-import { Component, proxy, useProps, t } from "@odoo/owl";
+import { Component, proxy, useProps, t, usePlugin } from "@odoo/owl";
+import { PosSnoozePlugin } from "@point_of_sale/app/plugins/pos_snooze_plugin";
 import { usePos } from "@point_of_sale/app/hooks/pos_hook";
 import { makeAwaitable } from "@point_of_sale/app/utils/make_awaitable_dialog";
 import { useService } from "@web/core/utils/hooks";
@@ -17,6 +18,7 @@ export class OptionalProductPopup extends Component {
 
     setup() {
         this.pos = usePos();
+        this.snooze = usePlugin(PosSnoozePlugin);
         this.dialog = useService("dialog");
         this.state = proxy({
             product_lines:
@@ -32,7 +34,10 @@ export class OptionalProductPopup extends Component {
         if (
             increase &&
             optional_product.qty === 0 &&
-            !(await this.pos.canAddProductToCurrentOrder(optional_product.product_tmpl_id))
+            !(await this.snooze.canAddProductToOrder(
+                optional_product.product_tmpl_id,
+                this.pos.getOrder()
+            ))
         ) {
             return;
         }

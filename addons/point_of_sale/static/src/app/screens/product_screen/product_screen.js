@@ -18,6 +18,7 @@ import {
     usePlugin,
 } from "@odoo/owl";
 import { SoundEffectsPlugin } from "@mail/core/common/sound_effects_plugin";
+import { PosSnoozePlugin } from "@point_of_sale/app/plugins/pos_snooze_plugin";
 import { PosNumberBufferPlugin } from "@point_of_sale/app/plugins/pos_number_buffer_plugin";
 import { CategorySelector } from "@point_of_sale/app/components/category_selector/category_selector";
 import { Input } from "@point_of_sale/app/components/inputs/input/input";
@@ -67,6 +68,7 @@ export class ProductScreen extends Component {
 
     setup() {
         this.pos = usePos();
+        this.snooze = usePlugin(PosSnoozePlugin);
         this.ui = useService("ui");
         this.dialog = useService("dialog");
         this.notification = useService("notification");
@@ -367,7 +369,9 @@ export class ProductScreen extends Component {
         }
         this.soundEffects.play("beep");
 
-        if (!(await this.pos.canAddProductToCurrentOrder(product.product_tmpl_id))) {
+        if (
+            !(await this.snooze.canAddProductToOrder(product.product_tmpl_id, this.pos.getOrder()))
+        ) {
             return;
         }
 
@@ -430,7 +434,9 @@ export class ProductScreen extends Component {
         }
         this.soundEffects.play("beep");
 
-        if (!(await this.pos.canAddProductToCurrentOrder(product.product_tmpl_id))) {
+        if (
+            !(await this.snooze.canAddProductToOrder(product.product_tmpl_id, this.pos.getOrder()))
+        ) {
             return;
         }
 
@@ -472,7 +478,7 @@ export class ProductScreen extends Component {
     }
 
     async addProductToOrder(product) {
-        if (!(await this.pos.canAddProductToCurrentOrder(product))) {
+        if (!(await this.snooze.canAddProductToOrder(product, this.pos.getOrder()))) {
             return;
         }
         const options = {};

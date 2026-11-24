@@ -19,12 +19,12 @@ import {
 } from "@point_of_sale/utils";
 import { getOrderLineValues, getBestMatchingVariant } from "./card_utils";
 import { initLNA } from "@point_of_sale/app/utils/init_lna";
-import { SnoozeTracker } from "@point_of_sale/app/models/utils/snooze_tracker";
 import { InfoPopup } from "@pos_self_order/app/components/info_popup/info_popup";
 import { ComboSuggestion } from "@point_of_sale/app/models/utils/combo_suggestion";
 import { session } from "@web/session";
 import { PosDataPlugin } from "@point_of_sale/app/plugins/pos_data_plugin";
 import { PosTicketPrinterPlugin } from "@point_of_sale/app/plugins/pos_ticket_printer_plugin";
+import { PosSnoozePlugin } from "@point_of_sale/app/plugins/pos_snooze_plugin";
 
 const { DateTime } = luxon;
 
@@ -40,6 +40,7 @@ export class SelfOrder {
     async setup(env, { notification, router, barcode, bus_service, dialog }) {
         this.data = usePlugin(PosDataPlugin);
         this.ticketPrinter = usePlugin(PosTicketPrinterPlugin);
+        this.snooze = usePlugin(PosSnoozePlugin);
         this.ticketPrinter.init(env);
 
         // services
@@ -73,7 +74,6 @@ export class SelfOrder {
         this.currentCategory = null;
         this.productByCategIds = {};
         this.availableCategories = [];
-        this.snoozeTracker = new SnoozeTracker();
         this.pendingComboConversion = null;
 
         this.env.utils = {
@@ -105,7 +105,7 @@ export class SelfOrder {
             if (records.length > 0) {
                 await this.models.connectNewData({ "pos.snooze": records });
             }
-            this.snoozeTracker.setSnoozes(this.config.pos_snooze_ids);
+            this.snooze.setSnoozes(this.config.pos_snooze_ids);
         });
         this.data.connectWebSocket("PRODUCT_CHANGED", (payload) => {
             const productTemplateIds = payload["product.template"].map((tmpl) => tmpl.id);
@@ -650,7 +650,6 @@ export class SelfOrder {
     }
 
     initData() {
-        this.snoozeTracker.setSnoozes(this.config.pos_snooze_ids);
         this.initProducts();
         this._initLanguages();
         this.initHardware();
@@ -670,11 +669,11 @@ export class SelfOrder {
     }
 
     isProductSnoozed(product) {
-        return this.snoozeTracker.isProductSnoozed(product);
+        return this.snooze.isProductSnoozed(product);
     }
 
     get isSelfSnoozed() {
-        return this.snoozeTracker.getActiveSnooze("self-ordering");
+        return this.snooze.getActiveSnooze("self-ordering");
     }
 
     isProductAvailable(product) {

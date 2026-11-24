@@ -1231,7 +1231,7 @@ test("test_self_order_product_availability: mobile unavailable product handling"
         end_time: "2025-07-30 00:00:00",
     });
     store.config.pos_snooze_ids = [snooze, ...(store.config.pos_snooze_ids || [])];
-    store.snoozeTracker.setSnoozes(store.config.pos_snooze_ids);
+    store.snooze.setSnoozes(store.config.pos_snooze_ids);
     await Utils.checkIsNoBtn("My Order");
     await Utils.clickOrderNow();
     await Utils.selectLocation("In");
