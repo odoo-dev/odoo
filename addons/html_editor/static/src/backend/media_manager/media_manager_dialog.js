@@ -87,9 +87,9 @@ export function getMediaManagertDialogProps(recordInfo) {
         baseResId: getBaseResId(recordInfo.resId),
         filters: [
             // todo link this to the search bar filters somehow
-            { label: "uploaded last week", domain: [["create_date", ">", lastWeekDate]] },
-            { label: "uploaded by me", domain: MY_MEDIA_DOMAIN },
-            { label: "favorites", domain: [["is_favorite", "=", true]] },
+            { label: _t("uploaded last week"), domain: [["create_date", ">", lastWeekDate]] },
+            { label: _t("uploaded by me"), domain: MY_MEDIA_DOMAIN },
+            { label: _t("favorites"), domain: [["is_favorite", "=", true]] },
         ],
         noCreate: true,
         domain: getRecordDomain(recordInfo.resModel, getBaseResId(recordInfo.resId)),
