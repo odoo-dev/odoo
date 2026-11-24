@@ -46,3 +46,13 @@
 .o-mail-CreatePollOptionDialog-emoji {
     width: 2.25rem;
 }
+
+/* Same look as the handle widget of list views */
+.o-mail-CreatePollOptionDialog-handle {
+    cursor: grab;
+    color: var(--gray-500);
+
+    &:hover {
+        color: var(--gray-700);
+    }
+}

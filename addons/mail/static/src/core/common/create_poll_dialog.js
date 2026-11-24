@@ -6,11 +6,14 @@ import { Dialog } from "@web/core/dialog/dialog";
 import { EmojiPicker } from "@web/core/emoji_picker/emoji_picker";
 import { rpc } from "@web/core/network/rpc";
 import { useAutofocus, useService } from "@web/core/utils/hooks";
+import { useSortable } from "@web/core/utils/sortable_owl";
 
 export class CreatePollDialog extends Component {
     static template = "mail.CreatePollDialog";
     static components = { Dialog, EmojiPicker, CreatePollOptionDialog };
 
+    nextOptionId = 0;
+    optionsRef = signal.ref();
     questionRef = signal.ref();
 
     setup() {
@@ -24,14 +27,48 @@ export class CreatePollDialog extends Component {
         this.state = proxy({
             allowMultipleOptions: false,
             duration: "10",
-            options: [{ label: "" }, { label: "" }],
+            options: [this.makeOption(), this.makeOption()],
             question: "",
             submitted: false,
         });
+        useSortable({
+            ref: this.optionsRef,
+            elements: ".o-mail-CreatePollOptionDialog",
+            handle: ".o-mail-CreatePollOptionDialog-handle",
+            cursor: "grabbing",
+            onDrop: ({ element, previous }) =>
+                this.moveOption(
+                    Number(element.dataset.optionId),
+                    previous ? Number(previous.dataset.optionId) : undefined
+                ),
+        });
+    }
+
+    /**
+     * Options get a stable id so that each keeps its component (input
+     * selection, emoji picker) when options are reordered or removed.
+     */
+    makeOption(values = {}) {
+        return { id: this.nextOptionId++, label: "", ...values };
+    }
+
+    /**
+     * @param {number} optionId
+     * @param {number} [previousOptionId] id of the option it is dropped after,
+     *  undefined when dropped first
+     */
+    moveOption(optionId, previousOptionId) {
+        const options = this.state.options;
+        const [option] = options.splice(
+            options.findIndex(({ id }) => id === optionId),
+            1
+        );
+        const previousIndex = options.findIndex(({ id }) => id === previousOptionId);
+        options.splice(previousIndex + 1, 0, option);
     }
 
     onClickAddOption() {
-        this.state.options.push({ isUserAdded: true, label: "" });
+        this.state.options.push(this.makeOption({ isUserAdded: true }));
     }
 
     onClickRemoveOption(index) {

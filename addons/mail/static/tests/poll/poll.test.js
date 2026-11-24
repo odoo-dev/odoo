@@ -7,9 +7,9 @@ import {
     startServer,
     triggerEvents,
 } from "@mail/../tests/mail_test_helpers";
-import { advanceTime, describe, mockTouch, test, waitFor, waitForNone } from "@odoo/hoot";
+import { advanceTime, describe, expect, mockTouch, test, waitFor, waitForNone } from "@odoo/hoot";
 
-import { Command, contains } from "@web/../tests/web_test_helpers";
+import { Command, contains, onRpc } from "@web/../tests/web_test_helpers";
 
 describe.current.tags("desktop");
 defineMailModels();
@@ -73,6 +73,34 @@ test("autofocus question on poll opening and user-added options", async () => {
     await waitFor("input[name='poll_question']:focus:count(1)");
     await contains("button:text('Add another option'):count(1)").click();
     await waitFor(".o-mail-CreatePollOptionDialog:eq(2) input:focus:count(1)");
+});
+
+test("poll options can be reordered with drag and drop", async () => {
+    const pyEnv = await startServer();
+    const channelId = pyEnv["discuss.channel"].create({ name: "General" });
+    onRpc("/mail/poll/create", async (request) => {
+        const { params } = await request.json();
+        expect.step(params.options.map(({ label }) => label).join(","));
+    });
+    await start();
+    await openDiscuss(channelId);
+    await contains(".o-mail-Composer button[title='More Actions']:count(1)").click();
+    await contains(".o-dropdown-item:text('Create Poll'):count(1)").click();
+    await contains("input[name='poll_question']").edit("Favorite color?");
+    await contains(".o-mail-CreatePollOptionDialog:eq(0) input").edit("Red");
+    await contains(".o-mail-CreatePollOptionDialog:eq(1) input").edit("Green");
+    await contains("button:text('Add another option'):count(1)").click();
+    await contains(".o-mail-CreatePollOptionDialog:eq(2) input").edit("Blue");
+    // handle is displayed before the delete button
+    await waitFor(".o-mail-CreatePollOptionDialog-handle + button[title='Delete option']:count(3)");
+    await contains(
+        ".o-mail-CreatePollOptionDialog:eq(0) .o-mail-CreatePollOptionDialog-handle"
+    ).dragAndDrop(".o-mail-CreatePollOptionDialog:eq(2)");
+    await waitFor(".o-mail-CreatePollOptionDialog:eq(0) input:value('Green'):count(1)");
+    await waitFor(".o-mail-CreatePollOptionDialog:eq(1) input:value('Blue'):count(1)");
+    await waitFor(".o-mail-CreatePollOptionDialog:eq(2) input:value('Red'):count(1)");
+    await contains("button:text('Post'):count(1)").click();
+    await expect.waitForSteps(["Green,Blue,Red"]);
 });
 
 test("full label of a truncated poll option is shown in a tooltip", async () => {
