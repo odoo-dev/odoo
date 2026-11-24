@@ -1,5 +1,4 @@
 import { Plugin, useListener, usePlugin } from "@odoo/owl";
-import { registry } from "@web/core/registry";
 import { services } from "@web/core/services";
 import { deepCopy } from "@web/core/utils/objects";
 import { ORM } from "@web/core/orm_plugin";
@@ -32,16 +31,3 @@ export class LazySessionPlugin extends Plugin {
 }
 
 services.add(LazySessionPlugin);
-
-/**
- * -----------------------------------------------------------------------------
- * @todo owl3 migration
- * temporary - to remove when all use of the lazy_session service are removed
- * -----------------------------------------------------------------------------
- */
-export const lazySessionService = {
-    start() {
-        return usePlugin(LazySessionPlugin);
-    },
-};
-registry.category("services").add("lazy_session", lazySessionService);
