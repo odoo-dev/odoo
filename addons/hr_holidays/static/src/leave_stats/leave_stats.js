@@ -66,10 +66,6 @@ export class LeaveStatsComponent extends Component {
             this.state.date_from = dateFrom;
             this.state.employee = employee;
             this.state.department = department;
-            if (this.state.department) {
-                const department_name_array = this.state.department.display_name.split("/");
-                this.state.department_name = department_name_array.pop();
-            }
         });
     }
 
