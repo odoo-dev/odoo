@@ -55,7 +55,7 @@ except ImportError:
         return None
 
 from odoo import api, sql_db
-from odoo.http.handoff import AUTO, RegistryHandoff
+from odoo.http.handoff import AUTO, RegistryHandoff, peek_dbname
 from odoo.http.server import HTTPSocket
 from odoo.modules.registry import Registry
 from odoo.orm.cache import log_ormcache_stats
@@ -1330,13 +1330,18 @@ class WorkerHTTP(Worker):
             dbs.add(loading)
         self.handoff.publish(self.handoff_slot, dbs)
 
-    def send_connection(self, dbname, sock, raw):
-        if self.handoff.send(dbname, sock, raw, self.handoff_slot):
+    def hand_off(self, client):
+        """ Give the connection to a worker having the registry of the database
+        of its request, before reading anything: that worker reads it all. """
+        dbname = peek_dbname(client)
+        if not dbname or dbname in Registry.registries:
+            return False
+        if self.handoff.send(dbname, client, self.handoff_slot):
             return True
         self.publish_databases(loading=dbname)
         return False
 
-    def process_request(self, client, addr, prelude=b''):
+    def process_request(self, client, addr, handed_off=False):
         if self.handoff:
             self.handoff.set_busy(self.handoff_slot, True)
         client.setblocking(1)
@@ -1347,8 +1352,9 @@ class WorkerHTTP(Worker):
         fcntl.fcntl(client, fcntl.F_SETFD, flags)
         # a connection is handed off only once: the table can be outdated, and
         # the request must end up being served
-        handoff = self.send_connection if self.handoff and not prelude else None
-        http_socket = HTTPSocket(client, addr, prelude=prelude, handoff=handoff)
+        if self.handoff and not handed_off and self.hand_off(client):
+            return
+        http_socket = HTTPSocket(client, addr)
         http_socket.process_request()
 
         self.request_count += 1
@@ -1358,13 +1364,13 @@ class WorkerHTTP(Worker):
         received = self.handoff.receive(self.handoff_slot)
         if not received:
             return False
-        client, _dbname, prelude = received
+        client, _dbname = received
         with client:
             try:
                 addr = client.getpeername()
             except OSError:  # the client is gone
                 return True
-            contextvars.Context().run(self.process_request, client, addr, prelude)
+            contextvars.Context().run(self.process_request, client, addr, True)
         return True
 
     def process_accepted(self):
