@@ -6541,6 +6541,33 @@ class BaseModel(metaclass=MetaModel):
 
     @typing.final
     @api.private
+    def to_compute(self, fnames: Collection[str]) -> Self:
+        """ Mark the fields ``fnames`` to be recomputed on ``self``, together
+        with all the fields that depend on them.
+
+        Stored computed fields are marked to compute, and non-stored computed
+        fields are invalidated from the cache; both are recomputed when accessed
+        (or flushed, for stored ones). Fields that are not computed keep their
+        value, but the fields depending on them are marked as well.
+
+        This is useful when a value changed without the ORM noticing it, for
+        instance when the result of a compute method depends on data that is
+        not declared as a dependency.
+        """
+        non_stored = []
+        for fname in fnames:
+            field = self._fields[fname]
+            if field.compute:
+                if field.store:
+                    self.env.add_to_compute(self._fields[fname], self)
+                else:
+                    non_stored.append(fname)
+        self.invalidate_recordset(non_stored, flush=False)
+        self.modified(fnames, before=True)
+        return self
+
+    @typing.final
+    @api.private
     def modified(self, fnames: Collection[str], create: bool = False, before: bool = False) -> None:
         """ Notify that fields will be or have been modified on ``self``. This
         invalidates the cache where necessary, and prepares the recomputation of

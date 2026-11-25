@@ -586,6 +586,46 @@ class TestFields(TransactionCaseWithUserDemo, TransactionExpressionCase):
         record.foo = "Ho"
         self.assertEqual(record.baz, "<[Ho]>")
 
+    def test_12_cascade_to_compute(self):
+        """ test marking fields and their dependents to compute """
+        rec1, rec2 = records = self.env['test_orm.cascade'].create([{'foo': "A"}, {'foo': "B"}])
+        self.assertEqual(records.mapped('baz'), ["<[A]>", "<[B]>"])
+        self.env.flush_all()
+        baz = records._fields['baz']
+
+        # modify 'foo' in database without notifying the ORM, and only
+        # invalidate 'foo' itself: computed fields keep their former value
+        self.env.cr.execute("UPDATE test_orm_cascade SET foo = foo || '!' WHERE id IN %s", [records._ids])
+        records.invalidate_recordset(['foo'], flush=False)
+        self.assertEqual(records.mapped('foo'), ["A!", "B!"])
+        self.assertEqual(records.mapped('bar'), ["[A]", "[B]"])
+        self.assertEqual(records.mapped('baz'), ["<[A]>", "<[B]>"])
+        self.assertFalse(self.env.records_to_compute(baz))
+
+        # non-stored computed field: invalidated, and its dependents are marked
+        self.assertEqual(rec1.to_compute(['bar']), rec1)
+        self.assertEqual(self.env.records_to_compute(baz), rec1)
+        self.assertEqual(records.mapped('bar'), ["[A!]", "[B]"])
+        self.assertEqual(records.mapped('baz'), ["<[A!]>", "<[B]>"])
+        self.assertFalse(self.env.records_to_compute(baz))
+
+        # stored computed field: marked to compute
+        rec2.to_compute(['baz'])
+        self.assertEqual(self.env.records_to_compute(baz), rec2)
+        self.assertEqual(rec2.baz, "<[B]>")
+        self.assertFalse(self.env.records_to_compute(baz))
+
+        # non-computed field: only its dependents are marked
+        rec2.to_compute(['foo'])
+        self.assertEqual(self.env.records_to_compute(baz), rec2)
+        self.assertEqual(rec2.foo, "B!")
+        self.assertEqual(rec2.baz, "<[B!]>")
+
+        # the recomputed values are flushed to the database
+        self.env.flush_all()
+        self.env.cr.execute("SELECT baz FROM test_orm_cascade WHERE id IN %s ORDER BY id", [records._ids])
+        self.assertEqual([baz for baz, in self.env.cr.fetchall()], ["<[A!]>", "<[B!]>"])
+
     def test_12_unlink_cascade_active_store(self):
         """ Test that `unlink` on many records doesn't raise a RecursionError
         with a stored related `active` field.
