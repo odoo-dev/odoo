@@ -1,4 +1,12 @@
-import { EventBus, Plugin, signal, useListener, usePlugin } from "@odoo/owl";
+import {
+    EventBus,
+    onWillDestroy,
+    Plugin,
+    signal,
+    useListener,
+    usePlugin,
+    useScope,
+} from "@odoo/owl";
 import { browser } from "@web/core/browser/browser";
 import { registry } from "@web/core/registry";
 import { user } from "@web/core/user";
@@ -40,6 +48,16 @@ export class BusPlugin extends Plugin {
     #bus = new EventBus();
     #notificationBus = new EventBus();
     #subscribeFnToWrapper = new Map();
+    /**
+     * Notifications received before the plugins of the app are all started, delivered once they
+     * are (`null` afterwards). Plugins are started in batches of increasing sequence, so without
+     * this, the ones started after the bus (e.g. the mail plugins, which start after the legacy
+     * services) would miss the notifications received in between.
+     *
+     * @type {?{ id: number, type: string, payload: any }[]}
+     */
+    #pendingNotifications = [];
+    #pluginManager = useScope().pluginManager;
 
     startedAt = null;
     isActive = signal(false);
@@ -47,6 +65,8 @@ export class BusPlugin extends Plugin {
 
     setup() {
         this.startedAt = luxon.DateTime.now().set({ milliseconds: 0 });
+        this.#flushPendingNotificationsWhenReady();
+        onWillDestroy(() => (this.#pendingNotifications = null));
         browser.localStorage.removeItem("bus.last_notification_id");
         useListener(browser, "pagehide", ({ persisted }) => {
             if (!persisted) {
@@ -106,8 +126,12 @@ export class BusPlugin extends Plugin {
             }
             case "BUS:NOTIFICATION": {
                 const notifications = data.map(({ id, message }) => ({ id, ...message }));
-                for (const { id, type, payload } of notifications) {
-                    this.#notificationBus.trigger(type, { id, payload });
+                if (this.#pendingNotifications) {
+                    this.#pendingNotifications.push(...notifications);
+                    break;
+                }
+                for (const notification of notifications) {
+                    this.#dispatchNotification(notification);
                 }
                 break;
             }
@@ -128,6 +152,35 @@ export class BusPlugin extends Plugin {
         if (!INTERNAL_EVENTS.has(type)) {
             this.#bus.trigger(type, data);
         }
+    }
+
+    async #flushPendingNotificationsWhenReady() {
+        // `ready` is only set once the `startPlugins` call starting this plugin has queued all its
+        // batches: read it on the next microtask.
+        await Promise.resolve();
+        let ready;
+        // Plugins added while starting (e.g. by a lazy loaded bundle) extend the chain and replace
+        // `ready`: wait for the latest one.
+        while (this.#pluginManager && ready !== this.#pluginManager.ready) {
+            ready = this.#pluginManager.ready;
+            try {
+                await ready;
+            } catch {
+                // Reported by whoever awaits `ready` (e.g. the mount): keep the bus working.
+            }
+        }
+        const notifications = this.#pendingNotifications;
+        if (!notifications) {
+            return; // destroyed in the meantime
+        }
+        this.#pendingNotifications = null;
+        for (const notification of notifications) {
+            this.#dispatchNotification(notification);
+        }
+    }
+
+    #dispatchNotification({ id, type, payload }) {
+        this.#notificationBus.trigger(type, { id, payload });
     }
 
     /**

@@ -1,3 +1,5 @@
+import { waitUntilSubscribe } from "@bus/../tests/bus_test_helpers";
+import { BusPlugin } from "@bus/services/bus_plugin";
 import {
     actionPanel,
     assertChatBubbleAndWindowImStatus,
@@ -35,12 +37,14 @@ import {
     Command,
     contains,
     getService,
+    patchWithCleanup,
     preloadBundle,
     serverState,
     withUser,
 } from "@web/../tests/web_test_helpers";
 
 import { rpc } from "@web/core/network/rpc";
+import { registry } from "@web/core/registry";
 import { range } from "@web/core/utils/numbers";
 
 describe.current.tags("desktop");
@@ -631,6 +635,63 @@ test("chat window should open when receiving a new DM", async () => {
     await waitFor(".o-mail-ChatBubble-counter:text('1'):count(1)");
     await waitFor(".o-mail-ChatBubble .o-mail-ImStatus[title='User is online']:count(1)");
     await assertChatBubbleAndWindowImStatus("DemoUser", 1);
+});
+
+test("chat window should open when receiving a new DM while the app is starting", async () => {
+    mockDate("2023-01-03 12:00:00"); // so that it's after last interest (mock server is in 2019 by default!)
+    const pyEnv = await startServer();
+    const partnerId = pyEnv["res.partner"].create({ name: "DemoUser" });
+    const userId = pyEnv["res.users"].create({ partner_id: partnerId, im_status: "online" });
+    const channelId = pyEnv["discuss.channel"].create({
+        channel_member_ids: [
+            Command.create({
+                unpin_dt: "2021-01-01 12:00:00",
+                last_interest_dt: "2021-01-01 10:00:00",
+                partner_id: serverState.partnerId,
+            }),
+            Command.create({ partner_id: partnerId }),
+        ],
+        channel_type: "chat",
+    });
+    // Delays the start of the plugins started after the legacy services (e.g. the mail ones) while
+    // the bus is already connected.
+    const slowServiceStart = Promise.withResolvers();
+    registry.category("services").add("test.slow_service", {
+        dependencies: ["mail.store"],
+        start: () => slowServiceStart.promise,
+    });
+    const newMessageReceived = Promise.withResolvers();
+    patchWithCleanup(BusPlugin.prototype, {
+        handleMessage(messageEv) {
+            const { type, data } = messageEv.data;
+            if (
+                type === "BUS:NOTIFICATION" &&
+                data.some(({ message }) => message.type === "discuss.channel/new_message")
+            ) {
+                newMessageReceived.resolve();
+            }
+            return super.handleMessage(messageEv);
+        },
+    });
+    const subscribed = waitUntilSubscribe();
+    const started = start({ waitUntilSubscribe: false });
+    await subscribed;
+    await withUser(userId, () =>
+        rpc("/mail/message/post", {
+            post_data: {
+                body: "Hi, are you here?",
+                message_type: "comment",
+                subtype_xmlid: "mail.mt_comment",
+            },
+            thread_id: channelId,
+            thread_model: "discuss.channel",
+        })
+    );
+    await newMessageReceived.promise;
+    slowServiceStart.resolve({});
+    await started;
+    await waitFor(".o-mail-ChatBubble:count(1)");
+    await waitFor(".o-mail-ChatBubble-counter:text('1'):count(1)");
 });
 
 test("chat window should not open when receiving a new DM from odoobot", async () => {
