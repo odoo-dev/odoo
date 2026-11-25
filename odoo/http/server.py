@@ -18,9 +18,7 @@ import odoo
 import odoo.release
 from odoo.tools import config
 
-from odoo.modules.registry import Registry
-
-from .router import db_filter, dbfilter_dbname, root
+from .router import root
 from .server_log import _logger, http_log, reset_thread_info
 
 if typing.TYPE_CHECKING:
@@ -94,13 +92,11 @@ class HTTPSocket:
         'conn',
         'h11request',
         'h11response',
-        'handoff',
         'ip',
-        'raw',
         'sock',
     )
 
-    def __init__(self, client_sock, client_addr, *, prelude=b'', handoff=None):
+    def __init__(self, client_sock, client_addr, *, prelude=b''):
         self.sock = client_sock
         self.addr = client_addr
         self.ip = client_addr[0]  # until we find the X-Forwarded-For header
@@ -114,11 +110,6 @@ class HTTPSocket:
 
         self.h11request = None
         self.h11response = None
-
-        # A callable (dbname, sock, raw) -> bool that tries to give the
-        # connection to another worker, with what we have read from it.
-        self.handoff = handoff
-        self.raw = bytearray()
 
     def _log(self, level, msg, *args, req=None, res=None, **kwargs):
         kwargs.setdefault('extra', {}).setdefault('remote_addr', self.ip)
@@ -198,21 +189,6 @@ class HTTPSocket:
 
         return environ
 
-    def _guess_dbname(self):
-        """ Return the database of the request when the headers tell it: the
-        X-Odoo-Database header, or a literal dbfilter. Only a guess, used to
-        pick a worker: that worker resolves the database again. """
-        if self.h11request.target.split(b'/', 3)[2:3] == [b'static']:
-            return None  # static files are served without a registry
-        headers = dict(self.h11request.headers)
-        host = headers.get(b'host', b'')
-        if config['proxy_mode'] and (forwarded := headers.get(b'x-forwarded-host')):
-            host = forwarded.rsplit(b',', 1)[-1].strip()  # as ProxyFix does
-        host = host.decode('latin-1')
-        if dbname := headers.get(b'x-odoo-database', b'').decode('latin-1'):
-            return dbname if db_filter([dbname], host=host) else None
-        return dbfilter_dbname(host)
-
     def process_request(self):
         reset_thread_info()
 
@@ -221,15 +197,12 @@ class HTTPSocket:
             event = self.conn.next_event()
             while event is h11.NEED_DATA:
                 try:
-                    data = self.sock.recv(RECV_SIZE)
+                    self.conn.receive_data(self.sock.recv(RECV_SIZE))
                 except ConnectionError:
                     return
                 except TimeoutError as exc:
                     e = "Timed out"
                     raise h11.RemoteProtocolError(e, HTTPStatus.REQUEST_TIMEOUT) from exc
-                if self.handoff:
-                    self.raw += data
-                self.conn.receive_data(data)
                 event = self.conn.next_event()
             if type(event) is h11.ConnectionClosed:
                 return
@@ -259,16 +232,6 @@ class HTTPSocket:
         else:
             # We got our request.
             self._log(logging.DEBUG, '[REQ] ')  # request line + headers
-
-        # Give the request to a worker having the registry of its database,
-        # before doing anything else with it: the other worker does it all.
-        if (
-            self.handoff
-            and (dbname := self._guess_dbname())
-            and dbname not in Registry.registries
-            and self.handoff(dbname, self.sock, bytes(self.raw))
-        ):
-            return
 
         # If the request has header "Expect: 100-continue". Send a 100
         # Continue response now: we're just before forwarding the

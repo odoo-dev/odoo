@@ -3,11 +3,12 @@ Registry-aware dispatching of HTTP requests between prefork workers.
 
 Prefork HTTP workers compete on ``accept()``, so a request can land on a worker
 that has to build the registry of its database while another one is sitting
-idle with that very registry loaded. With hand-off enabled, such a worker gives
-the connection to the idle worker instead, and only builds the registry when
-no idle worker has it. This makes a database stick to the workers that already
-have its registry and its ormcache, without any extra cost when the worker
-that accepted the connection already has the registry.
+idle with that very registry loaded. Such a worker gives the connection to the
+idle worker instead, before reading anything from it, and only builds the
+registry when no idle worker has it. The database is guessed from the request
+head, peeked at: the X-Odoo-Database header, or a literal dbfilter such as
+``^%d$``. A database thus sticks to the workers having its registry and its
+ormcache.
 
 The number of workers loading the registry of a database can be capped: once
 that many workers have it, a request that finds none of them idle waits for one
@@ -18,14 +19,13 @@ loaded, and at least ``AUTO_MIN_WORKERS``: a single database gets all of them.
 The workers share the following, all created by the master before forking:
 
 - a table with, for each worker slot, whether the worker is busy, and the
-  digests of the databases it has loaded. It is written
-  only by the worker owning the slot, one aligned 8-byte word at a time: a
-  digest keeps its place while its registry is loaded, so updating an entry
-  never hides the others. It is read without synchronization: it is a hint, a
+  digests of the databases it has loaded. It is written only by the worker
+  owning the slot, one aligned 8-byte word at a time: a digest keeps its place
+  while its registry is loaded, so updating an entry never hides the others. It is read without synchronization: it is a hint, a
   wrong entry only means that the registry gets built by the worker that
   receives the request, or that a request waits for a request in progress;
-- a datagram socket per slot, the inbox, that carries the connection, the bytes
-  that were already read from it, and the database resolved for the request.
+- a datagram socket per slot, the inbox, that carries the connection, before
+  anything was read from it, and the database guessed for its request.
   Connections left in the inbox of a worker that died are given to another one.
 
 Enabled for the HTTP workers of the prefork server.
@@ -36,11 +36,17 @@ import hashlib
 import logging
 import mmap
 import random
+import re
 import socket
 import sys
 import time
 from collections.abc import Iterable
 from typing import Literal
+
+from odoo.tools import config
+
+from .router import db_filter
+from .server import MAX_INCOMPLETE_EVENT_SIZE
 
 _logger = logging.getLogger(__name__)
 
@@ -49,14 +55,64 @@ MAX_DATABASES = 256  # per worker, the excess is simply not advertised
 BUSY, DIGESTS = range(2)  # the words of a slot, the digests come last
 SLOT_WORDS = DIGESTS + MAX_DATABASES
 SLOT_SIZE = SLOT_WORDS * DIGEST_SIZE  # a multiple of 8: every word is aligned
-RECV_SIZE = 65536  # bigger than the 32kiB HTTPSocket may have read, and a dbname
+RECV_SIZE = 1024  # a database name
 AUTO = 'auto'  # the cap of workers per database follows the databases loaded
 AUTO_MIN_WORKERS = 6
 AUTO_REFRESH = 1.0  # seconds between two counts of the databases loaded
 
 
+# The headers that tell the database of a request, found without parsing it.
+HEADERS_RE = re.compile(
+    rb'\r\n(host|x-forwarded-host|x-odoo-database)[ \t]*:[ \t]*([^\r\n]*?)[ \t]*(?=\r\n|$)',
+    re.IGNORECASE,
+)
+
+
 def _digest(dbname: str) -> bytes:
     return hashlib.blake2b(dbname.encode(), digest_size=DIGEST_SIZE).digest()
+
+
+def peek_dbname(sock: socket.socket) -> str | None:
+    """ Return the database guessed for the request on the connection, without
+    reading it: the request is peeked at once, in a buffer big enough for any
+    request head h11 accepts. A head that did not arrive in full gives none. """
+    try:
+        peeked = sock.recv(MAX_INCOMPLETE_EVENT_SIZE, socket.MSG_PEEK)
+    except (ConnectionError, TimeoutError):
+        return None  # reading the request fails the same way
+    head, complete, _body = peeked.partition(b'\r\n\r\n')
+    return guess_dbname(head) if complete else None
+
+
+def guess_dbname(head: bytes) -> str | None:
+    """ Return the database of a request from its head (request line and
+    headers) when they tell it: the X-Odoo-Database header, or a literal
+    dbfilter. Only a guess to pick a worker, made without parsing the
+    request: that worker parses it and resolves the database again. """
+    target = head.split(b' ', 2)[1:2]
+    if target and target[0].split(b'/', 3)[2:3] == [b'static']:
+        return None  # static files are served without a registry
+    headers = {name.lower(): value for name, value in HEADERS_RE.findall(head)}
+    host = headers.get(b'host', b'')
+    if config['proxy_mode'] and (forwarded := headers.get(b'x-forwarded-host')):
+        host = forwarded.rsplit(b',', 1)[-1].strip()  # as ProxyFix does
+    host = host.decode('latin-1')
+    if dbname := headers.get(b'x-odoo-database', b'').decode('latin-1'):
+        return dbname if db_filter([dbname], host=host) else None
+    return dbfilter_dbname(host)
+
+
+def dbfilter_dbname(host: str) -> str | None:
+    """ Return the database that a literal dbfilter, such as ``^%d$``, gives
+    for the host, without listing the databases. ``None`` when the dbfilter
+    is not a literal: then only listing the databases can tell. """
+    dbfilter = config['dbfilter']
+    literal = dbfilter.removeprefix('^').removesuffix('$')
+    fixed = literal.replace('%h', '').replace('%d', '')
+    if dbfilter != f'^{literal}$' or re.escape(fixed) != fixed:
+        return None
+    host = host.partition(':')[0].removeprefix('www.')  # as db_filter() does
+    return literal.replace('%h', host).replace('%d', host.partition('.')[0])
 
 
 class RegistryHandoff:
@@ -96,11 +152,10 @@ class RegistryHandoff:
         self.free_slots.append(slot)
         live = [other for other in range(self.slots) if other not in self.free_slots]
         while received := self.receive(slot):
-            sock, dbname, raw = received
+            sock, dbname = received
             with sock:
-                message = self._message(dbname, raw)
-                if not self.send(dbname, sock, raw, None) and not any(
-                    self._try_send(other, sock, message, queue=True)
+                if not self.send(dbname, sock, None) and not any(
+                    self._try_send(other, sock, dbname.encode(), queue=True)
                     for other in random.sample(live, len(live))
                 ):
                     _logger.warning("Closing a connection for %s left by slot %s", dbname, slot)
@@ -144,17 +199,16 @@ class RegistryHandoff:
             return True
         return False
 
-    def receive(self, slot: int) -> tuple[socket.socket, str, bytes] | None:
-        """ Return the next connection of the inbox, with the database resolved
-        for its request and its first bytes. """
+    def receive(self, slot: int) -> tuple[socket.socket, str] | None:
+        """ Return the next connection of the inbox, with the database guessed
+        for its request. """
         try:
             message, fds, _flags, _addr = socket.recv_fds(self.reader(slot), RECV_SIZE, 1)
         except BlockingIOError:
             return None
-        dbname, _, raw = message.partition(b'\0')
-        return socket.socket(fileno=fds[0]), dbname.decode(), raw
+        return socket.socket(fileno=fds[0]), message.decode()
 
-    def send(self, dbname: str, sock: socket.socket, raw: bytes, own_slot: int | None) -> bool:
+    def send(self, dbname: str, sock: socket.socket, own_slot: int | None) -> bool:
         """ Try to give the connection to another worker, in order of preference:
 
         - an idle worker having the registry of the given database;
@@ -166,7 +220,7 @@ class RegistryHandoff:
         another one from its LRU.
         """
         digest = _digest(dbname)
-        message = self._message(dbname, raw)
+        message = dbname.encode()
         holders = self._holders(digest, own_slot)
         random.shuffle(holders)  # do not favor a slot
 
@@ -195,10 +249,6 @@ class RegistryHandoff:
             self.auto_cap = max(AUTO_MIN_WORKERS, -(-self.slots // max(len(loaded), 1)))
             self.auto_expiry = now + AUTO_REFRESH
         return self.auto_cap
-
-    @staticmethod
-    def _message(dbname: str, raw: bytes) -> bytes:
-        return b'%s\0%s' % (dbname.encode(), raw)
 
     def _try_send(self, slot: int, sock: socket.socket, message: bytes, *, queue: bool = False) -> bool:
         """ Send the connection to the slot. Unless ``queue``, only when nothing

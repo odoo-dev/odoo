@@ -2,9 +2,8 @@
 
 import os
 import socket
-from unittest.mock import patch
-
-import h11
+from types import SimpleNamespace
+from unittest.mock import Mock, patch
 
 from odoo.http.handoff import (
     AUTO,
@@ -15,8 +14,11 @@ from odoo.http.handoff import (
     SLOT_SIZE,
     RegistryHandoff,
     _digest,
+    guess_dbname,
+    peek_dbname,
 )
-from odoo.http.server import HTTPSocket
+from odoo.modules.registry import Registry
+from odoo.service.server import WorkerHTTP
 from odoo.tests.common import BaseCase
 from odoo.tools import config
 
@@ -72,9 +74,9 @@ class TestRegistryHandoff(BaseCase):
     # Handing off to an idle worker having the registry
     #
     def test_send_needs_a_holder(self):
-        self.assertFalse(self.handoff.send('db', self.server, b'GET', 0))
+        self.assertFalse(self.handoff.send('db', self.server, 0))
         self.handoff.publish(1, ['other'])
-        self.assertFalse(self.handoff.send('db', self.server, b'GET', 0))
+        self.assertFalse(self.handoff.send('db', self.server, 0))
 
     def test_holders_in_a_single_scan(self):
         handoff = self.make(4)
@@ -87,45 +89,38 @@ class TestRegistryHandoff(BaseCase):
 
     def test_send_never_targets_own_slot(self):
         self.handoff.publish(0, ['db'])
-        self.assertFalse(self.handoff.send('db', self.server, b'GET', 0))
+        self.assertFalse(self.handoff.send('db', self.server, 0))
 
-    def test_send_gives_the_connection_and_the_bytes(self):
+    def test_send_gives_the_connection_and_the_database(self):
+        self.client.sendall(b'GET / HTTP/1.1\r\n\r\n')  # unread by the sender
         self.handoff.publish(1, ['db'])
         self.assertIsNone(self.handoff.receive(1))
-        self.assertTrue(self.handoff.send('db', self.server, b'GET / HTTP/1.1', 0))
+        self.assertTrue(self.handoff.send('db', self.server, 0))
 
-        sock, dbname, raw = self.handoff.receive(1)
+        sock, dbname = self.handoff.receive(1)
         with sock:
             self.assertEqual(dbname, 'db')
-            self.assertEqual(raw, b'GET / HTTP/1.1')
             # the connection survives the sender closing its descriptor
             self.server.close()
+            self.assertEqual(sock.recv(64), b'GET / HTTP/1.1\r\n\r\n')
             sock.sendall(b'pong')
             self.assertEqual(self.client.recv(4), b'pong')
         self.assertIsNone(self.handoff.receive(1))
 
-    def test_send_big_prelude(self):
-        self.handoff.publish(1, ['db'])
-        prelude = b'x' * 32768  # the most HTTPSocket may have read
-        self.assertTrue(self.handoff.send('db', self.server, prelude, 0))
-        sock, _dbname, raw = self.handoff.receive(1)
-        sock.close()
-        self.assertEqual(raw, prelude)
-
     def test_send_does_not_queue_behind_a_busy_worker(self):
         self.handoff.publish(1, ['db'])
         self.handoff.set_busy(1, True)
-        self.assertFalse(self.handoff.send('db', self.server, b'GET', 0))
+        self.assertFalse(self.handoff.send('db', self.server, 0))
         self.handoff.set_busy(1, False)
-        self.assertTrue(self.handoff.send('db', self.server, b'GET', 0))
+        self.assertTrue(self.handoff.send('db', self.server, 0))
         self.handoff.receive(1)[0].close()
 
     def test_send_does_not_queue_behind_a_pending_connection(self):
         self.handoff.publish(1, ['db'])
-        self.assertTrue(self.handoff.send('db', self.server, b'first', 0))
-        self.assertFalse(self.handoff.send('db', self.server, b'second', 0))
+        self.assertTrue(self.handoff.send('db', self.server, 0))
+        self.assertFalse(self.handoff.send('db', self.server, 0))
         self.handoff.receive(1)[0].close()
-        self.assertTrue(self.handoff.send('db', self.server, b'third', 0))
+        self.assertTrue(self.handoff.send('db', self.server, 0))
         self.handoff.receive(1)[0].close()
 
     def test_send_prefers_an_idle_holder(self):
@@ -134,19 +129,19 @@ class TestRegistryHandoff(BaseCase):
         handoff.publish(2, ['db'])
         handoff.set_busy(1, True)
         for _ in range(10):
-            self.assertTrue(handoff.send('db', self.server, b'GET', 0))
+            self.assertTrue(handoff.send('db', self.server, 0))
             self.assertEqual(self.received_by(handoff, [1, 2]), 2)
 
     def test_busy_flag_is_shared_after_fork(self):
         self.handoff.publish(1, ['db'])
         finish = self.in_child(lambda: self.handoff.set_busy(1, True))
         self.addCleanup(finish)
-        self.assertFalse(self.handoff.send('db', self.server, b'GET', 0))
+        self.assertFalse(self.handoff.send('db', self.server, 0))
 
     def test_published_table_is_shared_after_fork(self):
         finish = self.in_child(lambda: self.handoff.publish(1, ['db']))
         self.addCleanup(finish)
-        self.assertTrue(self.handoff.send('db', self.server, b'GET', 0))
+        self.assertTrue(self.handoff.send('db', self.server, 0))
         self.handoff.receive(1)[0].close()
 
     #
@@ -158,16 +153,18 @@ class TestRegistryHandoff(BaseCase):
         handoff.publish(2, ['db'])
         handoff.set_busy(1, True)
         handoff.set_busy(2, True)
-        self.assertTrue(handoff.send('db', self.server, b'GET', 0))
+        self.assertTrue(handoff.send('db', self.server, 0))
         self.assertIn(self.received_by(handoff, [1, 2]), (1, 2))
 
     def test_cap_queues_even_behind_a_pending_connection(self):
         handoff = self.make(3, max_workers=1)
         handoff.publish(1, ['db'])
         handoff.set_busy(1, True)
-        self.assertTrue(handoff.send('db', self.server, b'first', 0))
-        self.assertTrue(handoff.send('db', self.server, b'second', 0))
-        self.assertEqual([handoff.receive(1)[2], handoff.receive(1)[2]], [b'first', b'second'])
+        self.assertTrue(handoff.send('db', self.server, 0))
+        self.assertTrue(handoff.send('db', self.server, 0))
+        for _ in range(2):
+            handoff.receive(1)[0].close()
+        self.assertIsNone(handoff.receive(1))
 
     def test_cap_picks_a_busy_holder_at_random(self):
         handoff = self.make(4, max_workers=2)
@@ -176,7 +173,7 @@ class TestRegistryHandoff(BaseCase):
             handoff.set_busy(slot, True)
         picked = set()
         for _ in range(50):  # each one is missed with a chance of 2**-50
-            self.assertTrue(handoff.send('db', self.server, b'GET', 0))
+            self.assertTrue(handoff.send('db', self.server, 0))
             picked.add(self.received_by(handoff, [1, 2]))
         self.assertEqual(picked, {1, 2})
 
@@ -185,14 +182,14 @@ class TestRegistryHandoff(BaseCase):
         for slot in (1, 2):
             handoff.publish(slot, ['db'])
             handoff.set_busy(slot, True)
-        self.assertFalse(handoff.send('db', self.server, b'GET', 0))
+        self.assertFalse(handoff.send('db', self.server, 0))
 
     def test_without_cap_never_queue_behind_a_busy_holder(self):
         handoff = self.make(4, max_workers=None)
         for slot in (1, 2, 3):
             handoff.publish(slot, ['db'])
             handoff.set_busy(slot, True)
-        self.assertFalse(handoff.send('db', self.server, b'GET', 0))
+        self.assertFalse(handoff.send('db', self.server, 0))
 
     def test_auto_cap_gives_a_single_database_every_worker(self):
         handoff = self.make(12, max_workers=AUTO)
@@ -200,7 +197,7 @@ class TestRegistryHandoff(BaseCase):
             handoff.publish(slot, ['db'])
             handoff.set_busy(slot, True)
         self.assertEqual(handoff.cap(), 12)
-        self.assertFalse(handoff.send('db', self.server, b'GET', 0))
+        self.assertFalse(handoff.send('db', self.server, 0))
 
     def test_auto_cap_is_a_fair_share(self):
         handoff = self.make(48, max_workers=AUTO)
@@ -218,7 +215,7 @@ class TestRegistryHandoff(BaseCase):
             handoff.publish(slot, [f'db{slot}', 'shared'])
             handoff.set_busy(slot, True)
         handoff.auto_expiry = 0  # count again
-        self.assertTrue(handoff.send('shared', self.server, b'GET', 0))
+        self.assertTrue(handoff.send('shared', self.server, 0))
         self.received_by(handoff, range(1, 1 + AUTO_MIN_WORKERS))
 
     def test_auto_cap_is_counted_at_most_once_a_second(self):
@@ -237,7 +234,7 @@ class TestRegistryHandoff(BaseCase):
         dbnames = [f'db{i}' for i in range(MAX_DATABASES + 10)]
         self.handoff.publish(1, ['db'])
         self.handoff.publish(1, dbnames)
-        self.assertFalse(self.handoff.send('db', self.server, b'GET', 0))
+        self.assertFalse(self.handoff.send('db', self.server, 0))
         self.assertEqual(len(self.advertised(1, dbnames)), MAX_DATABASES)
 
     def test_publish_advertises_the_excess_once_an_entry_is_free(self):
@@ -275,7 +272,7 @@ class TestRegistryHandoff(BaseCase):
     def test_forget(self):
         self.handoff.publish(1, ['db'])
         self.handoff.forget(1)
-        self.assertFalse(self.handoff.send('db', self.server, b'GET', 0))
+        self.assertFalse(self.handoff.send('db', self.server, 0))
 
     #
     # Dead workers
@@ -284,12 +281,12 @@ class TestRegistryHandoff(BaseCase):
         handoff = self.make(3)
         self.assertEqual([handoff.acquire_slot(), handoff.acquire_slot()], [2, 1])
         handoff.publish(1, ['db'])
-        handoff.send('db', self.server, b'GET', 0)  # to slot 1, which dies
+        handoff.send('db', self.server, 0)  # to slot 1, which dies
         handoff.publish(2, ['db'])
         handoff.release_slot(1)
-        sock, dbname, raw = handoff.receive(2)
+        sock, dbname = handoff.receive(2)
         sock.close()
-        self.assertEqual((dbname, raw), ('db', b'GET'))
+        self.assertEqual(dbname, 'db')
         self.assertIsNone(handoff.receive(1))
         self.assertEqual(handoff.free_slots, [0, 1])
 
@@ -297,7 +294,7 @@ class TestRegistryHandoff(BaseCase):
         handoff = self.make(3, max_workers=6)
         self.assertEqual([handoff.acquire_slot(), handoff.acquire_slot()], [2, 1])
         handoff.publish(1, ['db'])
-        handoff.send('db', self.server, b'GET', 0)
+        handoff.send('db', self.server, 0)
         handoff.set_busy(2, True)  # no registry, busy, still better than closing
         handoff.release_slot(1)
         handoff.receive(2)[0].close()
@@ -305,7 +302,7 @@ class TestRegistryHandoff(BaseCase):
     def test_release_slot_closes_when_no_worker_is_left(self):
         self.assertEqual(self.handoff.acquire_slot(), 1)
         self.handoff.publish(1, ['db'])
-        self.handoff.send('db', self.server, b'GET', 0)
+        self.handoff.send('db', self.server, 0)
         self.server.close()
         self.handoff.release_slot(1)
         self.client.settimeout(5)
@@ -319,20 +316,17 @@ class TestRegistryHandoff(BaseCase):
 
 
 class TestGuessDbname(BaseCase):
-    """ The database of a request guessed from its headers, before handing it
-    off: the worker receiving it resolves it again. """
+    """ The database of a request guessed from its head, without parsing it,
+    before handing it off: the worker receiving it resolves it again. """
 
     def guess(self, target='/web/login', host='acme.example.com', dbfilter='', db_name=(), proxy_mode=False, **headers):
-        client, server = socket.socketpair()
-        self.addCleanup(client.close)
-        self.addCleanup(server.close)
-        http_socket = HTTPSocket(server, ('127.0.0.1', 0))
-        http_socket.h11request = h11.Request(method='GET', target=target, headers=[
-            ('Host', host), *((name.replace('_', '-'), value) for name, value in headers.items()),
-        ])
+        head = '\r\n'.join([
+            f'GET {target} HTTP/1.1', f'Host: {host}',
+            *(f"{name.replace('_', '-')}: {value}" for name, value in headers.items()),
+        ]).encode()
         options = {'dbfilter': dbfilter, 'db_name': list(db_name), 'proxy_mode': proxy_mode}
         with patch.dict(config.options, options):
-            return http_socket._guess_dbname()
+            return guess_dbname(head)
 
     def test_header(self):
         self.assertEqual(self.guess(X_Odoo_Database='db1'), 'db1')
@@ -341,6 +335,12 @@ class TestGuessDbname(BaseCase):
         self.assertEqual(self.guess(dbfilter='^acme.*$', X_Odoo_Database='acme2'), 'acme2')
         self.assertIsNone(self.guess(dbfilter='^acme.*$', X_Odoo_Database='other'))
         self.assertIsNone(self.guess(db_name=['allowed'], X_Odoo_Database='other'))
+
+    def test_headers_found_by_the_regex(self):
+        head = b'GET / HTTP/1.1\r\nx-odoo-DATABASE:\t db1 \r\nHost: h\r\nX-Other: X-Odoo-Database: db2'
+        with patch.dict(config.options, {'dbfilter': '', 'db_name': []}):
+            self.assertEqual(guess_dbname(head), 'db1')
+            self.assertIsNone(guess_dbname(b'GET / HTTP/1.1\r\nMy-X-Odoo-Database: db1'))
 
     def test_literal_dbfilter(self):
         self.assertEqual(self.guess(dbfilter='^%d$'), 'acme')
@@ -364,3 +364,52 @@ class TestGuessDbname(BaseCase):
         forwarded = {'X_Forwarded_Host': 'evil.example.com, client.example.com'}
         self.assertEqual(self.guess(dbfilter='^%d$', proxy_mode=True, **forwarded), 'client')
         self.assertEqual(self.guess(dbfilter='^%d$', **forwarded), 'acme')
+
+
+class TestPeekHandoff(BaseCase):
+    """ The request is peeked at, not read: the receiving worker reads it. """
+
+    def connection(self, data):
+        client, server = socket.socketpair()
+        self.addCleanup(client.close)
+        self.addCleanup(server.close)
+        client.sendall(data)
+        server.settimeout(1)
+        return server
+
+    def peek(self, data):
+        sock = self.connection(data)
+        with patch.dict(config.options, {'dbfilter': '', 'db_name': [], 'proxy_mode': False}):
+            dbname = peek_dbname(sock)
+        return dbname, sock.recv(len(data))
+
+    def test_peek_without_reading(self):
+        request = b'POST /x HTTP/1.1\r\nHost: h\r\nX-Odoo-Database: db1\r\nContent-Length: 2\r\n\r\n{}'
+        self.assertEqual(self.peek(request), ('db1', request))
+
+    def test_incomplete_head_tells_nothing(self):
+        request = b'GET /x HTTP/1.1\r\nHost: h\r\nX-Odoo-Database: db1\r\n'
+        self.assertEqual(self.peek(request), (None, request))
+
+    def hand_off(self, data, loaded=(), sent=True):
+        worker = SimpleNamespace(handoff=Mock(), handoff_slot=0, publish_databases=Mock())
+        worker.handoff.send.return_value = sent
+        with patch.object(Registry, 'registries', dict.fromkeys(loaded)), \
+             patch.dict(config.options, {'dbfilter': '', 'db_name': [], 'proxy_mode': False}):
+            return WorkerHTTP.hand_off(worker, self.connection(data)), worker
+
+    def test_hand_off(self):
+        handed, worker = self.hand_off(b'GET / HTTP/1.1\r\nX-Odoo-Database: db1\r\n\r\n')
+        self.assertTrue(handed)
+        self.assertEqual(worker.handoff.send.call_args.args[0], 'db1')
+        worker.publish_databases.assert_not_called()
+
+    def test_loaded_registry_is_served_here(self):
+        handed, worker = self.hand_off(b'GET / HTTP/1.1\r\nX-Odoo-Database: db1\r\n\r\n', loaded=['db1'])
+        self.assertFalse(handed)
+        worker.handoff.send.assert_not_called()
+
+    def test_loading_here_is_advertised_first(self):
+        handed, worker = self.hand_off(b'GET / HTTP/1.1\r\nX-Odoo-Database: db1\r\n\r\n', sent=False)
+        self.assertFalse(handed)
+        worker.publish_databases.assert_called_once_with(loading='db1')
