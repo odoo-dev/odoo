@@ -469,12 +469,19 @@ class HrWorkEntryType(models.Model):
         # We only need to filter allocation_data for the dashboard
         if not self.env.context.get("from_dashboard", False):
             return employee_work_entry_type_infos
-        filtered_employee_work_entry_type_infos = [
-            work_entry_type_info
-            for work_entry_type_info in employee_work_entry_type_infos
-            if work_entry_type_info[1]["max_leaves"]
-        ]
-        return filtered_employee_work_entry_type_infos
+        cards = [card for card in employee_work_entry_type_infos if card[1]['max_leaves']]
+        country = employee.company_id.country_id
+        types_without_allocation = self.browse(card[3] for card in cards if not card[2])
+        local_codes = {
+            entry_type.code for entry_type in types_without_allocation
+            if entry_type.country_id == country
+        }
+        hidden_type_ids = {
+            entry_type.id for entry_type in types_without_allocation
+            if (entry_type.country_id and entry_type.country_id != country)
+            or (country and not entry_type.country_id and entry_type.code in local_codes)
+        }
+        return [card for card in cards if card[3] not in hidden_type_ids]
 
     def get_allocation_data(self, employees, target_date=None):
         allocation_data = defaultdict(list)
