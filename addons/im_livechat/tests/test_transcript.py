@@ -41,3 +41,20 @@ class TestImLivechatTranscript(TestImLivechatCommon, HttpCaseWithUserPortal):
                 "/im_livechat/email_livechat_transcript",
                 {"channel_id": data["channel_id"], "email": self.partner_portal.email},
             )
+
+    def test_transcript_internal_messages(self):
+        """ Transcript is sent to the customer: internal messages are not included. """
+        data = self.make_jsonrpc_request(
+            "/im_livechat/get_session",
+            {"channel_id": self.livechat_channel.id},
+        )
+        channel = self.env["discuss.channel"].browse(data["channel_id"])
+        channel.message_post(body="Public answer", message_type="comment", subtype_xmlid="mail.mt_comment")
+        channel._message_log(body="Internal step", message_type="comment")  # e.g. AI agent steps
+        html = self.env["ir.actions.report"]._render_qweb_html(
+            "im_livechat.action_report_livechat_conversation",
+            channel.ids,
+            data={"tz": channel._get_livechat_customer_timezone(), "correspondent_names": ""},
+        )[0].decode()
+        self.assertIn("Public answer", html)
+        self.assertNotIn("Internal step", html)

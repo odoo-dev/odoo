@@ -22,7 +22,8 @@
 <table cellspacing="0" cellpadding="0" class="table-borderless" style="width:100%; margin: 16px 0;">
     <t t-set="deleted_messages" t-value="channel.message_ids._filter_empty()"/>
     <t t-foreach="channel.message_ids.sorted(lambda m: (m.date, m.id))" t-as="message">
-        <t t-if="message.message_type != 'notification'">
+        <!-- transcript is sent to the customer: skip internal messages (e.g. notes logged by agents) -->
+        <t t-if="message.message_type != 'notification' and not message.is_internal and not message.subtype_id.internal">
             <t t-set="author_name"><t t-if="message.author_id" t-out="message.author_id.sudo().user_livechat_username or message.author_id.sudo().name"/><t t-else="">You</t></t>
             <tr>
                 <td style="padding: 4px 0;">
