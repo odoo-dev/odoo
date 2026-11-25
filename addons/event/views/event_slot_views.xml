@@ -45,7 +45,7 @@
         <field name="name">event.slot.list</field>
         <field name="model">event.slot</field>
         <field name="arch" type="xml">
-            <list string="Slots" js_class="event_slot_list">
+            <list string="Slots" on_create="event.event_slot_action_new">
                 <field name="date"/>
                 <field name="start_hour" string="From" widget="float_time"/>
                 <button name="durationArrow" width="20px" title="Until"
@@ -68,6 +68,13 @@
                 <field name="date_tz" invisible="1"/>
             </calendar>
         </field>
+    </record>
+
+    <record id="event_slot_action_new" model="ir.actions.act_window">
+        <field name="name">New Slot</field>
+        <field name="res_model">event.slot</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
     </record>
 
     <record id="event_slot_action_from_event" model="ir.actions.act_window">
