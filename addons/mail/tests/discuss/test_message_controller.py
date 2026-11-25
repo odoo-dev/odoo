@@ -382,12 +382,18 @@ class TestMessageLinks(MailCommon, HttpCase):
             message_type='comment',
             subtype_xmlid='mail.mt_comment',
         )
-        res = self.url_open(f'/mail/message/{message.id}')
-        self.assertEqual(res.status_code, 200)
-        self.assertEqual(res.url, self.base_url() + f'/discuss/channel/{self.public_channel.id}?highlight_message_id={message.id}')
         note = self.public_channel.message_post(body='Public Channel Note', subtype_xmlid='mail.mt_note')
-        res = self.url_open(f'/mail/message/{note.id}')
-        self.assertEqual(res.url, self.base_url() + f'/web/login?redirect=/mail/message/{note.id}')
+        # legacy links (message_id) behave like message links
+        for url_message, url_note in [
+            (f'/mail/message/{message.id}', f'/mail/message/{note.id}'),
+            (f'/mail/view?message_id={message.id}', f'/mail/view?message_id={note.id}'),
+        ]:
+            with self.subTest(url=url_message):
+                res = self.url_open(url_note)
+                self.assertEqual(res.url, self.base_url() + f'/web/login?redirect=/mail/message/{note.id}')
+                res = self.url_open(url_message)
+                self.assertEqual(res.status_code, 200)
+                self.assertEqual(res.url, self.base_url() + f'/discuss/channel/{self.public_channel.id}?highlight_message_id={message.id}')
 
     def test_message_link_store_by_share_users(self):
         """ Messages linked in a body are sent to share users only when they can read them. """

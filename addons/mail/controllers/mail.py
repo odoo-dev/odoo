@@ -233,13 +233,14 @@ class MailController(http.Controller):
         # This is needed because after a migration from an older version to saas-11.3, the link
         # received by mail with a message_id no longer work.
         # So this block of code is needed to guarantee the backward compatibility of those links.
+        # Use the message link, that checks access without leaking the message document.
         if kwargs.get('message_id'):
             try:
-                message = request.env['mail.message'].sudo().browse(int(kwargs['message_id'])).exists()
-            except:
-                message = request.env['mail.message']
-            if message:
-                model, res_id = message.model, message.res_id
+                message_id = int(kwargs['message_id'])
+            except ValueError:
+                message_id = False
+            if message_id:
+                return request.redirect(f'/mail/message/{message_id}')
         # ==============================================================================================
 
         if res_id and isinstance(res_id, str):
