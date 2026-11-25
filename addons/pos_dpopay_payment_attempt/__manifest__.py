@@ -4,12 +4,8 @@
     'name': 'PoS DPO Pay Payment Attempts',
     'version': '1.0',
     'category': 'Sales/Point of Sale',
-    'summary': 'Record every DPO Pay terminal request as a payment attempt.',
-    'description': """
-Bridge between PoS DPO Pay and PoS Payment Attempts: the DPO Pay requests that go
-through the server update the payment attempt, and the attempt status can be
-checked with the terminal afterwards.
-    """,
+    'summary': 'Log every DPO Pay terminal transaction.',
+    'description': "Logs every DPO Pay terminal transaction and its status in PoS Payment Attempts.",
     'depends': ['pos_dpopay', 'pos_payment_attempt'],
     'assets': {
         'point_of_sale._assets_pos': [
