@@ -1,0 +1,7 @@
+id,name,model_id,group_id/id,operation,domain
+access_pos_payment_attempt_user,pos.payment.attempt user,pos.payment.attempt,point_of_sale.group_pos_user,cru,
+access_pos_payment_attempt_manager,pos.payment.attempt manager,pos.payment.attempt,point_of_sale.group_pos_manager,crud,
+rule_pos_payment_attempt_multi_company,PoS Payment Attempt,pos.payment.attempt,,crud,"[('company_id', 'in', company_ids)]"
+access_pos_payment_attempt_event_user,pos.payment.attempt.event user,pos.payment.attempt.event,point_of_sale.group_pos_user,r,
+access_pos_payment_attempt_event_manager,pos.payment.attempt.event manager,pos.payment.attempt.event,point_of_sale.group_pos_manager,crud,
+rule_pos_payment_attempt_event_multi_company,PoS Payment Attempt Event,pos.payment.attempt.event,,crud,"[('company_id', 'in', company_ids)]"

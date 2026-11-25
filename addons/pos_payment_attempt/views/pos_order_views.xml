@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_pos_pos_form_inherit_payment_attempt" model="ir.ui.view">
+        <field name="name">pos.order.form.inherit.payment.attempt</field>
+        <field name="model">pos.order</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_pos_form"/>
+        <field name="arch" type="xml">
+            <div name="button_box" position="inside">
+                <button name="action_view_payment_attempts" type="object" class="oe_stat_button"
+                    icon="payments" invisible="payment_attempt_count == 0">
+                    <field name="payment_attempt_count" widget="statinfo" string="Payment Attempts"/>
+                </button>
+            </div>
+        </field>
+    </record>
+</odoo>

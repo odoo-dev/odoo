@@ -135,7 +135,7 @@ export class PaymentDPOPay extends PaymentInterface {
 
         const statusResponse = await this._callDpoPayMakeRequest(data, "get-status");
         if (!statusResponse || statusResponse.errorMessage) {
-            if (statusResponse.errorMessage === "Transaction not found") {
+            if (statusResponse?.errorMessage === "Transaction not found") {
                 return false;
             }
             this._handleError(statusResponse, _t("Failed to retrieve payment status."));

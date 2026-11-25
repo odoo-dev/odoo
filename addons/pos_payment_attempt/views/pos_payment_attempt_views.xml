@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_pos_payment_attempt_list" model="ir.ui.view">
+        <field name="name">pos.payment.attempt.list</field>
+        <field name="model">pos.payment.attempt</field>
+        <field name="arch" type="xml">
+            <list string="Payment Attempts" create="0" edit="0"
+                decoration-muted="reviewed"
+                decoration-danger="state == 'unknown' and not reviewed">
+                <field name="date_start"/>
+                <field name="name"/>
+                <field name="pos_order_id"/>
+                <field name="session_id" optional="hide"/>
+                <field name="config_id" optional="hide"/>
+                <field name="payment_method_id"/>
+                <field name="payment_provider" optional="show"/>
+                <field name="user_id" widget="many2one_avatar_user" optional="show"/>
+                <field name="amount" sum="Total"/>
+                <field name="currency_id" column_invisible="True"/>
+                <field name="card_no" optional="hide"/>
+                <field name="error_message" optional="show"/>
+                <field name="date_end" optional="hide"/>
+                <field name="reviewed" column_invisible="True"/>
+                <field name="state" widget="badge"
+                    decoration-success="state == 'success'"
+                    decoration-info="state in ('initiated', 'processing')"
+                    decoration-warning="state in ('unknown', 'timeout', 'force_done', 'force_cancelled')"
+                    decoration-danger="state in ('failed', 'cancelled')"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_pos_payment_attempt_form" model="ir.ui.view">
+        <field name="name">pos.payment.attempt.form</field>
+        <field name="model">pos.payment.attempt</field>
+        <field name="arch" type="xml">
+            <form string="Payment Attempt" create="0" edit="0">
+                <header>
+                    <button name="action_check_status" type="object" string="Check Status"
+                        class="btn-primary" invisible="not is_open or not name"/>
+                    <button name="action_mark_reviewed" type="object" string="Mark as Reviewed"
+                        invisible="reviewed or (not is_open and (pos_payment_id or state not in ('success', 'force_done')))"/>
+                    <field name="state" widget="statusbar" statusbar_visible="initiated,processing,success"/>
+                </header>
+                <sheet>
+                    <field name="is_open" invisible="1"/>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="No transaction reference yet"/></h1>
+                    </div>
+                    <group>
+                        <group name="order">
+                            <field name="pos_order_id"/>
+                            <field name="pos_payment_id"/>
+                            <field name="session_id"/>
+                            <field name="user_id" widget="many2one_avatar_user"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group name="payment">
+                            <field name="payment_method_id"/>
+                            <field name="payment_provider"/>
+                            <field name="amount"/>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="card_brand" invisible="not card_brand"/>
+                            <field name="card_no" invisible="not card_no"/>
+                            <field name="authcode" invisible="not authcode"/>
+                            <field name="reviewed"/>
+                        </group>
+                        <group name="dates">
+                            <field name="date_start"/>
+                            <field name="date_last_update"/>
+                            <field name="date_end"/>
+                        </group>
+                        <group name="error" invisible="not error_message">
+                            <field name="error_message"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Timeline" name="timeline">
+                            <field name="event_ids">
+                                <list decoration-muted="not state_applied">
+                                    <field name="create_date"/>
+                                    <field name="source"/>
+                                    <field name="state"/>
+                                    <field name="state_applied" optional="hide"/>
+                                    <field name="message"/>
+                                </list>
+                                <form>
+                                    <group>
+                                        <field name="create_date"/>
+                                        <field name="source"/>
+                                        <field name="state"/>
+                                        <field name="state_applied"/>
+                                        <field name="message"/>
+                                        <field name="payload" groups="point_of_sale.group_pos_manager"/>
+                                    </group>
+                                </form>
+                            </field>
+                        </page>
+                        <page string="Technical" name="technical" groups="base.group_no_one">
+                            <group>
+                                <field name="uuid"/>
+                                <field name="order_uuid"/>
+                                <field name="payment_uuid"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_pos_payment_attempt_search" model="ir.ui.view">
+        <field name="name">pos.payment.attempt.search</field>
+        <field name="model">pos.payment.attempt</field>
+        <field name="arch" type="xml">
+            <search string="Payment Attempts">
+                <field name="name"/>
+                <field name="pos_order_id"/>
+                <field name="session_id"/>
+                <field name="payment_method_id"/>
+                <field name="user_id"/>
+                <filter string="Needs Review" name="needs_review"
+                    domain="[('reviewed', '=', False), '|', ('state', 'in', ('initiated', 'processing', 'unknown')), '&amp;', ('state', 'in', ('success', 'force_done')), ('pos_payment_id', '=', False)]"/>
+                <separator/>
+                <filter string="Successful" name="success" domain="[('state', '=', 'success')]"/>
+                <filter string="Failed" name="failed" domain="[('state', 'in', ('failed', 'timeout'))]"/>
+                <filter string="Cancelled" name="cancelled" domain="[('state', '=', 'cancelled')]"/>
+                <filter string="Forced" name="forced" domain="[('state', 'in', ('force_done', 'force_cancelled'))]"/>
+                <filter string="Open" name="open" domain="[('state', 'in', ('initiated', 'processing', 'unknown'))]"/>
+                <separator/>
+                <filter string="Date" name="date_start" date="date_start"/>
+                <group>
+                    <filter string="Status" name="group_by_state" context="{'group_by': 'state'}"/>
+                    <filter string="Provider" name="group_by_provider" context="{'group_by': 'payment_provider'}"/>
+                    <filter string="Payment Method" name="group_by_payment_method" context="{'group_by': 'payment_method_id'}"/>
+                    <filter string="Session" name="group_by_session" context="{'group_by': 'session_id'}"/>
+                    <filter string="Cashier" name="group_by_user" context="{'group_by': 'user_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_pos_payment_attempt" model="ir.actions.act_window">
+        <field name="name">Payment Attempts</field>
+        <field name="res_model">pos.payment.attempt</field>
+        <field name="view_mode">list,form</field>
+        <field name="search_view_id" ref="view_pos_payment_attempt_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_empty_folder">No payment attempts yet</p>
+            <p>Every payment request sent to a payment terminal from the Point of Sale is listed here, whatever its outcome.</p>
+        </field>
+    </record>
+
+    <menuitem id="menu_pos_payment_attempt" parent="point_of_sale.menu_point_of_sale"
+        action="action_pos_payment_attempt" sequence="4" groups="point_of_sale.group_pos_manager"/>
+</odoo>
