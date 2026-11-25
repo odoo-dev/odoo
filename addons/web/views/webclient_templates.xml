@@ -324,47 +324,162 @@ For more information, please visit: https://developer.mozilla.org/en-US/docs/Web
     <template id="webclient_offline">
         <t t-set="head">
             <script type="text/javascript">
-                document.addEventListener("DOMContentLoaded", () =&gt; {
-                    const cookies = document.cookie.split(';').map(c =&gt; c.trim());
-                    if (cookies.includes('color_scheme=dark')) {
-                        document.body.style.backgroundColor = "#25262b";
-                        document.body.style.color = "#FFFFFF";
-                    }
+                if (document.cookie.split("; ").includes("color_scheme=dark")) {
+                    document.documentElement.dataset.theme = "dark";
+                }
+                window.addEventListener("online", () =&gt; {
+                    document.body.classList.add("o_offline_reconnected");
+                    setTimeout(() =&gt; location.reload(), 600);
                 });
-                window.addEventListener('online', () =&gt; location.reload());
             </script>
             <style>
-                body {
-                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Ubuntu, "Noto Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-                padding:0;
-                margin:0;
-                background-color: #fff;
-                color: rgb(17, 24, 39);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                text-align: center;
-                height: 100vh;
-                width: 100vw;
-                user-select: none;
+                .o_offline {
+                    --Offline-background-color: #f8f9fa;
+                    --Offline-color: #212529;
+                    --Offline__halo-background-color: hsl(from var(--Offline-background-color) h s calc(l - 5) / .95);
+                    --Offline__dots-background-color: rgba(0, 0, 0, 1);
+                    --Offline__text-color: #495057;
+                    --Offline__button-background-color: #714B67;
+                    --Offline__button-background-color--hover: #52374B;
+                    --Offline__button-box-shadow--focus: 0 0 0 .25rem rgba(113, 75, 103, .25);
+                    --Offline__ring-stroke: var(--Offline__button-background-color);
+                    --Offline__piece-stroke: #8F8F8F;
+                    --Offline__veil-background-color: var(--Offline-background-color);
+
+                    position: relative;
+                    height: 100%;
+                    margin: 0;
+                    overflow: hidden;
+                    background-color: var(--Offline-background-color);
+                    background-image:
+                        linear-gradient(45deg, var(--Offline-background-color) 0%, transparent 50%),
+                        linear-gradient(135deg, var(--Offline-background-color) 0%, transparent 30%, transparent 60%, var(--Offline-background-color) 95%),
+                        linear-gradient(180deg, var(--Offline-background-color) 0%, transparent 100%),
+                        radial-gradient(circle at 50% 50%, var(--Offline__halo-background-color) 20%, transparent 400%),
+                        radial-gradient(var(--Offline__dots-background-color) 1px, var(--Offline-background-color) 1px);
+                    background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, repeat;
+                    background-size: auto, auto, 100% 40%, auto, 12px 12px;
+                    color: var(--Offline-color);
+                    font: 1rem/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Ubuntu, "Noto Sans", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
                 }
-                .card {
-                width: 80%;
+                [data-theme="dark"] .o_offline {
+                    --Offline-background-color: #1F1F23;
+                    --Offline-color: #EBEBEB;
+                    --Offline__halo-background-color: rgb(from hsl(from var(--Offline-background-color) h s calc(l - 4)) r g b / .93);
+                    --Offline__dots-background-color: rgba(255, 255, 255, .75);
+                    --Offline__text-color: #B3B4B8;
+                    --Offline__button-background-color: #92427d;
+                    --Offline__button-background-color--hover: #9d4786;
+                    --Offline__button-box-shadow--focus: 0 0 0 .25rem rgba(146, 66, 125, .5);
+                    --Offline__piece-stroke: #88898F;
+                    --Offline__veil-background-color: hsl(from var(--Offline-background-color) h s calc(l - 4));
                 }
-                .card img {
-                width: 96px;
-                height: auto;
-                filter: grayscale(.6);
+                .o_offline_veil {
+                    position: absolute;
+                    inset: 0;
+                    background: radial-gradient(ellipse 230px 250px at 50% 43%, var(--Offline__veil-background-color) 60%, transparent);
                 }
-                .card button {
-                background-color: #714B67;
-                color: #FFFFFF;
-                border: 1px solid #714B67;
-                border-radius: .25rem;
-                padding: .5rem 1rem;
-                cursor: pointer;
-                font-size: 1.2rem;
-                font-weight: 500;
+                .o_offline_message {
+                    position: absolute;
+                    inset: 0 24px 120px;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    text-align: center;
+                }
+                .o_offline_message h1 {
+                    margin: 28px 0 10px;
+                    font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Ubuntu, "Noto Sans", Arial, sans-serif;
+                    font-size: 1.5rem;
+                    font-weight: 600;
+                    line-height: 1.2;
+                    letter-spacing: -.015em;
+                }
+                .o_offline_description {
+                    max-width: 420px;
+                    margin: 0;
+                    color: var(--Offline__text-color);
+                }
+                .o_offline_retry {
+                    position: fixed;
+                    right: 24px;
+                    bottom: 40px;
+                    left: 24px;
+                    height: 48px;
+                    padding: 0 16px;
+                    border: 0;
+                    border-radius: 4px;
+                    background-color: var(--Offline__button-background-color);
+                    color: #ffffff;
+                    font: inherit;
+                    font-size: 1rem;
+                    font-weight: 500;
+                    cursor: pointer;
+                }
+                .o_offline_retry:hover {
+                    background-color: var(--Offline__button-background-color--hover);
+                }
+                .o_offline_retry:focus-visible {
+                    outline: 0;
+                    box-shadow: var(--Offline__button-box-shadow--focus);
+                }
+                .o_offline_ring {
+                    overflow: visible;
+                }
+                .o_offline_ring path {
+                    fill: none;
+                    stroke: var(--Offline__ring-stroke);
+                    stroke-width: 14;
+                }
+                .o_offline_ring .o_offline_piece {
+                    stroke: var(--Offline__piece-stroke);
+                    transform: translate(7px, -7px);
+                    transform-box: fill-box;
+                    transform-origin: center;
+                    transition: stroke .3s;
+                }
+                .o_offline_reconnected .o_offline_ring .o_offline_piece {
+                    stroke: var(--Offline__ring-stroke);
+                    transform: none;
+                }
+                @media (prefers-reduced-motion: no-preference) {
+                    .o_offline_ring .o_offline_piece {
+                        animation: o_offline_unplug .6s cubic-bezier(.3, 1.4, .5, 1) .2s backwards;
+                    }
+                    .o_offline_reconnected .o_offline_ring .o_offline_piece {
+                        animation: o_offline_snap .4s cubic-bezier(.3, 1.6, .5, 1);
+                    }
+                    .o_offline_reconnected .o_offline_ring {
+                        animation: o_offline_pop .3s ease-out .3s;
+                    }
+                }
+                @keyframes o_offline_unplug {
+                    from { transform: none; }
+                }
+                @keyframes o_offline_snap {
+                    from { transform: translate(7px, -7px); }
+                }
+                @keyframes o_offline_pop {
+                    50% { transform: scale(1.06); }
+                }
+                @media screen and (min-width: 768px), print and (min-width: 188mm) {
+                    .o_offline_veil {
+                        background: radial-gradient(ellipse 380px 270px at 50% 50%, var(--Offline__veil-background-color) 58%, transparent);
+                    }
+                    .o_offline_message {
+                        inset: 0 16px;
+                    }
+                    .o_offline_message h1 {
+                        margin-top: 32px;
+                        font-size: 1.75rem;
+                    }
+                    .o_offline_retry {
+                        position: static;
+                        height: 36px;
+                        margin-top: 28px;
+                        font-size: .875rem;
+                    }
                 }
             </style>
             <meta name="viewport" content="width=device-width, initial-scale=1"/>
@@ -372,13 +487,18 @@ For more information, please visit: https://developer.mozilla.org/en-US/docs/Web
         <t t-call="web.layout"
             html_data="{'style': 'height: 100%;'}"
             title.translate="Offline"
+            body_classname.f="o_offline"
             head="head">
-            <div class="card">
-                <img t-attf-src="data:image/png;base64,{{odoo_icon.to_base64()}}" alt="Odoo logo"/>
+            <div class="o_offline_veil" aria-hidden="true"/>
+            <main class="o_offline_message">
+                <svg class="o_offline_ring" width="88" height="88" viewBox="0 0 80 80" aria-hidden="true">
+                    <path d="M67.25 30.08A29 29 0 1 1 49.92 12.75"/>
+                    <path class="o_offline_piece" d="M49.44 12.58A29 29 0 0 1 67.42 30.56"/>
+                </svg>
                 <h1>You are offline</h1>
-                <p>Check your network connection and come back here. Odoo will load as soon as you're back online.</p>
-                <button onclick="location.reload()">Check again</button>
-            </div>
+                <p class="o_offline_description">Check your network connection and come back here. Odoo will load as soon as you're back online.</p>
+                <button class="o_offline_retry" type="button" onclick="location.reload()">Check again</button>
+            </main>
         </t>
     </template>
 
