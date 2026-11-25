@@ -185,6 +185,21 @@ class TestMessageController(MailControllerThreadCommon):
         )
         self.assertEqual(response.status_code, 200)
 
+    def test_thread_messages_non_thread_model(self):
+        """ Chatter messages are fetched on mail.thread documents only, other models
+        (e.g. channels, using their own routes) are ignored instead of crashing. """
+        nothread = self.env["mail.test.nothread"].create({"name": "NoThread"})
+        channel = self.env["discuss.channel"]._create_channel(name="Public Channel", group_id=None)
+        channel.message_post(body="Hello", message_type="comment", subtype_xmlid="mail.mt_comment")
+        self.authenticate(None, None)
+        for record in (nothread, channel):
+            with self.subTest(model=record._name):
+                data = self.make_jsonrpc_request(
+                    "/mail/store",
+                    {"fetch_params": [["/mail/thread/messages", {"thread_model": record._name, "thread_id": record.id}]]},
+                )
+                self.assertFalse(data.get("mail.message"))
+
     def test_thread_post_no_access(self):
         """Test the case where the user tries to upload on a record he can't access."""
         self.authenticate(self.user_admin.login, self.user_admin.login)

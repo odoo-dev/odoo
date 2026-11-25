@@ -43,6 +43,9 @@ class PortalWebClientController(WebclientController):
         **params,
     ):
         access_params = access_params or {}
+        # chatter of mail.thread documents only, other models (e.g. channels) use their own routes
+        if thread_model not in request.env or not isinstance(request.env[thread_model], request.env.registry["mail.thread"]):
+            return
         thread = ThreadController._get_thread_with_access(
             thread_model,
             thread_id,

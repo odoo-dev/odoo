@@ -216,6 +216,9 @@ class WebclientController(ThreadController):
         access_params=None,
     ):
         request.update_context(add_chatter_fields=True)
+        # chatter of mail.thread documents only, other models (e.g. channels) use their own routes
+        if thread_model not in request.env or not isinstance(request.env[thread_model], request.env.registry["mail.thread"]):
+            return
         if thread := self._get_thread_with_access(
             thread_model,
             thread_id,

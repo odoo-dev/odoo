@@ -96,6 +96,18 @@ class TestPortalControllers(TestPortal):
         )
         self.assertNotIn(msg_note.id, fetched_ids, "Internal subtype should be excluded.")
 
+        # chatter of mail.thread documents only, other models are ignored instead of crashing
+        nothread = self.env["mail.test.nothread"].create({"name": "NoThread"})
+        channel = self.env["discuss.channel"]._create_channel(name="Public Channel", group_id=None)
+        channel.message_post(body="Hello", message_type="comment", subtype_xmlid="mail.mt_comment")
+        for record in (nothread, channel):
+            with self.subTest(model=record._name):
+                result = self.make_jsonrpc_request(
+                    "/mail/store",
+                    {"fetch_params": [["/mail/chatter_fetch", {"thread_model": record._name, "thread_id": record.id}]]},
+                )
+                self.assertFalse(result.get("mail.message"))
+
 
 @tagged('-at_install', 'post_install', 'portal', 'mail_controller')
 class TestPortalFlow(MailCommon, HttpCase):
