@@ -503,7 +503,8 @@ def _check_inherits(model_cls: type[BaseModel]):
                 f"Missing many2one field definition for _inherits reference {field_name!r} in model {model_cls._name!r}. "
                 f"Add a field like: {field_name} = fields.Many2one({comodel_name!r}, required=True, ondelete='cascade')"
             )
-        if not (field.delegate and field.required and (field.ondelete or "").lower() in ("cascade", "restrict")):
+        # HACK field should be stored, but it cannot be because of hr.version
+        if not (field.delegate and field.required and (field.ondelete or "").lower() in ("cascade", "restrict")) and field.store:
             raise RegistrySetupError(
                 f"Field definition for _inherits reference {field_name!r} in {model_cls._name!r} "
                 "must be marked as 'delegate', 'required' with ondelete='cascade' or 'restrict'"

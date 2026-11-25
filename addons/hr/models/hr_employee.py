@@ -60,8 +60,8 @@ class HrEmployee(models.Model):
         compute='_compute_version_id',
         search='_search_version_id',
         compute_sql='_compute_sql_version_id',
-        ondelete='cascade',  # FIXME: cascade but not store to avoid Error => "Field definition for _inherits ..."
-        required=True,
+        # HACK added to model_classes.py to ignore ondelete and required
+        # ondelete does not make sense, not required because version is created after the employee
         store=False,
         compute_sudo=True,
     )
