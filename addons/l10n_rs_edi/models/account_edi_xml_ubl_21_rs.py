@@ -66,3 +66,8 @@ class AccountEdiXmlUBL21RS(models.AbstractModel):
         quantity_node = line_node[self._get_tags_for_document_type(vals)['line_quantity']]
         if quantity_node['unitCode'] == 'C62':
             quantity_node['unitCode'] = 'H87'
+
+    def _add_invoice_delivery_nodes(self, document_node, vals):
+        super()._add_invoice_delivery_nodes(document_node, vals)
+        invoice = vals['invoice']
+        document_node['cac:Delivery']['cbc:ActualDeliveryDate']['_text'] = invoice.taxable_supply_date

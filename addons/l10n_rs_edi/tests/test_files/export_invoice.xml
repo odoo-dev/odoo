@@ -120,7 +120,7 @@
 		</cac:Party>
 	</cac:AccountingCustomerParty>
 	<cac:Delivery>
-		<cbc:ActualDeliveryDate>2025-01-15</cbc:ActualDeliveryDate>
+		<cbc:ActualDeliveryDate>2017-01-15</cbc:ActualDeliveryDate>
 		<cac:DeliveryLocation>
 			<cac:Address>
 				<cbc:StreetName>Balkanska ulica, 21</cbc:StreetName>

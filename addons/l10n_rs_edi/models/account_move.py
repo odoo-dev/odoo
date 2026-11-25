@@ -65,14 +65,6 @@ class AccountMove(models.Model):
     l10n_rs_edi_sales_invoice = fields.Char(string="Sales Invoice Id", copy=False)
     l10n_rs_edi_purchase_invoice = fields.Char(string="Purchase Invoice Id", copy=False)
 
-    @api.depends('country_code', 'move_type')
-    def _compute_show_delivery_date(self):
-        # EXTENDS 'account'
-        super()._compute_show_delivery_date()
-        for move in self:
-            if move.l10n_rs_edi_is_eligible:
-                move.show_delivery_date = True
-
     @api.depends("country_code", "move_type")
     def _compute_l10n_rs_edi_is_eligible(self):
         self.fetch(["country_code"])

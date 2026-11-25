@@ -50,7 +50,7 @@ class TestUBLRS(TestUBLCommon):
             send=False,
             move_type=move_type,
             currency_id=self.env.company.currency_id.id,
-            delivery_date='2025-01-15',
+            taxable_supply_date='2017-01-15',
             invoice_line_ids=[
                 {
                     'product_id': self.product_a.id,
