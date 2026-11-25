@@ -29,6 +29,12 @@ class MrpWorkorder(models.Model):
     name = fields.Char(
         'Work Order', required=True, copy=True)
     sequence = fields.Integer("Sequence", compute='_compute_sequence', store=True, readonly=False, precompute=True)
+    production_sequence = fields.Integer(
+        "Manufacturing Order Sequence", related='production_id.sequence', store=True,
+        help="Sequence of the manufacturing order: reordering work orders reorders their manufacturing orders.")
+    production_date_start = fields.Datetime(
+        "Manufacturing Order Start", related='production_id.date_start', store=True,
+        help="Technical: the work orders are displayed in the order of the start of their manufacturing orders.")
     barcode = fields.Char(compute='_compute_barcode', store=True)
     workcenter_id = fields.Many2one(
         'mrp.workcenter', 'Work Center', required=True, index=True, tracking=True,
@@ -525,15 +531,20 @@ class MrpWorkorder(models.Model):
                         values['duration_expected'] = computed_duration
                 # Update MO dates if the start date of the first WO or the
                 # finished date of the last WO is update.
-                if workorder == workorder.production_id.workorder_ids[0] and 'date_start' in values:
-                    if values['date_start']:
-                        workorder.production_id.with_context(force_date=True).write({
-                            'date_start': fields.Datetime.to_datetime(values['date_start'])
+                # A manual MO date is fixed, unless the MO is planned: its dates then follow its work
+                # orders, and stay manual (planning is equivalent to setting the dates manually).
+                production = workorder.production_id
+                if workorder == production.workorder_ids[0] and 'date_start' in values:
+                    if values['date_start'] and (production.is_planned or not production.date_start_manual):
+                        production.with_context(force_date=True).write({
+                            'date_start': fields.Datetime.to_datetime(values['date_start']),
+                            'date_start_manual': production.is_planned,
                         })
-                if workorder == workorder.production_id.workorder_ids[-1] and 'date_finished' in values:
-                    if values['date_finished']:
-                        workorder.production_id.with_context(force_date=True).write({
-                            'date_finished': fields.Datetime.to_datetime(values['date_finished'])
+                if workorder == production.workorder_ids[-1] and 'date_finished' in values:
+                    if values['date_finished'] and (production.is_planned or not production.date_finished_manual):
+                        production.with_context(force_date=True).write({
+                            'date_finished': fields.Datetime.to_datetime(values['date_finished']),
+                            'date_finished_manual': production.is_planned,
                         })
 
         res = super().write(values)
@@ -714,7 +725,7 @@ class MrpWorkorder(models.Model):
                     wo._prepare_timeline_vals(wo.duration, fields.Datetime.now())
                 )
 
-            if wo.production_id.state != 'progress':
+            if wo.production_id.state != 'progress' and not wo.production_id.date_start_manual:
                 wo.production_id.with_context(force_date=True).write({
                     'date_start': fields.Datetime.now()
                 })
@@ -826,8 +837,10 @@ class MrpWorkorder(models.Model):
                 ('date_start', '!=', False),
                 ('date_finished', '!=', False),
             ])
+        workorders.production_id._reset_manual_dates()
         date = max(min([wo.date_start for wo in workorders if wo.date_start], default=datetime.min), datetime.now())
         workorders._action_plan(from_date=date, alternative=False)
+        workorders.production_id._set_planned_dates_manual()
 
         # since date_start changes, we need to resequence
         for mo in workorders.production_id:
@@ -853,6 +866,14 @@ class MrpWorkorder(models.Model):
         }
 
     def web_resequence(self, specification, field_name='sequence', offset=0):
+        if field_name == 'production_sequence':
+            # reordering work orders by their MO sequence reorders their manufacturing orders
+            productions = self.env['mrp.production']
+            for workorder in self:
+                if workorder.production_id not in productions:
+                    productions |= workorder.production_id
+            productions.web_resequence({}, field_name='sequence')
+            return self.web_read(specification)
         # Loop through workorders from the later one to the sooner one. Make sure the date_start are
         # always decresing. If not, set the same than the next one then set the sequence to keep the
         # order.

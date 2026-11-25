@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="mrp_production_capacity_view_form" model="ir.ui.view">
+        <field name="name">mrp.production.capacity.form</field>
+        <field name="model">mrp.production.capacity</field>
+        <field name="arch" type="xml">
+            <form string="Weekly Production Capacity">
+                <field name="company_id" invisible="1"/>
+                <group>
+                    <label for="weekly_capacity"/>
+                    <div class="d-flex align-items-baseline gap-2">
+                        <field name="weekly_capacity" style="max-width: 8rem;"/>
+                        <span>hours</span>
+                    </div>
+                </group>
+                <p class="text-muted mb-4">
+                    For example, if you have 2 operators that work 40 hours per week, the capacity is 80 hours.
+                </p>
+                <p class="text-muted">
+                    For reference, in the last 4 weeks, your weekly average output was
+                    <field name="weekly_average_output" class="oe_inline fw-bold"/> hours.
+                    <button name="action_view_details" type="object" class="btn-link p-0 align-baseline" string="View Operation Performance"/>
+                </p>
+                <footer>
+                    <button name="action_save" type="object" string="Save" class="btn-primary" data-hotkey="q"/>
+                    <button string="Discard" class="btn-secondary" special="cancel" data-hotkey="x"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_mrp_production_capacity" model="ir.actions.act_window">
+        <field name="name">Weekly Production Capacity</field>
+        <field name="res_model">mrp.production.capacity</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="mrp_production_capacity_view_form"/>
+        <field name="target">new</field>
+    </record>
+</odoo>

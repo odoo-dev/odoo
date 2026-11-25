@@ -229,21 +229,14 @@ class TestMrpOrder(TestMrpCommon, MailCase):
         mo.button_mark_done()
         self.assertEqual(mo.date_finished.day, 28)
 
-        # test tracking in case of finished date change wo state chage
+        # the dates of the MOs are not tracked in the chatter
         self.flush_tracking()
         new_date_finished = datetime(2022, 6, 28, 18, 0)
         with self.mock_mail_gateway(), self.mock_mail_app():
             mo.with_env(self.env).write({'date_finished': new_date_finished})
             self.flush_tracking()
-        self.assertMessageFields(self._new_msgs, {
-            'body': '',
-            'message_type': 'tracking',
-            'subject': False,
-            'subtype_id': self.env.ref('mail.mt_note'),
-            'tracking_values': [
-                ('date_finished', 'datetime', datetime(2022, 6, 28, 8, 0), new_date_finished),
-            ],
-        })
+        self.assertEqual(mo.date_finished, new_date_finished)
+        self.assertFalse(self._new_msgs)
 
     def test_over_consumption(self):
         """ Consume more component quantity than the initial demand. No split on moves.

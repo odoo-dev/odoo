@@ -24,14 +24,8 @@
     }
     .o_kanban_workorder_date {
         display: flex;
-        flex-basis: 40%;
         flex-direction: row;
         color: gray;
-    }
-    .o_kanban_workorder_remaining {
-        border: solid 1px;
-        padding: 1px;
-        border-color: green;
     }
     .o_kanban_record.o_wo_draft {
         .o_kanban_workorder_title {
@@ -39,9 +33,6 @@
         }
         .o_kanban_workorder_production_name {
             opacity: 0.5;
-        }
-        .o_kanban_workorder_remaining {
-            border: 0px;
         }
     }
     .o_kanban_record.o_wo_date_orange {
@@ -56,7 +47,7 @@
     }
     .o_kanban_record.o_wo_remaining_red {
         .o_kanban_workorder_remaining {
-           border-color: red;
+           color: red;
         }
     }
 }

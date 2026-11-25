@@ -35,6 +35,9 @@ class MrpProductionGroup(models.Model):
         string='Parent Manufacturing Orders')
 
 
+NO_DEADLINE_SEQUENCE = 99999999  # after the sequences of the MOs with a deadline (YYYYMMDD)
+
+
 class MrpProduction(models.Model):
     """ Manufacturing Orders """
     _name = 'mrp.production'
@@ -82,6 +85,11 @@ class MrpProduction(models.Model):
     priority = fields.Selection(
         PROCUREMENT_PRIORITIES, string='Priority', default='0',
         help="Components will be reserved first for the MO with the highest priorities.")
+    sequence = fields.Integer(
+        'Sequence', copy=False, index=True,
+        help="Order in which the manufacturing orders should be processed. Initialized at creation "
+             "from the deadline (or the scheduled date) as YYYYMMDD; reordering manufacturing orders "
+             "swaps their sequences.")
     backorder_sequence = fields.Integer("Backorder Sequence", default=0, copy=False, help="Backorder sequence, if equals to 0 means there is not related backorder")
     origin = fields.Char(
         'Source', copy=False,
@@ -159,8 +167,17 @@ class MrpProduction(models.Model):
         'End', copy=False, default=_get_default_date_finished,
         compute='_compute_date_finished', store=True,
         help="Date you expect to finish production or actual date you finished production.")
+    date_start_manual = fields.Boolean(
+        "Manual Start Date", copy=False,
+        help="Technical: the scheduled date was set by the user.")
+    date_finished_manual = fields.Boolean(
+        "Manual End Date", copy=False,
+        help="Technical: the scheduled end was set by the user and is not recomputed anymore.")
     duration_expected = fields.Float("Expected Duration", help="Total expected duration (in minutes)", compute='_compute_duration_expected', store=True)
     duration = fields.Float("Real Duration", help="Total real duration (in minutes)", compute='_compute_duration', store=True)
+    progress = fields.Float(
+        "Progress", compute='_compute_progress',
+        help="Real duration of the work orders compared to their total expected duration (in %).")
 
     bom_id = fields.Many2one(
         'mrp.bom', 'Bill of Material', readonly=False,
@@ -288,6 +305,12 @@ class MrpProduction(models.Model):
     is_outdated_bom = fields.Boolean("Outdated BoM", help="The BoM has been updated since creation of the MO")
     is_delayed = fields.Boolean(compute='_compute_is_delayed', search='_search_is_delayed')
     is_due_today = fields.Boolean(compute='_compute_is_delayed')
+    is_late_on_deadline = fields.Boolean(
+        compute='_compute_deadline_color',
+        help="Technical: the scheduled end is after the deadline.")
+    deadline_color = fields.Integer(
+        compute='_compute_deadline_color',
+        help="Technical: color of the kanban card highlight, red when the scheduled end is after the deadline.")
     search_date_category = fields.Selection([
         ('before', 'Before'),
         ('yesterday', 'Yesterday'),
@@ -303,6 +326,10 @@ class MrpProduction(models.Model):
     remaining_time = fields.Float('Remaining Working Time', compute='_compute_remaining_time',
                                   help="The remaining time to finish this production in hours.")
     active_workcenter_ids = fields.Many2many('mrp.workcenter', compute='_compute_active_workcenter_ids')
+    workcenter_tags = fields.Json(
+        compute='_compute_workcenter_tags',
+        help="Technical: work centers of the work orders in progress, then of those to do, as "
+             "[{'id', 'name', 'state'}] for the kanban card.")
     packages_count = fields.Integer(string='Packages Count', compute='_compute_packages_count', copy=False)
     package_history_ids = fields.One2many('stock.package.history', 'production_id', string='Package History')
 
@@ -509,6 +536,22 @@ class MrpProduction(models.Model):
     def _compute_duration(self):
         for production in self:
             production.duration = sum(production.workorder_ids.mapped('duration'))
+
+    @api.depends('duration', 'duration_expected')
+    def _compute_progress(self):
+        for production in self:
+            production.progress = production.duration_expected and production.duration / production.duration_expected * 100
+
+    @api.depends('state', 'date_deadline', 'date_finished')
+    def _compute_deadline_color(self):
+        for production in self:
+            is_late = (
+                production.state not in ('done', 'cancel')
+                and production.date_deadline and production.date_finished
+                and production.date_deadline < production.date_finished
+            )
+            production.is_late_on_deadline = is_late
+            production.deadline_color = 1 if is_late else 0  # 1 is red in the color index
 
     @api.depends("workorder_ids.is_planned")
     def _compute_is_planned(self):
@@ -815,10 +858,18 @@ class MrpProduction(models.Model):
         late_stock_moves = self.env['stock.move'].search([('delay_alert_date', operator, value)])
         return ['|', ('move_raw_ids', 'in', late_stock_moves.ids), ('move_finished_ids', 'in', late_stock_moves.ids)]
 
-    @api.depends('company_id', 'date_start', 'is_planned', 'product_id', 'workorder_ids.duration_expected')
+    @api.depends('company_id', 'date_start', 'is_planned', 'product_id', 'date_finished_manual',
+                 'workorder_ids.duration_expected')
     def _compute_date_finished(self):
         for production in self:
-            if not production.date_start or production.is_planned or production.state == 'done':
+            if not production.date_start or production.state == 'done' or production.date_finished_manual:
+                continue
+            if production.state in ('confirmed', 'progress') and production.company_id.mrp_weekly_capacity > 0:
+                continue  # computed by the scheduling, see `_schedule_productions`
+            if production.state == 'progress' and production.workorder_ids:
+                production.date_finished = production._get_date_finished_in_progress()
+                continue
+            if production.is_planned:
                 continue
             days_delay = production.bom_id.produce_delay
             date_finished = production.date_start + relativedelta(days=days_delay)
@@ -826,6 +877,103 @@ class MrpProduction(models.Model):
                 date_finished = production._calculate_expected_finished_date(date_finished) or \
                     (date_finished + relativedelta(minutes=sum(production.workorder_ids.mapped('duration_expected')) or 60))
             production.date_finished = date_finished
+
+    # ------------------------------------------------------------
+    # Scheduling by sequence and capacity
+    # ------------------------------------------------------------
+
+    def _get_scheduling_hours(self):
+        """ Remaining work of the MO (in hours): its work orders still to do, 1 hour without work orders. """
+        self.ensure_one()
+        if not self.workorder_ids:
+            return 1.0
+        return sum(max(wo.remaining_time, 0) for wo in self.workorder_ids if wo.state not in ('done', 'cancel')) / 60
+
+    @api.model
+    def _schedule_productions(self, companies=None):
+        """ Schedule the confirmed and in-progress MOs one after the other, in the order of their
+        sequence, on the production working schedule of their company, according to its weekly
+        capacity: with a capacity twice the hours of the working schedule, a 1 hour MO only takes
+        30 minutes of the schedule (2 MOs are processed in parallel), so the next MO starts 30
+        minutes later. The end of an MO is its start + its remaining time, within the working times.
+
+        Only the dates that are not set manually are computed: the MOs with a fixed start (manual,
+        in progress or planned with their work orders) are left out of the scheduling, but they use
+        their share of the capacity from their start: the other MOs are scheduled around them.
+        Nothing is done for the companies without weekly capacity. """
+        if companies is None:
+            companies = self.env['res.company'].sudo().search([('mrp_weekly_capacity', '>', 0)])
+        now = fields.Datetime.now().replace(microsecond=0)
+        for company in companies.filtered(lambda c: c.mrp_weekly_capacity > 0):
+            calendar = company._get_mrp_production_calendar().with_company(company)
+            factor = (calendar.hours_per_week or company.mrp_weekly_capacity) / company.mrp_weekly_capacity
+
+            def plan(hours, from_date):
+                return calendar.plan_hours(hours, from_date) or from_date + relativedelta(hours=hours)
+
+            productions = self.sudo().search([
+                ('company_id', '=', company.id),
+                ('state', 'in', ('confirmed', 'progress')),
+            ], order='sequence, id')
+            def is_fixed(production):
+                # dates not computed: actual start, manual start or planned with its work orders
+                return production.state == 'progress' or production.date_start_manual or production.is_planned
+
+            def write_dates(production, date_start, date_finished):
+                vals = {}
+                if date_start != production.date_start:
+                    vals['date_start'] = date_start
+                if date_finished != production.date_finished:
+                    vals['date_finished'] = date_finished
+                if vals:
+                    production.with_context(mrp_scheduling=True, force_date=True).write(vals)
+
+            def compute_date_finished(production, work_from, remaining_hours):
+                if production.date_finished_manual or (production.is_planned and production.state != 'progress'):
+                    return production.date_finished
+                # the end of an MO is its start + its remaining time, within the working times
+                return plan(remaining_hours, work_from)
+
+            # 1. the MOs with fixed dates are not scheduled, but they use their share of the capacity
+            busy = []
+            for production in productions.filtered(is_fixed):
+                remaining_hours = production._get_scheduling_hours()
+                work_from = max(now, production.date_start) if production.state == 'progress' else production.date_start
+                write_dates(production, production.date_start, compute_date_finished(production, work_from, remaining_hours))
+                busy.append((work_from, plan(remaining_hours * factor, work_from)))
+            busy.sort()
+
+            # 2. the other MOs are scheduled one after the other, in the remaining capacity
+            cursor = now
+            for production in productions.filtered(lambda p: not is_fixed(p)):
+                remaining_hours = production._get_scheduling_hours()
+                date_start = plan(0, cursor)
+                slot_end = plan(remaining_hours * factor, date_start)
+                for busy_start, busy_end in busy:
+                    if busy_start < slot_end and date_start < busy_end:  # overlap: after the busy slot
+                        date_start = plan(0, busy_end)
+                        slot_end = plan(remaining_hours * factor, date_start)
+                write_dates(production, date_start, compute_date_finished(production, date_start, remaining_hours))
+                # the next MO starts once this one used its share of the capacity, on the working schedule
+                cursor = slot_end
+
+    def _reschedule(self):
+        if not self.env.context.get('mrp_scheduling'):
+            self.env['mrp.production']._schedule_productions(self.company_id.sudo())
+
+    def _get_date_finished_in_progress(self):
+        """ Forecasted end of an in-progress MO: the remaining work of its work orders starts now. """
+        self.ensure_one()
+        remaining_minutes = sum(max(wo.remaining_time, 0) for wo in self.workorder_ids if wo.state not in ('done', 'cancel'))
+        return max(fields.Datetime.now(), self.date_start) + relativedelta(minutes=remaining_minutes)
+
+    def _update_date_finished_in_progress(self):
+        """ Called when time is logged on the work orders, unless the end was set by the user. """
+        if scheduled := self.filtered(lambda p: p.company_id.mrp_weekly_capacity > 0):
+            scheduled._reschedule()
+        for production in self - scheduled:
+            if production.state == 'progress' and production.workorder_ids and not production.date_finished_manual:
+                production.date_finished = production._get_date_finished_in_progress()
 
     def _calculate_expected_finished_date(self, date_start):
         """
@@ -986,6 +1134,19 @@ class MrpProduction(models.Model):
             production.remaining_time = sum(production.workorder_ids.mapped('remaining_time'))
 
     @api.depends('workorder_ids.time_ids')
+    @api.depends('state', 'workorder_ids.state', 'workorder_ids.workcenter_id', 'workorder_ids.sequence')
+    def _compute_workcenter_tags(self):
+        for production in self:
+            tags = []
+            if production.state not in ('confirmed', 'progress', 'to_close'):
+                production.workcenter_tags = tags
+                continue
+            for state in ('progress', 'ready'):
+                workorders = production.workorder_ids.filtered(lambda wo: wo.state == state).sorted(lambda wo: (wo.sequence, wo.id))
+                for workcenter in workorders.workcenter_id:  # unique, in the order of the work orders
+                    tags.append({'id': workcenter.id, 'name': workcenter.display_name, 'state': state})
+            production.workcenter_tags = tags
+
     def _compute_active_workcenter_ids(self):
         active_workcenters_by_mo = self.env["mrp.workcenter.productivity"]._read_group(
             [("workorder_id", "in", self.workorder_ids.ids), ("date_end", "=", False)],
@@ -1073,6 +1234,24 @@ class MrpProduction(models.Model):
                 raise ValidationError(_("The end date cannot be set in the future."))
 
     def write(self, vals):
+        if not self.env.context.get('mrp_scheduling'):
+            # Only the form sets a date manually (it sends the flag with the date). A date written
+            # without its flag (e.g. moving the MO to another column of the kanban) is not fixed.
+            for date_field, flag in (('date_start', 'date_start_manual'), ('date_finished', 'date_finished_manual')):
+                if date_field in vals and flag not in vals:
+                    vals = {**vals, flag: False}
+        if not self.env.context.get('mrp_scheduling') and {
+            'sequence', 'date_start', 'date_finished', 'date_start_manual', 'date_finished_manual', 'state',
+        } & vals.keys():
+            res = self.with_context(mrp_scheduling=True).write(vals)
+            self.with_context(mrp_scheduling=False)._reschedule()
+            return res
+        if vals.get('state') == 'progress' and 'date_start' not in vals:
+            # a manually set start date is fixed: starting the production doesn't move it
+            fixed_start = self.filtered('date_start_manual')
+            if fixed_start and fixed_start != self:
+                fixed_start.write(vals)
+                return (self - fixed_start).write(vals)
         if 'product_id' in vals and self.state != 'draft':
             vals.pop('product_id')
         if 'move_byproduct_ids' in vals and 'move_finished_ids' not in vals:
@@ -1120,15 +1299,19 @@ class MrpProduction(models.Model):
                     production.move_raw_ids.reference_ids.filtered(lambda r: r.name == prev_production_name).name = production.name
                     moves_to_reassign |= production.move_raw_ids
 
-        if vals.get('state') == 'progress' and 'date_start' not in vals:
+        if vals.get('state') == 'progress' and 'date_start' not in vals and not any(self.mapped('date_start_manual')):
             vals['date_start'] = fields.Datetime.now()
-
-        if 'date_finished' in vals and 'state' not in vals:
-            to_update = self.filtered(lambda p: p.state == 'done')
-            to_update._track_add({production.id: {'date_finished': production.date_finished} for production in to_update})
 
         confirmed_productions = self.filtered(lambda p: p.state == 'confirmed') if 'date_start' in vals else self.env['mrp.production']
         res = super(MrpProduction, self).write(vals)
+
+        if 'date_deadline' in vals and 'sequence' not in vals:
+            # the MOs without deadline always come last: they move when a deadline is set/removed
+            for production in self:
+                if production.date_deadline and production.sequence == NO_DEADLINE_SEQUENCE:
+                    production.sequence = production._get_initial_sequence()
+                elif not production.date_deadline and production.sequence != NO_DEADLINE_SEQUENCE:
+                    production.sequence = NO_DEADLINE_SEQUENCE
 
         for production in self:
             if 'date_start' in vals and not self.env.context.get('force_date', False):
@@ -1136,6 +1319,8 @@ class MrpProduction(models.Model):
                     raise UserError(_('You cannot move a manufacturing order once it is cancelled or done.'))
                 if production.is_planned and vals.get('state') != 'progress' and not (production in confirmed_productions and production.state == 'progress'):
                     production._unplan_workorders()
+                    # the dates of a planned MO are manual: unplanned, the dates not set now are computed again
+                    production.write({flag: False for flag in ('date_start_manual', 'date_finished_manual') if flag not in vals})
             if vals.get('date_start'):
                 production.move_raw_ids.write({'date': production.date_start, 'date_deadline': production.date_start})
             if vals.get('date_finished'):
@@ -1214,7 +1399,49 @@ class MrpProduction(models.Model):
                 rec.move_finished_ids.write({'date': rec.date_finished})
         if reference_vals_list:
             self.env['stock.reference'].create(reference_vals_list)
+        for rec, vals in zip(res, vals_list):
+            if not vals.get('sequence'):
+                rec.sequence = rec._get_initial_sequence()
         return res
+
+    def _get_initial_sequence(self):
+        """ Sequence of a new MO: its deadline as YYYYMMDD in the user's timezone, so that the MOs
+        are ordered chronologically by default; the MOs without deadline come last. It is then
+        managed by reordering the MOs. """
+        self.ensure_one()
+        if not self.date_deadline:
+            return NO_DEADLINE_SEQUENCE
+        return int(fields.Datetime.context_timestamp(self, self.date_deadline).strftime('%Y%m%d'))
+
+    def web_resequence(self, specification, field_name='sequence', offset=0):
+        """ Reordering MOs exchanges their sequences: the reordered MOs (``self``, in their new
+        order) take over the sequence values they occupied, in ascending order. E.g. swapping
+        MO1 (sequence 1) and MO2 (sequence 2) gives MO2 the sequence 1 and MO1 the sequence 2. """
+        if field_name != 'sequence':
+            return super().web_resequence(specification, field_name=field_name, offset=offset)
+        new_sequences = []
+        for sequence in sorted(self.mapped('sequence')):
+            if new_sequences and sequence <= new_sequences[-1]:
+                # MOs sharing a sequence (e.g. same deadline) must be split to keep the new order
+                sequence = new_sequences[-1] + 1
+            new_sequences.append(sequence)
+        moved = self.browse()
+        for production, sequence in zip(self, new_sequences):
+            if production.sequence != sequence:
+                production.with_context(mrp_scheduling=True).sequence = sequence
+                moved |= production
+        if moved:
+            # Reordering MOs recomputes the dates of all the MOs from their position: the manual
+            # dates are released (they are only fixed until the MOs are reordered or replanned),
+            # except the planned MOs: their dates are those of their work orders until unplanned.
+            self.search([
+                ('company_id', 'in', moved.company_id.ids),
+                ('state', 'in', ('confirmed', 'progress')),
+                '|', ('is_planned', '=', False), ('state', '=', 'progress'),
+                '|', ('date_start_manual', '=', True), ('date_finished_manual', '=', True),
+            ]).with_context(mrp_scheduling=True).write({'date_start_manual': False, 'date_finished_manual': False})
+            moved._reschedule()
+        return self.web_read(specification)
 
     def unlink(self):
         self.action_cancel()
@@ -1841,16 +2068,30 @@ class MrpProduction(models.Model):
             production.move_raw_ids._action_assign()
         return True
 
+    def _set_planned_dates_manual(self):
+        """ Planning an MO (its work orders) is equivalent to setting its dates manually. """
+        self.filtered('is_planned').write({'date_start_manual': True, 'date_finished_manual': True})
+
+    def _reset_manual_dates(self):
+        """ Manually set dates are fixed until the MO is reordered or replanned. """
+        self.filtered(lambda p: p.date_start_manual or p.date_finished_manual).write({
+            'date_start_manual': False,
+            'date_finished_manual': False,
+        })
+
     def button_plan(self, as_soon_as_possible=True, ignore_schedule=False):
         """ Create work orders. And probably do stuff, like things. """
+        self._reset_manual_dates()
         skip_orders_count = 0
         for order in self:
             if order.is_planned or not order._has_workorders():
                 skip_orders_count += 1
                 continue
             if as_soon_as_possible:
-                order.date_start = fields.Datetime.now()
-            order._plan_workorders(ignore_schedule)
+                # not rescheduled by sequence and capacity: the work orders are planned from now
+                order.with_context(mrp_scheduling=True).date_start = fields.Datetime.now()
+            order.with_context(mrp_scheduling=True)._plan_workorders(ignore_schedule)
+            order._set_planned_dates_manual()
             order.message_post(body=self.env._("The manufacturing order has been planned."), subtype_id=self.env.ref('mrp.mt_mo_state').id)
         if skip_orders_count == len(self):
             return {
@@ -1878,6 +2119,7 @@ class MrpProduction(models.Model):
         )._action_plan(from_date=self.date_start, ignore_schedule=ignore_schedule)
 
     def button_unplan(self):
+        self._reset_manual_dates()
         orders_to_unplan = self.filtered(lambda order: order.is_planned)
         orders_to_unplan._unplan_workorders()
         for order in orders_to_unplan:
@@ -3258,9 +3500,17 @@ class MrpProduction(models.Model):
     def _track_execute(self, track_init_values, trackings, track_records=None):
         """
            Extend tracking behavior to manage the `previous_date_start` field
-           based on changes to `date_start`.
+           based on changes to `date_start`. The dates of the MOs change with their scheduling:
+           their changes are not logged in the chatter.
         """
-        res = super()._track_execute(track_init_values, trackings, track_records=track_records)
+        untracked_dates = {'date_start', 'date_finished', 'date_deadline'}
+        logged_trackings = {}
+        for record_id, (changes, tracking_values) in trackings.items():
+            logged_trackings[record_id] = (
+                {fname for fname in changes if fname not in untracked_dates},
+                [value for value in tracking_values or [] if value.get('field_name') not in untracked_dates],
+            )
+        res = super()._track_execute(track_init_values, logged_trackings, track_records=track_records)
         for mo in self:
             changes, _tracking_values = trackings.get(mo.id, ([], None))
             if 'date_start' in changes:

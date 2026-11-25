@@ -1,0 +1,7 @@
+/* Computed (not manually set) scheduled dates of manufacturing orders are muted */
+.o_field_widget .o_mrp_date_start_computed :is(button, input, span)[data-field="date_start"],
+.o_field_widget .o_mrp_date_finished_computed :is(button, input, span)[data-field="date_finished"],
+.o_field_widget .o_mrp_date_start_computed span.text-truncate:first-of-type,
+.o_field_widget .o_mrp_date_finished_computed span.text-truncate:last-of-type {
+    color: var(--o-main-color-muted);
+}

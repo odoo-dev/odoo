@@ -8,6 +8,7 @@ from . import mrp_consumption_warning
 from . import product_replenish
 from . import mrp_finished_product_label_layout
 from . import mrp_production_split
+from . import mrp_production_capacity
 from . import stock_label_type
 from . import mrp_production_serial_numbers
 from . import stock_replenishment_info

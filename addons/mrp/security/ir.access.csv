@@ -51,6 +51,7 @@ access_mrp_workcenter_tag_group_user,access.mrp.workcenter.tag,mrp.workcenter.ta
 access_mrp_workcenter_tag_manager,access.mrp.workcenter.tag,mrp.workcenter.tag,mrp.group_mrp_manager,crud,
 access_mrp_production_split_multi,access.mrp.production.split.multi,mrp.production.split.multi,mrp.group_mrp_user,cru,
 access_mrp_production_split,access.mrp.production.split,mrp.production.split,mrp.group_mrp_user,cru,
+access_mrp_production_capacity,access.mrp.production.capacity,mrp.production.capacity,mrp.group_mrp_manager,cru,
 access_mrp_production_split_line,access.mrp.production.split.line,mrp.production.split.line,mrp.group_mrp_user,crud,
 access_mrp_workcenter_capacity_manager,mrp.workcenter.capacity.manager,mrp.workcenter.capacity,mrp.group_mrp_manager,crud,
 access_mrp_workcenter_capacity_group_user,mrp.workcenter.capacity,mrp.workcenter.capacity,mrp.group_mrp_user,r,

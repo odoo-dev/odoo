@@ -41,8 +41,9 @@
             <field name="name">mrp.production.list</field>
             <field name="model">mrp.production</field>
             <field name="arch" type="xml">
-                <list string="Manufacturing Orders" multi_edit="1" sample="1" decoration-info="state == 'draft'">
+                <list string="Manufacturing Orders" multi_edit="1" sample="1" decoration-info="state == 'draft'" default_order="sequence, id" js_class="mrp_production_list">
                     <header>
+                        <button name="%(mrp.action_mrp_production_capacity)d" type="action" string="Capacity" display="always" groups="mrp.group_mrp_manager"/>
                         <button name="button_plan" type="object" string="Plan" groups="mrp.group_mrp_routings"/>
                         <button name="action_assign" type="object" string="Reserve"/>
                         <button name="action_cancel" type="object" string="Cancel"
@@ -50,26 +51,31 @@
                             confirm-title="Cancel Manufacturing Orders" confirm-label="Cancel these Orders"/>
                     </header>
                     <field name="company_id" column_invisible="True"/> <!-- needed by the company-dependent domain of the check_company fields of this multi-edit list -->
+                    <field name="sequence" widget="handle"/>
                     <field name="priority" optional="show" widget="priority" nolabel="1" width="20px"/>
                     <field name="name" decoration-bf="1"/>
-                    <field name="date_start" optional="show" widget="relative_date"/>
-                    <field name="date_finished" optional="hide" widget="relative_date"/>
-                    <field name="date_deadline" widget="mrp_relative_date_unformatted" invisible="state in ['done', 'cancel']" optional="hide"
-                        decoration-danger="is_delayed"
-                        decoration-bf="is_delayed"/>
                     <field name="product_id" readonly="1" optional="show"/>
-                    <field name="lot_producing_ids" optional="hide" widget="many2many_tags"/>
-                    <field name="bom_id" readonly="1" optional="hide"/>
-                    <field name="activity_ids" string="Next Activity" widget="list_activity" optional="show"/>
-                    <field name="origin" optional="show" readonly="state in ['cancel', 'done']"/>
-                    <field name="user_id" optional="hide" widget="many2one_avatar_user" readonly="state in ['cancel', 'done']"/>
                     <field name="components_availability_state" column_invisible="True" options='{"lazy": true}'/> <!-- drives decoration-success/warning/danger of components_availability -->
-                    <field name="components_availability" options='{"lazy": true}'
+                    <field name="components_availability" string="Components" options='{"lazy": true}'
                         invisible="state not in ['confirmed', 'progress']"
                         optional="show"
                         decoration-success="reservation_state == 'assigned' or components_availability_state == 'available'"
                         decoration-warning="reservation_state != 'assigned' and components_availability_state in ('expected', 'available')"
                         decoration-danger="reservation_state != 'assigned' and components_availability_state in ('late', 'unavailable')"/>
+                    <field name="date_start_manual" column_invisible="True"/> <!-- computed dates are muted -->
+                    <field name="date_finished_manual" column_invisible="True"/>
+                    <field name="date_start" optional="show" widget="relative_date" options="{'classes': {}}" decoration-muted="not date_start_manual"/>
+                    <field name="date_finished" optional="hide" widget="relative_date" options="{'classes': {}}" decoration-muted="not date_finished_manual"/>
+                    <field name="is_late_on_deadline" column_invisible="True"/> <!-- drives decoration-danger of date_deadline -->
+                    <field name="date_deadline" widget="mrp_relative_date_unformatted" invisible="state in ['done', 'cancel']" optional="show"
+                        decoration-danger="is_late_on_deadline"/>
+                    <field name="progress" widget="progressbar" optional="show" groups="mrp.group_mrp_routings"
+                        invisible="state not in ['progress', 'to_close'] or not duration_expected"/>
+                    <field name="lot_producing_ids" optional="hide" widget="many2many_tags"/>
+                    <field name="bom_id" readonly="1" optional="hide"/>
+                    <field name="activity_ids" string="Next Activity" widget="list_activity" optional="hide"/>
+                    <field name="origin" optional="show" readonly="state in ['cancel', 'done']"/>
+                    <field name="user_id" optional="hide" widget="many2one_avatar_user" readonly="state in ['cancel', 'done']"/>
                     <field name="reservation_state" optional="hide" decoration-danger="reservation_state == 'confirmed'" decoration-success="reservation_state == 'assigned'"/>
                     <field name="product_qty" sum="Total Qty" string="Quantity" readonly="1" optional="show"/>
                     <field name="uom_id" readonly="1" options="{'no_open':True,'no_create':True}" groups="uom.group_uom" widget="many2one_uom" optional="show"/>
@@ -84,7 +90,6 @@
                            decoration-info="state == 'draft'"
                            optional="show" widget="badge" class="text-dark"/>
                     <field name="activity_exception_decoration" widget="activity_exception"/>
-                    <field name="is_delayed" column_invisible="True"/> <!-- drives decoration-danger/decoration-bf of date_deadline -->
                     <field nolabel="1" name="json_popover" widget="stock_rescheduling_popover" invisible="not json_popover"/>
                 </list>
             </field>
@@ -101,9 +106,12 @@
                     </header>
                     <field name="priority" optional="show" widget="priority" nolabel="1" width="20px"/>
                     <field name="name" decoration-bf="1"/>
-                    <field name="date_start" optional="show" widget="relative_date"/>
-                    <field name="date_finished" optional="hide" widget="relative_date"/>
-                    <field name="date_deadline" widget="mrp_relative_date_unformatted" invisible="state in ['done', 'cancel']" optional="hide" decoration-danger="is_delayed" decoration-bf="is_delayed"/>
+                    <field name="date_start_manual" column_invisible="True"/> <!-- computed dates are muted -->
+                    <field name="date_finished_manual" column_invisible="True"/>
+                    <field name="date_start" optional="show" widget="relative_date" options="{'classes': {}}" decoration-muted="not date_start_manual"/>
+                    <field name="date_finished" optional="hide" widget="relative_date" options="{'classes': {}}" decoration-muted="not date_finished_manual"/>
+                    <field name="is_late_on_deadline" column_invisible="True"/> <!-- drives decoration-danger of date_deadline -->
+                    <field name="date_deadline" widget="mrp_relative_date_unformatted" invisible="state in ['done', 'cancel']" optional="hide" decoration-danger="is_late_on_deadline"/>
                     <field name="product_id" readonly="1" optional="show"/>
                     <field name="lot_producing_ids" optional="hide" widget="many2many_tags"/>
                     <field name="bom_id" readonly="1" optional="hide"/>
@@ -111,7 +119,7 @@
                     <field name="origin" optional="show" readonly="state in ['cancel', 'done']"/>
                     <field name="user_id" optional="hide" widget="many2one_avatar_user" readonly="state in ['cancel', 'done']"/>
                     <field name="components_availability_state" column_invisible="True" options='{"lazy": true}'/> <!-- drives decoration-success/warning/danger of components_availability -->
-                    <field name="components_availability" options='{"lazy": true}'
+                    <field name="components_availability" string="Components" options='{"lazy": true}'
                         invisible="state not in ['confirmed', 'progress']"
                         optional="show"
                         decoration-success="reservation_state == 'assigned' or components_availability_state == 'available'"
@@ -445,16 +453,12 @@
                             <label name="scheduled_date" for="date_start" string="Scheduled Date" invisible="state in ['progress', 'to_close', 'done', 'cancel']"/>
                             <label name="start_date" for="date_start" string="Start Date" invisible="state not in ['progress', 'to_close', 'done', 'cancel']"/>
                             <div class="o_row" name="date_start">
-                                <field name="date_start"
+                                <field name="date_start" widget="mrp_daterange" options="{'end_date_field': 'date_finished', 'always_range': True}"
                                     readonly="state in ['done', 'to_close', 'cancel']"
-                                    decoration-warning="state not in ('done', 'cancel') and date_start &lt; now"
-                                    decoration-danger="state not in ('done', 'cancel') and date_deadline and date_deadline &lt; date_finished"
-                                    help="Date at which you plan to start.
-                                          Red if the scheduled end is forecasted after the production order deadline.
-                                          Orange if the scheduled date is in the past."/>
+                                    help="Dates at which you plan to start and end the production.
+                                          Muted when they are computed, i.e. not set manually."/>
                                 <field nolabel="1" name="json_popover" widget="stock_rescheduling_popover" invisible="not json_popover"/>
                             </div>
-                            <field name="date_finished" string="End Date" readonly="is_locked" invisible="state != 'done'" help="Date at which you finished production."/>
                             <field name="components_availability_state" invisible="1"/> <!-- drives decoration-success/warning/danger of components_availability -->
                             <field name="components_availability" invisible="state not in ['confirmed', 'progress']"
                                 decoration-success="reservation_state == 'assigned' or components_availability_state == 'available'"
@@ -643,7 +647,8 @@
                                 </group>
                                 <group>
                                     <field name="origin" readonly="state in ['cancel', 'done']"/>
-                                    <field name="date_deadline"/>
+                                    <field name="is_late_on_deadline" invisible="1"/> <!-- drives decoration-danger of date_deadline -->
+                                    <field name="date_deadline" placeholder="None" decoration-danger="is_late_on_deadline"/>
                                     <field name="is_delayed" invisible="True"/> <!-- xpath anchor of project_mrp which adds its field after it -->
                                     <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}" readonly="state != 'draft'" force_save="1"/>
                                     <field name="note" readonly="False"/>
@@ -665,6 +670,7 @@
                     <field name="reservation_state"/>
                     <field name="components_availability_state"/>
                     <field name="workorder_ids"/>
+                    <field name="workcenter_tags"/>
                     <templates>
                         <t t-name="card">
                             <div class="d-flex mb-1 align-items-center justify-content-between">
@@ -683,17 +689,18 @@
                                 <field name="product_qty" widget="float_without_trailing_zeros" class="ms-auto flex-shrink-0"/>
                                 <field name="uom_id" class="ms-1 flex-shrink-0"/>
                             </div>
-                            <div t-if="record.active_workcenter_ids.raw_value.length" class="d-flex mb-1">
-                                <field name="active_workcenter_ids" class="ms-1"/>
+                            <!-- work centers of the work orders in progress (orange) and to do (grey) -->
+                            <div t-if="record.workcenter_tags.raw_value and record.workcenter_tags.raw_value.length" class="d-flex flex-wrap gap-1 mb-1 ms-1">
+                                <t t-foreach="record.workcenter_tags.raw_value" t-as="tag" t-key="tag.state + '_' + tag.id">
+                                    <span t-attf-class="o_tag badge rounded-pill {{ tag.state == 'progress' ? 'o_tag_color_2' : 'o_tag_color_0' }}" t-out="tag.name"/>
+                                </t>
                             </div>
                             <footer class="text-muted">
                                 <div class="d-flex w-100 align-items-center gap-1" style="height:26px;" >
-                                    <field name="priority" widget="priority"/>
-                                    <field name="activity_ids" widget="kanban_activity"/>
                                     <field name="json_popover" widget="stock_rescheduling_popover" invisible="not json_popover"/>
                                     <div t-if="record.date_deadline.raw_value &amp;&amp; !['done', 'cancel'].includes(record.state.raw_value)" class="d-flex">
                                         <i class="oi mx-1 mt-1" data-icon="calendar_today" role="img" title="Deadline"/>
-                                        <field name="date_deadline" widget="datetime" options="{'show_time': false}" decoration-danger="is_delayed" decoration-warning="is_due_today"/>
+                                        <field name="date_deadline" widget="datetime" options="{'show_time': false}" decoration-danger="is_late_on_deadline"/>
                                     </div>
                                     <div t-if="record.workorder_ids.raw_value.length &amp;&amp; !['done', 'cancel'].includes(record.state.raw_value)" class="d-flex text-nowrap overflow-hidden text-overflow-ellipsis">
                                         <i class="oi mx-1 mt-1" data-icon="hourglass_bottom" role="img" title="Remaining Time"/>
@@ -712,7 +719,10 @@
                                             <field name="mrp_production_all_child_count"/>
                                         </a>
                                     </div>
-                                    <field name="user_id" widget="many2one_avatar_user" readonly="state in ['cancel', 'done']" class="ms-auto"/>
+                                    <div class="d-flex align-items-center gap-1 ms-auto">
+                                        <field name="user_id" widget="many2one_avatar_user" readonly="state in ['cancel', 'done']"/>
+                                        <field name="activity_ids" widget="kanban_activity"/>
+                                    </div>
                                 </div>
                             </footer>
                         </t>
@@ -725,7 +735,10 @@
             <field name="name">mrp.production.kanban</field>
             <field name="model">mrp.production</field>
             <field name="arch" type="xml">
-                <kanban class="o_kanban_mobile" card_id="%(mrp.mrp_production_card_view)d" sample="1" default_group_by="date_start:week" js_class="mrp_production_kanban">
+                <kanban class="o_kanban_mobile" card_id="%(mrp.mrp_production_card_view)d" sample="1" default_group_by="date_start:week" default_order="sequence, id" highlight_color="deadline_color" js_class="mrp_production_kanban">
+                    <header>
+                        <button name="%(mrp.action_mrp_production_capacity)d" type="action" string="Capacity" display="always" groups="mrp.group_mrp_manager"/>
+                    </header>
                     <progressbar field="state" colors='{"draft": "info", "confirmed": "300", "progress": "warning", "to_close": "success", "done": "success", "cancel": "danger"}'/>
                 </kanban>
             </field>
@@ -869,6 +882,24 @@
             </field>
         </record>
 
+        <record id="mrp_production_action_kanban" model="ir.actions.act_window">
+            <field name="name">Manufacturing Orders</field>
+            <field name="path">manufacturing-kanban</field>
+            <field name="res_model">mrp.production</field>
+            <field name="view_mode">kanban,list,form,calendar,pivot,graph,activity</field>
+            <field name="view_id" ref="mrp_production_kanban_view"/>
+            <field name="search_view_id" ref="view_mrp_production_filter"/>
+            <field name="context">{'search_default_todo': True, 'default_company_id': allowed_company_ids[0]}</field>
+            <field name="domain">[('picking_type_id.active', '=', True)]</field>
+            <field name="help" type="html">
+              <p class="o_view_nocontent_smiling_face">
+                No manufacturing order found. Let's create one.
+              </p><p>
+                Use Manufacturing Orders (MO) to build finished products while consuming components: i.e. 1 Table = 4 Table Legs + 1 Table Top
+              </p>
+            </field>
+        </record>
+
         <record id="mrp_production_action_picking_deshboard" model="ir.actions.act_window">
             <field name="name">Manufacturing Orders</field>
             <field name="res_model">mrp.production</field>
@@ -906,6 +937,16 @@
         <menuitem action="mrp_production_action"
             id="menu_mrp_production_action"
             parent="menu_mrp_manufacturing"
+            sequence="1"/>
+
+        <menuitem id="menu_mrp_planning_production"
+            name="Manufacturing Orders"
+            parent="mrp_planning_menu_root"
+            sequence="0"/>
+        <menuitem id="menu_mrp_planning_production_kanban"
+            name="MO Kanban"
+            action="mrp_production_action_kanban"
+            parent="menu_mrp_planning_production"
             sequence="1"/>
 
         <menuitem id="menu_mrp_workorder_todo"

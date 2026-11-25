@@ -581,6 +581,18 @@ class MrpWorkcenterProductivity(models.Model):
         self.date_start = self.date_end - timedelta(minutes=self.duration)
         self._loss_type_change()
 
+    @api.model_create_multi
+    def create(self, vals_list):
+        time_logs = super().create(vals_list)
+        time_logs.filtered('date_end').workorder_id.production_id._update_date_finished_in_progress()
+        return time_logs
+
+    def write(self, vals):
+        res = super().write(vals)
+        if {'date_start', 'date_end', 'duration'} & vals.keys():
+            self.filtered('date_end').workorder_id.production_id._update_date_finished_in_progress()
+        return res
+
     @api.constrains('workorder_id')
     def _check_open_time_ids(self):
         for workorder in self.workorder_id:
