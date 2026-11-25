@@ -630,11 +630,9 @@ been taken for this time type. Changing it now would affect existing employee ba
                     },
                     work_entry_type.requires_allocation,
                     work_entry_type.id)
-                for excess_date, excess_days in extra_data[employee][work_entry_type]['excess_days'].items():
+                for leave_id, excess_days in extra_data[employee][work_entry_type]['excess_days'].items():
                     amount = excess_days['amount']
-                    lt_info[1]['virtual_excess_data'].update({
-                        excess_date.strftime('%Y-%m-%d'): excess_days
-                    })
+                    lt_info[1]['virtual_excess_data'][leave_id] = excess_days
                     lt_info[1]['total_virtual_excess'] += amount
                     if not work_entry_type.allows_negative:
                         continue

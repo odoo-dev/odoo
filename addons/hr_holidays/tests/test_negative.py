@@ -131,3 +131,52 @@ class TestNegative(TestHrHolidaysCommon):
                 'work_entry_type_id': work_entry_type_hours.id,
                 'number_of_days': -2,
             })
+
+    def test_negative_excess_requests_ending_same_day(self):
+        """Requests in excess that end on the same day must each be counted."""
+        work_entry_type = self.env['hr.work.entry.type'].create({
+            'name': 'Half days with negative',
+            'code': 'Half days with negative',
+            'leave_validation_type': 'no_validation',
+            'requires_allocation': True,
+            'allows_negative': True,
+            'max_allowed_negative': 5,
+            'request_unit': 'half_day',
+            'unit_of_measure': 'day',
+        })
+        self.env['hr.leave.allocation'].create({
+            'employee_id': self.employee_emp_id,
+            'work_entry_type_id': work_entry_type.id,
+            'date_from': '2023-01-01',
+            'number_of_days': 1,
+        })
+        with freeze_time('2023-10-02'):
+            Leave = self.env['hr.leave'].with_user(self.user_employee_id)
+            # consumes the whole allocation
+            Leave.create({
+                'name': 'Full day',
+                'work_entry_type_id': work_entry_type.id,
+                'employee_id': self.employee_emp_id,
+                'request_date_from': datetime(2023, 10, 9),
+                'request_date_to': datetime(2023, 10, 9),
+            })
+            # two half days in excess, ending the same day
+            morning, afternoon = (Leave.create({
+                'name': f'Half day {period}',
+                'work_entry_type_id': work_entry_type.id,
+                'employee_id': self.employee_emp_id,
+                'request_date_from': datetime(2023, 10, 10),
+                'request_date_to': datetime(2023, 10, 10),
+                'request_date_from_period': period,
+                'request_date_to_period': period,
+            }) for period in ('am', 'pm'))
+            self.assertEqual((morning | afternoon).mapped('number_of_days'), [0.5, 0.5])
+
+            data = work_entry_type.get_allocation_data(self.employee_emp, datetime(2023, 10, 10))[self.employee_emp][0][1]
+            self.assertEqual(
+                {excess['leave_id'] for excess in data['virtual_excess_data'].values()},
+                {morning.id, afternoon.id},
+                "Both requests in excess should be reported",
+            )
+            self.assertEqual(data['total_virtual_excess'], 1)
+            self.assertEqual(data['virtual_remaining_leaves'], -1)

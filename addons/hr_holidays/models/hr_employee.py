@@ -661,8 +661,8 @@ class HrEmployee(models.Model):
               ``<other unit>_remaining`` in the other unit. Types without allocation use the key
               ``False`` instead of an allocation.
             - ``to_recheck[employee][work_entry_type]`` is a dict with ``excess_days``
-              (``{date: {'amount', 'is_virtual', 'leave_id'}}``, the time not covered by any
-              allocation), ``to_recheck_leaves`` (the future requests not deducted) and
+              (``{leave_id: {'amount', 'is_virtual', 'leave_id'}}``, the time of each request not
+              covered by any allocation), ``to_recheck_leaves`` (the future requests not deducted) and
               ``exceeding_duration`` (negative or zero, what the future accrual will miss to cover
               them).
         :rtype: tuple
@@ -893,7 +893,8 @@ class HrEmployee(models.Model):
 
                         leave_duration = round(remaining_primary, 2)
                         if leave_duration > 0:
-                            primary['to_recheck']['excess_days'][leave.date_to.date()] = {
+                            # keyed by request: several requests can end on the same day
+                            primary['to_recheck']['excess_days'][leave.id] = {
                                 'amount': leave_duration,
                                 'is_virtual': leave.state != 'validate',
                                 'leave_id': leave.id,
