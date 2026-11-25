@@ -9,8 +9,8 @@
     'description': """
 Keeps one line per payment terminal transaction with its current status, including
 the ones that never became a payment (declined, cancelled, timed out...).
-Payment terminal modules fill it by overriding
-``pos.payment._get_terminal_transaction_log_values``.
+Payment terminal modules report each step with
+``pos.payment.method._log_terminal_transaction``.
     """,
     'depends': ['point_of_sale'],
     'data': [

@@ -74,6 +74,7 @@ export class PaymentDPOPay extends PaymentInterface {
                 paymentLine.amount * Math.pow(10, currency.decimal_places)
             ).toString(), // Convert amount to smallest currency unit
             sourceId: paymentLine.transaction_id,
+            orderUuid: order.uuid,
         };
 
         const response = await this._callDpoPayMakeRequest(data, "start-transaction");
@@ -109,7 +110,7 @@ export class PaymentDPOPay extends PaymentInterface {
             }
 
             if (this.paymentStopped) {
-                await this._cancelPaymentRequest(data);
+                await this._cancelPaymentRequest({ ...data, cancelReason: "timeout" });
                 paymentLine.setPaymentStatus("retry");
                 return resolve(false);
             }

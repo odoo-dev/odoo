@@ -19,6 +19,19 @@ class PosPaymentMethod(models.Model):
     def _get_terminal_provider_selection(self):
         return []
 
+    def _log_terminal_transaction(self, transaction_id, state, *, amount=None, message=None, order_uuid=None):
+        """Called by payment terminal modules at each step of a terminal transaction.
+
+        Does nothing here; logging modules override it to record the transaction.
+
+        :param str transaction_id: reference of the transaction at the provider
+        :param str state: ``processing``, ``success``, ``failed``, ``cancelled`` or ``timeout``
+        :param float amount: amount of the transaction, in the payment currency
+        :param str message: provider message, e.g. the decline reason
+        :param str order_uuid: uuid of the POS order being paid
+        """
+        self.ensure_one()
+
     def _get_external_qr_provider_selection(self):
         return []
 

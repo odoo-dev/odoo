@@ -39,9 +39,47 @@ class PosPaymentMethod(models.Model):
 
     def send_dpopay_request(self, data, endpoint):
         self.ensure_one()
+        # Only meant for Odoo, DPO Pay must not receive them.
+        order_uuid = data.pop('orderUuid', None)
+        cancel_reason = data.pop('cancelReason', None)
         if endpoint == 'start-transaction':
             data['transactionType'] = self._get_dpopay_transaction_type()
-        return self._execute_dpopay_api_request(data, endpoint)
+        response = self._execute_dpopay_api_request(data, endpoint)
+        self._dpopay_log_transaction(data, endpoint, response, order_uuid=order_uuid, cancel_reason=cancel_reason)
+        return response
+
+    def _dpopay_log_transaction(self, data, endpoint, response, order_uuid=None, cancel_reason=None):
+        source_id = data.get('sourceId')
+        if not source_id:
+            return  # Terminal readiness check, not a transaction.
+        response = response if isinstance(response, dict) else {}
+        error = response.get('errorMessage')
+        description = response.get('resultCodeDescription') or response.get('displayText')
+
+        if endpoint == 'start-transaction':
+            currency = self.journal_id.currency_id or self.company_id.currency_id
+            try:
+                amount = int(data.get('amount')) / 10 ** currency.decimal_places
+            except (TypeError, ValueError):
+                amount = None
+            state = 'failed' if error else 'processing'
+            self._log_terminal_transaction(source_id, state, amount=amount, message=error, order_uuid=order_uuid)
+        elif endpoint == 'get-status':
+            if error == 'Transaction not found':
+                self._log_terminal_transaction(source_id, 'failed', message=_("Unknown to the terminal"))
+            elif error:
+                return
+            elif response.get('declined') or (response.get('complete') and not response.get('success')):
+                self._log_terminal_transaction(source_id, 'failed', message=description)
+            elif response.get('offline'):
+                self._log_terminal_transaction(source_id, 'failed', message=_("Terminal offline"))
+            elif not response.get('complete'):
+                self._log_terminal_transaction(source_id, 'processing')
+            # Approved: get-result logs the success.
+        elif endpoint == 'get-result' and response.get('success') and not error:
+            self._log_terminal_transaction(source_id, 'success', message=description)
+        elif endpoint == 'cancel-transaction' and response.get('responseCode'):
+            self._log_terminal_transaction(source_id, 'timeout' if cancel_reason == 'timeout' else 'cancelled')
 
     def _get_dpopay_base_url(self, is_token=False):
         self.ensure_one()
