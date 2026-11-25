@@ -4037,6 +4037,29 @@ test(`action/type attributes on tree arch, type='action'`, async () => {
     expect.verifySteps(["doActionButton type action name a1", "web_search_read"]);
 });
 
+test(`on_create attribute on list arch`, async () => {
+    mockService("action", {
+        doAction(action, options) {
+            // simulate a target new action which creates a record and closes itself
+            expect.step(`doAction ${action}`);
+            MockServer.env["foo"].create({ foo: "new" });
+            options.onClose();
+        },
+    });
+
+    await mountView({
+        resModel: "foo",
+        type: "list",
+        arch: `<list editable="bottom" on_create="some.action"><field name="foo"/></list>`,
+    });
+    expect(`.o_data_row`).toHaveCount(4);
+
+    await contains(`.o_list_button_add`).click();
+    expect.verifySteps(["doAction some.action"]);
+    expect(`.o_data_row`).toHaveCount(5);
+    expect(`.o_selected_row`).toHaveCount(0);
+});
+
 test.tags("desktop");
 test(`editable list view: readonly fields cannot be edited`, async () => {
     Foo._fields.foo = fields.Char({ readonly: true });

@@ -355,6 +355,21 @@ export class ListController extends Component {
     async onWillSaveRecord(record) {}
 
     async createRecord({ group, newWindow } = {}) {
+        const { onCreate } = this.archInfo;
+        if (onCreate) {
+            const { root } = this.model;
+            return this.actionService.doAction(onCreate, {
+                additionalContext: root.context,
+                onClose: async ({ noReload } = {}) => {
+                    if (!noReload) {
+                        await root.load();
+                        this.model.useSampleModel = false;
+                        render(this);
+                    }
+                },
+                newWindow,
+            });
+        }
         if (!this.model.isReady() && !this.model.config.groupBy.length && this.editable) {
             // If the view isn't grouped and the list is editable, a new record row will be added,
             // in edition. In this situation, we must wait for the model to be ready.

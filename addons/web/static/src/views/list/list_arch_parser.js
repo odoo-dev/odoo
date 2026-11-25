@@ -294,6 +294,8 @@ export class ListArchParser {
                 const action = xmlDoc.getAttribute("action");
                 const type = xmlDoc.getAttribute("type");
                 treeAttr.openAction = action && type ? { action, type } : null;
+
+                treeAttr.onCreate = xmlDoc.getAttribute("on_create");
             }
         });
 
