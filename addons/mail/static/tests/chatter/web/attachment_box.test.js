@@ -252,3 +252,24 @@ test("attachment should be uploaded on the correct record when using the pager n
     await contains(".o-mail-AttachmentCard", { text: "A.jpeg" });
     await contains(".o-mail-AttachmentCard", { text: "B.jpeg" });
 });
+
+test("hide attachment delete button when user lacks write access on thread", async () => {
+    const pyEnv = await startServer();
+    const partnerId = pyEnv["res.partner"].create({ hasWriteAccess: false });
+    pyEnv["ir.attachment"].create({
+        mimetype: "text/plain",
+        name: "Testing.txt",
+        res_id: partnerId,
+        res_model: "res.partner",
+    });
+    await start();
+    await openFormView("res.partner", partnerId, {
+        arch: `
+            <form>
+                <sheet></sheet>
+                <chatter open_attachments="True"/>
+            </form>`,
+    });
+    await contains(".o-mail-AttachmentCard", { text: "Testing.txt" });
+    await contains("button[title='Remove']", { count: 0 });
+});

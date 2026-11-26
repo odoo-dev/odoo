@@ -127,7 +127,8 @@ class AttachmentController(ThreadController):
                                 exc_info=True,
                             )
 
-            raise NotFound()
+                raise NotFound()
+            raise AccessError(_("You are not allowed to delete this attachment."))
         # sudo: ir.attachment: access is validated with _has_attachments_ownership
         attachment.sudo()._delete_and_notify(message)
 

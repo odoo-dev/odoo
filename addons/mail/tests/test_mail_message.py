@@ -2,7 +2,7 @@
 
 # from odoo import exceptions
 from odoo.addons.mail.tests import common
-from odoo.tests import new_test_user, tagged, users
+from odoo.tests import HttpCase, JsonRpcException, new_test_user, tagged, users
 
 
 @tagged("-at_install", "post_install", "mail_message")
@@ -62,3 +62,24 @@ class TestMailMessage(common.MailCommon):
             ],
         ):
             message.unlink()
+@tagged("post_install", "-at_install")
+class TestAttachmentDeleteAccess(HttpCase):
+    def test_mail_attachment_delete_readonly_user(self):
+        partner = self.env["res.partner"].create({"name": "Test Partner"})
+        attachment = self.env["ir.attachment"].create({
+            "name": "readonly_test.txt",
+            "res_model": "res.partner",
+            "res_id": partner.id,
+        })
+        self.env["ir.model.access"].search([
+            ("model_id.model", "=", "res.partner"),
+        ]).write({"perm_write": False, "perm_create": False, "perm_unlink": False})
+
+        self.authenticate('demo', 'demo')
+        with self.assertRaises(JsonRpcException) as cm:
+            self.make_jsonrpc_request(
+                "/mail/attachment/delete",
+                {"attachment_id": attachment.id},
+            )
+        self.assertEqual(str(cm.exception), "odoo.exceptions.AccessError")
+        self.assertTrue(attachment.exists())

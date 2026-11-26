@@ -73,6 +73,9 @@ export class Attachment extends FileModelMixin(Record) {
         if (this.message && this.store.self.main_user_id?.share !== false) {
             return this.message.editable;
         }
+        if (!this.thread.hasWriteAccess) {
+            return Boolean(this.ownership_token);
+        }
         return true;
     }
 
