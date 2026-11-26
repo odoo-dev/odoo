@@ -8,6 +8,9 @@
                 <p>Company ID: <span t-out="rs_enterprise_number"/></p>
             </div>
         </xpath>
+        <xpath expr="//div[@name='delivery_date']" position="attributes">
+            <attribute name="t-if">o.delivery_date and o.delivery_date != o.taxable_supply_date</attribute>
+        </xpath>
     </template>
 
 </odoo>

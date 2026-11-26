@@ -22,8 +22,8 @@ class TestAccountMoveSyncTaxLines(AccountTestInvoicingCommon):
             ('2026-06-03', 3)])
 
     @freeze_time('2024-01-31')
-    def test_delivery_date_currency_rate_sync(self):
-        """ Test that changing the delivery_date (the exchange rate date in Hungary)
+    def test_taxable_supply_date_currency_rate_sync(self):
+        """ Test that changing the taxable_supply_date (the exchange rate date in Hungary)
         correctly triggers a recomputation of the currency rate and
         synchronizes the journal items' balances.
         """
@@ -36,7 +36,7 @@ class TestAccountMoveSyncTaxLines(AccountTestInvoicingCommon):
 
         lines = out_invoice.line_ids
         self.assertRecordValues(out_invoice, [
-            {'invoice_currency_rate': 3.0, 'expected_currency_rate': 3.0, 'delivery_date': False}
+            {'invoice_currency_rate': 3.0, 'expected_currency_rate': 3.0, 'taxable_supply_date': False}
         ])
         self.assertRecordValues(lines, [
             {'amount_currency': -10000.0, 'balance': -3333.33},
@@ -44,7 +44,7 @@ class TestAccountMoveSyncTaxLines(AccountTestInvoicingCommon):
             {'amount_currency': 12700.0, 'balance': 3333.33 + 900.0},
         ])
 
-        out_invoice.delivery_date = '2024-01-30'
+        out_invoice.taxable_supply_date = '2024-01-30'
         self.assertRecordValues(out_invoice, [
             {'invoice_currency_rate': 2.0, 'expected_currency_rate': 2.0}
         ])
@@ -54,7 +54,7 @@ class TestAccountMoveSyncTaxLines(AccountTestInvoicingCommon):
             {'amount_currency': 12700.0, 'balance': 5000.0 + 1350.0},
         ])
 
-        out_invoice.delivery_date = '2024-01-31'
+        out_invoice.taxable_supply_date = '2024-01-31'
         self.assertRecordValues(out_invoice, [
             {'invoice_currency_rate': 3.0, 'expected_currency_rate': 3.0}
         ])
@@ -73,7 +73,7 @@ class TestAccountMoveSyncTaxLines(AccountTestInvoicingCommon):
         invoice1 = self.env['account.move'].create([{
             'move_type': 'out_invoice',
             'invoice_date': False,
-            'delivery_date': '2026-06-01',
+            'taxable_supply_date': '2026-06-01',
             'partner_id': self.partner_a.id,
             'invoice_line_ids': [Command.create({'quantity': 1, 'price_unit': 60})],
             'currency_id': self.other_currency.id,

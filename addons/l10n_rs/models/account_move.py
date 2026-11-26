@@ -19,7 +19,7 @@ class AccountMove(models.Model):
     def _compute_taxable_supply_date_placeholder(self):
         super()._compute_taxable_supply_date_placeholder()
         for move in self.filtered(lambda m: m.country_code == 'RS'):
-            move.taxable_supply_date_placeholder = self.env._("Invoice Date")
+            move.taxable_supply_date_placeholder = self.env._("Datum prometa")
 
     def _post(self, soft=True):
         for move in self:

@@ -150,7 +150,7 @@ class L10nHuEdiTestCommon(AccountTestInvoicingCommon):
             'currency_id': (currency or self.env.ref('base.HUF')).id,
             'partner_id': self.partner_company.id,
             'invoice_date': self.today,
-            'delivery_date': self.today,
+            'taxable_supply_date': self.today,
             'invoice_line_ids': [
                 Command.create({
                     'product_id': self.product_a.id,
@@ -185,7 +185,7 @@ class L10nHuEdiTestCommon(AccountTestInvoicingCommon):
             'currency_id': self.env.ref('base.HUF').id,
             'partner_id': self.partner_company.id,
             'invoice_date': self.today,
-            'delivery_date': self.today,
+            'taxable_supply_date': self.today,
             'invoice_line_ids': [
                 Command.create({
                     'product_id': self.product_a.id,
@@ -208,7 +208,7 @@ class L10nHuEdiTestCommon(AccountTestInvoicingCommon):
             'currency_id': self.env.ref('base.HUF').id,
             'partner_id': self.partner_company.id,
             'invoice_date': self.today,
-            'delivery_date': self.today,
+            'taxable_supply_date': self.today,
             'invoice_line_ids': [
                 Command.create({
                     'product_id': self.product_a.id,
@@ -284,7 +284,7 @@ class L10nHuEdiTestCommon(AccountTestInvoicingCommon):
             'currency_id': self.env.ref('base.HUF').id,
             'partner_id': self.partner_company.id,
             'invoice_date': self.today,
-            'delivery_date': self.today,
+            'taxable_supply_date': self.today,
             'l10n_hu_payment_mode': 'TRANSFER',
             'invoice_cash_rounding_id': self.env['account.chart.template'].with_company(self.company).ref('cash_rounding_1_huf').id,
             'invoice_line_ids': [
@@ -325,7 +325,7 @@ class L10nHuEdiTestCommon(AccountTestInvoicingCommon):
             'partner_id': self.partner_company.id,
             'invoice_date': self.yesterday,
             'invoice_date_due': self.today,
-            'delivery_date': self.today,
+            'taxable_supply_date': self.today,
             'l10n_hu_payment_mode': 'TRANSFER',
             'invoice_line_ids': [
                 Command.create({
