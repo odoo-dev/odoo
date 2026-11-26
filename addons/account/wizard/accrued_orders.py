@@ -267,7 +267,7 @@ class AccountAccruedOrdersWizard(models.TransientModel):
                         qty_to_invoice = order_line.qty_delivered_at_date - order_line.qty_invoiced_at_date
                         expense_account, stock_variation_account = self._get_product_expense_and_stock_var_accounts(product)
                         account = self._get_computed_account(order, product, is_purchase)
-                        price_unit = order_line.price_unit
+                        price_unit = order_line._get_discounted_price()
                         if qty_to_invoice > 0:
                             # Invoices to be issued.
                             amount_currency = order_line.amount_to_invoice_at_date

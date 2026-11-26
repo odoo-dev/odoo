@@ -5,6 +5,7 @@ from odoo import fields
 from odoo.exceptions import UserError
 from odoo.fields import Command
 from odoo.tests import freeze_time, tagged
+from odoo.tools.misc import formatLang
 
 from odoo.addons.sale.tests.common import TestSaleCommon
 
@@ -228,3 +229,56 @@ class TestAccruedSaleOrders(TestSaleCommon):
         """ When nothing has been delivered nor invoiced yet, both account
         types should be proposed by default. """
         self._assert_account_domain(self.sale_order, {'asset_current', 'liability_current'})
+
+    def _create_accrual_sale_order(self, lines_vals):
+        order = self.env['sale.order'].create({
+            'partner_id': self.partner_a.id,
+            'order_line': [
+                Command.create({'product_id': self.product_a.id, 'tax_ids': False, **vals})
+                for vals in lines_vals
+            ],
+        })
+        order.action_confirm()
+        return order
+
+    def test_accrued_order_with_discount(self):
+        order = self._create_accrual_sale_order([
+            {'product_uom_qty': 10.0, 'price_unit': 100.0, 'discount': 50.0},
+        ])
+        order.order_line.qty_delivered = 10
+        self.assertEqual(order.order_line.amount_to_invoice_at_date, 500.0)
+
+        wizard = self.env['account.accrued.orders.wizard'].with_context(
+            active_model='sale.order', active_ids=order.ids,
+        ).create({'account_id': self.account_expense.id, 'date': fields.Date.today()})
+        moves = self.env['account.move'].search(wizard.create_entries()['domain'])
+        self.assertRecordValues(moves.line_ids, [
+            # reverse move lines
+            {'account_id': self.account_revenue.id, 'debit': 500.0, 'credit': 0.0},
+            {'account_id': self.account_expense.id, 'debit': 0.0, 'credit': 500.0},
+            # move lines
+            {'account_id': self.account_revenue.id, 'debit': 0.0, 'credit': 500.0},
+            {'account_id': self.account_expense.id, 'debit': 500.0, 'credit': 0.0},
+        ])
+        revenue_line = moves.line_ids.filtered(lambda l: l.account_id == self.account_revenue)[-1]
+        self.assertIn(formatLang(self.env, 50.0, currency_obj=order.currency_id), revenue_line.name)
+
+    def test_accrued_order_with_price_included_tax(self):
+        tax_10_incl = self.percent_tax(10.0, price_include_override='tax_included')
+        tax_21_incl = self.percent_tax(21.0, price_include_override='tax_included')
+        order = self._create_accrual_sale_order([
+            # discount + included tax: 10 * 110 * 0.9 / 1.1
+            {'product_uom_qty': 10.0, 'price_unit': 110.0, 'discount': 10.0, 'tax_ids': tax_10_incl.ids},
+            # no rounding drift on low unit price: 1000 * 1.0 / 1.21 = 826.446...
+            {'product_uom_qty': 1000.0, 'price_unit': 1.0, 'tax_ids': tax_21_incl.ids},
+            # zero ordered quantity: 4 * 110 * 0.9 / 1.1
+            {'product_uom_qty': 0.0, 'price_unit': 110.0, 'discount': 10.0, 'tax_ids': tax_10_incl.ids},
+        ])
+        order.order_line[0].qty_delivered = 10
+        order.order_line[1].qty_delivered = 1000
+        order.order_line[2].qty_delivered = 4
+        self.assertRecordValues(order.order_line, [
+            {'amount_to_invoice_at_date': 900.0},
+            {'amount_to_invoice_at_date': 826.45},
+            {'amount_to_invoice_at_date': 360.0},
+        ])

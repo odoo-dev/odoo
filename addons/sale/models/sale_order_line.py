@@ -1280,11 +1280,25 @@ class SaleOrderLine(models.Model):
             else:
                 line.amount_to_invoice = 0.0
 
-    @api.depends('price_unit', 'qty_invoiced_at_date', 'qty_delivered_at_date')
+    @api.depends(
+        'price_unit', 'discount', 'tax_ids', 'product_id', 'order_id.currency_id',
+        'order_id.partner_shipping_id', 'qty_invoiced_at_date', 'qty_delivered_at_date',
+    )
     @api.depends_context('accrual_entry_date')
     def _compute_amount_to_invoice_at_date(self):
         for line in self:
-            line.amount_to_invoice_at_date = (line.qty_delivered_at_date - line.qty_invoiced_at_date) * line.price_unit
+            qty_to_invoice = line.qty_delivered_at_date - line.qty_invoiced_at_date
+            price_reduce = line._get_discounted_price()
+            amount = price_reduce * qty_to_invoice
+            if line.tax_ids.filtered(lambda tax: tax.price_include):
+                amount = line.tax_ids.compute_all(
+                    price_reduce,
+                    currency=line.currency_id,
+                    quantity=qty_to_invoice,
+                    product=line.product_id,
+                    partner=line.order_id.partner_shipping_id,
+                )['total_excluded']
+            line.amount_to_invoice_at_date = amount
 
     @api.depends('order_id.partner_id', 'product_id')
     def _compute_analytic_distribution(self):
