@@ -121,7 +121,7 @@
                 </a>
             </td>
             <td>
-                <a t-attf-href="/calendar/ics/{{ object.event_id.id }}/{{ object.event_id._calendar_event_ensure_token() }}"
+                <a t-att-href="object.event_id.outlook_calendar_url" target="new"
                     style="padding-top: 10px; padding-right: 8px; padding-bottom: 2px; padding-left: 8px; margin-left: 8px; border-radius: 3px; background-color: #E7E9ED;">
                     <img src="/calendar/static/src/img/outlook-calendar-128.png" alt="Outlook" title="Outlook" style="height: 20px; vertical-align: baseline;"/>
                 </a>
@@ -274,7 +274,7 @@
                 </a>
             </td>
             <td>
-                <a t-attf-href="/calendar/ics/{{ object.event_id.id }}/{{ object.event_id._calendar_event_ensure_token() }}"
+                <a t-att-href="object.event_id.outlook_calendar_url" target="new"
                     style="padding-top: 10px; padding-right: 8px; padding-bottom: 2px; padding-left: 8px; margin-left: 8px; border-radius: 3px; background-color: #E7E9ED;">
                     <img src="/calendar/static/src/img/outlook-calendar-128.png" alt="Outlook" title="Outlook" style="height: 20px; vertical-align: baseline;"/>
                 </a>
@@ -408,7 +408,7 @@
                 </a>
             </td>
             <td>
-                <a t-attf-href="/calendar/ics/{{ object.event_id.id }}/{{ object.event_id._calendar_event_ensure_token() }}"
+                <a t-att-href="object.event_id.outlook_calendar_url" target="new"
                     style="padding-top: 10px; padding-right: 8px; padding-bottom: 2px; padding-left: 8px; margin-left: 8px; border-radius: 3px; background-color: #E7E9ED;">
                     <img src="/calendar/static/src/img/outlook-calendar-128.png" alt="Outlook" title="Outlook" style="height: 20px; vertical-align: baseline;"/>
                 </a>
@@ -533,7 +533,7 @@
                 </a>
             </td>
             <td>
-                <a t-attf-href="/calendar/ics/{{ object.id }}/{{ object._calendar_event_ensure_token() }}"
+                <a t-att-href="object.outlook_calendar_url" target="new"
                     style="padding-top: 10px; padding-right: 8px; padding-bottom: 2px; padding-left: 8px; margin-left: 8px; border-radius: 3px; background-color: #E7E9ED;">
                     <img src="/calendar/static/src/img/outlook-calendar-128.png" alt="Outlook" title="Outlook" style="height: 20px; vertical-align: baseline;"/>
                 </a>

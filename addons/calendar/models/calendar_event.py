@@ -190,6 +190,8 @@ class CalendarEvent(models.Model):
     access_token = fields.Char('Invitation Token', default=lambda self: str(uuid.uuid4()), copy=False, readonly=True)
     google_calendar_url = fields.Char('Google Calendar URL', compute="_compute_google_calendar_url",
         help="Link to manually add the meeting to Google Calendar")
+    outlook_calendar_url = fields.Char('Outlook Calendar URL', compute="_compute_outlook_calendar_url",
+        help="Link to manually add the meeting to Outlook Calendar")
     videocall_source = fields.Selection([('discuss', 'Discuss'), ('custom', 'Custom')], compute='_compute_videocall_source')
     videocall_channel_id = fields.Many2one('discuss.channel', 'Discuss Channel', index="btree_not_null")
     # visibility
@@ -690,6 +692,29 @@ class CalendarEvent(models.Model):
             if event.location:
                 params.update(location=event.location.replace(', ', ' '))
             event.google_calendar_url = 'https://www.google.com/calendar/render?' + url_encode(params)
+
+    @api.depends('allday', 'description', 'location', 'name', 'start', 'stop', 'start_date', 'stop_date')
+    def _compute_outlook_calendar_url(self):
+        for event in self:
+            if not event.allday:
+                url_date_start = fields.Datetime.from_string(event.start).strftime('%Y-%m-%dT%H:%M:%SZ')
+                url_date_stop = fields.Datetime.from_string(event.stop).strftime('%Y-%m-%dT%H:%M:%SZ')
+            else:
+                url_date_start = fields.Date.from_string(event.start_date).strftime('%Y-%m-%d')
+                url_date_stop = fields.Date.from_string(event.stop_date).strftime('%Y-%m-%d')
+            params = {
+                'path': '/calendar/action/compose',
+                'rru': 'addevent',
+                'startdt': url_date_start,
+                'enddt': url_date_stop,
+                'subject': event._get_customer_summary(),
+                'body': event._get_customer_description(),
+            }
+            if event.allday:
+                params.update(allday='true')
+            if event.location:
+                params.update(location=event.location)
+            event.outlook_calendar_url = 'https://outlook.live.com/calendar/deeplink/compose?' + url_encode(params)
 
     @api.depends('partner_ids', 'start', 'stop')
     def _compute_unavailable_partner_ids(self):
