@@ -11,7 +11,7 @@ import {
     SelectCreateDialog,
     selectCreateDialogProps,
 } from "@web/views/view_dialogs/select_create_dialog";
-import { props, t } from "@odoo/owl";
+import { t, useProps } from "@odoo/owl";
 
 export const mediaManagerDialogProps = {
     ...selectCreateDialogProps,
@@ -27,7 +27,7 @@ export const mediaManagerDialogProps = {
 
 export class MediaManagerDialog extends SelectCreateDialog {
     static template = "html_editor.MediaManagerDialog";
-    props = props(mediaManagerDialogProps);
+    props = useProps(mediaManagerDialogProps);
     document = document;
 
     setup() {

@@ -72,7 +72,7 @@ export class MediaPlugin extends Plugin {
                     this.openMediaDialog({
                         activeTab: this.getActiveDialogTab(context.searchTerm),
                     }),
-                isAvailable: isHtmlContentSupported,
+                isAvailable: (selection) => this.dependencies.dom.supportsHtmlContent(selection),
             },
             {
                 id: "insertMediaOLD",

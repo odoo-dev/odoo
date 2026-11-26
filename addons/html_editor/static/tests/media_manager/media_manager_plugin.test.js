@@ -74,7 +74,7 @@ test("insert the selected images in the notes, then save them", async () => {
     await clickCard("partner.jpg"); // unselect
     await contains(".modal .o_select_button").click();
     await waitFor(`${NOTES} img[alt='logo.png']`);
-    expect(".modal").toHaveCount(0);
+    await waitForNone(".modal");
     expect(queryAll(`${NOTES} img`).map((img) => img.alt)).toEqual(["banner.png", "logo.png"]);
     expect(`${NOTES} img[alt='banner.png']`).toHaveAttribute("src", PNG_DATA_URL);
 
