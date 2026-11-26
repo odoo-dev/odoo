@@ -54,15 +54,14 @@ export class MediaManagerPlugin extends MediaPlugin {
 
     /**
      * The kinds of media the media manager can list and import here: the
-     * images, and the videos when the editor can insert them (a custom `save`
-     * callback, e.g. of a builder option, needs an image).
+     * images, and the videos when the editor can insert them.
      *
      * @param {Object} params the params given to `openMediaManager`
      * @returns {import("@html_editor/main/media/media_manager/helpers").MediaType[]}
      */
     getAvailableMediaTypes(params) {
         const mediaTypes = [IMAGE_TYPE];
-        if (this.getResource("media_manager_video_element_providers").length && !params.save) {
+        if (this.getResource("media_manager_video_element_providers").length) {
             mediaTypes.push(VIDEO_TYPE);
         }
         return mediaTypes;
@@ -88,9 +87,14 @@ export class MediaManagerPlugin extends MediaPlugin {
      * @param {import("@html_editor/main/media/media_manager/helpers").MediaType[]} [params.allowedMediaTypes]
      *      the kinds of media that can be chosen and imported (IMAGE_TYPE,
      *      VIDEO_TYPE), among the available ones. By default, the kind of the
-     *      replaced media, or all the available ones.
+     *      replaced media, the images for a custom `save` callback (e.g. of a
+     *      builder option), or all the available ones.
      * @param {boolean} [params.multiSelect] whether several media can be
      *      chosen. By default, only when no media is replaced.
+     * @param {Function} [params.save] called with the chosen element (their
+     *      list with `multiSelect`), the chosen attachments, `undefined` (the
+     *      tab of the media dialog) and the replaced media, instead of
+     *      inserting the chosen media.
      * @param {HTMLElement} [editableEl] the editable of the edited record
      */
     openMediaManager(params = {}, editableEl = null) {
@@ -105,7 +109,7 @@ export class MediaManagerPlugin extends MediaPlugin {
         let defaultMediaTypes = availableMediaTypes;
         if (videoToReplace) {
             defaultMediaTypes = [VIDEO_TYPE];
-        } else if (mediaToReplace) {
+        } else if (mediaToReplace || params.save) {
             defaultMediaTypes = [IMAGE_TYPE];
         }
         const allowedMediaTypes = (params.allowedMediaTypes ?? defaultMediaTypes).filter((type) =>
@@ -115,11 +119,12 @@ export class MediaManagerPlugin extends MediaPlugin {
             this.getDomain(recordInfo, params),
             Domain.or(allowedMediaTypes.map((type) => MEDIA_TYPE_DOMAINS[type])),
         ]).toList();
+        const multiSelect = params.multiSelect ?? !mediaToReplace;
         return this.dependencies.dialog.addDialog(MediaManagerDialog, {
             ...getMediaManagertDialogProps(recordInfo),
             domain,
             allowedMediaTypes,
-            multiSelect: params.multiSelect ?? !mediaToReplace,
+            multiSelect,
             onSelected: async (resIds, records) => {
                 if (!records.length) {
                     return;
@@ -138,6 +143,12 @@ export class MediaManagerPlugin extends MediaPlugin {
                     const imageEl = await loadImage(record.local_url);
                     imageEl.alt = record.display_name ?? "";
                     elements.push(imageEl);
+                }
+                if (params.save) {
+                    // same arguments as the media dialog (without its tab)
+                    const selection = multiSelect ? elements : elements[0];
+                    await params.save(selection, records, undefined, mediaToReplace);
+                    return;
                 }
                 const promises = [];
                 for (const el of elements) {

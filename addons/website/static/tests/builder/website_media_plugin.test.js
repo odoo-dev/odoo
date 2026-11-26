@@ -1,20 +1,28 @@
-import { animationFrame, dblclick, expect, test, waitFor, waitForNone } from "@odoo/hoot";
+import { animationFrame, dblclick, expect, queryAll, test, waitFor, waitForNone } from "@odoo/hoot";
 import { mailModels } from "@mail/../tests/mail_test_helpers";
-import { contains, defineModels, serverState } from "@web/../tests/web_test_helpers";
-import { dummyBase64Img } from "@html_builder/../tests/helpers";
+import { contains, defineModels, onRpc, serverState } from "@web/../tests/web_test_helpers";
+import { dummyBase64Img, getDragHelper } from "@html_builder/../tests/helpers";
 import { setSelection } from "@html_editor/../tests/_helpers/selection";
 import { insertText } from "@html_editor/../tests/_helpers/user_actions";
 import {
     card,
+    CARD,
     defineMediaManagerViews,
     getAttachmentRecords,
     getCardNames,
     getMediaManagerViews,
     MediaTag,
     PNG_DATA_URL,
+    VIDEO_CARD,
+    videoCard,
     waitForMediaManager,
+    YOUTUBE_URL,
 } from "@html_editor/../tests/media_manager/media_manager_test_helpers";
-import { defineWebsiteModels, setupWebsiteBuilder } from "./website_helpers";
+import {
+    defineWebsiteModels,
+    setupWebsiteBuilder,
+    setupWebsiteBuilderOeId,
+} from "./website_helpers";
 
 class IrAttachment extends mailModels.IrAttachment {
     _records = [
@@ -82,4 +90,55 @@ test("insert images from the powerbox of the website builder", async () => {
     await contains(".o-we-powerbox .o-we-command-name:contains(/^Media$/)").click();
     await waitForMediaManager();
     expect(getCardNames()).toEqual(["banner.png", "logo.png", "link.png"]);
+});
+
+async function dropVideoSnippet() {
+    const { moveTo, drop } = await contains(
+        ".o_website_builder_sidebar [name='Video'] .o_snippet_thumbnail"
+    ).drag();
+    await moveTo(":iframe #wrap .oe_drop_zone");
+    await drop(getDragHelper());
+    await waitForMediaManager();
+}
+
+test("drop the video snippet: choose a video replacing it", async () => {
+    await setupWebsiteBuilder(`<div><p>Text</p></div>`);
+    await dropVideoSnippet();
+    // only the videos can be chosen and imported
+    expect(CARD).toHaveCount(queryAll(VIDEO_CARD).length);
+    expect(".modal button:contains(Import video link)").toHaveCount(1);
+    expect(".modal button:contains(Import image link)").toHaveCount(0);
+    expect(".modal button:contains(Upload)").toHaveCount(0);
+
+    await contains(`${videoCard("YouTube - dQw4w9WgXcQ")} .o_kanban_image`).click();
+    await contains(
+        ".modal .o_video_options_dialog .modal-footer .btn-primary:contains(Insert)"
+    ).click();
+    await waitForNone(".modal");
+    await animationFrame();
+    expect(":iframe .media_iframe_video").toHaveCount(1);
+    expect(":iframe .media_iframe_video").not.toHaveClass("s_video");
+    expect(":iframe .media_iframe_video").toHaveAttribute("data-platform", "youtube");
+});
+
+test("drop the video snippet: the imported links belong to the page of the snippet", async () => {
+    onRpc("/html_editor/attachment/add_url", async (request) => {
+        const { params } = await request.json();
+        expect.step(`${params.res_model} ${params.res_id}`);
+        return {};
+    });
+    const { getEditor } = await setupWebsiteBuilder(`<div><p>Text</p></div>`, {
+        footerContent: `<footer><p class="website_name" data-oe-model="website" data-oe-id="1"
+            data-oe-field="name">My Website</p></footer>`,
+    });
+    // the selection is in another record than the page
+    const nameEl = getEditor().editable.querySelector(".website_name");
+    setSelection({ anchorNode: nameEl.firstChild, anchorOffset: 0 });
+    await dropVideoSnippet();
+
+    await contains(".modal .btn-import-video-url").click();
+    await contains(".modal input[name=url]").edit(YOUTUBE_URL, { confirm: false });
+    await waitFor(".modal .o_we_url_success");
+    await contains(".modal .btn-import-video-url").click();
+    await expect.waitForSteps([`ir.ui.view ${setupWebsiteBuilderOeId}`]);
 });

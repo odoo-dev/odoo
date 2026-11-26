@@ -4,6 +4,7 @@ import { closestElement } from "@html_editor/utils/dom_traversal";
 import { shouldEditableMediaBeEditable } from "@html_builder/utils/utils_css";
 import { _t } from "@web/core/l10n/translation";
 import { Tooltip } from "@web/core/tooltip/tooltip";
+import { VIDEO_TYPE } from "@html_editor/main/media/media_manager/helpers";
 
 export class MediaWebsitePlugin extends Plugin {
     static id = "media_website";
@@ -127,16 +128,23 @@ export class MediaWebsitePlugin extends Plugin {
             return;
         }
         let isVideoSelected = false;
+        // the record of the snippet, not the one of the selection
+        const editableEl = closestElement(snippetEl, ".o_savable") || this.editable;
         await new Promise((resolve) => {
-            const onClose = this.dependencies.media.openMediaDialog({
-                activeTab: "VIDEOS",
-                save: async (selectedVideoEl) => {
-                    isVideoSelected = true;
-                    snippetEl.insertAdjacentElement("afterend", selectedVideoEl);
-                    snippetEl.remove();
-                    dragState.replacedSnippetEl = selectedVideoEl;
+            const onClose = this.dependencies.media.openMediaDialog(
+                {
+                    activeTab: "VIDEOS",
+                    allowedMediaTypes: [VIDEO_TYPE],
+                    multiSelect: false,
+                    save: async (selectedVideoEl) => {
+                        isVideoSelected = true;
+                        snippetEl.insertAdjacentElement("afterend", selectedVideoEl);
+                        snippetEl.remove();
+                        dragState.replacedSnippetEl = selectedVideoEl;
+                    },
                 },
-            });
+                editableEl
+            );
             onClose.then(() => {
                 resolve();
             });
