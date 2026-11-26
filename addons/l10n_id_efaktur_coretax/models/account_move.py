@@ -402,7 +402,7 @@ class AccountMove(models.Model):
             "BuyerDocument": l10n_id_buyer_document_type_mapping_to_xml.get(partner.l10n_id_buyer_document_type, partner.l10n_id_buyer_document_type),
             "BuyerTin": partner.vat if partner.l10n_id_buyer_document_type == "TIN" else "0000000000000000",
             "BuyerCountry": COUNTRY_CODE_MAP.get(partner.country_id.code),
-            "BuyerDocumentNumber": partner.l10n_id_buyer_document_number or "",
+            "BuyerDocumentNumber": partner.l10n_id_buyer_document_number if partner.l10n_id_buyer_document_type != 'TIN' else "",
             "BuyerName": self.partner_id.name,
             "BuyerAdress": self.partner_id._display_address(separator=' '),
             "BuyerEmail": partner.email or "",
