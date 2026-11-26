@@ -162,7 +162,7 @@ class HrWorkEntryType(models.Model):
 
         return [('id', operator, work_entry_types.ids)]
 
-    @api.constrains('allow_request_on_top')
+    @api.constrains('allow_request_on_top', 'count_as')
     def _check_allow_request_on_top(self):
         """Forbid requests on top of absences."""
         for leave in self:

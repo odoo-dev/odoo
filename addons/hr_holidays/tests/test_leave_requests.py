@@ -3289,6 +3289,49 @@ class TestLeaveRequests(TestHrHolidaysCommon):
                                  "each part carries the duration its periods describe")
                 self.assertEqual(leave.number_of_days + new_leaves.number_of_days, total)
 
+    def test_unavailability_of_overlapping_absences_on_durations(self):
+        """ Two absences overlapping (here forced, the overlap check is skipped) share one leave
+        interval: on a schedule told in durations, the Gantt unavailability adjusts each of them. """
+
+        employee = self.env['hr.employee'].create({
+            'name': 'Employee',
+            'tz': 'UTC',
+            'resource_calendar_id': self._duration_based_calendar().id,
+            'contract_date_start': self.monday - timedelta(weeks=1),
+        })
+
+        # Create two overlapping leaves: Leave A (Monday to Wednesday)
+        # and Leave B (Tuesday to Thursday).
+        leaves = self.env['hr.leave'].with_context(leave_skip_date_check=True).create([{
+            'name': name,
+            'employee_id': employee.id,
+            'work_entry_type_id': work_entry_type.id,
+            'request_date_from': date_from, 'request_date_to': date_to,
+        } for name, work_entry_type, date_from, date_to in (
+            ('Leave A', self.holidays_type_1, self.monday, self.wednesday),
+            ('Leave B', self.holidays_type_half, self.tuesday, self.thursday),
+        )])
+
+        # Approve both leaves while skipping the overlap check.
+        leaves.filtered(lambda leave: leave.state != 'validate').with_context(leave_skip_date_check=True).action_approve()
+        self.assertEqual(leaves.mapped('state'), ['validate', 'validate'])
+
+        # Calculate employee unavailability -> Monday(00:00) to next Monday(00:00)
+        # Both leaves overlap, so each leave must still be adjusted using its own dates.
+        start = datetime.combine(self.monday, datetime.min.time(), UTC)
+        stop = start + timedelta(weeks=1)
+
+        # employee and user both in UTC: no timezone shift in the result
+        unavailabilities = employee.with_context(tz='UTC')._get_employee_unavailable_intervals(start, stop)
+
+        end_of_thursday = datetime.combine(self.monday + timedelta(days=4), datetime.min.time(), UTC)
+        # Monday to Thursday: the two leaves
+        # Saturday and Sunday: no work
+        self.assertEqual(unavailabilities[employee.id], [
+            {'start': start, 'stop': end_of_thursday},
+            {'start': end_of_thursday + timedelta(days=1), 'stop': stop},
+        ])
+
     def test_splitting_a_moved_request(self):
         """ Two days moved by half a day, then split at both ends: 0.5 + 1 + 0.5. """
         for label, calendar in (("on clock hours", False),

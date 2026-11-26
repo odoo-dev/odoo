@@ -85,6 +85,17 @@ class TestHrWorkEntryType(TestHrHolidaysCommon):
             employee._compute_leave_status()
             self.assertFalse(employee.is_absent)
 
+    def test_allow_request_on_top_on_absence(self):
+        """A type allowing requests on top cannot become an absence."""
+        work_entry_type = self.env['hr.work.entry.type'].create({
+            'name': 'Training',
+            'code': 'Training',
+            'count_as': 'working_time',
+            'allow_request_on_top': True,
+        })
+        with self.assertRaises(ValidationError):
+            work_entry_type.count_as = 'absence'
+
     def test_type_creation_right(self):
         # HrUser creates some holiday statuses -> crash because only HrManagers should do this
         with self.assertRaises(AccessError):
