@@ -5,6 +5,7 @@ import { BuilderAction } from "@html_builder/core/builder_action";
 import { _t } from "@web/core/l10n/translation";
 import { VideoSelector } from "@html_editor/main/media/media_dialog/video_selector";
 import { getBgImageURLFromEl } from "@html_builder/utils/utils_css";
+import { VIDEO_TYPE } from "@html_editor/main/media/media_manager/helpers";
 
 function getBgVideoOrParallax(editingElement) {
     // Make sure parallax and video element are considered to be below the
@@ -92,6 +93,8 @@ export class WebsiteBackgroundVideoPlugin extends Plugin {
                     },
                 ],
                 visibleTabs: ["VIDEO_BACKGROUND"],
+                allowedMediaTypes: [VIDEO_TYPE],
+                multiSelect: false,
                 save: (media) => {
                     const playerEl = media.querySelector("iframe, video");
                     resolve({

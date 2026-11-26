@@ -22,6 +22,7 @@ import {
     defineWebsiteModels,
     setupWebsiteBuilder,
     setupWebsiteBuilderOeId,
+    setupWebsiteBuilderWithSnippet,
 } from "./website_helpers";
 
 class IrAttachment extends mailModels.IrAttachment {
@@ -141,4 +142,25 @@ test("drop the video snippet: the imported links belong to the page of the snipp
     await waitFor(".modal .o_we_url_success");
     await contains(".modal .btn-import-video-url").click();
     await expect.waitForSteps([`ir.ui.view ${setupWebsiteBuilderOeId}`]);
+});
+
+test("background video: choose a video of the media manager", async () => {
+    await setupWebsiteBuilderWithSnippet("s_cover");
+    await contains(":iframe .s_cover").click();
+    await contains('[data-container-title="Cover"]').click();
+    await contains('[data-action-id="toggleBgVideo"]').click();
+    await waitForMediaManager();
+    // only the videos can be chosen and imported
+    expect(CARD).toHaveCount(queryAll(VIDEO_CARD).length);
+    expect(".modal button:contains(Import video link)").toHaveCount(1);
+    expect(".modal button:contains(Import image link)").toHaveCount(0);
+    expect(".modal button:contains(Upload)").toHaveCount(0);
+
+    await contains(`${videoCard("YouTube - dQw4w9WgXcQ")} .o_kanban_image`).click();
+    await contains(
+        ".modal .o_video_options_dialog .modal-footer .btn-primary:contains(Insert)"
+    ).click();
+    await waitForNone(".modal");
+    expect(":iframe .s_cover").toHaveClass("o_background_video");
+    expect(":iframe .s_cover").toHaveAttribute("data-bg-video-src", /youtube.*dQw4w9WgXcQ/);
 });
