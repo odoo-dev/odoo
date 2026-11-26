@@ -13,7 +13,10 @@ patch(OrderPaymentValidation.prototype, {
             return false;
         }
         const currentPartner = this.order.getPartner();
-        if (currentPartner && !currentPartner.vat) {
+        const isIdentified =
+            !!currentPartner?.vat ||
+            Object.values(currentPartner?.additional_identifiers || {}).some((value) => value);
+        if (currentPartner && !isIdentified) {
             this.pos.editPartner(currentPartner);
             this.pos.dialog.add(AlertDialog, {
                 title: _t("Missing Field"),

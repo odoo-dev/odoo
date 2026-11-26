@@ -18,6 +18,7 @@ Install this if you are using the Point of Sale app in Peru.
     ],
     "assets": {
         "point_of_sale._assets_pos": ["l10n_pe_pos/static/src/**/*"],
+        "web.assets_unit_tests": ["l10n_pe_pos/static/tests/unit/**/*"],
     },
     "auto_install": True,
     "license": "LGPL-3",
