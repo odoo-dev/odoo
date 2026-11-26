@@ -392,7 +392,7 @@ class TestEfakturCoretax(AccountTestInvoicingCommon):
         self.assertXmlTreeEqual(result_tree, expected_tree)
 
     def test_efaktur_xml_buyer_document_number_when_tin(self):
-        """When BuyerDocument is TIN, BuyerDocumentNumber must come from l10n_id_buyer_document_number."""
+        """When BuyerDocument is TIN, BuyerDocumentNumber must be empty even if l10n_id_buyer_document_number is set."""
         self.partner_a.write({
             'l10n_id_buyer_document_type': 'TIN',
             'l10n_id_buyer_document_number': 'TIN-DOC-999',
@@ -415,7 +415,7 @@ class TestEfakturCoretax(AccountTestInvoicingCommon):
             etree.fromstring(self.sample_xml),
             '''
             <xpath expr="//BuyerDocumentNumber" position="replace">
-                <BuyerDocumentNumber>TIN-DOC-999</BuyerDocumentNumber>
+                <BuyerDocumentNumber/>
             </xpath>
             '''
         )
