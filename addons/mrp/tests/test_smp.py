@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from datetime import timedelta
+
 from odoo.addons.mrp.tests.common import TestMrpCommon
 from odoo.tests import Form
 from odoo import Command
@@ -336,6 +338,20 @@ class TestMrpSerialMassProduce(TestMrpCommon):
         self.assertEqual(mo.state, "confirmed")
         # Each generated serial number should have its own mo
         self.assertEqual(len(mo.procurement_group_id.mrp_production_ids), 12)
+
+    def test_smp_backorders_keep_date_start(self):
+        """Create a MO for a product tracked by serial number, scheduled in the future.
+        The backorders created by the smp wizard should keep the scheduled start date.
+        """
+        mo = self.generate_mo(tracking_final='serial', qty_final=3)[0]
+        mo.date_start += timedelta(days=10)
+        action = mo.action_mass_produce()
+        wizard = Form(self.env['mrp.batch.produce'].with_context(**action['context']))
+        wizard.lot_name = "sn#1"
+        wizard = wizard.save()
+        wizard.action_generate_production_text()
+        wizard.action_prepare()
+        self.assertEqual(mo.procurement_group_id.mrp_production_ids.mapped('date_start'), [mo.date_start] * 3)
 
     def test_smp_two_steps(self):
         """Create a MO for a product tracked by lot and with a component untracked and tracked by lot.

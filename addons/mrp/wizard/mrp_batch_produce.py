@@ -88,6 +88,7 @@ class MrpBatchProduct(models.TransientModel):
             components_list.append(components_line)
 
         productions = self.production_id._split_productions({self.production_id: productions_amount})
+        (productions - self.production_id).date_start = self.production_id.date_start
         lots = self.env['stock.lot'].search(
             domain=[
                 ('company_id', 'in', [self.production_id.product_id.company_id.id, False]),
