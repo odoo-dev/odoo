@@ -142,7 +142,7 @@
                     <field name="currency_id" column_invisible="True"/> <!-- currency_field option of the lst_price monetary widget -->
                     <field name="default_code" optional="show" string="Reference" readonly="1"/>
                     <field name="description" string="Note" optional="show" readonly="1"/>
-                    <field name="lst_price" widget='monetary' options="{'currency_field': 'currency_id', 'field_digits': True}" optional="show" string="Sales Price"/>
+                    <field name="lst_price" widget='monetary' options="{'currency_field': 'currency_id', 'field_digits': True}" optional="show" string="Price"/>
                     <field name="standard_price" widget='monetary' options="{'currency_field': 'currency_id', 'field_digits': True}" optional="show"/>
                     <field name="supplier_taxes_id" widget="many2many_tax_tags" optional="show"/>
                 </list>
