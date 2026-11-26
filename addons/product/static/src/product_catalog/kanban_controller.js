@@ -22,11 +22,6 @@ export class ProductCatalogKanbanController extends KanbanController {
         this._defineButtonContent();
     }
 
-    // Force the slot for the "Back to Quotation" button to always be shown.
-    get canCreate() {
-        return true;
-    }
-
     get stateFiels() {
         return ["state"];
     }
