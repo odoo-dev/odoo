@@ -162,7 +162,7 @@ class AccountMove(models.Model):
     l10n_id_coretax_custom_doc_month_year = fields.Date(string="Custom Document Month and Year")
     l10n_id_kode_transaksi = fields.Selection(
         selection=TAX_TRANSACTION_CODE,
-        string='Kode Transaksi',
+        string="Transaction Code",
         help="The first 2 digits of tax code",
         readonly=False,
         copy=False,

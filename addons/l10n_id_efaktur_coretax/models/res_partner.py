@@ -17,8 +17,8 @@ class Partner(models.Model):
     l10n_id_buyer_document_number = fields.Char(string="Document Number")
     l10n_id_kode_transaksi = fields.Selection(
         selection=TAX_TRANSACTION_CODE,
-        string='Invoice Transaction Code',
-        help="he first 2 digits of tax code",
+        string="Transaction Code",
+        help="The first 2 digits of tax code",
         default='04',
         tracking=True,
     )
