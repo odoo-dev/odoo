@@ -31,14 +31,14 @@
                 <field name="hierarchy_level">0</field>
                 <field name="children_ids">
                     <record id="l10n_bh_tax_report_full_1a" model="account.report.line">
-                        <field name="name">1(a). Standard rated sales at 10%</field>
-                        <field name="name@ar">1(a). المبيعات المقدرة القياسية بنسبة 10%</field>
+                        <field name="name">1. Standard rated sales at 10%</field>
+                        <field name="name@ar">1. المبيعات المقدرة القياسية بنسبة 10%</field>
                         <field name="code">bh_1a</field>
                         <field name="expression_ids">
                             <record id="l10n_bh_tax_report_full_1a_base" model="account.report.expression">
                                 <field name="label">base</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">-1(a) B</field>
+                                <field name="formula">-1 B</field>
                             </record>
                             <record id="l10n_bh_tax_report_full_1a_adjustment" model="account.report.expression">
                                 <field name="label">adjustment</field>
@@ -49,7 +49,7 @@
                             <record id="l10n_bh_tax_report_full_1a_tax" model="account.report.expression">
                                 <field name="label">tax</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">-1(a) T</field>
+                                <field name="formula">-1 T</field>
                             </record>
                         </field>
                     </record>
@@ -189,14 +189,14 @@
                 <field name="hierarchy_level">0</field>
                 <field name="children_ids">
                     <record id="l10n_bh_tax_report_full_8" model="account.report.line">
-                        <field name="name">8(a). Standard rated domestic purchases at 10%</field>
-                        <field name="name@ar">8(a). مشتريات محلية مصنفة قياسية بنسبة 10%</field>
+                        <field name="name">8. Standard rated domestic purchases at 10%</field>
+                        <field name="name@ar">8. مشتريات محلية مصنفة قياسية بنسبة 10%</field>
                         <field name="code">bh_8a</field>
                         <field name="expression_ids">
                             <record id="l10n_bh_tax_report_full_8_base" model="account.report.expression">
                                 <field name="label">base</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">8(a) B</field>
+                                <field name="formula">8 B</field>
                             </record>
                             <record id="l10n_bh_tax_report_full_8_adjustment" model="account.report.expression">
                                 <field name="label">adjustment</field>
@@ -207,19 +207,19 @@
                             <record id="l10n_bh_tax_report_full_8_tax" model="account.report.expression">
                                 <field name="label">tax</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">8(a) T</field>
+                                <field name="formula">8 T</field>
                             </record>
                         </field>
                     </record>
                     <record id="l10n_bh_tax_report_full_9" model="account.report.line">
-                        <field name="name">9(a). Imports subject to VAT paid at customs</field>
-                        <field name="name@ar">9(a). الواردات الخاضعة لضريبة القيمة المضافة المدفوعة في الجمارك</field>
+                        <field name="name">9. Imports subject to VAT paid at customs</field>
+                        <field name="name@ar">9. الواردات الخاضعة لضريبة القيمة المضافة المدفوعة في الجمارك</field>
                         <field name="code">bh_9a</field>
                         <field name="expression_ids">
                             <record id="l10n_bh_tax_report_full_9_base" model="account.report.expression">
                                 <field name="label">base</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">9(a) B</field>
+                                <field name="formula">9 B</field>
                             </record>
                             <record id="l10n_bh_tax_report_full_9_adjustment" model="account.report.expression">
                                 <field name="label">adjustment</field>
@@ -230,7 +230,7 @@
                             <record id="l10n_bh_tax_report_full_9_tax" model="account.report.expression">
                                 <field name="label">tax</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">9(a) T</field>
+                                <field name="formula">9 T</field>
                             </record>
                         </field>
                     </record>
@@ -258,14 +258,14 @@
                         </field>
                     </record>
                     <record id="l10n_bh_tax_report_full_11" model="account.report.line">
-                        <field name="name">11(a). Imports subject to VAT accounted for through reverse charge mechanism at 10%</field>
-                        <field name="name@ar">11(a). الواردات الخاضعة لضريبة القيمة المضافة المحسوبة من خلال آلية الرسوم العكسية بنسبة 10%</field>
+                        <field name="name">11. Imports subject to VAT accounted for through reverse charge mechanism at 10%</field>
+                        <field name="name@ar">11. الواردات الخاضعة لضريبة القيمة المضافة المحسوبة من خلال آلية الرسوم العكسية بنسبة 10%</field>
                         <field name="code">bh_11a</field>
                         <field name="expression_ids">
                             <record id="l10n_bh_tax_report_full_11_base" model="account.report.expression">
                                 <field name="label">base</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">11(a) B</field>
+                                <field name="formula">11 B</field>
                             </record>
                             <record id="l10n_bh_tax_report_full_11_adjustment" model="account.report.expression">
                                 <field name="label">adjustment</field>
@@ -276,7 +276,7 @@
                             <record id="l10n_bh_tax_report_full_11_tax" model="account.report.expression">
                                 <field name="label">tax</field>
                                 <field name="engine">tax_tags</field>
-                                <field name="formula">11(a) T</field>
+                                <field name="formula">11 T</field>
                             </record>
                         </field>
                     </record>
@@ -333,8 +333,6 @@
                                     bh_8a.base +
                                     bh_9a.base +
                                     bh_10.base +
-                                    bh_11a.base +
-                                    bh_12.base +
                                     bh_13.base
                                 </field>
                             </record>
@@ -345,8 +343,6 @@
                                     bh_8a.adjustment +
                                     bh_9a.adjustment +
                                     bh_10.adjustment +
-                                    bh_11a.adjustment +
-                                    bh_12.adjustment +
                                     bh_13.adjustment
                                 </field>
                             </record>
@@ -356,9 +352,7 @@
                                 <field name="formula">
                                     bh_8a.tax +
                                     bh_9a.tax +
-                                    bh_10.tax +
-                                    bh_11a.tax +
-                                    bh_12.tax
+                                    bh_10.tax
                                 </field>
                             </record>
                         </field>
@@ -374,7 +368,7 @@
                     <record id="l10n_bh_tax_report_full_15_tax" model="account.report.expression">
                         <field name="label">tax</field>
                         <field name="engine">aggregation</field>
-                        <field name="formula">(bh_7.tax + bh_1a.adjustment*0.1) - (bh_14.tax + 0.1*(bh_8a.adjustment + bh_9a.adjustment + bh_10.adjustment + bh_11a.adjustment + bh_12.adjustment))</field>
+                        <field name="formula">(bh_7.tax + bh_1a.adjustment*0.1) - (bh_14.tax + 0.1*(bh_8a.adjustment + bh_9a.adjustment + bh_10.adjustment))</field>
                     </record>
                 </field>
                 <field name="children_ids">
