@@ -6,7 +6,7 @@ from datetime import timedelta
 from operator import itemgetter
 from re import findall as regex_findall
 
-from odoo import _, api, Command, fields, models, SUPERUSER_ID
+from odoo import _, api, Command, fields, models
 from odoo.exceptions import UserError, ValidationError
 from odoo.fields import Domain
 from odoo.tools.float_utils import float_compare, float_is_zero, float_round
@@ -373,8 +373,6 @@ class StockMove(models.Model):
                     move.reference = move.inventory_name
                 else:
                     move.reference = _('Product Quantity Confirmed') if float_is_zero(move.quantity, precision_rounding=move.product_uom.rounding) else _('Product Quantity Updated')
-                    if move.create_uid and move.create_uid.id != SUPERUSER_ID:
-                        move.reference += f' ({move.create_uid.display_name})'
             else:
                 move.reference = move.picking_id.name
 
