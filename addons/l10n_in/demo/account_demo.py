@@ -54,6 +54,14 @@ class AccountChartTemplate(models.AbstractModel):
         inter_state_ref = 'base.state_in_ts'
         intra_state_ref = 'base.state_in_gj'
         default_partner_dict = {'country_id': 'base.in', 'company_id': company.id}
+        # PAN entities are global (unique name), while this method may be called
+        # several times (multiple Indian companies, later module installs).
+        PanEntity = self.env['l10n_in.pan.entity']
+        pan_entity = PanEntity.search([('name', '=', 'AACCT6304N')], limit=1) or PanEntity.create({
+            'name': 'AACCT6304N',
+            'msme_type': 'micro',
+            'msme_number': 'UDYAM-GJ-01-1232131',
+        })
         return {
             'res_partner_registered_customer': {
                 **default_partner_dict,
@@ -110,6 +118,7 @@ class AccountChartTemplate(models.AbstractModel):
                 'state_id': 'base.state_in_tn',
                 'zip': '625218',
                 'vat': '33AACCT6304M1DB',
+                'l10n_in_pan_entity_id': pan_entity.id,
             },
             'res_partner_registered_supplier_2': {
                 **default_partner_dict,
@@ -122,6 +131,7 @@ class AccountChartTemplate(models.AbstractModel):
                 'state_id': inter_state_ref,
                 'zip': '500014',
                 'vat': '36AACCT6304M1ZB',
+                'l10n_in_pan_entity_id': pan_entity.id,
             },
             'res_partner_sez': {
                 'name': 'Coolware SEZ Unit',
