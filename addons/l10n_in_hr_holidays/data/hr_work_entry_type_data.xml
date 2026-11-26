@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Non-working days counted by a sandwich leave: not paid in addition to a paid time
+             off, deducted from the salary for an unpaid time off. -->
+        <record id="work_entry_type_sandwich_paid" model="hr.work.entry.type">
+            <field name="name">Sandwich Days</field>
+            <field name="code">INSANDWICH</field>
+            <field name="country_id" ref="base.in"/>
+            <field name="count_as">absence</field>
+            <field name="amount_rate">0</field>
+            <field name="time_off_selectable" eval="False"/>
+        </record>
+        <record id="work_entry_type_sandwich_unpaid" model="hr.work.entry.type">
+            <field name="name">Sandwich Days Deduction</field>
+            <field name="code">INSANDWICHDED</field>
+            <field name="country_id" ref="base.in"/>
+            <field name="count_as">absence</field>
+            <field name="amount_rate">-1</field>
+            <field name="time_off_selectable" eval="False"/>
+        </record>
+    </data>
+    <!-- The types above did not exist yet when the sandwich leave types got their default. -->
+    <function model="hr.work.entry.type" name="_compute_l10n_in_sandwich_work_entry_type_id">
+        <value model="hr.work.entry.type" eval="obj().search([('l10n_in_is_sandwich_leave', '=', True), ('l10n_in_sandwich_work_entry_type_id', '=', False)]).ids"/>
+    </function>
+</odoo>

@@ -10,6 +10,7 @@
             <xpath expr="//group[@name='configuration']//field[@name='support_document']" position="after">
                 <field name="l10n_in_is_sandwich_leave" invisible="country_code != 'IN'"/>
                 <field name="l10n_in_sandwich_policy" class="w-75" invisible="country_code != 'IN' or not l10n_in_is_sandwich_leave"/>
+                <field name="l10n_in_sandwich_work_entry_type_id" class="w-75" invisible="country_code != 'IN' or not l10n_in_is_sandwich_leave"/>
                 <field name="l10n_in_is_limited_to_optional_days" invisible="country_code != 'IN'"/>
             </xpath>
         </field>

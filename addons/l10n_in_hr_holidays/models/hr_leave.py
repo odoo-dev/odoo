@@ -1,19 +1,58 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
+from collections import defaultdict
 from datetime import datetime, timedelta, time, UTC
+from math import inf
 from zoneinfo import ZoneInfo
 
 from odoo import api, fields, models
 from odoo.exceptions import ValidationError
+from odoo.fields import Domain
 from odoo.tools.date_utils import sum_intervals
 from odoo.tools.intervals import Intervals
 from odoo.tools.float_utils import float_compare
+
+
+# Number of consecutive non-working days a sandwich span can extend over.
+SANDWICH_MAX_DAYS = 30
+INACTIVE_STATES = ('refuse', 'cancel')
+ONE_DAY = timedelta(days=1)
+SANDWICH_CLOSING_ORDER_SEQUENCE = 'l10n_in_hr_leave_sandwich_closing_order_seq'
 
 
 class HrLeave(models.Model):
     _inherit = "hr.leave"
 
     l10n_in_contains_sandwich_leaves = fields.Boolean()
+    # Order in which the leaves closed the sandwich gaps: set when the leave is created, and
+    # again when a refused or cancelled leave is made active. A gap belongs to the leave that
+    # closed it last (see ``_l10n_in_owns_sandwich_gap``). Not a field default: the existing
+    # leaves keep 0 when the field is added, i.e. their creation order.
+    l10n_in_sandwich_closing_order = fields.Integer(copy=False, readonly=True)
+
+    def init(self):
+        super().init()
+        self.env.cr.execute(f"CREATE SEQUENCE IF NOT EXISTS {SANDWICH_CLOSING_ORDER_SEQUENCE}")
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        # Before the creation: the durations computed at creation already use it.
+        for vals in vals_list:
+            vals.setdefault('l10n_in_sandwich_closing_order', self._l10n_in_next_sandwich_closing_order())
+        return super().create(vals_list)
+
+    @api.model
+    def _l10n_in_next_sandwich_closing_order(self):
+        # A sequence: increasing, without conflict between concurrent transactions.
+        self.env.cr.execute(f"SELECT nextval('{SANDWICH_CLOSING_ORDER_SEQUENCE}')")
+        return self.env.cr.fetchone()[0]
+
+    def write(self, vals):
+        if vals.get('state') and vals['state'] not in INACTIVE_STATES:
+            # Made active again: the leave closes its gaps again.
+            for leave in self.filtered(lambda leave: leave.state in INACTIVE_STATES):
+                leave.l10n_in_sandwich_closing_order = self._l10n_in_next_sandwich_closing_order()
+        return super().write(vals)
 
     def _l10n_in_get_default_leave_hours(self):
         self.ensure_one()
@@ -31,15 +70,17 @@ class HrLeave(models.Model):
 
     def _l10n_in_is_full_day_request(self, hours=None, default_hours=None):
         self.ensure_one()
-        default_hours = default_hours or self._l10n_in_get_default_leave_hours()
-        hours = hours if hours is not None else (self.number_of_hours or 0.0)
-        if self.work_entry_type_request_unit == 'hour':
-            return bool(default_hours) and float_compare(hours, default_hours, precision_digits=2) >= 0
-        if (
+        is_hour_request = self.work_entry_type_request_unit == 'hour'
+        if not is_hour_request and (
             self.request_date_from_period != self.request_date_to_period
             and (self.request_date_from_period != "pm" or self.request_date_to_period != "am")
-        ) or not default_hours:
+        ):
+            # Whole days: no need to compute the hours of the schedule.
             return True
+        default_hours = default_hours or self._l10n_in_get_default_leave_hours()
+        if not default_hours:
+            return not is_hour_request
+        hours = hours if hours is not None else (self.number_of_hours or 0.0)
         return float_compare(hours, default_hours, precision_digits=2) >= 0
 
     @api.constrains("work_entry_type_id", "request_date_from", "request_date_to")
@@ -76,180 +117,234 @@ class HrLeave(models.Model):
                 self.env._("The following leaves are not on Optional Holidays:\n - %s", "\n - ".join(invalid_leaves))
             )
 
-    def _l10n_in_is_working(self, on_date, public_holiday_dates, resource_calendar):
-        return on_date not in public_holiday_dates and resource_calendar._works_on_date(on_date)
+    @api.model
+    def _l10n_in_search_sandwich_leaves(self, employees, date_from, date_to, domain=None):
+        """ Return the sandwich leaves of ``employees`` that can affect the sandwich spans of
+        ``[date_from, date_to]``.
 
-    def _l10n_in_count_adjacent_non_working(self, start_date, public_holiday_dates, resource_calendar, reverse=False, include_start=False):
-        step = -1 if reverse else 1
-        first_day = start_date if include_start else start_date + timedelta(days=step)
-        current = first_day
-        for _ in range(30):
-            if self._l10n_in_is_working(current, public_holiday_dates, resource_calendar):
-                break
-            current += timedelta(days=step)
-        if current == first_day:
-            return 0
-        date_from, date_to = sorted((first_day, current - timedelta(days=step)))
-        return self._l10n_in_count_days_by_sandwich_policy(date_from, date_to, public_holiday_dates)
-
-    def _l10n_in_find_linked_leave(self, start_date, public_holiday_dates, resource_calendar, leaves_by_date, reverse=False):
-        step = -1 if reverse else 1
-        current_date = start_date
-        for _ in range(30):
-            current_date += timedelta(days=step)
-            if self._l10n_in_is_working(current_date, public_holiday_dates, resource_calendar):
-                break
-        linked_leave = leaves_by_date.get(current_date, self.env["hr.leave"])
-        if linked_leave and not linked_leave._l10n_in_is_full_day_request():
-            return self.env["hr.leave"]
-        return linked_leave
-
-    def _l10n_in_get_linked_leaves(self, leaves_dates_by_employee, public_holidays_date_by_company):
-        linked_before = self.env["hr.leave"]
-        linked_after = self.env["hr.leave"]
-
-        for leave in self:
-            public_holiday_dates = leave._l10n_in_get_public_holiday_dates(public_holidays_date_by_company)
-            leaves_by_date = leaves_dates_by_employee.get(leave.employee_id, {})
-            linked_before |= self._l10n_in_find_linked_leave(
-                leave.request_date_from, public_holiday_dates, leave.resource_calendar_id, leaves_by_date, reverse=True
-            )
-            linked_after |= self._l10n_in_find_linked_leave(
-                leave.request_date_to, public_holiday_dates, leave.resource_calendar_id, leaves_by_date, reverse=False
-            )
-        return linked_before, linked_after
-
-    def _l10n_in_prepare_sandwich_context(self):
-        """
-            Build and return a tuple:
-                (indian_leaves, leaves_by_employee, public_holidays_by_company_id)
-            - Filters Indian, full-day, sandwich-enabled leaves.
-            - Prepares dicts for sibling employee leaves and company public holidays.
-        """
-        def _to_local_date(datetime, tz):
-            return datetime.replace(tzinfo=UTC).astimezone(ZoneInfo(tz)).date()
-
-        indian_leaves = self.filtered(
-            lambda leave: leave.company_id.country_id.code == "IN"
-            and leave.work_entry_type_id.l10n_in_is_sandwich_leave
-        )
-        if not indian_leaves:
-            return (indian_leaves, {}, {})
-
-        leaves_dates_by_employee = {}
-        grouped_leaves = self._read_group(
-            domain=[
-                ('id', 'not in', self.ids),
-                ('employee_id', 'in', self.employee_id.ids),
-                ('state', 'not in', ['cancel', 'refuse']),
+        A span extends over at most ``SANDWICH_MAX_DAYS`` non-working days past its leave, and
+        the links of the linked leaves are searched from their far edge: only the leaves close
+        enough to the period are loaded, not the whole history of the employees. """
+        margin = timedelta(days=SANDWICH_MAX_DAYS + 1)
+        base_domain = Domain.AND([
+            domain or [],
+            [
+                ('employee_id', 'in', employees.ids),
                 ('work_entry_type_id.l10n_in_is_sandwich_leave', '=', True),
             ],
-            groupby=['employee_id'],
-            aggregates=['id:recordset'],
-        )
-        for emp_id, recs in grouped_leaves:
-            valid_recs = recs.filtered(lambda leave: leave._l10n_in_is_full_day_request())
-            if not valid_recs:
-                continue
-            leaves_dates_by_employee[emp_id] = {
-                (leave.request_date_from + timedelta(days=offset)): leave
-                for leave in valid_recs
-                for offset in range((leave.request_date_to - leave.request_date_from).days + 1)
-            }
+        ])
+        search_from, search_to = date_from - 2 * margin, date_to + 2 * margin
+        leaves = self.search(base_domain & Domain([
+            ('request_date_to', '>=', search_from),
+            ('request_date_from', '<=', search_to),
+        ]))
+        if leaves:
+            # A leave found can be long: its own links are further away.
+            widened_from = min(leaves.mapped('request_date_from')) - margin
+            widened_to = max(leaves.mapped('request_date_to')) + margin
+            if widened_from < search_from or widened_to > search_to:
+                leaves = self.search(base_domain & Domain([
+                    ('request_date_to', '>=', widened_from),
+                    ('request_date_from', '<=', widened_to),
+                ]))
+        return leaves
 
-        public_holidays_dates_by_company = {}
-        for company_id, recs in self.env['resource.calendar.leaves']._read_group(
-            domain=[
-                ('resource_id', '=', False),
-                ('company_id', 'in', indian_leaves.company_id.ids),
-            ],
-            groupby=['company_id'],
-            aggregates=['id:recordset'],
-        ):
-            company_dates = {}
-            tz = company_id.tz or self.env.context.get("tz") or self.env.user.tz or "UTC"
-            for holiday in recs:
-                local_start = _to_local_date(holiday.date_from, tz)
-                local_end = _to_local_date(holiday.date_to, tz)
+    def _l10n_in_get_active_sandwich_leaves(self, include_self, hours_by_leave=None):
+        """ Return the active, full day sandwich leaves that can sandwich non-working days with
+        the leaves of ``self``.
+
+        :param bool include_self: whether the active leaves of ``self`` are part of them (leaves
+            created or approved together); otherwise, they are the ones of the employees as if
+            the leaves of ``self`` did not exist (refused, deleted...)
+        :param dict hours_by_leave: ``{leave id: hours}`` of the leaves of ``self``, when their
+            ``number_of_hours`` is being computed
+        """
+        active_leaves = self._l10n_in_search_sandwich_leaves(
+            self.employee_id,
+            min(self.mapped('request_date_from')),
+            max(self.mapped('request_date_to')),
+            domain=[('id', 'not in', self.ids), ('state', 'not in', INACTIVE_STATES)],
+        ).filtered(lambda leave: leave._l10n_in_is_full_day_request())
+        if include_self:
+            hours_by_leave = hours_by_leave or {}
+            active_leaves |= self.filtered(
+                lambda leave: leave.state not in INACTIVE_STATES
+                and leave._l10n_in_is_full_day_request(hours=hours_by_leave.get(leave.id))
+            )
+        return active_leaves
+
+    def _l10n_in_get_public_holiday_dates_by_employee(self, date_from, date_to):
+        """ Return ``{employee: {local date: resource.calendar.leaves}}``: the public holidays of
+        the employees of the leaves in ``self`` between ``date_from`` and ``date_to``.
+
+        Like the requested dates of the leaves, the days are the ones of the employee's
+        timezone. A public holiday restricted to a working schedule only applies on the days
+        the employee follows that schedule. """
+        employees = self.employee_id
+        holidays = self.env['resource.calendar.leaves'].search([
+            ('resource_id', '=', False),
+            ('company_id', 'in', employees.company_id.ids),
+            # One day of margin for the timezones
+            ('date_from', '<=', datetime.combine(date_to + timedelta(days=1), time.max)),
+            ('date_to', '>=', datetime.combine(date_from - timedelta(days=1), time.min)),
+        ])
+        holidays_by_company = holidays.grouped('company_id')
+        public_holiday_dates_by_employee = {}
+        for employee in employees:
+            # The versions are not readable by every employee.
+            sudo_employee = employee.sudo()
+            tz = ZoneInfo(sudo_employee._get_tz())
+            employee_dates = {}
+            for holiday in holidays_by_company.get(employee.company_id, []):
+                local_start = holiday.date_from.replace(tzinfo=UTC).astimezone(tz).date()
+                local_end = holiday.date_to.replace(tzinfo=UTC).astimezone(tz).date()
                 for offset in range((local_end - local_start).days + 1):
-                    company_dates[local_start + timedelta(days=offset)] = holiday
-            public_holidays_dates_by_company[company_id] = company_dates
+                    holiday_date = local_start + timedelta(days=offset)
+                    if holiday.calendar_id and holiday.calendar_id != sudo_employee._get_version(holiday_date).resource_calendar_id:
+                        continue
+                    employee_dates[holiday_date] = holiday
+            public_holiday_dates_by_employee[employee] = employee_dates
+        return public_holiday_dates_by_employee
 
-        return indian_leaves, leaves_dates_by_employee, public_holidays_dates_by_company
+    def _l10n_in_get_sandwich_spans(self, active_leaves):
+        """ Return ``{leave id: span}``: the days counted for each leave of ``self`` by the
+        sandwich rules, given the ``active_leaves`` of the employees (see
+        :meth:`_l10n_in_get_active_sandwich_leaves`). The leaves without working day have no span.
 
-    def _l10n_in_count_days_by_sandwich_policy(self, date_from, date_to, public_holiday_dates):
-        self.ensure_one()
-        policy = self.work_entry_type_id.l10n_in_sandwich_policy or "full"
-        calendar = self.resource_calendar_id
+        The rules, on the days of the employee (weekends: the days off of the schedule in effect
+        that day; public holidays: see :meth:`_l10n_in_get_public_holiday_dates_by_employee`):
 
-        total_leaves = 0
-        current_date = date_from
+        1. A leave counts the days from its first to its last working day, the non-working days
+           in between included.
+        2. Before its first working day (and after its last one), the run of non-working days up
+           to the closest working day is a *gap*. When another active leave covers that working
+           day and the gap is at most ``SANDWICH_MAX_DAYS`` days, the two leaves are *linked*:
+           they sandwich the gap.
+        3. A gap is counted on a single leave: the one that closed it last, i.e. created or made
+           active again last (``l10n_in_sandwich_closing_order``, then the id). A leave being
+           created, not saved yet, is the last one.
+        4. A non-working day is only counted when the sandwich policy of the work entry type
+           includes it: weekends, public holidays, or both.
 
-        while current_date <= date_to:
-            is_weekend = not calendar._works_on_date(current_date)
-            is_public_holiday = current_date in public_holiday_dates
-            if (
-                policy == "full"
-                or (not is_weekend and not is_public_holiday)
-                or (policy == "weekend" and is_weekend)
-                or (policy == "public_holiday" and is_public_holiday)
-            ):
-                total_leaves += 1
+        A span is a dict with:
+            - ``counted_dates``: the days counted for the leave, ordered
+            - ``sandwich_dates``: the non-working days among them
+            - ``has_non_working``: whether there are non-working days between the first and the
+              last day of the span, counted or not
+            - ``linked_leaves``: the leaves linked to the leave, whichever counts the gap
+        """
+        spans = {}
+        if not self:
+            return spans
+        margin = timedelta(days=SANDWICH_MAX_DAYS + 1)
+        date_from = min(self.mapped('request_date_from')) - margin
+        date_to = max(self.mapped('request_date_to')) + margin
 
-            current_date += timedelta(days=1)
-        return total_leaves
+        active_leave_by_employee_date = defaultdict(dict)
+        for active_leave in active_leaves:
+            for offset in range((active_leave.request_date_to - active_leave.request_date_from).days + 1):
+                active_leave_by_employee_date[active_leave.employee_id][active_leave.request_date_from + timedelta(days=offset)] = active_leave
 
-    def _l10n_in_apply_sandwich_rule(self, public_holidays_date_by_company, leaves_dates_by_employee):
-        self.ensure_one()
-        if not (self.request_date_from and self.request_date_to):
-            return 0
+        public_holidays_by_employee = self._l10n_in_get_public_holiday_dates_by_employee(date_from, date_to)
+        # The working schedule can change inside a span: the weekends are the days off of the
+        # schedule in effect each day (the one of the leave before the first version).
+        calendar_periods_by_employee = self.employee_id._get_calendar_periods(date_from, date_to, check_contract=False)
+        weekend_dates_by_employee = {}
+        for employee, employee_leaves in self.grouped('employee_id').items():
+            weekend_dates = set()
+            day = min(employee_leaves.mapped('request_date_from')) - margin
+            last_day = max(employee_leaves.mapped('request_date_to')) + margin
+            while day <= last_day:
+                calendar = next(
+                    (calendar for period_from, period_to, calendar in calendar_periods_by_employee.get(employee, [])
+                     if period_from <= day <= period_to),
+                    employee_leaves[0].resource_calendar_id,
+                )
+                if not calendar._works_on_date(day):
+                    weekend_dates.add(day)
+                day += ONE_DAY
+            weekend_dates_by_employee[employee] = weekend_dates
 
-        date_from = self.request_date_from
-        date_to = self.request_date_to
-        public_holiday_dates = self._l10n_in_get_public_holiday_dates(public_holidays_date_by_company)
-        is_non_working_from = not self._l10n_in_is_working(date_from, public_holiday_dates, self.resource_calendar_id)
-        is_non_working_to = not self._l10n_in_is_working(date_to, public_holiday_dates, self.resource_calendar_id)
+        for leave in self:
+            weekend_dates = weekend_dates_by_employee[leave.employee_id]
+            # A work entry type including the public holidays in the duration works them.
+            public_holiday_dates = {} if leave.work_entry_type_id.include_public_holidays_in_duration \
+                else public_holidays_by_employee.get(leave.employee_id, {})
+            active_leave_by_date = active_leave_by_employee_date[leave.employee_id]
 
-        if is_non_working_from and is_non_working_to and not any(
-            self._l10n_in_is_working(date_from + timedelta(days=x), public_holiday_dates, self.resource_calendar_id)
-            for x in range(1, (date_to - date_from).days)
-        ):
-            return 0
+            # Rule 1: from the first to the last working day of the leave.
+            working_dates = [
+                day for day in (leave.request_date_from + timedelta(days=offset)
+                                for offset in range((leave.request_date_to - leave.request_date_from).days + 1))
+                if day not in weekend_dates and day not in public_holiday_dates
+            ]
+            if not working_dates:
+                continue
+            span_start, span_end = working_dates[0], working_dates[-1]
 
-        total_leaves = self._l10n_in_count_days_by_sandwich_policy(date_from, date_to, public_holiday_dates)
-        linked_before, linked_after = self._l10n_in_get_linked_leaves(leaves_dates_by_employee, public_holidays_date_by_company)
-        linked_before_leave = linked_before[:1]
-        linked_after_leave = linked_after[:1]
-        # Only expand the current leave when the linked record starts before it.
-        has_previous_link = bool(linked_before_leave and linked_before_leave.request_date_from < date_from)
-        has_next_link = bool(linked_after_leave and linked_after_leave.request_date_from > date_to)
+            # Rules 2 and 3: the gaps before the first working day and after the last one.
+            linked_leaves = self.env['hr.leave']
+            for edge, step in ((span_start, -ONE_DAY), (span_end, ONE_DAY)):
+                day = edge + step
+                gap_days = 0
+                while (day in weekend_dates or day in public_holiday_dates) and gap_days <= SANDWICH_MAX_DAYS:
+                    day += step
+                    gap_days += 1
+                other_leave = active_leave_by_date.get(day)
+                if gap_days > SANDWICH_MAX_DAYS or not other_leave or other_leave == leave:
+                    continue
+                linked_leaves |= other_leave
+                leave_rank, other_rank = (
+                    (rank_leave.l10n_in_sandwich_closing_order, rank_leave._origin.id) if rank_leave._origin.id else (inf, inf)
+                    for rank_leave in (leave, other_leave)
+                )
+                if gap_days and leave_rank > other_rank:
+                    if step == ONE_DAY:
+                        span_end = day - ONE_DAY
+                    else:
+                        span_start = day + ONE_DAY
 
-        if has_previous_link:
-            total_leaves += self._l10n_in_count_adjacent_non_working(
-                date_from, public_holiday_dates, self.resource_calendar_id, reverse=True
-            )
-        elif is_non_working_from:
-            total_leaves -= self._l10n_in_count_adjacent_non_working(
-                date_from, public_holiday_dates, self.resource_calendar_id, include_start=True,
-            )
+            # Rule 4: the non-working days counted by the sandwich policy.
+            policy = leave.work_entry_type_id.l10n_in_sandwich_policy or 'full'
+            counted_dates, sandwich_dates = [], set()
+            has_non_working = False
+            day = span_start
+            while day <= span_end:
+                is_weekend = day in weekend_dates
+                is_public_holiday = day in public_holiday_dates
+                if not is_weekend and not is_public_holiday:
+                    counted_dates.append(day)
+                else:
+                    has_non_working = True
+                    if (
+                        policy == 'full'
+                        or (policy == 'weekend' and is_weekend)
+                        or (policy == 'public_holiday' and is_public_holiday)
+                    ):
+                        counted_dates.append(day)
+                        sandwich_dates.add(day)
+                day += ONE_DAY
 
-        if has_next_link:
-            total_leaves += self._l10n_in_count_adjacent_non_working(
-                date_to, public_holiday_dates, self.resource_calendar_id
-            )
-        elif is_non_working_to:
-            total_leaves = total_leaves - self._l10n_in_count_adjacent_non_working(
-                date_to, public_holiday_dates, self.resource_calendar_id, reverse=True, include_start=True,
-            )
-        return total_leaves
+            spans[leave.id] = {
+                'counted_dates': counted_dates,
+                'sandwich_dates': sandwich_dates,
+                'has_non_working': has_non_working,
+                'linked_leaves': linked_leaves,
+            }
+        return spans
 
     def _get_durations(self, check_work_entry_type=True, resource_calendar=None, additional_domain=None):
         result = super()._get_durations(check_work_entry_type=check_work_entry_type, resource_calendar=resource_calendar, additional_domain=additional_domain)
 
-        indian_leaves, leaves_dates_by_employee, public_holidays_date_by_company = self._l10n_in_prepare_sandwich_context()
+        indian_leaves = self.filtered(
+            lambda leave: leave.company_id.country_id.code == "IN" and leave.work_entry_type_id.l10n_in_is_sandwich_leave
+        )
         if not indian_leaves:
             return result
-
+        hours_by_leave = {leave_id: hours for leave_id, (_days, hours) in result.items()}
+        spans = indian_leaves._l10n_in_get_sandwich_spans(
+            indian_leaves._l10n_in_get_active_sandwich_leaves(include_self=True, hours_by_leave=hours_by_leave)
+        )
         for leave in indian_leaves:
             leave_days, hours = result[leave.id]
             if not leave_days or (
@@ -257,78 +352,61 @@ class HrLeave(models.Model):
                 and not self.env.user.has_group("hr_holidays.group_hr_holidays_user")
             ):
                 continue
-            default_hours = leave._l10n_in_get_default_leave_hours()
-            if not leave._l10n_in_is_full_day_request(hours=hours, default_hours=default_hours):
+            span = spans.get(leave.id)
+            if not span or not leave._l10n_in_is_full_day_request(hours=hours):
                 leave.l10n_in_contains_sandwich_leaves = False
                 continue
-            updated_days = leave._l10n_in_apply_sandwich_rule(public_holidays_date_by_company, leaves_dates_by_employee)
-            if updated_days and updated_days != leave_days:
-                updated_hours = (updated_days * (hours / leave_days)) if leave_days else hours
-                result[leave.id] = (updated_days, updated_hours)
-                leave.l10n_in_contains_sandwich_leaves = True
-            else:
-                leave.l10n_in_contains_sandwich_leaves = False
+            span_days = len(span['counted_dates'])
+            if span_days != leave_days:
+                result[leave.id] = (span_days, span_days * hours / leave_days)
+            leave.l10n_in_contains_sandwich_leaves = span['has_non_working']
         return result
 
-    def _l10n_in_get_public_holiday_dates(self, public_holidays_date_by_company):
-        if self.work_entry_type_id.include_public_holidays_in_duration:
-            return {}
-        return public_holidays_date_by_company.get(self.company_id, {})
-
-    def _l10n_in_update_neighbors_duration_after_change(self):
-        indian_leaves, leaves_dates_by_employee, public_holidays_dates_by_company = self._l10n_in_prepare_sandwich_context()
+    def _l10n_in_update_neighbors_duration_after_change(self, deleting=False):
+        """ Recompute the durations of the leaves linked to the leaves of ``self`` after these
+        changed (approved, refused, cancelled or deleted when ``deleting``), and of the leaves
+        of ``self`` themselves when they are approved. """
+        indian_leaves = self.filtered(
+            lambda leave: leave.company_id.country_id.code == "IN" and leave.work_entry_type_id.l10n_in_is_sandwich_leave
+        )
         if not indian_leaves:
             return
-        if all(state in ['refuse', 'cancel'] for state in self.mapped('state')):
+        if all(state in INACTIVE_STATES for state in self.mapped('state')):
             self.l10n_in_contains_sandwich_leaves = False
 
-        linked_before, linked_after = indian_leaves._l10n_in_get_linked_leaves(
-            leaves_dates_by_employee, public_holidays_dates_by_company
-        )
-        neighbors = (linked_before | linked_after) - self
+        active_leaves = indian_leaves._l10n_in_get_active_sandwich_leaves(include_self=not deleting)
+        neighbors = self.env['hr.leave'].union(
+            span['linked_leaves'] for span in indian_leaves._l10n_in_get_sandwich_spans(active_leaves).values()
+        ) - self
+        if any(state in ['validate', 'validate1'] for state in self.mapped('state')):
+            neighbors |= self
         if not neighbors:
             return
 
-        if any(state in ['validate', 'validate1'] for state in self.mapped('state')):
-            neighbors |= self
-        # Recompute neighbor durations with the baseline (non-sandwich) logic.
-        base_map = super(HrLeave, neighbors)._get_durations(
-            check_work_entry_type=True,
-            resource_calendar=None,
-        )
-
+        # The durations without the sandwich rules, then with them.
+        base_durations = super(HrLeave, neighbors)._get_durations(check_work_entry_type=True, resource_calendar=None)
+        spans = neighbors._l10n_in_get_sandwich_spans(active_leaves)
         for neighbor in neighbors:
-            base_days, base_hours = base_map.get(neighbor.id, (neighbor.number_of_days, neighbor.number_of_hours))
-            default_hours = neighbor._l10n_in_get_default_leave_hours()
-            if not neighbor._l10n_in_is_full_day_request(hours=base_hours, default_hours=default_hours):
+            base_days, base_hours = base_durations.get(neighbor.id, (neighbor.number_of_days, neighbor.number_of_hours))
+            span = spans.get(neighbor.id)
+            if not span or not base_days or not neighbor._l10n_in_is_full_day_request(hours=base_hours):
                 neighbor.write({
                     'number_of_days': base_days,
                     'number_of_hours': base_hours,
                     'l10n_in_contains_sandwich_leaves': False,
                 })
                 continue
-            updated_days = neighbor._l10n_in_apply_sandwich_rule(
-                public_holidays_date_by_company=public_holidays_dates_by_company,
-                leaves_dates_by_employee=leaves_dates_by_employee,
-            )
-            if updated_days and updated_days != base_days:
-                new_hours = (updated_days * (base_hours / base_days)) if base_days else base_hours
-                neighbor.write({
-                    'number_of_days': updated_days,
-                    'number_of_hours': new_hours,
-                    'l10n_in_contains_sandwich_leaves': True,
-                })
-            else:
-                neighbor.write({
-                    'number_of_days': base_days,
-                    'number_of_hours': base_hours,
-                    'l10n_in_contains_sandwich_leaves': False,
-                })
+            span_days = len(span['counted_dates'])
+            neighbor.write({
+                'number_of_days': span_days,
+                'number_of_hours': span_days * base_hours / base_days,
+                'l10n_in_contains_sandwich_leaves': span['has_non_working'],
+            })
 
     @api.ondelete(at_uninstall=False)
     def _ondelete_refresh_neighbors(self):
         """Pre-delete hook: update neighbors as if these records were already deleted"""
-        self._l10n_in_update_neighbors_duration_after_change()
+        self._l10n_in_update_neighbors_duration_after_change(deleting=True)
 
     def action_refuse(self):
         res = super().action_refuse()
