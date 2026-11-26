@@ -265,8 +265,13 @@ export class MediaManagerKanbanRenderer extends KanbanRenderer {
         fileInputEl.value = "";
     }
 
-    uploadDragEnter() {
-        this.state.isDraggingFile = this.canImport(IMAGE_TYPE);
+    /**
+     * Only the files can be dropped, not the elements or links dragged from
+     * the page (e.g. the image of a card).
+     */
+    uploadDragEnter(ev) {
+        this.state.isDraggingFile =
+            this.canImport(IMAGE_TYPE) && !!ev.dataTransfer?.types.includes("Files");
     }
 
     uploadDragLeave() {
@@ -276,14 +281,14 @@ export class MediaManagerKanbanRenderer extends KanbanRenderer {
     uploadDrop(ev) {
         this.state.isDraggingFile = false;
         const files = [...ev.dataTransfer.items]
+            // the other items (text, html, ...) have no file
+            .filter((item) => item.kind === "file")
             .map((item) => item.getAsFile())
-            .filter((file) => {
-                // todo: add a way to configure the accepted file type ?
-                if (IMAGE_MIMETYPES.includes(file.type)) {
-                    return file;
-                }
-            });
-        this.uploadFiles(files);
+            // todo: add a way to configure the accepted file type ?
+            .filter((file) => file && IMAGE_MIMETYPES.includes(file.type));
+        if (files.length) {
+            this.uploadFiles(files);
+        }
     }
 
     async uploadFiles(files) {

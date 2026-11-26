@@ -287,13 +287,19 @@ describe("upload", () => {
     test("drop files on the images: only the images are uploaded", async () => {
         mockUploadRoute();
         await openMediaManager();
-        await manuallyDispatchProgrammaticEvent(queryOne(".modal .o_kanban_renderer"), "dragenter");
-        await animationFrame();
-        expect(".modal .media-manager-drop-zone").toHaveClass("active");
-
         const dataTransfer = new DataTransfer();
         dataTransfer.items.add(new File(["x"], "dropped.png", { type: "image/png" }));
         dataTransfer.items.add(new File(["x"], "dropped.pdf", { type: "application/pdf" }));
+        await manuallyDispatchProgrammaticEvent(
+            queryOne(".modal .o_kanban_renderer"),
+            "dragenter",
+            {
+                dataTransfer,
+            }
+        );
+        await animationFrame();
+        expect(".modal .media-manager-drop-zone").toHaveClass("active");
+
         await manuallyDispatchProgrammaticEvent(
             queryOne(".modal .media-manager-drop-zone"),
             "drop",
@@ -303,6 +309,31 @@ describe("upload", () => {
         await animationFrame();
         expect(".modal .media-manager-drop-zone").not.toHaveClass("active");
         await waitFor(card("dropped.png"));
+    });
+
+    test("drop an element of the page: nothing is uploaded", async () => {
+        mockUploadRoute();
+        await openMediaManager();
+        // e.g. the image of a card
+        const dataTransfer = new DataTransfer();
+        dataTransfer.setData("text/uri-list", "/web/image/1");
+        dataTransfer.setData("text/html", '<img src="/web/image/1">');
+        await manuallyDispatchProgrammaticEvent(
+            queryOne(".modal .o_kanban_renderer"),
+            "dragenter",
+            {
+                dataTransfer,
+            }
+        );
+        await animationFrame();
+        expect(".modal .media-manager-drop-zone").not.toHaveClass("active");
+        await manuallyDispatchProgrammaticEvent(
+            queryOne(".modal .media-manager-drop-zone"),
+            "drop",
+            { dataTransfer }
+        );
+        await animationFrame();
+        expect.verifySteps([]);
     });
 
     test("import from an invalid url", async () => {
