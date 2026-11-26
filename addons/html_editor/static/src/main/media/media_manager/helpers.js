@@ -1,3 +1,20 @@
+/**
+ * The kinds of media of the media manager, see `allowedMediaTypes` of
+ * `openMediaManager`.
+ *
+ * @typedef {typeof IMAGE_TYPE|typeof VIDEO_TYPE|typeof FILE_TYPE} MediaType
+ */
+export const IMAGE_TYPE = "image";
+/** The videos of the third party platforms, added by url. */
+export const VIDEO_TYPE = "video";
+/**
+ * Any other file (documents, ...). Unused for now: no editor can insert them
+ * from the media manager yet, so it is never available (see
+ * `getAvailableMediaTypes`).
+ */
+export const FILE_TYPE = "file";
+export const MEDIA_TYPES = Object.freeze([IMAGE_TYPE, VIDEO_TYPE, FILE_TYPE]);
+
 export const IMAGE_MIMETYPES = [
     "image/jpg",
     "image/jpeg",

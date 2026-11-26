@@ -138,6 +138,10 @@ describe("embedded video menu", () => {
         expect(getCardNames()).toEqual([]);
         expect(VIDEO_CARD).toHaveCount(2);
         expect(".modal .o_select_button").toHaveCount(0);
+        // only video links can be imported
+        expect(".modal .media-manager-side-panel button:contains(Upload)").toHaveCount(0);
+        expect(".modal .btn-import-url").toHaveCount(0);
+        expect(".modal .btn-import-video-url").toHaveCount(1);
 
         await contains(`${videoCard("YouTube - dQw4w9WgXcQ")} .o_kanban_image`).click();
         await waitFor(DIALOG);

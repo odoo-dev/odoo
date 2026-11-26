@@ -11,11 +11,21 @@ import {
 } from "@html_editor/main/media/video/video_providers";
 import { MAIN_PLUGINS } from "@html_editor/plugin_sets";
 import { loadImage } from "@html_editor/utils/image_processing";
+import { IMAGE_TYPE, VIDEO_TYPE } from "@html_editor/main/media/media_manager/helpers";
 import {
     getBaseResId,
     getMediaManagertDialogProps,
     MediaManagerDialog,
 } from "./media_manager_dialog";
+
+/**
+ * The media of each kind, see `allowedMediaTypes` of `openMediaManager`.
+ * FILE_TYPE has none yet: it is never available.
+ */
+const MEDIA_TYPE_DOMAINS = {
+    [IMAGE_TYPE]: IMAGES_DOMAIN,
+    [VIDEO_TYPE]: VIDEOS_DOMAIN,
+};
 
 /**
  * @typedef {((params: { url: string }) => Promise<HTMLElement|undefined>)[]} media_manager_video_element_providers
@@ -43,6 +53,22 @@ export class MediaManagerPlugin extends MediaPlugin {
     }
 
     /**
+     * The kinds of media the media manager can list and import here: the
+     * images, and the videos when the editor can insert them (a custom `save`
+     * callback, e.g. of a builder option, needs an image).
+     *
+     * @param {Object} params the params given to `openMediaManager`
+     * @returns {import("@html_editor/main/media/media_manager/helpers").MediaType[]}
+     */
+    getAvailableMediaTypes(params) {
+        const mediaTypes = [IMAGE_TYPE];
+        if (this.getResource("media_manager_video_element_providers").length && !params.save) {
+            mediaTypes.push(VIDEO_TYPE);
+        }
+        return mediaTypes;
+    }
+
+    /**
      * @override
      * Opens the media manager, or the old media dialog with
      * `params.useOldMediaDialog`.
@@ -59,27 +85,41 @@ export class MediaManagerPlugin extends MediaPlugin {
      *
      * @param {Object} [params]
      * @param {HTMLElement} [params.node] the media to replace
+     * @param {import("@html_editor/main/media/media_manager/helpers").MediaType[]} [params.allowedMediaTypes]
+     *      the kinds of media that can be chosen and imported (IMAGE_TYPE,
+     *      VIDEO_TYPE), among the available ones. By default, the kind of the
+     *      replaced media, or all the available ones.
+     * @param {boolean} [params.multiSelect] whether several media can be
+     *      chosen. By default, only when no media is replaced.
      * @param {HTMLElement} [editableEl] the editable of the edited record
      */
     openMediaManager(params = {}, editableEl = null) {
         const videoElementProviders = this.getResource("media_manager_video_element_providers");
         const recordInfo = this.getRecordInfo(editableEl);
-        let domain = this.getDomain(recordInfo, params);
-        // A custom `save` callback (builder options) needs an image.
-        const canUseVideos = !!videoElementProviders.length && !params.save;
+        const availableMediaTypes = this.getAvailableMediaTypes(params);
         // A video is replaced by a video, an image by an image.
-        const videoToReplace = canUseVideos && params.node?.closest?.(VIDEO_ELEMENT_SELECTOR);
+        const videoToReplace =
+            availableMediaTypes.includes(VIDEO_TYPE) &&
+            params.node?.closest?.(VIDEO_ELEMENT_SELECTOR);
         let mediaToReplace = videoToReplace || params.node || null;
-        const allowVideos = canUseVideos && (!params.node || !!videoToReplace);
+        let defaultMediaTypes = availableMediaTypes;
         if (videoToReplace) {
-            domain = Domain.and([domain, VIDEOS_DOMAIN]).toList();
-        } else if (!allowVideos) {
-            domain = Domain.and([domain, IMAGES_DOMAIN]).toList();
+            defaultMediaTypes = [VIDEO_TYPE];
+        } else if (mediaToReplace) {
+            defaultMediaTypes = [IMAGE_TYPE];
         }
+        const allowedMediaTypes = (params.allowedMediaTypes ?? defaultMediaTypes).filter((type) =>
+            availableMediaTypes.includes(type)
+        );
+        const domain = Domain.and([
+            this.getDomain(recordInfo, params),
+            Domain.or(allowedMediaTypes.map((type) => MEDIA_TYPE_DOMAINS[type])),
+        ]).toList();
         return this.dependencies.dialog.addDialog(MediaManagerDialog, {
             ...getMediaManagertDialogProps(recordInfo),
             domain,
-            allowVideos,
+            allowedMediaTypes,
+            multiSelect: params.multiSelect ?? !mediaToReplace,
             onSelected: async (resIds, records) => {
                 if (!records.length) {
                     return;
@@ -106,7 +146,6 @@ export class MediaManagerPlugin extends MediaPlugin {
                 }
                 await Promise.all(promises);
             },
-            multiSelect: !mediaToReplace,
         });
     }
 

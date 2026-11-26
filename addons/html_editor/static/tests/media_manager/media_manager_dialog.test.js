@@ -13,6 +13,7 @@ import {
     waitFor,
 } from "@odoo/hoot";
 import { mockDate } from "@odoo/hoot-mock";
+import { VIDEO_TYPE } from "@html_editor/main/media/media_manager/helpers";
 import {
     contains,
     editSearch,
@@ -35,6 +36,7 @@ import {
     PNG_DATA_URL,
     TAGS,
     videoCard,
+    waitForMediaManager,
     YOUTUBE_URL,
 } from "./media_manager_test_helpers";
 
@@ -350,6 +352,20 @@ describe("upload", () => {
         expect(`${SIDE_PANEL} input[name=url]`).toHaveAttribute("placeholder", "Video url...");
         expect(`${SIDE_PANEL} input[name=url]`).toHaveValue(YOUTUBE_URL);
         expect.verifySteps([]);
+    });
+
+    test("the media types and the multi selection are given by the params", async () => {
+        const { editor } = await openPartnerForm();
+        editor.shared.media.openMediaDialog({
+            allowedMediaTypes: [VIDEO_TYPE],
+            multiSelect: false,
+        });
+        await waitForMediaManager();
+        expect(getCardNames()).toEqual([]);
+        expect(".modal .o_select_button").toHaveCount(0);
+        expect(`${SIDE_PANEL} button:contains(Upload)`).toHaveCount(0);
+        expect(`${SIDE_PANEL} .btn-import-url`).toHaveCount(0);
+        expect(`${SIDE_PANEL} .btn-import-video-url`).toHaveCount(1);
     });
 
     test("no video link to import when replacing an image", async () => {

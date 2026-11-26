@@ -5,6 +5,7 @@ import {
     getRecordDomain,
     MY_MEDIA_DOMAIN,
 } from "@html_editor/main/media/media_manager/domain_helper";
+import { IMAGE_TYPE, MEDIA_TYPES } from "@html_editor/main/media/media_manager/helpers";
 
 import {
     SelectCreateDialog,
@@ -18,7 +19,8 @@ export const mediaManagerDialogProps = {
     baseResModel: t.string(),
     baseResId: t.number(),
     filters: t.array().optional(),
-    allowVideos: t.boolean().optional(),
+    // the kinds of media that can be imported
+    allowedMediaTypes: t.array(t.selection(MEDIA_TYPES)).optional(),
     domain: t.array().optional(),
     context: t.object().optional(),
 };
@@ -51,7 +53,7 @@ export class MediaManagerDialog extends SelectCreateDialog {
             baseResModel: this.props.baseResModel,
             baseResId: this.props.baseResId,
             filters: this.props.filters,
-            allowVideos: !!this.props.allowVideos,
+            allowedMediaTypes: this.props.allowedMediaTypes ?? [IMAGE_TYPE],
             onSelectionChanged: this.onSelectionChanged,
         };
         return props;

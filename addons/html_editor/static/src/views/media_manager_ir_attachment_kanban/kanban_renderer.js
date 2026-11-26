@@ -1,7 +1,13 @@
 import { KanbanRenderer, kanbanRendererProps } from "@web/views/kanban/kanban_renderer";
 import { MediaManagerKanbanRecord } from "./kanban_record";
 import { useService } from "@web/core/utils/hooks";
-import { IMAGE_EXTENSIONS, IMAGE_MIMETYPES } from "@html_editor/main/media/media_manager/helpers";
+import {
+    IMAGE_EXTENSIONS,
+    IMAGE_MIMETYPES,
+    IMAGE_TYPE,
+    MEDIA_TYPES,
+    VIDEO_TYPE,
+} from "@html_editor/main/media/media_manager/helpers";
 import {
     getVideoMimetype,
     matchPlatformUrl,
@@ -16,8 +22,9 @@ export const MediaManagerKanbanRendererProps = {
     baseResModel: t.string(),
     baseResId: t.number().optional(),
     filters: t.array().optional(),
-    // the videos of the third party platforms can be imported by url
-    allowVideos: t.boolean().optional(),
+    // the kinds of media that can be imported: IMAGE_TYPE (upload, url) and
+    // VIDEO_TYPE (url of a third party platform). Default: the images.
+    allowedMediaTypes: t.array(t.selection(MEDIA_TYPES)).optional(),
 };
 
 export class MediaManagerKanbanRenderer extends KanbanRenderer {
@@ -27,6 +34,9 @@ export class MediaManagerKanbanRenderer extends KanbanRenderer {
         KanbanRecord: MediaManagerKanbanRecord,
     };
     props = useProps(MediaManagerKanbanRendererProps);
+    // for the templates
+    IMAGE_TYPE = IMAGE_TYPE;
+    VIDEO_TYPE = VIDEO_TYPE;
     fileInputRef = signal.ref();
     urlInputRef = signal.ref();
 
@@ -37,8 +47,8 @@ export class MediaManagerKanbanRenderer extends KanbanRenderer {
         this.state.isDraggingFile = false;
 
         this.debouncedValidateUrl = useDebounced(this.validateUrl, 500);
-        // the kind of link imported by the url input: "image" or "video"
-        this.state.urlImportType = "image";
+        // the kind of link imported by the url input: IMAGE_TYPE or VIDEO_TYPE
+        this.state.urlImportType = this.canImport(IMAGE_TYPE) ? IMAGE_TYPE : VIDEO_TYPE;
         this.initialDomain = [...this.env.model.config.domain];
         // the url input is hidden until the next render, it can only be
         // focused once displayed
@@ -52,20 +62,30 @@ export class MediaManagerKanbanRenderer extends KanbanRenderer {
     }
 
     /**
+     * @param {import("@html_editor/main/media/media_manager/helpers").MediaType} type
+     * @returns {boolean}
+     */
+    canImport(type) {
+        return (this.props.allowedMediaTypes ?? [IMAGE_TYPE]).includes(type);
+    }
+
+    /**
      * @param {string} url
      * @returns {Promise<{ isValidUrl: boolean, isValidImageFormat: boolean, videoMatch: Object|null }>}
      *      `videoMatch` is the platform of a video url (see `matchPlatformUrl`),
-     *      when the videos are allowed
+     *      when the videos can be imported
      */
     async validateUrl(url) {
         const path = url.split("?")[0];
         const isValidUrl = isHttpUrl(path);
         // the video platforms urls are pages, not images
-        const videoMatch = (isValidUrl && this.props.allowVideos && matchPlatformUrl(url)) || null;
+        const videoMatch =
+            (isValidUrl && this.canImport(VIDEO_TYPE) && matchPlatformUrl(url)) || null;
 
         const isValidImageFormat =
             isValidUrl &&
             !videoMatch &&
+            this.canImport(IMAGE_TYPE) &&
             (await new Promise((resolve) => {
                 const img = new Image();
                 img.src = path;
@@ -92,11 +112,11 @@ export class MediaManagerKanbanRenderer extends KanbanRenderer {
     // -----------------
 
     get urlPlaceholder() {
-        return this.state.urlImportType === "video" ? _t("Video url...") : _t("Image url...");
+        return this.state.urlImportType === VIDEO_TYPE ? _t("Video url...") : _t("Image url...");
     }
 
     get urlWarningTitle() {
-        if (this.state.urlImportType === "video") {
+        if (this.state.urlImportType === VIDEO_TYPE) {
             return _t(
                 "The URL does not seem to be a video of a supported platform: %s",
                 Object.values(PLATFORMS)
@@ -111,7 +131,7 @@ export class MediaManagerKanbanRenderer extends KanbanRenderer {
     }
 
     /**
-     * @param {"image"|"video"} type
+     * @param {import("@html_editor/main/media/media_manager/helpers").MediaType} type
      * @returns {boolean} whether the url input is displayed to import this kind of link
      */
     isImportingUrl(type) {
@@ -122,9 +142,9 @@ export class MediaManagerKanbanRenderer extends KanbanRenderer {
      * Display the url input, or import its link. Both kinds of link are
      * accepted whatever the button: the type only adapts the input.
      *
-     * @param {"image"|"video"} [type]
+     * @param {import("@html_editor/main/media/media_manager/helpers").MediaType} [type]
      */
-    async importLinkClicked(type = "image") {
+    async importLinkClicked(type = IMAGE_TYPE) {
         const inputEl = this.urlInputRef();
         if (this.isImportingUrl(type)) {
             inputEl.disabled = true;
@@ -246,7 +266,7 @@ export class MediaManagerKanbanRenderer extends KanbanRenderer {
     }
 
     uploadDragEnter() {
-        this.state.isDraggingFile = true;
+        this.state.isDraggingFile = this.canImport(IMAGE_TYPE);
     }
 
     uploadDragLeave() {

@@ -1,12 +1,13 @@
 import { KanbanController, kanbanControllerProps } from "@web/views/kanban/kanban_controller";
 import { t, useProps } from "@odoo/owl";
+import { MEDIA_TYPES } from "@html_editor/main/media/media_manager/helpers";
 
 export const MediaManagerKanbanControllerProps = {
     ...kanbanControllerProps,
     baseResModel: t.string(),
     baseResId: t.number().optional(),
     filters: t.array().optional(),
-    allowVideos: t.boolean().optional(),
+    allowedMediaTypes: t.array(t.selection(MEDIA_TYPES)).optional(),
 };
 export class MediaManagerKanbanController extends KanbanController {
     static template = "ir.attachment.MediaManagerKanbanView";
