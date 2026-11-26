@@ -85,7 +85,7 @@ export class PowerButtonsPlugin extends Plugin {
         const composePowerButton = (/**@type {PowerButton} */ item) => {
             const command = this.dependencies.userCommand.getCommand(item.commandId);
             return {
-                ...pick(command, "description", "icon", "iconClass"),
+                ...pick(command, "description", "icon", "iconClass", "isAvailableOffline"),
                 ...omit(item, "commandId", "commandParams"),
                 run: () => command.run(item.commandParams),
                 isAvailable: (selection) =>
@@ -94,7 +94,7 @@ export class PowerButtonsPlugin extends Plugin {
                         .every((predicate) => predicate(selection)),
             };
         };
-        const renderButton = ({ description, icon, iconClass, text, run }) => {
+        const renderButton = ({ description, icon, iconClass, text, run, isAvailableOffline }) => {
             const btn = this.dependencies.localOverlay.createElement("button");
             let className = "power_button btn px-2 py-1 cursor-pointer";
             if (icon) {
@@ -109,6 +109,9 @@ export class PowerButtonsPlugin extends Plugin {
             }
             btn.className = className;
             btn.title = description;
+            if (isAvailableOffline !== false) {
+                btn.dataset.availableOffline = "";
+            }
             this.addDomListener(btn, "pointerdown", (ev) => ev.preventDefault());
             this.addDomListener(btn, "click", () => this.applyCommand(run));
             return btn;

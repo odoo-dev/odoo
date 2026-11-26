@@ -23,6 +23,7 @@ export class FilePlugin extends Plugin {
     resources = {
         user_commands: {
             id: "uploadFile",
+            isAvailableOffline: false,
             title: _t("Upload a file"),
             description: _t("Add a download box"),
             icon: "upload",

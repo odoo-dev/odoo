@@ -57,12 +57,14 @@ export class MediaPlugin extends Plugin {
         user_commands: [
             {
                 id: "replaceImage",
+                isAvailableOffline: false,
                 description: _t("Replace media"),
                 icon: "image",
                 run: this.replaceImage.bind(this),
             },
             {
                 id: "insertMedia",
+                isAvailableOffline: false,
                 title: _t("Media"),
                 description: this.config.allowVideo
                     ? _t("Insert image, icon or video")

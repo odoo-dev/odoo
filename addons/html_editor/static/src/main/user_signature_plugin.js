@@ -41,6 +41,7 @@ export class UserSignaturePlugin extends Plugin {
         user_commands: [
             {
                 id: "insertUserSignature",
+                isAvailableOffline: false,
                 title: _t("Signature"),
                 description: _t("Insert your email signature"),
                 icon: "edit_square",

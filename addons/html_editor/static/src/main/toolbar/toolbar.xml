@@ -23,6 +23,7 @@
                                 t-att-disabled="button.isDisabled"
                                 t-att-title="button.description"
                                 t-att-name="button.id"
+                                t-att-data-available-offline="button.isAvailableOffline !== false ? '' : false"
                                 t-on-click="() => this.onButtonClick(button)"
                             >
                                 <t t-if="button.icon">

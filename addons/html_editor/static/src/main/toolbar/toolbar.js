@@ -17,6 +17,7 @@ const genericButtonSchema = {
     iconClass: t.string().optional(),
     id: t.string(),
     isActive: t.boolean(),
+    isAvailableOffline: t.boolean().optional(),
     isDisabled: t.boolean(),
     opensUi: t.boolean().optional(),
     run: t.function(),
@@ -121,7 +122,7 @@ export const toolbarButtonProps = {
 export function composeToolbarButton(userCommand, toolbarItem) {
     const description = toolbarItem.description || userCommand.description;
     return {
-        ...pick(userCommand, "icon", "iconClass"),
+        ...pick(userCommand, "icon", "iconClass", "isAvailableOffline"),
         ...omit(toolbarItem, "commandId", "commandParams"),
         run: () => userCommand.run(toolbarItem.commandParams),
         isAvailable: (selection) =>

@@ -25,6 +25,7 @@ import { baseContainerGlobalSelector } from "@html_editor/utils/base_container";
  * @property {string} [icon] oi class - Inheritable
  * @property {TranslatedString[]} [keywords]
  * @property {(selection: EditorSelection) => boolean} [isAvailable] Optional and inheritable
+ * @property {boolean} [isAvailableOffline] Inheritable - `false` disables the command offline
  */
 
 /**
@@ -149,7 +150,7 @@ export class PowerboxPlugin extends Plugin {
                     commandId === command.id && deepEqual(commandParams, item.commandParams)
             )?.literals[0];
             return {
-                ...pick(command, "title", "description", "icon", "iconClass"),
+                ...pick(command, "title", "description", "icon", "iconClass", "isAvailableOffline"),
                 ...omit(item, "commandId", "commandParams"),
                 categoryName: categoryDict[item.categoryId].name,
                 ...(shorthandLiteral && { shorthandLiteral }),
@@ -184,6 +185,13 @@ export class PowerboxPlugin extends Plugin {
      * @param {PowerboxCategory[]} [categories]
      */
     updatePowerbox(commands, categories) {
+        if (this.services.offline?.isOffline()) {
+            commands = commands.filter((command) => command.isAvailableOffline !== false);
+            if (!commands.length) {
+                this.closePowerbox();
+                return;
+            }
+        }
         if (categories) {
             const orderCommands = [];
             for (const category of categories) {
@@ -246,6 +254,10 @@ export class PowerboxPlugin extends Plugin {
     }
 
     applyCommand(command) {
+        if (command.isAvailableOffline === false && this.services.offline?.isOffline()) {
+            this.closePowerbox();
+            return;
+        }
         const context = {};
         this.onApplyCommand(command, context);
         command.run(context);

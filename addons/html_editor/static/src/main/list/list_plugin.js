@@ -1404,7 +1404,7 @@ export class ListPlugin extends Plugin {
                 );
                 const button = composeToolbarButton(command, item);
                 return {
-                    ...pick(button, "id", "icon", "run", "mode"),
+                    ...pick(button, "id", "icon", "run", "mode", "isAvailableOffline"),
                     // We want short descriptions for these buttons.
                     description: item.description,
                 };

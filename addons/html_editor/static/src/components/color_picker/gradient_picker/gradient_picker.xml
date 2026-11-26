@@ -6,7 +6,7 @@
                 Type
                 <t t-if="this.isMobileOS">
                     <Dropdown>
-                        <button class="btn btn-light d-flex justify-content-between w-100 ms-2 border border-dark rounded-0">
+                        <button data-available-offline="" class="btn btn-light d-flex justify-content-between w-100 ms-2 border border-dark rounded-0">
                             <span class="px-1" t-out="this.state.type"/>
                             <i class="oi ms-2" data-icon="arrow_drop_down"/>
                         </button>
@@ -25,9 +25,9 @@
                 </t>
                 <t t-else="">
                     <span class="d-flex justify-content-between">
-                        <button t-attf-class="btn btn-sm btn-light {{ this.state.type === 'linear' ? 'active' : ''}}" t-on-click="() => this.selectType('linear')"> Linear </button>
-                        <button t-attf-class="btn btn-sm btn-light {{ this.state.type === 'radial' ? 'active' : ''}}" t-on-click="() => this.selectType('radial')"> Radial </button>
-                        <button t-attf-class="btn btn-sm btn-light {{ this.state.type === 'conic' ? 'active' : ''}}" t-on-click="() => this.selectType('conic')"> Conic </button>
+                        <button data-available-offline="" t-attf-class="btn btn-sm btn-light {{ this.state.type === 'linear' ? 'active' : ''}}" t-on-click="() => this.selectType('linear')"> Linear </button>
+                        <button data-available-offline="" t-attf-class="btn btn-sm btn-light {{ this.state.type === 'radial' ? 'active' : ''}}" t-on-click="() => this.selectType('radial')"> Radial </button>
+                        <button data-available-offline="" t-attf-class="btn btn-sm btn-light {{ this.state.type === 'conic' ? 'active' : ''}}" t-on-click="() => this.selectType('conic')"> Conic </button>
                     </span>
                 </t>
             </div>
@@ -38,17 +38,61 @@
                         <div style="margin-right: auto;">
                             Size
                         </div>
-                        <button t-on-click="() => this.onSizeChange('closest-side')" t-att-data-color="this.getRadialGradient('closest-side')" t-attf-class="btn btn-light p-0 {{ this.state.size === 'closest-side' ? `active` : ''}}" title="Extend to the closest side">
-                            <img src="/html_editor/static/src/img/gradient-closest-side.svg"/>
+                        <button data-available-offline="" t-on-click="() => this.onSizeChange('closest-side')" t-att-data-color="this.getRadialGradient('closest-side')" t-attf-class="btn btn-light p-0 {{ this.state.size === 'closest-side' ? `active` : ''}}" title="Extend to the closest side">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="35" height="35" viewBox="0 0 20 20" fill="none">
+                                <clipPath id="gradient-closest-side-clip">
+                                    <rect x="2" y="2" width="16" height="16"/>
+                                </clipPath>
+                                <g clip-path="url(#gradient-closest-side-clip)">
+                                    <circle cx="4" cy="6" r="2" fill="#333"/>
+                                    <circle cx="4" cy="6" r="1.5" fill="#666"/>
+                                    <circle cx="4" cy="6" r="1" fill="#999"/>
+                                    <circle cx="4" cy="6" r="0.5" fill="#CCC"/>
+                                </g>
+                                <rect x="2" y="2" width="16" height="16" stroke="#999"/>
+                            </svg>
                         </button>
-                        <button t-on-click="() => this.onSizeChange('closest-corner')" t-att-data-color="this.getRadialGradient('closest-corner')" t-attf-class="btn btn-light p-0 {{ this.state.size === 'closest-corner' ? `active` : ''}}" title="Extend to the closest corner">
-                            <img src="/html_editor/static/src/img/gradient-closest-corner.svg"/>
+                        <button data-available-offline="" t-on-click="() => this.onSizeChange('closest-corner')" t-att-data-color="this.getRadialGradient('closest-corner')" t-attf-class="btn btn-light p-0 {{ this.state.size === 'closest-corner' ? `active` : ''}}" title="Extend to the closest corner">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="35" height="35" viewBox="0 0 20 20" fill="none">
+                                <clipPath id="gradient-closest-corner-clip">
+                                    <rect x="2" y="2" width="16" height="16"/>
+                                </clipPath>
+                                <g clip-path="url(#gradient-closest-corner-clip)">
+                                    <circle cx="4" cy="6" r="4.4" fill="#333"/>
+                                    <circle cx="4" cy="6" r="3.3" fill="#666"/>
+                                    <circle cx="4" cy="6" r="2.2" fill="#999"/>
+                                    <circle cx="4" cy="6" r="1.1" fill="#CCC"/>
+                                </g>
+                                <rect x="2" y="2" width="16" height="16" stroke="#999"/>
+                            </svg>
                         </button>
-                        <button t-on-click="() => this.onSizeChange('farthest-side')" t-att-data-color="this.getRadialGradient('farthest-side')" t-attf-class="btn btn-light p-0 {{ this.state.size === 'farthest-side' ? `active` : ''}}" title="Extend to the farthest side">
-                            <img src="/html_editor/static/src/img/gradient-farthest-side.svg"/>
+                        <button data-available-offline="" t-on-click="() => this.onSizeChange('farthest-side')" t-att-data-color="this.getRadialGradient('farthest-side')" t-attf-class="btn btn-light p-0 {{ this.state.size === 'farthest-side' ? `active` : ''}}" title="Extend to the farthest side">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="35" height="35" viewBox="0 0 20 20" fill="none">
+                                <clipPath id="gradient-farthest-side-clip">
+                                    <rect x="2" y="2" width="16" height="16"/>
+                                </clipPath>
+                                <g clip-path="url(#gradient-farthest-side-clip)">
+                                    <circle cx="4" cy="6" r="14" fill="#333"/>
+                                    <circle cx="4" cy="6" r="10.5" fill="#666"/>
+                                    <circle cx="4" cy="6" r="7" fill="#999"/>
+                                    <circle cx="4" cy="6" r="3.5" fill="#CCC"/>
+                                </g>
+                                <rect x="2" y="2" width="16" height="16" stroke="#999"/>
+                            </svg>
                         </button>
-                        <button t-on-click="() => this.onSizeChange('farthest-corner')" t-att-data-color="this.getRadialGradient('farthest-corner')" t-attf-class="btn btn-light p-0 {{ this.state.size === 'farthest-corner' ? `active`: ''}}" title="Extend to the farthest corner">
-                            <img src="/html_editor/static/src/img/gradient-farthest-corner.svg"/>
+                        <button data-available-offline="" t-on-click="() => this.onSizeChange('farthest-corner')" t-att-data-color="this.getRadialGradient('farthest-corner')" t-attf-class="btn btn-light p-0 {{ this.state.size === 'farthest-corner' ? `active`: ''}}" title="Extend to the farthest corner">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="35" height="35" viewBox="0 0 20 20" fill="none">
+                                <clipPath id="gradient-farthest-corner-clip">
+                                    <rect x="2" y="2" width="16" height="16"/>
+                                </clipPath>
+                                <g clip-path="url(#gradient-farthest-corner-clip)">
+                                    <circle cx="4" cy="6" r="18" fill="#333"/>
+                                    <circle cx="4" cy="6" r="13.5" fill="#666"/>
+                                    <circle cx="4" cy="6" r="9" fill="#999"/>
+                                    <circle cx="4" cy="6" r="4.5" fill="#CCC"/>
+                                </g>
+                                <rect x="2" y="2" width="16" height="16" stroke="#999"/>
+                            </svg>
                         </button>
                     </div>
                 </div>

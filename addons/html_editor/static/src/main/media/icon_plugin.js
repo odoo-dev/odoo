@@ -50,6 +50,7 @@ export class IconPlugin extends Plugin {
             },
             {
                 id: "replaceIcon",
+                isAvailableOffline: false,
                 description: _t("Replace icon"),
                 run: this.openIconDialog.bind(this),
             },

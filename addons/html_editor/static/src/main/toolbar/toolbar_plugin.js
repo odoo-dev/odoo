@@ -46,6 +46,7 @@ import { removeStyle } from "@html_editor/utils/dom";
  * @property {(selection: EditorSelection, nodes: Node[]) => boolean} [isActive]
  * @property {(selection: EditorSelection, nodes: Node[]) => boolean} [isDisabled]
  * @property {boolean} [opensUi] The button opens some UI (dialog, popover...) that takes the focus
+ * @property {boolean} [isAvailableOffline] * - `false` disables the button offline (default: available)
  *
  * @typedef {Object} ToolbarComponentItem
  * Adds a custom component to the toolbar.
@@ -555,7 +556,15 @@ export class ToolbarPlugin extends Plugin {
                         ...(button.Component
                             ? pick(button, "Component", "props")
                             : {
-                                  ...pick(button, "run", "icon", "iconClass", "text", "opensUi"),
+                                  ...pick(
+                                      button,
+                                      "run",
+                                      "icon",
+                                      "iconClass",
+                                      "text",
+                                      "opensUi",
+                                      "isAvailableOffline"
+                                  ),
                                   isActive: !!button.isActive?.(selection, targetedNodes),
                               }),
                     })),

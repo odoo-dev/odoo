@@ -10,6 +10,7 @@ export class SignaturePlugin extends Plugin {
         user_commands: [
             {
                 id: "insertSignature",
+                isAvailableOffline: false,
                 title: _t("Signature"),
                 description: _t("Insert your handwritten signature"),
                 icon: "o_signature_icon",

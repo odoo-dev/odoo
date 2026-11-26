@@ -29,6 +29,7 @@ export class DynamicFieldPlugin extends Plugin {
         user_commands: [
             {
                 id: "insertField",
+                isAvailableOffline: false,
                 title: _t("Field"),
                 description: _t("Insert a field"),
                 icon: "database",
@@ -37,6 +38,7 @@ export class DynamicFieldPlugin extends Plugin {
             },
             {
                 id: "editDynamicField",
+                isAvailableOffline: false,
                 title: _t("Edit field"),
                 description: _t("Change the placeholder or the expression for an existing field"),
                 icon: "edit",

@@ -1,7 +1,7 @@
 <templates xml:space="preserve">
     <t t-name="html_editor.TableMenu">
         <Dropdown menuClass="'m-0'" position="this.props.type === 'column' ? 'bottom' : 'right'" state="this.props.dropdownState" bottomSheet="false">
-            <button
+            <button data-available-offline=""
                 type="button"
                 t-ref="this.menuRef"
                 t-att-data-type="this.props.type"

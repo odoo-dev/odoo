@@ -13,6 +13,7 @@ export class EmbeddedWhiteboardPlugin extends Plugin {
         user_commands: [
             {
                 id: "embedWhiteboard",
+                isAvailableOffline: false,
                 title: _t("Embed whiteboard"),
                 description: _t("Embed a whiteboard or a diagram"),
                 iconClass: "o_embed_whiteboard_icon",
