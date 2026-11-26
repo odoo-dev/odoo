@@ -291,7 +291,7 @@ class MailMail(models.Model):
                         'failure_type': failure_type,
                         'failure_reason': failure_reason,
                     })
-                    messages = notifications.mapped('mail_message_id').filtered(lambda m: m._is_thread_message())
+                    messages = notifications.mapped('mail_message_id').sudo().filtered(lambda m: m._is_thread_message())
                     # TDE TODO: could be great to notify message-based, not notifications-based, to lessen number of notifs
                     messages._notify_message_notification_update()  # notify user that we have a failure
         if not failure_type or failure_type in ['mail_email_invalid', 'mail_email_missing']:  # if we have another error, we want to keep the mail.
@@ -461,7 +461,7 @@ class MailMail(models.Model):
                     'partner_id': False,
                 })
         # specific behavior to customize the send email for notified partners
-        for partner in self.recipient_ids:
+        for partner in self.sudo().recipient_ids:
             # check partner email content
             email_to_normalized = tools.mail.email_normalize_all(partner.email)
             email_to = [
@@ -641,14 +641,16 @@ class MailMail(models.Model):
         for mail in self.sorted(lambda k: (k.create_date, k.id)):
             if mail_server.owner_limit_count >= MAX_SEND:
                 to_delay |= mail
-            elif mail_server.owner_limit_count + (len(mail.recipient_ids) or 1) > MAX_SEND:
+                continue
+            # Record rules can hide cross-company recipients from the user sending the mail.
+            recipient_ids = mail.sudo().recipient_ids
+            if mail_server.owner_limit_count + (len(recipient_ids) or 1) > MAX_SEND:
                 # Because we split for each recipient, if we want to
                 # respect the limit we have to create new mails
                 # (the first one keep the email_to and the email_cc
                 # so it might send 2 emails instead of 1,
                 # see `_prepare_outgoing_list`)
                 to_keep = MAX_SEND - mail_server.owner_limit_count
-                recipient_ids = mail.recipient_ids
                 new_mail = mail.with_user(mail.create_uid).sudo().copy({
                     'headers': mail.headers,
                     'mail_message_id': mail.mail_message_id.id,
@@ -665,16 +667,17 @@ class MailMail(models.Model):
                 to_delay |= mail
             else:
                 to_send |= mail
-                mail_server.owner_limit_count += len(mail.recipient_ids) or 1
+                mail_server.owner_limit_count += len(recipient_ids) or 1
 
         # Delay if necessary
         if to_delay:
             owner_limit_count = mail_server.owner_limit_count
             for mail in to_delay:
+                recipient_count = len(mail.sudo().recipient_ids) or 1
                 if owner_limit_count < MAX_SEND:
-                    owner_limit_count += len(mail.recipient_ids) or 1
+                    owner_limit_count += recipient_count
                 else:
-                    owner_limit_count = len(mail.recipient_ids) or 1
+                    owner_limit_count = recipient_count
                     server_limit_minute += timedelta(minutes=1)
 
                 mail.scheduled_date = server_limit_minute
@@ -727,16 +730,12 @@ class MailMail(models.Model):
                 are possible
             :return: True
         """
-        # Access is checked when splitting emails (read). Then they are throttled,
-        # sent and post-processed as sudo, as the queue does: sending should not
-        # depend on access to messages, documents or recipients (record rules
-        # would e.g. silently filter out recipients of other companies).
         for mail_server_id, alias_domain_id, smtp_from, batch_ids in self._split_by_mail_configuration():
             mail_server = self.env["ir.mail_server"].browse(mail_server_id)
 
             if mail_server and mail_server.owner_user_id:
                 # Throttle the sending that use personal mail servers
-                batch_ids = self.browse(batch_ids).sudo()._split_by_delayed_batch(mail_server).ids
+                batch_ids = self.browse(batch_ids)._split_by_delayed_batch(mail_server).ids
                 if not batch_ids:
                     continue
 
@@ -749,11 +748,11 @@ class MailMail(models.Model):
                     # exceptions, it is encapsulated into an Odoo MailDeliveryException
                     raise MailDeliveryException(_('Unable to connect to SMTP Server'), exc)
                 else:
-                    batch = self.browse(batch_ids).sudo()
+                    batch = self.browse(batch_ids)
                     batch.write({'state': 'exception', 'failure_reason': tools.exception_to_unicode(exc)})
                     batch._postprocess_sent_message(success_pids=[], success_emails=[], failure_type="mail_smtp")
             else:
-                self.browse(batch_ids).sudo()._send(
+                self.browse(batch_ids)._send(
                     auto_commit=auto_commit,
                     raise_exception=raise_exception,
                     smtp_session=smtp_session,
@@ -811,7 +810,7 @@ class MailMail(models.Model):
                 mail = self.browse(mail_id)
                 if mail.state != 'outgoing':
                     continue
-                no_recipients = (not (mail.email_to or '').strip() and not mail.recipient_ids and not (mail.email_cc or '').strip())
+                no_recipients = (not (mail.email_to or '').strip() and not mail.sudo().recipient_ids and not (mail.email_cc or '').strip())
 
                 message_id = mail.message_id
                 # Writing on the mail object may fail (e.g. lock on user) which
