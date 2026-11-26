@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <templates id="template" xml:space="preserve">
     <t t-name="point_of_sale.CategorySelector">
-        <div t-attf-class="product-list category-list p-2 gap-2 {{ this.pos.isSmallProductScreen ? 'd-flex flex-nowrap overflow-x-auto' : 'd-grid' }}" t-att-style="this.pos.isSmallProductScreen and 'width: 100vw'">
+        <div t-attf-class="product-list category-list p-2 gap-2 {{ this.pos.isSmallProductScreen ? 'd-flex flex-nowrap overflow-x-auto pb-0' : 'd-grid' }}" t-att-style="this.pos.isSmallProductScreen and 'width: 100vw'">
             <t t-foreach="this.getCategoriesAndSub()" t-as="category" t-key="category.id">
                 <button t-on-click="() => this.pos.setSelectedCategory(category.id)"
                     t-attf-class="{{ category.color ? 'o_colorlist_color o_colorlist_color_' + category.color : '' }}"

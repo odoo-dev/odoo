@@ -34,7 +34,7 @@
                         <span>Subtotal</span>
                         <span t-out="this.order.currencyDisplayPriceExcl" class="subtotal"/>
                     </div>
-                    <div t-if="this.order.prices.taxDetails.has_tax_groups" class="tax-info subentry d-flex justify-content-between w-100 fs-6 text-muted">
+                    <div t-if="this.order.prices.taxDetails.has_tax_groups" class="tax-info taxes-line subentry d-flex justify-content-between w-100 fs-6 text-muted">
                         Taxes
                         <div id="order-widget-taxes">
                             <span t-out="this.order.currencyAmountTaxes" class="tax"/>

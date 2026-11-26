@@ -29,3 +29,26 @@
     word-break: break-word;
     padding: 4px;
 }
+
+@media (max-width: 767.98px) {
+    .product-screen .leftpane {
+        .order-summary {
+            border-bottom: 0 !important;
+
+            .taxes-line {
+                display: none !important;
+            }
+        }
+
+        .control-buttons {
+            display: none !important;
+        }
+
+        .numpad-button {
+            padding-top: calc(var(--btn-padding-y) + 3px) !important;
+            padding-bottom: calc(var(--btn-padding-y) + 3px) !important;
+            font-size: var(--btn-font-size) !important;
+            line-height: var(--btn-line-height) !important;
+        }
+    }
+}

@@ -461,6 +461,9 @@ export class ProductScreen extends Component {
     switchPane() {
         this.pos.scanning = false;
         this.pos.switchPane();
+        if (this.pos.mobile_pane === "left") {
+            this.currentOrder?.deselectOrderline();
+        }
     }
 
     getProductImage(product) {

@@ -505,6 +505,14 @@
   min-height: 120px;
   border-radius: 6px;
   margin-bottom: 0 !important;
+
+  @media (max-width: 575.98px) {
+    min-height: 102px;
+
+    .o_fp_table_number {
+      font-size: 1.25rem !important;
+    }
+  }
 }
 
 .o_fp_table_number {
