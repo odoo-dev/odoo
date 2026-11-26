@@ -2,6 +2,7 @@
 <odoo>
 <template id="report_purchaseorder_document">
     <t t-set="address">
+        <strong name="vendor_address_title">From</strong>
         <div t-field="o.partner_id"
              t-options='{"widget": "contact", "fields": ["address", "name", "phone", "vat"], "no_marker": True, "phone_icons": True}'/>
     </t>
@@ -24,6 +25,8 @@
         <t t-set="o" t-value="o.with_context(lang=o.partner_id.lang)"/>
         <div class="page">
             <div class="oe_structure"/>
+            <t t-set="lines_to_report" t-value="o.order_line.filtered(lambda l: l.display_type or l.product_qty != 0)"/>
+            <t t-set="display_discount" t-value="any(l.discount for l in lines_to_report if not l.display_type)"/>
             <div id="informations" class="row mb-4 mt-4">
                 <div t-if="o.user_id" class="col">
                     <strong>Buyer</strong>
@@ -42,7 +45,7 @@
                     <p t-field="o.date_order" t-options="{'date_only': 'true'}" class="m-0"/>
                 </div>
                 <div t-if="o.date_planned" class="col-2 bm-2">
-                    <strong>Expected Arrival:</strong>
+                    <strong>Earliest Arrival Date:</strong>
                     <p t-field="o.date_planned" t-options="{'date_only': 'true'}" class="m-0"/>
                 </div>
                 <div t-if="o.incoterm_id" class="col-2 bm-2">
@@ -61,7 +64,7 @@
                         <th name="th_description" class="text-start"><strong>Description</strong></th>
                         <th name="th_quantity" class="text-end"><strong>Qty</strong></th>
                         <th name="th_price_unit" class="text-end"><strong>Unit Price</strong></th>
-                        <th name="th_discount" class="text-end"><strong>Disc.</strong></th>
+                        <th t-if="display_discount" name="th_discount" class="text-end"><strong>Disc.</strong></th>
                         <th name="th_taxes" class="text-end"><strong>Taxes</strong></th>
                         <th name="th_subtotal" class="text-end">
                             <strong>Amount</strong>
@@ -69,7 +72,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <t t-foreach="o.order_line.filtered(lambda l: l.display_type or l.product_qty != 0)" t-as="line">
+                    <t t-foreach="lines_to_report" t-as="line">
                         <tr t-att-class="'fw-bolder o_line_section' if line.display_type == 'line_section' else 'fw-bold o_line_subsection' if line.display_type == 'line_subsection' else 'fst-italic o_line_note' if line.display_type == 'line_note' else ''">
                             <t t-if="not line.display_type">
                                 <td id="product" class="text-start">
@@ -86,8 +89,8 @@
                                 <td class="text-end">
                                     <span t-field="line.price_unit"/>
                                 </td>
-                                <td class="text-end">
-                                    <span class="text-align-bottom"><span t-field="line.discount"/>%</span>
+                                <td t-if="display_discount" name="td_discount" class="text-end">
+                                    <span t-if="line.discount" class="text-align-bottom"><span t-field="line.discount"/>%</span>
                                 </td>
                                 <td class="text-end">
                                     <span t-out="', '.join(tax.tax_label for tax in line.tax_ids if tax.tax_label)"/>
@@ -98,7 +101,7 @@
                                 </td>
                             </t>
                             <t t-if="line.display_type in ('line_section', 'line_subsection')">
-                                <td colspan="5" id="section">
+                                <td t-att-colspan="5 if display_discount else 4" id="section">
                                     <span t-field="line.name"/>
                                 </td>
                                 <td class="text-end">
