@@ -321,6 +321,15 @@
         </field>
     </record>
 
+    <!-- New activity, not linked to any record -->
+    <record id="mail_activity_schedule_action_new" model="ir.actions.act_window">
+        <field name="name">Schedule Activity</field>
+        <field name="res_model">mail.activity.schedule</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{'active_model': False, 'active_id': False, 'active_ids': False, 'dialog_size': 'medium'}</field>
+    </record>
+
     <record id="mail_activity_view_tree_without_record_access" model="ir.ui.view">
         <field name="name">mail.activity.view.list.without.record.access</field>
         <field name="model">mail.activity</field>
@@ -333,6 +342,7 @@
                 <attribute name="edit">0</attribute>
                 <attribute name="duplicate">0</attribute>
                 <attribute name="js_class">archive_disabled_activity_list</attribute>
+                <attribute name="on_create">mail.mail_activity_schedule_action_new</attribute>
             </xpath>
         </field>
     </record>
@@ -348,6 +358,7 @@
                 <attribute name="action">action_open_document</attribute>
                 <attribute name="type">object</attribute>
                 <attribute name="js_class">archive_disabled_activity_list</attribute>
+                <attribute name="on_create">mail.mail_activity_schedule_action_new</attribute>
                 <attribute name="multi_edit">1</attribute>
             </xpath>
             <xpath expr="//list//field[@name='activity_type_id']" position="attributes">
@@ -360,7 +371,7 @@
         <field name="name">mail.activity.view.kanban.open.target</field>
         <field name="model">mail.activity</field>
         <field name="arch" type="xml">
-            <kanban string="Activity" action="action_open_document" type="object" js_class="mail_activity_my_kanban">
+            <kanban string="Activity" action="action_open_document" type="object" on_create="mail.mail_activity_schedule_action_new">
                 <templates>
                     <field name="active" invisible="1"/>
                     <field name="icon" invisible="1"/>
