@@ -565,19 +565,26 @@ class Field[T, C]:
     def prepare_setup(self) -> None:
         self._setup_done = False
 
+    def _check_attrs(self, model: BaseModel) -> None:
+        """ Check the field parameters, and warn about inconsistent ones.
+
+        This is called on the final field, once all its definitions are
+        merged, and before ``_setup()`` modifies it.
+        """
+        for key in self._extra_keys__:
+            if not model._valid_field_parameter(self, key):
+                setup_warning(
+                    self,
+                    f"unknown parameter {key!r}, if this is an actual"
+                    " parameter you may want to override the method"
+                    " _valid_field_parameter on the relevant model in order to"
+                    " allow it"
+                )
+
     def setup(self, model: BaseModel) -> None:
         """ Perform the complete setup of a field. """
         if not self._setup_done:
-            # validate field params
-            for key in self._extra_keys__:
-                if not model._valid_field_parameter(self, key):
-                    setup_warning(
-                        self,
-                        f"unknown parameter {key!r}, if this is an actual"
-                        " parameter you may want to override the method"
-                        " _valid_field_parameter on the relevant model in order to"
-                        " allow it"
-                    )
+            self._check_attrs(model)
 
             try:
                 self._setup(model)

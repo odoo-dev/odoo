@@ -5016,20 +5016,28 @@ class TestSelectionOndeleteAdvanced(TransactionCase):
 
 @tagged('at_install', '-post_install')
 class TestFieldParametersValidation(TransactionCase):
-    def test_invalid_parameter(self):
+    def assertSetupWarning(self, regex, **attrs):
+        """ Check that setting up a model with the given attributes warns. """
         from odoo.orm.model_classes import add_to_registry  # noqa: PLC0415
 
-        class Foo(models.Model):
-            _module = None
-            _name = _description = 'test_orm.field_parameter_validation'
-
-            name = fields.Char(invalid_parameter=42)
-
-        add_to_registry(self.registry, Foo)
-        self.addCleanup(self.registry.__delitem__, Foo._name)
-
-        with self.assertWarnsRegex(UserWarning, "unknown parameter 'invalid_parameter'"):
+        Foo = type(models.Model)('Foo', (models.Model,), {
+            '__module__': __name__,
+            '_module': None,
+            '_name': 'test_orm.field_setup_warning',
+            '_description': 'test_orm.field_setup_warning',
+            **attrs,
+        })
+        if Foo._name not in self.registry:
+            self.addCleanup(self.registry.__delitem__, Foo._name)
+        with self.assertWarnsRegex(UserWarning, regex):
+            add_to_registry(self.registry, Foo)
             self.registry._setup_models__(self.env.cr, [])  # incremental setup
+
+    def test_invalid_parameter(self):
+        self.assertSetupWarning(
+            "unknown parameter 'invalid_parameter'",
+            name=fields.Char(invalid_parameter=42),
+        )
 
 
 def select(model, *fnames):
