@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_move_form_l10n_kr_edi" model="ir.ui.view">
+        <field name="name">account.move.form.l10n_kr_edi</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="l10n_kr.view_move_form_l10n_kr"/>
+        <field name="arch" type="xml">
+            <field name="l10n_kr_issuance_type" position="attributes">
+                <attribute name="readonly">l10n_kr_edi_state not in (False, 'error', 'canceled')</attribute>
+            </field>
+            <field name="l10n_kr_edocument_number" position="attributes">
+                <attribute name="invisible">country_code != 'KR' or move_type in ('entry', 'out_invoice', 'out_refund')</attribute>
+            </field>
+            <xpath expr="//header" position="inside">
+                <button name="action_l10n_kr_edi_refresh_state"
+                        type="object"
+                        string="Refresh e-Issuance Status"
+                        groups="account.group_account_invoice"
+                        invisible="l10n_kr_edi_state not in ('issued', 'sent')"/>
+                <button name="action_l10n_kr_edi_cancel"
+                        type="object"
+                        string="Cancel e-Issuance"
+                        groups="account.group_account_invoice"
+                        confirm="This cancels the e-Tax Invoice on Barobill before it reaches the NTS. Do you want to continue?"
+                        invisible="l10n_kr_edi_state != 'issued' or l10n_kr_issuance_type == 'cash_receipt'"/>
+            </xpath>
+            <xpath expr="//field[@name='invoice_line_ids']/list/column[@name='product_and_description']" position="after">
+                <field name="l10n_kr_edi_supply_date"
+                       optional="hide"
+                       column_invisible="parent.country_code != 'KR' or parent.move_type not in ('out_invoice', 'out_refund')"/>
+            </xpath>
+            <xpath expr="//notebook" position="inside">
+                <page id="l10n_kr_edi_page"
+                      name="l10n_kr_edi_page"
+                      string="E-issuance"
+                      invisible="country_code != 'KR' or move_type not in ('out_invoice', 'out_refund')">
+                    <group>
+                        <group>
+                            <field name="l10n_kr_edi_state" invisible="not l10n_kr_edi_state"/>
+                            <field name="l10n_kr_edi_nts_send_date" invisible="not l10n_kr_edi_nts_send_date"/>
+                            <field name="l10n_kr_edocument_number" readonly="l10n_kr_edi_state not in (False, 'error', 'canceled')"/>
+                            <field name="l10n_kr_edi_origin_move_id" invisible="move_type != 'out_invoice' or not l10n_kr_edi_origin_move_id"/>
+                            <field name="l10n_kr_edi_amendment_code"
+                                   readonly="1"
+                                   invisible="(move_type != 'out_refund' and not debit_origin_id) or not l10n_kr_edi_origin_move_id or l10n_kr_issuance_type == 'cash_receipt'"/>
+                            <field name="l10n_kr_edi_cash_receipt_cancel_code"
+                                   readonly="1"
+                                   invisible="move_type != 'out_refund' or not l10n_kr_edi_origin_move_id or l10n_kr_issuance_type != 'cash_receipt'"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_invoice_list_l10n_kr_edi" model="ir.ui.view">
+        <field name="name">account.move.list.l10n_kr_edi</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_invoice_tree"/>
+        <field name="arch" type="xml">
+            <field name="status_in_payment" position="before">
+                <field name="l10n_kr_edi_nts_send_date" optional="hide"/>
+                <field name="l10n_kr_edi_state" optional="show" widget="badge"
+                       decoration-info="l10n_kr_edi_state == 'issued'"
+                       decoration-warning="l10n_kr_edi_state == 'sent'"
+                       decoration-success="l10n_kr_edi_state == 'success'"
+                       decoration-danger="l10n_kr_edi_state == 'error'"
+                       decoration-muted="l10n_kr_edi_state == 'canceled'"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="view_account_invoice_filter_l10n_kr_edi" model="ir.ui.view">
+        <field name="name">account.invoice.select.l10n_kr_edi</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_account_invoice_filter"/>
+        <field name="arch" type="xml">
+            <field name="journal_id" position="after">
+                <field name="l10n_kr_edi_state"/>
+            </field>
+            <filter name="due_date" position="after">
+                <filter name="l10n_kr_edi_nts_send_date" string="NTS Submission Date" date="l10n_kr_edi_nts_send_date"/>
+            </filter>
+            <filter name="status" position="after">
+                <filter name="l10n_kr_edi_state" string="e-Issuance Status" context="{'group_by': 'l10n_kr_edi_state'}"/>
+            </filter>
+        </field>
+    </record>
+</odoo>

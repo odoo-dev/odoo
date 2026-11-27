@@ -1,0 +1,4 @@
+id,name,model_id,group_id/id,operation,domain
+access_l10n_kr_edi_document_readonly,l10n_kr_edi.document.readonly,l10n_kr_edi.document,account.group_account_readonly,r,
+access_l10n_kr_edi_document_invoice,l10n_kr_edi.document.invoice,l10n_kr_edi.document,account.group_account_invoice,crud,
+l10n_kr_edi_document_company_rule,l10n_kr_edi.document.company,l10n_kr_edi.document,,crud,"[('company_id', 'in', company_ids)]"

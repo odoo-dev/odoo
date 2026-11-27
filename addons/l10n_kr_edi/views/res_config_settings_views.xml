@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.l10n_kr_edi</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="l10n_kr.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <field name="module_l10n_kr_edi" position="after">
+                <div class="content-group">
+                    <div class="mt8">
+                        <field name="l10n_kr_edi_staging_mode" class="oe_inline o_light_label"/>
+                        <label for="l10n_kr_edi_staging_mode" class="oe_inline o_light_label ps-1 me-0"/>
+                        <div class="oi" data-icon="help" title="Send documents to the Barobill test environment instead of the National Tax Service. Enabled automatically when the database is duplicated."/>
+                    </div>
+                    <div class="row mt8">
+                        <label for="l10n_kr_edi_barobill_id" class="col-lg-4 o_light_label"/>
+                        <field name="l10n_kr_edi_barobill_id" class="w-50"/>
+                        <div class="oi" data-icon="help" title="The ID you log in to Barobill with. It is shown as the person in charge on the issued documents."/>
+                    </div>
+                    <div class="row mt8">
+                        <label for="l10n_kr_edi_certificate_key" class="col-lg-4 o_light_label"/>
+                        <field name="l10n_kr_edi_certificate_key" class="w-50" password="True"/>
+                        <div class="oi" data-icon="help" title="The integration certificate key (CERTKEY) issued by Barobill. It allows Odoo to issue documents with your Barobill account."/>
+                    </div>
+                </div>
+            </field>
+        </field>
+    </record>
+</odoo>

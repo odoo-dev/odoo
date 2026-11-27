@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_account_move_reversal_l10n_kr_edi" model="ir.ui.view">
+        <field name="name">account.move.reversal.form.l10n_kr_edi</field>
+        <field name="model">account.move.reversal</field>
+        <field name="inherit_id" ref="account.view_account_move_reversal"/>
+        <field name="arch" type="xml">
+            <group position="before">
+                <div class="alert alert-warning" role="alert" invisible="not l10n_kr_edi_is_mixed">
+                    The selected invoices are mixed: some were issued to the NTS and some were not.
+                    The amendment reason required for NTS submission can't be set.
+                </div>
+            </group>
+            <field name="reason" position="attributes">
+                <attribute name="invisible">move_type == 'entry' or l10n_kr_edi_is_amendment</attribute>
+            </field>
+            <field name="reason" position="after">
+                <field name="l10n_kr_edi_is_amendment" invisible="1"/>
+                <field name="l10n_kr_edi_amendment_code"
+                       invisible="not l10n_kr_edi_is_amendment or l10n_kr_edi_document_type != 'tax_invoice'"
+                       required="l10n_kr_edi_is_amendment and l10n_kr_edi_document_type == 'tax_invoice'"/>
+                <field name="l10n_kr_edi_cash_receipt_cancel_code"
+                       invisible="not l10n_kr_edi_is_amendment or l10n_kr_edi_document_type != 'cash_receipt'"
+                       required="l10n_kr_edi_is_amendment and l10n_kr_edi_document_type == 'cash_receipt'"/>
+            </field>
+            <button name="refund_moves" position="attributes">
+                <attribute name="invisible">l10n_kr_edi_is_replacement</attribute>
+            </button>
+            <button name="modify_moves" position="attributes">
+                <attribute name="invisible">move_type == 'entry' or l10n_kr_edi_is_amendment</attribute>
+            </button>
+            <button name="refund_moves" position="after">
+                <button string="Reverse and Create Invoice" name="modify_moves" type="object" class="btn-primary" data-hotkey="q" invisible="not l10n_kr_edi_is_replacement"/>
+            </button>
+        </field>
+    </record>
+</odoo>
