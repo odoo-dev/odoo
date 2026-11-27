@@ -95,6 +95,13 @@ export class WebsiteBackgroundVideoPlugin extends Plugin {
                 visibleTabs: ["VIDEO_BACKGROUND"],
                 allowedMediaTypes: [VIDEO_TYPE],
                 multiSelect: false,
+                // played as a background
+                videoOptions: {
+                    autoplay: true,
+                    loop: true,
+                    hideControls: true,
+                    hideFullscreen: true,
+                },
                 save: (media) => {
                     const playerEl = media.querySelector("iframe, video");
                     resolve({

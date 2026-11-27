@@ -1,4 +1,13 @@
-import { animationFrame, dblclick, expect, queryAll, test, waitFor, waitForNone } from "@odoo/hoot";
+import {
+    animationFrame,
+    dblclick,
+    expect,
+    queryAll,
+    queryOne,
+    test,
+    waitFor,
+    waitForNone,
+} from "@odoo/hoot";
 import { mailModels } from "@mail/../tests/mail_test_helpers";
 import { contains, defineModels, onRpc, serverState } from "@web/../tests/web_test_helpers";
 import { dummyBase64Img, getDragHelper } from "@html_builder/../tests/helpers";
@@ -156,11 +165,17 @@ test("background video: choose a video of the media manager", async () => {
     expect(".modal button:contains(Import image link)").toHaveCount(0);
     expect(".modal button:contains(Upload)").toHaveCount(0);
 
+    // a background video plays by itself, without controls: no options to set
     await contains(`${videoCard("YouTube - dQw4w9WgXcQ")} .o_kanban_image`).click();
-    await contains(
-        ".modal .o_video_options_dialog .modal-footer .btn-primary:contains(Insert)"
-    ).click();
     await waitForNone(".modal");
     expect(":iframe .s_cover").toHaveClass("o_background_video");
-    expect(":iframe .s_cover").toHaveAttribute("data-bg-video-src", /youtube.*dQw4w9WgXcQ/);
+    const src = new URL(queryOne(":iframe .s_cover").dataset.bgVideoSrc);
+    expect(src.pathname).toBe("/embed/dQw4w9WgXcQ");
+    expect(Object.fromEntries(src.searchParams)).toMatchObject({
+        autoplay: "1",
+        mute: "1",
+        loop: "1",
+        controls: "0",
+        fs: "0",
+    });
 });

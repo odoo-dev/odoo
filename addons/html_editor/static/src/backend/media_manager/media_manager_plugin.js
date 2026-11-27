@@ -28,8 +28,9 @@ const MEDIA_TYPE_DOMAINS = {
 };
 
 /**
- * @typedef {((params: { url: string }) => Promise<HTMLElement|undefined>)[]} media_manager_video_element_providers
- * Build the element of a video chosen in the media manager (see VideoPlugin).
+ * @typedef {((params: { url: string, options?: Object }) => Promise<HTMLElement|undefined>)[]} media_manager_video_element_providers
+ * Build the element of a video chosen in the media manager (see VideoPlugin),
+ * with the given options if any (see `videoOptions` of `openMediaManager`).
  * The videos are only listed when there is a provider.
  */
 
@@ -91,6 +92,9 @@ export class MediaManagerPlugin extends MediaPlugin {
      *      builder option), or all the available ones.
      * @param {boolean} [params.multiSelect] whether several media can be
      *      chosen. By default, only when no media is replaced.
+     * @param {Object} [params.videoOptions] the options of the chosen videos
+     *      (autoplay, loop, hideControls, ...), not set by the user then (e.g.
+     *      a background video).
      * @param {Function} [params.save] called with the chosen element (their
      *      list with `multiSelect`), the chosen attachments, `undefined` (the
      *      tab of the media dialog) and the replaced media, instead of
@@ -134,6 +138,7 @@ export class MediaManagerPlugin extends MediaPlugin {
                     if (VIDEO_URL_MIMETYPES.includes(record.mimetype)) {
                         const videoEl = await this.createVideoElement(videoElementProviders, {
                             url: record.url,
+                            options: params.videoOptions,
                         });
                         if (videoEl) {
                             elements.push(videoEl);
@@ -162,7 +167,7 @@ export class MediaManagerPlugin extends MediaPlugin {
 
     /**
      * @param {media_manager_video_element_providers} providers
-     * @param {{ url: string }} params
+     * @param {{ url: string, options?: Object }} params
      * @returns {Promise<HTMLElement|undefined>}
      */
     async createVideoElement(providers, params) {

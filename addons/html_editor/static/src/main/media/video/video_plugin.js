@@ -77,16 +77,23 @@ export class VideoPlugin extends Plugin {
 
     /**
      * Build the element of a platform's video chosen in the media manager,
-     * once the user has set its options.
+     * once the user has set its options, unless they are given.
      *
      * @param {Object} params
      * @param {string} params.url
+     * @param {Object} [params.options] the options of the video: the user
+     *      does not set them
      * @returns {Promise<HTMLElement|undefined>} undefined if the url is not the
      *      video of a supported platform, or if the user discarded the options
      */
-    async createMediaManagerVideoElement({ url }) {
-        if (!matchPlatformUrl(url)) {
+    async createMediaManagerVideoElement({ url, options }) {
+        const match = matchPlatformUrl(url);
+        if (!match) {
             return;
+        }
+        if (options) {
+            const { provider, urlMatch } = match;
+            return this.createVideoElement(provider.getVideoUrlData(urlMatch, options));
         }
         const videoData = await this.openVideoOptionsDialog({ url });
         return videoData && this.createVideoElement(videoData);
