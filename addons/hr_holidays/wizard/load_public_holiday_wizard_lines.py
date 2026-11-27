@@ -2,6 +2,12 @@
 
 from odoo import api, fields, models
 
+WORK_ENTRY_TYPE_BY_COUNTRY = {
+    'BE': 'hr_work_entry.l10n_be_work_entry_type_bank_holiday',
+    'CH': 'hr_work_entry.l10n_ch_work_entry_type_bank_holiday',
+    'HK': 'hr_work_entry.l10n_hk_work_entry_type_public_holiday',
+}
+
 
 class ResourceCalendarPublicHolidayWizardLine(models.TransientModel):
     _name = 'load.public.holiday.wizard.line'
@@ -15,12 +21,32 @@ class ResourceCalendarPublicHolidayWizardLine(models.TransientModel):
     work_entry_type_id = fields.Many2one('hr.work.entry.type', string="Work Entry Type",
         compute='_compute_work_entry_type', readonly=False, store=True,
         domain="[('id', 'in', allowed_work_entry_type_ids)]")
-    allowed_work_entry_type_ids = fields.Many2many('hr.work.entry.type', compute='_compute_work_entry_type', store=True)
+    allowed_work_entry_type_ids = fields.Many2many('hr.work.entry.type', compute='_compute_allowed_work_entry_type_ids', store=True)
 
     @api.depends('company_id')
+    def _compute_allowed_work_entry_type_ids(self):
+        # Kept separate from _compute_work_entry_type: when work_entry_type_id is given at
+        # create, all fields of its compute method are protected and would stay empty.
+        work_entry_types = self.env['hr.work.entry.type'].search([
+            '|',
+            ('country_id', 'in', self.company_id.country_id.ids),
+            ('country_id', '=', False),
+        ])
+        for line in self:
+            line.allowed_work_entry_type_ids = work_entry_types.filtered(
+                lambda work_entry_type: work_entry_type.country_id == line.company_id.country_id
+            )
+
+    @api.depends('allowed_work_entry_type_ids')
     def _compute_work_entry_type(self):
         for line in self:
-            domain = [('country_id', '=', line.company_id.country_id.id)]
-            line.allowed_work_entry_type_ids = self.env['hr.work.entry.type'].search(domain)
-            if line.work_entry_type_id not in line.allowed_work_entry_type_ids:
-                line.work_entry_type_id = False
+            allowed_work_entry_type = line.allowed_work_entry_type_ids
+            default_work_entry_type = False
+            if xmlid := WORK_ENTRY_TYPE_BY_COUNTRY.get(line.company_id.country_id.code):
+                default_work_entry_type = self.env.ref(xmlid, raise_if_not_found=False)
+
+            line.work_entry_type_id = (
+                default_work_entry_type
+                if default_work_entry_type and default_work_entry_type in allowed_work_entry_type
+                else False
+            )

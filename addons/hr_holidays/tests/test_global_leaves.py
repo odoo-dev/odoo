@@ -4,6 +4,7 @@
 from datetime import date, datetime, timedelta
 from odoo.addons.hr_holidays.tests.common import TestHrHolidaysCommon
 from odoo.addons.mail.tests.common import mail_new_test_user
+from odoo import Command
 from odoo.exceptions import ValidationError
 from freezegun import freeze_time
 
@@ -228,6 +229,15 @@ class TestGlobalLeaves(TestHrHolidaysCommon):
         )
         wizard = wizard_model.create({'year': 2026})
 
+        wizard.line_ids.work_entry_type_id = self.env['hr.work.entry.type'].create({
+            'name': 'Paid Time Off',
+            'code': 'Paid Time Off',
+            'count_as': 'absence',
+            'requires_allocation': False,
+            'request_unit': 'day',
+            'unit_of_measure': 'day',
+        })
+
         expected_count = len(wizard.line_ids)
         public_holidays_domain = [
             ('company_id', '=', self.company.id),
@@ -249,6 +259,34 @@ class TestGlobalLeaves(TestHrHolidaysCommon):
 
         self.assertFalse(second_wizard.line_ids)
         self.assertIn('All public holidays for 2026 are already present', second_wizard.warning_message)
+
+    def test_public_holiday_wizard_requires_work_entry_type(self):
+        """ Public holidays without a work entry type would break the payslip computation. """
+        self.company.country_id = self.env.ref('base.in')
+        wizard = self.env['load.public.holiday.wizard'].with_context(allowed_company_ids=self.company.ids).create({'year': 2026})
+        self.assertTrue(wizard.line_ids)
+        self.assertFalse(wizard.line_ids.work_entry_type_id)
+
+        leaves_count = self.env['resource.calendar.leaves'].search_count([])
+        action = wizard.action_add_public_holidays()
+
+        self.assertEqual(action['params']['type'], 'danger')
+        self.assertEqual(self.env['resource.calendar.leaves'].search_count([]), leaves_count)
+
+        # The web client saves the lines with an empty work entry type, which must still be selectable afterwards
+        saved_wizard = self.env['load.public.holiday.wizard'].create({
+            'year': 2026,
+            'line_ids': [Command.create({
+                'name': 'Holi',
+                'start_date': date(2026, 3, 4),
+                'company_id': self.company.id,
+                'work_entry_type_id': False,
+            })],
+        })
+        self.assertEqual(
+            saved_wizard.line_ids.allowed_work_entry_type_ids,
+            self.env['hr.work.entry.type'].search([('country_id', '=', self.company.country_id.id)]),
+        )
 
     @freeze_time('2024-12-01')
     def test_global_leave_keeps_employee_resource_leave(self):
