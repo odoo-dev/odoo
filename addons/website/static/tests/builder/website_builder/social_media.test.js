@@ -271,6 +271,17 @@ test("Edit share icon", async () => {
     expect(".o-we-linkpopover").toHaveCount(0);
 });
 
+test("replace a social media icon by an icon", async () => {
+    await setupSocialMediaSnippet(
+        { social_facebook: "https://facebook.com/odoo" },
+        { loadIframeBundles: true }
+    );
+    await contains(":iframe .s_social_media a i").dblclick();
+    await contains(".o_select_media_dialog .font-icons-icons span[data-icon='favorite']").click();
+    expect(".o_select_media_dialog").toHaveCount(0);
+    expect(":iframe .s_social_media a i[data-icon='favorite']").toHaveCount(1);
+});
+
 test("Social Media snippet options are correct", async () => {
     await testSocialSnippetOptions("s_social_media", "Social Media", "github");
 });

@@ -244,7 +244,6 @@ export class ToggleBgImageAction extends BuilderAction {
 
     getMediaDialogProps(context) {
         return {
-            onlyImages: true,
             node: context.editingElement,
             save: async (imageEl) => {
                 context.imageEl = imageEl;
@@ -281,7 +280,6 @@ export class ReplaceBgImageAction extends BuilderAction {
 
     getMediaDialogProps(context) {
         return {
-            onlyImages: true,
             node: context.editingElement,
             save: async (imageEl) => {
                 context.imageEl = imageEl;

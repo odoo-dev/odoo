@@ -133,7 +133,6 @@ export class MediaWebsitePlugin extends Plugin {
         await new Promise((resolve) => {
             const onClose = this.dependencies.media.openMediaDialog(
                 {
-                    activeTab: "VIDEOS",
                     allowedMediaTypes: [VIDEO_TYPE],
                     multiSelect: false,
                     save: async (selectedVideoEl) => {

@@ -26,7 +26,6 @@ export class ImageSnippetOptionPlugin extends Plugin {
 
     getMediaDialogProps(snippetEl, dragState) {
         return {
-            onlyImages: true,
             save: async (...args) => {
                 const selectedImageEl = args[0];
                 const elementToReplace = args[3] || snippetEl;

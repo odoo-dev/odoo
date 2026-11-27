@@ -879,6 +879,20 @@ test("sidebar should open even when translated elements fetch is slow", async ()
     expect(".o_builder_sidebar_open").toHaveCount(1);
 });
 
+test("a document is translated with another document", async () => {
+    const { waitSidebarUpdated } = await setupSidebarBuilderForTranslation({
+        websiteContent: getTranslateEditable({
+            inWrap: `<span class="o_file_box"><a href="#" title="document" data-mimetype="application/pdf">document</a></span>`,
+        }),
+    });
+    await contains(".modal .btn:contains(Ok, never show me this again)").click();
+    await contains(":iframe .o_file_box").click();
+    await waitSidebarUpdated();
+    await contains("[data-action-id='translateMediaSrc']").click();
+    expect(".o_select_media_dialog .nav-link").toHaveCount(1);
+    expect(".o_select_media_dialog .nav-link").toHaveText("Documents");
+});
+
 describe("translate images", () => {
     const baseImgHTML = `
         <div>

@@ -147,7 +147,6 @@ export class SetCoverBackgroundAction extends BaseCoverPropertiesAction {
 
     getMediaDialogProps({ editingElement }) {
         return {
-            onlyImages: true,
             save: (imageEl) => {
                 const imageSrc = imageEl.getAttribute("src");
                 const b64ToSave = imageEl.getAttribute("src").startsWith("data:");

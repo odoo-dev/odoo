@@ -63,6 +63,8 @@ export class CustomIconAction extends BuilderAction {
                 ? getActiveCustomIcons(editingElement)
                 : getInactiveCustomIcons(editingElement);
             const mediaDialogParams = {
+                // TODO: the media manager has no icons yet: use the old media dialog until it does.
+                useOldMediaDialog: true,
                 visibleTabs: ["ICONS"],
                 media,
                 save: (icon) => {

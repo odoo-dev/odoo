@@ -77,7 +77,6 @@ export class ReplaceAgentAvatarAction extends ShowChatBoxAction {
         // so the element may not exist when the builder tries to target it.
         // That’s why we didn’t use the standard replaceMedia action.
         await this.dependencies.media.openMediaDialog({
-            onlyImages: true,
             save: (newMediaEl) => {
                 const src = newMediaEl.getAttribute("src");
                 if (src) {

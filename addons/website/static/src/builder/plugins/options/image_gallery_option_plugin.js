@@ -512,8 +512,6 @@ export class AddImageAction extends BuilderAction {
     }
     async apply({ editingElement }) {
         await this.dependencies.media.openMediaDialog({
-            onlyImages: true,
-            multiImages: true,
             save: async (images) => {
                 const { images: processedImages } =
                     await this.dependencies.imageGalleryOption.processImages(

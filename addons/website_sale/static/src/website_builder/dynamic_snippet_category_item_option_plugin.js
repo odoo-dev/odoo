@@ -24,8 +24,6 @@ export class SetCategoryImageAction extends BuilderAction {
         if (!categoryImage) return;
         await this.dependencies.media.openMediaDialog({
             node: categoryImage,
-            onlyImages: true,
-            noDocuments: true,
             save: async (selectedImageEl, selectedMedia) => {
                 rpc('/snippets/category/set_image', {
                     category_id: parseInt(categoryId),

@@ -17,6 +17,8 @@ export class IconSnippetOptionPlugin extends Plugin {
         }
         let iconInserted = false;
         await this.dependencies.media.openMediaDialog({
+            // TODO: the media manager has no icons yet: use the old media dialog until it does.
+            useOldMediaDialog: true,
             activeTab: "ICONS",
             save: async (selectedIconEl) => {
                 iconInserted = true;

@@ -41,14 +41,6 @@ export class ReferencesCarouselOptionPlugin extends Plugin {
         // of the strip, `o_editable_media` keeps the logos replaceable.
         content_not_editable_selectors: [".s_references_carousel_marquee_wrapper"],
         auto_unfold_container_providers: { selector: `${itemSelector} img`, target: itemSelector },
-        // A logo is an image: "Logo Size" does not apply to icons, nor does a
-        // strip of logos to videos or documents.
-        replace_media_dialog_params_processors: (params) => {
-            if (params.node?.nodeType === Node.ELEMENT_NODE && params.node.closest(itemSelector)) {
-                params.visibleTabs = ["IMAGES"];
-            }
-            return params;
-        },
         remove_disabled_reason_providers: (el) => {
             if (el.matches(`${itemSelector}:only-child`)) {
                 return _t("You cannot remove the last item.");

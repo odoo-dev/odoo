@@ -74,20 +74,25 @@ export class MediaTranslationPlugin extends Plugin {
 
     getMediaDialogProps({ mediaEl }) {
         const mediaType = this.getMediaType(mediaEl);
+        if (mediaType === "documents") {
+            return {
+                // TODO: the media manager has no documents yet: use the old
+                // media dialog until it does.
+                useOldMediaDialog: true,
+                noImages: true,
+                visibleTabs: ["DOCUMENTS"],
+                node: mediaEl,
+                save: null,
+            };
+        }
         return {
-            onlyImages: mediaType === "images",
-            noImages: mediaType !== "images",
-            visibleTabs: [mediaType.toUpperCase()],
             node: mediaEl,
-            save:
-                mediaType === "documents"
-                    ? null
-                    : (newMediaEl) => {
-                          this.savingMap[mediaType](mediaEl, newMediaEl);
-                          mediaEl.classList.add("oe_translated");
-                          this.trigger("on_media_replaced_handlers", { newMediaEl: mediaEl });
-                          this.dependencies.history.commit(); // Needed for the dblclick
-                      },
+            save: (newMediaEl) => {
+                this.savingMap[mediaType](mediaEl, newMediaEl);
+                mediaEl.classList.add("oe_translated");
+                this.trigger("on_media_replaced_handlers", { newMediaEl: mediaEl });
+                this.dependencies.history.commit(); // Needed for the dblclick
+            },
         };
     }
 

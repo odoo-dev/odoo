@@ -25,6 +25,8 @@ export class DefineCustomIconAction extends BuilderAction {
         let selectedIcon;
         await new Promise((resolve) => {
             const onClose = this.dependencies.media.openMediaDialog({
+                // TODO: the media manager has no icons yet: use the old media dialog until it does.
+                useOldMediaDialog: true,
                 visibleTabs: ["ICONS"],
                 save: (icon) => {
                     selectedIcon = { className: icon.className, name: icon.dataset.icon };

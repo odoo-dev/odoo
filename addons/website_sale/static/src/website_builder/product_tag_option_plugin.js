@@ -45,9 +45,6 @@ export class ProductTagImageAction extends BuilderAction {
     async load({ editingElement: el }) {
         return new Promise((resolve) => {
             const onClose = this.dependencies.media.openMediaDialog({
-                addFieldImage: true,
-                multiImages: false,
-                visibleTabs: ["IMAGES"],
                 node: el,
                 save: async (imgEl, selectedMedia) => {
                     if (selectedMedia.length) {

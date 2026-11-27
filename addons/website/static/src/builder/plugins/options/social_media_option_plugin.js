@@ -232,6 +232,8 @@ export class SocialMediaOptionPlugin extends Plugin {
             params.node?.nodeType === Node.ELEMENT_NODE &&
             params.node.closest(".s_social_media, .s_share")
         ) {
+            // TODO: the media manager has no icons yet: use the old media dialog until it does.
+            params.useOldMediaDialog = true;
             params.visibleTabs = ["IMAGES", "ICONS"];
         }
         return params;

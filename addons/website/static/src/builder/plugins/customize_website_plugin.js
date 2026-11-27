@@ -547,7 +547,6 @@ export class ToggleBodyBgImageAction extends BuilderAction {
     }
     getMediaDialogProps({ editingElement }) {
         return {
-            onlyImages: true,
             node: editingElement,
             save: async (imageEl) => {
                 const { type: currentType, image: currentImage } = this.getCurrentConfig();

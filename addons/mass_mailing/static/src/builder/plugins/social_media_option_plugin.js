@@ -117,6 +117,8 @@ export class MassMailingSocialMediaOptionPlugin extends Plugin {
             params.node?.nodeType === Node.ELEMENT_NODE &&
             params.node.matches(".s_social_media .s_social_media_links .oi")
         ) {
+            // TODO: the media manager has no icons yet: use the old media dialog until it does.
+            params.useOldMediaDialog = true;
             params.visibleTabs = ["ICONS"];
         }
         return params;
