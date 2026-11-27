@@ -14,13 +14,6 @@ class TestAnalyticToSaleToInvoice(SaleCommon):
         # without sudo (sale/models/account_analytic_line.py _sync_so_accounts_and_partners
         # get_int). To be adapted by the team.
         'base.group_system',
-        # FIXME: cross-module regression (group ignored when its module is absent):
-        # 'hr_timesheet.group_hr_timesheet_approver' is required because writing
-        # product_id/so_line/amount on an analytic line that is another user's timesheet triggers
-        # hr_timesheet account.analytic.line._check_can_write ("not yours") without sudo.
-        # Revealed by test_changing_product_on_analytic_line_recreates_upsale_lines & co.
-        # To be adapted by the hr_timesheet team.
-        'hr_timesheet.group_hr_timesheet_approver',
     )
 
     _test_user_name = 'Test Sales & Analytic Manager'

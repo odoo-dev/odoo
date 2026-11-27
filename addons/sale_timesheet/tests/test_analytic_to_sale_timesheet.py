@@ -1,3 +1,5 @@
+from odoo.exceptions import AccessError
+
 from odoo.addons.sale_timesheet.tests.common import TestCommonSaleTimesheet
 
 
@@ -92,3 +94,20 @@ class TestAnalyticToSaleTimesheet(TestCommonSaleTimesheet):
             15,
             "The delivered quantity should be sum of timesheet and upsell AALs",
         )
+
+    def test_non_timesheet_analytic_line_write_by_other_user(self):
+        """A user without timesheet approver rights can update another user's analytic line
+        when it is not a timesheet, but cannot turn it into a timesheet."""
+        salesman = self.company_data['default_user_salesman']
+        salesman.group_ids += self.env.ref('sales_team.group_sale_salesman_all_leads') + self.env.ref('account.group_account_invoice')
+        aal = self.env['account.analytic.line'].with_context(from_services_and_material=True).create({
+            'name': 'Upsell line',
+            'unit_amount': 1,
+            'product_id': self.product_delivery_timesheet2.id,
+            'order_id': self.timesheet_and_services_sale_order.id,
+        })
+
+        aal.with_user(salesman).with_context(from_services_and_material=True).unit_amount = 2
+        self.assertEqual(self.invoice_delivered_qty_sol.qty_delivered, 12)
+        with self.assertRaises(AccessError):
+            aal.with_user(salesman).project_id = self.project_global
