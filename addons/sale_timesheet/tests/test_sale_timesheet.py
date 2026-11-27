@@ -620,6 +620,19 @@ class TestSaleTimesheet(TestCommonSaleTimesheet):
         self.assertEqual(timesheet_count2, 1, "One timesheet in project_template")
         self.assertEqual(len(task.timesheet_ids), 2, "The 2 timesheets still should be linked to task")
 
+    def test_cancel_invoice_preserves_timesheet_sale_line(self):
+        """Cancelling the draft invoice keeps previously logged hours on their original sales order line."""
+        order = self._create_order_with_timesheet_lines(count=2)
+        original_line, new_line = order.order_line
+        timesheet = self._create_timesheet(original_line, Date.today(), 2)
+        invoice = order._create_invoices()
+        original_line.task_id.sale_line_id = new_line
+        self.assertEqual(timesheet.so_line, original_line)
+        invoice.button_cancel()
+        self.assertEqual(original_line.qty_delivered, 2)
+        self.assertEqual(new_line.qty_delivered, 0)
+        self.assertEqual(timesheet.so_line, original_line)
+
     def test_change_customer_and_SOL_after_invoiced_timesheet(self):
         sale_order1 = self.env['sale.order'].create({
             'partner_id': self.partner_a.id,

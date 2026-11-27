@@ -41,6 +41,12 @@ class AccountMove(models.Model):
         for invoice in self:
             invoice.timesheet_count = mapped_data.get(invoice.id, 0)
 
+    def button_cancel(self):
+        timesheets = self.sudo().timesheet_ids
+        # Cancelling makes the hours invoiceable again. Keep their delivered sale order item.
+        with self.env.protecting([timesheets._fields['so_line']], timesheets):
+            return super().button_cancel()
+
     def action_view_timesheet(self):
         self.ensure_one()
         return {
