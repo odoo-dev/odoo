@@ -61,7 +61,7 @@ from odoo.modules.registry import Registry
 from odoo.orm.cache import log_ormcache_stats
 from odoo.release import nt_service_name
 from odoo.tools import OrderedSet, config, gc, osutil, profiler
-from odoo.tools.misc import dumpstacks, mute_logger, stripped_sys_argv
+from odoo.tools.misc import dumpstacks, mute_logger, str2bool, stripped_sys_argv
 from odoo.tools.osutil import memory_info
 
 _logger = logging.getLogger(__name__)
@@ -800,6 +800,8 @@ class PreforkServer(CommonServer):
         # working vars
         self.beat = 4
         self.socket = None
+        self.worker_sockets = []
+        self.free_slots = set()
         self.workers_http = {}
         self.workers_cron = {}
         self.workers = {}
@@ -1009,6 +1011,32 @@ class PreforkServer(CommonServer):
                     host = f'[{host}]'
                 _logger.info("HTTP service running on %s:%s", host, port)
 
+            if str2bool(os.environ.get('ODOO_HTTP_WORKER_PORTS', '0')):
+                self.bind_worker_sockets()
+
+    def bind_worker_sockets(self):
+        """ Give each HTTP worker a port of its own, ``http_port + 1 + slot``,
+        so that a load balancer picks the worker. The sockets belong to the
+        slots, and stay open in the master: a worker that restarts takes a free
+        slot back, its connections wait in the backlog meanwhile. """
+        ports = range(self.port + 1, self.port + 1 + self.population)
+        if config['gevent_workers'] and config['gevent_port'] in ports:
+            sys.exit(f"The gevent port {config['gevent_port']} is among the HTTP worker ports {ports[0]}-{ports[-1]}")
+        fds = os.environ.pop('ODOO_HTTP_WORKER_SOCKET_FDS', '')
+        self.worker_sockets = [socket.socket(fileno=int(fd)) for fd in fds.split(',') if fd]
+        for port in ports[len(self.worker_sockets):]:
+            self.worker_sockets.append(socket.create_server(
+                (self.interface, port),
+                family=socket.AF_INET6 if ':' in self.interface else socket.AF_INET,
+                backlog=8,
+                dualstack_ipv6=self.interface == '::',
+            ))
+        for sock in self.worker_sockets:
+            sock.setblocking(0)
+            sock.set_inheritable(False)
+        self.free_slots = set(range(len(self.worker_sockets)))
+        _logger.info("HTTP workers running on ports %s-%s", ports[0], ports[-1])
+
     def fork_and_reload(self):
         self.logger.info("Reloading server")
         pid = os.fork()
@@ -1018,6 +1046,10 @@ class PreforkServer(CommonServer):
             flags = fcntl.fcntl(http_socket_fileno, fcntl.F_GETFD)
             fcntl.fcntl(http_socket_fileno, fcntl.F_SETFD, flags & ~fcntl.FD_CLOEXEC)
             os.environ['ODOO_HTTP_SOCKET_FD'] = str(http_socket_fileno)
+            if self.worker_sockets:
+                for sock in self.worker_sockets:
+                    sock.set_inheritable(True)
+                os.environ['ODOO_HTTP_WORKER_SOCKET_FDS'] = ','.join(str(sock.fileno()) for sock in self.worker_sockets)
             os.environ['ODOO_READY_SIGHUP_PID'] = str(pid)
 
             if not hasattr(socket, 'SO_REUSEPORT'):
@@ -1108,6 +1140,8 @@ class PreforkServer(CommonServer):
 
         if self.socket:
             self.socket.close()
+        for sock in self.worker_sockets:
+            sock.close()
         if graceful:
             super().stop()
             self.stop_workers_gracefully()
@@ -1174,6 +1208,7 @@ class Worker:
         self.request_max = multi.limit_request
         self.request_count = 0
         self.logger = _logger.getChild(self.__class__.__name__)
+        self.sockets = [multi.socket]
 
     def setproctitle(self, title=""):
         setproctitle('odoo: %s %s %s' % (self.__class__.__name__, self.pid, title))
@@ -1197,7 +1232,7 @@ class Worker:
 
     def sleep(self):
         try:
-            select.select([self.multi.socket, self.wakeup_fd_r], [], [], self.multi.beat)
+            select.select([*self.sockets, self.wakeup_fd_r], [], [], self.multi.beat)
             # clear wakeup pipe if we were interrupted
             empty_pipe(self.wakeup_fd_r)
         except OSError as e:
@@ -1301,6 +1336,22 @@ class WorkerHTTP(Worker):
         sock_timeout = os.environ.get("ODOO_HTTP_SOCKET_TIMEOUT")
         self.sock_timeout = float(sock_timeout) if sock_timeout else 2
 
+        # the workers beyond the initial population have no port of their own
+        self.slot = min(multi.free_slots, default=None)
+        if self.slot is not None:
+            multi.free_slots.remove(self.slot)
+            self.sockets.insert(0, multi.worker_sockets[self.slot])
+
+    def close(self):
+        if self.slot is not None:
+            self.multi.free_slots.add(self.slot)
+        super().close()
+
+    def start(self):
+        super().start()
+        if self.slot is not None:
+            self.setproctitle(f"port {self.sockets[0].getsockname()[1]}")
+
     def process_request(self, client, addr):
         client.setblocking(1)
         client.settimeout(self.sock_timeout)
@@ -1314,13 +1365,14 @@ class WorkerHTTP(Worker):
         self.request_count += 1
 
     def process_work(self):
-        try:
-            client, addr = self.multi.socket.accept()
-        except (BlockingIOError, ConnectionAbortedError):
-            pass
-        else:
+        for sock in self.sockets:
+            try:
+                client, addr = sock.accept()
+            except (BlockingIOError, ConnectionAbortedError):
+                continue
             with client:
                 contextvars.Context().run(self.process_request, client, addr)
+            break
 
 
 class WorkerCron(Worker):
@@ -1403,6 +1455,8 @@ class WorkerCron(Worker):
         super().start()
         if self.multi.socket:
             self.multi.socket.close()
+        for sock in self.multi.worker_sockets:
+            sock.close()
         if registries_size := os.environ.get('ODOO_REGISTRY_LRU_SIZE_CRON'):
             Registry.registries.count = int(registries_size)
 

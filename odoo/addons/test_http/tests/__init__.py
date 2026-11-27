@@ -17,4 +17,5 @@ from . import test_static
 from . import test_web_server
 from . import test_webjson
 from . import test_webjson2
+from . import test_worker_ports
 from . import test_xss
