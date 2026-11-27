@@ -13,10 +13,11 @@ import {
     waitFor,
 } from "@odoo/hoot";
 import { mockDate } from "@odoo/hoot-mock";
-import { VIDEO_TYPE } from "@html_editor/main/media/media_manager/helpers";
+import { IMAGE_TYPE, VIDEO_TYPE } from "@html_editor/main/media/media_manager/helpers";
 import {
     contains,
     editSearch,
+    getFacetTexts,
     MockServer,
     onRpc,
     toggleMenuItem,
@@ -397,6 +398,18 @@ describe("upload", () => {
         expect(`${SIDE_PANEL} button:contains(Upload)`).toHaveCount(0);
         expect(`${SIDE_PANEL} .btn-import-url`).toHaveCount(0);
         expect(`${SIDE_PANEL} .btn-import-video-url`).toHaveCount(1);
+    });
+
+    test("the filters active by default are given by the params", async () => {
+        const { editor } = await openPartnerForm();
+        editor.shared.media.openMediaDialog({
+            allowedMediaTypes: [IMAGE_TYPE],
+            searchDefaults: { my_media_filter: 1 },
+        });
+        await waitForMediaManager();
+        expect(getFacetTexts()).toEqual(["My Media(s)"]);
+        // partner.jpg was created by OdooBot
+        expect(getCardNames()).toEqual(["banner.png", "logo.png", "link.png"]);
     });
 
     test("no video link to import when replacing an image", async () => {

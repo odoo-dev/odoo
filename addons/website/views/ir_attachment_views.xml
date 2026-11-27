@@ -20,4 +20,16 @@
            </field>
        </field>
    </record>
+    <record id="mediamanager_media_search_inherit_website" model="ir.ui.view">
+        <field name="name">ir.attachment.mediamanager.search.inherit.website</field>
+        <field name="model">ir.attachment</field>
+        <field name="inherit_id" ref="html_editor.mediamanager_media_search"/>
+        <field name="arch" type="xml">
+            <filter name="url_filter" position="after">
+                <!-- the suggestions of the background video option -->
+                <filter name="background_videos" string="Background videos" invisible="1"
+                        domain="[('media_tag_ids', 'in', [%(website.media_tag_background_videos)d])]"/>
+            </filter>
+        </field>
+    </record>
 </odoo>

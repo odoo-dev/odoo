@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<!-- Videos suggested as backgrounds (see the background video option) -->
+<record id="website.media_tag_background_videos" model="html_editor.media.tag">
+    <field name="name">Background videos</field>
+</record>
+<record id="website.library_background_video_528686125" model="ir.attachment">
+    <field name="public" eval="True"/>
+    <field name="name">Vimeo - 528686125</field>
+    <field name="res_model">ir.ui.view</field>
+    <field name="type">url</field>
+    <field name="url">https://vimeo.com/528686125</field>
+    <field name="mimetype">video/x-vimeo</field>
+    <field name="media_tag_ids" eval="[Command.link(ref('website.media_tag_background_videos'))]"/>
+</record>
+<record id="website.library_background_video_430330731" model="ir.attachment">
+    <field name="public" eval="True"/>
+    <field name="name">Vimeo - 430330731</field>
+    <field name="res_model">ir.ui.view</field>
+    <field name="type">url</field>
+    <field name="url">https://vimeo.com/430330731</field>
+    <field name="mimetype">video/x-vimeo</field>
+    <field name="media_tag_ids" eval="[Command.link(ref('website.media_tag_background_videos'))]"/>
+</record>
+<record id="website.library_background_video_509869821" model="ir.attachment">
+    <field name="public" eval="True"/>
+    <field name="name">Vimeo - 509869821</field>
+    <field name="res_model">ir.ui.view</field>
+    <field name="type">url</field>
+    <field name="url">https://vimeo.com/509869821</field>
+    <field name="mimetype">video/x-vimeo</field>
+    <field name="media_tag_ids" eval="[Command.link(ref('website.media_tag_background_videos'))]"/>
+</record>
+<record id="website.library_background_video_397142251" model="ir.attachment">
+    <field name="public" eval="True"/>
+    <field name="name">Vimeo - 397142251</field>
+    <field name="res_model">ir.ui.view</field>
+    <field name="type">url</field>
+    <field name="url">https://vimeo.com/397142251</field>
+    <field name="mimetype">video/x-vimeo</field>
+    <field name="media_tag_ids" eval="[Command.link(ref('website.media_tag_background_videos'))]"/>
+</record>
+<record id="website.library_background_video_763851966" model="ir.attachment">
+    <field name="public" eval="True"/>
+    <field name="name">Vimeo - 763851966</field>
+    <field name="res_model">ir.ui.view</field>
+    <field name="type">url</field>
+    <field name="url">https://vimeo.com/763851966</field>
+    <field name="mimetype">video/x-vimeo</field>
+    <field name="media_tag_ids" eval="[Command.link(ref('website.media_tag_background_videos'))]"/>
+</record>
+<record id="website.library_background_video_486931161" model="ir.attachment">
+    <field name="public" eval="True"/>
+    <field name="name">Vimeo - 486931161</field>
+    <field name="res_model">ir.ui.view</field>
+    <field name="type">url</field>
+    <field name="url">https://vimeo.com/486931161</field>
+    <field name="mimetype">video/x-vimeo</field>
+    <field name="media_tag_ids" eval="[Command.link(ref('website.media_tag_background_videos'))]"/>
+</record>
+<record id="website.library_background_video_1092009120" model="ir.attachment">
+    <field name="public" eval="True"/>
+    <field name="name">Vimeo - 1092009120</field>
+    <field name="res_model">ir.ui.view</field>
+    <field name="type">url</field>
+    <field name="url">https://vimeo.com/1092009120</field>
+    <field name="mimetype">video/x-vimeo</field>
+    <field name="media_tag_ids" eval="[Command.link(ref('website.media_tag_background_videos'))]"/>
+</record>
+<record id="website.library_background_video_728584384" model="ir.attachment">
+    <field name="public" eval="True"/>
+    <field name="name">Vimeo - 728584384</field>
+    <field name="res_model">ir.ui.view</field>
+    <field name="type">url</field>
+    <field name="url">https://vimeo.com/728584384</field>
+    <field name="mimetype">video/x-vimeo</field>
+    <field name="media_tag_ids" eval="[Command.link(ref('website.media_tag_background_videos'))]"/>
+</record>
+<record id="website.library_background_video_865314310" model="ir.attachment">
+    <field name="public" eval="True"/>
+    <field name="name">Vimeo - 865314310</field>
+    <field name="res_model">ir.ui.view</field>
+    <field name="type">url</field>
+    <field name="url">https://vimeo.com/865314310</field>
+    <field name="mimetype">video/x-vimeo</field>
+    <field name="media_tag_ids" eval="[Command.link(ref('website.media_tag_background_videos'))]"/>
+</record>
+<record id="website.library_background_video_511727912" model="ir.attachment">
+    <field name="public" eval="True"/>
+    <field name="name">Vimeo - 511727912</field>
+    <field name="res_model">ir.ui.view</field>
+    <field name="type">url</field>
+    <field name="url">https://vimeo.com/511727912</field>
+    <field name="mimetype">video/x-vimeo</field>
+    <field name="media_tag_ids" eval="[Command.link(ref('website.media_tag_background_videos'))]"/>
+</record>
+<record id="website.library_background_video_466830211" model="ir.attachment">
+    <field name="public" eval="True"/>
+    <field name="name">Vimeo - 466830211</field>
+    <field name="res_model">ir.ui.view</field>
+    <field name="type">url</field>
+    <field name="url">https://vimeo.com/466830211</field>
+    <field name="mimetype">video/x-vimeo</field>
+    <field name="media_tag_ids" eval="[Command.link(ref('website.media_tag_background_videos'))]"/>
+</record>
+
+</odoo>

@@ -92,6 +92,9 @@ export class MediaManagerPlugin extends MediaPlugin {
      *      builder option), or all the available ones.
      * @param {boolean} [params.multiSelect] whether several media can be
      *      chosen. By default, only when no media is replaced.
+     * @param {Object} [params.searchDefaults] the filters of the search view
+     *      active by default, e.g. `{ my_media_filter: 1 }` (as the
+     *      `search_default_*` keys of a context)
      * @param {Object} [params.videoOptions] the options of the chosen videos
      *      (autoplay, loop, hideControls, ...), not set by the user then (e.g.
      *      a background video).
@@ -124,8 +127,14 @@ export class MediaManagerPlugin extends MediaPlugin {
             Domain.or(allowedMediaTypes.map((type) => MEDIA_TYPE_DOMAINS[type])),
         ]).toList();
         const multiSelect = params.multiSelect ?? !mediaToReplace;
+        const dialogProps = getMediaManagertDialogProps(recordInfo);
+        const searchDefaults = Object.entries(params.searchDefaults ?? {}).map(([name, value]) => [
+            `search_default_${name}`,
+            value,
+        ]);
         return this.dependencies.dialog.addDialog(MediaManagerDialog, {
-            ...getMediaManagertDialogProps(recordInfo),
+            ...dialogProps,
+            context: { ...dialogProps.context, ...Object.fromEntries(searchDefaults) },
             domain,
             allowedMediaTypes,
             multiSelect,

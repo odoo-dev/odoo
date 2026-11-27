@@ -2,8 +2,6 @@ import { Plugin, shared } from "@html_editor/plugin";
 import { registry } from "@web/core/registry";
 import { withSequence } from "@html_editor/utils/resource";
 import { BuilderAction } from "@html_builder/core/builder_action";
-import { _t } from "@web/core/l10n/translation";
-import { VideoSelector } from "@html_editor/main/media/media_dialog/video_selector";
 import { getBgImageURLFromEl } from "@html_builder/utils/utils_css";
 import { VIDEO_TYPE } from "@html_editor/main/media/media_manager/helpers";
 
@@ -68,33 +66,10 @@ export class WebsiteBackgroundVideoPlugin extends Plugin {
     loadReplaceBackgroundVideo() {
         return new Promise((resolve) => {
             const onClose = this.dependencies.media.openMediaDialog({
-                extraTabs: [
-                    {
-                        id: "VIDEO_BACKGROUND",
-                        title: _t("Videos"),
-                        Component: VideoSelector,
-                        props: {
-                            isForBgVideo: true,
-                            allowVideoFile: !!this.config.allowVideoFile,
-                            vimeoPreviewIds: [
-                                "528686125",
-                                "430330731",
-                                "509869821",
-                                "397142251",
-                                "763851966",
-                                "486931161",
-                                "1092009120",
-                                "728584384",
-                                "865314310",
-                                "511727912",
-                                "466830211",
-                            ],
-                        },
-                    },
-                ],
-                visibleTabs: ["VIDEO_BACKGROUND"],
                 allowedMediaTypes: [VIDEO_TYPE],
                 multiSelect: false,
+                // the suggestions of the website (see video_library.xml)
+                searchDefaults: { background_videos: 1 },
                 // played as a background
                 videoOptions: {
                     autoplay: true,

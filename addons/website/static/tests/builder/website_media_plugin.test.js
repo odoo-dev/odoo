@@ -1,5 +1,6 @@
 import {
     animationFrame,
+    beforeEach,
     dblclick,
     expect,
     queryAll,
@@ -9,7 +10,14 @@ import {
     waitForNone,
 } from "@odoo/hoot";
 import { mailModels } from "@mail/../tests/mail_test_helpers";
-import { contains, defineModels, onRpc, serverState } from "@web/../tests/web_test_helpers";
+import {
+    contains,
+    defineModels,
+    getFacetTexts,
+    onRpc,
+    removeFacet,
+    serverState,
+} from "@web/../tests/web_test_helpers";
 import { dummyBase64Img, getDragHelper } from "@html_builder/../tests/helpers";
 import { setSelection } from "@html_editor/../tests/_helpers/selection";
 import { insertText } from "@html_editor/../tests/_helpers/user_actions";
@@ -20,8 +28,9 @@ import {
     getAttachmentRecords,
     getCardNames,
     getMediaManagerViews,
-    MediaTag,
+    MediaTag as HtmlEditorMediaTag,
     PNG_DATA_URL,
+    TAGS,
     VIDEO_CARD,
     videoCard,
     waitForMediaManager,
@@ -33,6 +42,23 @@ import {
     setupWebsiteBuilderOeId,
     setupWebsiteBuilderWithSnippet,
 } from "./website_helpers";
+
+const BACKGROUND_VIDEOS_TAG_ID = 3;
+const VIMEO_URL = "https://vimeo.com/528686125";
+
+/** The views of the media manager, with the filter of the website (see media_manager_views.xml). */
+function getWebsiteMediaManagerViews() {
+    const views = getMediaManagerViews();
+    const searchKey = Object.keys(views).find((key) => key.startsWith("search,"));
+    // (fetched before the tests, see defineMediaManagerViews)
+    views[searchKey] = views[searchKey]?.replace(
+        "</search>",
+        `<filter name="background_videos" string="Background videos"
+            domain="[('media_tag_ids', 'in', [${BACKGROUND_VIDEOS_TAG_ID}])]" invisible="1"/>
+        </search>`
+    );
+    return views;
+}
 
 class IrAttachment extends mailModels.IrAttachment {
     _records = [
@@ -68,11 +94,33 @@ class IrAttachment extends mailModels.IrAttachment {
             local_url: PNG_DATA_URL,
             create_uid: serverState.userId,
         },
+        // a suggested background video (see video_library.xml)
+        {
+            id: 23,
+            name: "Vimeo - 528686125",
+            mimetype: "video/x-vimeo",
+            type: "url",
+            public: true,
+            url: VIMEO_URL,
+            local_url: VIMEO_URL,
+            media_tag_ids: [BACKGROUND_VIDEOS_TAG_ID],
+            create_uid: serverState.odoobotUid,
+        },
     ];
-    _views = getMediaManagerViews();
+    _views = getWebsiteMediaManagerViews();
+}
+
+class MediaTag extends HtmlEditorMediaTag {
+    _records = [
+        { id: TAGS.banner, name: "Banner", color: 1 },
+        { id: TAGS.logo, name: "Logo", color: 2 },
+        { id: BACKGROUND_VIDEOS_TAG_ID, name: "Background videos", color: 3 },
+    ];
 }
 
 defineWebsiteModels({ includeMailModels: false });
+// the thumbnail of the Vimeo video (see Vimeo.getThumbnailUrl)
+beforeEach(() => onRpc("https://vimeo.com/api/oembed.json", () => ({ thumbnail_url: "" })));
 defineMediaManagerViews();
 defineModels({ ...mailModels, IrAttachment, MediaTag });
 
@@ -159,8 +207,14 @@ test("background video: choose a video of the media manager", async () => {
     await contains('[data-container-title="Cover"]').click();
     await contains('[data-action-id="toggleBgVideo"]').click();
     await waitForMediaManager();
+    // the suggested background videos are listed first
+    expect(getFacetTexts()).toEqual(["Background videos"]);
+    expect(CARD).toHaveCount(1);
+    expect(videoCard("Vimeo - 528686125")).toHaveCount(1);
+    await removeFacet("Background videos");
     // only the videos can be chosen and imported
     expect(CARD).toHaveCount(queryAll(VIDEO_CARD).length);
+    expect(CARD).toHaveCount(3);
     expect(".modal button:contains(Import video link)").toHaveCount(1);
     expect(".modal button:contains(Import image link)").toHaveCount(0);
     expect(".modal button:contains(Upload)").toHaveCount(0);
