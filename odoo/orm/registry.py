@@ -351,9 +351,9 @@ class Registry(Mapping[str, type["BaseModel"]]):
         # cache is invalid if the sequence is different. The 'registry' sequence
         # applies to the whole registry which must be rebuilt.
         self.registry_sequence: int = -1
+        self.db_oid: int = 0  # identifies the database in the shared caches
         self.registry_caches__: dict[str, tuple[int, MutableMapping]] = {}
         self.registry_cache_lock = threading.RLock()
-        self._template_code__ = LRU(_REGISTRY_CACHES['templates'])  # memo for code templates
 
         from odoo.modules import db  # noqa: PLC0415
         with closing(self.cursor()) as cr:
@@ -1179,6 +1179,8 @@ class Registry(Mapping[str, type["BaseModel"]]):
                     ))
                     cr.execute(SQL("INSERT INTO %s DEFAULT VALUES", SQL.identifier(table_name)))
 
+            cr.execute("SELECT oid FROM pg_database WHERE datname = current_database()")
+            self.db_oid = cr.fetchone()[0]
             db_registry_sequence, db_cache_sequences = self.get_sequences(cr)
             self.registry_sequence = db_registry_sequence
             self.registry_caches__ = {

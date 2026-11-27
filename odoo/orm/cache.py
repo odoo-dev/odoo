@@ -7,11 +7,14 @@ from collections.abc import Mapping, Collection
 from inspect import signature, Parameter
 import functools
 import logging
+import marshal
 import signal
 import sys
 import threading
 import time
 import typing
+
+from odoo.tools.shared_memory import get_cache_tables, get_shared_tables, shared_state_key
 
 if typing.TYPE_CHECKING:
     from collections.abc import Callable, Iterable
@@ -181,6 +184,184 @@ class ormcache:
             return self.method(*args, **kwargs)
 
 
+class shmcache(ormcache):
+    """ Like :class:`ormcache`, with the memory shared by the workers of the
+    server as a second level: a worker that misses its own cache gets the value
+    computed by another worker instead of computing it again.
+
+    The second level is configured per cache by ``--shared-memory``; without
+    it, this is a plain :class:`ormcache`. It is made of a table in memory
+    shared by the workers, where the values are serialized with
+    :mod:`marshal` (a value that is not serializable, like records or
+    functions, is not shared), and/or a local table (``lru``) in the memory of
+    the process, that keeps the values themselves. Like for :class:`ormcache`,
+    the cached values must not be modified.
+
+    The shared entries are never invalidated: their key contains the database
+    (name and oid), the registry sequence and the signaling sequences that
+    invalidate the cache, so that an invalidation makes them unreachable. The
+    shared memory is created by the server before forking the workers and
+    disappears with them.
+
+    The shared memory is not used when the transaction invalidated the cache,
+    nor when the registry is not ready (the sequences may not be up-to-date);
+    the values are not shared when the transaction modified the database.
+
+    An invalidation makes all the values of the cache unreachable, even those
+    that did not change. With ``revalidate``, the method of that name returns a
+    fingerprint of what the value depends on (called with the same arguments,
+    cheaper than the method); a value computed with the same fingerprint is
+    reused after an invalidation, instead of being computed again::
+
+        @shmcache('ref', cache='templates', revalidate='_get_template_fingerprint')
+
+    Same fingerprint, same value: the fingerprint must cover everything that
+    the value depends on and that the signaling of the cache invalidates. It
+    may be ``None`` (no reuse). As the fingerprint identifies the value, it is
+    reused and shared even in a transaction that invalidated the cache or
+    modified the database.
+    """
+
+    def __init__(self, *args: str, cache: str = 'default', revalidate: str | None = None, **kwargs):
+        super().__init__(*args, cache=cache, **kwargs)
+        assert '.' not in cache, "shmcache does not support dependent caches (their sequence is local)"
+        self.revalidate = revalidate
+        self.signals = tuple(key for key, names in _caches_by_key().items() if cache in names)
+
+    def determine_key(self) -> None:
+        super().determine_key()
+        self.qualname = f'{self.method.__module__}.{self.method.__qualname__}'.encode()
+
+    def shared_key(self, model: BaseModel, key: tuple) -> bytes | None:
+        """ Return the key of the value in the shared memory, or ``None`` if it
+        must not be used. """
+        from odoo.modules import module  # noqa: PLC0415
+        test = module.current_test
+        if test is not None and not getattr(test, 'use_shared_cache', False):
+            # tests simulate the signaling sequences, and restore them after
+            # each class: the same sequences would identify different states
+            return None
+        transaction = model.env.transaction
+        registry = transaction.registry
+        if not registry.ready or transaction._registry_invalidated:
+            return None
+        layer = transaction.ormcaches__[self.cache_name]
+        while layer is not None and hasattr(layer, 'parent'):  # CacheLayer
+            layer = layer.parent
+        if layer is None:
+            return None  # invalidated in this transaction
+        registry_caches = transaction._registry_caches__
+        try:
+            sequences = [registry_caches[name][0] for name in self.signals]
+        except KeyError:
+            return None
+        # key[1] is the method, its repr is not stable between processes
+        rest = repr((key[0], key[2:])).encode() + b'\0' + self.qualname
+        return shared_state_key(registry.db_name, registry.db_oid, registry.registry_sequence, sequences, rest)
+
+    def content_key(self, model: BaseModel, key: tuple, args, kwargs) -> bytes | None:
+        """ Return the key of the value in the shared memory by fingerprint
+        (see ``revalidate``), or ``None`` if there is none. """
+        transaction = model.env.transaction
+        registry = transaction.registry
+        if not registry.ready or transaction._registry_invalidated:
+            return None  # the code may change with the registry
+        fingerprint = getattr(model, self.revalidate)(*args[1:], **kwargs)
+        if fingerprint is None:
+            return None
+        # valid for any signaling sequences
+        rest = repr((key[0], key[2:], fingerprint)).encode() + b'\0' + self.qualname
+        return shared_state_key(registry.db_name, registry.db_oid, registry.registry_sequence, None, rest)
+
+    def lookup(self, *args, **kwargs):
+        model: BaseModel = args[0]
+        try:
+            d = model.env.transaction.ormcaches__[self.cache_name]
+        except TypeError:
+            if model.env.transaction is None:
+                raise RuntimeError("Trying to get cache from a closed transaction") from None
+            raise
+        key = self.key(*args, **kwargs)
+        counter = _COUNTERS[model.pool.db_name, self.method]
+
+        tx_lookups = model.env.cr.cache.setdefault('_ormcache_lookups', set())
+        tx_key = tuple(map(hash, key))
+        tx_first_lookup = tx_key not in tx_lookups
+        if tx_first_lookup:
+            counter.cache_name = self.cache_name
+            tx_lookups.add(tx_key)
+
+        try:
+            r = d[key]
+            counter.hit += 1
+            counter.tx_hit += tx_first_lookup
+            return r
+        except KeyError:
+            counter.miss += 1
+            counter.tx_miss += tx_first_lookup
+
+        local, shared = get_cache_tables(self.cache_name)
+        if local is None and shared is None:
+            start = time.monotonic()
+            value = self.method(*args, **kwargs)
+            counter.gen_time += time.monotonic() - start
+            d[key] = value
+            return value
+
+        def get(table_key):
+            if local is not None and (value := local.get(table_key)) is not None:
+                return value
+            if shared is not None and (data := shared.get(table_key)) is not None:
+                value = marshal.loads(data)
+                if local is not None:
+                    local.set(table_key, value)
+                return value
+            return None
+
+        def alias(table_key, target):
+            if local is not None:
+                local.alias(table_key, target)
+            if shared is not None:
+                shared.alias(table_key, target)
+
+        shared_key = self.shared_key(model, key)
+        if shared_key is not None and (value := get(shared_key)) is not None:
+            d[key] = value
+            return value
+
+        # the key by sequences is shared only if the transaction did not write
+        write_shared_key = shared_key is not None and not model.env.transaction._wrote__
+        content_key = self.revalidate and self.content_key(model, key, args, kwargs)
+        if content_key and (value := get(content_key)) is not None:
+            if write_shared_key:
+                alias(shared_key, content_key)
+            d[key] = value
+            return value
+
+        start = time.monotonic()
+        value = self.method(*args, **kwargs)
+        counter.gen_time += time.monotonic() - start
+        d[key] = value
+        table_key = content_key or (shared_key if write_shared_key else None)
+        if table_key is None:
+            return value
+        if local is not None:
+            local.set(table_key, value)
+        if shared is not None:
+            try:
+                shared.set(table_key, marshal.dumps(value))
+            except ValueError:
+                pass  # not shareable, for instance a function
+        if content_key and write_shared_key:
+            alias(shared_key, content_key)
+        return value
+
+
+def _caches_by_key():
+    from .registry import _CACHES_BY_KEY  # noqa: PLC0415
+    return _CACHES_BY_KEY
+
+
 def log_ormcache_stats(sig=None, frame=None):    # noqa: ARG001 (arguments are there for signals)
     # collect and log data in a separate thread to avoid blocking the main thread
     # and avoid using logging module directly in the signal handler
@@ -279,6 +460,18 @@ def log_ormcache_stats(sig=None, frame=None):    # noqa: ARG001 (arguments are t
                     f" * {cache_name}: {entries}/{count}{' (' if cache_total_size else ''}{cache_total_size or ''}{' bytes)' if cache_total_size else ''}"
                     for cache_name, entries, count, cache_total_size in db_cache_usage
                 )
+                if dbname == next(iter(sorted(cache_stats, key=lambda k: k or '~'))):
+                    # the tables are common to all databases: log them once
+                    for name, table in get_shared_tables().items():
+                        if table.serialize:
+                            entries, used = table.usage
+                            usage = f"{entries} entries, {used >> 20}/{table.size >> 20} MB, {table.evictions} evictions"
+                        else:
+                            usage = f"{len(table._lru)}/{table.entries} entries"
+                        log_msgs.append(
+                            f" * shared memory {name}: {usage}; "
+                            f"this process: {table.hits} hits, {table.misses} misses, {table.writes} writes"
+                        )
                 log_msgs.append('Details:')
 
                 # sort by -sz_entries_sum and method_name

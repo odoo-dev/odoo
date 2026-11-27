@@ -59,6 +59,7 @@ from odoo import api, sql_db
 from odoo.http.server import HTTPSocket
 from odoo.modules.registry import Registry
 from odoo.orm.cache import log_ormcache_stats
+from odoo.tools.shared_memory import init_shared_tables, shared_memory_size
 from odoo.release import nt_service_name
 from odoo.tools import OrderedSet, config, gc, osutil, profiler
 from odoo.tools.misc import dumpstacks, mute_logger, stripped_sys_argv
@@ -78,6 +79,8 @@ def set_limit_memory_hard():
     if odoo.evented and config['limit_memory_hard_gevent']:
         limit_memory_hard = config['limit_memory_hard_gevent']
     if limit_memory_hard:
+        # the shared memory is mapped in every worker, it is not their own
+        limit_memory_hard += shared_memory_size()
         rlimit = resource.RLIMIT_AS
         _soft, hard = resource.getrlimit(rlimit)
         resource.setrlimit(rlimit, (limit_memory_hard, hard))
@@ -1128,6 +1131,9 @@ class PreforkServer(CommonServer):
             self.stop()
             return rc
 
+        # Create the memory shared by the workers before forking them.
+        init_shared_tables()
+
         # Empty the cursor pool, we dont want them to be shared among forked workers.
         sql_db.close_all()
 
@@ -1214,7 +1220,8 @@ class Worker:
             self.logger.info("Max request (%s) reached.", self.request_count)
             self.alive = False
         # Reset the worker if it consumes too much memory (e.g. caused by a memory leak).
-        memory = memory_info(psutil.Process(os.getpid()))  # TODO: optimize this line
+        # the shared memory is mapped in every worker, it is not their own
+        memory = memory_info(psutil.Process(os.getpid())) - shared_memory_size()  # TODO: optimize this line
         if config['limit_memory_soft'] and memory > config['limit_memory_soft']:
             self.logger.info("Virtual memory limit (%s) reached.", memory)
             self.alive = False      # Commit suicide after the request.

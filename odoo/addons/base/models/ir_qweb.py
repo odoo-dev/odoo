@@ -355,6 +355,7 @@ from __future__ import annotations
 import ast
 import fnmatch
 import glob
+import hashlib
 import io
 import logging
 import math
@@ -367,6 +368,7 @@ import token
 import tokenize
 import traceback
 import warnings
+import weakref
 import werkzeug
 
 from markupsafe import Markup, escape
@@ -411,6 +413,9 @@ from odoo.addons.base.models.ir_ui_view import MOVABLE_BRANDING
 from odoo.tools.constants import SCRIPT_EXTENSIONS, STYLE_EXTENSIONS, TEMPLATE_EXTENSIONS, FONT_EXTENSIONS
 
 _logger = logging.getLogger(__name__)
+
+# {id(compiled code): (weak reference to the code, result of _load_code)}
+_loaded_code: dict[int, tuple[weakref.ref, tuple]] = {}
 
 
 # QWeb token usefull for generate expression used in `_compile_expr_tokens` method
@@ -1045,40 +1050,72 @@ class IrQweb(models.AbstractModel):
 
         return (template_functions, def_name, options, code)
 
-    @tools.conditional(
-        'xml' not in tools.config['dev_mode'],
-        api.ormcache('ref', 'tuple(self.env.context.get(k) or False for k in self._get_template_cache_keys())', cache='templates'),
-    )
     def _generate_code_cached(self, ref: int):
-        # The method preloads templates to put information into the transaction
-        # cache in addition to browse records. It also loads in batch the
-        # template from directives (like: t-call and t-snippet).
+        if 'xml' in tools.config['dev_mode']:
+            return self._generate_code_uncached(ref)
+        raw = self._generate_code_shared(ref)
+        compiled = raw[3]
+        if raw[0] is None:
+            return self._load_code(raw)  # error: no code to keep
+        # The functions are made from the code once per process: the cache
+        # gives the same code object as long as it keeps the code.
+        entry = _loaded_code.get(id(compiled))
+        if entry is None or entry[0]() is not compiled:
+            entry = _loaded_code[id(compiled)] = (
+                weakref.ref(compiled, lambda _ref, key=id(compiled): _loaded_code.pop(key, None)),
+                self._load_code(raw),
+            )
+        return entry[1]
+
+    @api.shmcache(
+        'ref', 'tuple(self.env.context.get(k) or False for k in self._get_template_cache_keys())',
+        cache='templates', revalidate='_get_template_fingerprint',
+    )
+    def _generate_code_shared(self, ref: int):
+        """ Return the marshallable code of the template (see ``_load_code``),
+        shared by the workers of the server. """
+        return self._generate_code_raw(ref)
+
+    def _get_template_fingerprint(self, ref: int) -> str | None:
+        """ The code does not change when the view does not change: keep it
+        through the invalidations of the cache (see ``shmcache``). """
         try:
             document = self._get_template(ref)[1]
         except Exception:  # noqa: BLE001
-            return self._generate_code_uncached(ref)
-
-        view_hash = hash(document)
-        cache_key = tuple(self.env.context.get(k) or False for k in self._get_template_cache_keys())
-
-        if 'xml' in tools.config['dev_mode']:
-            return self._generate_code_uncached(ref)
-        memo_key = (ref, view_hash, cache_key)
-        cache = self.env.registry._template_code__
-        code = cache.get(memo_key)
-        if code is None:
-            code = self._generate_code_uncached(ref)
-            cache[memo_key] = code
-        return code
+            return None
+        if isinstance(document, str):
+            document = document.encode()
+        return hashlib.blake2b(document, digest_size=16).hexdigest()
 
     def _generate_code_uncached(self, template: int | str | etree._Element):
+        return self._load_code(self._generate_code_raw(template))
+
+    def _generate_code_raw(self, template: int | str | etree._Element):
+        """ Compile the template into a marshallable tuple
+        ``(code, options, def_name, compiled)``, or ``(None, options,
+        def_name, error)`` when the template cannot be compiled. """
         assert isinstance(self, IrQweb)
         ref = self._get_template_info(template)['id'] if isinstance(template, (int, str)) else None
 
         code, options, def_name, error = self._generate_code(template)
-
         if error:
-            Error, message, stack = error
+            return None, dict(options), def_name, (*error, template)
+
+        wrap_code = '\n'.join([
+            "def generate_functions(code):",
+            indent_code(code, 1),
+            "    return template_functions",
+        ])
+        compiled = compile(wrap_code, f"<{ref}>", 'exec')
+        return code, dict(options), def_name, compiled
+
+    def _load_code(self, raw):
+        """ Return ``(template_functions, def_name, options, code)`` from the
+        result of ``_generate_code_raw``. The globals of the functions do not
+        depend on the registry: the result can be reused for the same code. """
+        code, options, def_name, compiled = raw
+        if code is None:
+            Error, message, stack, template = compiled
 
             def not_found_template(self, values, root_values, process):
                 if tools.config['dev_mode']:
@@ -1090,12 +1127,6 @@ class IrQweb(models.AbstractModel):
 
             return {'not_found_template': not_found_template}, 'not_found_template', frozendict(options), ''
 
-        wrap_code = '\n'.join([
-            "def generate_functions(code):",
-            indent_code(code, 1),
-            "    return template_functions",
-        ])
-        compiled = compile(wrap_code, f"<{ref}>", 'exec')
         globals_dict = self.__prepare_globals()
         globals_dict['__builtins__'] = globals_dict  # So that unknown/unsafe builtins are never added.
         unsafe_eval(compiled, globals_dict)
@@ -3147,7 +3178,7 @@ def render(template_name: str | int, values: dict, load: Callable[[str], tuple[e
     class MockRegistry:
         def __init__(self):
             self.db_name = None
-            self._template_code__ = LRU(_REGISTRY_CACHES['templates'])
+            self.ready = False  # no shared cache
 
     registry = MockRegistry()
 

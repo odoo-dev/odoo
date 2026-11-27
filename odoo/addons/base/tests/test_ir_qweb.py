@@ -2647,7 +2647,7 @@ class TestQwebPerformance(TransactionCaseWithUserDemo):
         env = self.env(user=self.user_demo)
 
         counter = itertools.count()
-        o_generate_code_uncached = self.env['ir.qweb']._generate_code_uncached
+        o_generate_code_uncached = self.env['ir.qweb']._generate_code_raw
 
         def generate_code_uncached(template):
             next(counter)
@@ -2657,7 +2657,7 @@ class TestQwebPerformance(TransactionCaseWithUserDemo):
             init = env.cr.sql_log_count
             counter_init = next(counter) + 1
 
-            with patch('odoo.addons.base.models.ir_qweb.IrQweb._generate_code_uncached', side_effect=generate_code_uncached):
+            with patch('odoo.addons.base.models.ir_qweb.IrQweb._generate_code_raw', side_effect=generate_code_uncached):
                 value = env['ir.qweb']._render(template)
 
             self.assertEqual(str(value), expected)

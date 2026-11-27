@@ -501,6 +501,23 @@ class configmanager:
                          "--gevent-workers", dest="gevent_workers", my_default=1,
                          help="Specify the number of gevent workers in prefork mode. (requires SO_REUSEPORT)",
                          type="int"))
+        group.add_option(PosixOnlyOption(
+                         "--shared-memory", dest="shared_memory", my_default="templates:64",
+                         help="Second level of some caches, as a size in MB per cache, optionally followed by "
+                         "lru=True|False, e.g. 'templates:64,default:16,lru=False' (default 'templates:64', "
+                         "empty to disable). With workers, the memory of that size is shared by the workers: a "
+                         "worker gets from it the values computed by the others, instead of computing them "
+                         "again; it is mapped in every worker and is not counted in the memory limits. 'lru' "
+                         "adds a local cache in each process, with as many entries as the shared memory would "
+                         "hold; it is the default without workers. When a shared memory is full, it evicts the values of the old states of the "
+                         "databases first, see --shared-memory-evict.",
+                         type="string"))
+        group.add_option(PosixOnlyOption(
+                         "--shared-memory-evict", dest="shared_memory_evict", my_default=5,
+                         help="Percentage of a shared memory cache to free when it is full (default 5). The "
+                         "values of the old states of the databases are evicted first; evicting values of "
+                         "their current states is logged as a warning, the cache is too small.",
+                         type="int"))
         group.add_option("--limit-memory-soft", dest="limit_memory_soft", my_default=2048 * 1024 * 1024,
                          help="Maximum allowed virtual memory per worker (in bytes), when reached the worker be "
                          "reset after the current request (default 2048MiB).",
@@ -766,6 +783,15 @@ class configmanager:
             if mod not in self['server_wide_modules']:
                 self._log(logging.INFO, "adding missing %r to %s", mod, self.options_index['server_wide_modules'])
                 self._runtime_options['server_wide_modules'] = [mod] + self['server_wide_modules']
+
+        if self['shared_memory']:
+            from .shared_memory import parse_shared_memory  # noqa: PLC0415
+            try:
+                parse_shared_memory(self['shared_memory'])
+            except ValueError as exc:
+                self.parser.error(exc.args[0])
+            if not 0 < self['shared_memory_evict'] <= 100:
+                self.parser.error("--shared-memory-evict must be a percentage between 1 and 100")
 
         # ensure default http_interface is set
         if not self['http_interface']:
