@@ -19,7 +19,6 @@ class Partner(models.Model):
         selection=TAX_TRANSACTION_CODE,
         string="Transaction Code",
         help="The first 2 digits of tax code",
-        default='04',
         tracking=True,
     )
 

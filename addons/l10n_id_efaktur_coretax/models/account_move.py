@@ -170,10 +170,42 @@ class AccountMove(models.Model):
         store=True,
     )
 
-    @api.depends('partner_id')
+    @api.depends('partner_id', 'fiscal_position_id', 'line_ids.tax_ids', 'reversed_entry_id')
     def _compute_kode_transaksi(self):
         for move in self:
-            move.l10n_id_kode_transaksi = move.commercial_partner_id.l10n_id_kode_transaksi
+            if not move.l10n_id_coretax_efaktur_available:
+                move.l10n_id_kode_transaksi = False
+                continue
+
+            if move.move_type == 'out_refund' and (code := move.reversed_entry_id.l10n_id_kode_transaksi):
+                move.l10n_id_kode_transaksi = code
+                continue
+
+            first_line = move.line_ids.filtered(lambda line: line.display_type == 'product' and line.tax_ids)[:1]
+            tax = first_line.tax_ids[:1]
+            partner = move.commercial_partner_id
+            ChartTemplate = self.env['account.chart.template'].with_company(move.company_id)
+
+            def matches(record, xmlid):
+                target = ChartTemplate.ref(xmlid, raise_if_not_found=False)
+                return bool(record and target and record == target)
+
+            if matches(tax.tax_group_id, 'l10n_id_tax_group_0'):
+                code = '07'
+            elif matches(tax.tax_group_id, 'l10n_id_tax_group_exempt'):
+                code = '08'
+            elif matches(move.fiscal_position_id, 'l10n_id_pemungut_ppn'):
+                code = partner.l10n_id_kode_transaksi if partner.l10n_id_kode_transaksi in ('02', '03') else '02'
+            elif partner.country_id and partner.country_id.code != 'ID':
+                code = '06'
+            elif matches(tax.tax_group_id, 'l10n_id_tax_group_luxury_goods'):
+                code = '01'
+            elif matches(tax.tax_group_id, 'l10n_id_tax_group_non_luxury_goods'):
+                code = '04'
+            else:
+                code = partner.l10n_id_kode_transaksi or '04'
+
+            move.l10n_id_kode_transaksi = code
 
     @api.depends('partner_id', 'line_ids.tax_ids')
     def _compute_l10n_id_coretax_efaktur_available(self):
@@ -184,7 +216,7 @@ class AccountMove(models.Model):
         for move in self:
             move.l10n_id_coretax_efaktur_available = (
                 move.country_code == 'ID'
-                and move.move_type == 'out_invoice'
+                and move.move_type in ('out_invoice', 'out_refund')
                 and move.line_ids.tax_ids
             )
 
