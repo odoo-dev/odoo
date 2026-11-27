@@ -9,5 +9,5 @@ class AccountPaymentMethod(models.Model):
     @api.model
     def _get_payment_method_information(self):
         res = super()._get_payment_method_information()
-        res["wire_transfer"] = {"mode": "unique", "type": ("bank",)}
+        res["wire_transfer"] = {"mode": "electronic", "type": ("bank",)}
         return res

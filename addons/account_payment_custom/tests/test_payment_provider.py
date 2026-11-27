@@ -23,6 +23,15 @@ class TestPaymentProvider(AccountPaymentCustomCommon):
             "wire_transfer", self.provider.journal_id.inbound_payment_method_line_ids.mapped("code")
         )
 
+    def test_duplicate_wire_transfer_provider(self):
+        """Test that a wire transfer provider can be duplicated, e.g. to use another bank account."""
+        provider_copy = self.provider.copy()
+        self.assertEqual(provider_copy.journal_id, self.provider.journal_id)
+        self.assertIn(
+            provider_copy,
+            self.provider.journal_id.inbound_payment_method_line_ids.payment_provider_id,
+        )
+
     def test_installing_provider_activates_auto_confirm_cron(self):
         """Test that the auto-confirm cron is activated when a provider is installed."""
         self.auto_confirm_cron.active = False
