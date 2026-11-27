@@ -9,9 +9,12 @@ import { _t } from "@web/core/l10n/translation";
 /**
  * @typedef {{
  *     selector: CSSSelector;
+ *     restrictSelector: CSSSelector;
  *     exclude: CSSSelector;
  *     dropIn: CSSSelector;
  *     dropNear: CSSSelector;
+ *     dropLockWithin: CSSSelector;
+ *     excludeAncestor: CSSSelector;
  *     excludeNearParent: CSSSelector;
  * }} DropzoneSelector
  *
@@ -130,6 +133,7 @@ export class DropZonePlugin extends Plugin {
         this.dropzoneSelectors.forEach((dropzoneSelector) => {
             const {
                 selector,
+                restrictSelector,
                 exclude = false,
                 dropIn,
                 dropNear,
@@ -151,6 +155,14 @@ export class DropZonePlugin extends Plugin {
                         ...this.getSelectorChildren(editableAreaEls, rootEl, { selector: dropIn })
                     );
                 }
+                if (dropLockWithin) {
+                    selectorLockedWithin.push(dropLockWithin);
+                }
+                if (excludeAncestor) {
+                    selectorExcludeAncestor.push(excludeAncestor);
+                }
+            }
+            if (snippetEl.matches(restrictSelector) && !snippetEl.matches(exclude)) {
                 if (dropLockWithin) {
                     selectorLockedWithin.push(dropLockWithin);
                 }
