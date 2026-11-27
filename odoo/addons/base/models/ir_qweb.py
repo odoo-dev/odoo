@@ -355,7 +355,6 @@ from __future__ import annotations
 import ast
 import fnmatch
 import glob
-import hashlib
 import io
 import logging
 import math
@@ -1069,23 +1068,12 @@ class IrQweb(models.AbstractModel):
 
     @api.shmcache(
         'ref', 'tuple(self.env.context.get(k) or False for k in self._get_template_cache_keys())',
-        cache='templates', revalidate='_get_template_fingerprint',
+        cache='templates',
     )
     def _generate_code_shared(self, ref: int):
         """ Return the marshallable code of the template (see ``_load_code``),
         shared by the workers of the server. """
         return self._generate_code_raw(ref)
-
-    def _get_template_fingerprint(self, ref: int) -> str | None:
-        """ The code does not change when the view does not change: keep it
-        through the invalidations of the cache (see ``shmcache``). """
-        try:
-            document = self._get_template(ref)[1]
-        except Exception:  # noqa: BLE001
-            return None
-        if isinstance(document, str):
-            document = document.encode()
-        return hashlib.blake2b(document, digest_size=16).hexdigest()
 
     def _generate_code_uncached(self, template: int | str | etree._Element):
         return self._load_code(self._generate_code_raw(template))

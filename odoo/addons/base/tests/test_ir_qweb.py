@@ -2680,17 +2680,18 @@ class TestQwebPerformance(TransactionCaseWithUserDemo):
         first_view.arch_db = '<div>Hello 2</div>'
 
         check(first_view.id, "<div>Hello 2</div>", queries=1, cachemiss=1)
-        check(extend_view_2.id, "<div><div>Hello 2</div><h1></h1><section></section></div>", queries=1, cachemiss=0)
+        # the write invalidated all the templates: the code is generated again
+        check(extend_view_2.id, "<div><div>Hello 2</div><h1></h1><section></section></div>", queries=1, cachemiss=1)
 
         first_view.arch_db = '<div>Hello</div>'
 
-        check(extend_view_2.id, "<div><div>Hello</div><h1></h1><section></section></div>", queries=3, cachemiss=1)
+        check(extend_view_2.id, "<div><div>Hello</div><h1></h1><section></section></div>", queries=3, cachemiss=2)
         check(first_view.id, "<div>Hello</div>", queries=0)
 
         first_view.arch_db = '<div>Hello1</div>'
 
         check(first_view.id, "<div>Hello1</div>", queries=1, cachemiss=1)
-        check(extend_view_2.id, "<div><div>Hello1</div><h1></h1><section></section></div>", queries=1)
+        check(extend_view_2.id, "<div><div>Hello1</div><h1></h1><section></section></div>", queries=1, cachemiss=1)
 
         first_view.arch_db = '<div>Hello2</div>'
         self.env.invalidate_all()
@@ -2698,7 +2699,7 @@ class TestQwebPerformance(TransactionCaseWithUserDemo):
         # 1 more query on ir_mode_data from _is_studio_view() in apply_inheritance_specs
         # TODO: use key (actually empty for some view) instead of xml_id field
         addons = tuple(self.env.registry._init_modules) + (self.env.context.get('install_module'),)
-        check(extend_view_2.id, "<div><div>Hello2</div><h1></h1><section></section></div>", queries=5, cachemiss=1)
+        check(extend_view_2.id, "<div><div>Hello2</div><h1></h1><section></section></div>", queries=5, cachemiss=2)
         check(first_view.id, "<div>Hello2</div>", queries=0)
 
         first_view.arch_db = '<div>Hello3</div>'
@@ -2706,12 +2707,12 @@ class TestQwebPerformance(TransactionCaseWithUserDemo):
 
         check(first_view.id, "<div>Hello3</div>", queries=2, cachemiss=1)
 
-        check(extend_view_2.id, "<div><div>Hello3</div><h1></h1><section></section></div>", queries=3)
+        check(extend_view_2.id, "<div><div>Hello3</div><h1></h1><section></section></div>", queries=3, cachemiss=1)
 
         extend_view_1.arch_db = '<xpath expr="//div" position="inside"><article/></xpath>'
         self.env.invalidate_all()
 
-        check(extend_view_2.id, "<div><div>Hello3</div><article></article><section></section></div>", queries=5, cachemiss=1)
+        check(extend_view_2.id, "<div><div>Hello3</div><article></article><section></section></div>", queries=5, cachemiss=2)
 
 
 class TestQwebMocked(BaseCase):

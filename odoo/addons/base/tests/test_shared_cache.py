@@ -66,34 +66,16 @@ class TestSharedHashTable(BaseCase):
         self.assertEqual(tables('templates:1', shared=['templates']), (None, 'SharedHashTable'))
         self.assertEqual(tables('templates:1,lru=True', shared=['templates']), ('LocalTable', 'SharedHashTable'))
 
-    def test_alias(self):
-        table = SharedHashTable(size=1 << 20, slots=64)
-        self.assertFalse(table.alias(b'b', b'a'), "no target")
-        self.assertIsNone(table.get(b'b'))
-        table.set(b'a', b'value a')
-        end = table._mm[16:24]
-        self.assertTrue(table.alias(b'b', b'a'))
-        self.assertEqual(table.get(b'b'), b'value a')
-        self.assertEqual(int.from_bytes(table._mm[16:24], 'little') - int.from_bytes(end, 'little'), 1,
-                         "only the key is written")
-        # keys are never replaced
-        table.set(b'c', b'value c')
-        self.assertTrue(table.alias(b'b', b'c'))
-        self.assertEqual(table.get(b'b'), b'value a')
-
     def test_local_table(self):
         table = LocalTable(entries=8)
         value = {'not': 'serialized'}
         self.assertTrue(table.set(b'a', value))
         self.assertIs(table.get(b'a'), value)
-        self.assertTrue(table.alias(b'b', b'a'))
-        self.assertIs(table.get(b'b'), value)
-        self.assertFalse(table.alias(b'c', b'missing'))
         table.set(b'a', {})
         self.assertIs(table.get(b'a'), value, "values are never replaced")
 
     def key(self, registry_seq, seq, name, db='db', oid=1):
-        return shared_state_key(db, oid, registry_seq, None if seq is None else [seq], name.encode())
+        return shared_state_key(db, oid, registry_seq, [seq], name.encode())
 
     def test_evict_old_states_first(self):
         # 16 slots: 12 entries max; evict 25%: 3 entries at least
@@ -180,47 +162,6 @@ class TestSharedHashTable(BaseCase):
         self.assertEqual(table.usage, (0, 0))
         self.assertIsNone(table.get(b'1'))
 
-    def test_evict_fingerprint_keys(self):
-        """ The keys by fingerprint are current for the current registry of
-        their database, whatever the signaling sequences. """
-        table = SharedHashTable(size=1 << 20, slots=16, name='test', evict_percent=10)  # 1 entry
-        table.set(self.key(9, None, 'fingerprint of registry 9'), b'v')
-        table.set(self.key(10, None, 'fingerprint'), b'v')
-        table.set(self.key(10, 5, 'signaling 5'), b'v')
-        for i in range(9):
-            table.set(self.key(10, 6, f'current {i}'), b'v')
-        with self.assertLogs('odoo.tools.shared_memory', 'INFO') as logs:
-            table.set(self.key(10, 6, 'current 9'), b'v')
-            table.set(self.key(10, 6, 'current 10'), b'v')
-        self.assertIn("evicted 1 entries of old states", logs.output[0])
-        self.assertIn("evicted 1 entries of old states", logs.output[1])
-        self.assertIsNone(table.get(self.key(9, None, 'fingerprint of registry 9')))
-        self.assertIsNone(table.get(self.key(10, 5, 'signaling 5')))
-        self.assertEqual(table.get(self.key(10, None, 'fingerprint')), b'v')
-
-    def test_evict_aliases(self):
-        """ Evicting a value evicts its aliases; the compaction moves the value
-        of the aliases that are kept. """
-        table = SharedHashTable(size=1 << 20, slots=16, name='test', evict_percent=10)  # 1 entry
-        table.set(self.key(10, None, 'old value'), b'old')
-        table.set(self.key(10, None, 'value'), b'value')
-        table.alias(self.key(10, 6, 'alias of old value'), self.key(10, None, 'old value'))
-        table.alias(self.key(10, 6, 'alias of value'), self.key(10, None, 'value'))
-        for i in range(8):
-            table.set(self.key(10, 6, f'current {i}'), b'v')
-        self.assertEqual(table.usage[0], 12)
-        with self.assertLogs('odoo.tools.shared_memory', 'WARNING') as logs:
-            table.set(self.key(10, 6, 'current 8'), b'v')
-        # the oldest entry and its alias
-        self.assertIn("evicted 0 entries of old states and 2 of current states", logs.output[0])
-        self.assertIsNone(table.get(self.key(10, None, 'old value')))
-        self.assertIsNone(table.get(self.key(10, 6, 'alias of old value')))
-        # moved
-        self.assertEqual(table.get(self.key(10, None, 'value')), b'value')
-        self.assertEqual(table.get(self.key(10, 6, 'alias of value')), b'value')
-        self.assertEqual(table.get(self.key(10, 6, 'current 8')), b'v')
-        self.assertEqual(table.usage[0], 11)
-
     def test_shared_with_forked_process(self):
         table = SharedHashTable(size=1 << 20, slots=64)
         table.set(b'parent', b'from parent')
@@ -299,20 +240,6 @@ class TestSharedQwebCode(TransactionCase):
         self.assertEqual(self.render(), '<span>World</span>')
         self.assertEqual(self.compiled, [self.view.id, self.view.id])
 
-    def without_revalidation(self):
-        self.patch(type(self.env['ir.qweb']), '_get_template_fingerprint', lambda qweb, ref: None)
-
-    def count_fingerprints(self):
-        fingerprints = []
-        get_template_fingerprint = type(self.env['ir.qweb'])._get_template_fingerprint
-
-        def counting_get_template_fingerprint(qweb, ref):
-            fingerprints.append(ref)
-            return get_template_fingerprint(qweb, ref)
-
-        self.patch(type(self.env['ir.qweb']), '_get_template_fingerprint', counting_get_template_fingerprint)
-        return fingerprints
-
     def signal(self):
         """ Another state of the database: the 'templates' cache was invalidated
         by another worker. """
@@ -322,51 +249,18 @@ class TestSharedQwebCode(TransactionCase):
         self.patch(self.env.transaction, '_registry_caches__', registry_caches)
 
     def test_not_shared_when_wrote(self):
-        self.without_revalidation()
         self.wrote = True
         self.render()
         self.cold_worker()
         self.render()
         self.assertEqual(self.compiled, [self.view.id, self.view.id])
-
-    def test_shared_by_fingerprint_when_wrote(self):
-        self.wrote = True
-        self.render()
-        self.cold_worker()
-        self.wrote = False
-        fingerprints = self.count_fingerprints()
-        self.render()
-        self.assertEqual(self.compiled, [self.view.id], "the code is found by fingerprint")
-        self.assertEqual(fingerprints, [self.view.id], "the code was not shared by sequences")
 
     def test_signaling_changes_the_key(self):
-        self.without_revalidation()
         self.render()
         self.cold_worker()
         self.signal()
         self.render()
         self.assertEqual(self.compiled, [self.view.id, self.view.id])
-
-    def test_signaling_revalidates(self):
-        self.render()
-        self.cold_worker()
-        self.signal()
-        fingerprints = self.count_fingerprints()
-        self.render()
-        self.assertEqual(self.compiled, [self.view.id], "the view did not change: same code")
-        self.assertEqual(fingerprints, [self.view.id])
-
-        # the code is now shared under the new sequences
-        self.cold_worker()
-        self.render()
-        self.assertEqual(self.compiled, [self.view.id])
-        self.assertEqual(fingerprints, [self.view.id], "no fingerprint needed")
-
-    def test_revalidation_in_invalidated_transaction(self):
-        self.render()
-        self.env.transaction.invalidate_ormcache('templates')
-        self.render()
-        self.assertEqual(self.compiled, [self.view.id], "the view did not change: same code")
 
     def test_no_shared_memory(self):
         """ Without table for the cache (not in --shared-memory), this is an
@@ -383,12 +277,12 @@ class TestSharedQwebCode(TransactionCase):
         local = LocalTable(64)
         with patch('odoo.orm.cache.get_cache_tables', return_value=(local, self.table)):
             self.render()
-            self.assertEqual((local.writes, self.table.writes), (2, 2), "content key and its alias")
+            self.assertEqual((local.writes, self.table.writes), (1, 1))
             local.clear()
             self.cold_worker()
             self.render()
             self.assertEqual(self.compiled, [self.view.id], "from the shared table")
-            self.assertEqual(local.writes, 3, "kept in the local table")
+            self.assertEqual(local.writes, 2, "kept in the local table")
             self.cold_worker()
             hits = self.table.hits
             self.render()
@@ -396,9 +290,7 @@ class TestSharedQwebCode(TransactionCase):
 
     def test_disabled_in_tests(self):
         self.patch(type(self), 'use_shared_cache', False)
-        fingerprints = self.count_fingerprints()
         self.render()
         self.cold_worker()
         self.render()
-        self.assertEqual(self.compiled, [self.view.id], "the fingerprint does not depend on the sequences")
-        self.assertEqual(fingerprints, [self.view.id, self.view.id], "not shared by sequences")
+        self.assertEqual(self.compiled, [self.view.id, self.view.id])

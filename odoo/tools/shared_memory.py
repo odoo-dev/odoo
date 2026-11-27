@@ -9,11 +9,8 @@ it never outlives the code that filled it.
 Layout::
 
     header | magic (8) | generation (8) | end of the data (8) | entries (8) |
-    slots  | hash (8) | key offset (8) | value offset (8) | value length (4) | key length (4) | x SLOTS
+    slots  | hash (8) | offset (8) | value length (4) | key length (4) | x SLOTS
     data   | key | value | key | value | ...   (append only)
-
-A slot may point to the value of another slot (see ``alias``): several keys
-share one copy of the value.
 
 The tables are configured by the option ``--shared-memory``, as a size in MB
 per cache, optionally followed by ``lru=True|False``:
@@ -23,14 +20,11 @@ values themselves (not serialized); it is the default without shared table.
 
 A key is ``state + b'\\0' + rest``, where ``state`` is the ``repr`` of
 ``(dbname, db_oid, registry_sequence, signaling_sequences)``: the state of the
-database for which the value was computed (``signaling_sequences`` is ``None``
-for a key by fingerprint, valid for any signaling sequences). When the table is
-full, it evicts the entries of the old states of each database first (the
+database for which the value was computed. When the table is full, it evicts the entries of the old states of each database first (the
 oldest first, so a registry sequence goes away with its last signaling
 sequences), until ``--shared-memory-evict`` percent of the table is free, then
 compacts the data. If the old states are not enough, it evicts the oldest
-entries of the current states: the table is too small. Evicting a value evicts
-its aliases.
+entries of the current states: the table is too small.
 
 Writers serialize with a lock (``lockf`` between processes, a thread lock
 inside a process). Readers do not lock: a slot is published by writing its
@@ -61,7 +55,7 @@ __all__ = [
 _MAGIC = b'ODOOSHM1'
 _HEADER = struct.Struct('<8sQQQ')  # magic, generation, end of the data, entries
 _HEADER_SIZE = 64
-_SLOT = struct.Struct('<QQQII')  # hash, key offset, value offset, value length, key length
+_SLOT = struct.Struct('<QQII')  # hash, offset, value length, key length
 _GENERATION = struct.Struct('<Q')
 _GENERATION_OFFSET = 8
 _END_OFFSET = 16
@@ -123,11 +117,11 @@ class SharedHashTable:
         mm = self._mm
         index = h % self.slots
         for _ in range(self.slots):
-            slot_h, key_offset, value_offset, length, key_length = _SLOT.unpack_from(mm, _HEADER_SIZE + index * _SLOT.size)
+            slot_h, offset, length, key_length = _SLOT.unpack_from(mm, _HEADER_SIZE + index * _SLOT.size)
             if not slot_h:
                 return index, None
-            if slot_h == h and key_length == len(key) and mm[key_offset:key_offset + key_length] == key:
-                return index, (value_offset, length)
+            if slot_h == h and key_length == len(key) and mm[offset:offset + key_length] == key:
+                return index, (offset + key_length, length)
             index = (index + 1) % self.slots
         return -1, None
 
@@ -175,59 +169,23 @@ class SharedHashTable:
                     end, entries = _END.unpack_from(mm, _END_OFFSET)
                 mm[end:end + len(key)] = key
                 mm[end + len(key):end + len(key) + len(value)] = value
-                self._publish(index, h, end, end + len(key), len(value), len(key), entries)
+                _END.pack_into(mm, _END_OFFSET, end + len(key) + len(value), entries + 1)
+                slot = _HEADER_SIZE + index * _SLOT.size
+                struct.pack_into('<QII', mm, slot + 8, end, len(value), len(key))
+                struct.pack_into('<Q', mm, slot, h)  # publish: the hash last
+                self.writes += 1
                 return True
             finally:
                 fcntl.lockf(self._fd, fcntl.LOCK_UN)
 
-    def alias(self, key: bytes, target: bytes) -> bool:
-        """ Add ``key`` with the value of ``target``, without copying the
-        value, unless ``key`` is already there. Return whether ``key`` is in
-        the table. """
-        h = self._hash(key)
-        target_h = self._hash(target)
-        with self._thread_lock:
-            fcntl.lockf(self._fd, fcntl.LOCK_EX)
-            try:
-                index, found = self._find(key, h)
-                if found is not None:
-                    return True
-                mm = self._mm
-                end, entries = _END.unpack_from(mm, _END_OFFSET)
-                if index < 0 or end + len(key) > self.size or entries >= self.max_entries:
-                    reason = "slots" if index < 0 or entries >= self.max_entries else "data"
-                    self._evict(reason, len(key))
-                    index, _found = self._find(key, h)
-                    end, entries = _END.unpack_from(mm, _END_OFFSET)
-                _target_index, found = self._find(target, target_h)
-                if found is None:
-                    return False
-                value_offset, length = found
-                mm[end:end + len(key)] = key
-                self._publish(index, h, end, value_offset, length, len(key), entries)
-                return True
-            finally:
-                fcntl.lockf(self._fd, fcntl.LOCK_UN)
-
-    def _publish(self, index, h, key_offset, value_offset, length, key_length, entries) -> None:
-        """ Fill the slot ``index`` (called with the lock, the key and value
-        are written at their offsets). """
-        mm = self._mm
-        _END.pack_into(mm, _END_OFFSET, max(key_offset + key_length, value_offset + length), entries + 1)
-        slot = _HEADER_SIZE + index * _SLOT.size
-        struct.pack_into('<QQII', mm, slot + 8, key_offset, value_offset, length, key_length)
-        struct.pack_into('<Q', mm, slot, h)  # publish: the hash last
-        self.writes += 1
-
-    def _entries(self) -> list[tuple[int, int, int, int, int]]:
-        """ Return the entries as (key offset, key length, value offset, value
-        length, hash), in the order of writing (called with the lock). """
-        mm = self._mm
-        result = []
-        for index in range(self.slots):
-            h, key_offset, value_offset, length, key_length = _SLOT.unpack_from(mm, _HEADER_SIZE + index * _SLOT.size)
-            if h:
-                result.append((key_offset, key_length, value_offset, length, h))
+    def _entries(self) -> list[tuple[int, int, int, int]]:
+        """ Return the entries as (offset, key length, value length, hash),
+        in the order of writing (called with the lock). """
+        result = [
+            (offset, key_length, length, h)
+            for h, offset, length, key_length in _SLOT.iter_unpack(self._mm[_HEADER_SIZE:self.data_start])
+            if h
+        ]
         result.sort()
         return result
 
@@ -240,17 +198,6 @@ class SharedHashTable:
         entries = self._entries()
         old_end, _count = _END.unpack_from(mm, _END_OFFSET)
 
-        # an entry owns its value when the value follows its key, otherwise it
-        # is an alias of the value of another entry
-        def owns(entry):
-            key_offset, key_length, value_offset, _length, _h = entry
-            return value_offset == key_offset + key_length
-
-        aliases = {}  # {value offset: [indexes of the aliases]}
-        for i, entry in enumerate(entries):
-            if not owns(entry):
-                aliases.setdefault(entry[2], []).append(i)
-
         # free the percentage of what is full: the slots or the data
         if reason == 'slots':
             target_bytes = max(0, needed - (self.size - old_end))
@@ -260,20 +207,9 @@ class SharedHashTable:
             target_bytes = max(needed - (self.size - old_end), capacity * self.evict_percent // 100)
             target_count = 0
         evicted, evicted_old, freed = choose_evictions(
-            [
-                (mm[key_offset:key_offset + key_length], key_length + (length if owns(entry) else 0))
-                for entry in entries
-                for key_offset, key_length, _value_offset, length, _h in [entry]
-            ],
+            [(mm[offset:offset + key_length], key_length + length) for offset, key_length, length, _h in entries],
             target_bytes, target_count,
         )
-        # the aliases of an evicted value go with it
-        for i in list(evicted):
-            if owns(entries[i]):
-                for alias in aliases.get(entries[i][2], ()):
-                    if alias not in evicted:
-                        evicted.add(alias)
-                        freed += entries[alias][1]
 
         # compact the data and rebuild the index
         [generation] = _GENERATION.unpack_from(mm, _GENERATION_OFFSET)
@@ -281,24 +217,16 @@ class SharedHashTable:
         mm[_HEADER_SIZE:self.data_start] = bytes(self.data_start - _HEADER_SIZE)
         end = self.data_start
         kept = 0
-        moved_values = {}  # {old value offset: new value offset}
-        for i, (key_offset, key_length, value_offset, length, h) in enumerate(entries):
+        for i, (offset, key_length, length, h) in enumerate(entries):
             if i in evicted:
                 continue
-            if owns(entries[i]):
-                size = key_length + length
-                new_value_offset = moved_values[value_offset] = end + key_length
-            else:
-                # the value was written before the alias: it is moved already
-                size = key_length
-                new_value_offset = moved_values[value_offset]
-            if key_offset != end:
-                mm.move(end, key_offset, size)
+            if offset != end:
+                mm.move(end, offset, key_length + length)
             index = h % self.slots
             while _SLOT.unpack_from(mm, _HEADER_SIZE + index * _SLOT.size)[0]:
                 index = (index + 1) % self.slots
-            _SLOT.pack_into(mm, _HEADER_SIZE + index * _SLOT.size, h, end, new_value_offset, length, key_length)
-            end += size
+            _SLOT.pack_into(mm, _HEADER_SIZE + index * _SLOT.size, h, end, length, key_length)
+            end += key_length + length
             kept += 1
         _END.pack_into(mm, _END_OFFSET, end, kept)
         _GENERATION.pack_into(mm, _GENERATION_OFFSET, generation + 2)
@@ -345,38 +273,28 @@ def choose_evictions(entries: list[tuple[bytes, int]], target_bytes: int, target
                 parsed = ast.literal_eval(state.decode())
             except (ValueError, SyntaxError, UnicodeDecodeError, MemoryError, RecursionError):
                 parsed = None
-            states[state] = parsed if isinstance(parsed, tuple) and len(parsed) == 4 else None
+            states[state] = parsed if isinstance(parsed, tuple) and len(parsed) == 4 and parsed[3] is not None else None
         entry_states.append(state)
 
     # the current state of a database: the most recent registry and
-    # signaling sequences of the database it was written last for; the keys
-    # by fingerprint (no sequences) are current for its registry
+    # signaling sequences of the database it was written last for
     latest_oid = {}
     for state in entry_states:
         if (parsed := states[state]) is not None:
             latest_oid[parsed[0]] = parsed[1]
     current = {}
-    current_registry = {}
     for state, parsed in states.items():
         if parsed is not None and parsed[1] == latest_oid[parsed[0]]:
-            current_registry[parsed[0]] = max(current_registry.get(parsed[0], parsed[2]), parsed[2])
-            if parsed[3] is None:
-                continue
             version = (parsed[2], list(parsed[3]))
             if parsed[0] not in current or version > current[parsed[0]][0]:
                 current[parsed[0]] = (version, state)
     current_states = {state for _version, state in current.values()}
-    current_states.update(
-        state for state, parsed in states.items()
-        if parsed is not None and parsed[3] is None
-        and parsed[1] == latest_oid[parsed[0]] and parsed[2] == current_registry[parsed[0]]
-    )
 
     def age(state):
         # by database, the oldest states first: removed databases, then
         # the sequences of the registry and signaling
         parsed = states[state]
-        return (parsed[0], parsed[1] == latest_oid[parsed[0]], parsed[2], list(parsed[3] or ()))
+        return (parsed[0], parsed[1] == latest_oid[parsed[0]], parsed[2], list(parsed[3]))
 
     old_states = sorted(
         (state for state, parsed in states.items() if parsed is not None and state not in current_states),
@@ -412,9 +330,8 @@ def _log_eviction(name, reason, evicted, evicted_old, freed, start_time, kept, u
 
 
 def shared_state_key(dbname: str, db_oid: int, registry_sequence: int, sequences, rest: bytes) -> bytes:
-    """ Return the key of ``rest`` for the given state of the database;
-    ``sequences`` is ``None`` for a key valid for any signaling sequences. """
-    state = repr((dbname, db_oid, registry_sequence, None if sequences is None else tuple(sequences))).encode()
+    """ Return the key of ``rest`` for the given state of the database. """
+    state = repr((dbname, db_oid, registry_sequence, tuple(sequences))).encode()
     return state + b'\0' + rest
 
 
@@ -447,17 +364,6 @@ class LocalTable:
                 self._lru[key] = value
                 self.writes += 1
         return True
-
-    def alias(self, key: bytes, target: bytes) -> bool:
-        with self._lock:
-            if self._lru.get(key) is not None:
-                return True
-            value = self._lru.get(target)
-            if value is None:
-                return False
-            self._lru[key] = value
-            self.writes += 1
-            return True
 
     def clear(self) -> None:
         self._lru.clear()

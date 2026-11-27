@@ -206,26 +206,11 @@ class shmcache(ormcache):
     The shared memory is not used when the transaction invalidated the cache,
     nor when the registry is not ready (the sequences may not be up-to-date);
     the values are not shared when the transaction modified the database.
-
-    An invalidation makes all the values of the cache unreachable, even those
-    that did not change. With ``revalidate``, the method of that name returns a
-    fingerprint of what the value depends on (called with the same arguments,
-    cheaper than the method); a value computed with the same fingerprint is
-    reused after an invalidation, instead of being computed again::
-
-        @shmcache('ref', cache='templates', revalidate='_get_template_fingerprint')
-
-    Same fingerprint, same value: the fingerprint must cover everything that
-    the value depends on and that the signaling of the cache invalidates. It
-    may be ``None`` (no reuse). As the fingerprint identifies the value, it is
-    reused and shared even in a transaction that invalidated the cache or
-    modified the database.
     """
 
-    def __init__(self, *args: str, cache: str = 'default', revalidate: str | None = None, **kwargs):
+    def __init__(self, *args: str, cache: str = 'default', **kwargs):
         super().__init__(*args, cache=cache, **kwargs)
         assert '.' not in cache, "shmcache does not support dependent caches (their sequence is local)"
-        self.revalidate = revalidate
         self.signals = tuple(key for key, names in _caches_by_key().items() if cache in names)
 
     def determine_key(self) -> None:
@@ -258,20 +243,6 @@ class shmcache(ormcache):
         # key[1] is the method, its repr is not stable between processes
         rest = repr((key[0], key[2:])).encode() + b'\0' + self.qualname
         return shared_state_key(registry.db_name, registry.db_oid, registry.registry_sequence, sequences, rest)
-
-    def content_key(self, model: BaseModel, key: tuple, args, kwargs) -> bytes | None:
-        """ Return the key of the value in the shared memory by fingerprint
-        (see ``revalidate``), or ``None`` if there is none. """
-        transaction = model.env.transaction
-        registry = transaction.registry
-        if not registry.ready or transaction._registry_invalidated:
-            return None  # the code may change with the registry
-        fingerprint = getattr(model, self.revalidate)(*args[1:], **kwargs)
-        if fingerprint is None:
-            return None
-        # valid for any signaling sequences
-        rest = repr((key[0], key[2:], fingerprint)).encode() + b'\0' + self.qualname
-        return shared_state_key(registry.db_name, registry.db_oid, registry.registry_sequence, None, rest)
 
     def lookup(self, *args, **kwargs):
         model: BaseModel = args[0]
@@ -308,54 +279,32 @@ class shmcache(ormcache):
             d[key] = value
             return value
 
-        def get(table_key):
-            if local is not None and (value := local.get(table_key)) is not None:
+        shared_key = self.shared_key(model, key)
+        if shared_key is not None:
+            if local is not None and (value := local.get(shared_key)) is not None:
+                d[key] = value
                 return value
-            if shared is not None and (data := shared.get(table_key)) is not None:
+            if shared is not None and (data := shared.get(shared_key)) is not None:
                 value = marshal.loads(data)
                 if local is not None:
-                    local.set(table_key, value)
+                    local.set(shared_key, value)
+                d[key] = value
                 return value
-            return None
-
-        def alias(table_key, target):
-            if local is not None:
-                local.alias(table_key, target)
-            if shared is not None:
-                shared.alias(table_key, target)
-
-        shared_key = self.shared_key(model, key)
-        if shared_key is not None and (value := get(shared_key)) is not None:
-            d[key] = value
-            return value
-
-        # the key by sequences is shared only if the transaction did not write
-        write_shared_key = shared_key is not None and not model.env.transaction._wrote__
-        content_key = self.revalidate and self.content_key(model, key, args, kwargs)
-        if content_key and (value := get(content_key)) is not None:
-            if write_shared_key:
-                alias(shared_key, content_key)
-            d[key] = value
-            return value
 
         start = time.monotonic()
         value = self.method(*args, **kwargs)
         counter.gen_time += time.monotonic() - start
         d[key] = value
-        table_key = content_key or (shared_key if write_shared_key else None)
-        if table_key is None:
-            return value
+        if shared_key is None or model.env.transaction._wrote__:
+            return value  # the transaction may see values that are not committed
         if local is not None:
-            local.set(table_key, value)
+            local.set(shared_key, value)
         if shared is not None:
             try:
-                shared.set(table_key, marshal.dumps(value))
+                shared.set(shared_key, marshal.dumps(value))
             except ValueError:
                 pass  # not shareable, for instance a function
-        if content_key and write_shared_key:
-            alias(shared_key, content_key)
         return value
-
 
 def _caches_by_key():
     from .registry import _CACHES_BY_KEY  # noqa: PLC0415
