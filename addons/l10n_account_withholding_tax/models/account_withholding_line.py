@@ -414,6 +414,7 @@ class AccountWithholdingLine(models.AbstractModel):
                 'amount_currency': amounts['amount_currency'],
                 'balance': amounts['balance'],
                 'partner_id': self._get_comodel_partner().id,
+                'analytic_distribution': None,
             })
             aml_create_values_list.append({
                 **grouping_key,
