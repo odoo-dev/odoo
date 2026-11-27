@@ -56,21 +56,33 @@ export class SaleTemplateDropdown extends Component {
     }
 
     async createQuotation({ additionalContext = {} } = {}) {
-        const saved = await this._saveIfNeeded();
-        if (!saved) {
-            return;
-        }
-
         if (!additionalContext.default_sale_order_template_id) {
             // If the user doesn't specify a template, we remove the previous one from the context
             additionalContext.default_sale_order_template_id = false;
+        }
+
+        if (
+            this.isFormView &&
+            this.props.record.isNew &&
+            additionalContext.default_sale_order_template_id
+        ) {
+            // Apply the template to the unsaved quotation to keep its values
+            await this.props.record.update({
+                sale_order_template_id: { id: additionalContext.default_sale_order_template_id },
+            });
+            return;
+        }
+
+        const saved = await this._saveIfNeeded();
+        if (!saved) {
+            return;
         }
 
         if (this.isFormView) {
             await this.props.record.model.load({
                 resId: false,
                 mode: "edit",
-                context: additionalContext,
+                context: { additionalContext },
             });
             return;
         }
