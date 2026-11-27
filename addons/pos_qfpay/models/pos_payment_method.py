@@ -6,7 +6,7 @@ from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.primitives import padding
 
 from odoo import _, fields, models, api
-from odoo.exceptions import UserError, AccessDenied
+from odoo.exceptions import UserError, AccessDenied, ValidationError
 
 
 class PosPaymentMethod(models.Model):
@@ -41,6 +41,13 @@ class PosPaymentMethod(models.Model):
     def _check_qfpay_terminal(self):
         if any(record.use_payment_terminal == 'qfpay' and record.company_id.currency_id.name != 'HKD' for record in self):
             raise UserError(_('QFPay is only valid for HKD Currency'))
+
+    @api.constrains('qfpay_pos_key')
+    def _check_qfpay_pos_key(self):
+        for record in self.sudo().filtered(lambda r: r.use_payment_terminal == 'qfpay' and r.qfpay_pos_key):
+            # The POS key is used as an AES key, which must be 16, 24 or 32 bytes long
+            if len(record.qfpay_pos_key.encode('utf-8')) not in (16, 24, 32):
+                raise ValidationError(_('QFPay POS Key must be 16, 24 or 32 characters long.'))
 
     def _is_write_forbidden(self, fields):
         return super()._is_write_forbidden(fields - {'qfpay_latest_response'})

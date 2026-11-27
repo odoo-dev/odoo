@@ -1,5 +1,6 @@
 from unittest.mock import patch
 from odoo.addons.point_of_sale.tests.test_frontend import TestPointOfSaleHttpCommon
+from odoo.exceptions import ValidationError
 from odoo.tests import Command
 from odoo.tests.common import tagged
 
@@ -28,3 +29,20 @@ class TestQFPayPoS(TestPointOfSaleHttpCommon):
     def test_tour_qfpay_order_and_refund(self):
         with patch('odoo.addons.pos_qfpay.controllers.main.consteq', lambda a, b: True):
             self.start_pos_tour('qfpay_order_and_refund')
+
+    def test_qfpay_sign_request_invalid_pos_key(self):
+        qfpay_payment_method = self.main_pos_config.payment_method_ids.filtered(
+            lambda pm: pm.use_payment_terminal == 'qfpay'
+        )
+        with self.assertRaisesRegex(
+            ValidationError,
+            "QFPay POS Key must be 16, 24 or 32 characters long."
+        ):
+            qfpay_payment_method.qfpay_pos_key = 'dummy'
+            # Payload sent by the PoS when paying with a QFPay terminal
+            qfpay_payment_method.qfpay_sign_request({
+                'func_type': 1001,
+                'amt': 32,
+                'channel': 'card_payment',
+                'out_trade_no': 'test',
+            })
