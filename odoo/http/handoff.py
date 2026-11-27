@@ -7,14 +7,9 @@ idle with that very registry loaded. Such a worker gives the connection to the
 idle worker instead, before reading anything from it, and only builds the
 registry when no idle worker has it. The database is guessed from the request
 head, peeked at: the X-Odoo-Database header, or a literal dbfilter such as
-``^%d$``. A database thus sticks to the workers having its registry and its
-ormcache.
-
-The number of workers loading the registry of a database can be capped: once
-that many workers have it, a request that finds none of them idle waits for one
-of them, picked at random, rather than having yet another worker build it. By
-default, the cap is the fair share of the workers among the databases they have
-loaded, and at least ``AUTO_MIN_WORKERS``: a single database gets all of them.
+``^%d$``. The workers having the registry of a database are ranked in an order
+fixed per database, and its requests go to the first idle one: the other copies
+of the registry stop serving, and expire.
 
 The workers share the following, all created by the master before forking:
 
@@ -39,9 +34,7 @@ import random
 import re
 import socket
 import sys
-import time
 from collections.abc import Iterable
-from typing import Literal
 
 from odoo.tools import config
 
@@ -56,9 +49,6 @@ BUSY, DIGESTS = range(2)  # the words of a slot, the digests come last
 SLOT_WORDS = DIGESTS + MAX_DATABASES
 SLOT_SIZE = SLOT_WORDS * DIGEST_SIZE  # a multiple of 8: every word is aligned
 RECV_SIZE = 1024  # a database name
-AUTO = 'auto'  # the cap of workers per database follows the databases loaded
-AUTO_MIN_WORKERS = 6
-AUTO_REFRESH = 1.0  # seconds between two counts of the databases loaded
 
 
 # The headers that tell the database of a request, found without parsing it.
@@ -116,13 +106,8 @@ def dbfilter_dbname(host: str) -> str | None:
 
 
 class RegistryHandoff:
-    def __init__(self, slots: int, max_workers: int | None | Literal['auto'] = None):
-        """ ``max_workers`` caps the number of workers loading the registry of
-        a database, ``None`` means unlimited, ``AUTO`` a fair share. """
+    def __init__(self, slots: int):
         self.slots = slots
-        self.max_workers = max_workers
-        self.auto_cap = slots
-        self.auto_expiry = 0.0
         self.free_slots = list(range(slots))
         self.table = mmap.mmap(-1, slots * SLOT_SIZE)
         self.words = memoryview(self.table).cast('Q')
@@ -189,8 +174,8 @@ class RegistryHandoff:
         self.entries.pop(slot, None)
 
     def set_busy(self, slot: int, busy: bool) -> None:
-        """ Flag the slot as serving a request: senders only queue a connection
-        behind a request in progress when the cap of workers is reached. """
+        """ Flag the slot as serving a request: senders do not queue a
+        connection behind a request in progress. """
         self.words[slot * SLOT_WORDS + BUSY] = busy
 
     def pending(self, slot: int) -> bool:
@@ -209,46 +194,28 @@ class RegistryHandoff:
         return socket.socket(fileno=fds[0]), message.decode()
 
     def send(self, dbname: str, sock: socket.socket, own_slot: int | None) -> bool:
-        """ Try to give the connection to another worker, in order of preference:
-
-        - an idle worker having the registry of the given database;
-        - when the cap of workers having that registry is reached, one of them
-          picked at random, even if busy: the connection waits in its inbox.
+        """ Try to give the connection to the first idle worker having the
+        registry of the given database, in an order fixed per database.
 
         Return whether the connection was given: then the caller must only close
-        its socket. Otherwise, the caller loads the registry, which may evict
-        another one from its LRU.
+        its socket. Otherwise, the caller serves it: either it comes first in
+        that order, or it loads the registry, which may evict another one from
+        its LRU.
         """
         digest = _digest(dbname)
         message = dbname.encode()
-        holders = self._holders(digest, own_slot)
-        random.shuffle(holders)  # do not favor a slot
+        holders = self._holders(digest)
+        holders.sort(key=lambda slot: _digest(f'{dbname}/{slot}'))  # rendezvous hashing
 
         for slot in holders:
+            if slot == own_slot:
+                return False
             if self._idle(slot) and self._try_send(slot, sock, message):
                 _logger.debug("Handed off %s from slot %s to slot %s", dbname, own_slot, slot)
                 return True
 
-        if holders and (cap := self.cap()) and len(holders) >= cap:
-            for slot in holders:
-                if self._try_send(slot, sock, message, queue=True):
-                    _logger.debug("Queued %s from slot %s on busy slot %s", dbname, own_slot, slot)
-                    return True
-
         _logger.debug("No worker for %s, slot %s loads it", dbname, own_slot)
         return False
-
-    def cap(self) -> int | None:
-        """ Return the number of workers that may load the registry of a
-        database, ``None`` for unlimited. """
-        if self.max_workers != AUTO:
-            return self.max_workers
-        now = time.monotonic()
-        if now >= self.auto_expiry:
-            loaded = set(self.words.tolist()) - {0, 1}  # neither a free entry nor a busy flag
-            self.auto_cap = max(AUTO_MIN_WORKERS, -(-self.slots // max(len(loaded), 1)))
-            self.auto_expiry = now + AUTO_REFRESH
-        return self.auto_cap
 
     def _try_send(self, slot: int, sock: socket.socket, message: bytes, *, queue: bool = False) -> bool:
         """ Send the connection to the slot. Unless ``queue``, only when nothing
@@ -265,16 +232,15 @@ class RegistryHandoff:
             return False
         return True
 
-    def _holders(self, digest: bytes, own_slot: int | None) -> list[int]:
-        """ Return the other slots advertising the digest. One search per slot
+    def _holders(self, digest: bytes) -> list[int]:
+        """ Return the slots advertising the digest. One search per slot
         is faster than one over the table: CPython searches long buffers with
         a slower algorithm. """
         find, size = self.table.find, MAX_DATABASES * DIGEST_SIZE
         return [
             slot
             for slot in range(self.slots)
-            if slot != own_slot
-            and find(digest, start := (slot * SLOT_WORDS + DIGESTS) * DIGEST_SIZE, start + size) != -1
+            if find(digest, start := (slot * SLOT_WORDS + DIGESTS) * DIGEST_SIZE, start + size) != -1
         ]
 
     def _idle(self, slot: int) -> bool:
