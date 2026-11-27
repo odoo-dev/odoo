@@ -1,8 +1,13 @@
 # -*- coding: utf-8 -*-
 
+from unittest.mock import patch
+
+from dateutil.relativedelta import relativedelta
+
+from odoo import fields
 from odoo.addons.mail.tests.common import mail_new_test_user
 from odoo.addons.mail.tools.discuss import Store
-from odoo.tests import tagged
+from odoo.tests import HttpCase, tagged
 
 from odoo.addons.project.tests.test_project_sharing import TestProjectSharingCommon
 
@@ -178,3 +183,138 @@ class TestPortalTimesheet(TestProjectSharingCommon):
             store.as_dict()["mail.thread"][0]["collaborator_ids"],
             [self.partner_portal.id],
         )
+
+
+@tagged('post_install', '-at_install')
+class TestPortalTimesheetDownload(HttpCase, TestProjectSharingCommon):
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.user_portal.password = 'chell'
+        cls.employee = cls.env['hr.employee'].create({
+            'name': 'Project User Employee',
+            'user_id': cls.user_projectuser.id,
+        })
+        today = fields.Date.today()
+        AnalyticLine = cls.env['account.analytic.line']
+        cls.timesheet_foo = AnalyticLine.create({
+            'name': 'foo meeting',
+            'project_id': cls.project_portal.id,
+            'task_id': cls.task_portal.id,
+            'employee_id': cls.employee.id,
+            'date': today,
+            'unit_amount': 1,
+        })
+        cls.timesheet_bar = AnalyticLine.create({
+            'name': 'bar meeting',
+            'project_id': cls.project_portal.id,
+            'task_id': cls.task_portal.id,
+            'employee_id': cls.employee.id,
+            'date': today,
+            'unit_amount': 2,
+        })
+        cls.timesheet_old = AnalyticLine.create({
+            'name': 'foo old',
+            'project_id': cls.project_portal.id,
+            'task_id': cls.task_portal.id,
+            'employee_id': cls.employee.id,
+            'date': today - relativedelta(years=2),
+            'unit_amount': 3,
+        })
+        # not visible to the portal user
+        cls.timesheet_private = AnalyticLine.create({
+            'name': 'foo private',
+            'project_id': cls.project_no_collabo.id,
+            'task_id': cls.task_no_collabo.id,
+            'employee_id': cls.employee.id,
+            'date': today,
+            'unit_amount': 4,
+        })
+
+    def _download(self, **params):
+        """ Call the download route and return the response and the ids of the
+            timesheets given to the report.
+        """
+        ReportModel = self.registry['ir.actions.report']
+        original_render = ReportModel._render_qweb_pdf
+        rendered_ids = []
+
+        def _render_qweb_pdf(report_self, report_ref, res_ids=None, data=None):
+            if report_ref == 'hr_timesheet.timesheet_report':
+                rendered_ids.extend(res_ids or [])
+            return original_render(report_self, report_ref, res_ids=res_ids, data=data)
+
+        with patch.object(ReportModel, '_render_qweb_pdf', _render_qweb_pdf):
+            response = self.url_open('/my/timesheets/download', params=params)
+        self.assertEqual(response.status_code, 200)
+        return response, set(rendered_ids)
+
+    def test_portal_timesheet_download_filtered(self):
+        self.authenticate('chell', 'chell')
+        response, ids = self._download()
+        self.assertEqual(ids, {self.timesheet_foo.id, self.timesheet_bar.id, self.timesheet_old.id})
+        self.assertIn('attachment', response.headers['Content-Disposition'])
+
+        _response, ids = self._download(filterby='year', search_in='name', search='foo')
+        self.assertEqual(ids, {self.timesheet_foo.id})
+
+        _response, ids = self._download(filterby='not_a_filter', search_in='name', search='foo')
+        self.assertEqual(ids, {self.timesheet_foo.id, self.timesheet_old.id}, "An unknown filter falls back on 'all'.")
+
+    def test_portal_timesheet_download_parent_task(self):
+        subtask = self.env['project.task'].create({
+            'name': 'Portal Subtask',
+            'project_id': self.project_portal.id,
+            'parent_id': self.task_portal.id,
+        })
+        timesheet_subtask = self.env['account.analytic.line'].create({
+            'name': 'subtask work',
+            'project_id': self.project_portal.id,
+            'task_id': subtask.id,
+            'employee_id': self.employee.id,
+            'unit_amount': 1,
+        })
+        self.authenticate('chell', 'chell')
+        _response, ids = self._download(parent_task_id=self.task_portal.id)
+        self.assertEqual(ids, {timesheet_subtask.id})
+
+    def test_portal_timesheet_download_access(self):
+        self.authenticate('chell', 'chell')
+        _response, ids = self._download(search_in='name', search='private')
+        self.assertFalse(ids, "Timesheets outside the portal domain must never be printed.")
+
+    def test_portal_timesheet_download_multi_company(self):
+        company_b = self.env['res.company'].create({'name': 'Company B'})
+        project_b = self.env['project.project'].create({
+            'name': 'Portal B',
+            'privacy_visibility': 'portal',
+            'partner_id': self.user_portal.partner_id.id,
+            'company_id': company_b.id,
+        })
+        employee_b = self.env['hr.employee'].create({
+            'name': 'Employee B',
+            'company_id': company_b.id,
+        })
+        timesheet_b = self.env['account.analytic.line'].with_company(company_b).create({
+            'name': 'company b work',
+            'project_id': project_b.id,
+            'employee_id': employee_b.id,
+            'unit_amount': 1,
+        })
+        self.authenticate('chell', 'chell')
+        _response, ids = self._download()
+        self.assertEqual(ids, {self.timesheet_foo.id, self.timesheet_bar.id, self.timesheet_old.id, timesheet_b.id})
+
+    def test_portal_timesheet_download_empty(self):
+        self.authenticate('chell', 'chell')
+        _response, ids = self._download(search_in='name', search='nothing matches')
+        self.assertFalse(ids)
+
+    def test_portal_timesheet_download_button(self):
+        self.authenticate('chell', 'chell')
+        response = self.url_open('/my/timesheets')
+        self.assertIn('/my/timesheets/download', response.text)
+
+        response = self.url_open('/my/timesheets', params={'search_in': 'name', 'search': 'nothing matches'})
+        self.assertNotIn('/my/timesheets/download', response.text)

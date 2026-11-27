@@ -60,26 +60,7 @@ class TimesheetCustomerPortal(CustomerPortal):
             'name': {'label': _('Description')},
         }
 
-    def _project_get_page_view_values(self, project, access_token, page=1, date_begin=None, date_end=None, sortby=None, search=None, search_in='content', groupby=None, **kwargs):
-        values = super()._project_get_page_view_values(project, access_token, page, date_begin, date_end, sortby, search, search_in, groupby, **kwargs)
-        values['allow_timesheets'] = project.allow_timesheets
-        return values
-
-    @http.route(['/my/timesheets', '/my/timesheets/page/<int:page>'], type='http', auth="user", website=True)
-    def portal_my_timesheets(self, page=1, sortby=None, filterby=None, search=None, search_in='all', groupby='none', **kw):
-        Timesheet = request.env['account.analytic.line']
-        domain = Domain(Timesheet._timesheet_get_portal_domain())
-        Timesheet_sudo = Timesheet.sudo()
-
-        values = self._prepare_portal_layout_values()
-        items_per_page = 100
-
-        searchbar_sortings = self._get_searchbar_sortings()
-
-        searchbar_inputs = dict(sorted(self._get_searchbar_inputs().items(), key=lambda item: item[1]['sequence']))
-
-        searchbar_groupby = dict(sorted(self._get_searchbar_groupby().items(), key=lambda item: item[1]['sequence']))
-
+    def _get_searchbar_filters(self):
         today = fields.Date.context_today(request.env.user)
         quarter_start, quarter_end = date_utils.get_quarter(today)
         last_quarter_date = date_utils.subtract(quarter_start, weeks=1)
@@ -88,7 +69,7 @@ class TimesheetCustomerPortal(CustomerPortal):
         last_month = today + relativedelta(months=-1)
         last_year = today + relativedelta(years=-1)
 
-        searchbar_filters = {
+        return {
             'all': {'label': _('All'), 'domain': []},
             'last_year': {'label': _('Last Year'), 'domain': [('date', '>=', date_utils.start_of(last_year, 'year')), ('date', '<=', date_utils.end_of(last_year, 'year'))]},
             'last_quarter': {'label': _('Last Quarter'), 'domain': [('date', '>=', last_quarter_start), ('date', '<=', last_quarter_end)]},
@@ -100,19 +81,47 @@ class TimesheetCustomerPortal(CustomerPortal):
             'quarter': {'label': _('This Quarter'), 'domain': [('date', '>=', quarter_start), ('date', '<=', quarter_end)]},
             'year': {'label': _('This Year'), 'domain': [('date', '>=', date_utils.start_of(today, 'year')), ('date', '<=', date_utils.end_of(today, 'year'))]},
         }
+
+    def _get_portal_timesheets_domain(self, filterby='all', search=None, search_in='all', **kw):
+        """ Return the domain of the timesheets displayed on /my/timesheets for the
+            given filter, search and parent task, restricted to the timesheets the
+            current user can access on the portal.
+        """
+        searchbar_filters = self._get_searchbar_filters()
+        domain = Domain(request.env['account.analytic.line']._timesheet_get_portal_domain())
+        domain &= Domain(searchbar_filters.get(filterby, searchbar_filters['all'])['domain'])
+        if search and search_in:
+            domain &= self._get_search_domain(search_in, search)
+        if parent_task_id := kw.get('parent_task_id'):
+            domain &= Domain('parent_task_id', '=', int(parent_task_id))
+        return domain
+
+    def _project_get_page_view_values(self, project, access_token, page=1, date_begin=None, date_end=None, sortby=None, search=None, search_in='content', groupby=None, **kwargs):
+        values = super()._project_get_page_view_values(project, access_token, page, date_begin, date_end, sortby, search, search_in, groupby, **kwargs)
+        values['allow_timesheets'] = project.allow_timesheets
+        return values
+
+    @http.route(['/my/timesheets', '/my/timesheets/page/<int:page>'], type='http', auth="user", website=True)
+    def portal_my_timesheets(self, page=1, sortby=None, filterby=None, search=None, search_in='all', groupby='none', **kw):
+        Timesheet_sudo = request.env['account.analytic.line'].sudo()
+
+        values = self._prepare_portal_layout_values()
+        items_per_page = 100
+
+        searchbar_sortings = self._get_searchbar_sortings()
+
+        searchbar_inputs = dict(sorted(self._get_searchbar_inputs().items(), key=lambda item: item[1]['sequence']))
+
+        searchbar_groupby = dict(sorted(self._get_searchbar_groupby().items(), key=lambda item: item[1]['sequence']))
+
+        searchbar_filters = self._get_searchbar_filters()
         # default sort by value
         if not sortby:
             sortby = 'date desc'
         # default filter by value
         if not filterby:
             filterby = 'all'
-        domain &= Domain(searchbar_filters[filterby]['domain'])
-
-        if search and search_in:
-            domain &= self._get_search_domain(search_in, search)
-
-        if parent_task_id := kw.get('parent_task_id'):
-            domain &= Domain('parent_task_id', '=', int(parent_task_id))
+        domain = self._get_portal_timesheets_domain(filterby, search, search_in, **kw)
 
         timesheet_count = Timesheet_sudo.search_count(domain)
         # pager
@@ -167,6 +176,18 @@ class TimesheetCustomerPortal(CustomerPortal):
             'is_uom_day': request.env['account.analytic.line']._is_timesheet_encode_uom_day(),
         })
         return request.render("hr_timesheet.portal_my_timesheets", values)
+
+    @http.route('/my/timesheets/download', type='http', auth='user', website=True, methods=['GET'])
+    def portal_my_timesheets_download(self, filterby=None, search=None, search_in='all', **kw):
+        domain = self._get_portal_timesheets_domain(filterby or 'all', search, search_in, **kw)
+        # sudo: records are restricted to the portal domain of the current user
+        timesheets_sudo = request.env['account.analytic.line'].sudo().search(domain)
+        # Rendered directly rather than through _show_report, so that timesheets
+        # of several companies can be printed, like in the backend.
+        report = request.env['ir.actions.report'].sudo()._render_qweb_pdf(
+            'hr_timesheet.timesheet_report', timesheets_sudo.ids, data={'report_type': 'pdf'})[0]
+        headers = self._get_http_headers(timesheets_sudo, 'pdf', report, download=True)
+        return request.make_response(report, headers=list(headers.items()))
 
 
 class TimesheetProjectCustomerPortal(ProjectCustomerPortal):
