@@ -20,13 +20,15 @@
         </field>
     </record>
 
-    <record id="hub_item_forecast_margins" model="ir.hub.item">
-        <field name="hub_id" ref="project.hub_project"/>
-        <field name="sequence">135</field>
-        <field name="name">Forecast Margins</field>
-        <field name="python_method">action_estimated_margin</field>
-        <field name="res_model">sale.report</field>
-        <field name="group_ids" eval="[(4, ref('project.group_project_manager'))]"/>
-        <field name="context">{'margin_date_filter': False}</field>
+    <record id="project_project_view_hub_inherit_sale_project_margin" model="ir.ui.view">
+        <field name="name">project.project.view.hub.inherit.sale.project.margin</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.project_project_view_hub"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='action_real_margin']" position="after">
+                <button name="action_estimated_margin" type="object" string="Forecast Margins"
+                        groups="project.group_project_manager" context="{'margin_date_filter': False}"/>
+            </xpath>
+        </field>
     </record>
 </odoo>

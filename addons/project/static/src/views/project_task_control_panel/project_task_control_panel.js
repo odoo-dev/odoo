@@ -23,7 +23,7 @@ export class ProjectTaskControlPanel extends ControlPanel {
     }
 
     get taskOptionsTitle() {
-        if (this.env.config.hub) {
+        if (this.env.config.hub?.items().length) {
             return _t("Show sub-tasks & hub tabs");
         }
         return _t("Show sub-tasks");
@@ -42,7 +42,7 @@ export class ProjectTaskControlPanel extends ControlPanel {
     hasMobileHubItems() {
         return (
             this.uiService.isSmall &&
-            Boolean(this.env.config.hub && this.env.config.hub.items().length)
+            Boolean(this.env.config.hub?.items().length)
         );
     }
 }

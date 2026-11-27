@@ -4,7 +4,7 @@ import logging
 from odoo import _
 from odoo.exceptions import UserError, MissingError, AccessError
 from odoo.http import Controller, request, route
-from .utils import add_hub_info, clean_action
+from .utils import clean_action
 from werkzeug.exceptions import BadRequest
 
 
@@ -44,11 +44,6 @@ class Action(Controller):
         action_type = base_action[0]['type']
         if action_type == 'ir.actions.act_window':
             result = request.env[action_type].sudo().browse([action_id])._get_action_dict()
-            context = request.env.context
-            add_hub_info(
-                result, request.env, context.get('active_id'),
-                action_id=action_id, model=context.get('active_model'),
-            )
             return clean_action(result, env=request.env) if result else False
         result = request.env[action_type].sudo().browse([action_id]).read()
         return clean_action(result[0], env=request.env) if result else False
@@ -81,16 +76,22 @@ class Action(Controller):
                     if act['type'] == 'ir.actions.client' and idx + 1 < len(actions) and action.get('action') == actions[idx + 1].get('action'):
                         results.append({'error': 'Client actions don\'t have multi-record views'})
                         continue
+                    # the hub of a record shown by the action (see web_get_hub)
+                    hub_view = act.get('hub_view_id')
+                    hub_info = {
+                        'res_model': act.get('res_model') or False,
+                        'hub_view_id': (hub_view[0] if isinstance(hub_view, (list, tuple)) else hub_view) or False,
+                    }
                     if record_id:
                         # some actions may not have a res_model (e.g. a client action)
                         if record_id == 'new':
-                            results.append({'display_name': _("New")})
+                            results.append({'display_name': _("New"), **hub_info})
                         elif act['res_model']:
                             record = request.env[act['res_model']].browse(record_id)
                             record.read(['display_name'])
-                            results.append({'display_name': record.display_name})
+                            results.append({'display_name': record.display_name, **hub_info})
                         else:
-                            results.append({'display_name': act['display_name']})
+                            results.append({'display_name': act['display_name'], **hub_info})
                     else:
                         if act.get('res_model') and act['type'] != 'ir.actions.client':
                             request.env[act['res_model']].check_access('read')
@@ -98,16 +99,16 @@ class Action(Controller):
                             name = act['display_name'] if any(view[1] != 'form' and view[1] != 'search' for view in act['views']) else None
                         else:
                             name = act['display_name']
-                        results.append({'display_name': name})
+                        results.append({'display_name': name, **hub_info})
                 elif action.get('model'):
                     Model = request.env[action.get('model')]
                     if record_id:
                         if record_id == 'new':
-                            results.append({'display_name': _("New")})
+                            results.append({'display_name': _("New"), 'res_model': Model._name, 'hub_view_id': False})
                         else:
                             record = Model.browse(record_id)
                             record.read(['display_name'])
-                            results.append({'display_name': record.display_name})
+                            results.append({'display_name': record.display_name, 'res_model': Model._name, 'hub_view_id': False})
                     else:
                         # This case cannot be produced by the web client
                         raise BadRequest('Actions with a model should also have a resId')

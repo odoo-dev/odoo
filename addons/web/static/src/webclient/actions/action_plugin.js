@@ -169,7 +169,10 @@ export class ActionPlugin extends Plugin {
 
     /**
      * Functions called with each controller about to be displayed (but not
-     * when opened in a new window), e.g. to add entries to its config.
+     * when opened in a new window), e.g. to add entries to its config or to
+     * its ``extraState`` (kept with its state in the history and the session
+     * storage, and given back when it is restored), and the stack of
+     * controllers it ends.
      */
     controllerSetups = new Resource({ name: "controller_setups", validation: t.function() });
 
@@ -192,7 +195,9 @@ export class ActionPlugin extends Plugin {
                 !ev.detail.error
             ) {
                 rpcBus.trigger("CLEAR-CACHES", "/web/action/load");
-                const virtualStack = await this.#controllersFromState(this.#router.current);
+                const virtualStack = await this.#controllersFromState(
+                    this.#getStoredState(this.#router.current)
+                );
                 const nextStack = [
                     ...virtualStack,
                     this.#controllerStack[this.#controllerStack.length - 1],
@@ -276,10 +281,6 @@ export class ActionPlugin extends Plugin {
      * @returns {Promise<object[]>} an array of virtual controllers
      */
     async #controllersFromState(state) {
-        const currentState = JSON.parse(browser.sessionStorage.getItem("current_state") || "{}");
-        if (this.#router.stateToUrl(currentState) === this.#router.stateToUrl(state)) {
-            state = currentState;
-        }
         if (!state?.actionStack?.length) {
             return [];
         }
@@ -289,6 +290,7 @@ export class ActionPlugin extends Plugin {
             .map((actionState, index) => {
                 const controller = this.#makeController({
                     displayName: actionState.displayName,
+                    extraState: { ...actionState.extra },
                     virtual: true,
                     action: {},
                     props: {},
@@ -348,6 +350,20 @@ export class ActionPlugin extends Plugin {
     }
 
     /**
+     * @param {object} state
+     * @returns {object} the state stored in the session storage if it has the
+     *  same url as ``state`` (e.g. on a reload), as it has more information
+     *  (e.g. the display names of the breadcrumbs), otherwise ``state``
+     */
+    #getStoredState(state) {
+        const currentState = JSON.parse(browser.sessionStorage.getItem("current_state") || "{}");
+        if (this.#router.stateToUrl(currentState) === this.#router.stateToUrl(state)) {
+            return currentState;
+        }
+        return state;
+    }
+
+    /**
      * Load breadcrumbs for an array of controllers. This function adds display
      * names to controllers that the current user has access to and for which
      * the view (and record) exist. Controllers that correspond to a deleted
@@ -390,7 +406,10 @@ export class ActionPlugin extends Plugin {
         const controllersToRemove = [];
         for (const [controller, res] of zip(controllers, results)) {
             if ("display_name" in res) {
-                controller.displayName = res.display_name;
+                const { display_name, ...actionInfo } = res;
+                controller.displayName = display_name;
+                // what the server knows of the action, e.g. its model (res_model)
+                Object.assign(controller.action, actionInfo);
             } else {
                 controllersToRemove.push(controller);
                 if ("error" in res) {
@@ -1014,8 +1033,10 @@ export class ActionPlugin extends Plugin {
             }
         };
         controller.config.isReloadingController = controller === this.#controllerStack.at(-1);
+        // see #makeState
+        controller.extraState ||= { ...options.extraState };
         for (const setupController of this.controllerSetups.items()) {
-            setupController(controller);
+            setupController(controller, nextStack);
         }
 
         const plugin = this;
@@ -1826,6 +1847,7 @@ export class ActionPlugin extends Plugin {
                 throw new Error("Attempted to restore a virtual controller whose state is invalid");
             }
             const { actionRequest, options } = actionParams;
+            options.extraState = controller.extraState;
             this.#controllerStack = this.#controllerStack.slice(0, index);
             return this.#doAction(actionRequest, options);
         }
@@ -1859,11 +1881,17 @@ export class ActionPlugin extends Plugin {
             browser.sessionStorage.removeItem("current_lang");
             browser.sessionStorage.removeItem("current_state");
         }
-        const newStack = await this.#controllersFromState(state);
+        const storedState = this.#getStoredState(state);
+        const newStack = await this.#controllersFromState(storedState);
         const actionParams = this.#getActionParams(state);
         if (actionParams) {
             // Params valid => performs a "doAction"
             const { actionRequest, options } = actionParams;
+            // see #makeState
+            const { extra } = storedState.actionStack?.at(-1) || {};
+            if (extra) {
+                options.extraState = extra;
+            }
             if (options.index) {
                 options.newStack = newStack.slice(0, options.index);
                 delete options.index;
@@ -1897,6 +1925,11 @@ export class ActionPlugin extends Plugin {
         const actions = cStack.map((controller) => {
             const { action, props, displayName } = controller;
             const actionState = { displayName };
+            // what other plugins keep with the state of the controller (in the
+            // history and the session storage, not in the url)
+            if (Object.keys(controller.extraState || {}).length) {
+                actionState.extra = controller.extraState;
+            }
             if (action.path || action.id) {
                 actionState.action = action.path || action.id;
             } else if (action.type === "ir.actions.client") {

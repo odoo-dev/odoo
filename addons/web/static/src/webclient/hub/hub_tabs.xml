@@ -3,15 +3,15 @@
 
     <t t-name="web.HubTabs">
         <!-- on small screens, the items are listed in the control panel instead -->
-        <Transition visible="!this.ui.isSmall and this.props.hub.showTabs()" name="'o-fade'" t-slot-scope="transition" leaveDuration="500">
+        <Transition visible="!this.ui.isSmall and this.props.hub.showTabs() and this.items().length > 0" name="'o-fade'" t-slot-scope="transition" leaveDuration="500">
             <div class="o_hub_tabs d-flex align-items-end px-3 pt-2" t-att-class="transition.className">
                 <ul class="nav nav-tabs border-bottom-0" t-ref="this.root">
-                    <t t-foreach="this.getPinnedItems()" t-as="hubItem" t-key="hubItem.id">
-                        <li class="o_hub_tab nav-item me-1" t-att-data-id="hubItem.id">
+                    <t t-foreach="this.getPinnedItems()" t-as="hubItem" t-key="hubItem.key">
+                        <li class="o_hub_tab nav-item me-1" t-att-data-key="hubItem.key">
                             <span class="nav-link"
-                                t-att-class="{ 'active': this.props.hub.activeItemId === hubItem.id }"
+                                t-att-class="{ 'active': this.props.hub.activeItemKey === hubItem.key }"
                                 t-custom-click.prevent="(ev, newWindow) => this.openHubItem(hubItem, newWindow)">
-                                <t t-out="hubItem.display_name"/>
+                                <t t-out="hubItem.string"/>
                             </span>
                         </li>
                     </t>
@@ -21,11 +21,11 @@
                         <i class="oi" data-icon="keyboard_arrow_down" role="img" aria-hidden="true"/>
                     </button>
                     <t t-set-slot="content">
-                        <DropdownItem t-foreach="this.items()" t-as="item" t-key="item.id"
+                        <DropdownItem t-foreach="this.items()" t-as="item" t-key="item.key"
                             class="this.isPinned(item) ? 'selected' : ''"
                             onSelected="() => this.togglePin(item)"
                             closingMode="'none'">
-                            <span t-out="item.display_name"/>
+                            <span t-out="item.string"/>
                         </DropdownItem>
                     </t>
                 </Dropdown>

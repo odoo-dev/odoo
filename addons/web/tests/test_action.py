@@ -1,8 +1,6 @@
 import json
-from unittest.mock import patch
 
-from odoo.fields import Command
-from odoo.tests import HttpCase, new_test_user, tagged
+from odoo.tests import HttpCase, tagged
 
 
 @tagged('post_install', '-at_install')
@@ -276,70 +274,29 @@ class TestLoadBreadcrumbs(HttpCase):
         )
         self.assertEqual(resp.json()['error']['message'], 'Odoo Server Error')
 
-
-@tagged('post_install', '-at_install')
-class TestActionHub(HttpCase):
-    """ The routes opening actions add the hub of the opened item (see
-    ``test_ir_hub`` for the content of the hub).
-    """
-
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        cls.user = new_test_user(cls.env, 'hub_http_user', groups='base.group_user')
-        cls.partners = cls.env['res.partner'].create([{'name': 'Hub partner 1'}, {'name': 'Hub partner 2'}])
-        cls.window_action = cls.env['ir.actions.act_window'].create({'name': 'Partners', 'res_model': 'res.partner'})
-        cls.env['ir.hub'].search([('res_model', '=', 'res.partner')]).unlink()
-        cls.hub = cls.env['ir.hub'].create({
-            'name': 'Partner hub',
-            'res_model': 'res.partner',
-            'item_ids': [
-                Command.create({'name': 'Method', 'python_method': 'action_hub_test', 'res_model': 'res.partner'}),
-                Command.create({'name': 'Action', 'action_id': cls.window_action.id}),
-            ],
+    # the model and the hub view of the actions are given, for the web client
+    # to show the hub of the records they display
+    def test_breadcrumbs_hub(self):
+        hub_view = self.env['ir.ui.view'].create({
+            'model': 'res.partner',
+            'arch': '<hub><button name="action_archive" type="object" string="Archive"/></hub>',
         })
-        cls.method_item, cls.action_item = cls.hub.item_ids
-
-        def action_hub_test(self):
-            return {'type': 'ir.actions.act_window', 'res_model': 'res.partner', 'views': [[False, 'list']]}
-
-        cls.startClassPatcher(patch.object(
-            cls.registry['res.partner'], 'action_hub_test', action_hub_test, create=True,
-        ))
-
-    def setUp(self):
-        super().setUp()
-        self.authenticate('hub_http_user', 'hub_http_user')
-
-    def _call_button(self, partners):
-        return self.make_jsonrpc_request('/web/dataset/call_button', {
-            'model': 'res.partner', 'method': 'action_hub_test', 'args': [partners.ids], 'kwargs': {},
-        })
-
-    # a button calling an item's method on one record opens that item's hub
-    def test_call_button_hub(self):
-        with self.assertNoLogs('odoo.addons.web.controllers.utils', 'WARNING'):
-            action = self._call_button(self.partners[0])
-        self.assertEqual(action['hub']['active_item_id'], self.method_item.id)
-
-    # a button called on several records opens no hub
-    def test_call_button_multi_ids(self):
-        self.assertNotIn('hub', self._call_button(self.partners))
-
-    # loading an item's action opens its hub only when given an active record
-    # of the hub's model
-    def test_action_load_hub(self):
-        def load(context=None):
-            return self.make_jsonrpc_request('/web/action/load', {
-                'action_id': self.window_action.id, 'context': context or {},
-            })
-
-        partner_id = self.partners[0].id
-        action = load({'active_id': partner_id, 'active_model': 'res.partner'})
-        self.assertEqual(action['hub']['active_item_id'], self.action_item.id)
-        # restored from the url, without active_model
-        self.assertEqual(load({'active_id': partner_id})['hub']['active_item_id'], self.action_item.id)
-        self.assertNotIn('hub', load())
-        self.assertNotIn('hub', load({'active_id': partner_id, 'active_model': 'res.users'}))
-        missing_id = self.env['res.partner'].search([], order='id desc', limit=1).id + 1
-        self.assertNotIn('hub', load({'active_id': missing_id}))
+        self.window_action.hub_view_id = hub_view
+        self.authenticate("admin", "admin")
+        resp = self.url_open(
+            '/web/action/load_breadcrumbs',
+            headers={'Content-Type': 'application/json'},
+            data=json.dumps({
+                'params': {
+                    'actions': [
+                        {'action': self.window_action.id, 'resId': self.partner.id},
+                        {'model': 'res.partner', 'resId': self.partner.id},
+                    ],
+                },
+            }),
+        )
+        result = resp.json()['result']
+        self.assertEqual(
+            [(res['res_model'], res['hub_view_id']) for res in result],
+            [('res.partner', hub_view.id), ('res.partner', False)],
+        )

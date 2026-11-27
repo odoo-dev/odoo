@@ -11,6 +11,7 @@ from zoneinfo import ZoneInfo
 import babel
 import babel.dates
 import psycopg2
+from lxml import etree
 
 from odoo import api, models
 from odoo.fields import Command, Date, Domain
@@ -20,6 +21,7 @@ from odoo.tools import DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMA
 from odoo.exceptions import AccessError, UserError, ValidationError
 from odoo.tools.date_utils import all_timezones
 from odoo.tools.misc import LazyDict
+from odoo.tools.safe_eval import expr_eval
 from odoo.tools.translate import LazyTranslate
 
 if typing.TYPE_CHECKING:
@@ -310,6 +312,56 @@ class Base(models.AbstractModel):
                 'blocked_ids': blocked_ids,
             }
             raise error from None
+
+    @api.readonly
+    def web_get_hub(self, view_id=False):
+        """ Return the hub of this record: the buttons of the hub view
+        ``view_id`` (by default, the default hub view of the model) visible for
+        this record, that the web client shows as tabs above the views of the
+        actions opened for the record.
+
+        The buttons are filtered by their ``groups`` (as in any view) and their
+        ``invisible`` expression, and their ``context`` is evaluated, on the
+        record.
+
+        :param int view_id: id of a hub view of the model
+        :return: ``False`` if the model has no hub view, otherwise a dict with
+            the ``view_id`` of the hub, the ``display_name`` of the record, and
+            the ``items`` of the hub: dicts with the ``key`` (identifying the
+            button in the user settings), ``type``, ``name``, ``string`` and
+            ``context`` of the buttons, in the order of the view
+        """
+        self.ensure_one()
+        # sudo: the views are not readable by all users
+        view_id = view_id or self.env['ir.ui.view'].sudo().default_view(self._name, 'hub')
+        if not view_id:
+            return False
+        self.check_access('read')
+        arch = etree.fromstring(self.get_view(view_id, 'hub')['arch'])
+        # the fields used by the expressions of the buttons are added to the
+        # view (see _add_missing_fields); sudo: they only drive the display of
+        # the buttons, they must not fail on a field the user can't read
+        fnames = [node.get('name') for node in arch.iterchildren('field')]
+        values = self.sudo().read(fnames, load=None)[0] if fnames else {}
+        eval_context = {
+            **values,
+            'id': self.id,
+            'active_id': self.id,
+            'uid': self.env.uid,
+            'context': self.env.context,
+        }
+        items = [
+            {
+                'key': f"{button.get('type')}:{button.get('name')}",
+                'type': button.get('type'),
+                'name': button.get('name'),
+                'string': button.get('string'),
+                'context': expr_eval(button.get('context') or '{}', eval_context),
+            }
+            for button in arch.iterchildren('button')
+            if not (button.get('invisible') and expr_eval(button.get('invisible'), eval_context))
+        ]
+        return {'view_id': view_id, 'display_name': self.display_name, 'items': items}
 
     @api.readonly
     def web_read(self, specification: dict[str, dict]) -> list[dict]:

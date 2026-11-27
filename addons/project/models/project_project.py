@@ -603,7 +603,7 @@ class ProjectProject(models.Model):
     def _get_hub_settings(self):
         """ Return the hub settings of all users for the projects of ``self``. """
         return self.env['res.users.settings.hub'].search([
-            ('hub_id.res_model', '=', self._name),
+            ('res_model', '=', self._name),
             ('res_id', 'in', self.ids),
         ])
 

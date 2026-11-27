@@ -30,38 +30,38 @@ export class HubTabs extends Component {
     getPinnedItems() {
         const items = this.items();
         return this.props.hub
-            .pinnedItemIds()
-            .map((id) => items.find((item) => item.id === id))
+            .pinnedItemKeys()
+            .map((key) => items.find((item) => item.key === key))
             .filter(Boolean);
     }
 
     /**
      * Move the dropped tab after ``previous`` (or first), and save that order.
-     * Ids of deleted items are dropped from the pins along the way.
+     * Keys of removed items are dropped from the pins along the way.
      */
     onTabDrop({ element, previous }) {
-        const itemId = Number(element.dataset.id);
-        const pinnedItemIds = this.getPinnedItems()
-            .map((item) => item.id)
-            .filter((id) => id !== itemId);
-        const index = previous ? pinnedItemIds.indexOf(Number(previous.dataset.id)) + 1 : 0;
-        pinnedItemIds.splice(index, 0, itemId);
-        this.props.hub.saveSetting({ pinned_item_ids: pinnedItemIds });
+        const itemKey = element.dataset.key;
+        const pinnedItemKeys = this.getPinnedItems()
+            .map((item) => item.key)
+            .filter((key) => key !== itemKey);
+        const index = previous ? pinnedItemKeys.indexOf(previous.dataset.key) + 1 : 0;
+        pinnedItemKeys.splice(index, 0, itemKey);
+        this.props.hub.saveSetting({ pinned_item_keys: pinnedItemKeys });
     }
 
     isPinned(item) {
-        return this.props.hub.pinnedItemIds().includes(item.id);
+        return this.props.hub.pinnedItemKeys().includes(item.key);
     }
 
     /**
      * Pin ``item`` as the last tab, or unpin it if it is pinned.
      */
     togglePin(item) {
-        const pinnedItemIds = this.props.hub.pinnedItemIds().filter((id) => id !== item.id);
+        const pinnedItemKeys = this.props.hub.pinnedItemKeys().filter((key) => key !== item.key);
         if (!this.isPinned(item)) {
-            pinnedItemIds.push(item.id);
+            pinnedItemKeys.push(item.key);
         }
-        this.props.hub.saveSetting({ pinned_item_ids: pinnedItemIds });
+        this.props.hub.saveSetting({ pinned_item_keys: pinnedItemKeys });
     }
 
     openHubItem(item, newWindow) {

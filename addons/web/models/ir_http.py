@@ -79,12 +79,9 @@ class IrHttp(models.AbstractModel):
 
     @api.model
     def lazy_session_info(self):
-        res = {
+        return {
             'is_demo': bool(self.env['ir.module.module'].sudo().search_count([('demo', '=', True)])),
         }
-        if self.env.user._is_internal():
-            res['hubs'] = self.env['ir.hub']._get_session_hubs()
-        return res
 
     def session_info(self):
         user = self.env.user
@@ -161,6 +158,8 @@ class IrHttp(models.AbstractModel):
             disallowed_ancestor_companies_sudo = user_companies.parent_ids - user_companies
             all_companies_in_hierarchy_sudo = disallowed_ancestor_companies_sudo + user_companies
             session_info.update({
+                # the models whose records have a hub (see web_get_hub)
+                "hub_models": self.env['ir.ui.view']._get_hub_models(),
                 # current_company should be default_company
                 "user_companies": {
                     'current_company': user.company_id.id,

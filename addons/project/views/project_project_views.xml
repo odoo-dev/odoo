@@ -942,10 +942,25 @@
             </field>
         </record>
 
-        <!-- Hub for project.project; items are defined next to the embedded actions they mirror -->
-        <record id="hub_project" model="ir.hub">
-            <field name="name">Project</field>
-            <field name="res_model">project.project</field>
+        <!-- The tabs shown above the views opened for a project; the first one is opened by default -->
+        <record id="project_project_view_hub" model="ir.ui.view">
+            <field name="name">project.project.view.hub</field>
+            <field name="model">project.project</field>
+            <field name="arch" type="xml">
+                <hub>
+                    <!-- the method rather than the action: action_view_tasks adapts it to the project (archived, template, ...) and is overridden in other modules -->
+                    <button name="action_view_tasks" type="object" string="Tasks"/>
+                    <button name="action_get_list_view" type="object" string="Milestones"
+                            groups="project.group_project_milestone" invisible="not allow_milestones"/>
+                    <button name="action_open_project_form" type="object" string="Overview"
+                            groups="project.group_project_manager" context="{'create': False}"/>
+                    <button name="%(project.project_update_all_action)d" type="action" string="Updates"/>
+                    <button name="action_project_task_burndown_chart_report" type="object" string="Burndown Chart"
+                            groups="project.group_project_manager"/>
+                    <button name="action_project_time_by_stage_report" type="object" string="Time by Stage"
+                            groups="project.group_project_manager"/>
+                </hub>
+            </field>
         </record>
 
 </odoo>

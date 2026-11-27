@@ -11,7 +11,7 @@ from . import models
 from . import base_document_layout
 from . import res_config_settings
 from . import res_partner
-from . import ir_hub
+from . import ir_actions
 from . import res_users_settings_hub
 from . import res_users_settings
 from . import res_users

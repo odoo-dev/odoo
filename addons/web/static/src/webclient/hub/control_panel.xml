@@ -6,7 +6,7 @@
             <t t-call="web.HubItemsMobileDropdown"/>
         </xpath>
         <xpath expr="//div[hasclass('o_cp_pager')]" position="after">
-            <button t-if="this.env.config.hub and !this.uiService.isSmall" name="hub_tabs" class="btn btn-secondary"
+            <button t-if="this.env.config.hub?.items().length and !this.uiService.isSmall" name="hub_tabs" class="btn btn-secondary"
                     t-att-class="{active: this.env.config.hub.showTabs()}"
                     t-on-click="() => this.env.config.hub.toggleTabs()"
                     aria-label="View related documents"
@@ -17,7 +17,7 @@
     </t>
 
     <t t-name="web.HubItemsMobileDropdown">
-        <Dropdown t-if="this.env.config.hub and this.env.config.hub.items().length" menuClass="'o_hub_items_mobile_dropdown'">
+        <Dropdown t-if="this.env.config.hub?.items().length" menuClass="'o_hub_items_mobile_dropdown'">
             <button class="btn btn-secondary" aria-label="View related documents" data-tooltip="View related documents">
                 <i class="oi oi-fw" data-icon="tune" role="img" aria-hidden="true"/>
             </button>
@@ -28,10 +28,10 @@
     </t>
 
     <t t-name="web.HubItemsMobileDropdownItems">
-        <DropdownItem t-foreach="this.env.config.hub.items()" t-as="item" t-key="item.id"
-            class="item.id === this.env.config.hub.activeItemId ? 'selected' : ''"
+        <DropdownItem t-foreach="this.env.config.hub.items()" t-as="item" t-key="item.key"
+            class="item.key === this.env.config.hub.activeItemKey ? 'selected' : ''"
             onSelected="() => this.env.config.hub.openItem(item)">
-            <span t-out="item.display_name"/>
+            <span t-out="item.string"/>
         </DropdownItem>
     </t>
 

@@ -12,7 +12,7 @@
                         <DropdownItem onSelected="() => this.onClickShowSubtasks()" class="this.showSubtasks() ? 'selected' : ''">
                             Show Sub-Tasks
                         </DropdownItem>
-                        <DropdownItem t-if="this.env.config.hub and !this.uiService.isSmall"
+                        <DropdownItem t-if="this.env.config.hub?.items().length and !this.uiService.isSmall"
                             class="this.env.config.hub.showTabs() ? 'selected' : ''"
                             onSelected="() => this.env.config.hub.toggleTabs()"
                         >
