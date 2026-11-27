@@ -213,7 +213,10 @@ class PosPaymentMethod(models.Model):
 
         if not response.ok:
             try:
-                error_detail = response.json().get("errors").get("detail")
+                if response.status_code == 401:
+                    error_detail = _("It seem the SumUp API key is invalid. Please check your configuration.")
+                else:
+                    error_detail = response.json().get("errors").get("detail")
             except ValueError:
                 error_detail = None
             return {
