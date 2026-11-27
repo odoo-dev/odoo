@@ -1364,9 +1364,10 @@ class AccountMoveLine(models.Model):
     @api.depends('account_id', 'company_id', 'currency_rate', 'move_id.line_ids.account_id', 'move_id.line_ids.discount', 'move_id.line_ids.analytic_distribution')
     def _compute_discount_allocation_needed(self):
         def _get_discount_before_rounding(line):
+            company = line.company_id or self.env.company
             base_line = line.move_id._prepare_product_base_line_for_taxes_computation(line)
             base_line['discount'] = 0.0
-            self.env['account.tax']._add_tax_details([base_line], line.company_id, rounding_method='no_round')
+            self.env['account.tax']._add_tax_details([base_line], company, rounding_method='round_globally')
             price_subtotal = base_line['tax_details']['raw_total_excluded_currency']
             return line.move_id.direction_sign * price_subtotal * line.discount / 100
 

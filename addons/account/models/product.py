@@ -415,6 +415,7 @@ class ProductProduct(models.Model):
                 product_taxes,
                 product_uom,
                 document_tax_mode,
+                currency=product_currency or currency,
             )
 
         # Apply fiscal position.
@@ -422,8 +423,7 @@ class ProductProduct(models.Model):
             product_price_unit = self._get_tax_included_unit_price_from_price(
                 product_price_unit,
                 product_taxes,
-                product_currency,
-                company,
+                currency=product_currency,
                 fiscal_position=fiscal_position,
                 document_tax_mode=document_tax_mode,
             )
@@ -435,10 +435,11 @@ class ProductProduct(models.Model):
         return product_price_unit
 
     def _get_tax_included_unit_price_from_price(
-        self, product_price_unit, product_taxes, product_currency, company,
+        self, product_price_unit, product_taxes,
         fiscal_position=None,
         product_taxes_after_fp=None,
         document_tax_mode=None,
+        currency=None,
     ):
         if not product_taxes:
             return product_price_unit
@@ -452,11 +453,10 @@ class ProductProduct(models.Model):
         return product_taxes._adapt_price_unit_to_another_taxes(
             price_unit=product_price_unit,
             product=self,
-            currency=product_currency,
-            company=company,
             original_taxes=product_taxes,
             new_taxes=product_taxes_after_fp,
             document_tax_mode=document_tax_mode,
+            currency=currency,
         )
 
     @api.depends('lst_price', 'product_tmpl_id', 'taxes_id')
@@ -472,8 +472,15 @@ class ProductProduct(models.Model):
         product_taxes,
         product_uom,
         document_tax_mode,
+        currency=None,
     ):
-        if document_tax_mode == self.company_id.account_price_include:
+        if not product_taxes:
+            company = self.env.company
+        else:
+            company = product_taxes[0].company_id._accessible_branches()[:1] or product_taxes[0].company_id
+        currency = currency or company.currency_id
+
+        if document_tax_mode == company.account_price_include:
             return product_price_unit
 
         AccountTax = self.env['account.tax']
@@ -483,12 +490,13 @@ class ProductProduct(models.Model):
             quantity=1,
             product_id=self,
             tax_ids=product_taxes,
-            document_tax_mode=self.company_id.account_price_include,
+            currency_id=currency,
+            document_tax_mode=company.account_price_include,
         )
         AccountTax._add_tax_details(
             base_lines=[base_line],
-            company=self.company_id,
-            rounding_method='no_round',
+            company=company,
+            rounding_method='round_globally',
         )
         tax_details = base_line['tax_details']
         if document_tax_mode == 'tax_included':

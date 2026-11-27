@@ -1665,11 +1665,14 @@ class AccountMove(models.Model):
         self.ensure_one()
         is_invoice = self.is_invoice(include_receipts=True)
         sign = self.direction_sign if is_invoice else 1
+        company = product_line.company_id or self.env.company
+        currency = product_line.currency_id or company.currency_id
 
         kwargs = {
             'price_unit': product_line.price_unit if is_invoice else product_line.amount_currency,
             'quantity': product_line.quantity if is_invoice else 1.0,
             'discount': product_line.discount if is_invoice else 0.0,
+            'currency_id': currency,
             'rate': self._get_product_base_line_currency_rate(product_line),
             'sign': sign,
             'special_mode': False if is_invoice else 'total_excluded',
@@ -6681,8 +6684,7 @@ class AccountMove(models.Model):
                 line.price_unit = line.product_id._get_tax_included_unit_price_from_price(
                     line.price_unit,
                     line.tax_ids,
-                    line.currency_id,
-                    line.company_id,
+                    currency=line.currency_id,
                     fiscal_position=line.move_id.fiscal_position_id,
                     product_taxes_after_fp=new_taxes,
                     document_tax_mode=line.document_tax_mode,

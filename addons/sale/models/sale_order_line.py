@@ -830,19 +830,20 @@ class SaleOrderLine(models.Model):
     def _reset_price_unit(self):
         self.ensure_one()
 
-        line = self.with_company(self.company_id)
+        company = self.company_id or self.env.company
+        line = self.with_company(company)
+        currency = self.currency_id or company.currency_id
         price = line._get_display_price()
         product_taxes = line.product_id.taxes_id._filter_taxes_by_company(line.company_id)
         price_unit = line.product_id._get_tax_included_unit_price_from_price(
             price,
             product_taxes=product_taxes,
-            product_currency=line.currency_id,
-            company=self.company_id,
+            currency=currency,
             fiscal_position=line.order_id.fiscal_position_id,
             document_tax_mode=line.document_tax_mode,
         )
         price_unit = line.product_id._adapt_price_unit_to_document_tax_mode(
-            price_unit, product_taxes, line.product_uom_id, line.document_tax_mode
+            price_unit, product_taxes, line.product_uom_id, line.document_tax_mode, currency=currency,
         )
         line.update({"price_unit": price_unit, "technical_price_unit": price_unit})
 

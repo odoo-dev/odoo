@@ -1400,7 +1400,7 @@ class AccountTax(models.Model):
         self._add_tax_details(
             base_lines=[new_base_line],
             company=company,
-            rounding_method='no_round',
+            rounding_method='round_globally',
         )
         new_tax_details = new_base_line['tax_details']
         return new_tax_details['raw_total_excluded_currency'] + sum(
@@ -1410,7 +1410,7 @@ class AccountTax(models.Model):
         )
 
     @api.model
-    def _adapt_price_unit_to_another_taxes(self, price_unit, product, currency, company, original_taxes, new_taxes, product_uom=None, document_tax_mode=None):
+    def _adapt_price_unit_to_another_taxes(self, price_unit, product, original_taxes, new_taxes, product_uom=None, document_tax_mode=None, currency=None, company=None):
         """ From the price unit and taxes given as parameter, compute a new price unit corresponding to the
         new taxes.
 
@@ -1436,7 +1436,12 @@ class AccountTax(models.Model):
         :param document_tax_mode:   The tax mode of the document.
         :return:                    The price_unit after mapping of taxes.
         """
-        # TODO: 'company' param
+        if not original_taxes:
+            company = self.env.company
+        else:
+            company = original_taxes[0].company_id._accessible_branches()[:1] or original_taxes[0].company_id
+        currency = currency or company.currency_id
+
         base_line = self._prepare_base_line_for_taxes_computation(
             record=None,
             price_unit=price_unit,
@@ -1450,7 +1455,7 @@ class AccountTax(models.Model):
         self._add_tax_details(
             base_lines=[base_line],
             company=company,
-            rounding_method='no_round',
+            rounding_method='round_globally',
         )
         return self._adapt_base_line_price_unit_to_new_taxes(base_line, company, new_taxes)
 

@@ -116,7 +116,7 @@ class PosEdiXmlUBL21Jo(models.AbstractModel):
         # end up generating lines taxes using unrounded base amounts
         new_base_lines = [base_line.copy() for base_line in base_lines]
         for base_line, new_base_line in zip(base_lines, new_base_lines):
-            AccountTax._add_tax_details([new_base_line], new_base_line['record'].company_id, rounding_method='no_round')
+            AccountTax._add_tax_details([new_base_line], new_base_line['record'].company_id, rounding_method='round_globally')
             for key in [
                 'raw_total_excluded_currency',
                 'raw_total_excluded',

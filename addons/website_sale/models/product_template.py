@@ -1259,8 +1259,7 @@ class ProductTemplate(models.Model):
         price = product._get_tax_included_unit_price_from_price(
             price,
             product_taxes,
-            currency,
-            self.env.company,
+            currency=currency,
             product_taxes_after_fp=taxes
         )
 

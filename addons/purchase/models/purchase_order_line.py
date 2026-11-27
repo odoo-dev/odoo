@@ -557,6 +557,7 @@ class PurchaseOrderLine(models.Model):
 
             supplier_taxes = line.product_id.supplier_taxes_id._filter_taxes_by_company(line.company_id)
             # If no seller, use the standard price. It needs a proper currency conversion.
+            currency = line.currency_id or line.company_id.currency_id
             if not seller_info:
                 if line.price_unit and line.uom_id == line._origin.uom_id and line.partner_id == line._origin.partner_id \
                         and not line.product_id._has_vendor_pricelist(line.partner_id, line.company_id):
@@ -574,7 +575,7 @@ class PurchaseOrderLine(models.Model):
                 )
                 price_unit = line.product_id.cost_currency_id._convert(
                     price_unit,
-                    line.currency_id,
+                    currency,
                     line.company_id,
                     line.date_order or fields.Date.context_today(line),
                     False
@@ -584,16 +585,19 @@ class PurchaseOrderLine(models.Model):
                     supplier_taxes,
                     line.uom_id,
                     line.document_tax_mode,
+                    line.company_id,
+                    currency=currency,
                 ))
 
             else:
                 price_unit = line.env['account.tax']._fix_tax_included_price_company(seller_info['price'], supplier_taxes, line.tax_ids, line.company_id, document_tax_mode=line.document_tax_mode)
-                price_unit = seller_info['currency_id']._convert(price_unit, line.currency_id, line.company_id, line.date_order or fields.Date.context_today(line), False)
+                price_unit = seller_info['currency_id']._convert(price_unit, currency, line.company_id, line.date_order or fields.Date.context_today(line), False)
                 line.price_unit = line.technical_price_unit = line.product_id._adapt_price_unit_to_document_tax_mode(
                     seller_info['uom_id']._compute_price(price_unit, line.uom_id),
                     supplier_taxes,
                     line.uom_id,
                     line.document_tax_mode,
+                    currency=currency,
                 )
                 line.discount = seller_info['discount'] or 0.0
 

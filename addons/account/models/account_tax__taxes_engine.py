@@ -1085,11 +1085,9 @@ class AccountTax(models.Model):
         # Here, by using 'rounded_distr', the base amount will be 1000 - 83.33 - 83.33 = 833.34.
         # If we don't use it, the base amount will be computed as 1000 - 83.3333...3333 - 83.3333...3333 = 833.3333...3333 ≃ 833.33
         # but 833.33 + 83.33 + 83.33 = 999.99 != 1000.0. So we enforce 'rounded_distr' in all cases.
-        # In 'no_round', the rounded amounts are not computed at all (forced to zero),
-        # so the raw tax amounts have to be used instead.
         raw_base_untaxed -= self._get_batch_tax_amount(
             batch,
-            field_type='raw' if global_context['rounding_method'] == 'no_round' else 'rounded_distr',
+            field_type='rounded_distr',
         )
         for tax_data in batch['taxes_data']:
             tax_data['raw_base_amount_currency'].set(raw_base_untaxed)
@@ -1446,7 +1444,9 @@ class AccountTax(models.Model):
         }
 
     # -------------------------------------------------------------------------
-    # TAXES ENGINE - default
+    # TAXES ENGINE - default behavior in a future version
+    # For now, it's the base behavior from which the custom implementation
+    # are based on.
     # -------------------------------------------------------------------------
 
     @api.model
@@ -1473,11 +1473,11 @@ class AccountTax(models.Model):
         }
 
     # -------------------------------------------------------------------------
-    # TAXES ENGINE - Old default behavior (round_globally)
+    # TAXES ENGINE - round_globally (default)
     # -------------------------------------------------------------------------
 
     @api.model
-    def _set_base_line_taxes_raw_base_amount_currency_round_globally_old_default(self, global_context, batch):
+    def _set_base_line_taxes_raw_base_amount_currency_round_globally_default(self, global_context, batch):
         self._set_template1_base_line_taxes_raw_base_amount_currency(
             global_context,
             batch,
@@ -1485,7 +1485,7 @@ class AccountTax(models.Model):
         )
 
     @api.model
-    def _set_base_line_taxes_raw_tax_amount_currency_round_globally_old_default(self, global_context, batch):
+    def _set_base_line_taxes_raw_tax_amount_currency_round_globally_default(self, global_context, batch):
         self._set_template1_base_line_taxes_raw_tax_amount_currency(
             global_context,
             batch,
@@ -1493,7 +1493,7 @@ class AccountTax(models.Model):
         )
 
     @api.model
-    def _set_base_lines_raw_total_excluded_round_globally_old_default(self, global_context, base_lines_grouping_key, base_lines):
+    def _set_base_lines_raw_total_excluded_round_globally_default(self, global_context, base_lines_grouping_key, base_lines):
         rate = base_lines_grouping_key['rate']
         inverse_rate = (1 / rate) if rate else 0.0
         for base_line in base_lines:
@@ -1507,45 +1507,43 @@ class AccountTax(models.Model):
                 tax_details['raw_total_excluded'].set(tax_details['raw_total_excluded_currency'].value() * inverse_rate)
 
     @api.model
-    def _set_taxes_data_raw_base_amount_round_globally_old_default(self, global_context, taxes_data_grouping_key, taxes_data):
+    def _set_taxes_data_raw_base_amount_round_globally_default(self, global_context, taxes_data_grouping_key, taxes_data):
         rate = taxes_data_grouping_key['rate']
         inverse_rate = (1 / rate) if rate else 0.0
         for tax_data in taxes_data:
             tax_data['raw_base_amount'].set(tax_data['raw_base_amount_currency'].value() * inverse_rate)
 
     @api.model
-    def _set_taxes_data_raw_tax_amount_round_globally_old_default(self, global_context, taxes_data_grouping_key, taxes_data):
+    def _set_taxes_data_raw_tax_amount_round_globally_default(self, global_context, taxes_data_grouping_key, taxes_data):
         rate = taxes_data_grouping_key['rate']
         inverse_rate = (1 / rate) if rate else 0.0
         for tax_data in taxes_data:
             tax_data['raw_tax_amount'].set(tax_data['raw_tax_amount_currency'].value() * inverse_rate)
 
     @api.model
-    def _get_taxes_engine_functions_round_globally_old_default(self, global_context):
+    def _get_taxes_engine_functions_round_globally_default(self, global_context):
         return {
-            **self._get_taxes_engine_functions_default(global_context),
-
-            'base_line_batch_raw_base_amount_currency': self._set_base_line_taxes_raw_base_amount_currency_round_globally_old_default,
-            'base_line_batch_raw_tax_amount_currency': self._set_base_line_taxes_raw_tax_amount_currency_round_globally_old_default,
+            'base_line_batch_raw_base_amount_currency': self._set_base_line_taxes_raw_base_amount_currency_round_globally_default,
+            'base_line_batch_raw_tax_amount_currency': self._set_base_line_taxes_raw_tax_amount_currency_round_globally_default,
 
             'base_lines_total_excluded_currency': self._set_base_lines_total_excluded_currency_globally,
-            'base_lines_raw_total_excluded': self._set_base_lines_raw_total_excluded_round_globally_old_default,
+            'base_lines_raw_total_excluded': self._set_base_lines_raw_total_excluded_round_globally_default,
             'base_lines_total_excluded': self._set_base_lines_total_excluded_globally,
 
             'taxes_base_amount_currency': self._set_taxes_data_base_amount_currency_globally,
-            'taxes_raw_base_amount': self._set_taxes_data_raw_base_amount_round_globally_old_default,
+            'taxes_raw_base_amount': self._set_taxes_data_raw_base_amount_round_globally_default,
             'taxes_base_amount': self._set_taxes_data_base_amount_globally,
-            'taxes_raw_tax_amount': self._set_taxes_data_raw_tax_amount_round_globally_old_default,
+            'taxes_raw_tax_amount': self._set_taxes_data_raw_tax_amount_round_globally_default,
 
             'post_processing_base_lines_raw_total_excluded_currency': self._post_processing_base_lines_raw_total_excluded_currency_globally,
         }
 
     # -------------------------------------------------------------------------
-    # TAXES ENGINE - Old default behavior (round_per_line)
+    # TAXES ENGINE - round_per_line (default)
     # -------------------------------------------------------------------------
 
     @api.model
-    def _set_base_line_taxes_raw_base_amount_currency_round_per_line_old_default(self, global_context, batch):
+    def _set_base_line_taxes_raw_base_amount_currency_round_per_line_default(self, global_context, batch):
         self._set_template1_base_line_taxes_raw_base_amount_currency(
             global_context,
             batch,
@@ -1554,7 +1552,7 @@ class AccountTax(models.Model):
         )
 
     @api.model
-    def _set_base_line_taxes_raw_tax_amount_currency_round_per_line_old_default(self, global_context, batch):
+    def _set_base_line_taxes_raw_tax_amount_currency_round_per_line_default(self, global_context, batch):
         self._set_template1_base_line_taxes_raw_tax_amount_currency(
             global_context,
             batch,
@@ -1563,58 +1561,11 @@ class AccountTax(models.Model):
         )
 
     @api.model
-    def _get_taxes_engine_functions_round_per_line_old_default(self, global_context):
+    def _get_taxes_engine_functions_round_per_line_default(self, global_context):
         return {
-            **self._get_taxes_engine_functions_default(global_context),
+            'base_line_batch_raw_base_amount_currency': self._set_base_line_taxes_raw_base_amount_currency_round_per_line_default,
+            'base_line_batch_raw_tax_amount_currency': self._set_base_line_taxes_raw_tax_amount_currency_round_per_line_default,
 
-            'base_line_batch_raw_base_amount_currency': self._set_base_line_taxes_raw_base_amount_currency_round_per_line_old_default,
-            'base_line_batch_raw_tax_amount_currency': self._set_base_line_taxes_raw_tax_amount_currency_round_per_line_old_default,
-
-            'taxes_tax_amount_currency': self._set_taxes_data_tax_amount_currency_per_line,
-            'taxes_tax_amount': self._set_taxes_data_tax_amount_per_line,
-        }
-
-    # -------------------------------------------------------------------------
-    # TAXES ENGINE - no_round
-    # -------------------------------------------------------------------------
-
-    @api.model
-    def _set_base_line_taxes_raw_base_amount_currency_no_round(self, global_context, batch):
-        self._set_template1_base_line_taxes_raw_base_amount_currency(global_context, batch, apply_tax_on_rounded_base=False)
-
-    @api.model
-    def _set_base_line_taxes_raw_tax_amount_currency_no_round(self, global_context, batch):
-        self._set_template1_base_line_taxes_raw_tax_amount_currency(global_context, batch, apply_tax_on_rounded_base=False)
-
-    @api.model
-    def _get_taxes_engine_custom_functions_no_round(self, global_context):
-        return {
-            'base_line_batch_raw_base_amount_currency': self._set_base_line_taxes_raw_base_amount_currency_no_round,
-            'base_line_batch_raw_tax_amount_currency': self._set_base_line_taxes_raw_tax_amount_currency_no_round,
-
-            'base_lines_total_excluded_currency': None,
-            'base_lines_total_excluded': None,
-
-            'taxes_base_amount_currency': None,
-            'taxes_base_amount_currency_distr': None,
-            'taxes_tax_amount_currency': None,
-            'taxes_tax_amount_currency_distr': None,
-            'taxes_raw_base_amount': None,
-            'taxes_base_amount': None,
-            'taxes_raw_tax_amount': None,
-            'taxes_tax_amount_distr': None,
-            'taxes_tax_amount': None,
-
-            'post_processing_base_lines_raw_total_excluded_currency': None,
-        }
-
-    # -------------------------------------------------------------------------
-    # TAXES ENGINE - round_per_line
-    # -------------------------------------------------------------------------
-
-    @api.model
-    def _get_taxes_engine_custom_functions_round_per_line(self, global_context):
-        return {
             'taxes_tax_amount_currency': self._set_taxes_data_tax_amount_currency_per_line,
             'taxes_tax_amount': self._set_taxes_data_tax_amount_per_line,
         }
@@ -1705,11 +1656,13 @@ class AccountTax(models.Model):
         rounding_method=None,
     ):
         country_code = company.account_fiscal_country_id.code
+        force_rounding_method = bool(rounding_method)
         rounding_method = rounding_method or company.tax_calculation_rounding_method
 
         return {
             'country_code': country_code,
             'company': company,
+            'force_rounding_method': force_rounding_method,
             'rounding_method': rounding_method,
             'base_lines': base_lines,
             'tax_lines': tax_lines,
@@ -1929,7 +1882,7 @@ class AccountTax(models.Model):
                     # For price-included taxes, the raw base has been computed by subtracting the
                     # 'tax_amount_currency_distr' (see '_set_template1_base_line_taxes_price_include_raw_base_amount_currency').
                     # Use the same amounts to keep 'raw_total_included[_currency]' equal to the original price.
-                    if batch['price_include'] and rounding_method != 'no_round':
+                    if batch['price_include']:
                         raw_total_tax_amount_currency += tax_data['tax_amount_currency_distr']
                         raw_total_tax_amount += tax_data['tax_amount_distr']
                     else:
@@ -1959,8 +1912,6 @@ class AccountTax(models.Model):
             currency = base_line['currency_id']
             if 'delta_total_excluded_currency' in old_tax_details:
                 tax_details['delta_total_excluded_currency'] = old_tax_details['delta_total_excluded_currency']
-            elif rounding_method == 'no_round':
-                tax_details['delta_total_excluded_currency'] = 0.0
             else:
                 tax_details['delta_total_excluded_currency'] = currency.round(
                     tax_details['total_excluded_currency']
@@ -1970,8 +1921,6 @@ class AccountTax(models.Model):
 
             if 'delta_total_excluded' in old_tax_details:
                 tax_details['delta_total_excluded'] = old_tax_details['delta_total_excluded']
-            elif rounding_method == 'no_round':
-                tax_details['delta_total_excluded'] = 0.0
             else:
                 tax_details['delta_total_excluded'] = company.currency_id.round(
                     tax_details['total_excluded']
@@ -1982,18 +1931,11 @@ class AccountTax(models.Model):
     @api.model
     def _get_taxes_engine_custom_functions(self, global_context):
         country_code = global_context['country_code']
+        force_rounding_method = global_context['force_rounding_method']
         rounding_method = global_context['rounding_method']
         force_new_taxes_engine = self.env['ir.config_parameter'].sudo().get_bool('account.use_new_taxes_engine')
 
         # Customizations
-        if rounding_method == 'no_round':
-            return self._get_taxes_engine_custom_functions_no_round(global_context)
-        if rounding_method == 'round_per_line':
-            if force_new_taxes_engine:
-                return self._get_taxes_engine_custom_functions_round_per_line(global_context)
-
-            # Fallback on round_per_line_old_default
-            return None
         # if country_code == 'IT':
         #     return self._get_taxes_engine_custom_functions_l10n_it(global_context)
         # if country_code == 'JO':
@@ -2003,19 +1945,25 @@ class AccountTax(models.Model):
         # if country_code == 'MX':
         #     return self._get_taxes_engine_custom_functions_l10n_mx(global_context)
         if country_code == 'PT':
-            return self._get_taxes_engine_custom_functions_l10n_pt(global_context)
-        if (
+            custom_functions = self._get_taxes_engine_custom_functions_l10n_pt(global_context)
+        elif (
             country_code in (
                 'AT', 'BE', 'CH', 'CY', 'CZ', 'DE', 'DK', 'EE', 'FI',
                 'FR', 'IE', 'IS', 'LT', 'LU', 'LV', 'MT', 'NL', 'NO', 'SE',
                 'SI', 'AR',
             )
-            or self.env['ir.config_parameter'].sudo().get_bool('account.use_new_taxes_engine')
+            or force_new_taxes_engine
         ):
-            return self._get_taxes_engine_functions_default(global_context)
+            custom_functions = self._get_taxes_engine_functions_default(global_context)
+        else:
+            custom_functions = None
 
-        # Fallback on round_globally_old_default
-        return None
+        if not force_rounding_method and custom_functions:
+            return custom_functions
+
+        if rounding_method == 'round_per_line':
+            return self._get_taxes_engine_functions_round_per_line_default(global_context)
+        return self._get_taxes_engine_functions_round_globally_default(global_context)
 
     @api.model
     def _init_taxes_engine_functions(self, global_context):
@@ -2150,16 +2098,8 @@ class AccountTax(models.Model):
     def _add_tax_details(self, base_lines, company, tax_lines=None, rounding_method=None):
         global_context = self._init_taxes_engine_global_context(base_lines, company, tax_lines=tax_lines, rounding_method=rounding_method)
         self._init_taxes_engine_base_lines(global_context)
-        if global_context['rounding_method'] == 'round_per_line':
-            default_functions = self._get_taxes_engine_functions_round_per_line_old_default(global_context)
-        else:
-            default_functions = self._get_taxes_engine_functions_round_globally_old_default(global_context)
-        extra_functions = self._get_taxes_engine_custom_functions(global_context)
-        if extra_functions:
-            default_functions = {
-                **self._get_taxes_engine_functions_default(global_context),
-                **extra_functions,
-            }
+        default_functions = self._get_taxes_engine_functions_default(global_context)
+        default_functions.update(self._get_taxes_engine_custom_functions(global_context))
         global_context['default_functions'] = default_functions
         self._init_taxes_engine_functions(global_context)
         self._apply_manual_tax_amounts(global_context)

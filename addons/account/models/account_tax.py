@@ -767,12 +767,7 @@ class AccountTax(models.Model):
             document_tax_mode=document_tax_mode,
         )
 
-        if not rounding_method:
-            if company.tax_calculation_rounding_method == 'round_per_line':
-                rounding_method = 'round_per_line'
-            else:
-                rounding_method = 'no_round'
-
+        rounding_method = rounding_method or company.tax_calculation_rounding_method
         self._add_tax_details([base_line], company, rounding_method=rounding_method)
         self.with_context(
             compute_all_use_raw_base_lines=True,

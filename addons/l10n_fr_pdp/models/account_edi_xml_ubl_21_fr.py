@@ -204,33 +204,26 @@ class AccountEdiXmlUbl21Fr(models.AbstractModel):
             }]
 
     def _ubl_add_line_price_node(self, vals, in_foreign_currency=True):
-        # OVERRIDE
-        line_node = vals['line_node']
-        base_line = vals['line_vals']['base_line']
-        suffix = '_currency' if in_foreign_currency else ''
-        currency = base_line['currency_id'] if in_foreign_currency else vals['company_currency']
-        price_amount = base_line['tax_details'][f'raw_gross_price_unit{suffix}']
-
-        line_node['cac:Price'] = {
-            'cbc:PriceAmount': {
-                '_text': FloatFmt(price_amount, min_dp=1, max_dp=6),
-                'currencyID': currency.name,
+        # EXTENDS account.edi.ubl
+        super()._ubl_add_line_price_node(vals, in_foreign_currency=in_foreign_currency)
+        price_node = vals['line_node']['cac:Price']
+        price_amount_node = price_node['cbc:PriceAmount']
+        raw_gross_price_unit = price_amount_node['_text']
+        price_amount_node['_text'] = FloatFmt(raw_gross_price_unit, min_dp=1, max_dp=6)
+        price_node['cac:AllowanceCharge'] = {
+            "cbc:ChargeIndicator": [{
+                "_text": 'false',
+            }],
+            # Discount amount
+            "cbc:Amount": [{
+                "_text": FloatFmt(0, min_dp=1, max_dp=6),
+                "currencyID": price_amount_node['currencyID'],
+            }],
+            # Pre-discount amount
+            'cbc:BaseAmount': {
+                '_text': FloatFmt(raw_gross_price_unit, min_dp=1, max_dp=6),
+                'currencyID': price_amount_node['currencyID'],
             },
-            'cac:AllowanceCharge': {
-                "cbc:ChargeIndicator": [{
-                    "_text": 'false',
-                }],
-                # Discount amount
-                "cbc:Amount": [{
-                    "_text": FloatFmt(0, min_dp=1, max_dp=6),
-                    "currencyID": currency.name,
-                }],
-                # Pre-discount amount
-                'cbc:BaseAmount': {
-                    '_text': FloatFmt(price_amount, min_dp=1, max_dp=6),
-                    'currencyID': currency.name,
-                },
-            }
         }
 
     def _import_ubl_invoice_add_customer_values(self, collected_values):

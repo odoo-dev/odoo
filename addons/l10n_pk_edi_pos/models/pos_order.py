@@ -214,7 +214,7 @@ class PosOrder(models.Model):
     def _l10n_pk_edi_pos_sale_base(self, base_line, price_unit):
         self.ensure_one()
         sale_line = {**base_line, 'price_unit': price_unit, 'discount': 0}
-        self.env['account.tax']._add_tax_details([sale_line], self.company_id, rounding_method='no_round')
+        self.env['account.tax']._add_tax_details([sale_line], self.company_id, rounding_method='round_globally')
         return sale_line['tax_details']['raw_total_excluded_currency']
 
     def _l10n_pk_edi_pos_line_details(self):
