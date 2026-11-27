@@ -42,6 +42,7 @@ from . import test_taxes_computation_l10n_br
 from . import test_taxes_computation_l10n_in
 from . import test_taxes_computation_l10n_pt
 from . import test_taxes_tax_totals_summary
+from . import test_taxes_dispatching_base_lines
 from . import test_invoice_taxes
 from . import test_account_move_send
 from . import test_account_move_qr_code
