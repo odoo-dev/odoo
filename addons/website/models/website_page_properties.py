@@ -199,6 +199,7 @@ class WebsitePageProperties(models.TransientModel):
     ]
 
     target_model_id = fields.Many2one('website.page')
+    is_homepage = fields.Boolean(write_sequence=25)
     name = fields.Char(related='target_model_id.name', readonly=False, copy=True)
     url = fields.Char(related='target_model_id.url', readonly=False)
     website_indexed = fields.Boolean(related='target_model_id.website_indexed', readonly=False)
@@ -230,21 +231,29 @@ class WebsitePageProperties(models.TransientModel):
             website_default_lang = page_properties.website_id.default_lang_id.code
             page_properties.url_in_website_default_lang = page_properties.with_context(lang=website_default_lang).url
 
-    @api.depends('url', 'website_id.homepage_url')
+    @api.depends('url', 'website_id.homepage_url', 'target_model_id.is_homepage')
     def _compute_is_homepage(self):
         """
         Don't match is_homepage when url is '/' as this model's url is not the
         accessed route's url.
         """
         for record in self:
-            current_homepage_url = record.website_id.homepage_url or '/'
-            record.is_homepage = record.url_in_website_default_lang == current_homepage_url
+            page = record.target_model_id
+            if page.website_id:
+                record.is_homepage = page.is_homepage
+            else:
+                current_homepage_url = record.website_id.homepage_url or '/'
+                record.is_homepage = record.url_in_website_default_lang == current_homepage_url
 
     def _inverse_is_homepage(self):
         self.ensure_one()
-        website_default_lang = self.website_id.default_lang_id.code
-        url = self.with_context(lang=website_default_lang).url
-        self._update_homepage(url)
+        page = self.target_model_id
+        if page.website_id:
+            page.is_homepage = self.is_homepage
+        else:
+            website_default_lang = self.website_id.default_lang_id.code
+            url = self.with_context(lang=website_default_lang).url
+            self._update_homepage(url)
 
     @api.depends('parent_id')
     def _compute_has_parent_page(self):

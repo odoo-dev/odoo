@@ -58,7 +58,11 @@ class WebsitePage(models.Model):
     website_indexed = fields.Boolean('Is Indexed', default=True)
     menu_ids = fields.One2many('website.menu', 'page_id', 'Related Menus')
     is_in_menu = fields.Boolean(compute='_compute_website_menu')
-    is_homepage = fields.Boolean(compute='_compute_is_homepage', string='Homepage')
+    is_homepage = fields.Boolean(
+        string='Homepage',
+        compute='_compute_is_homepage', inverse='_inverse_is_homepage', store=True, readonly=False,
+        help="Serve this page as the homepage of its website. An unpublished page "
+             "keeps this setting and becomes the homepage once it is published.")
     is_visible = fields.Boolean(compute='_compute_visible', string='Is Visible')
     is_new_page_template = fields.Boolean(string="New Page Template", help='Add this page to the "+New" page templates. It will be added to the "Custom" category.')
     parent_id = fields.Many2one('website.page', string="Parent Page")
@@ -89,11 +93,34 @@ class WebsitePage(models.Model):
                 parent = parent.parent_id
             page.parent_ids = self.browse(reversed(parent_ids))
 
+    @api.depends('url', 'website_id.homepage_url')
     def _compute_is_homepage(self):
-        website = self.env.website or self.env.website.browse(self.env.context.get('host_id'))
-        website_default_lang = website.default_lang_id.code
         for page in self:
-            page.is_homepage = page.with_context(lang=website_default_lang).url == (website.homepage_url or page.website_id == website and '/')
+            if page.is_published or not page.is_homepage:
+                page.is_homepage = page._is_website_homepage()
+
+    def _inverse_is_homepage(self):
+        self.filtered('is_published')._update_website_homepage()
+
+    def _is_website_homepage(self):
+        """Return whether the website of this page serves it as homepage."""
+        self.ensure_one()
+        website = self.website_id
+        if not website:
+            return False
+        url = self.with_context(lang=website.default_lang_id.code).url
+        return url == (website.homepage_url or '/')
+
+    def _update_website_homepage(self):
+        """Make the website of each page serve it as homepage, or stop doing so,
+        according to its ``is_homepage`` flag."""
+        for page in self.filtered('website_id'):
+            website = page.website_id
+            if page.is_homepage:
+                url = page.with_context(lang=website.default_lang_id.code).url
+                website.homepage_url = url if url != '/' else False
+            elif page._is_website_homepage():
+                website.homepage_url = False
 
     def _compute_visible(self):
         for page in self:
@@ -251,6 +278,10 @@ class WebsitePage(models.Model):
             if vals['visibility'] != 'restricted_group':
                 vals['group_ids'] = False
 
+        future_homepages = self.browse()
+        if vals.get('is_published'):
+            future_homepages = self.filtered(lambda page: page.is_homepage and not page.is_published)
+
         # write on page == write on view
         # the view will invalidate the 'templates' cache
         res = super().write(vals)
@@ -271,6 +302,8 @@ class WebsitePage(models.Model):
                 key = self.env['ir.http']._slugify(page_en.name or '')
                 key = self.env['website'].with_context(website_id=page_en.website_id.id).get_unique_key(key)
                 super(WebsitePage, page_en).write({'key': key})
+
+        future_homepages._update_website_homepage()
 
         return res
 
