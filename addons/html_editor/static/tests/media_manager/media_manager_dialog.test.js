@@ -7,6 +7,7 @@ import {
     expect,
     hover,
     manuallyDispatchProgrammaticEvent,
+    queryAllTexts,
     queryOne,
     setInputFiles,
     test,
@@ -20,6 +21,7 @@ import {
     getFacetTexts,
     MockServer,
     onRpc,
+    removeFacet,
     toggleMenuItem,
     toggleSearchBarMenu,
     validateSearch,
@@ -189,6 +191,74 @@ describe("side panel filters", () => {
         await openMediaManager();
         await clickSidePanelFilter("uploaded by me");
         expect(getCardNames()).toEqual(["banner.png", "logo.png", "link.png"]);
+    });
+});
+
+describe("side panel tags", () => {
+    const TAG_BUTTON = `${SIDE_PANEL} .media-manager-side-panel-tags button`;
+    const tagButton = (name) => `${TAG_BUTTON}:contains(${name})`;
+
+    /** The media manager, with logo.png tagged "Logo" too. */
+    async function openMediaManagerWithTags() {
+        const { editor } = await openPartnerForm();
+        MockServer.env["ir.attachment"].write([2], { media_tag_ids: [[4, TAGS.logo]] });
+        await openMediaManagerFromPowerbox(editor);
+    }
+
+    test("the tags are switches, all off by default", async () => {
+        await openMediaManager();
+        expect(queryAllTexts(TAG_BUTTON)).toEqual(["Banner", "Logo"]);
+        expect(`${TAG_BUTTON}.active`).toHaveCount(0);
+        expect(getFacetTexts()).toEqual([]);
+        expect(getCardNames()).toEqual(PARTNER_IMAGES);
+    });
+
+    test("switch several tags on and off: the media with any of them are listed", async () => {
+        await openMediaManagerWithTags();
+        await contains(tagButton("Banner")).click();
+        expect(tagButton("Banner")).toHaveClass("active");
+        expect(getFacetTexts()).toEqual(["Banner"]);
+        expect(getCardNames()).toEqual(["banner.png"]);
+
+        await contains(tagButton("Logo")).click();
+        expect(`${TAG_BUTTON}.active`).toHaveCount(2);
+        expect(getFacetTexts()).toEqual(["Banner\nor\nLogo"]);
+        expect(getCardNames()).toEqual(["banner.png", "logo.png"]);
+
+        await contains(tagButton("Banner")).click();
+        expect(tagButton("Banner")).not.toHaveClass("active");
+        expect(tagButton("Logo")).toHaveClass("active");
+        expect(getFacetTexts()).toEqual(["Logo"]);
+        expect(getCardNames()).toEqual(["logo.png"]);
+
+        await contains(tagButton("Logo")).click();
+        expect(`${TAG_BUTTON}.active`).toHaveCount(0);
+        expect(getFacetTexts()).toEqual([]);
+        expect(getCardNames()).toEqual(PARTNER_IMAGES);
+    });
+
+    test("removing the facet of the tags switches them off", async () => {
+        await openMediaManagerWithTags();
+        await contains(tagButton("Banner")).click();
+        await contains(tagButton("Logo")).click();
+        await removeFacet("Banner or Logo");
+        expect(`${TAG_BUTTON}.active`).toHaveCount(0);
+        expect(getCardNames()).toEqual(PARTNER_IMAGES);
+    });
+
+    test("a tag created from a card menu is added to the switches", async () => {
+        await openMediaManager();
+        await contains(tagButton("Banner")).click();
+        await openCardMenu("banner.png");
+        await addTag("Hero", "Create");
+        await waitFor(tagButton("Hero"));
+        expect(queryAllTexts(TAG_BUTTON)).toEqual(["Banner", "Hero", "Logo"]);
+        // the switches already on stay on
+        expect(tagButton("Banner")).toHaveClass("active");
+
+        await contains(tagButton("Hero")).click();
+        expect(getFacetTexts()).toEqual(["Banner\nor\nHero"]);
+        expect(getCardNames()).toEqual(["banner.png"]);
     });
 });
 

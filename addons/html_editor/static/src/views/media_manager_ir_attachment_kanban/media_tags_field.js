@@ -34,8 +34,10 @@ export class MediaTagsField extends Many2ManyTagsField {
         await this.saveRecord();
     }
 
-    saveRecord() {
-        return this.props.record.save({ reload: false });
+    async saveRecord() {
+        await this.props.record.save({ reload: false });
+        // a tag may have been created: the side panel lists the tags again
+        this.props.record.model.bus.trigger("MEDIA_TAGS_CHANGED");
     }
 }
 

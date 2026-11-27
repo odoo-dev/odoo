@@ -1,6 +1,6 @@
 import { KanbanRenderer, kanbanRendererProps } from "@web/views/kanban/kanban_renderer";
 import { MediaManagerKanbanRecord } from "./kanban_record";
-import { useService } from "@web/core/utils/hooks";
+import { useBus, useService } from "@web/core/utils/hooks";
 import {
     IMAGE_EXTENSIONS,
     IMAGE_MIMETYPES,
@@ -13,7 +13,7 @@ import {
     matchPlatformUrl,
     PLATFORMS,
 } from "@html_editor/main/media/video/video_providers";
-import { onPatched, signal, t, useProps } from "@odoo/owl";
+import { onPatched, onWillStart, signal, t, useProps } from "@odoo/owl";
 import { useDebounced } from "@web/core/utils/timing";
 import { _t } from "@web/core/l10n/translation";
 
@@ -44,6 +44,10 @@ export class MediaManagerKanbanRenderer extends KanbanRenderer {
         super.setup();
         this.uploadService = useService("upload");
         this.notificationService = useService("notification");
+        this.orm = useService("orm");
+        this.state.mediaTags = [];
+        onWillStart(() => this.loadMediaTags());
+        useBus(this.env.model.bus, "MEDIA_TAGS_CHANGED", () => this.loadMediaTags());
         this.state.isDraggingFile = false;
 
         this.debouncedValidateUrl = useDebounced(this.validateUrl, 500);
@@ -105,6 +109,67 @@ export class MediaManagerKanbanRenderer extends KanbanRenderer {
         } else {
             this.env.model.env.searchModel.clearQuery();
         }
+    }
+
+    // ---------------
+    // Tag switches :
+    // ---------------
+
+    get searchModel() {
+        return this.env.model.env.searchModel;
+    }
+
+    /**
+     * Load the tags, with a filter of the search model for each of them. The
+     * filters are hidden from the search menus and share a group: the media
+     * with any of the tags switched on are listed, in a single facet.
+     */
+    async loadMediaTags() {
+        const tags = await this.orm.searchRead("html_editor.media.tag", [], ["name", "color"], {
+            order: "name",
+        });
+        const searchModel = this.searchModel;
+        const tagItems = Object.values(searchModel.searchItems).filter((item) => item.mediaTagId);
+        const searchItemIds = new Map(tagItems.map((item) => [item.mediaTagId, item.id]));
+        const newTags = tags.filter((tag) => !searchItemIds.has(tag.id));
+        if (newTags.length) {
+            // inactive filters, in the group of the other tags or in a new one
+            // (see `SearchModel.createNewFilters`)
+            const { groupId, groupNumber } = tagItems[0] ?? {
+                groupId: searchModel.nextGroupId++,
+                groupNumber: searchModel.nextGroupNumber++,
+            };
+            for (const tag of newTags) {
+                const id = searchModel.nextId++;
+                searchModel.searchItems[id] = {
+                    id,
+                    groupId,
+                    groupNumber,
+                    type: "filter",
+                    description: tag.name,
+                    domain: `[("media_tag_ids", "in", [${tag.id}])]`,
+                    invisible: "True",
+                    mediaTagId: tag.id,
+                };
+                searchItemIds.set(tag.id, id);
+            }
+        }
+        this.state.mediaTags = tags.map((tag) => ({
+            ...tag,
+            searchItemId: searchItemIds.get(tag.id),
+        }));
+    }
+
+    /** @returns {number[]} the ids of the tags switched on */
+    get activeMediaTagIds() {
+        const { query, searchItems } = this.searchModel;
+        return query
+            .map(({ searchItemId }) => searchItems[searchItemId]?.mediaTagId)
+            .filter(Boolean);
+    }
+
+    toggleMediaTag(tag) {
+        this.searchModel.toggleSearchItem(tag.searchItemId);
     }
 
     // -----------------

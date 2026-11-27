@@ -61,6 +61,18 @@
                         <br/><a href="#" t-on-click.prevent="() => this.filterRecords(filter.domain)"><t t-out="filter.label"/></a>
                     </t>
                 </div>
+
+                <!-- switches: the media with any of the tags switched on are listed -->
+                <div class="media-manager-side-panel-tags d-flex flex-wrap gap-1 mt-4" t-if="this.state.mediaTags.length">
+                    <t t-set="activeMediaTagIds" t-value="this.activeMediaTagIds"/>
+                    <button t-foreach="this.state.mediaTags" t-as="tag" t-key="tag.id" type="button"
+                            t-attf-class="btn btn-sm o_tag_color_{{ tag.color }}"
+                            t-att-class="{ 'active': activeMediaTagIds.includes(tag.id) }"
+                            t-att-aria-pressed="activeMediaTagIds.includes(tag.id) ? 'true' : 'false'"
+                            t-on-click="() => this.toggleMediaTag(tag)">
+                        <t t-out="tag.name"/>
+                    </button>
+                </div>
             </div>
         </xpath>
     </t>

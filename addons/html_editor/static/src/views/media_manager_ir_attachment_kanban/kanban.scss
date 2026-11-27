@@ -168,3 +168,22 @@
 .o_media_tags_menu {
     width: 220px;
 }
+
+// the tag switches of the side panel: dimmed until switched on
+.media-manager-side-panel-tags .btn {
+    background-color: var(--o-colorlist-bg-subtle);
+    border-color: var(--o-colorlist-border);
+    color: var(--o-colorlist-text-emphasis);
+    opacity: 0.5;
+    &:hover, &.active {
+        background-color: var(--o-colorlist-bg-subtle);
+        border-color: var(--o-colorlist-border);
+        color: var(--o-colorlist-text-emphasis);
+    }
+    &:hover {
+        opacity: 0.75;
+    }
+    &.active {
+        opacity: 1;
+    }
+}
