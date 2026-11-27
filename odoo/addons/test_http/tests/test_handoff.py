@@ -6,8 +6,6 @@ from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
 from odoo.http.handoff import (
-    AUTO,
-    AUTO_MIN_WORKERS,
     DIGEST_SIZE,
     DIGESTS,
     MAX_DATABASES,
@@ -31,8 +29,8 @@ class TestRegistryHandoff(BaseCase):
         self.addCleanup(self.client.close)
         self.addCleanup(self.server.close)
 
-    def make(self, slots, max_workers=None):
-        handoff = RegistryHandoff(slots, max_workers)
+    def make(self, slots):
+        handoff = RegistryHandoff(slots)
         for reader, writer in handoff.inboxes:
             self.addCleanup(reader.close)
             self.addCleanup(writer.close)
@@ -62,7 +60,7 @@ class TestRegistryHandoff(BaseCase):
 
     def advertised(self, slot, dbnames, handoff=None):
         handoff = handoff or self.handoff
-        return {dbname for dbname in dbnames if slot in handoff._holders(_digest(dbname), None)}
+        return {dbname for dbname in dbnames if slot in handoff._holders(_digest(dbname))}
 
     def received_by(self, handoff, slots):
         """ Return the slot among ``slots`` that received the connection. """
@@ -83,9 +81,8 @@ class TestRegistryHandoff(BaseCase):
         for slot in (0, 1, 3):
             handoff.publish(slot, ['other', 'db'])
         handoff.publish(2, ['other'])
-        self.assertEqual(handoff._holders(_digest('db'), None), [0, 1, 3])
-        self.assertEqual(handoff._holders(_digest('db'), 1), [0, 3])
-        self.assertEqual(handoff._holders(_digest('none'), None), [])
+        self.assertEqual(handoff._holders(_digest('db')), [0, 1, 3])
+        self.assertEqual(handoff._holders(_digest('none')), [])
 
     def test_send_never_targets_own_slot(self):
         self.handoff.publish(0, ['db'])
@@ -124,13 +121,47 @@ class TestRegistryHandoff(BaseCase):
         self.handoff.receive(1)[0].close()
 
     def test_send_prefers_an_idle_holder(self):
-        handoff = self.make(4, max_workers=2)
+        handoff = self.make(4)
         handoff.publish(1, ['db'])
         handoff.publish(2, ['db'])
         handoff.set_busy(1, True)
         for _ in range(10):
             self.assertTrue(handoff.send('db', self.server, 0))
             self.assertEqual(self.received_by(handoff, [1, 2]), 2)
+
+    def test_send_keeps_a_database_on_the_same_holder(self):
+        handoff = self.make(5)
+        dbnames = [f'db{i}' for i in range(4)]
+        for slot in range(1, 5):
+            handoff.publish(slot, dbnames)
+        receivers = set()
+        for dbname in dbnames:
+            slots = set()
+            for _ in range(10):
+                self.assertTrue(handoff.send(dbname, self.server, 0))
+                slots.add(self.received_by(handoff, range(1, 5)))
+            self.assertEqual(len(slots), 1, dbname)
+            receivers |= slots
+        self.assertGreater(len(receivers), 1, "the databases are spread over the holders")
+
+    def test_send_hands_off_to_a_better_ranked_idle_holder(self):
+        handoff = self.make(3)
+        for slot in range(3):
+            handoff.publish(slot, ['db'])
+        order = []
+        for _ in range(3):
+            self.assertTrue(handoff.send('db', self.server, None))
+            order.append(self.received_by(handoff, range(3)))
+            handoff.set_busy(order[-1], True)
+        first, second, third = order
+        handoff.set_busy(second, False)
+        self.assertTrue(handoff.send('db', self.server, third))
+        self.assertEqual(self.received_by(handoff, range(3)), second)
+        self.assertFalse(handoff.send('db', self.server, second))
+        handoff.set_busy(first, False)
+        self.assertFalse(handoff.send('db', self.server, first))
+        self.assertTrue(handoff.send('db', self.server, second))
+        self.assertEqual(self.received_by(handoff, range(3)), first)
 
     def test_busy_flag_is_shared_after_fork(self):
         self.handoff.publish(1, ['db'])
@@ -143,89 +174,6 @@ class TestRegistryHandoff(BaseCase):
         self.addCleanup(finish)
         self.assertTrue(self.handoff.send('db', self.server, 0))
         self.handoff.receive(1)[0].close()
-
-    #
-    # Capping the workers having the registry of a database
-    #
-    def test_cap_queues_behind_a_busy_holder(self):
-        handoff = self.make(4, max_workers=2)
-        handoff.publish(1, ['db'])
-        handoff.publish(2, ['db'])
-        handoff.set_busy(1, True)
-        handoff.set_busy(2, True)
-        self.assertTrue(handoff.send('db', self.server, 0))
-        self.assertIn(self.received_by(handoff, [1, 2]), (1, 2))
-
-    def test_cap_queues_even_behind_a_pending_connection(self):
-        handoff = self.make(3, max_workers=1)
-        handoff.publish(1, ['db'])
-        handoff.set_busy(1, True)
-        self.assertTrue(handoff.send('db', self.server, 0))
-        self.assertTrue(handoff.send('db', self.server, 0))
-        for _ in range(2):
-            handoff.receive(1)[0].close()
-        self.assertIsNone(handoff.receive(1))
-
-    def test_cap_picks_a_busy_holder_at_random(self):
-        handoff = self.make(4, max_workers=2)
-        for slot in (1, 2):
-            handoff.publish(slot, ['db'])
-            handoff.set_busy(slot, True)
-        picked = set()
-        for _ in range(50):  # each one is missed with a chance of 2**-50
-            self.assertTrue(handoff.send('db', self.server, 0))
-            picked.add(self.received_by(handoff, [1, 2]))
-        self.assertEqual(picked, {1, 2})
-
-    def test_below_the_cap_the_sender_loads_the_registry(self):
-        handoff = self.make(4, max_workers=3)
-        for slot in (1, 2):
-            handoff.publish(slot, ['db'])
-            handoff.set_busy(slot, True)
-        self.assertFalse(handoff.send('db', self.server, 0))
-
-    def test_without_cap_never_queue_behind_a_busy_holder(self):
-        handoff = self.make(4, max_workers=None)
-        for slot in (1, 2, 3):
-            handoff.publish(slot, ['db'])
-            handoff.set_busy(slot, True)
-        self.assertFalse(handoff.send('db', self.server, 0))
-
-    def test_auto_cap_gives_a_single_database_every_worker(self):
-        handoff = self.make(12, max_workers=AUTO)
-        for slot in range(1, 12):
-            handoff.publish(slot, ['db'])
-            handoff.set_busy(slot, True)
-        self.assertEqual(handoff.cap(), 12)
-        self.assertFalse(handoff.send('db', self.server, 0))
-
-    def test_auto_cap_is_a_fair_share(self):
-        handoff = self.make(48, max_workers=AUTO)
-        for slot in range(1, 48):
-            handoff.publish(slot, [f'db{slot % 3}'])
-        handoff.set_busy(5, True)  # the busy word is not a database
-        self.assertEqual(handoff.cap(), 16)
-
-    def test_auto_cap_has_a_minimum(self):
-        handoff = self.make(12, max_workers=AUTO)
-        for slot in range(1, 12):
-            handoff.publish(slot, [f'db{slot}', f'other{slot}'])
-        self.assertEqual(handoff.cap(), AUTO_MIN_WORKERS)
-        for slot in range(1, 1 + AUTO_MIN_WORKERS):
-            handoff.publish(slot, [f'db{slot}', 'shared'])
-            handoff.set_busy(slot, True)
-        handoff.auto_expiry = 0  # count again
-        self.assertTrue(handoff.send('shared', self.server, 0))
-        self.received_by(handoff, range(1, 1 + AUTO_MIN_WORKERS))
-
-    def test_auto_cap_is_counted_at_most_once_a_second(self):
-        handoff = self.make(12, max_workers=AUTO)
-        self.assertEqual(handoff.cap(), 12)
-        for slot in range(1, 12):
-            handoff.publish(slot, [f'db{slot}'])
-        self.assertEqual(handoff.cap(), 12, "still the previous count")
-        handoff.auto_expiry = 0
-        self.assertEqual(handoff.cap(), AUTO_MIN_WORKERS)
 
     #
     # The table
@@ -291,7 +239,7 @@ class TestRegistryHandoff(BaseCase):
         self.assertEqual(handoff.free_slots, [0, 1])
 
     def test_release_slot_gives_what_a_dead_worker_left_to_any_worker(self):
-        handoff = self.make(3, max_workers=6)
+        handoff = self.make(3)
         self.assertEqual([handoff.acquire_slot(), handoff.acquire_slot()], [2, 1])
         handoff.publish(1, ['db'])
         handoff.send('db', self.server, 0)
@@ -405,9 +353,14 @@ class TestPeekHandoff(BaseCase):
         worker.publish_databases.assert_not_called()
 
     def test_loaded_registry_is_served_here(self):
-        handed, worker = self.hand_off(b'GET / HTTP/1.1\r\nX-Odoo-Database: db1\r\n\r\n', loaded=['db1'])
+        """ Only when no idle worker having it ranks before this one, as told
+        by RegistryHandoff.send(). """
+        request = b'GET / HTTP/1.1\r\nX-Odoo-Database: db1\r\n\r\n'
+        handed, worker = self.hand_off(request, loaded=['db1'], sent=False)
         self.assertFalse(handed)
-        worker.handoff.send.assert_not_called()
+        self.assertEqual(worker.handoff.send.call_args.args[0], 'db1')
+        handed, _worker = self.hand_off(request, loaded=['db1'])
+        self.assertTrue(handed)
 
     def test_loading_here_is_advertised_first(self):
         handed, worker = self.hand_off(b'GET / HTTP/1.1\r\nX-Odoo-Database: db1\r\n\r\n', sent=False)

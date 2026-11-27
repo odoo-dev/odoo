@@ -55,7 +55,7 @@ except ImportError:
         return None
 
 from odoo import api, sql_db
-from odoo.http.handoff import AUTO, RegistryHandoff, peek_dbname
+from odoo.http.handoff import RegistryHandoff, peek_dbname
 from odoo.http.server import HTTPSocket
 from odoo.modules.registry import Registry
 from odoo.orm.cache import log_ormcache_stats
@@ -792,11 +792,7 @@ class PreforkServer(CommonServer):
         self.servers_gevent = {}
         self.handoff = None
         if config['http_enable']:
-            # the workers loading the registry of a database: a fair share by
-            # default, 0 for unlimited
-            max_workers = os.environ.get('ODOO_REGISTRY_HANDOFF_MAX_WORKERS')
-            max_workers = (int(max_workers) or None) if max_workers else AUTO
-            self.handoff = RegistryHandoff(self.population, max_workers)
+            self.handoff = RegistryHandoff(self.population)
 
     def signal_handler(self, sig, frame):
         if len(self.queue) < 5 or sig == signal.SIGCHLD:
@@ -1334,7 +1330,7 @@ class WorkerHTTP(Worker):
         """ Give the connection to a worker having the registry of the database
         of its request, before reading anything: that worker reads it all. """
         dbname = peek_dbname(client)
-        if not dbname or dbname in Registry.registries:
+        if not dbname:
             return False
         if self.handoff.send(dbname, client, self.handoff_slot):
             return True
@@ -1390,6 +1386,7 @@ class WorkerHTTP(Worker):
         try:
             if not self.process_received():
                 self.process_accepted()
+            Registry._drop_idle()
             self.publish_databases()
         finally:
             self.handoff.set_busy(self.handoff_slot, False)
