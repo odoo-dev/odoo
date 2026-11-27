@@ -1,6 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import api, fields, models, _, SUPERUSER_ID
+from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError
 
 
@@ -40,7 +40,7 @@ class ProductTemplate(models.Model):
     task_template_id = fields.Many2one('project.task', 'Task Template',
         domain=[("is_template", "=", True)],
         ui_domain="[('is_template', '=', True), '|', ('project_id', '=', project_id), ('project_id', '=', False)]",
-        company_dependent=True, copy=True, compute='_compute_task_template', store=True, readonly=False
+        company_dependent=True, copy=True,
     )
     service_policy = fields.Selection('_selection_service_policy', string="Service Invoicing Policy", compute_sudo=True, compute='_compute_service_policy', inverse='_inverse_service_policy', tracking=True)
     service_type = fields.Selection(selection_add=[
@@ -54,8 +54,8 @@ class ProductTemplate(models.Model):
             if not product.service_policy and product.type == 'service':
                 product.service_policy = 'ordered_prepaid'
 
-    @api.depends('project_id')
-    def _compute_task_template(self):
+    @api.onchange('project_id')
+    def _onchange_project_id(self):
         for product in self:
             if product.task_template_id.project_id and product.task_template_id.project_id != product.project_id:
                 product.task_template_id = False
