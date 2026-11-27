@@ -139,7 +139,11 @@ class PosOrderLine(models.Model):
         return super().create(vals_list)
 
     def write(self, vals):
-        if vals.get('qty') is not None and vals.get('qty') < self.qty:
+        if (
+            vals.get('qty') is not None and vals.get('qty') < self.qty
+            # A line split in several lines keeps its total quantity: not an edit.
+            and not self.env.context.get('pos_line_split')
+        ):
             vals['is_edited'] = True
             body = _("%(product_name)s: Ordered quantity: %(old_qty)s", product_name=self.full_product_name, old_qty=self.qty)
             body += Markup(" &rarr; ") + str(vals.get('qty'))
