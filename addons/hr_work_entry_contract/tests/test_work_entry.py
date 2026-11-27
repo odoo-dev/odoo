@@ -6,6 +6,7 @@ from dateutil.relativedelta import relativedelta
 from psycopg2 import IntegrityError
 import pytz
 
+from odoo import Command
 from odoo.exceptions import ValidationError
 from odoo.tests import Form
 from odoo.tests.common import tagged
@@ -562,3 +563,39 @@ class TestWorkEntry(TestWorkEntryBase):
         leave_entry = work_entries.filtered(lambda we: we.work_entry_type_id == self.work_entry_type_leave)
         self.assertEqual(len(leave_entry), 1)
         self.assertEqual(leave_entry.duration, 2)
+
+    def test_regenerate_work_entries_evening_shift_negative_utc_offset(self):
+        """Check that regenerating a month keeps exactly one work entry for an evening shift on the last day of October."""
+        calendar = self.env['resource.calendar'].create({
+            'name': 'Evening Calendar',
+            'tz': 'America/Bogota',
+            'attendance_ids': [
+                Command.clear(),
+                Command.create({'name': 'Friday Evening', 'dayofweek': '4', 'hour_from': 19.5, 'hour_to': 22, 'day_period': 'afternoon'}),
+            ],
+        })
+        employee = self.env['hr.employee'].create({
+            'name': 'Evening Employee',
+            'resource_calendar_id': calendar.id,
+        })
+        self.env['hr.contract'].create({
+            'employee_id': employee.id,
+            'resource_calendar_id': calendar.id,
+            'date_start': date(2025, 10, 1),
+            'name': 'Evening Contract',
+            'wage': 1000,
+            'state': 'open',
+        })
+        employee.generate_work_entries(date(2025, 10, 1), date(2025, 11, 30))
+        friday_evening = pytz.timezone('America/Bogota').localize(datetime(2025, 10, 31, 19, 30)).astimezone(pytz.utc).replace(tzinfo=None)
+
+        for date_from, date_to in [(date(2025, 10, 1), date(2025, 10, 31)), (date(2025, 11, 1), date(2025, 11, 30))]:
+            self.env['hr.work.entry.regeneration.wizard'].create({
+                'employee_ids': [Command.set(employee.ids)],
+                'date_from': date_from,
+                'date_to': date_to,
+            }).regenerate_work_entries()
+            self.assertEqual(self.env['hr.work.entry'].search_count([
+                ('employee_id', '=', employee.id),
+                ('date_start', '=', friday_evening),
+            ]), 1)

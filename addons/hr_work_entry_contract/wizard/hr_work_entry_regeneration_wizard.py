@@ -4,7 +4,9 @@
 from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError
 
+from datetime import datetime, time
 from dateutil.relativedelta import relativedelta
+import pytz
 
 class HrWorkEntryRegenerationWizard(models.TransientModel):
     _name = 'hr.work.entry.regeneration.wizard'
@@ -103,11 +105,14 @@ class HrWorkEntryRegenerationWizard(models.TransientModel):
 
         date_from = max(self.date_from, self.earliest_available_date) if self.earliest_available_date else self.date_from
         date_to = min(self.date_to, self.latest_available_date) if self.latest_available_date else self.date_to
-        work_entries = self.env['hr.work.entry'].search([
-            ('employee_id', 'in', self.employee_ids.ids),
-            ('date_stop', '>=', date_from),
-            ('date_start', '<=', date_to),
-            ('state', '!=', 'validated')])
+        work_entries = self.env['hr.work.entry']
+        for employee_tz, employees in self.employee_ids.grouped(lambda e: (e.resource_calendar_id or e).tz).items():
+            tz = pytz.timezone(employee_tz) if employee_tz else pytz.utc
+            work_entries |= work_entries.search([
+                ('employee_id', 'in', employees.ids),
+                ('date_stop', '>=', tz.localize(datetime.combine(date_from, time.min)).astimezone(pytz.utc).replace(tzinfo=None)),
+                ('date_start', '<=', tz.localize(datetime.combine(date_to, time.max)).astimezone(pytz.utc).replace(tzinfo=None)),
+                ('state', '!=', 'validated')])
 
         write_vals = {field: False for field in self._work_entry_fields_to_nullify()}
         work_entries.write(write_vals)
