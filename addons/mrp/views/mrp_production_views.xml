@@ -58,7 +58,7 @@
                         decoration-danger="is_delayed"
                         decoration-bf="is_delayed"/>
                     <field name="product_id" readonly="1" optional="show"/>
-                    <field name="lot_producing_ids" optional="hide" widget="many2many_tags"/>
+                    <field name="lot_producing_ids" groups="stock.group_production_lot" optional="hide" widget="many2many_tags"/>
                     <field name="bom_id" readonly="1" optional="hide"/>
                     <field name="activity_ids" string="Next Activity" widget="list_activity" optional="show"/>
                     <field name="origin" optional="show" readonly="state in ['cancel', 'done']"/>
@@ -105,7 +105,7 @@
                     <field name="date_finished" optional="hide" widget="relative_date"/>
                     <field name="date_deadline" widget="mrp_relative_date_unformatted" invisible="state in ['done', 'cancel']" optional="hide" decoration-danger="is_delayed" decoration-bf="is_delayed"/>
                     <field name="product_id" readonly="1" optional="show"/>
-                    <field name="lot_producing_ids" optional="hide" widget="many2many_tags"/>
+                    <field name="lot_producing_ids" groups="stock.group_production_lot" optional="hide" widget="many2many_tags"/>
                     <field name="bom_id" readonly="1" optional="hide"/>
                     <field name="activity_ids" string="Next Activity" widget="list_activity" optional="show"/>
                     <field name="origin" optional="show" readonly="state in ['cancel', 'done']"/>
@@ -370,7 +370,7 @@
                                 <span class="o_stat_text">Packages</span>
                             </div>
                         </button>
-                        <button class="oe_stat_button" name="action_view_serial_numbers" type="object" icon="build" invisible="serial_numbers_count &lt;= 1 or state == 'draft'">
+                        <button class="oe_stat_button" name="action_view_serial_numbers" type="object" icon="build" groups="stock.group_production_lot" invisible="serial_numbers_count &lt;= 1 or state == 'draft'">
                             <div class="o_field_widget o_stat_info">
                                 <span class="o_stat_value"><field name="serial_numbers_count"/></span>
                                 <span class="o_stat_text">Serial Numbers</span>
@@ -386,8 +386,8 @@
                     <group>
                         <group>
                             <field name="id" invisible="1"/> <!-- drives invisible of the header buttons and feeds the default_*_production_id of the component and by-product contexts -->
-                            <field name="use_create_components_lots" invisible="1"/> <!-- drives the create attribute of lot_ids in the component and by-product lists -->
-                            <field name="show_lot_ids" invisible="1"/> <!-- drives column_invisible of lot_ids in the component and by-product lists -->
+                            <field name="use_create_components_lots" groups="stock.group_production_lot" invisible="1"/> <!-- drives the create attribute of lot_ids in the component and by-product lists -->
+                            <field name="show_lot_ids" groups="stock.group_production_lot" invisible="1"/> <!-- drives column_invisible of lot_ids in the component and by-product lists -->
                             <field name="product_tracking" invisible="1"/> <!-- drives readonly of qty_producing and invisible of the lot/serial block and its buttons -->
                             <field name="product_id" context="{'default_is_storable': True}" readonly="state != 'draft'" default_focus="1" placeholder="Product to build..."/>
                             <field name="product_tmpl_id" invisible="1"/> <!-- passed as default_product_tmpl_id in the context of bom_id -->
@@ -430,8 +430,8 @@
                                 <button type="object" name="action_product_forecast_report" title="Forecast Report" icon="area_chart" invisible="forecasted_issue"/>
                                 <button type="object" name="action_product_forecast_report" title="Forecast Report" icon="area_chart" invisible="not forecasted_issue" class="text-danger"/>
                             </div>
-                            <label for="lot_producing_ids" invisible="state in ('draft', 'cancel') or not product_tracking or (state == 'done' and product_tracking == 'serial' and product_qty > 1)"/>
-                            <div class="o_row" invisible="state in ('draft', 'cancel') or not product_tracking or (state == 'done' and product_tracking == 'serial' and product_qty > 1)">
+                            <label for="lot_producing_ids" groups="stock.group_production_lot" invisible="state in ('draft', 'cancel') or not product_tracking or (state == 'done' and product_tracking == 'serial' and product_qty > 1)"/>
+                            <div class="o_row" groups="stock.group_production_lot" invisible="state in ('draft', 'cancel') or not product_tracking or (state == 'done' and product_tracking == 'serial' and product_qty > 1)">
                                 <field name="lot_producing_ids" widget="many2many_tags" options="{'on_tag_click': 'open_form'}"
                                     invisible="not product_tracking or (product_tracking == 'serial' and (product_qty > 1 or serial_numbers_count > 1))"
                                     readonly="lot_producing_ids" force_save="1" context="{'default_product_id': product_id}"/>
@@ -787,10 +787,10 @@
                 <search string="Search Production">
                     <field name="name" string="Manufacturing Order" filter_domain="['|', ('name', 'ilike', self), ('origin', 'ilike', self)]"/>
                     <field name="product_id"/>
-                    <field name="lot_producing_ids"/>
-                    <field name="product_variant_attributes"/>
+                    <field name="lot_producing_ids" groups="stock.group_production_lot"/>
+                    <field name="product_variant_attributes" groups="product.group_product_variant"/>
                     <field name="move_raw_ids" string="Component" filter_domain="[('move_raw_ids.product_id', 'ilike', self)]"/>
-                    <field name="workcenter_id" string="Work Center" filter_domain="[('workorder_ids.workcenter_id', 'ilike', self)]"/>
+                    <field name="workcenter_id" string="Work Center" groups="mrp.group_mrp_routings" filter_domain="[('workorder_ids.workcenter_id', 'ilike', self)]"/>
                     <field name="origin"/>
                     <field name="picking_type_id"/>
                     <filter string="To Do" name="todo" domain="[('state', 'in', ('draft', 'confirmed', 'progress', 'to_close'))]"

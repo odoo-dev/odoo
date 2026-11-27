@@ -423,8 +423,8 @@
                                     <field name="show_quant" column_invisible="True"/> <!-- read by stock_move_line_x2_many_field.js to decide quant display -->
                                     <field name="show_lots_text" column_invisible="True"/> <!-- kept for stock.move.line list rendering of lot info -->
                                     <field name="show_lots_m2o" column_invisible="True"/> <!-- kept for stock.move.line list rendering of lot info -->
-                                    <field name="display_import_lot" column_invisible="True"/> <!-- kept for lot import/assign serial UI logic -->
-                                    <field name="has_lines_without_result_package" column_invisible="True"/> <!-- read by stock_package_m2m.js to show the "None" tag -->
+                                    <field name="display_import_lot" groups="stock.group_production_lot" column_invisible="True"/> <!-- kept for lot import/assign serial UI logic -->
+                                    <field name="has_lines_without_result_package" groups="stock.group_tracking_lot" column_invisible="True"/> <!-- read by stock_package_m2m.js to show the "None" tag -->
                                     <field name="package_ids" optional="show" widget="package_m2m" groups="stock.group_tracking_lot" width="200px" readonly="1"/>
                                     <field name="product_uom_qty" string="Demand" readonly="not is_initial_demand_editable"/>
                                     <field name="forecast_expected_date" column_invisible="True"/> <!-- read by forecast_widget.js to flag late forecasts -->

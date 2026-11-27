@@ -181,7 +181,7 @@
                 <field name="name" string="Work Order"/>
                 <field name="workcenter_id"/>
                 <field name="product_id"/>
-                <field name="production_lot_producing_id"/>
+                <field name="production_lot_producing_id" groups="stock.group_production_lot"/>
                 <field name="move_raw_ids" string="Component" filter_domain="[('move_raw_ids.product_id', 'ilike', self)]"/>
                 <filter string="Draft" name="draft" domain="[('production_state', '=', 'draft')]"/>
                 <filter string="To Do" name="ready" domain="[('production_state', '!=', 'draft'), ('state', '=', 'ready')]"/>
@@ -346,7 +346,7 @@
             <field name="sequence" invisible="1"/> <!-- posted back through this form like operation_id, which _compute_sequence derives it from to put the kit operations first -->
             <sheet>
                 <field name="company_id" invisible="1"/> <!-- needed by the company-dependent domain of the check_company fields of this form -->
-                <field name="product_tracking" invisible="1"/> <!-- drives invisible of production_lot_producing_id -->
+                <field name="product_tracking" groups="stock.group_production_lot" invisible="1"/> <!-- drives invisible of production_lot_producing_id -->
                 <div invisible="not has_conflicts" class="h5 alert alert-warning text-center" role="alert">
                     This work order is planned at the same time as other work orders in this work center
                     <button name="%(action_mrp_workorder_workcenter)d" icon="east" type="action" string="View Planning" class="btn-link"
@@ -379,7 +379,7 @@
                     <group>
                         <field name="product_id" readonly="1"/>
                         <field name="production_id" force_save="1"/>
-                        <field name="production_lot_producing_id" widget="many2many_tags" readonly="1" invisible="not product_tracking"/>
+                        <field name="production_lot_producing_id" groups="stock.group_production_lot" widget="many2many_tags" readonly="1" invisible="not product_tracking"/>
                         <label for="qty_produced"  class="d-touch-none"/>
                         <div class="o_row g-0 d-flex" name="qty">
                             <div class="o_row flex-grow-1">

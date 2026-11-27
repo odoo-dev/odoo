@@ -111,12 +111,12 @@
                     </div>
                     <group>
                         <group>
-                            <field name="allowed_lot_ids" invisible="1"/> <!-- used in the python-declared domain of lot_id -->
+                            <field name="allowed_lot_ids" invisible="1" groups="stock.group_production_lot"/> <!-- used in the python-declared domain of lot_id -->
                             <field name="repair_request" invisible="not sale_order_line_id"/>
                             <field name="partner_id" widget="res_partner_many2one" context="{'res_partner_search_mode': 'customer', 'show_identifier': True}" readonly="sale_order_id"/>
                             <field name="product_id" readonly="state in ['cancel', 'done']"/>
-                            <label for="lot_id" invisible="tracking not in ['serial', 'lot']"/>
-                            <div class="o_row" invisible="tracking not in ['serial', 'lot']">
+                            <label for="lot_id" invisible="tracking not in ['serial', 'lot']" groups="stock.group_production_lot"/>
+                            <div class="o_row" invisible="tracking not in ['serial', 'lot']" groups="stock.group_production_lot">
                                 <field name="lot_id" context="{'default_product_id': product_id}" groups="stock.group_production_lot" invisible="tracking not in ['serial', 'lot']" readonly="state == 'done'" required="state=='done' and tracking in ['serial', 'lot']"/>
                                 <button name="action_generate_serial" type="object" class="oi btn btn-primary" data-icon="add_box" aria-label="Creates a new serial/lot number" title="Creates a new serial/lot number" role="img" invisible="lot_id"/>
                             </div>
@@ -166,7 +166,7 @@
                                 <field name="is_locked" column_invisible="True"/> <!-- kept loaded for record data though not shown in this list -->
                                 <field name="is_storable" column_invisible="True"/> <!-- read by the forecast_widget of forecast_availability to open the forecast report -->
                                 <field name="has_tracking" column_invisible="True"/> <!-- drives invisible of lot_ids -->
-                                <field name="display_assign_serial" column_invisible="True"/> <!-- kept loaded for record data though not shown in this list -->
+                                <field name="display_assign_serial" groups="stock.group_production_lot" column_invisible="True"/> <!-- kept loaded for record data though not shown in this list -->
                                 <field name="product_id" context="{'default_is_storable': True}" required="1" readonly="(state != 'draft' and not additional) or move_lines_count &gt; 0"/>
                                 <field name="forecast_availability" string="" column_invisible="parent.state == 'done'" widget="forecast_widget"/>
                                 <field name="description_picking" string="Description" optional="hide"/>

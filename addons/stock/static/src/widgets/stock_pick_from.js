@@ -54,7 +54,6 @@ registry.category("fields").add("pick_from", {
         // dependencies to build the quant display name
         { name: "location_id", type: "relation" },
         { name: "location_dest_id", type: "relation" },
-        { name: "package_id", type: "relation" },
         { name: "owner_id", type: "relation" },
         { name: "state", type: "char" },
     ],
