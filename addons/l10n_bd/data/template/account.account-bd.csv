@@ -85,6 +85,7 @@
 "l10n_bd_211050","l10n_bd_group_211","True","Employees Payables","211050","liability_payable","True","","",""
 "l10n_bd_211520","l10n_bd_group_211","True","TDS Payable","211520","liability_payable","True","True","",""
 "l10n_bd_211530","l10n_bd_group_211","True","VDS Payable","211530","liability_payable","True","True","",""
+"l10n_bd_211540","l10n_bd_group_211","True","Supplementary Duty","211540","liability_current","False","","",""
 "l10n_bd_212010","l10n_bd_group_212","True","Accrued - Salaries","212010","liability_current","False","","",""
 "l10n_bd_212020","l10n_bd_group_212","True","Accrued - Commissions","212020","liability_current","False","","",""
 "l10n_bd_212030","l10n_bd_group_212","True","Accrued-Staff Bonus","212030","liability_current","False","","",""
