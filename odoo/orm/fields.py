@@ -601,6 +601,8 @@ class Field[T, C]:
             and self.readonly and not self.inverse and not self.inherited
         ):
             setup_warning(self, "copy attribute has no effect on a readonly non-stored field without inverse")
+        if self.inverse and self.readonly and not self.related:
+            setup_warning(self, "inverse of a readonly field is only called from code, use ui_readonly instead")
         if self.default_export_compatible and not self.exportable:
             setup_warning(self, "default_export_compatible attribute makes no sense on a non-exportable field")
         if self.company_dependent:

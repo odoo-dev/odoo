@@ -312,7 +312,7 @@ class O2m_Readonly_Subfield_Child(models.Model):
 
     name = fields.Char()
     parent_id = fields.Many2one('o2m_readonly_subfield_parent')
-    f = fields.Integer(compute='_compute_f', inverse='_inverse_f', readonly=True)
+    f = fields.Integer(compute='_compute_f', inverse='_inverse_f', ui_readonly=True)
 
     @api.depends('name')
     def _compute_f(self):

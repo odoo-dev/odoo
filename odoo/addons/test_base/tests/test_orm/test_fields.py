@@ -5133,6 +5133,14 @@ class TestFieldParametersValidation(TransactionCase):
             _compute_name=lambda self: self.update({'name': False}),
         )
 
+    def test_readonly_with_inverse(self):
+        self.assertSetupWarning(
+            "inverse of a readonly field is only called from code, use ui_readonly instead",
+            name=fields.Char(compute='_compute_name', inverse='_inverse_name', readonly=True),
+            _compute_name=lambda self: self.update({'name': False}),
+            _inverse_name=lambda self: None,
+        )
+
     def test_default_export_compatible_not_exportable(self):
         self.assertSetupWarning(
             "default_export_compatible attribute makes no sense on a non-exportable field",
