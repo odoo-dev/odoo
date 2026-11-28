@@ -5039,6 +5039,20 @@ class TestFieldParametersValidation(TransactionCase):
             name=fields.Char(invalid_parameter=42),
         )
 
+    def test_not_boolean_parameter(self):
+        self.assertSetupWarning(
+            "property required should be a boolean",
+            name=fields.Char(required="1"),
+        )
+        self.assertSetupWarning(
+            "property ui_readonly should be a boolean or None",
+            name=fields.Char(ui_readonly="True"),
+        )
+        self.assertSetupWarning(
+            "groups must not contain spaces",
+            name=fields.Char(groups="base.group_user, base.group_system"),
+        )
+
 
 def select(model, *fnames):
     """ Return the expected query string to SELECT the given columns. """

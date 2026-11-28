@@ -580,6 +580,14 @@ class Field[T, C]:
                     " _valid_field_parameter on the relevant model in order to"
                     " allow it"
                 )
+        for key in ('required', 'readonly'):
+            if not isinstance(value := getattr(self, key), bool):
+                setup_warning(self, f'property {key} should be a boolean ({value})')
+        for key in ('ui_required', 'ui_readonly'):
+            if (value := getattr(self, key)) is not None and not isinstance(value, bool):
+                setup_warning(self, f'property {key} should be a boolean or None ({value})')
+        if self.groups and ' ' in self.groups:
+            setup_warning(self, 'groups must not contain spaces')
 
     def setup(self, model: BaseModel) -> None:
         """ Perform the complete setup of a field. """
@@ -591,15 +599,6 @@ class Field[T, C]:
             except Exception as e:
                 e.add_note(f"Field setup failed: {self}")
                 raise
-
-            if not isinstance(self.required, bool):
-                setup_warning(self, f'property required should be a boolean ({self.required})')
-
-            if not isinstance(self.readonly, bool):
-                setup_warning(self, f'property readonly should be a boolean ({self.readonly})')
-
-            if self.groups and ' ' in self.groups:
-                setup_warning(self, 'groups must not contain spaces')
 
             self._setup_done = True
             # column_type might be changed during Field.setup
