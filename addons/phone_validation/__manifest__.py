@@ -33,6 +33,15 @@ records numbers. """,
         'web.assets_backend': [
             'phone_validation/static/src/**/*',
         ],
+        "im_livechat.assets_embed_core": [
+            "phone_validation/static/src/core/common/**/*",
+        ],
+        "mail.assets_public": [
+            "phone_validation/static/src/core/common/**/*",
+        ],
+        "portal.assets_chatter_helpers": [
+            "phone_validation/static/src/core/common/**/*",
+        ],
         'web.assets_unit_tests': [
             'phone_validation/static/tests/**/*',
         ],
