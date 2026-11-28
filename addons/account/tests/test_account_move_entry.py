@@ -1460,19 +1460,18 @@ class TestAccountMove(AccountTestInvoicingCommon):
         any recomputation on account.move or account.move.line fields
         """
         # Prepare patching
-        protected_models = ['account.move', 'account.move.line']
-        original_recompute = {model: self.env[model]._recompute_field for model in protected_models}
+        original_recompute = fields.Field.recompute
         fields_recomputed = []
 
-        def mock_recompute(self, field, ids=None):
-            ids_to_compute = self.env.transaction.tocompute.get(field, ())
-            ids = ids_to_compute if ids is None else [id_ for id_ in ids if id_ in ids_to_compute]
+        def mock_recompute(field, records):
+            ids_to_compute = records.env.transaction.tocompute.get(field, ())
+            ids = [id_ for id_ in records._ids if id_ in ids_to_compute]
             if field.store and (
-                (self._name == 'account.move' and invoice.id in ids)
-                or (self._name == 'account.move.line' and set(invoice.line_ids.ids) & set(ids))
+                (records._name == 'account.move' and invoice.id in ids)
+                or (records._name == 'account.move.line' and set(invoice.line_ids.ids) & set(ids))
             ):
                 fields_recomputed.append(str(field))
-            original_recompute[self._name](field, ids)
+            original_recompute(field, records)
 
         # Setup data
         invoice = self.env['account.move'].create({
@@ -1488,8 +1487,7 @@ class TestAccountMove(AccountTestInvoicingCommon):
         self.env.flush_all()
 
         # Check
-        for model in protected_models:
-            self.patch(self.env.registry[model], '_recompute_field', mock_recompute)
+        self.patch(fields.Field, 'recompute', mock_recompute)
 
         invoice.company_id.partner_id.write({
             'street': 'New Street',

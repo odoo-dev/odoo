@@ -388,7 +388,8 @@ class Environment(Mapping[str, "BaseModel"]):
             if not fields_:
                 break
             for field in fields_:
-                self[field.model_name]._recompute_field(field)
+                if ids := self.transaction.tocompute.get(field):
+                    field.recompute(self[field.model_name].browse(id_ for id_ in ids if id_))
         else:
             _logger.warning("Too many iterations for recomputing fields!")
 

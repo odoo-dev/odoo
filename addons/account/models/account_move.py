@@ -4350,7 +4350,9 @@ class AccountMove(models.Model):
     def _flush(self):
         if self._fields['move_type'] in self.env._field_dirty:
             # `_flush` writes every dirty `move_type`, `_check_document_tax_mode_set` needs their tax mode computed first
-            self._recompute_model(['document_tax_mode'])
+            field = self._fields['document_tax_mode']
+            if ids := self.env.transaction.tocompute.get(field):
+                field.recompute(self.browse(id_ for id_ in ids if id_))
         return super()._flush()
 
     @api.depends('partner_id', 'date', 'state', 'move_type')

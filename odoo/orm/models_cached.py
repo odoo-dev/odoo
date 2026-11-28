@@ -62,7 +62,11 @@ class CachedModel(Model):
         # the value it had before its dependencies changed.  Only the
         # computations are processed: flushing to database here would run the
         # model constraints in the middle of an unrelated write.
-        self._recompute_model(fnames)
+        tocompute = self.env.transaction.tocompute
+        for fname in fnames:
+            field = self._fields[fname]
+            if field.compute and field.store and (ids := tocompute.get(field)):
+                field.recompute(self.browse(id_ for id_ in ids if id_))
         # 'prefetch_langs' keeps the value of translated fields for all the
         # languages, so that the cached data does not depend on 'env.lang'
         records = self.sudo().with_context({'active_test': False, 'prefetch_langs': True}).search_fetch(

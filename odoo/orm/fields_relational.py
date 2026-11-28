@@ -1039,8 +1039,11 @@ class One2many(_RelationalMulti):
             # force the computation of the inverse field to ensure that the
             # cache value of self is consistent
             inverse_field = records.pool[self.comodel_name]._fields[self.inverse_name]
-            if inverse_field.compute:
-                records.env[self.comodel_name]._recompute_model([self.inverse_name])
+            if inverse_field.compute and inverse_field.store and (
+                ids := records.env.transaction.tocompute.get(inverse_field)
+            ):
+                comodel = records.env[self.comodel_name]
+                inverse_field.recompute(comodel.browse(id_ for id_ in ids if id_))
         return super().__get__(records, owner)
 
     def read(self, records):

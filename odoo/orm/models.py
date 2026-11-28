@@ -4073,11 +4073,10 @@ class BaseModel(metaclass=MetaModel):
 
         # force the computation of fields that are computed with some assigned
         # fields, but are not assigned themselves
-        to_compute = [field.name
-                      for field in protected
-                      if field.compute and field.name not in vals]
-        if to_compute:
-            self._recompute_recordset(to_compute)
+        real_records = self.browse(id_ for id_ in self._ids if id_)
+        for field in protected:
+            if field.compute and field.store and field.name not in vals:
+                field.recompute(real_records)
 
         # protect fields being written against recomputation
         with env.protecting(protected, self):
@@ -6089,9 +6088,18 @@ class BaseModel(metaclass=MetaModel):
 
         :param fnames: optional iterable of field names to flush
         """
-        self._recompute_model(fnames)
+        if fnames is None:
+            fields = self._fields.values()
+        else:
+            fields = [self._fields[fname] for fname in fnames]
+        tocompute = self.env.transaction.tocompute
+        for field in fields:
+            if field.compute and field.store and (ids := tocompute.get(field)):
+                # do not force recomputation on new records; those will be
+                # recomputed by accessing the field on the records
+                field.recompute(self.browse(id_ for id_ in ids if id_))
         dirty_fields = self.env._field_dirty
-        if fnames is None or any(self._fields[fname] in dirty_fields for fname in fnames):
+        if fnames is None or any(field in dirty_fields for field in fields):
             self._flush()
 
     @api.private
@@ -6105,11 +6113,15 @@ class BaseModel(metaclass=MetaModel):
         """
         if not self:
             return
-        self._recompute_recordset(fnames)
         if fnames is None:
             fields = self._fields.values()
         else:
             fields = [self._fields[fname] for fname in fnames]
+        # do not force recomputation on new records; those will be
+        # recomputed by accessing the field on the records
+        for field in fields:
+            if field.compute and field.store:
+                field.recompute(self.browse(id_ for id_ in self._ids if id_))
         ids = set(self._ids)
         dirty_fields = self.env._field_dirty
         if not all(ids.isdisjoint(dirty_fields.get(field, ())) for field in fields):
@@ -6738,48 +6750,6 @@ class BaseModel(metaclass=MetaModel):
                     records |= cache_records.filtered(lambda r: not set(r[field.name]._ids).isdisjoint(new_ids))
 
             yield from records._modified_triggers(subtree)
-
-    def _recompute_model(self, fnames: Collection[str] | None = None) -> None:
-        """ Process the pending computations of the fields of ``self``'s model.
-
-        :param fnames: optional iterable of field names to compute
-        """
-        if fnames is None:
-            fields = self._fields.values()
-        else:
-            fields = [self._fields[fname] for fname in fnames]
-
-        for field in fields:
-            if field.compute and field.store:
-                self._recompute_field(field)
-
-    def _recompute_recordset(self, fnames: Collection[str] | None = None) -> None:
-        """ Process the pending computations of the fields of the records in ``self``.
-
-        :param fnames: optional iterable of field names to compute
-        """
-        if fnames is None:
-            fields = self._fields.values()
-        else:
-            fields = [self._fields[fname] for fname in fnames]
-
-        for field in fields:
-            if field.compute and field.store:
-                self._recompute_field(field, self._ids)
-
-    def _recompute_field(self, field: Field, ids: Sequence[IdType] | None = None) -> None:
-        ids_to_compute = self.env.transaction.tocompute.get(field, ())
-        if ids is None:
-            ids = ids_to_compute
-        else:
-            ids = [id_ for id_ in ids if id_ in ids_to_compute]
-        if not ids:
-            return
-
-        # do not force recomputation on new records; those will be
-        # recomputed by accessing the field on the records
-        records = self.browse(tuple(id_ for id_ in ids if id_))
-        field.recompute(records)
 
     #
     # Generic onchange method
