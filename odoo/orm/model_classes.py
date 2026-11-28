@@ -418,10 +418,12 @@ def _setup(model_cls: type[BaseModel], env: Environment):
             # the field is currently company dependent in the database; ensure
             # the field is company dependent to avoid converting its column to
             # the base data type
-            company_dependent = next((
-                field._args__['company_dependent'] for field in reversed(fields_) if 'company_dependent' in field._args__
-            ), False)
-            if not company_dependent:
+            company_dependent = _get_field_arg(fields_, 'company_dependent', False)
+            # a non-stored field has no column to protect
+            store = _get_field_arg(fields_, 'store', not (
+                _get_field_arg(fields_, 'compute') or _get_field_arg(fields_, 'related')
+            ))
+            if not company_dependent and store:
                 # validate column type again in case the column type is changed by upgrade script
                 rows = env.execute_query(sql.SQL(
                     'SELECT data_type FROM information_schema.columns'
@@ -624,6 +626,11 @@ def _add_manual_fields(model_cls: type[BaseModel], env: Environment):
                     add_field(model_cls, name, field)
             except Exception:
                 _logger.exception("Failed to load field %s.%s: skipped", model_cls._name, field_data['name'])
+
+
+def _get_field_arg(fields_: list[Field], key: str, default: typing.Any = None) -> typing.Any:
+    """ Return the parameter ``key`` given by the last definition in ``fields_``. """
+    return next((field._args__[key] for field in reversed(fields_) if key in field._args__), default)
 
 
 def add_field(model_cls: type[BaseModel], name: str, field: Field, shareable: bool = False):
