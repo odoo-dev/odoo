@@ -444,7 +444,7 @@ class SequenceMixin(models.AbstractModel):
                 if not triggered_field.store or not triggered_field.compute:
                     continue
                 for field in registry.field_inverses[inverse_field[0]] if inverse_field else [None]:
-                    self.env.add_to_compute(triggered_field, self[field.name] if field else self)
+                    (self[field.name] if field else self).to_compute([triggered_field.name])
 
         self._compute_split_sequence()
 

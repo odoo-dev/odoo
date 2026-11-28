@@ -392,10 +392,7 @@ class HrAttendance(models.Model):
         """
         same_day_attendances = self._search_same_day_attendances()
         had_issue = same_day_attendances.filtered("has_issue")
-        for fname in ("is_late_check_in", "is_early_check_out", "is_overtime", "is_undertime"):
-            self.env.add_to_compute(self._fields[fname], same_day_attendances)
-        # has_issue is not stored, so add_to_compute does not reset it
-        same_day_attendances.invalidate_recordset(["has_issue"])
+        same_day_attendances.to_compute(["is_late_check_in", "is_early_check_out", "is_overtime", "is_undertime"])
         return had_issue
 
     @api.depends('is_late_check_in', 'is_early_check_out', 'is_overtime', 'is_undertime')

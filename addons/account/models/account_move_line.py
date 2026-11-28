@@ -2201,8 +2201,7 @@ class AccountMoveLine(models.Model):
         # Since this method is called during the sync, inside of `create`/`write`, these fields
         # already have been computed and marked as so. But this method should re-trigger it since
         # it changes the dependencies.
-        self.env.add_to_compute(self._fields['debit'], container['records'])
-        self.env.add_to_compute(self._fields['credit'], container['records'])
+        container['records'].to_compute(['debit', 'credit'])
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -4185,8 +4184,7 @@ class AccountMoveLine(models.Model):
             condition(line)
             and not self.env.is_protected(field, line)
         )
-        to_reset.invalidate_recordset([fname])
-        self.env.add_to_compute(field, to_reset)
+        to_reset.to_compute([fname])
 
     # -------------------------------------------------------------------------
     # HOOKS

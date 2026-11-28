@@ -6566,6 +6566,7 @@ class BaseModel(metaclass=MetaModel):
         instance when the result of a compute method depends on data that is
         not declared as a dependency.
         """
+        # XXX should we skip protected fields, see _conditional_add_to_compute
         non_stored = []
         for fname in fnames:
             field = self._fields[fname]

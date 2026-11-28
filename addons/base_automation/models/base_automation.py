@@ -50,7 +50,7 @@ def _keep_to_compute(env, changed_fields):
     }
     yield
     for dep, comp in to_compute.items():
-        env.add_to_compute(dep, comp)
+        comp.to_compute([dep.name])
 
 
 DATE_RANGE = {

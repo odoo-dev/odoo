@@ -933,8 +933,7 @@ class AccountAccount(models.Model):
     @api.onchange('code')
     def _onchange_code(self):
         to_update = self.filtered(lambda a: not a.id or not a.account_type)
-        self.env.add_to_compute(self._fields['account_type'], to_update)
-        to_update.modified(['account_type'])
+        to_update.to_compute(['account_type'])
 
     @api.depends_context('company', 'formatted_display_name', 'from_bill')
     @api.depends('code')

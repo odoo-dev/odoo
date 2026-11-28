@@ -878,7 +878,7 @@ class ResPartner(models.Model):
                 ('state', '=', 'draft'),
                 ('move_type', 'in', Move.get_sale_types(include_receipts=True)),
             ])
-            self.env.add_to_compute(Move._fields['narration'], draft_invoices)
+            draft_invoices.to_compute(['narration'])
         return res
 
     @api.model_create_multi

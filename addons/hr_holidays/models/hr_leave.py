@@ -1270,8 +1270,7 @@ class HrLeave(models.Model):
         # the datetimes are protected, so modified() propagates nothing
         all_moved = self.browse().union(*moved_per_vals.values())
         for fname in ('date_from', 'date_to', 'number_of_days', 'number_of_hours'):
-            field = self._fields[fname]
-            self.env.add_to_compute(field, all_moved - self.env.protected(field))
+            (all_moved - self.env.protected(self._fields[fname])).to_compute([fname])
 
     @api.onchange('number_of_hours')
     def _onchange_number_of_hours(self):

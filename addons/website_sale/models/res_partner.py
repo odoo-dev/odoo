@@ -86,7 +86,7 @@ class ResPartner(models.Model):
             order_fpos_recompute_domain = self._get_order_fiscal_position_recompute_domain()
             if orders_sudo := self.env["sale.order"].sudo().search(order_fpos_recompute_domain):
                 orders_by_fpos = orders_sudo.grouped("fiscal_position_id")
-                self.env.add_to_compute(orders_sudo._fields["fiscal_position_id"], orders_sudo)
+                orders_sudo.to_compute(["fiscal_position_id"])
                 if fpos_changed := orders_sudo.filtered(
                     lambda so: so not in orders_by_fpos.get(so.fiscal_position_id, [])
                 ):

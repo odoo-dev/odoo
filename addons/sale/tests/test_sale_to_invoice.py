@@ -969,16 +969,14 @@ class TestSaleToInvoice(TestSaleCommon):
         move_form.save()
 
         # Default uom rounding to 0.01
-        qty_invoiced_field = sol_prod_deliver._fields.get("qty_invoiced")
-        sol_prod_deliver.env.add_to_compute(qty_invoiced_field, sol_prod_deliver)
+        sol_prod_deliver.to_compute(["qty_invoiced"])
         self.assertEqual(sol_prod_deliver.qty_invoiced, quantity)
 
         # If rounding of used uom is different from decimal precision, it's the decimal precision
         # that is used for 'qty_invoiced'. No rounding is done.
         self.env["decimal.precision"].search([("name", "=", "Product Unit")]).digits = 1
         expected_qty = 5.1
-        qty_invoiced_field = sol_prod_deliver._fields.get("qty_invoiced")
-        sol_prod_deliver.env.add_to_compute(qty_invoiced_field, sol_prod_deliver)
+        sol_prod_deliver.to_compute(["qty_invoiced"])
         self.assertEqual(sol_prod_deliver.qty_invoiced, expected_qty)
 
     def test_multi_company_invoice(self):

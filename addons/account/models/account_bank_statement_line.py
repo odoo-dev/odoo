@@ -431,7 +431,7 @@ class AccountBankStatementLine(models.Model):
             with self.env.protecting(self.env['account.move']._get_protected_vals(vals, st_line)):
                 st_line.move_id.with_context(clear_sequence_mixin_cache=False).write(to_write)
         self.env['account.move.line'].create(to_create_lines_vals)
-        self.env.add_to_compute(self.env['account.move']._fields['name'], st_lines.move_id)
+        st_lines.move_id.to_compute(['name'])
 
         # Otherwise field narration will be recomputed silently (at next flush) when writing on partner_id
         self.env.remove_to_compute(self.env['account.move']._fields['narration'], st_lines.move_id)

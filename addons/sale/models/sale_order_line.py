@@ -767,7 +767,7 @@ class SaleOrderLine(models.Model):
                     line.env.context.get("recompute_unit_price_on_tax_change", False)
                     and result != line.tax_ids
                 ):
-                    line.env.add_to_compute(self._fields["price_unit"], line)
+                    line.to_compute(["price_unit"])
 
                 # If company_id is set, always filter taxes by the company
                 line.tax_ids = result

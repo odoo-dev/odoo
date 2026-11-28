@@ -39,10 +39,7 @@ class TestSalePrices(SaleCommon):
         belgium = cls.env.ref("base.be")
         cls.env.company.sudo().account_fiscal_country_id = belgium
         for model in ("account.tax", "account.tax.group"):
-            cls.env.add_to_compute(
-                cls.env[model]._fields["country_id"],
-                cls.env[model].search([("company_id", "=", cls.env.company.id)]),
-            )
+            cls.env[model].search([("company_id", "=", cls.env.company.id)]).to_compute(["country_id"])
 
     def _create_discount_pricelist_rule(self, **additional_values):
         return self.env["product.pricelist.item"].create({

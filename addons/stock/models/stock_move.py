@@ -748,7 +748,7 @@ Please change the quantity done or the rounding precision in your settings.""",
             # inverse rewriting `move_line_ids` does not override it. Force
             # the recompute to keep `quantity` in sync with the move lines
             if any(command[0] == Command.DELETE for command in move_lines_commands):
-                self.env.add_to_compute(move._fields['quantity'], move)
+                move.to_compute(['quantity'])
 
     @api.depends('picking_type_id', 'date', 'priority', 'state')
     def _compute_reservation_date(self):
@@ -949,9 +949,7 @@ Please change the quantity done or the rounding precision in your settings.""",
         if not self:
             return
         orderpoints = self._get_orderpoints_to_update()
-        orderpoints.invalidate_recordset(['qty_to_order', 'qty_forecast'])
-        self.env.add_to_compute(self.env['stock.warehouse.orderpoint']._fields['qty_to_order_computed'], orderpoints)
-        self.env.add_to_compute(self.env['stock.warehouse.orderpoint']._fields['deadline_date'], orderpoints)
+        orderpoints.to_compute(['qty_to_order', 'qty_forecast', 'qty_to_order_computed', 'deadline_date'])
 
     def _get_orderpoints_to_update(self):
         domains = []
@@ -2471,8 +2469,7 @@ Please change the quantity done or the rounding precision in your settings.""",
         self.with_context(prefetch_fields=False).mapped('move_line_ids').unlink()
         orderpoints = self._get_orderpoints_to_update()
         res = super().unlink()
-        self.env.add_to_compute(self.env['stock.warehouse.orderpoint']._fields['qty_to_order_computed'], orderpoints)
-        self.env.add_to_compute(self.env['stock.warehouse.orderpoint']._fields['deadline_date'], orderpoints)
+        orderpoints.to_compute(['qty_to_order_computed', 'deadline_date'])
         return res
 
     def _prepare_move_split_vals(self, qty):

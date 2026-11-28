@@ -510,7 +510,7 @@ class AccountPayment(models.Model):
             ):
                 payment.state = 'reconciled'
                 paid_payments_to_recompute |= payment
-        self.env.add_to_compute(self._fields['is_matched'], paid_payments_to_recompute)
+        paid_payments_to_recompute.to_compute(['is_matched'])
 
     @api.depends('move_id.line_ids.amount_residual', 'move_id.line_ids.amount_residual_currency', 'move_id.line_ids.account_id', 'state')
     def _compute_reconciliation_status(self):
@@ -1031,7 +1031,7 @@ class AccountPayment(models.Model):
 
         linked_invoices = self.reconciled_invoice_ids
         res = super().unlink()
-        self.env.add_to_compute(linked_invoices._fields['payment_state'], linked_invoices)
+        linked_invoices.to_compute(['payment_state'])
         return res
 
     @api.depends('move_id.name')

@@ -223,7 +223,7 @@ class AccountMergeWizard(models.TransientModel):
         ))
 
         account_to_merge_into.sudo().company_ids = company_ids_to_write
-        self.env.add_to_compute(self.env['account.account']._fields['tag_ids'], account_to_merge_into)
+        account_to_merge_into.to_compute(['tag_ids'])
 
 
 class AccountMergeWizardLine(models.TransientModel):

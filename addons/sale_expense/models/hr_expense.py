@@ -47,8 +47,7 @@ class HrExpense(models.Model):
     @api.onchange('sale_order_id')
     def _onchange_sale_order_id(self):
         to_reset = self.filtered(lambda line: not self.env.is_protected(self._fields['analytic_distribution'], line))
-        to_reset.invalidate_recordset(['analytic_distribution'])
-        self.env.add_to_compute(self._fields['analytic_distribution'], to_reset)
+        to_reset.to_compute(['analytic_distribution'])
 
     def _sale_expense_reset_sol_quantities(self):
         """

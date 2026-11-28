@@ -90,7 +90,7 @@ class ResourceCalendarLeaves(models.Model):
 
         previous_durations = leaves.mapped('number_of_days')
         previous_states = leaves.mapped('state')
-        self.env.add_to_compute(self.env['hr.leave']._fields['number_of_days'], leaves)
+        leaves.to_compute(['number_of_days'])
         leaves.sudo().write({
             'state': 'confirm',
         })

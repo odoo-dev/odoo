@@ -357,9 +357,7 @@ class StockPackage(models.Model):
 
         if 'package_dest_id' in vals:
             # to correctly trigger the weight and volume computation on pickings when outermost_package_id change
-            fields_to_recompute = ['shipping_weight', 'shipping_volume']
-            for field in fields_to_recompute:
-                self.env.add_to_compute(self.env['stock.picking']._fields[field], self.picking_ids)
+            self.picking_ids.to_compute(['shipping_weight', 'shipping_volume'])
 
         return super().write(vals)
 

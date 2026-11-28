@@ -222,10 +222,7 @@ class AccountTestInvoicingCommon(ProductCommon):
         company.country_id = country
         company.account_fiscal_country_id = country
         for model in ('account.tax', 'account.tax.group'):
-            cls.env.add_to_compute(
-                cls.env[model]._fields['country_id'],
-                cls.env[model].search([('company_id', '=', company.id)]),
-            )
+            cls.env[model].search([('company_id', '=', company.id)]).to_compute(['country_id'])
 
     @classmethod
     def setup_other_company(cls, name='company_2', **create_values):

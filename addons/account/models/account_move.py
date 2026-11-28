@@ -896,9 +896,9 @@ class AccountMove(models.Model):
             if accounting_date and accounting_date != move.date:
                 move.date = accounting_date
                 # _affect_tax_report may trigger premature recompute of line_ids.date
-                self.env.add_to_compute(move.line_ids._fields['date'], move.line_ids)
+                move.line_ids.to_compute(['date'])
                 # might be protected because `_get_accounting_date` requires the `name`
-                self.env.add_to_compute(self._fields['name'], move)
+                move.to_compute(['name'])
 
     @api.depends('auto_post')
     def _compute_auto_post_until(self):
@@ -6893,9 +6893,9 @@ class AccountMove(models.Model):
                 )
         container = {'records': self}
         with self._check_balanced(container), self._sync_dynamic_lines(container):
-            self.env.add_to_compute(lines_to_recompute._fields['price_unit'], lines_to_recompute)
-            self.env.add_to_compute(self.invoice_line_ids._fields['tax_ids'], self.invoice_line_ids)
-            self.env.add_to_compute(self.line_ids._fields['account_id'], self.line_ids)
+            lines_to_recompute.to_compute(['price_unit'])
+            self.invoice_line_ids.to_compute(['tax_ids'])
+            self.line_ids.to_compute(['account_id'])
 
     def open_created_caba_entries(self):
         self.ensure_one()
@@ -7351,7 +7351,7 @@ class AccountMove(models.Model):
         self.ensure_one()
         if self.payment_state == 'blocked':
             self.payment_state = 'not_paid'
-            self.env.add_to_compute(self._fields['payment_state'], self)
+            self.to_compute(['payment_state'])
         else:
             if self.payment_state in ('paid', 'in_payment'):
                 raise UserError(_("You can't block a paid invoice."))
@@ -8413,8 +8413,7 @@ class AccountMove(models.Model):
             and not self.env.is_protected(field, move._origin)
             and (move._origin or not move[fname])
         )
-        to_reset.invalidate_recordset([fname])
-        self.env.add_to_compute(field, to_reset)
+        to_reset.to_compute([fname])
 
     # -------------------------------------------------------------------------
     # HOOKS

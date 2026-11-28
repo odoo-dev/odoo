@@ -276,8 +276,7 @@ class MailActivityMixin(models.AbstractModel):
             for fname in vals
         ):
             activities = self.sudo().with_context(active_test=False).activity_ids
-            res_name_field = activities._fields['res_name']
-            self.env.add_to_compute(res_name_field, activities - self.env.protected(res_name_field))
+            (activities - self.env.protected(activities._fields['res_name'])).to_compute(['res_name'])
         return result
 
     # Reschedules next my activity to Today

@@ -207,5 +207,5 @@ class TestAccountExpensesStates(TestAccountExpenseCommon, MailCase):
 
         account_hr_expense.post_init_hook(self.env)
         self.assertRecordValues(self.expenses_all, [{'marked_as_paid': True}, {'marked_as_paid': True}])
-        self.env.add_to_compute(self.expenses_all._fields['state'], self.expenses_all)
+        self.expenses_all.to_compute(['state'])
         self.assertRecordValues(self.expenses_all, [{'state': 'paid'}, {'state': 'paid'}])

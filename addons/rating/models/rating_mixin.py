@@ -102,8 +102,7 @@ class RatingMixin(models.AbstractModel):
         result = super().write(vals)
         for record in self.sudo():  # ratings may be inaccessible
             if record._rec_name in vals:  # set the res_name of ratings to be recomputed
-                res_name_field = self.env['rating.rating']._fields['res_name']
-                self.env.add_to_compute(res_name_field, record.rating_ids)
+                record.rating_ids.to_compute(['res_name'])
             if record._rating_get_parent_field_name() in vals:
                 record.rating_ids.write({'parent_res_id': record[record._rating_get_parent_field_name()].id})
 

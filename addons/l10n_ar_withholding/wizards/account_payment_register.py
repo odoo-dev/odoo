@@ -88,12 +88,9 @@ class AccountPaymentRegister(models.TransientModel):
         """
         self.ensure_one()
         self.amount = amount  # amount + step
-        # The comodel_percentage_paid_factor the base derives from is not stored, cleaning the cache to force
-        # recompute against the amount just set.
-        self.withholding_line_ids.invalidate_recordset(['comodel_percentage_paid_factor'])
-        self.env.add_to_compute(self.withholding_line_ids._fields['base_amount'], self.withholding_line_ids)
-        self.env.add_to_compute(self.withholding_line_ids._fields['amount'], self.withholding_line_ids)
-        self.env.add_to_compute(self._fields['withholding_net_amount'], self)
+        # recompute against the amount just set
+        self.withholding_line_ids.to_compute(['comodel_percentage_paid_factor', 'base_amount', 'amount'])
+        self.to_compute(['withholding_net_amount'])
 
     @api.depends(
         'withholding_net_amount', 'l10n_latam_checks_amount', 'can_edit_wizard', 'can_group_payments', 'group_payment',

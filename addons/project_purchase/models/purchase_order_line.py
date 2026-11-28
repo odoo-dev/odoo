@@ -31,5 +31,5 @@ class PurchaseOrderLine(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         lines = super().create(vals_list)
-        lines._fields['analytic_distribution'].recompute(lines)
+        lines.mapped('analytic_distribution')  # process pending computations
         return lines

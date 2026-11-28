@@ -472,7 +472,7 @@ class MrpProduction(models.Model):
                 if not production.bom_id or production.bom_id.product_tmpl_id != production.product_tmpl_id or (production.bom_id.product_id and production.bom_id.product_id != production.product_id):
                     bom = boms_by_product[production.product_id]
                     production.bom_id = bom.id or False
-                    self.env.add_to_compute(production._fields['picking_type_id'], production)
+                    production.to_compute(['picking_type_id'])
 
     @api.depends('bom_id')
     def _compute_product_qty(self):
